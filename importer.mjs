@@ -1,10 +1,38 @@
-const Importer =  require('./api/importer/importer');
-const Message =  require('./api/message');
-const mysql = require('./api/database');
-const config = require('./config.json');
+//const Importer =  require('./api/importer/importer');
+import Message from "./src/app/lib/message.mjs";
+//const mysql = require('./api/database');
+//const config = require('./config.json');
+import {simpleQuery} from "./src/app/lib/database.mjs";
+import { FTPImporter } from "./src/app/lib/ftpimporter.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
 
+
+(async () =>{
+
+    const query = "SELECT * FROM nstats_ftp ORDER BY id ASC";
+    const result = await simpleQuery(query);
+
+    console.log(result);
+
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        const test = new FTPImporter(r.host, r.user, r.password, false, r.target_folder);
+
+        await test.connect();
+
+    }
+    
+
+
+    
+    process.exit();
+})()
+
+
+/*
 ftpServers = [];
 bCurrentImportFinished = false;
 
@@ -186,3 +214,4 @@ async function main(){
 })();
 
 
+*/

@@ -1,14 +1,14 @@
-import mysql from "../../../api/database.js";
+import {simpleQuery} from "./database.mjs";
 import Servers from "../../../api/servers";
 import Gametypes from "../../../api/gametypes";
 import Maps from "../../../api/maps";
-import { cleanMapName } from "../../../api/generic.mjs";
+import { cleanMapName } from "./generic";
 
 async function getDMWinner(playerId){
 
     const query = `SELECT name,country FROM nstats_player_totals WHERE id=?`;
 
-    const result = await mysql.simpleQuery(query, [playerId]);
+    const result = await simpleQuery(query, [playerId]);
 
     if(result.length > 0){
         return {"name": result[0].name, "country": result[0].country};
@@ -75,9 +75,9 @@ export async function searchMatches(page, perPage, gametype, map, sortBy, order)
 
     let start = perPage * (page - 1);
 
-    const result = await mysql.simpleQuery(query, [start, perPage]);
+    const result = await simpleQuery(query, [start, perPage]);
     //total possible matches that meet the search
-    const totalResult = await mysql.simpleQuery(totalQuery);
+    const totalResult = await simpleQuery(totalQuery);
 
 
     await setMatchDetails(result);

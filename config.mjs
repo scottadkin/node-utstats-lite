@@ -1,8 +1,5 @@
-{
+export default {
     "importInterval": 0,
-    "imageServerPort": 3001,
-    "websitePort": 3000,
-    "minTMPFileAgeInDays": 1,
     "mysql": {
         "host": "localhost",
         "port": 3306,
@@ -11,7 +8,7 @@
         "database": "node_utstats_2"
     },
     "logFilePrefix": "unreal.nglog.",
-    "importedLogsFolder": "Logs",
+    "importedLogsFolder": "./Logs",
     "multiKillTimeLimit": 3,
     "spawnKillTimeLimit": 2,
     "ace": {

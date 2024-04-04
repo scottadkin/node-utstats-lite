@@ -1,5 +1,5 @@
 import mysql from "mysql2/promise";
-const config = require("../../../config.json");
+import config from "../../../config.mjs";
 
 const pool = mysql.createPool({
     "host": config.mysql.host,
@@ -27,37 +27,37 @@ export async function simpleQuery(query, vars){
 
 export async function simpleFetch(query, vars){
 
-    return await this.simpleQuery(query, vars);
+    return await simpleQuery(query, vars);
 }
 
 export async function simpleInsert(query, vars){
 
-    return await this.simpleQuery(query, vars);
+    return await simpleQuery(query, vars);
 }
 
 export async function simpleDelete(query, vars){
     
-    return await this.simpleQuery(query, vars);
+    return await simpleQuery(query, vars);
 }
 
 export async function simpleUpdate(query, vars){
     
-    return await this.simpleQuery(query, vars);
+    return await simpleQuery(query, vars);
 }
 
 export async function insertReturnInsertId(query, vars){
 
-    const result = await this.simpleQuery(query, vars);
+    const result = await simpleQuery(query, vars);
     return result.insertId;
 }
 
 export async function updateReturnAffectedRows(query, vars){
-    const result = await this.simpleQuery(query, vars);
+    const result = await simpleQuery(query, vars);
     return result.affectedRows;
 }
 
 
-async function bulkInsert(query, vars, maxPerInsert){
+export async function bulkInsert(query, vars, maxPerInsert){
 
     if(vars.length === 0) return;
     if(maxPerInsert === undefined) maxPerInsert = 100000;
