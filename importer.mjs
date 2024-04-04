@@ -4,8 +4,18 @@ import Message from "./src/app/lib/message.mjs";
 //const config = require('./config.json');
 import {simpleQuery} from "./src/app/lib/database.mjs";
 import { FTPImporter } from "./src/app/lib/ftpimporter.mjs";
+import { readFile } from 'node:fs/promises';
+import { MatchParser } from "./src/app/lib/matchParser.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
+
+async function openFile(){
+
+    const data = await readFile("Logs/test.txt", {"encoding": "utf16le"});
+
+    new MatchParser(data);
+}
+
 
 
 (async () =>{
@@ -25,6 +35,7 @@ new Message('Node UTStats 2 Importer module started.','note');
 
     }
     
+    await openFile();
 
 
     

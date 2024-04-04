@@ -23,20 +23,17 @@ export class FTPImporter{
         try {
 
             await this.client.access({
-                "host": "127.0.0.1",
-                "user": "ooper",
-                "password": "password",
+                "host": this.host,
+                "user": this.user,
+                "password": this.password,
                 "secure": false
-            })
+            });
 
-            //console.log(await this.client.list("/System"))
-            //await client.uploadFrom("README.md", "README_FTP.md")
-            //await client.downloadTo("README_COPY.md", "README_FTP.md")
+            new Message(`Connected to ${this.host}`,"pass");
 
             await this.downloadMatchLogs();
         }
         catch(err) {
-            console.log(err)
             new Message(err.toString(),"error");
         }
 
@@ -46,12 +43,10 @@ export class FTPImporter{
 
     async downloadMatchLogs(){
 
-        const files = await this.client.list("/Logs");
+        const files = await this.client.list(`${this.targetFolder}/Logs`);
 
         const lowerPrefix = config.logFilePrefix.toLowerCase();
         const fileExt = /^.+\.log$/i;
-
-
        
         for(let i = 0; i < files.length; i++){
 
