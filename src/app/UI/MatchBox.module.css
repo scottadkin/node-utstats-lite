@@ -1,0 +1,44 @@
+.wrapper{
+    display:inline-block;
+    text-align:center;
+    background-color:var(--bg-color-2);
+    border:1px solid var(--border-color-1);  
+    width:360px;
+    margin-right:5px;
+    overflow:hidden;
+    padding-top:5px;
+    
+
+}
+
+.wrapper img{
+    width:100%;
+
+}
+
+.map{
+    font-size:18px;
+    padding:5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.gametype{
+    padding:5px;
+    font-size:14px;
+}
+
+.server{
+    font-size:12px;
+    padding:5px;
+    color:var(--font-color-2);
+    margin-bottom:5px;
+}
+
+.info{
+    font-size:14px;
+    line-height:22px;
+    padding:5px;
+    color:var(--font-color-2);
+}

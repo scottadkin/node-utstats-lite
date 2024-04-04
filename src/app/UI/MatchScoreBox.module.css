@@ -1,0 +1,32 @@
+.wrapper{
+    height:82px;
+    color:white;
+    text-align:center;
+}
+
+.wrapper div img{
+    width:32px;
+    height:32px;
+    margin-top:10px;
+    margin-bottom:5px;
+}
+
+.score{
+    padding:5px;
+    font-size:18px;
+}
+
+.duo{
+    display:grid;
+    grid-template-columns: 1fr 1fr;   
+}
+
+.trio{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr; 
+}
+
+.quad{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
