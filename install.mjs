@@ -43,7 +43,7 @@ const queries = [
         use_ace_player_hwid INT(1) NOT NULL
       ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
-      `CREATE TABLE IF NOT EXISTS nstats_logs_folder (
+        `CREATE TABLE IF NOT EXISTS nstats_logs_folder (
         id int(11) NOT NULL AUTO_INCREMENT,
         name varchar(100) NOT NULL,
         first int(11) NOT NULL,
@@ -59,11 +59,19 @@ const queries = [
         total_ace_join_logs INT(1) NOT NULL,
         total_ace_screenshots INT(1) NOT NULL,
         use_ace_player_hwid INT(1) NOT NULL
-      ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,  
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,  
+
+        `CREATE TABLE IF NOT EXISTS nstats_players (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            name varchar(32) NOT NULL,
+            ip varchar(39) NOT NULL,
+            hwid varchar(255) NOT NULL,
+            mac1 varchar(255) NOT NULL,
+            mac2 varchar(255) NOT NULL,
+            country varchar(3) NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
 ];
-
-
 
 
 (async () =>{

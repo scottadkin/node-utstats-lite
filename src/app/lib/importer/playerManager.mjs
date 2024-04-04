@@ -1,5 +1,6 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
+import { getPlayerMasterId } from "../players.mjs";
 
 export class PlayerManager{
 
@@ -131,5 +132,26 @@ export class PlayerManager{
 
         player[key] = value;
 
+    }
+
+
+    async setPlayerMasterIds(){
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+            console.log(p.name);
+
+            let masterId = await getPlayerMasterId(p.name);
+
+            if(masterId === null){
+                new Message("Player doesn't exist", "note");
+            }else{
+                console.log("get player id");
+                new Message("Player already exists", "note");
+            }
+            //console.log(await getPlayerMasterId(p.name));
+
+        }
     }
 }

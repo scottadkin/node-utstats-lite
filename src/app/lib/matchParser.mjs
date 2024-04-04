@@ -11,6 +11,14 @@ export class MatchParser{
         //console.log(`${this.rawData}`);
 
         this.parseLines();
+
+    }
+
+    async main(){
+
+        console.log(`---------------------------------------------------------------`);
+        await this.players.setPlayerMasterIds();
+        
     }
 
     parseLines(){

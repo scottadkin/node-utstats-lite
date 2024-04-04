@@ -13,7 +13,9 @@ async function openFile(){
 
     const data = await readFile("Logs/test.txt", {"encoding": "utf16le"});
 
-    new MatchParser(data);
+    const m = new MatchParser(data);
+
+    await m.main();
 }
 
 
