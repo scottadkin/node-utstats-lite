@@ -3,7 +3,7 @@ import { sha256 } from 'js-sha256';
 import salt from "../../../salt";
 import {simpleQuery} from "./database.mjs";
 import { cookies } from 'next/headers';
-import { createRandomString } from "./generic";
+import { createRandomString } from "./generic.mjs";
 
 async function getUserName(id){
 

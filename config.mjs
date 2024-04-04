@@ -5,7 +5,7 @@ export default {
         "port": 3306,
         "user": "root",
         "password": "",
-        "database": "node_utstats_2"
+        "database": "node_utstats_lite"
     },
     "logFilePrefix": "unreal.nglog.",
     "importedLogsFolder": "./Logs",

@@ -21,22 +21,31 @@ export class MatchParser{
         const lines = test.match(lineReg);
 
 
+        const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
         //38.49	player	Rename	Archon	1
-        const playerNameReg = /^(\d+?\.\d+?)\tplayer\trename\t(.+)\t(\d+)$/i;
+
+        const playerReg =  /^player\t(.+)$/i;
+        
 
         for(let i = 0; i < lines.length; i++){
+            
 
             //console.log(i);
             const line = lines[i];
-            //console.log(line);
-            //console.log(playerNameReg.test(line));
-            if(playerNameReg.test(line)){
-               console.log(playerNameReg.exec(line));
 
-               const result = playerNameReg.exec(line);
-               if(result === null) continue;
-               this.players.addPlayer(parseFloat(result[1]), result[2], parseInt(result[3]));
+            const timestampResult = timestampReg.exec(line);
+
+            if(timestampResult === null) continue;
+
+            const timestamp = parseFloat(timestampResult[1]);
+            const subString = timestampResult[2];
+
+            if(playerReg.test(subString)){
+                this.players.parseLine(timestamp, subString);
             }
+
+            //console.log(playerNameReg.test(line));
+            
         }
 
 

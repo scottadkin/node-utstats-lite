@@ -2,7 +2,7 @@ import {simpleQuery} from "./database.mjs";
 import Servers from "../../../api/servers";
 import Gametypes from "../../../api/gametypes";
 import Maps from "../../../api/maps";
-import { cleanMapName } from "./generic";
+import { cleanMapName } from "./generic.mjs";
 
 async function getDMWinner(playerId){
 

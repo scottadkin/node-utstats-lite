@@ -3,7 +3,7 @@ import {getData} from "@/app/lib/match";
 import Header from "@/app/UI/Header";
 import MatchScoreBox from "@/app/UI/MatchScoreBox";
 import InteractiveTable from "@/app/UI/InteractiveTable";
-import { getTeamColorClass } from "../../lib/generic";
+import { getTeamColorClass } from "../../lib/generic.mjs";
 import FragTable from "@/app/UI/Match/FragTable";
 
 

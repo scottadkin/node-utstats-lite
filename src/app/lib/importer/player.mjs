@@ -10,6 +10,8 @@ export class Player{
         this.hwid = null;
         this.mac1 = null;
         this.mac2 = null;
+        this.team = -1;
+        this.bBot = 0;
     }
 
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "./MatchBox.module.css";
 import Image from "next/image";
 import MatchScoreBox from "./MatchScoreBox";
-import { convertTimestamp, toPlaytime } from "../lib/generic";
+import { convertTimestamp, toPlaytime } from "../lib/generic.mjs";
 
 export default function MatchBox({data}){
 
