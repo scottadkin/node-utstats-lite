@@ -2,6 +2,7 @@ import { PlayerManager } from "./importer/playerManager.mjs";
 import { createMatch } from "./matches.mjs";
 import Message from "./message.mjs";
 import {Match} from "./importer/match.mjs";
+import { Server } from "./importer/server.mjs";
 
 export class MatchParser{
 
@@ -12,6 +13,7 @@ export class MatchParser{
         this.players = new PlayerManager();
         //console.log(`${this.rawData}`);
         this.match = new Match();
+        this.server = new Server();
 
         this.parseLines();
 
@@ -19,14 +21,24 @@ export class MatchParser{
 
     async main(){
 
-        await this.players.setPlayerMasterIds();
 
-        //serverId, gametypeId, mapId, date, players
-        this.matchId = await createMatch(0,0,0,this.match.date,0);
+        try{
 
-        if(this.matchId === null){
-            new Message(`Failed to create match id.`,"error")
-            return;
+            await this.players.setPlayerMasterIds();
+
+            await this.server.getServerId();
+
+            //serverId, gametypeId, mapId, date, players
+            this.matchId = await createMatch(0,0,0,this.match.date,0);
+
+            if(this.matchId === null){
+                new Message(`Failed to create match id.`,"error")
+                return;
+            }
+
+        }catch(err){
+            console.trace(err);
+            new Message(err.toString(),"error");
         }
         
         
@@ -109,14 +121,16 @@ export class MatchParser{
         const type = result[1].toLowerCase();
         const value = result[2];
 
+        //0.00	info	Server_ServerName	Dogs have wet noses
 
         if(type === "absolute_time"){
+            this.match.setDate(value);    
+        }
 
-            this.match.setDate(value);
-            
+        if(type === "server_servername"){
+            this.server.name = value;
         }
 
     }
-
 }
 
