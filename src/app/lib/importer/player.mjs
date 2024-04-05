@@ -7,9 +7,9 @@ export class Player{
         this.id = playerId;
 
         this.ip = null;
-        this.hwid = null;
-        this.mac1 = null;
-        this.mac2 = null;
+        this.hwid = "";
+        this.mac1 = "";
+        this.mac2 = "";
         this.team = -1;
         this.bBot = 0;
     }

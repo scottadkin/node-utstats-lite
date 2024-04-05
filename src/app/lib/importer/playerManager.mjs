@@ -1,6 +1,6 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId } from "../players.mjs";
+import { getPlayerMasterId, createMasterPlayer, setMasterPlayerIP } from "../players.mjs";
 
 export class PlayerManager{
 
@@ -142,16 +142,20 @@ export class PlayerManager{
             const p = this.players[i];
             console.log(p.name);
 
-            let masterId = await getPlayerMasterId(p.name);
+            const masterId = await getPlayerMasterId(p.name, p.hwid, p.mac1, p.mac2);
 
             if(masterId === null){
                 new Message("Player doesn't exist", "note");
+
+                await createMasterPlayer(p.name, p.ip, p.hwid, p.mac1, p.mac2);
             }else{
+
+
+                await setMasterPlayerIP(masterId, p.ip);
                 console.log("get player id");
                 new Message("Player already exists", "note");
             }
             //console.log(await getPlayerMasterId(p.name));
-
         }
     }
 }
