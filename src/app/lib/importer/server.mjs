@@ -9,7 +9,7 @@ export class Server{
         this.port = 7777;
     }
 
-    async setServerId(){
+    async setId(){
 
         this.id = await updateServer(this.name, this.ip, this.port);
     }

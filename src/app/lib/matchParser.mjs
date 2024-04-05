@@ -4,6 +4,7 @@ import Message from "./message.mjs";
 import {Match} from "./importer/match.mjs";
 import { Server } from "./importer/server.mjs";
 import { Gametype } from "./importer/gametype.mjs";
+import { Map } from "./importer/map.mjs";
 
 export class MatchParser{
 
@@ -16,6 +17,7 @@ export class MatchParser{
         this.match = new Match();
         this.server = new Server();
         this.gametype = new Gametype();
+        this.map = new Map();
 
         this.parseLines();
 
@@ -28,11 +30,12 @@ export class MatchParser{
 
             await this.players.setPlayerMasterIds();
 
-            await this.server.setServerId();
-            await this.gametype.setGametypeId();
+            await this.server.setId();
+            await this.gametype.setId();
+            await this.map.setId();
 
             //serverId, gametypeId, mapId, date, players
-            this.matchId = await createMatch(this.server.id, this.gametype.id, 0, this.match.date, 0);
+            this.matchId = await createMatch(this.server.id, this.gametype.id, this.map.id, this.match.date, 0);
 
             if(this.matchId === null){
                 new Message(`Failed to create match id.`,"error")
@@ -63,6 +66,7 @@ export class MatchParser{
 
         const infoReg = /^info\t(.+)$/i;
         const gameReg = /^game\t(.+)$/i;        
+        const mapReg = /^map\t(.+)$/i;
 
         for(let i = 0; i < lines.length; i++){
             
@@ -102,7 +106,14 @@ export class MatchParser{
 
                 const result = gameReg.exec(subString);
 
-                this.parseGameInfo(result[1]);
+                this.gametype.parseLine(result[1]);
+                continue;
+            }
+
+            if(mapReg.test(subString)){
+
+                const result = mapReg.exec(subString);
+                this.map.parseLine(result[1]);
                 continue;
             }
 
@@ -144,20 +155,6 @@ export class MatchParser{
         }
     }
 
-    parseGameInfo(line){
-
-        const reg = /^(.+?)\t(.+)$/i;
-
-        const result = reg.exec(line);
-
-        if(result === null) return;
-
-        const type = result[1].toLowerCase();
-        const value = result[2];
-
-        if(type === "gamename"){
-            this.gametype.name = value;
-        }
-    }
+    
 }
 

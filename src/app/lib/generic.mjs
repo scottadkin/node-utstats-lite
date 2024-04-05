@@ -259,3 +259,15 @@ export function convertTimestamp(timestamp, noDayName, noTime){
 
     return `${dayNameString}${day}${getOrdinal(day)} ${getMonthName(month)} ${year}${timeString}`;
 }
+
+
+export function removeUNR(name){
+
+    const reg = /^(.+)\.unr$/i;
+
+    const result = reg.exec(name);
+
+    if(result === null) return name;
+
+    return result[1];
+}

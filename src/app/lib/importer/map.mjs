@@ -1,6 +1,7 @@
-import { updateGametype } from "../gametypes.mjs";
+import { removeUNR } from "../generic.mjs";
+import { updateMap } from "../map.mjs";
 
-export class Gametype{
+export class Map{
 
     constructor(){
 
@@ -10,22 +11,19 @@ export class Gametype{
     parseLine(line){
 
         const reg = /^(.+?)\t(.+)$/i;
-
         const result = reg.exec(line);
-
-        if(result === null) return;
 
         const type = result[1].toLowerCase();
         const value = result[2];
 
-        if(type === "gamename"){
-            this.name = value;
+        if(type === "name"){
+            this.name = removeUNR(result[2]);
         }
     }
 
+
     async setId(){
 
-
-        this.id = await updateGametype(this.name);
+        this.id = await updateMap(this.name);
     }
 }
