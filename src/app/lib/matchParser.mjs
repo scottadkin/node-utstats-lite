@@ -33,6 +33,7 @@ export class MatchParser{
         //38.49	player	Rename	Archon	1
 
         const playerReg =  /^player\t(.+)$/i;
+        const statPlayerReg = /^stat_player\t(.+)$/i;
         
 
         for(let i = 0; i < lines.length; i++){
@@ -49,7 +50,15 @@ export class MatchParser{
             const subString = timestampResult[2];
 
             if(playerReg.test(subString)){
+
                 this.players.parseLine(timestamp, subString);
+                continue;
+            }
+
+            if(statPlayerReg.test(subString)){
+
+                this.players.parseStatLine(timestamp, subString);
+                continue;
             }
 
             //console.log(playerNameReg.test(line));
@@ -59,8 +68,6 @@ export class MatchParser{
 
         console.log(this.players.players);
 
-
-        console.log(this.players.getPlayerByName("alys"));
         //console.log(lines);
     }
 

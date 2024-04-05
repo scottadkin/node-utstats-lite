@@ -12,6 +12,18 @@ export class Player{
         this.mac2 = "";
         this.team = -1;
         this.bBot = 0;
+
+        this.stats = {
+            "score": 0,
+            "frags": 0,
+            "kills": 0,
+            "deaths": 0,
+            "suicides": 0,
+            "teamKills": 0,
+            "efficiency": 0,
+            "timeOnServer": 0,
+            "ttl": 0
+        };
     }
 
 }

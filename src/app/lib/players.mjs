@@ -5,7 +5,6 @@ export async function getPlayerMasterId(playerName, hwid, mac1, mac2){
     const query = `SELECT id FROM nstats_players WHERE name=? AND hwid=? AND mac1=? AND mac2=?`;
 
     const result = await simpleQuery(query, [playerName, hwid, mac1, mac2]);
-    console.log(result);
 
     if(result.length === 0) return null;
 
@@ -19,25 +18,6 @@ export async function createMasterPlayer(name, ip, hwid, mac1, mac2){
     const result = await simpleQuery(query, [name, ip, hwid, mac1, mac2]);
 
     console.log(result);
-}
-
-export async function getNamesByIds(targetIds){
-
-    if(targetIds === undefined) return {};
-
-    const query = `SELECT id,name FROM nstats_player_totals WHERE id IN (?)`;
-    const result = await simpleQuery(query, [targetIds]);
-
-    const idsToNames = {};
-
-    for(let i = 0; i < result.length; i++){
-
-        const {id, name} = result[i];
-
-        idsToNames[id] = name;
-    }
-
-    return idsToNames;
 }
 
 
