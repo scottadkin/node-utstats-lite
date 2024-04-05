@@ -1,4 +1,4 @@
-import {searchMatches} from "../lib/matches";
+import {searchMatches} from "../lib/matches.mjs";
 import MatchList from "../UI/MatchList";
 import Header from "../UI/Header";
 import Pagination from "../UI/Pagination";

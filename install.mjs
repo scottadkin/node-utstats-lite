@@ -71,6 +71,16 @@ const queries = [
             country varchar(3) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
+        `CREATE TABLE IF NOT EXISTS nstats_matches (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            server_id int(11) NOT NULL,
+            gametype_id int(11) NOT NULL,
+            map_id int(11) NOT NULL,
+            date datetime NOT NULL,
+            players int(11) NOT NULL
+           
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+
 ];
 
 
