@@ -1,3 +1,5 @@
+import { bulkInserKills } from "../kills.mjs";
+
 export class KillsManager{
 
     constructor(){
@@ -78,5 +80,27 @@ export class KillsManager{
                 k.victimMasterId = victim.masterId;
             }
         }
+    }
+
+
+    async insertKills(matchId){
+
+        const allKills = [];
+
+        const types = ["kills", "teamKills"];
+
+        for(let x = 0; x < types.length; x++){
+
+            for(let i = 0; i < this[types[x]].length; i++){
+
+                const k = this[types[x]][i];
+
+                k.type = x;
+
+                allKills.push(k);
+            }
+        }
+
+        await bulkInserKills(allKills, matchId);
     }
 }

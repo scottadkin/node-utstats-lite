@@ -128,6 +128,7 @@ const queries = [
             id int(11) NOT NULL AUTO_INCREMENT,
             match_id int(11) NOT NULL,
             timestamp float NOT NULL,
+            kill_type int(11) NOT NULL,
             killer_id int(11) NOT NULL,
             killer_weapon int(11) NOT NULL,
             victim_id int(11) NOT NULL,

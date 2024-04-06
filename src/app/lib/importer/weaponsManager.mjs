@@ -38,7 +38,5 @@ export class WeaponsManager{
 
             this.weapons[id] = name;
         }
-
-        console.log(this.weapons);
     }
 }

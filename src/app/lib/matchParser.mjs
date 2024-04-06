@@ -50,6 +50,7 @@ export class MatchParser{
             await this.weapons.setWeaponIds();
             this.kills.setWeaponIds(this.weapons.weapons);
             this.kills.setPlayerIds(this.players);
+            await this.kills.insertKills(this.matchId);
 
         }catch(err){
             console.trace(err);
