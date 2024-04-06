@@ -42,6 +42,8 @@ export class MatchParser{
                 return;
             }
 
+            await this.players.insertPlayerMatchData(this.matchId);
+
         }catch(err){
             console.trace(err);
             new Message(err.toString(),"error");

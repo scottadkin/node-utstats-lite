@@ -95,7 +95,27 @@ const queries = [
         `CREATE TABLE IF NOT EXISTS nstats_maps (
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_match_players (     
+            id int NOT NULL,
+            player_id int NOT NULL,
+            ip varchar(39) COLLATE utf8mb4_unicode_ci NOT NULL,
+            hwid varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+            mac1 varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+            mac2 varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+            match_id int NOT NULL,
+            score int NOT NULL,
+            frags int NOT NULL,
+            kills int NOT NULL,
+            deaths int NOT NULL,
+            suicides int NOT NULL,
+            team_kills int NOT NULL,
+            efficiency float NOT NULL,
+            time_on_server float NOT NULL,
+            ttl float NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+
 
 ];
 

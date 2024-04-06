@@ -1,6 +1,6 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId, createMasterPlayer, setMasterPlayerIP } from "../players.mjs";
+import { getPlayerMasterId, createMasterPlayer, setMasterPlayerIP, insertPlayerMatchData } from "../players.mjs";
 
 export class PlayerManager{
 
@@ -195,12 +195,12 @@ export class PlayerManager{
 
             const p = this.players[i];
 
-            const masterId = await getPlayerMasterId(p.name, p.hwid, p.mac1, p.mac2);
+            let masterId = await getPlayerMasterId(p.name, p.hwid, p.mac1, p.mac2);
 
             if(masterId === null){
 
                 //new Message("Player doesn't exist", "note");
-                await createMasterPlayer(p.name, p.ip, p.hwid, p.mac1, p.mac2);
+                masterId = await createMasterPlayer(p.name, p.ip, p.hwid, p.mac1, p.mac2);
 
             }else{
 
@@ -208,6 +208,22 @@ export class PlayerManager{
                 //new Message("Player already exists", "note");
             }
             //console.log(await getPlayerMasterId(p.name));
+
+            masterId = parseInt(masterId);
+            if(masterId !== masterId) throw new Error(`Player masterId is not a valid integer`);
+
+            p.masterId = masterId;
+        }
+    }
+
+
+    async insertPlayerMatchData(matchId){
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            await insertPlayerMatchData(p, matchId);
         }
     }
 }

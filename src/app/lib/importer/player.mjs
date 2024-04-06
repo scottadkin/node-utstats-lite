@@ -13,6 +13,8 @@ export class Player{
         this.team = -1;
         this.bBot = 0;
 
+        this.masterId = null;
+
         this.stats = {
             "score": 0,
             "frags": 0,
