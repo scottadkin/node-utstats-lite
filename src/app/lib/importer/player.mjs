@@ -12,6 +12,7 @@ export class Player{
         this.mac2 = "";
         this.team = -1;
         this.bBot = 0;
+        this.country = "";
 
         this.masterId = null;
 

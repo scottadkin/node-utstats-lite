@@ -35,15 +35,18 @@ export async function insertPlayerMatchData(playerData, matchId){
 
     const p = playerData;
 
-    const query = `INSERT INTO nstats_match_players VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const query = `INSERT INTO nstats_match_players VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
     const vars = [
         p.masterId,
         p.ip,
+        p.country,
         p.hwid,
         p.mac1,
         p.mac2,
         matchId,
+        p.bBot,
+        p.team,
         p.stats.score,
         p.stats.frags,
         p.stats.kills,
