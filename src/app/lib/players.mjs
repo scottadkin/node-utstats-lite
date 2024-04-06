@@ -31,8 +31,6 @@ export async function setMasterPlayerIP(masterId, ip){
 
 export async function insertPlayerMatchData(playerData, matchId){
 
-    console.log(playerData);
-
     const p = playerData;
 
     const query = `INSERT INTO nstats_match_players VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;

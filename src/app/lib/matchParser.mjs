@@ -5,6 +5,8 @@ import {Match} from "./importer/match.mjs";
 import { Server } from "./importer/server.mjs";
 import { Gametype } from "./importer/gametype.mjs";
 import { Map } from "./importer/map.mjs";
+import { WeaponsManager } from "./importer/weaponsManager.mjs";
+import { KillsManager } from "./importer/killsmanager.mjs";
 
 export class MatchParser{
 
@@ -18,6 +20,8 @@ export class MatchParser{
         this.server = new Server();
         this.gametype = new Gametype();
         this.map = new Map();
+        this.weapons = new WeaponsManager();
+        this.kills = new KillsManager();
 
         this.parseLines();
 
@@ -43,6 +47,7 @@ export class MatchParser{
             }
 
             await this.players.insertPlayerMatchData(this.matchId);
+            await this.weapons.setWeaponIds();
 
         }catch(err){
             console.trace(err);
@@ -69,6 +74,7 @@ export class MatchParser{
         const infoReg = /^info\t(.+)$/i;
         const gameReg = /^game\t(.+)$/i;        
         const mapReg = /^map\t(.+)$/i;
+        const killReg = /^(kill|teamkill)\t(.+)$/i
 
         for(let i = 0; i < lines.length; i++){
             
@@ -119,15 +125,14 @@ export class MatchParser{
                 continue;
             }
 
-            //console.log(playerNameReg.test(line));
+            if(killReg.test(subString)){
+
+                this.kills.parseLine(line);
+                this.weapons.parseLine(subString);
+                continue;
+            }
             
         }
-
-
-        console.log(this.players.players);
-
-
-        //console.log(lines);
     }
 
 
