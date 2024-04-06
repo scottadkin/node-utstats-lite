@@ -18,7 +18,7 @@ export class FTPImporter{
 
         this.client = new Client()
 
-        this.client.ftp.verbose = true
+        //this.client.ftp.verbose = true
 
         try {
 
@@ -32,8 +32,8 @@ export class FTPImporter{
             new Message(`Connected to ${this.host}`,"pass");
 
             await this.downloadMatchLogs();
-        }
-        catch(err) {
+
+        }catch(err) {
             new Message(err.toString(),"error");
         }
 

@@ -13,6 +13,8 @@ export class Map{
         const reg = /^(.+?)\t(.+)$/i;
         const result = reg.exec(line);
 
+        if(result === null) return;
+
         const type = result[1].toLowerCase();
         const value = result[2];
 

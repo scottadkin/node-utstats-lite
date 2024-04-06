@@ -17,13 +17,19 @@ async function parseLog(file){
 
     const url = `${config.importedLogsFolder}/${file}`;
 
-    const dummy = await readFile(url);
+    let data = await readFile(url);
 
-    let detectedEncoding = Encoding.detect(dummy);
+    const currentFileEncoding = Encoding.detect(data);
+    
+    if(currentFileEncoding !== "UTF16"){
 
-    if(detectedEncoding === "UTF16") detectedEncoding = "utf16le";
+        data = Encoding.codeToString(Encoding.convert(data, {
+            "to": "UTF16",
+            "from": currentFileEncoding
+        }));
+    }
 
-    const data = await readFile(url, detectedEncoding);
+    data = data.toString().replace(/\u0000/ig, '');
 
     const m = new MatchParser(data);
 
@@ -42,7 +48,6 @@ async function parseLogs(){
 
         const f = files[i];
         
-
         if(!f.toLowerCase().startsWith(config.logFilePrefix)) continue;
 
         await parseLog(f);
@@ -56,23 +61,19 @@ async function parseLogs(){
     const query = "SELECT * FROM nstats_ftp ORDER BY id ASC";
     const result = await simpleQuery(query);
 
-
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
+
         const test = new FTPImporter(r.host, r.user, r.password, false, r.target_folder);
 
         await test.connect();
-
     }
-
-
-    
-   // await openFile();
 
     await parseLogs();
 
-    
+    new Message(`Import Completed`,"pass");
     process.exit();
-})()
+
+})();
 
