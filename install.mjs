@@ -69,7 +69,7 @@ const queries = [
             mac1 varchar(255) NOT NULL,
             mac2 varchar(255) NOT NULL,
             country varchar(3) NOT NULL
-        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_matches (
             id int(11) NOT NULL AUTO_INCREMENT,
@@ -122,6 +122,16 @@ const queries = [
         `CREATE TABLE IF NOT EXISTS nstats_weapons (
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_kills (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            match_id int(11) NOT NULL,
+            timestamp float NOT NULL,
+            killer_id int(11) NOT NULL,
+            killer_weapon int(11) NOT NULL,
+            victim_id int(11) NOT NULL,
+            victim_weapon int(11) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
 

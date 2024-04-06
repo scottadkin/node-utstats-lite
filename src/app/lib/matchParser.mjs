@@ -48,6 +48,8 @@ export class MatchParser{
 
             await this.players.insertPlayerMatchData(this.matchId);
             await this.weapons.setWeaponIds();
+            this.kills.setWeaponIds(this.weapons.weapons);
+            this.kills.setPlayerIds(this.players);
 
         }catch(err){
             console.trace(err);
@@ -127,7 +129,7 @@ export class MatchParser{
 
             if(killReg.test(subString)){
 
-                this.kills.parseLine(line);
+                this.kills.parseLine(timestamp, subString);
                 this.weapons.parseLine(subString);
                 continue;
             }
