@@ -132,7 +132,6 @@ export class MatchParser{
     parseMatchInfo(line){
 
         if(line === null) return;
-        console.log(line);
 
         const typeReg = /^(.+?)\t(.*)$/i;
 

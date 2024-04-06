@@ -17,6 +17,7 @@ export class PlayerManager{
         const isABotReg = /^isabot\t(.+)\t(.+)$/i;
         const teamReg = /^team\t(\d+?)\t(\d+)$/i;
         const ipReg = /^ip\t(\d+?)\t(.+)$/i;
+        const genericReg = /^(.+?)\t(\d+?)\t(.+)$/i;
 
         const typeResult = typeReg.exec(line);
 
@@ -62,6 +63,7 @@ export class PlayerManager{
             const teamId = parseInt(result[2]);
 
             this.setPlayerProperty(playerId, "team", teamId);
+            return;
 
         }
 
@@ -75,7 +77,25 @@ export class PlayerManager{
             const ip = result[2];
 
             this.setPlayerProperty(playerId, "ip", ip);
+            return;
         }
+
+
+        const genericResult = genericReg.exec(line);
+
+        if(genericResult === null) return;
+
+        const subType = genericResult[1].toLowerCase();
+
+        const targets = ["hwid", "mac1", "mac2"];
+
+        if(targets.indexOf(subType) === -1) return;
+
+        const playerId = parseInt(genericResult[2]);
+        const subValue = genericResult[3];
+        
+        this.setPlayerProperty(playerId, subType, subValue);
+        
     }
 
 
