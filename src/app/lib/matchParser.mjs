@@ -60,7 +60,7 @@ export class MatchParser{
                 this.gametype.bInsta,
                 this.match.date, 
                 this.matchLength,
-                0,
+                this.players.getTotalUniquePlayers(),
                 this.totalTeams,
                 this.teamScores[0],
                 this.teamScores[1],
@@ -80,8 +80,7 @@ export class MatchParser{
             this.kills.setWeaponIds(this.weapons.weapons);
             this.kills.setPlayerIds(this.players);
             await this.kills.insertKills(this.matchId);
-
-            this.players.debugListAllPlayers();
+            
 
         }catch(err){
             console.trace(err);

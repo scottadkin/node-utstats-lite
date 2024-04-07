@@ -38,7 +38,7 @@ export class PlayerManager{
         }
 
         if(type === "connect"){
-            
+
             const result = connectReg.exec(line);
 
             if(result === null) return;
@@ -270,11 +270,22 @@ export class PlayerManager{
     }
 
 
+    //ignore spectators
     getTotalUniquePlayers(){
 
-        let totalPlayers = 0;
-       
+        const uniqueNames = [];
 
-        return totalPlayers;
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(!p.bSpectator && !p.bBot){
+
+                if(uniqueNames.indexOf(p.name) !== -1) continue;
+                uniqueNames.push(p.name);
+            }
+        }
+       
+        return uniqueNames.length;
     }
 }
