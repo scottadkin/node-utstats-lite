@@ -78,6 +78,7 @@ const queries = [
             map_id int(11) NOT NULL,
             date datetime NOT NULL,
             players int(11) NOT NULL,
+            total_teams int(1) NOT NULL,
             team_0_score int(11) NOT NULL,   
             team_1_score int(11) NOT NULL,   
             team_2_score int(11) NOT NULL,   

@@ -24,6 +24,7 @@ export class MatchParser{
         this.kills = new KillsManager();
 
 
+        this.totalTeams = 0;
         this.teamScores = [0,0,0,0];
         this.soloWinner = 0;
         this.soloWinnerScore = 0;
@@ -51,6 +52,7 @@ export class MatchParser{
                 this.map.id, 
                 this.match.date, 
                 0,
+                this.totalTeams,
                 this.teamScores[0],
                 this.teamScores[1],
                 this.teamScores[2],
@@ -194,6 +196,10 @@ export class MatchParser{
 
         const teamId = parseInt(regResult[1]);
         const teamScore = parseInt(regResult[2]);
+
+        if(teamId + 1 > this.totalTeams){
+            this.totalTeams = teamId + 1;
+        }
 
         this.teamScores[teamId] = teamScore;
     }
