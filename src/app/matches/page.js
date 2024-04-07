@@ -1,4 +1,4 @@
-import {searchMatches} from "../lib/matches.mjs";
+import {getRecentMatches} from "../lib/matches.mjs";
 import MatchList from "../UI/MatchList";
 import Header from "../UI/Header";
 import Pagination from "../UI/Pagination";
@@ -13,7 +13,13 @@ export default async function Page({params, searchParams}) {
     let page = searchParams?.page ?? 1;
 
     //const matches = await m.getRecent(page, perPage, 0, playerManager);
-    const {matches, total} = await searchMatches(page, perPage,0,0,"date","ASC");;
+    //const {matches, total} = await searchMatches(page, perPage,0,0,"date","ASC");;
+
+
+    let matches = await getRecentMatches(1, 25);
+    let total = 0;
+
+
   
     return (
       <main className={"styles.main"}>

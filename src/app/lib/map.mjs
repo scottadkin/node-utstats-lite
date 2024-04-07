@@ -38,3 +38,24 @@ export async function updateMap(name){
 
     return mapId;
 }
+
+
+export async function getMapNames(names){
+
+    if(names.length === 0) return [];
+
+    const query = `SELECT id,name FROM nstats_maps WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [names]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r.name;
+
+    }
+
+    return data;
+}
