@@ -3,7 +3,7 @@ import Link from "next/link";
 import styles from "./MatchBox.module.css";
 import Image from "next/image";
 import MatchScoreBox from "./MatchScoreBox";
-import { convertTimestamp, toPlaytime } from "../lib/generic.mjs";
+import { convertTimestamp, toPlaytime, plural } from "../lib/generic.mjs";
 
 export default function MatchBox({data}){
 
@@ -18,9 +18,9 @@ export default function MatchBox({data}){
             <div className={styles.server}>
                 {data.serverName}
             </div>  
-            <Image src={`/images/maps/thumbs/${data.mapImage}.jpg`} alt="image" width={360} height={202} />
+            <Image src={`/images/maps/${data.mapImage}`} alt="image" width={360} height={202} />
             <div className={styles.info}>
-                {data.players} Player{(data.players !== 1) ? "s" : ""}<br/>
+                {data.players} {plural(data.players, "Player")}<br/>
                 {toPlaytime(data.playtime)}<br/>
                 {convertTimestamp(data.date, true)}
             </div>

@@ -2,6 +2,7 @@ import {simpleQuery} from "./database.mjs";
 import {getMapNames} from "./map.mjs";
 import { getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
+import { getMapImages } from "./map.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
@@ -41,11 +42,15 @@ async function setMatchTypeNames(matches){
     const mapNames = await getMapNames([...mapIds]);
     const gametypeNames = await getGametypeNames([...gametypeIds]);
     const serverNames = await getServerNames([...serverIds]);
+    const mapImages = await getMapImages(mapNames);
 
-    return {
-        mapNames,
-        gametypeNames,
-        serverNames
+    for(let i = 0; i < matches.length; i++){
+
+        const m = matches[i];
+        m.serverName = serverNames[m.server_id];
+        m.gametypeName = gametypeNames[m.gametype_id];
+        m.mapName = mapNames[m.map_id];
+        m.mapImage = mapImages[m.mapName.toLowerCase()];
     }
 
 }
@@ -67,18 +72,20 @@ export async function getRecentMatches(page, perPage){
         page = 1;
     }
 
-    page = 0;
+    page--;
+
+    if(page < 0) page = 0;
 
     let start = page * perPage;
     if(start < 0) start = 0;
 
-    const query = `SELECT * FROM nstats_matches ORDER BY date DESC LIMIT ?, ?`;
+    //const query = `SELECT * FROM nstats_matches ORDER BY date DESC, id DESC LIMIT ?, ?`;
+    const query = `SELECT * FROM nstats_matches ORDER BY id DESC LIMIT ?, ?`;
 
     const result = await simpleQuery(query, [start, perPage]);
 
+    await setMatchTypeNames(result);
 
-    const {mapNames, gametypeNames, serverNames} = await setMatchTypeNames(result);
-
-    console.log(mapNames, gametypeNames, serverNames);
+    return result;
 
 }

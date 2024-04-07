@@ -16,7 +16,7 @@ export default async function Page({params, searchParams}) {
     //const {matches, total} = await searchMatches(page, perPage,0,0,"date","ASC");;
 
 
-    let matches = await getRecentMatches(1, 25);
+    const data = await getRecentMatches(1, 25);
     let total = 0;
 
 
@@ -25,7 +25,7 @@ export default async function Page({params, searchParams}) {
       <main className={"styles.main"}>
         <div>
             <Header>Recent Matches</Header>
-            <MatchList matches={JSON.stringify(matches)} />
+            <MatchList data={JSON.stringify(data)} />
             <Pagination url="/matches?page=" currentPage={page} results={total} perPage={perPage}/>
         </div>
       </main>

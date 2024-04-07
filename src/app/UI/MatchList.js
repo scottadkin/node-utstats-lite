@@ -3,13 +3,13 @@ import MatchBox from "./MatchBox";
 import styles from "./MatchList.module.css"
 
 
-export default function MatchesList({matches}){
+export default function MatchesList({data}){
 
-    matches = JSON.parse(matches);
-    
+    data = JSON.parse(data);
+
     return <div className={`center ${styles.wrapper}`}>
 
-        {matches.map((m, i) =>{
+        {data.map((m, i) =>{
             return <MatchBox 
                 key={i}
                 data={m} 

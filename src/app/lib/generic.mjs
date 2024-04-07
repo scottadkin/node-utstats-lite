@@ -272,6 +272,16 @@ export function removeUNR(name){
     return result[1];
 }
 
+
+export function plural(value, word){
+
+    //if(value == "") return word;
+
+    if(value === 1) return word;
+
+    return `${word}s`;
+}
+
 export function scalePlaytime(playtime, bHardcore){
 
     if(bHardcore && playtime !== 0){
