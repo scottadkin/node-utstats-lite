@@ -110,6 +110,7 @@ const queries = [
         `CREATE TABLE IF NOT EXISTS nstats_match_players (     
             id int NOT NULL,
             player_id int NOT NULL,
+            played int(1) NOT NULL,
             ip varchar(39) COLLATE utf8mb4_unicode_ci NOT NULL,
             country varchar(3) COLLATE utf8mb4_unicode_ci NOT NULL,
             hwid varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,

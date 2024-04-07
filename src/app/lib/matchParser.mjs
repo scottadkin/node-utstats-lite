@@ -81,6 +81,7 @@ export class MatchParser{
             this.kills.setPlayerIds(this.players);
             await this.kills.insertKills(this.matchId);
 
+            this.players.debugListAllPlayers();
 
         }catch(err){
             console.trace(err);
@@ -98,8 +99,6 @@ export class MatchParser{
         const lines = test.match(lineReg);
 
         const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
-        //38.49	player	Rename	Archon	1
-
         const playerReg =  /^player\t(.+)$/i;
         const statPlayerReg = /^stat_player\t(.+)$/i;
 
@@ -111,8 +110,6 @@ export class MatchParser{
         const teamScoreReg = /^teamscore\t(\d+)\t(.+)$/i;
 
         const endReg = /^game_end\t.+$/i;
-
-        //0.00	game	HardCore	True
 
         for(let i = 0; i < lines.length; i++){
             

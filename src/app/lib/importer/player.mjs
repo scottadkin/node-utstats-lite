@@ -13,7 +13,8 @@ export class Player{
         this.team = -1;
         this.bBot = 0;
         this.country = "";
-
+        this.bHadConnectEvent = false;
+        this.bSpectator = 1;
         this.masterId = null;
 
         this.stats = {
@@ -27,6 +28,12 @@ export class Player{
             "timeOnServer": 0,
             "ttl": 0
         };
+    }
+
+    connected(){
+
+        this.bHadConnectEvent = true;
+        this.bSpectator = 0;
     }
 
 }

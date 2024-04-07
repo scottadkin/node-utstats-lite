@@ -18,6 +18,8 @@ export class PlayerManager{
         const teamReg = /^team\t(\d+?)\t(\d+)$/i;
         const ipReg = /^ip\t(\d+?)\t(.+)$/i;
         const genericReg = /^(.+?)\t(\d+?)\t(.+)$/i;
+        //87.97	player	Connect	Illana	16	False
+        const connectReg = /^connect\t(.+?)\t(\d+)\t.+$/i;
 
         const typeResult = typeReg.exec(line);
 
@@ -33,6 +35,17 @@ export class PlayerManager{
 
             this.addPlayer(timestamp, result[1], parseInt(result[2]));
             return;
+        }
+
+        if(type === "connect"){
+            
+            const result = connectReg.exec(line);
+
+            if(result === null) return;
+
+            const playerName = result[1];
+
+            this.setConnectionEvent(playerName);
         }
 
         if(type === "isabot"){
@@ -98,7 +111,6 @@ export class PlayerManager{
         
     }
 
-
     parseStatLine(timestamp, line){
 
         const reg = /^stat_player\t(.+?)\t(.+?)\t(.+?)$/i;
@@ -155,6 +167,16 @@ export class PlayerManager{
     addPlayer(timestamp, name, playerId){
 
         this.players.push(new Player(timestamp, name, playerId));
+    }
+
+    setConnectionEvent(playerName){
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(p.name === playerName) p.connected();
+        }
     }
 
     /**
@@ -225,5 +247,34 @@ export class PlayerManager{
 
             await insertPlayerMatchData(p, matchId);
         }
+    }
+
+
+    debugListAllPlayers(){
+
+        const players = [];
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            players.push({
+                "name": p.name,
+                "hwid": p.hwid,
+                "mac1": p.mac1,
+                "mac2": p.mac2,
+                "bSpectator": p.bSpectator
+            });
+        }
+        console.table(players);
+    }
+
+
+    getTotalUniquePlayers(){
+
+        let totalPlayers = 0;
+       
+
+        return totalPlayers;
     }
 }

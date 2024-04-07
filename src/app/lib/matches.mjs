@@ -79,8 +79,8 @@ export async function getRecentMatches(page, perPage){
     let start = page * perPage;
     if(start < 0) start = 0;
 
-    //const query = `SELECT * FROM nstats_matches ORDER BY date DESC, id DESC LIMIT ?, ?`;
-    const query = `SELECT * FROM nstats_matches ORDER BY id DESC LIMIT ?, ?`;
+    const query = `SELECT * FROM nstats_matches ORDER BY date DESC, id DESC LIMIT ?, ?`;
+    //const query = `SELECT * FROM nstats_matches ORDER BY id DESC LIMIT ?, ?`;
 
     const result = await simpleQuery(query, [start, perPage]);
 
