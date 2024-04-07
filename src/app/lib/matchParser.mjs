@@ -23,12 +23,18 @@ export class MatchParser{
         this.weapons = new WeaponsManager();
         this.kills = new KillsManager();
 
+
+        this.teamScores = [0,0,0,0];
+        this.soloWinner = 0;
+        this.soloWinnerScore = 0;
+
+        this.bHardscore = null;
+
         this.parseLines();
 
     }
 
     async main(){
-
 
         try{
 
@@ -39,7 +45,19 @@ export class MatchParser{
             await this.map.setId();
 
             //serverId, gametypeId, mapId, date, players
-            this.matchId = await createMatch(this.server.id, this.gametype.id, this.map.id, this.match.date, 0);
+            this.matchId = await createMatch(
+                this.server.id, 
+                this.gametype.id, 
+                this.map.id, 
+                this.match.date, 
+                0,
+                this.teamScores[0],
+                this.teamScores[1],
+                this.teamScores[2],
+                this.teamScores[3],
+                this.soloWinner,
+                this.soloWinnerScore
+            );
 
             if(this.matchId === null){
                 new Message(`Failed to create match id.`,"error")
@@ -51,6 +69,7 @@ export class MatchParser{
             this.kills.setWeaponIds(this.weapons.weapons);
             this.kills.setPlayerIds(this.players);
             await this.kills.insertKills(this.matchId);
+
 
         }catch(err){
             console.trace(err);
@@ -78,6 +97,8 @@ export class MatchParser{
         const gameReg = /^game\t(.+)$/i;        
         const mapReg = /^map\t(.+)$/i;
         const killReg = /^(kill|teamkill)\t(.+)$/i
+
+        const teamScoreReg = /^teamscore\t(\d+)\t(.+)$/i;
 
         for(let i = 0; i < lines.length; i++){
             
@@ -134,7 +155,12 @@ export class MatchParser{
                 this.weapons.parseLine(subString);
                 continue;
             }
-            
+
+            if(teamScoreReg.test(subString)){
+
+                this.setTeamScores(teamScoreReg.exec(subString));
+                continue;
+            }    
         }
     }
 
@@ -149,11 +175,8 @@ export class MatchParser{
 
         if(result === null) return;
 
-
         const type = result[1].toLowerCase();
         const value = result[2];
-
-        //0.00	info	Server_ServerName	Dogs have wet noses
 
         if(type === "absolute_time"){
             this.match.setDate(value);    
@@ -162,6 +185,17 @@ export class MatchParser{
         if(type === "server_servername"){
             this.server.name = value;
         }
+    }
+
+
+    setTeamScores(regResult){
+
+        if(regResult === null) return;
+
+        const teamId = parseInt(regResult[1]);
+        const teamScore = parseInt(regResult[2]);
+
+        this.teamScores[teamId] = teamScore;
     }
 
     

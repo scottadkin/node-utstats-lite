@@ -4,11 +4,14 @@ import { getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 
 
-export async function createMatch(serverId, gametypeId, mapId, date, players){
+export async function createMatch(serverId, gametypeId, mapId, date, players, team0Scores, team1Scores, 
+    team2Scores, team3Score, soloWinner, soloWinnerScore){
 
-    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?)`;
+    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?)`;
 
-    const result = await simpleQuery(query, [serverId, gametypeId, mapId, date, players]);
+    const vars = [serverId, gametypeId, mapId, date, players, team0Scores, team1Scores, team2Scores, team3Score, soloWinner, soloWinnerScore];
+
+    const result = await simpleQuery(query, vars);
 
     if(result.insertId !== undefined) return result.insertId;
 

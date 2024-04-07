@@ -77,7 +77,13 @@ const queries = [
             gametype_id int(11) NOT NULL,
             map_id int(11) NOT NULL,
             date datetime NOT NULL,
-            players int(11) NOT NULL   
+            players int(11) NOT NULL,
+            team_0_score int(11) NOT NULL,   
+            team_1_score int(11) NOT NULL,   
+            team_2_score int(11) NOT NULL,   
+            team_3_score int(11) NOT NULL,   
+            solo_winner int(11) NOT NULL,
+            solo_winner_score int(11) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_servers (
