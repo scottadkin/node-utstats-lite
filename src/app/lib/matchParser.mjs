@@ -7,6 +7,7 @@ import { Gametype } from "./importer/gametype.mjs";
 import { Map } from "./importer/map.mjs";
 import { WeaponsManager } from "./importer/weaponsManager.mjs";
 import { KillsManager } from "./importer/killsmanager.mjs";
+import { scalePlaytime } from "./generic.mjs";
 
 export class MatchParser{
 
@@ -23,13 +24,13 @@ export class MatchParser{
         this.weapons = new WeaponsManager();
         this.kills = new KillsManager();
 
-
+        this.matchStart = 0;
+        this.matchEnd = 0;
+        this.matchLength = 0;
         this.totalTeams = 0;
         this.teamScores = [0,0,0,0];
         this.soloWinner = 0;
         this.soloWinnerScore = 0;
-
-        this.bHardscore = null;
 
         this.parseLines();
 
@@ -45,12 +46,20 @@ export class MatchParser{
             await this.gametype.setId();
             await this.map.setId();
 
+            this.matchLength = this.matchEnd - this.matchStart;
+            if(this.gametype.bHardcore){
+                this.matchLength = scalePlaytime(this.matchLength, true);
+            }
+
             //serverId, gametypeId, mapId, date, players
             this.matchId = await createMatch(
                 this.server.id, 
                 this.gametype.id, 
                 this.map.id, 
+                this.gametype.bHardcore,
+                this.gametype.bInsta,
                 this.match.date, 
+                this.matchLength,
                 0,
                 this.totalTeams,
                 this.teamScores[0],
@@ -88,7 +97,6 @@ export class MatchParser{
         const lineReg = /^(.+?)$/img;
         const lines = test.match(lineReg);
 
-
         const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
         //38.49	player	Rename	Archon	1
 
@@ -102,10 +110,12 @@ export class MatchParser{
 
         const teamScoreReg = /^teamscore\t(\d+)\t(.+)$/i;
 
+        const endReg = /^game_end\t.+$/i;
+
+        //0.00	game	HardCore	True
+
         for(let i = 0; i < lines.length; i++){
             
-
-            //console.log(i);
             const line = lines[i];
 
             const timestampResult = timestampReg.exec(line);
@@ -140,6 +150,13 @@ export class MatchParser{
 
                 const result = gameReg.exec(subString);
 
+                const subType = result[1].toLowerCase();
+
+                if(subType === "realstart"){
+                    this.matchStart = timestamp;
+                    continue;
+                }
+
                 this.gametype.parseLine(result[1]);
                 continue;
             }
@@ -163,6 +180,11 @@ export class MatchParser{
                 this.setTeamScores(teamScoreReg.exec(subString));
                 continue;
             }    
+
+            if(endReg.test(subString)){
+                this.matchEnd = timestamp;
+                continue;
+            }
         }
     }
 

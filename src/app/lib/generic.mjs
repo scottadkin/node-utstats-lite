@@ -271,3 +271,12 @@ export function removeUNR(name){
 
     return result[1];
 }
+
+export function scalePlaytime(playtime, bHardcore){
+
+    if(bHardcore && playtime !== 0){
+        return playtime / 1.1;      
+    }
+
+    return playtime;
+}
