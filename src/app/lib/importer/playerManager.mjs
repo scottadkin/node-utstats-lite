@@ -298,46 +298,27 @@ export class PlayerManager{
 
     getSoloWinner(){
 
-        const mergedScores = {};
-
-        for(let i = 0; i < this.players.length; i++){
-
-            const p = this.players[i];
-
-            if(p.bSpectator) continue;
-
-            if(mergedScores[p.name] === undefined){
-                mergedScores[p.name] = {"score": parseInt(p.stats.score), "deaths": parseInt(p.stats.deaths)};
-            }else{
-                mergedScores[p.name].score += parseInt(p.stats.score);
-                mergedScores[p.name].deaths += parseInt(p.stats.deaths);
-            }
+        const basicPlayers = [];
+        
+        for(const p of Object.values(this.mergedPlayers)){
+            basicPlayers.push({"id": p.masterId, "score": parseInt(p.stats.score), "deaths": parseInt(p.stats.deaths)});
         }
 
-        const orderedPlayers = [];
+        basicPlayers.sort((a, b) =>{
 
-        for(const [name, stats] of Object.entries(mergedScores)){
-
-            orderedPlayers.push({
-                "name": name,
-                "score": stats.score,
-                "deaths": stats.deaths
-            });
-        }
-
-        orderedPlayers.sort((a, b) =>{
-
-            if(a.score < b.score) return 1;
             if(a.score > b.score) return -1;
-            if(a.deaths > b.deaths) return 1;
-            if(a.deaths < b.deaths) return -1;
+            if(a.score < b.score) return 1;
 
+            if(a.deaths < b.score) return 1;
+            if(a.deaths > b.score) return -1;
             return 0;
         });
 
-        if(orderedPlayers.length === 0) return null;
+        if(basicPlayers.length > 0){
+            return basicPlayers[0];
+        }
 
-        return {"name": orderedPlayers[0].name, "score": orderedPlayers[0].score};
+        return {"id": 0, "score": 0}
     }
 
 

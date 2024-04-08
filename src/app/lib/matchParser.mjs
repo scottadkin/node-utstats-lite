@@ -40,18 +40,18 @@ export class MatchParser{
 
         try{
 
-            const soloStats = this.players.getSoloWinner();
-
             this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
             this.players.mergePlayers();
 
+            await this.players.setPlayerMasterIds();
+
+            const soloStats = this.players.getSoloWinner();
+
             if(soloStats !== null){
 
-                this.soloWinner = -1//this.players.getPlayerByName();
+                this.soloWinner = soloStats.id;
                 this.soloWinnerScore = soloStats.score;
             }
-
-            await this.players.setPlayerMasterIds();
 
             await this.server.setId();
             await this.gametype.setId();
