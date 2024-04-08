@@ -1,12 +1,9 @@
-//const Importer =  require('./api/importer/importer');
 import Message from "./src/app/lib/message.mjs";
-//const mysql = require('./api/database');
-//const config = require('./config.json');
 import {simpleQuery} from "./src/app/lib/database.mjs";
 import { FTPImporter } from "./src/app/lib/ftpimporter.mjs";
 import { readFile, readdir } from 'node:fs/promises';
 import { MatchParser } from "./src/app/lib/matchParser.mjs";
-import config from "./config.mjs";
+import {importedLogsFolder, logFilePrefix} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 
 new Message('Node UTStats 2 Importer module started.','note');
@@ -15,7 +12,7 @@ async function parseLog(file){
 
     new Message(`Starting parsing of log ${file}`,"note");
 
-    const url = `${config.importedLogsFolder}/${file}`;
+    const url = `${importedLogsFolder}/${file}`;
 
     let data = await readFile(url);
 
@@ -41,14 +38,14 @@ async function parseLog(file){
 
 async function parseLogs(){
 
-    const files = await readdir(config.importedLogsFolder);
+    const files = await readdir(importedLogsFolder);
     console.table(files);
 
     for(let i = 0; i < files.length; i++){
 
         const f = files[i];
         
-        if(!f.toLowerCase().startsWith(config.logFilePrefix)) continue;
+        if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
 
         await parseLog(f);
     }

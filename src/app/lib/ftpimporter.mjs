@@ -1,6 +1,6 @@
 import { Client } from "basic-ftp"; 
 import Message from "./message.mjs";
-import config from "../../../config.mjs";
+import { logFilePrefix, importedLogsFolder } from "../../../config.mjs";
 
 export class FTPImporter{
 
@@ -45,7 +45,7 @@ export class FTPImporter{
 
         const files = await this.client.list(`${this.targetFolder}/Logs`);
 
-        const lowerPrefix = config.logFilePrefix.toLowerCase();
+        const lowerPrefix = logFilePrefix.toLowerCase();
         const fileExt = /^.+\.log$/i;
        
         for(let i = 0; i < files.length; i++){
@@ -56,8 +56,8 @@ export class FTPImporter{
 
                 if(f.name.toLowerCase().startsWith(lowerPrefix) && fileExt.test(f.name)){
 
-                    await this.client.downloadTo(`${config.importedLogsFolder}/${f.name}`, `/Logs/${f.name}`);
-                    new Message(`Downloaded file ${config.importedLogsFolder}/${f.name}`,"pass");
+                    await this.client.downloadTo(`${importedLogsFolder}/${f.name}`, `/Logs/${f.name}`);
+                    new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass");
                 }
 
             }catch(err){

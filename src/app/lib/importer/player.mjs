@@ -1,3 +1,5 @@
+import {multiKillTimeLimit} from "../../../../config.mjs";
+
 export class Player{
 
     constructor(timestamp, name, playerId){
@@ -27,6 +29,26 @@ export class Player{
             "efficiency": 0,
             "timeOnServer": 0,
             "ttl": 0
+        };
+
+
+        this.lastKillTime = -99999;
+
+        this.sprees = {
+            "spree": 0,
+            "rampage": 0,
+            "dominating": 0,
+            "unstoppable": 0,
+            "godlike": 0,
+            "best": 0
+        };
+
+        this.multi = {
+            "double": 0,
+            "multi": 0,
+            "ultra": 0,
+            "monster": 0,
+            "best": 0
         };
     }
 

@@ -1,6 +1,6 @@
 "use server"
 import { sha256 } from 'js-sha256';
-import salt from "../../../salt";
+import {salt} from "../../../salt.mjs";
 import {simpleQuery} from "./database.mjs";
 import { cookies } from 'next/headers';
 import { createRandomString } from "./generic.mjs";
@@ -170,7 +170,7 @@ export async function register(currentState, formData){
             throw new Error(`Your password must be at least ${minPassLength} characters long.`);
         }
 
-        const passHash = sha256(`${salt()}${pass1}`);
+        const passHash = sha256(`${salt}${pass1}`);
 
         await createAccount(username, passHash);
 
@@ -194,7 +194,7 @@ export async function login(currentState, formData){
         if(username === null || username === "") throw new Error("No username entered");
         if(password === null || password === "") throw new Error("No password entered");
 
-        password = sha256(`${salt()}${password}`);
+        password = sha256(`${salt}${password}`);
         const query = `SELECT id FROM nstats_users WHERE name=? AND password=?`;
 
         const result = await simpleQuery(query, [username, password]);

@@ -1,11 +1,11 @@
 import mysql from "mysql2/promise";
-import config from "../../../config.mjs";
+import { mysqlSettings} from "../../../config.mjs";
 
 const pool = mysql.createPool({
-    "host": config.mysql.host,
-    "user": config.mysql.user,
-    "password": config.mysql.password,
-    "database": config.mysql.database
+    "host": mysqlSettings.host,
+    "user": mysqlSettings.user,
+    "password": mysqlSettings.password,
+    "database": mysqlSettings.database
 });
 
 

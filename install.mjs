@@ -1,19 +1,19 @@
 
 import fs from "fs";
 import Message from "./src/app/lib/message.mjs";
-import config from "./config.mjs";
+import { mysqlSettings } from "./config.mjs";
 import mysql from "mysql2/promise";
 import {createRandomString} from "./src/app/lib/generic.mjs";
 
 let connection = mysql.createPool({
-    "host": config.mysql.host,
-    "user": config.mysql.user,
-    "password": config.mysql.password
+    "host": mysqlSettings.host,
+    "user": mysqlSettings.user,
+    "password": mysqlSettings.password
 });
 
 
 const queries = [
-    `CREATE DATABASE IF NOT EXISTS ${config.mysql.database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`,
+    `CREATE DATABASE IF NOT EXISTS ${mysqlSettings.database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`,
     `CREATE TABLE IF NOT EXISTS nstats_ftp (
         id int(11) NOT NULL AUTO_INCREMENT,
         name varchar(100) NOT NULL,
@@ -63,7 +63,7 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_players (
             id int(11) NOT NULL AUTO_INCREMENT,
-            name varchar(32) NOT NULL
+            name varchar(32) NOT NULL,
             country varchar(3) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
@@ -159,10 +159,10 @@ const queries = [
                 connection.end();
 
                 connection = mysql.createPool({
-                    "host": config.mysql.host,
-                    "user": config.mysql.user,
-                    "password": config.mysql.password,
-                    "database": config.mysql.database
+                    "host": mysqlSettings.host,
+                    "user": mysqlSettings.user,
+                    "password": mysqlSettings.password,
+                    "database": mysqlSettings.database
                 });
             }
 
@@ -173,14 +173,14 @@ const queries = [
         connection.end();
 
 
-        if(!fs.existsSync("./salt.js")){
+        if(!fs.existsSync("./salt.mjs")){
 
             new Message(`Creating password hash`,"note");
 
             const seed = createRandomString(10000);
-            const fileContents = `module.exports = () => {  return \`${seed}\`;}`;
+            const fileContents = `export const salt = \`${seed}\`;`;
 
-            fs.writeFileSync("./salt.js", fileContents);
+            fs.writeFileSync("./salt.mjs", fileContents);
         }
 
         
