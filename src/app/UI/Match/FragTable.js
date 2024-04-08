@@ -2,7 +2,6 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { getTeamColorClass, MMSS, ignore0 } from "@/app/lib/generic.mjs";
-import styles from "./FragTable.module.css";
 
 export default function FragTable({data, totalTeams}){
 
@@ -15,10 +14,11 @@ export default function FragTable({data, totalTeams}){
         "frags": {"title": "Frags"},       
         "kills": {"title": "Kills"},       
         "deaths": {"title": "Deaths"},       
-        "suicides": {"title": "Suicides"},       
-        "efficiency": {"title": "Efficiency"},        
+        "suicides": {"title": "Suicides"},             
         "teamKills": {"title": "Team Kills"},       
         "headShots": {"title": "Headshots"},       
+        "efficiency": {"title": "Efficiency"},  
+        "ttl": {"title": "TTL"},  
     };
 
 
@@ -27,6 +27,7 @@ export default function FragTable({data, totalTeams}){
     for(let i = 0; i < data.playerData.length; i++){
 
         const d = data.playerData[i];
+        if(d.spectator === 1) continue;
 
         const name = data.playerNames[d.player_id] ?? "Not Found";
 
@@ -34,6 +35,7 @@ export default function FragTable({data, totalTeams}){
 
         if(totalTeams > 1){
             team = d.team;
+            
         }
         if(test[team] === undefined){
             test[team] = [];
@@ -55,6 +57,7 @@ export default function FragTable({data, totalTeams}){
             "efficiency": {"value": d.efficiency, "displayValue": `${ignore0(d.efficiency.toFixed(2))}%`},      
             "teamKills": {"value": d.team_kills, "displayValue": ignore0(d.team_kills)},       
             "headShots": {"value": d.headshots, "displayValue": ignore0(d.headshots)},  
+            "ttl": {"value": d.ttl, "displayValue": d.ttl},  
         });
     }
 
@@ -72,7 +75,7 @@ export default function FragTable({data, totalTeams}){
     }
 
 
-    return <div className={styles.wrapper}>
+    return <div className="margin-bottom-1">
         <Header>Frags Summary</Header>
         {elems}
     </div>

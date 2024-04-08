@@ -5,6 +5,7 @@ import MatchScoreBox from "@/app/UI/MatchScoreBox";
 import InteractiveTable from "@/app/UI/InteractiveTable";
 import { getTeamColorClass } from "../../lib/generic.mjs";
 import FragTable from "@/app/UI/Match/FragTable";
+import SpecialEvents from "@/app/UI/Match/SpecialEvents";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -62,8 +63,8 @@ export default async function MatchPage({params, searchParams}) {
 		<main>
 			<Header>Match Report</Header> 
 			<MatchScoreBox data={matchData.basic}/>
-				<FragTable data={JSON.stringify(matchData)} totalTeams={matchData.basic.total_teams}/>
-			<InteractiveTable headers={headers} rows={playerRows}/>
+			<FragTable data={JSON.stringify(matchData)} totalTeams={matchData.basic.total_teams}/>
+      <SpecialEvents data={JSON.stringify(matchData)} totalTeams={matchData.basic.total_teams}/>
 		</main>
     );
 }

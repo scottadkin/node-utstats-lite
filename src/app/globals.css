@@ -145,3 +145,7 @@ form{
 	background-color: var(--bg-color-4);
 	cursor: pointer;
 }
+
+.margin-bottom-1{
+	margin-bottom:var(--margin-1);
+}
