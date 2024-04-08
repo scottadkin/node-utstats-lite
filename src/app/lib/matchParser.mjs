@@ -92,7 +92,7 @@ export class MatchParser{
             this.kills.setPlayerIds(this.players);
             await this.kills.insertKills(this.matchId);
             
-            this.players.debugListAllPlayers();
+            //this.players.debugListAllPlayers();
             
 
         }catch(err){

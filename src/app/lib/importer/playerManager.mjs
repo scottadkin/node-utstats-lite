@@ -347,6 +347,15 @@ export class PlayerManager{
             "score", "frags", "kills", "deaths",
             "suicides", "teamKills", "timeOnServer"
         ];
+        
+        const spreeMergeKeys = [
+            "spree", "rampage", "dominating", "unstoppable", "godlike"
+        ];
+
+        const multiMergeKeys = [
+            "double", "multi", "ultra", "monster"
+        ];
+
 
         for(let i = 0; i < this.players.length; i++){
 
@@ -382,13 +391,36 @@ export class PlayerManager{
                 master.stats.ttl = master.stats.totalTTL / master.stats.merges;
             }
 
+            //merge basic stats events
             for(let x = 0; x < mergeKeys.length; x++){
 
                 const type = mergeKeys[x];
-
-                master.stats[type] += p.stats[type];
-                
+                master.stats[type] += p.stats[type];      
             }
+
+
+            for(let x = 0; x < multiMergeKeys.length; x++){
+
+                const type = multiMergeKeys[x];
+
+                master.stats.multis[type] += p.stats.multis[type];
+            }
+
+            if(p.stats.multis.best > master.stats.multis.best){
+                master.stats.multis.best = p.stats.multis.best;
+            }
+
+            if(p.stats.sprees.best > master.stats.sprees.best){
+                master.stats.sprees.best = p.stats.sprees.best;
+            }
+
+            for(let x = 0; x < spreeMergeKeys.length; x++){
+
+                const type = spreeMergeKeys[x];
+
+                master.stats.sprees[type] += p.stats.sprees[type];
+            }
+
         }
     }
 
