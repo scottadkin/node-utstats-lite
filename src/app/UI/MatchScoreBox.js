@@ -12,7 +12,7 @@ export default function MatchScoreBox({data}){
 
     const scoreElems = [];
 
-    if(data.solo_winner === 0){
+    if(data.total_teams > 0){
 
         for(let i = 0; i < data.total_teams; i++){
 
@@ -25,7 +25,7 @@ export default function MatchScoreBox({data}){
 
         scoreElems.push(<div key="-1">
             <Image src={`/images/${getTeamIcon(255)}`} alt="image" width={32} height={32} priority={true}/><br/>
-            {data.solo_winner} Wins with {data.solo_winner_score}
+            {data.soloWinnerName} Wins with {data.solo_winner_score}
         </div>);
     }
 

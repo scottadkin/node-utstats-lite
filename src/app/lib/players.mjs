@@ -88,3 +88,23 @@ export async function getPlayersById(ids){
 
     return data;
 }
+
+
+export async function getBasicPlayerInfo(ids){
+
+    if(ids.length === 0) return {};
+
+    const query = `SELECT id,name,country FROM nstats_players WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [ids]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r;
+    }
+
+    return data;
+}

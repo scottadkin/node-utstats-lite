@@ -3,7 +3,7 @@ import {getMapNames} from "./map.mjs";
 import { getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getMapImages } from "./map.mjs";
-import { getPlayersById } from "./players.mjs";
+import { getPlayersById, getBasicPlayerInfo } from "./players.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
@@ -92,9 +92,22 @@ export async function getRecentMatches(page, perPage){
     if(start < 0) start = 0;
 
     const query = `SELECT * FROM nstats_matches ORDER BY date DESC, id DESC LIMIT ?, ?`;
-    //const query = `SELECT * FROM nstats_matches ORDER BY id DESC LIMIT ?, ?`;
-
     const result = await simpleQuery(query, [start, perPage]);
+
+    const soloWinners = [... new Set(result.map((r) =>{
+        return r.solo_winner;
+    }))];
+
+    const playerNames = await getBasicPlayerInfo(soloWinners);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(r.solo_winner > 0){
+            r.soloWinnerName = playerNames[r.solo_winner]?.name ?? "Not Found";
+        }
+    }
 
     await setMatchTypeNames(result);
     const totalMatches = await getTotalMatches();
@@ -115,7 +128,6 @@ async function getMatch(id){
 
 async function getPlayerMatchData(id){
 
-    
 
     const query = `SELECT id,player_id,spectator,country,bot,team,score,frags,kills,deaths,suicides,team_kills,efficiency,time_on_server,
     ttl,spree_1,spree_2,spree_3,spree_4,spree_5,spree_best,first_blood,multi_1,multi_2,multi_3,multi_4,multi_best,headshots 
