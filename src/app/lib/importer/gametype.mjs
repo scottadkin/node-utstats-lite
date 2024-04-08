@@ -52,8 +52,7 @@ export class Gametype{
     }
 
     async setId(){
-
-
+        
         this.id = await updateGametype(this.name);
     }
 }

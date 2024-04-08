@@ -272,11 +272,13 @@ export class PlayerManager{
                 "hwid": p.hwid,
                 "mac1": p.mac1,
                 "mac2": p.mac2,
-                "bSpectator": p.bSpectator
+                "bSpectator": p.bSpectator,
+                "multis": p.stats.multis,
+                "sprees": p.stats.sprees
             });
         }
 
-        console.table(players);
+        console.log(players);
     }
 
 
@@ -388,7 +390,14 @@ export class PlayerManager{
                 
             }
         }
+    }
 
+    matchEnded(){
 
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+            p.matchEnded();
+        }
     }
 }

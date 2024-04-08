@@ -175,7 +175,7 @@ const queries = [
 
         if(!fs.existsSync("./salt.mjs")){
 
-            new Message(`Creating password hash`,"note");
+            new Message(`Creating password salt`,"note");
 
             const seed = createRandomString(10000);
             const fileContents = `export const salt = \`${seed}\`;`;

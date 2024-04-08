@@ -1,4 +1,5 @@
 import { bulkInserKills } from "../kills.mjs";
+import { scalePlaytime } from "../generic.mjs";
 
 export class KillsManager{
 
@@ -102,5 +103,27 @@ export class KillsManager{
         }
 
         await bulkInserKills(allKills, matchId);
+    }
+
+
+    /**
+     * set players multi kills and sprees
+     */
+    setPlayerSpecialEvents(playerManager, bHardcore){
+
+        for(let i = 0; i < this.kills.length; i++){
+
+            const k = this.kills[i];
+
+            const killer = playerManager.getPlayerById(k.killerId);
+            const victim = playerManager.getPlayerById(k.victimId);
+
+            let timestamp = k.timestamp;
+            if(bHardcore) timestamp = scalePlaytime(timestamp);
+
+            killer.killed(k.timestamp);
+        }
+
+        playerManager.matchEnded();
     }
 }
