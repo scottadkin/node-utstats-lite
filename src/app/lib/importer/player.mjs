@@ -29,6 +29,7 @@ export class Player{
             "efficiency": 0,
             "timeOnServer": 0,
             "ttl": 0,
+            "headshots": 0,
             "sprees": {
                 "spree": 0,
                 "rampage": 0,
@@ -123,6 +124,10 @@ export class Player{
 
         this.updateMultiHistory();
         this.updateSpreeHistory();
+    }
+
+    headshot(){
+        this.stats.headshots++;
     }
 
 }

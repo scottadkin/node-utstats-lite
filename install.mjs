@@ -123,7 +123,19 @@ const queries = [
             team_kills int NOT NULL,
             efficiency float NOT NULL,
             time_on_server float NOT NULL,
-            ttl float NOT NULL
+            ttl float NOT NULL,
+            spree_1 int NOT NULL,
+            spree_2 int NOT NULL,
+            spree_3 int NOT NULL,
+            spree_4 int NOT NULL,
+            spree_5 int NOT NULL,
+            spree_best int NOT NULL,
+            multi_1 int NOT NULL,
+            multi_2 int NOT NULL,
+            multi_3 int NOT NULL,
+            multi_4 int NOT NULL,
+            multi_best int NOT NULL,
+            headshots int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_weapons (

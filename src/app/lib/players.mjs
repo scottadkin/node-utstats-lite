@@ -27,7 +27,8 @@ export async function insertPlayerMatchData(playerData, matchId){
 
     const p = playerData;
 
-    const query = `INSERT INTO nstats_match_players VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const query = `INSERT INTO nstats_match_players VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
+    ?,?,?,?,?,?,?,?,?,?,?,?)`;
 
     const vars = [
         p.masterId,
@@ -48,7 +49,19 @@ export async function insertPlayerMatchData(playerData, matchId){
         p.stats.teamKills,
         p.stats.efficiency,
         p.stats.timeOnServer,
-        p.stats.ttl
+        p.stats.ttl,
+        p.stats.sprees.spree,
+        p.stats.sprees.rampage,
+        p.stats.sprees.dominating,
+        p.stats.sprees.unstoppable,
+        p.stats.sprees.godlike,
+        p.stats.sprees.best,
+        p.stats.multis.double,
+        p.stats.multis.multi,
+        p.stats.multis.ultra,
+        p.stats.multis.monster,
+        p.stats.multis.best,
+        p.stats.headshots
     ];
 
     await simpleQuery(query, vars);

@@ -9,13 +9,19 @@ export class KillsManager{
 
         this.kills = [];
         this.teamKills = [];
+        this.headshots = [];
     }
 
     parseLine(timestamp, line){
 
         const reg = /^(kill|teamkill)\t(\d+?)\t(.+?)\t(\d+?)\t(.+?)\t(.+)$/i;
-
+    
         const result = reg.exec(line);
+
+        if(result === null){
+            this.parseHeadshot(timestamp, line);
+            return;
+        }
 
         const killType = result[1].toLowerCase();
         const killerId = parseInt(result[2]);
@@ -36,6 +42,20 @@ export class KillsManager{
         }else{
             this.teamKills.push(kill);
         }
+    }
+
+    parseHeadshot(timestamp, line){
+
+        const reg = /^headshot\t(\d+?)\t.+$/i;
+
+        const result = reg.exec(line);
+
+        if(result === null) return;
+
+        this.headshots.push({
+            "timestamp": timestamp,
+            "killerId": parseInt(result[1])
+        });
     }
 
 
@@ -107,7 +127,7 @@ export class KillsManager{
 
 
     /**
-     * set players multi kills and sprees
+     * set players multi kills, sprees, and headshots
      */
     setPlayerSpecialEvents(playerManager, bHardcore){
 
@@ -122,6 +142,15 @@ export class KillsManager{
             if(bHardcore) timestamp = scalePlaytime(timestamp);
 
             killer.killed(k.timestamp);
+            victim.died(k.timestamp);
+        }
+
+
+        for(let i = 0; i < this.headshots.length; i++){
+
+            const h = this.headshots[i];
+            const killer = playerManager.getPlayerById(h.killerId);
+            killer.headshot();
         }
 
         playerManager.matchEnded();

@@ -120,6 +120,7 @@ export class MatchParser{
         const killReg = /^(kill|teamkill)\t(.+)$/i
 
         const teamScoreReg = /^teamscore\t(\d+)\t(.+)$/i;
+        const headshotReg = /^headshot\t.+$/i;
 
         const endReg = /^game_end\t.+$/i;
 
@@ -192,6 +193,11 @@ export class MatchParser{
 
             if(endReg.test(subString)){
                 this.matchEnd = timestamp;
+                continue;
+            }
+
+            if(headshotReg.test(subString)){
+                this.kills.parseLine(timestamp, subString);
                 continue;
             }
         }
