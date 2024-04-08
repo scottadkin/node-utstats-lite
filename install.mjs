@@ -124,6 +124,7 @@ const queries = [
             efficiency float NOT NULL,
             time_on_server float NOT NULL,
             ttl float NOT NULL,
+            first_blood int(1) NOT NULL,
             spree_1 int NOT NULL,
             spree_2 int NOT NULL,
             spree_3 int NOT NULL,

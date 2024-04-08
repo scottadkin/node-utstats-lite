@@ -18,6 +18,7 @@ export class Player{
         this.bHadConnectEvent = false;
         this.bSpectator = 1;
         this.masterId = null;
+        this.bFirstBlood = 0;
 
         this.stats = {
             "score": 0,

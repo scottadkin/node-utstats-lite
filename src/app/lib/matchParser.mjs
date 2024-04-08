@@ -124,6 +124,8 @@ export class MatchParser{
 
         const endReg = /^game_end\t.+$/i;
 
+        const firstBloodReg = /^first_blood\t(\d+)$/i;
+
         for(let i = 0; i < lines.length; i++){
             
             const line = lines[i];
@@ -199,6 +201,13 @@ export class MatchParser{
             if(headshotReg.test(subString)){
                 this.kills.parseLine(timestamp, subString);
                 continue;
+            }
+
+            if(firstBloodReg.test(subString)){
+
+                const result = firstBloodReg.exec(subString);
+
+                this.kills.setFirstBloodId(result[1]);
             }
         }
     }

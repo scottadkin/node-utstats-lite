@@ -10,6 +10,7 @@ export class KillsManager{
         this.kills = [];
         this.teamKills = [];
         this.headshots = [];
+        this.firstBloodId = -1;
     }
 
     parseLine(timestamp, line){
@@ -171,5 +172,18 @@ export class KillsManager{
         }
 
         playerManager.matchEnded();
+
+        if(this.firstBloodId !== -1){
+            const firstBloodPlayer = playerManager.getPlayerById(this.firstBloodId);
+
+            if(firstBloodPlayer !== null){
+                firstBloodPlayer.bFirstBlood = 1;
+            }
+        }
+    }
+
+
+    setFirstBloodId(id){
+        this.firstBloodId = parseInt(id);
     }
 }
