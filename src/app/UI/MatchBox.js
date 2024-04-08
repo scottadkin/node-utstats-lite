@@ -7,6 +7,8 @@ import { convertTimestamp, toPlaytime, plural } from "../lib/generic.mjs";
 
 export default function MatchBox({data}){
 
+    const finalDate = Math.floor(new Date(data.date) * 0.001);
+
     return <Link href={`/match/${data.id}`}>
         <div className={styles.wrapper}>
             <div className={styles.map}>
@@ -22,7 +24,7 @@ export default function MatchBox({data}){
             <div className={styles.info}>
                 {data.players} {plural(data.players, "Player")}<br/>
                 {toPlaytime(data.playtime)}<br/>
-                {convertTimestamp(data.date, true)}
+                {convertTimestamp(finalDate, false)}
             </div>
             <MatchScoreBox data={data}/>
         </div>

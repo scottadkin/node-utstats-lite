@@ -40,6 +40,16 @@ export class MatchParser{
 
         try{
 
+            const soloStats = this.players.getSoloWinner();
+
+            this.players.mergePlayers();
+
+            if(soloStats !== null){
+
+                this.soloWinner = -1//this.players.getPlayerByName();
+                this.soloWinnerScore = soloStats.score;
+            }
+
             await this.players.setPlayerMasterIds();
 
             await this.server.setId();
@@ -80,6 +90,8 @@ export class MatchParser{
             this.kills.setWeaponIds(this.weapons.weapons);
             this.kills.setPlayerIds(this.players);
             await this.kills.insertKills(this.matchId);
+            
+            this.players.debugListAllPlayers();
             
 
         }catch(err){

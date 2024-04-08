@@ -16,8 +16,7 @@ export default async function Page({params, searchParams}) {
     //const {matches, total} = await searchMatches(page, perPage,0,0,"date","ASC");;
 
 
-    const data = await getRecentMatches(1, 25);
-    let total = 0;
+    const {data, total} = await getRecentMatches(1, 25);
 
 
   

@@ -7,6 +7,8 @@ export class PlayerManager{
     constructor(){
 
         this.players = [];
+
+        this.mergedPlayers = {};
     }
 
     parseLine(timestamp, line){
@@ -211,39 +213,47 @@ export class PlayerManager{
     }
 
 
-    async setPlayerMasterIds(){
+    //lazy way for kills and other events, as kill data ids have not been merged into one
+    setNonMergedPlayersMasterId(playerName, masterId){
 
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
+
+            if(p.name === playerName) p.masterId = masterId;
+        }
+    }
+
+    async setPlayerMasterIds(){
+
+        for(const p of Object.values(this.mergedPlayers)){
 
             let masterId = await getPlayerMasterId(p.name, p.hwid, p.mac1, p.mac2);
 
             if(masterId === null){
 
-                //new Message("Player doesn't exist", "note");
                 masterId = await createMasterPlayer(p.name, p.ip, p.hwid, p.mac1, p.mac2);
 
             }else{
 
                 await setMasterPlayerIP(masterId, p.ip);
-                //new Message("Player already exists", "note");
             }
-            //console.log(await getPlayerMasterId(p.name));
 
             masterId = parseInt(masterId);
             if(masterId !== masterId) throw new Error(`Player masterId is not a valid integer`);
 
             p.masterId = masterId;
+            //we need to make sure duplicates have there master ids set correctly
+            this.setNonMergedPlayersMasterId(p.name, masterId);
+
         }
+        
     }
 
 
     async insertPlayerMatchData(matchId){
 
-        for(let i = 0; i < this.players.length; i++){
-
-            const p = this.players[i];
+        for(const p of Object.values(this.mergedPlayers)){
 
             await insertPlayerMatchData(p, matchId);
         }
@@ -266,6 +276,7 @@ export class PlayerManager{
                 "bSpectator": p.bSpectator
             });
         }
+
         console.table(players);
     }
 
@@ -275,17 +286,82 @@ export class PlayerManager{
 
         const uniqueNames = [];
 
+        for(const p of Object.values(this.mergedPlayers)){
+            if(p.bSpectator === 0 && p.bBot === 0) uniqueNames.push(p.name);
+        }
+    
+        return uniqueNames.length;
+    }
+
+
+
+    getSoloWinner(){
+
+        const mergedScores = {};
+
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
 
-            if(!p.bSpectator && !p.bBot){
+            if(p.bSpectator) continue;
 
-                if(uniqueNames.indexOf(p.name) !== -1) continue;
-                uniqueNames.push(p.name);
+            if(mergedScores[p.name] === undefined){
+                mergedScores[p.name] = {"score": parseInt(p.stats.score), "deaths": parseInt(p.stats.deaths)};
+            }else{
+                mergedScores[p.name].score += parseInt(p.stats.score);
+                mergedScores[p.name].deaths += parseInt(p.stats.deaths);
             }
         }
-       
-        return uniqueNames.length;
+
+        const orderedPlayers = [];
+
+        for(const [name, stats] of Object.entries(mergedScores)){
+
+            orderedPlayers.push({
+                "name": name,
+                "score": stats.score,
+                "deaths": stats.deaths
+            });
+        }
+
+        orderedPlayers.sort((a, b) =>{
+
+            if(a.score < b.score) return 1;
+            if(a.score > b.score) return -1;
+            if(a.deaths > b.deaths) return 1;
+            if(a.deaths < b.deaths) return -1;
+
+            return 0;
+        });
+
+        if(orderedPlayers.length === 0) return null;
+
+        return {"name": orderedPlayers[0].name, "score": orderedPlayers[0].score};
+    }
+
+
+    mergePlayers(){
+
+        //TODO merge stats
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(this.mergedPlayers[p.name] === undefined){
+                this.mergedPlayers[p.name] = p;
+                continue;
+            }
+
+            const master = this.mergedPlayers[p.name];
+
+            if(master.hwid === "") master.hwid = p.hwid;
+            if(master.mac1 === "") master.mac1 = p.mac1;
+            if(master.mac2 === "") master.mac2 = p.mac2;
+
+            if(master.bHadConnectEvent || p.bHadConnectEvent) master.bHadConnectEvent = true;
+            //if player played at any point don't mark them as a spectator even after reconnects
+            if(master.bSpectator === 0 || p.bSpectator === 0) master.bSpectator = 0;
+        }
     }
 }

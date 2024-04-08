@@ -55,6 +55,17 @@ async function setMatchTypeNames(matches){
 
 }
 
+
+async function getTotalMatches(){
+
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_matches`;
+
+    const result = await simpleQuery(query);
+
+    if(result.length > 0) return result[0].total_matches;
+    return 0;
+}
+
 export async function getRecentMatches(page, perPage){
 
     const DEFAULT_PER_PAGE = 25;
@@ -85,7 +96,7 @@ export async function getRecentMatches(page, perPage){
     const result = await simpleQuery(query, [start, perPage]);
 
     await setMatchTypeNames(result);
-
-    return result;
+    const totalMatches = await getTotalMatches();
+    return {"data": result, "total": totalMatches};
 
 }
