@@ -5,10 +5,8 @@ import { ignore0, plural, getTeamColorClass } from "@/app/lib/generic.mjs";
 function bHadAnyMultiEvents(playerData){
 
     const events = [
-        //"spree_1","spree_2","spree_3","spree_4","spree_5","spree_best",
         "multi_1","multi_2","multi_3","multi_4",
     ];
-
 
     if(playerData.multi_best < 2) return false;
 
@@ -17,7 +15,6 @@ function bHadAnyMultiEvents(playerData){
         const e = events[i];
         if(playerData[e] !== 0) return true;
     }
-
 
     return false;
 }
@@ -28,7 +25,6 @@ function bHadAnySpreeEvents(playerData){
         "spree_1","spree_2","spree_3","spree_4","spree_5","spree_best",
     ];
 
-
     if(playerData.spree_best < 5) return false;
 
     for(let i = 0; i < events.length; i++){
@@ -37,14 +33,46 @@ function bHadAnySpreeEvents(playerData){
         if(playerData[e] !== 0) return true;
     }
 
-
     return false;
 }
 
 
+function renderFirstBlood(data, totalTeams){
+
+    let player = null;
+
+    for(let i = 0; i < data.length; i++){
+
+        const p = data[i];
+
+        if(p.first_blood === 1){
+            player = p;
+            break;
+        }
+    }
+
+    if(player === null) return null;
+
+    let teamColor = "";
+
+    if(totalTeams > 0){
+        teamColor = getTeamColorClass(player.team);
+    }
+
+    return <table>
+        <tbody>
+            <tr>
+                <td>First Blood</td>
+                <td className={teamColor}>{player.name}</td>
+            </tr>
+        </tbody>
+    </table>
+}
+
 export default function SpecialEvents({data, totalTeams}){
 
     data = JSON.parse(data);
+
     const multiHeaders = {
         "player": {"title": <>Player</>},
         "double": {"title": <>Double Kill</>},
@@ -71,13 +99,11 @@ export default function SpecialEvents({data, totalTeams}){
 
         const p = data.playerData[i];
 
-
         let teamColor = "";
 
         if(totalTeams > 0){
             teamColor = getTeamColorClass(p.team);
         }
-
 
         if(bHadAnyMultiEvents(p)){
 
@@ -115,7 +141,7 @@ export default function SpecialEvents({data, totalTeams}){
 
     return <div className="test">
         <Header>Special Events</Header>
-        
+        {renderFirstBlood(data.playerData, totalTeams)}
         {(spreeRows.length === 0) ? null : <InteractiveTable headers={spreeHeaders} rows={spreeRows}/>}
         {(multiRows.length === 0) ? null : <InteractiveTable headers={multiHeaders} rows={multiRows}/>}
     </div>

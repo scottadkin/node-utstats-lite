@@ -118,7 +118,7 @@ async function getPlayerMatchData(id){
     
 
     const query = `SELECT id,player_id,spectator,country,bot,team,score,frags,kills,deaths,suicides,team_kills,efficiency,time_on_server,
-    ttl,spree_1,spree_2,spree_3,spree_4,spree_5,spree_best,multi_1,multi_2,multi_3,multi_4,multi_best,headshots 
+    ttl,spree_1,spree_2,spree_3,spree_4,spree_5,spree_best,first_blood,multi_1,multi_2,multi_3,multi_4,multi_best,headshots 
     FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
 
     return await simpleQuery(query, [id]);

@@ -1,7 +1,6 @@
 "use client"
 
 import { useReducer } from "react";
-import styles from "./InteractiveTable.module.css";
 
 function createHeaders(headers, state, dispatch){
 
@@ -108,7 +107,7 @@ export default function InteractiveTable({headers, rows, sortBy, order}){
 
     sortRows(rows, state.sortBy, state.order);
 
-    return <div className={styles.wrapper}>
+    return <div>
         <table>
             <tbody>
                 {createHeaders(headers, state, dispatch)}
