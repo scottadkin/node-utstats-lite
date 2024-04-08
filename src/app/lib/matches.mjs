@@ -3,6 +3,7 @@ import {getMapNames} from "./map.mjs";
 import { getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getMapImages } from "./map.mjs";
+import { getPlayersById } from "./players.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
@@ -98,5 +99,41 @@ export async function getRecentMatches(page, perPage){
     await setMatchTypeNames(result);
     const totalMatches = await getTotalMatches();
     return {"data": result, "total": totalMatches};
+}
 
+
+async function getMatch(id){
+
+    const query = `SELECT * FROM nstats_matches WHERE id=?`;
+
+    const result = await simpleQuery(query, [id]);
+
+    if(result.length > 0) return result[0];
+
+    return null;
+}
+
+async function getPlayerMatchData(id){
+
+    const query = `SELECT * FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
+
+    return await simpleQuery(query, [id]);
+}
+
+export async function getMatchData(id){
+
+    id = parseInt(id);
+    if(id !== id) throw new Error(`MatchId must be a valid integer`);
+
+    const basic = await getMatch(id);
+
+    const playerData = await getPlayerMatchData(id);
+
+    const uniquePlayers = [...new Set(playerData.map((p) =>{
+        return p.player_id;
+    }))]
+
+    const playerNames = await getPlayersById(uniquePlayers);
+
+    return {basic, playerData, playerNames};
 }

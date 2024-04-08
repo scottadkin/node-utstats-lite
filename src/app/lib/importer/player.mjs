@@ -120,6 +120,11 @@ export class Player{
         this.lastFragEvent = timestamp;
     }
 
+    teamKill(){
+
+        this.stats.teamKills++;
+    }
+
     matchEnded(){
 
         this.updateMultiHistory();

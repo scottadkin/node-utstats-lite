@@ -16,8 +16,7 @@ export default function FragTable({data, totalTeams}){
         "kills": {"title": "Kills"},       
         "deaths": {"title": "Deaths"},       
         "suicides": {"title": "Suicides"},       
-        "efficiency": {"title": "Efficiency"},       
-        "spawnKills": {"title": "Spawn Kills"},       
+        "efficiency": {"title": "Efficiency"},        
         "teamKills": {"title": "Team Kills"},       
         "headShots": {"title": "Headshots"},       
     };
@@ -53,8 +52,7 @@ export default function FragTable({data, totalTeams}){
             "kills": {"value": d.kills, "displayValue": ignore0(d.kills)},       
             "deaths": {"value": d.deaths, "displayValue": ignore0(d.deaths)},       
             "suicides": {"value": d.suicides, "displayValue": ignore0(d.suicides)},       
-            "efficiency": {"value": d.efficiency, "displayValue": `${ignore0(d.efficiency.toFixed(2))}%`},       
-            "spawnKills": {"value": d.spawn_kills, "displayValue": ignore0(d.spawn_kills)},       
+            "efficiency": {"value": d.efficiency, "displayValue": `${ignore0(d.efficiency.toFixed(2))}%`},      
             "teamKills": {"value": d.team_kills, "displayValue": ignore0(d.team_kills)},       
             "headShots": {"value": d.headshots, "displayValue": ignore0(d.headshots)},  
         });

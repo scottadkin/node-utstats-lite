@@ -66,3 +66,24 @@ export async function insertPlayerMatchData(playerData, matchId){
 
     await simpleQuery(query, vars);
 }
+
+
+export async function getPlayersById(ids){
+
+    if(ids.length === 0) return {};
+
+    const query = `SELECT * FROM nstats_players WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [ids]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = r.name;
+    }
+
+    return data;
+}

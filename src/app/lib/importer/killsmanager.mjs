@@ -146,6 +146,23 @@ export class KillsManager{
         }
 
 
+        for(let i = 0; i < this.teamKills.length; i++){
+
+            const k = this.teamKills[i];
+
+            const killer = playerManager.getPlayerById(k.killerId);
+            const victim = playerManager.getPlayerById(k.victimId);
+
+            let timestamp = k.timestamp;
+            if(bHardcore) timestamp = scalePlaytime(timestamp);
+
+            //dont count team kills for sprees and multis
+            //killer.killed(k.timestamp);
+            killer.teamKill();
+            victim.died(k.timestamp);
+        }
+
+
         for(let i = 0; i < this.headshots.length; i++){
 
             const h = this.headshots[i];

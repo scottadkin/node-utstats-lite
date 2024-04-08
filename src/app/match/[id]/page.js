@@ -1,5 +1,5 @@
 import Image from "next/image";
-import {getData} from "@/app/lib/match";
+import {getMatchData} from "@/app/lib/matches.mjs";
 import Header from "@/app/UI/Header";
 import MatchScoreBox from "@/app/UI/MatchScoreBox";
 import InteractiveTable from "@/app/UI/InteractiveTable";
@@ -34,27 +34,22 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
 export default async function MatchPage({params, searchParams}) {
 
-
-
     let matchId = params.id ?? -1;
 
-
-    const matchData = await getData(matchId);
-
-    console.log(Object.keys(matchData));
-    //<MatchScoreBox data={matchData}/>
-
+    const matchData = await getMatchData(matchId);
+	
     const headers = {
       "id": {"title": "Player ID"},
       "name": {"title": "Name"}
     };
 
     const playerRows = [];
-
+	
     for(const [playerId, playerName] of Object.entries(matchData.playerNames)){
 
 		playerRows.push({
-				"id": {"value": parseInt(playerId)},
+			"id": {
+				"value": parseInt(playerId)},
 				"name": {
 				"value": playerName.toLowerCase(), 
 				"displayValue": playerName,
@@ -64,13 +59,11 @@ export default async function MatchPage({params, searchParams}) {
     }
 
     return (
-        <main>
-          <Header>Match Report</Header> 
-          <MatchScoreBox data={matchData.basic}/>
-		      <FragTable data={JSON.stringify(matchData)} totalTeams={matchData.basic.total_teams}/>
-          <InteractiveTable headers={headers} rows={playerRows}/>
-        </main>
+		<main>
+			<Header>Match Report</Header> 
+			<MatchScoreBox data={matchData.basic}/>
+				<FragTable data={JSON.stringify(matchData)} totalTeams={matchData.basic.total_teams}/>
+			<InteractiveTable headers={headers} rows={playerRows}/>
+		</main>
     );
 }
-
-//<FragTable data={matchData.playerData} playerNames={matchData.playerNames} totalTeams={matchData.basic.total_teams}/>
