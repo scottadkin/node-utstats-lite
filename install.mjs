@@ -63,11 +63,7 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_players (
             id int(11) NOT NULL AUTO_INCREMENT,
-            name varchar(32) NOT NULL,
-            ip varchar(39) NOT NULL,
-            hwid varchar(255) NOT NULL,
-            mac1 varchar(255) NOT NULL,
-            mac2 varchar(255) NOT NULL,
+            name varchar(32) NOT NULL
             country varchar(3) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 

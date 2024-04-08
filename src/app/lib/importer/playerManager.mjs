@@ -1,6 +1,6 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId, createMasterPlayer, setMasterPlayerIP, insertPlayerMatchData } from "../players.mjs";
+import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData } from "../players.mjs";
 
 export class PlayerManager{
 
@@ -204,6 +204,8 @@ export class PlayerManager{
 
         const player = this.getPlayerById(playerId);
 
+        if(key === "timeOnServer") value = parseFloat(value);
+
         if(player === null){
             new Message(`Failed to get player by id ${playerId}, setPlayerStatProperty()`,"error");
             return;
@@ -234,9 +236,6 @@ export class PlayerManager{
 
                 masterId = await createMasterPlayer(p.name, p.ip, p.hwid, p.mac1, p.mac2);
 
-            }else{
-
-                await setMasterPlayerIP(masterId, p.ip);
             }
 
             masterId = parseInt(masterId);
@@ -342,7 +341,10 @@ export class PlayerManager{
 
     mergePlayers(){
 
-        //TODO merge stats
+        const mergeKeys = [
+            "score", "frags", "kills", "deaths",
+            "suicides", "teamKills", "timeOnServer"
+        ];
 
         for(let i = 0; i < this.players.length; i++){
 
@@ -350,10 +352,14 @@ export class PlayerManager{
 
             if(this.mergedPlayers[p.name] === undefined){
                 this.mergedPlayers[p.name] = p;
+                this.mergedPlayers[p.name].merges = 1;
+                this.mergedPlayers[p.name].totalEff = p.stats.efficiency;
+                this.mergedPlayers[p.name].totalTTL = p.stats.ttl;
                 continue;
             }
 
             const master = this.mergedPlayers[p.name];
+            master.merges += 1;
 
             if(master.hwid === "") master.hwid = p.hwid;
             if(master.mac1 === "") master.mac1 = p.mac1;
@@ -362,6 +368,27 @@ export class PlayerManager{
             if(master.bHadConnectEvent || p.bHadConnectEvent) master.bHadConnectEvent = true;
             //if player played at any point don't mark them as a spectator even after reconnects
             if(master.bSpectator === 0 || p.bSpectator === 0) master.bSpectator = 0;
+
+            master.stats.totalEff += p.stats.efficiency;
+            master.stats.totalTTL += p.stats.ttl;
+
+            if(master.stats.totalEff > 0){
+                master.stats.efficiency = master.stats.totalEff / master.stats.merges;
+            }
+
+            if(master.stats.totalTTL > 0){
+                master.stats.ttl = master.stats.totalTTL / master.stats.merges;
+            }
+
+            for(let x = 0; x < mergeKeys.length; x++){
+
+                const type = mergeKeys[x];
+
+                master.stats[type] += p.stats[type];
+                
+            }
         }
+
+
     }
 }
