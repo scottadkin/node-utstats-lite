@@ -1,6 +1,7 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
 import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData } from "../players.mjs";
+import geoip from "geoip-lite";
 
 export class PlayerManager{
 
@@ -411,6 +412,20 @@ export class PlayerManager{
 
             const p = this.players[i];
             p.matchEnded();
+        }
+    }
+
+
+    setCountries(){
+
+        for(const p of Object.values(this.mergedPlayers)){
+
+            const lookup = geoip.lookup(p.ip);
+
+            if(lookup !== null){
+                if(lookup.country !== undefined) p.country = lookup.country.toLowerCase();
+            }
+
         }
     }
 }

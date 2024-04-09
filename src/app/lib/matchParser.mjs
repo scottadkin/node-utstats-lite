@@ -43,6 +43,8 @@ export class MatchParser{
             this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
             this.players.mergePlayers();
 
+            this.players.setCountries();
+
             await this.players.setPlayerMasterIds();
 
             const soloStats = this.players.getSoloWinner();
