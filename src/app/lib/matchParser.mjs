@@ -44,6 +44,7 @@ export class MatchParser{
             this.players.mergePlayers();
 
             this.players.setCountries();
+            this.players.scalePlaytimes(this.gametype.bHardcore);
 
             await this.players.setPlayerMasterIds();
 

@@ -2,6 +2,7 @@ import { Player } from "./player.mjs";
 import Message from "../message.mjs";
 import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData } from "../players.mjs";
 import geoip from "geoip-lite";
+import { scalePlaytime } from "../generic.mjs";
 
 export class PlayerManager{
 
@@ -425,7 +426,15 @@ export class PlayerManager{
             if(lookup !== null){
                 if(lookup.country !== undefined) p.country = lookup.country.toLowerCase();
             }
+        }
+    }
 
+    scalePlaytimes(bHardcore){
+
+        if(bHardcore === 0) return;
+
+        for(const player of Object.values(this.mergedPlayers)){
+            player.timeOnServer = scalePlaytime(player.stats.timeOnServer, bHardcore);
         }
     }
 }

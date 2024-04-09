@@ -1,7 +1,7 @@
 "use client"
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
-import { getTeamColorClass, MMSS, ignore0 } from "@/app/lib/generic.mjs";
+import { getTeamColorClass, MMSS, ignore0, convertTimestamp } from "@/app/lib/generic.mjs";
 
 export default function FragTable({data, totalTeams}){
 
@@ -41,6 +41,8 @@ export default function FragTable({data, totalTeams}){
             test[team] = [];
         }
 
+        console.log(d.playtime);
+
 
         test[team].push({
             "name": {
@@ -48,7 +50,7 @@ export default function FragTable({data, totalTeams}){
                 "displayValue": name, 
                 "className": `${getTeamColorClass((totalTeams > 1) ? d.team : 255)} text-left`
             },
-            "playtime": {"value": d.playtime, "displayValue": MMSS(d.playtime)},
+            "playtime": {"value": d.time_on_server, "displayValue": MMSS(d.time_on_server)},
             "score": {"value": d.score, "displayValue": ignore0(d.score)},
             "frags": {"value": d.frags, "displayValue": ignore0(d.frags)},       
             "kills": {"value": d.kills, "displayValue": ignore0(d.kills)},       
