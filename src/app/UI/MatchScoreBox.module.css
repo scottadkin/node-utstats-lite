@@ -12,21 +12,5 @@
 }
 
 .score{
-    padding:5px;
-    font-size:18px;
-}
-
-.duo{
-    display:grid;
-    grid-template-columns: 1fr 1fr;   
-}
-
-.trio{
-    display:grid;
-    grid-template-columns: 1fr 1fr 1fr; 
-}
-
-.quad{
-    display:grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding:var(--padding-2);
 }

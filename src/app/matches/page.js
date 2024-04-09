@@ -9,14 +9,14 @@ export default async function Page({params, searchParams}) {
 
     //const m = new Matches();
 
-    let perPage = searchParams?.perPage ?? searchParams?.perpage ?? 5;
+    let perPage = searchParams?.perPage ?? searchParams?.perpage ?? 250;
     let page = searchParams?.page ?? 1;
 
     //const matches = await m.getRecent(page, perPage, 0, playerManager);
     //const {matches, total} = await searchMatches(page, perPage,0,0,"date","ASC");;
 
 
-    const {data, total} = await getRecentMatches(1, 25);
+    const {data, total} = await getRecentMatches(page, perPage);
 
 
   

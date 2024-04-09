@@ -2,13 +2,15 @@ import styles from "./MatchScoreBox.module.css";
 import { getTeamColorClass, getTeamIcon } from "../lib/generic.mjs";
 import Image from "next/image";
 
-export default function MatchScoreBox({data}){
+export default function MatchScoreBox({data, small}){
 
-    let wrapperClassName = styles.solo;
+    let wrapperClassName = "solo";
+
+    if(small === undefined) small = false;
     
-    if(data.total_teams === 2) wrapperClassName = styles.duo;
-    if(data.total_teams === 3) wrapperClassName = styles.trio;
-    if(data.total_teams === 4) wrapperClassName = styles.quad;
+    if(data.total_teams === 2) wrapperClassName = "duo";
+    if(data.total_teams === 3) wrapperClassName = "trio";
+    if(data.total_teams === 4) wrapperClassName = "quad";
 
     const scoreElems = [];
 
@@ -16,20 +18,25 @@ export default function MatchScoreBox({data}){
 
         for(let i = 0; i < data.total_teams; i++){
 
-            scoreElems.push(<div key={i} className={getTeamColorClass(i)}>
-                <Image src={`/images/${getTeamIcon(i)}`} alt="image" width={32} height={32} priority={true}/><br/>
+            const image = (!small) ? <Image src={`/images/${getTeamIcon(i)}`} alt="image" width={32} height={32} priority={true}/> : null;
+
+            scoreElems.push(<div key={i} className={getTeamColorClass(i)}>     
+                {image}
                 <div className={styles.score}>{data[`team_${i}_score`]}</div>
             </div>);
         }
+
     }else{
 
+        const image = (!small) ? <Image src={`/images/${getTeamIcon(255)}`} alt="image" width={32} height={32} priority={true}/> : null;
+
         scoreElems.push(<div key="-1">
-            <Image src={`/images/${getTeamIcon(255)}`} alt="image" width={32} height={32} priority={true}/><br/>
-            {data.soloWinnerName} Wins with {data.solo_winner_score}
+            {image}
+            <div className={styles.score}>{data.soloWinnerName} Wins with {data.solo_winner_score}</div>
         </div>);
     }
 
-    return <div className={`${styles.wrapper} ${wrapperClassName}`}>
+    return <div className={`${(!small) ? styles.wrapper: ""} ${wrapperClassName}`}>
         {scoreElems}
     </div>
 }

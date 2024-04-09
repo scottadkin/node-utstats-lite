@@ -1,4 +1,7 @@
 import { convertTimestamp, MMSS } from "../lib/generic.mjs";
+import MatchScoreBox from "./MatchScoreBox";
+import Link from "next/link";
+
 
 export default function MatchListTable({data}){
 
@@ -10,18 +13,23 @@ export default function MatchListTable({data}){
 
         const date = Math.floor(new Date(d.date) * 0.001);
 
+        const url = `/match/${d.id}`;
+
         rows.push(<tr key={d.id}>
-            <td>{d.mapName}</td>
-            <td>{d.gametypeName}</td>
-            <td>{d.serverName}</td>
-            <td>{convertTimestamp(date, true)}</td>
-            <td>{d.players}</td>
-            <td>{MMSS(d.playtime)}</td>
+            <td><Link href={url}>{d.mapName}</Link></td>
+            <td><Link href={url}>{d.gametypeName}</Link></td>
+            <td><Link href={url}>{d.serverName}</Link></td>
+            <td><Link href={url}>{convertTimestamp(date, true)}</Link></td>
+            <td><Link href={url}>{d.players}</Link></td>
+            <td><Link href={url}>{MMSS(d.playtime)}</Link></td>
+            <td>
+                <MatchScoreBox data={d} small={true}/>
+            </td>
         </tr>);
     }
 
     return <>
-        <table>
+        <table className="t-width-1">
             <tbody>
                 <tr>   
                     <th>Map</th>
@@ -30,6 +38,7 @@ export default function MatchListTable({data}){
                     <th>Date</th>
                     <th>Players</th>
                     <th>Playtime</th>
+                    <th>Result</th>
                 </tr>
                 {rows}
             </tbody>

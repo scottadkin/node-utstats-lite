@@ -216,3 +216,18 @@ tr:nth-child(odd){
 	width:var(--width-1);
 	max-width:var(--max-table-width-4);
 }
+
+.duo{
+    display:grid;
+    grid-template-columns: 1fr 1fr;   
+}
+
+.trio{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr; 
+}
+
+.quad{
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+}
