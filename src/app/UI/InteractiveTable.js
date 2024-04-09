@@ -98,7 +98,7 @@ function reducer(state, action){
     return state;
 }
 
-export default function InteractiveTable({headers, rows, sortBy, order}){
+export default function InteractiveTable({headers, rows, sortBy, order, width}){
 
     const [state, dispatch] = useReducer(reducer, {
         "order": (order !== undefined) ? order.toUpperCase() : "DESC",
@@ -107,8 +107,18 @@ export default function InteractiveTable({headers, rows, sortBy, order}){
 
     sortRows(rows, state.sortBy, state.order);
 
+
+    let widthClass = "";
+
+    if(width !== undefined){
+
+        width = parseInt(width);
+        
+        widthClass = `t-width-${width}`;
+    }
+
     return <div>
-        <table>
+        <table className={widthClass}>
             <tbody>
                 {createHeaders(headers, state, dispatch)}
                 {createRows(headers, rows)}

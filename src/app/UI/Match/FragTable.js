@@ -2,6 +2,7 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { getTeamColorClass, MMSS, ignore0, convertTimestamp } from "@/app/lib/generic.mjs";
+import CountryFlag from "../CountryFlag";
 
 export default function FragTable({data, totalTeams}){
 
@@ -41,14 +42,12 @@ export default function FragTable({data, totalTeams}){
             test[team] = [];
         }
 
-        console.log(d.playtime);
-
 
         test[team].push({
             "name": {
                 "value": name.toLowerCase(), 
-                "displayValue": name, 
-                "className": `${getTeamColorClass((totalTeams > 1) ? d.team : 255)} text-left`
+                "displayValue": <><CountryFlag code={d.country}/>{name}</>, 
+                "className": `player-name-td ${getTeamColorClass((totalTeams > 1) ? d.team : 255)} text-left`
             },
             "playtime": {"value": d.time_on_server, "displayValue": MMSS(d.time_on_server)},
             "score": {"value": d.score, "displayValue": ignore0(d.score)},
@@ -67,12 +66,12 @@ export default function FragTable({data, totalTeams}){
 
     if(totalTeams < 2){
 
-        elems = <InteractiveTable headers={headers} rows={test[0]}/>;
+        elems = <InteractiveTable width={3} headers={headers} rows={test[0]}/>;
 
     }else{
 
         for(const [teamId, players] of Object.entries(test)){
-            elems.push(<InteractiveTable key={teamId} headers={headers} rows={players} sortBy="score" order="DESC"/>);
+            elems.push(<InteractiveTable width={3} key={teamId} headers={headers} rows={players} sortBy="score" order="DESC"/>);
         }   
     }
 

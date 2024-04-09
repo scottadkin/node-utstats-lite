@@ -1,6 +1,7 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { ignore0, plural, getTeamColorClass } from "@/app/lib/generic.mjs";
+import CountryFlag from "../CountryFlag";
 
 function bHadAnyMultiEvents(playerData){
 
@@ -63,7 +64,7 @@ function renderFirstBlood(data, totalTeams){
         <tbody>
             <tr>
                 <td>First Blood</td>
-                <td className={teamColor}>{player.name}</td>
+                <td className={teamColor}><CountryFlag code={player.country}/>{player.name}</td>
             </tr>
         </tbody>
     </table>
@@ -110,8 +111,8 @@ export default function SpecialEvents({data, totalTeams}){
             multiRows.push({
                 "player": {
                     "value": p.name.toLowerCase(), 
-                    "displayValue": <>{p.name}</>,
-                    "className": `text-left ${teamColor}`
+                    "displayValue": <><CountryFlag code={p.country}/>{p.name}</>,
+                    "className": `text-left ${teamColor} player-name-td`
                 },
                 "double": {"value": p.multi_1, "displayValue": ignore0(p.multi_1)},
                 "multi": {"value": p.multi_2, "displayValue":  ignore0(p.multi_2)},
@@ -126,8 +127,8 @@ export default function SpecialEvents({data, totalTeams}){
             spreeRows.push({
                 "player": {
                     "value": p.name.toLowerCase(), 
-                    "displayValue": <>{p.name}</>,
-                    "className": `text-left ${teamColor}`
+                    "displayValue": <><CountryFlag code={p.country}/>{p.name}</>,
+                    "className": `text-left ${teamColor} player-name-td`
                 },
                 "spree": {"value": p.spree_1, "displayValue":  ignore0(p.spree_1)},
                 "rampage": {"value": p.spree_2, "displayValue":  ignore0(p.spree_2)},
@@ -142,7 +143,7 @@ export default function SpecialEvents({data, totalTeams}){
     return <div className="test">
         <Header>Special Events</Header>
         {renderFirstBlood(data.playerData, totalTeams)}
-        {(spreeRows.length === 0) ? null : <InteractiveTable headers={spreeHeaders} rows={spreeRows}/>}
-        {(multiRows.length === 0) ? null : <InteractiveTable headers={multiHeaders} rows={multiRows}/>}
+        {(spreeRows.length === 0) ? null : <InteractiveTable width={3} headers={spreeHeaders} rows={spreeRows}/>}
+        {(multiRows.length === 0) ? null : <InteractiveTable width={3} headers={multiHeaders} rows={multiRows}/>}
     </div>
 }
