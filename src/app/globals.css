@@ -180,6 +180,7 @@ table{
 	padding:var(--padding-1) 0px;
 }
 
+
 th{
     padding:var(--padding-1);
     color:yellow;
@@ -201,6 +202,10 @@ tr:nth-child(even){
 }
 tr:nth-child(odd){
     background-color:var(--bg-color-3);
+}
+
+tr:nth-child(even):hover, tr:nth-child(odd):hover{
+	background-color:var(--bg-color-1);
 }
 
 .player-name-td{
