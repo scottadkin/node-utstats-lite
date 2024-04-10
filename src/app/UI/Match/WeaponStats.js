@@ -65,7 +65,16 @@ export default function WeaponStats({data, totalTeams, players}){
         }
 
         if(currentRows.length > 0){
-            tables.push(<InteractiveTable key={weapon.id} headers={headers} rows={currentRows} sortBy="kills" order="DESC"/>);
+
+            tables.push(<InteractiveTable 
+                key={weapon.id} 
+                headers={headers} 
+                rows={currentRows} 
+                sortBy="kills" 
+                order="DESC" 
+                title={weapon.name}
+                width={4}
+            />);
         }
 
 

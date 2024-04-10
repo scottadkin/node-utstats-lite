@@ -104,6 +104,10 @@ a{
 	text-align:left;
 }
 
+.tect-center{
+	text-align:center;
+}
+
 label{
 	text-align:right;
 	padding-right:var(--padding-1);
@@ -167,6 +171,13 @@ table{
     font-size:14px;
     text-align: center;
     margin-bottom:var(--margin-1);
+}
+
+.table-title{
+	background-color:var(--bg-color-5);
+	color:var(--font-color-1);
+	text-align: center;
+	padding:var(--padding-1) 0px;
 }
 
 th{
