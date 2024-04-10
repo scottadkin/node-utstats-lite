@@ -139,6 +139,16 @@ const queries = [
             headshots int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            match_id int(11) NOT NULL AUTO_INCREMENT,
+            player_id int(11) NOT NULL AUTO_INCREMENT,
+            weapon_id int(11) NOT NULL AUTO_INCREMENT,
+            kills int(11) NOT NULL AUTO_INCREMENT,
+            deaths int(11) NOT NULL AUTO_INCREMENT,
+            team_kills int(11) NOT NULL AUTO_INCREMENT
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
         `CREATE TABLE IF NOT EXISTS nstats_weapons (
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL

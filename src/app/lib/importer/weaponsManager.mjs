@@ -1,4 +1,4 @@
-import { getWeaponId, createWeapon } from "../weapons.mjs";
+import { getWeaponId, createWeapon, bulkInsertMatchWeaponStats } from "../weapons.mjs";
 
 export class WeaponsManager{
 
@@ -6,6 +6,8 @@ export class WeaponsManager{
 
         this.tempNames = [];
         this.weapons = {};
+
+        this.playerStats = {};
     }
 
 
@@ -38,5 +40,49 @@ export class WeaponsManager{
 
             this.weapons[id] = name;
         }
+    }
+
+
+    getPlayerWeaponStats(playerId, weaponId){
+
+        if(this.playerStats[playerId] === undefined){
+            this.playerStats[playerId] = {};
+        }
+
+        if(this.playerStats[playerId][weaponId] === undefined){
+
+            this.playerStats[playerId][weaponId] = {
+                "kills": 0,
+                "deaths": 0,
+                "teamKills": 0
+            };
+        }
+
+        return this.playerStats[playerId][weaponId];
+    }
+
+    setPlayerStats(kills){
+
+        for(let i = 0; i < kills.length; i++){
+
+            const k = kills[i];
+
+            const killerStats = this.getPlayerWeaponStats(k.killerMasterId, k.killerWeaponId);
+            const victimStats = this.getPlayerWeaponStats(k.victimMasterId, k.victimWeaponId);
+
+            if(k.type === 0){
+                killerStats.kills++;
+            }else if(k.type === 1){
+                killerStats.teamKills++;
+            }
+            
+            victimStats.deaths++;       
+        }
+    }
+
+
+    async insertPlayerMatchStats(matchId){
+
+        await bulkInsertMatchWeaponStats(this.playerStats, matchId);
     }
 }
