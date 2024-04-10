@@ -290,3 +290,11 @@ export function scalePlaytime(playtime, bHardcore){
 
     return playtime;
 }
+
+
+export function getPlayer(players, playerId){
+
+    if(players[playerId] !== undefined) return players[playerId];
+
+    return {"name": "Not Found", "country": ""};
+}

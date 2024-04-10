@@ -36,7 +36,7 @@ export async function bulkInsertMatchWeaponStats(data, matchId){
             const weaponId = parseInt(wId);
 
             insertVars.push([
-                playerId, matchId, weaponId, weaponStats.kills,
+                matchId, playerId, weaponId, weaponStats.kills,
                 weaponStats.deaths, weaponStats.teamKills
             ]);
         }
@@ -46,4 +46,37 @@ export async function bulkInsertMatchWeaponStats(data, matchId){
 
     await bulkInsert(query, insertVars);
 
+}
+
+async function getWeaponNames(ids){
+
+    if(ids.length === 0) return {};
+
+    const query = `SELECT id,name FROM nstats_weapons WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [ids]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r.name;
+    }
+
+    return data;
+}
+
+export async function getMatchWeaponStats(matchId){
+
+    const query = `SELECT player_id,weapon_id,kills,deaths,team_kills FROM nstats_match_weapon_stats WHERE match_id=?`;
+    const result = await simpleQuery(query, [matchId]);
+
+    const uniqueWeapons = [...new Set(result.map((r) =>{
+        return r.weapon_id;
+    }))];
+
+    const names = await getWeaponNames(uniqueWeapons);
+
+    return {"data": result, "names": names}
 }

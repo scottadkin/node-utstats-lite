@@ -4,6 +4,7 @@ import { getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getMapImages } from "./map.mjs";
 import { getPlayersById, getBasicPlayerInfo } from "./players.mjs";
+import { getMatchWeaponStats } from "./weapons.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
@@ -158,5 +159,22 @@ export async function getMatchData(id){
         p.name = playerNames[p.player_id] ?? "Not Found";
     }
 
-    return {basic, playerData, playerNames};
+    const basicPlayers = {};
+
+    for(let i = 0; i < playerData.length; i++){
+
+        const p = playerData[i];
+
+        basicPlayers[p.player_id] = {
+            "name": p.name,
+            "country": p.country,
+            "team": p.team,
+            "bSpectator": p.spectator
+        };
+    }
+
+    const weaponStats = await getMatchWeaponStats(id);
+    
+
+    return {basic, playerData, playerNames, weaponStats, basicPlayers};
 }
