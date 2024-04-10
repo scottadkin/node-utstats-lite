@@ -76,10 +76,10 @@ export default function SpecialEvents({data, totalTeams}){
 
     const multiHeaders = {
         "player": {"title": <>Player</>},
-        "double": {"title": <>Double Kill</>},
-        "multi": {"title": <>Multi Kill</>},
-        "ultra": {"title": <>Ultra Kill</>},
-        "monster": {"title": <>Monster Kill</>},
+        "double": {"title": <>Double</>},
+        "multi": {"title": <>Multi</>},
+        "ultra": {"title": <>Ultra</>},
+        "monster": {"title": <>Monster</>},
         "bestMulti": {"title": <>Best</>},
     };
 

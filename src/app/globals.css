@@ -24,10 +24,11 @@
 	--font-size-small:12px;
 	--padding-1:10px;
 	--padding-2:5px;
-	--font-size-1:16px;
-	--line-height-1:24px;
-	--font-size-2:18px;
-	--font-size-3:20px;
+	--padding-3:3px;
+	--font-size-1:14px;
+	--line-height-1:22px;
+	--font-size-2:16px;
+	--font-size-3:18px;
 	--transition-1:background-color 0.5s;
 	--width-1:90%;
 	--width-2:75%;
@@ -194,7 +195,7 @@ th:hover{
 }
 
 td{
-    padding:var(--padding-2);
+    padding:var(--padding-3) var(--padding-2);
 }
 
 tr:nth-child(even){
