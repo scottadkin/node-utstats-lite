@@ -1,7 +1,10 @@
+"use client"
 import InteractiveTable from "../InteractiveTable";
 import Header from "../Header";
 import { ignore0, getPlayer, getTeamColorClass } from "@/app/lib/generic.mjs";
 import CountryFlag from "../CountryFlag";
+import Tabs from "../Tabs";
+import { useState } from "react";
 
 function renderBasicTables(orderedNames, data, players, totalTeams){
 
@@ -76,9 +79,11 @@ function getPlayerWeaponStats(data, playerId, weaponId){
     return null;
 }
 
-function renderKDTable(orderedNames, data, players, totalTeams){
+function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
 
     const rows = [];
+
+    const title = (selectedType === "kills") ? "Kills" : "Deaths";
 
     const headers = {
         "player": {"title": "Player"}
@@ -119,8 +124,8 @@ function renderKDTable(orderedNames, data, players, totalTeams){
             }else{
         
                 columns[`weapon_${n.id}`] = {
-                    "value": weaponStats.kills,
-                    "displayValue": <>{weaponStats.kills} - {weaponStats.deaths}</>
+                    "value": weaponStats[selectedType],
+                    "displayValue": <>{ignore0(weaponStats[selectedType])}</>
                 };
             }
     
@@ -130,12 +135,13 @@ function renderKDTable(orderedNames, data, players, totalTeams){
 
     }
 
-    return <InteractiveTable headers={headers} rows={rows}/>
+    return <InteractiveTable title={title} headers={headers} rows={rows} width={1}/>
     
 }
 
 export default function WeaponStats({data, totalTeams, players}){
 
+    const [selectedType, setSelectedType] = useState("kills");
     const orderedNames = [];
     
     for(const [weaponId, weaponName] of Object.entries(data.names)){
@@ -152,11 +158,18 @@ export default function WeaponStats({data, totalTeams, players}){
         return 0;
     });
 
-    let tables = renderKDTable(orderedNames, data.data, players, totalTeams);
+    let tables = renderKDTable(orderedNames, data.data, players, totalTeams, selectedType);
 
     
     return <>
         <Header>Weapon Stats</Header>
+        <Tabs 
+            selectedValue={selectedType}
+            changeSelected={setSelectedType}
+            options={[
+                {"name": "Kills", "value": "kills"},
+                {"name": "Deaths", "value": "deaths"},
+            ]}/>
         {tables}
     </>
 }

@@ -1,12 +1,9 @@
 import styles from "./Tabs.module.css";
-import Link from "next/link";
 
-export default function Tabs({options, selectedValue, tabName, url}){
+export default function Tabs({options, selectedValue, changeSelected}){
 
     if(options === undefined) return null;
     if(selectedValue === undefined) selectedValue = "";
-    if(url === undefined) url = "";
-    if(tabName === undefined) tabName = "";
 
     const elems = [];
 
@@ -20,11 +17,11 @@ export default function Tabs({options, selectedValue, tabName, url}){
             currentClass += ` ${styles.selected}`;
         }
 
-        elems.push(<Link key={i} href={`${url}?${tabName}=${o.value}`}>
-            <div className={currentClass}>
-                {o.name}
-            </div>
-        </Link>);
+        elems.push(<div className={currentClass} onClick={() =>{
+            changeSelected(o.value);
+        }}>
+            {o.name}
+        </div>);
     }
 
     return <div className={styles.wrapper}>
