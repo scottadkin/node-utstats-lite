@@ -1,10 +1,11 @@
 "use client"
 import InteractiveTable from "../InteractiveTable";
 import Header from "../Header";
-import { ignore0, getPlayer, getTeamColorClass } from "@/app/lib/generic.mjs";
+import { ignore0, getPlayer, getTeamColorClass, cleanWeaponName } from "@/app/lib/generic.mjs";
 import CountryFlag from "../CountryFlag";
 import Tabs from "../Tabs";
 import { useState } from "react";
+import Image from "next/image";
 
 function renderBasicTables(orderedNames, data, players, totalTeams){
 
@@ -94,7 +95,9 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
 
         const n = orderedNames[i];
 
-        headers[`weapon_${n.id}`] = {"title": n.name};
+        const name = cleanWeaponName(n.name)
+
+        headers[`weapon_${n.id}`] = {"title": <><Image src={`/images/weapons/${name}.png`} width={68} height={32}/></>};
     }
 
     for(const [pId, player] of Object.entries(players)){

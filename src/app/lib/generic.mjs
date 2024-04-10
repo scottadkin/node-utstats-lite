@@ -298,3 +298,13 @@ export function getPlayer(players, playerId){
 
     return {"name": "Not Found", "country": ""};
 }
+
+
+export function cleanWeaponName(name){
+
+    name = name.toLowerCase();
+
+    name = name.replaceAll(" ", "");
+
+    return name;
+}
