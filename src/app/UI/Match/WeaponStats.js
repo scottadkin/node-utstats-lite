@@ -97,7 +97,12 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
 
         const name = cleanWeaponName(n.name)
 
-        headers[`weapon_${n.id}`] = {"title": <><Image src={`/images/weapons/${name}.png`} width={68} height={26}/></>};
+        headers[`weapon_${n.id}`] = {
+            "title": <><Image src={`/images/weapons/${name}.png`} width={68} height={26} alt="image"/></>,
+            "mouseOverBox": {
+                "content": n.name
+            }
+        };
     }
 
     for(const [pId, player] of Object.entries(players)){

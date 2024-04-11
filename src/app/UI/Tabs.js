@@ -17,7 +17,7 @@ export default function Tabs({options, selectedValue, changeSelected}){
             currentClass += ` ${styles.selected}`;
         }
 
-        elems.push(<div className={currentClass} onClick={() =>{
+        elems.push(<div key={i} className={currentClass} onClick={() =>{
             changeSelected(o.value);
         }}>
             {o.name}

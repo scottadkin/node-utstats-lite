@@ -187,6 +187,7 @@ th{
     color:yellow;
     font-weight:normal;
 	background-color:var(--bg-color-5);
+	border:1px solid var(--border-color-2);
 }
 
 th:hover{
@@ -196,6 +197,7 @@ th:hover{
 
 td{
     padding:var(--padding-2) var(--padding-3);
+	border:1px solid var(--border-color-2);
 }
 
 tr:nth-child(even){
@@ -247,4 +249,14 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 .quad{
     display:grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.mouse-over{
+	position:absolute;
+	background-color:green;
+	padding:var(--padding-1);
+}
+
+.hidden{
+	display:none;
 }

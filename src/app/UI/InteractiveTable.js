@@ -1,15 +1,35 @@
 "use client"
 
 import { useReducer } from "react";
+import TableHeader from "./TableHeader";
+
 
 function createHeaders(headers, state, dispatch){
 
     const elems = [];
 
+
     for(const [name, content] of Object.entries(headers)){
-        elems.push(<th key={name} onClick={() =>{
-            dispatch({"type": "changeSort", "value": name});
-        }}>{content.title}</th>);
+
+        let mouseOverContent = null;
+
+        if(content.mouseOverBox !== undefined){
+            mouseOverContent = content.mouseOverBox.content;
+        }
+
+        elems.push(
+            <TableHeader 
+                key={name} onClick={() =>{
+                    dispatch({"type": "changeSort", "value": name});
+                }}
+                mouseOverBox={{
+                    "content": mouseOverContent
+                }}
+                >
+                
+                {content.title}
+            </TableHeader>
+        );
     }
 
     return <tr>{elems}</tr>;

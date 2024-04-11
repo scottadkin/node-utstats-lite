@@ -1,10 +1,10 @@
-import mysql from "../../../api/database.js";
+import { simpleQuery } from "./database.mjs";
 
 export async function getLogsFolderSettings(){
 
     const query = `SELECT * FROM nstats_logs_folder`;
 
-    const result = await mysql.simpleQuery(query);
+    const result = await simpleQuery(query);
 
     if(result.length > 0) return result[0];
 
@@ -15,7 +15,7 @@ export async function getAllFTPSettings(){
 
     const query = `SELECT * FROM nstats_ftp ORDER BY name ASC`;
 
-    const result = await mysql.simpleQuery(query);
+    const result = await simpleQuery(query);
 
     const logsFolder = await getLogsFolderSettings();
 

@@ -45,7 +45,6 @@ export default function FragTable({data, totalTeams}){
 
         let net = d.kills - d.deaths;
 
-        if(net > 0) net = `+${net}`;
 
         test[team].push({
             "name": {
@@ -58,7 +57,7 @@ export default function FragTable({data, totalTeams}){
             "frags": {"value": d.frags, "displayValue": ignore0(d.frags)},       
             "kills": {"value": d.kills, "displayValue": ignore0(d.kills)},       
             "deaths": {"value": d.deaths, "displayValue": ignore0(d.deaths)},       
-            "net": {"value": net, "displayValue": net},       
+            "net": {"value": net, "displayValue": (net > 0) ? net = `+${net}` : net},       
             "suicides": {"value": d.suicides, "displayValue": ignore0(d.suicides)},       
             "efficiency": {"value": d.efficiency, "displayValue": `${d.efficiency.toFixed(2)}%`},      
             "teamKills": {"value": d.team_kills, "displayValue": ignore0(d.team_kills)},       
