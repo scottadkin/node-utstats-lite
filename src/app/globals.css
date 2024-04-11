@@ -183,7 +183,7 @@ table{
 
 
 th{
-    padding:var(--padding-1);
+    padding:var(--padding-1) var(--padding-3);
     color:yellow;
     font-weight:normal;
 	background-color:var(--bg-color-5);
@@ -195,7 +195,7 @@ th:hover{
 }
 
 td{
-    padding:var(--padding-3) var(--padding-2);
+    padding:var(--padding-2) var(--padding-3);
 }
 
 tr:nth-child(even){

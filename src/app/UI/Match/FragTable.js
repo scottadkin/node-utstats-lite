@@ -60,7 +60,7 @@ export default function FragTable({data, totalTeams}){
             "deaths": {"value": d.deaths, "displayValue": ignore0(d.deaths)},       
             "net": {"value": net, "displayValue": net},       
             "suicides": {"value": d.suicides, "displayValue": ignore0(d.suicides)},       
-            "efficiency": {"value": d.efficiency, "displayValue": `${ignore0(d.efficiency.toFixed(2))}%`},      
+            "efficiency": {"value": d.efficiency, "displayValue": `${d.efficiency.toFixed(2)}%`},      
             "teamKills": {"value": d.team_kills, "displayValue": ignore0(d.team_kills)},       
             "headShots": {"value": d.headshots, "displayValue": ignore0(d.headshots)},  
             "ttl": {"value": d.ttl, "displayValue": MMSS(d.ttl)},  

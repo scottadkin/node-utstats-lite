@@ -97,7 +97,7 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
 
         const name = cleanWeaponName(n.name)
 
-        headers[`weapon_${n.id}`] = {"title": <><Image src={`/images/weapons/${name}.png`} width={68} height={32}/></>};
+        headers[`weapon_${n.id}`] = {"title": <><Image src={`/images/weapons/${name}.png`} width={68} height={26}/></>};
     }
 
     for(const [pId, player] of Object.entries(players)){
@@ -138,7 +138,7 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
 
     }
 
-    return <InteractiveTable title={title} headers={headers} rows={rows} width={1}/>
+    return <InteractiveTable headers={headers} rows={rows}/>
     
 }
 
