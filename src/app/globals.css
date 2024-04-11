@@ -253,8 +253,16 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 
 .mouse-over{
 	position:absolute;
-	background-color:green;
+	background-color:var(--bg-color-5);
+	padding:var(--padding-2);
+	border:1px solid var(--border-color-1);
+	color:var(--font-color-1);
+}
+
+.mouse-over-title{
+	font-size:var(--font-size-1);
 	padding:var(--padding-1);
+	font-weight:bold;
 }
 
 .hidden{

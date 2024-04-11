@@ -75,12 +75,44 @@ export default function SpecialEvents({data, totalTeams}){
     data = JSON.parse(data);
 
     const multiHeaders = {
-        "player": {"title": <>Player</>},
-        "double": {"title": <>Double</>},
-        "multi": {"title": <>Multi</>},
-        "ultra": {"title": <>Ultra</>},
-        "monster": {"title": <>Monster</>},
-        "bestMulti": {"title": <>Best</>},
+        "player": 
+            {"title": <>Player</>    
+        },
+        "double": {
+            "title": <>Double</>,
+            "mouseOverBox": {
+                "title": `Double Kill`,
+                "content": `Player got 2 kills in a short amount of time without dying`
+            }
+        },
+        "multi": {
+            "title": <>Multi</>,
+            "mouseOverBox": {
+                "title": `Multi Kill`,
+                "content": `Player got 3 kills in a short amount of time without dying`
+            }
+        },
+        "ultra": {
+            "title": <>Ultra</>,
+            "mouseOverBox": {
+                "title": `Ultra Kill`,
+                "content": `Player got 4 kills in a short amount of time without dying`
+            }
+        },
+        "monster": {
+            "title": <>Monster</>,
+            "mouseOverBox": {
+                "title": `Monster Kill`,
+                "content": `Player got 5 or more kills in a short amount of time without dying`
+            }
+        },
+        "bestMulti": {
+            "title": <>Best</>,
+            "mouseOverBox": {
+                "title": `Best Multi Kill`,
+                "content": `The most amount of kills the player got in a short amount of time without dying`
+            }
+        },
     };
 
     const spreeHeaders = {

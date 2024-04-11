@@ -38,9 +38,12 @@ export default function TableHeader({children, onClick, mouseOverBox}){
             }
         }
     }
+
+    const mouseTitleElem = (mouseOverBox.title === null) ? null : <div className="mouse-over-title">{mouseOverBox.title}</div>;
     
     return <th onClick={onClick} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave}>
         <div className={`mouse-over ${(bDisplayMouseOver) ? "" : "hidden"}`} ref={mouseRef}>
+            {mouseTitleElem}
             {mouseOverBox.content}
         </div>
         {children}

@@ -12,10 +12,18 @@ function createHeaders(headers, state, dispatch){
     for(const [name, content] of Object.entries(headers)){
 
         let mouseOverContent = null;
+        let mouseOverTitle = null;
 
         if(content.mouseOverBox !== undefined){
+
             mouseOverContent = content.mouseOverBox.content;
+
+            if(content.mouseOverBox.title !== undefined){
+                mouseOverTitle = content.mouseOverBox.title;
+            }
         }
+
+
 
         elems.push(
             <TableHeader 
@@ -23,7 +31,8 @@ function createHeaders(headers, state, dispatch){
                     dispatch({"type": "changeSort", "value": name});
                 }}
                 mouseOverBox={{
-                    "content": mouseOverContent
+                    "content": mouseOverContent,
+                    "title": mouseOverTitle
                 }}
                 >
                 
