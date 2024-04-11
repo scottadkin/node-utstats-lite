@@ -1,4 +1,5 @@
 import { getWeaponId, createWeapon, bulkInsertMatchWeaponStats } from "../weapons.mjs";
+import { removeDoubleEnforcer } from "../generic.mjs";
 
 export class WeaponsManager{
 
@@ -18,8 +19,8 @@ export class WeaponsManager{
         const result = reg.exec(line);
 
         //const killType = result[1].toLowerCase();
-        const killerWeapon = result[2];
-        const victimWeapon = result[3];
+        const killerWeapon = removeDoubleEnforcer(result[2]);
+        const victimWeapon = removeDoubleEnforcer(result[3]);
 
         if(this.tempNames.indexOf(killerWeapon) === -1) this.tempNames.push(killerWeapon);
         if(this.tempNames.indexOf(victimWeapon) === -1) this.tempNames.push(victimWeapon);
@@ -30,7 +31,7 @@ export class WeaponsManager{
 
         for(let i = 0; i < this.tempNames.length; i++){
 
-            const name = this.tempNames[i];
+            let name = this.tempNames[i];
 
             let id = await getWeaponId(name);
 

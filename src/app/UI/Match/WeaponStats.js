@@ -34,7 +34,7 @@ function renderBasicTables(orderedNames, data, players, totalTeams){
 
             currentRows.push({
                 "player": {
-                    "className": `text-left ${(totalTeams < 2) ? "" : getTeamColorClass(player.team)}`,
+                    "className": `player-name-td text-left ${(totalTeams < 2) ? "" : getTeamColorClass(player.team)}`,
                     "value": player.name.toLowerCase(), 
                     "displayValue": <><CountryFlag code={player.country}/>{player.name}</>
                 },
@@ -109,7 +109,7 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
         columns.player = {
             "value": player.name.toLowerCase(), 
             "displayValue": <><CountryFlag code={player.country}/>{player.name}</>,
-            "className": `text-left ${(totalTeams < 2) ? "" : getTeamColorClass(player.team)}`
+            "className": `player-name-td text-left ${(totalTeams < 2) ? "" : getTeamColorClass(player.team)}`
         };
 
         for(let i = 0; i < orderedNames.length; i++){

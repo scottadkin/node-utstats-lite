@@ -1,5 +1,5 @@
 import { bulkInserKills } from "../kills.mjs";
-import { scalePlaytime } from "../generic.mjs";
+import { scalePlaytime, removeDoubleEnforcer } from "../generic.mjs";
 
 export class KillsManager{
 
@@ -26,9 +26,9 @@ export class KillsManager{
 
         const killType = result[1].toLowerCase();
         const killerId = parseInt(result[2]);
-        const killerWeapon = result[3];
+        const killerWeapon = removeDoubleEnforcer(result[3]);
         const victimId = parseInt(result[4]);
-        const victimWeapon = result[5];
+        const victimWeapon = removeDoubleEnforcer(result[5]);
 
         const kill = {
             timestamp,
@@ -78,7 +78,7 @@ export class KillsManager{
             for(let i = 0; i < this[types[x]].length; i++){
 
                 const k = this[types[x]][i];
-
+                
                 k.killerWeaponId = this.getId(weapons, k.killerWeapon);
                 k.victimWeaponId =  this.getId(weapons, k.victimWeapon);
             }

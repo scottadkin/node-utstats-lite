@@ -308,3 +308,13 @@ export function cleanWeaponName(name){
 
     return name;
 }
+
+
+export function removeDoubleEnforcer(name){
+
+    if(name.toLowerCase() === "double enforcers"){
+        name = "Enforcer";
+    }
+
+    return name;
+}
