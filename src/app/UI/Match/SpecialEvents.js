@@ -117,12 +117,48 @@ export default function SpecialEvents({data, totalTeams}){
 
     const spreeHeaders = {
         "player": {"title": <>Player</>},
-        "spree": {"title": <>Killing Spree</>},
-        "rampage": {"title": <>Rampage</>},
-        "dominating": {"title": <>Dominating</>},
-        "unstoppable": {"title": <>Unstoppable</>},
-        "godlike": {"title": <>Godlike</>},
-        "bestSpree": {"title": <>Best</>}
+        "spree": {
+            "title": <>Killing Spree</>,
+            "mouseOverBox": {
+                "title": "Killing Spree",
+                "content": `Player killed 5 to 9 players in a single life`
+            }
+        },
+        "rampage": {
+            "title": <>Rampage</>,
+            "mouseOverBox": {
+                "title": "Rampage",
+                "content": `Player killed 10 to 14 players in a single life`
+            }
+        },
+        "dominating": {
+            "title": <>Dominating</>,
+            "mouseOverBox": {
+                "title": "Dominating",
+                "content": `Player killed 15 to 19 players in a single life`
+            }
+        },
+        "unstoppable": {
+            "title": <>Unstoppable</>,
+            "mouseOverBox": {
+                "title": "Unstoppable",
+                "content": `Player killed 20 to 24 players in a single life`
+            }
+        },
+        "godlike": {
+            "title": <>Godlike</>,
+            "mouseOverBox": {
+                "title": "Godlike",
+                "content": `Player killed at least 25 players in a single life`
+            }
+        },
+        "bestSpree": {
+            "title": <>Best</>,
+            "mouseOverBox": {
+                "title": "Best Spree",
+                "content": `Most amount of kills a player got in a single life`
+            }
+        }
     }
 
     const multiRows = [];

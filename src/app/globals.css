@@ -187,7 +187,7 @@ th{
     color:yellow;
     font-weight:normal;
 	background-color:var(--bg-color-5);
-	border:1px solid var(--border-color-2);
+	border:1px solid var(--border-color-1);
 }
 
 th:hover{
@@ -197,7 +197,7 @@ th:hover{
 
 td{
     padding:var(--padding-2) var(--padding-3);
-	border:1px solid var(--border-color-2);
+	border:1px solid var(--border-color-1);
 }
 
 tr:nth-child(even){
@@ -255,8 +255,9 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 	position:absolute;
 	background-color:var(--bg-color-5);
 	padding:var(--padding-2);
-	border:1px solid var(--border-color-1);
+	border:1px solid var(--border-color-2);
 	color:var(--font-color-1);
+	max-width:250px;
 }
 
 .mouse-over-title{
