@@ -1,11 +1,12 @@
+"use server"
 import Image from "next/image";
 import {getMatchData} from "@/app/lib/matches.mjs";
 import Header from "@/app/UI/Header";
 import MatchScoreBox from "@/app/UI/MatchScoreBox";
-import { getTeamColorClass } from "../../lib/generic.mjs";
 import FragTable from "@/app/UI/Match/FragTable";
 import SpecialEvents from "@/app/UI/Match/SpecialEvents";
 import WeaponStats from "@/app/UI/Match/WeaponStats";
+import KillsMatchUp from "@/app/UI/Match/KillsMatchUp";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -23,10 +24,10 @@ export async function generateMetadata({ params, searchParams }, parent) {
     //const previousImages = (await parent).openGraph?.images || []
    
     return {
-      title: `Match ${id}`,
-      /*openGraph: {
-        images: ['/some-specific-page-image.jpg'],
-      },*/
+        title: `Match ${id}`,
+        /*openGraph: {
+            images: ['/some-specific-page-image.jpg'],
+        },*/
     }
 }
 
@@ -40,13 +41,15 @@ export default async function MatchPage({params, searchParams}) {
     const matchData = await getMatchData(matchId);
 	const totalTeams = matchData.basic.total_teams;
 
+
     return (
 		<main>
 			<Header>Match Report</Header> 
+            <KillsMatchUp kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/>
 			<MatchScoreBox data={matchData.basic}/>
 			<FragTable data={JSON.stringify(matchData)} totalTeams={totalTeams}/>
-      		<WeaponStats data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers}/>
-      		<SpecialEvents data={JSON.stringify(matchData)} totalTeams={totalTeams}/>
+            <WeaponStats data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers}/>
+            <SpecialEvents data={JSON.stringify(matchData)} totalTeams={totalTeams}/>
 		</main>
     );
 }

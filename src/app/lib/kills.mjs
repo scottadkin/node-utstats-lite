@@ -1,4 +1,4 @@
-import { bulkInsert } from "./database.mjs";
+import { bulkInsert, simpleQuery } from "./database.mjs";
 
 
 export async function bulkInserKills(kills, matchId){
@@ -22,4 +22,11 @@ export async function bulkInserKills(kills, matchId){
 
     const query = `INSERT INTO nstats_kills (match_id,timestamp,kill_type,killer_id,killer_weapon,victim_id,victim_weapon) VALUES ?`;
     await bulkInsert(query, insertVars);
+}
+
+export async function getMatchKills(matchId){
+
+    const query = `SELECT timestamp,killer_id,killer_weapon,victim_id,victim_weapon FROM nstats_kills WHERE match_id=?`;
+
+    return await simpleQuery(query, [matchId]);
 }
