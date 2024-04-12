@@ -6,8 +6,6 @@ import CountryFlag from "../CountryFlag";
 
 export default function FragTable({data, totalTeams}){
 
-    data = JSON.parse(data);
-
     const headers = {
         "name": {"title": "Player"},
         "playtime": {"title": "Playtime"},

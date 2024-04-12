@@ -45,11 +45,11 @@ export default async function MatchPage({params, searchParams}) {
     return (
 		<main>
 			<Header>Match Report</Header> 
-            <KillsMatchUp kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/>
 			<MatchScoreBox data={matchData.basic}/>
-			<FragTable data={JSON.stringify(matchData)} totalTeams={totalTeams}/>
+			<FragTable data={matchData} totalTeams={totalTeams}/>
             <WeaponStats data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers}/>
-            <SpecialEvents data={JSON.stringify(matchData)} totalTeams={totalTeams}/>
+            <SpecialEvents data={matchData} totalTeams={totalTeams}/>
+            <KillsMatchUp kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/>
 		</main>
     );
 }

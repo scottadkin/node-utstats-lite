@@ -72,8 +72,6 @@ function renderFirstBlood(data, totalTeams){
 
 export default function SpecialEvents({data, totalTeams}){
 
-    data = JSON.parse(data);
-
     const multiHeaders = {
         "player": 
             {"title": <>Player</>    
