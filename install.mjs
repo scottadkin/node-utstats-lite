@@ -163,6 +163,25 @@ const queries = [
             killer_weapon int(11) NOT NULL,
             victim_id int(11) NOT NULL,
             victim_weapon int(11) NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE nstats_match_ctf (
+            id int NOT NULL,
+            match_id int NOT NULL,
+            player_id int NOT NULL,
+            flag_taken int NOT NULL,
+            flag_pickup int NOT NULL,
+            flag_drop int NOT NULL,
+            flag_assist int NOT NULL,
+            flag_cover int NOT NULL,
+            flag_seal int NOT NULL,
+            flag_cap int NOT NULL,
+            flag_kill int NOT NULL,
+            flag_return int NOT NULL,
+            flag_return_base int NOT NULL,
+            flag_return_mid int NOT NULL,
+            flag_return_enemy_base int NOT NULL,
+            flag_return_save int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
 
