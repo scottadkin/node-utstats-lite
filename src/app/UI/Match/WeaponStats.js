@@ -109,6 +109,9 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
 
         const playerId = parseInt(pId);
 
+        if(player.team < 0 || player.team > 3) continue;
+
+
         const columns = {};
 
         columns.player = {

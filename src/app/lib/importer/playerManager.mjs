@@ -25,6 +25,8 @@ export class PlayerManager{
         //87.97	player	Connect	Illana	16	False
         const connectReg = /^connect\t(.+?)\t(\d+)\t.+$/i;
 
+        const disconnectReg = /^disconnect\t(\d+)$/i;
+
         const typeResult = typeReg.exec(line);
 
         if(typeResult === null) return;
@@ -49,7 +51,20 @@ export class PlayerManager{
 
             const playerName = result[1];
 
-            this.setConnectionEvent(playerName);
+            this.setConnectionEvent(playerName, timestamp);
+            return;
+        }
+
+        if(type === "disconnect"){
+
+            const result = disconnectReg.exec(line);
+
+            if(result === null) return;
+
+            this.setDisconnectEvent(parseInt(result[1]), timestamp);
+            return;
+
+    
         }
 
         if(type === "isabot"){
@@ -173,14 +188,26 @@ export class PlayerManager{
         this.players.push(new Player(timestamp, name, playerId));
     }
 
-    setConnectionEvent(playerName){
+    setConnectionEvent(playerName, timestamp){
 
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
 
-            if(p.name === playerName) p.connected();
+            if(p.name === playerName) p.connected(timestamp);
         }
+    }
+
+    setDisconnectEvent(playerId, timestamp){
+
+        const player = this.getPlayerById(playerId);
+
+        if(player === null){
+            new Message(`Failed to get player by id setDisconnectEvent`,"warning");
+            return;
+        }
+
+        player.disconnect(timestamp);
     }
 
     /**
@@ -404,15 +431,19 @@ export class PlayerManager{
                 master.stats.sprees[type] += p.stats.sprees[type];
             }
 
+            master.connects = [... new Set([...master.connects, ...p.connects])];
+
+            master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];
+
         }
     }
 
-    matchEnded(){
+    matchEnded(matchStart, matchEnd){
 
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
-            p.matchEnded();
+            p.matchEnded(matchStart, matchEnd);
         }
     }
 
@@ -429,12 +460,20 @@ export class PlayerManager{
         }
     }
 
+    setPlayerPlaytime(matchStart, matchEnd){
+
+        for(const p of Object.values(this.mergedPlayers)){
+            
+            p.setPlaytime(matchStart, matchEnd);
+        }
+    }
+
     scalePlaytimes(bHardcore){
 
         if(bHardcore === 0) return;
 
         for(const player of Object.values(this.mergedPlayers)){
-            player.timeOnServer = scalePlaytime(player.stats.timeOnServer, bHardcore);
+            player.playtime = scalePlaytime(player.playtime, bHardcore);
         }
     }
 }

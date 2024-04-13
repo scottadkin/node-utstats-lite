@@ -29,7 +29,7 @@ export default function MatchListTable({data}){
     }
 
     return <>
-        <table>
+        <table className="t-width-1">
             <tbody>
                 <tr>   
                     <th>Map</th>

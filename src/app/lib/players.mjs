@@ -48,7 +48,7 @@ export async function insertPlayerMatchData(playerData, matchId){
         p.stats.suicides,
         p.stats.teamKills,
         p.stats.efficiency,
-        p.stats.timeOnServer,
+        p.playtime,
         p.stats.ttl,
         p.bFirstBlood,
         p.stats.sprees.spree,

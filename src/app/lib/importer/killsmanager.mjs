@@ -171,7 +171,7 @@ export class KillsManager{
             killer.headshot();
         }
 
-        playerManager.matchEnded();
+        //playerManager.matchEnded();
 
         if(this.firstBloodId !== -1){
             const firstBloodPlayer = playerManager.getPlayerById(this.firstBloodId);

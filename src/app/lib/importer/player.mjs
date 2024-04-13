@@ -20,6 +20,9 @@ export class Player{
         this.masterId = null;
         this.bFirstBlood = 0;
 
+        this.connects = [];
+        this.disconnects = [];
+
         this.stats = {
             "score": 0,
             "frags": 0,
@@ -54,10 +57,16 @@ export class Player{
         this.lastFragEvent = -99999;
     }
 
-    connected(){
+    connected(timestamp){
 
+        this.connects.push(timestamp);
         this.bHadConnectEvent = true;
         this.bSpectator = 0;
+    }
+
+    disconnect(timestamp){
+
+        this.disconnects.push(timestamp);
     }
 
     updateMultiHistory(){
@@ -126,14 +135,44 @@ export class Player{
         this.stats.teamKills++;
     }
 
-    matchEnded(){
+    matchEnded(matchStart, matchEnd){
 
         this.updateMultiHistory();
         this.updateSpreeHistory();
+        this.disconnects.push(matchEnd);
     }
 
     headshot(){
         this.stats.headshots++;
     }
 
+
+    setPlaytime(matchStart, matchEnd){
+
+        let playtime = 0;
+
+        //spectators won't have connect events if there were never a player
+        if(this.connects.length === 0){
+            this.playtime = 0;
+            return;
+        }
+
+        for(let i = 0; i < this.connects.length; i++){
+
+            let con = this.connects[i];
+            const disc = this.disconnects[i];
+
+            if(con < matchStart) con = matchStart;
+
+            const diff = disc - con;
+
+            //ignore connects before match start, if diff < 0 disconnect happened before match start
+            if(diff < 0) continue;
+
+            playtime += diff;
+
+        }
+
+        this.playtime = playtime;
+    }
 }
