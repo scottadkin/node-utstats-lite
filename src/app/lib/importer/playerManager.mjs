@@ -303,7 +303,8 @@ export class PlayerManager{
                 "mac2": p.mac2,
                 "bSpectator": p.bSpectator,
                 "multis": p.stats.multis,
-                "sprees": p.stats.sprees
+                "sprees": p.stats.sprees,
+                "ctf": p.stats.ctf
             });
         }
 
@@ -357,6 +358,11 @@ export class PlayerManager{
             "score", "frags", "kills", "deaths",
             "suicides", "teamKills", "timeOnServer"
         ];
+
+        const intTypes = [
+            "score", "frags", "kills", "deaths",
+            "suicides", "teamKills"
+        ];
         
         const spreeMergeKeys = [
             "spree", "rampage", "dominating", "unstoppable", "godlike"
@@ -365,6 +371,13 @@ export class PlayerManager{
         const multiMergeKeys = [
             "double", "multi", "ultra", "monster"
         ];
+
+        let ctfKeys = [];
+
+        if(this.players.length > 0){
+
+            ctfKeys = Object.keys(this.players[0].stats.ctf);
+        }
 
 
         for(let i = 0; i < this.players.length; i++){
@@ -405,7 +418,14 @@ export class PlayerManager{
             for(let x = 0; x < mergeKeys.length; x++){
 
                 const type = mergeKeys[x];
-                master.stats[type] += p.stats[type];      
+
+                if(intTypes.indexOf(type) !== -1){
+
+                    master.stats[type] = parseInt(master.stats[type]);
+                    master.stats[type] += parseInt(p.stats[type]);   
+                }else{
+                    master.stats[type] += p.stats[type];   
+                }   
             }
 
 
@@ -429,6 +449,13 @@ export class PlayerManager{
                 const type = spreeMergeKeys[x];
 
                 master.stats.sprees[type] += p.stats.sprees[type];
+            }
+
+            for(let x = 0; x < ctfKeys.length; x++){
+
+                const type = ctfKeys[x];
+
+                master.stats.ctf[type] += p.stats.ctf[type];
             }
 
             master.connects = [... new Set([...master.connects, ...p.connects])];

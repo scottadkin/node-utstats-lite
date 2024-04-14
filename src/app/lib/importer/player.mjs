@@ -50,6 +50,20 @@ export class Player{
                 "monster": 0,
                 "best": 0,
                 "current": 0
+            },
+            "ctf": {
+                "kill": 0,
+                "return": 0,
+                "returnBase": 0,
+                "returnMid": 0,
+                "returnEnemyBase": 0,
+                "returnSave": 0,
+                "dropped": 0,
+                "assist": 0,
+                "capture": 0,
+                "cover": 0,
+                "taken": 0,
+                "pickedup": 0,
             }
         };
 

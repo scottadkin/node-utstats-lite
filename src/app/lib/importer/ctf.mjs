@@ -1,3 +1,5 @@
+import Message from "../message.mjs";
+
 export class CTF{
 
     constructor(){
@@ -60,22 +62,27 @@ export class CTF{
         }
 
         if(type === "flag_return_base"){
-            this.parseGeneric(timestamp, subString, "return_base");
+            this.parseGeneric(timestamp, subString, "returnBase");
             return;
         }
 
         if(type === "flag_return_mid"){
-            this.parseGeneric(timestamp, subString, "return_mid");
+            this.parseGeneric(timestamp, subString, "returnMid");
             return;
         }
 
         if(type === "flag_return_enemybase"){
-            this.parseGeneric(timestamp, subString, "return_mid");
+            this.parseGeneric(timestamp, subString, "returnEnemyBase");
             return;
         }
 
         if(type === "flag_return_closesave"){
-            this.parseGeneric(timestamp, subString, "return_save");
+            this.parseGeneric(timestamp, subString, "returnSave");
+            return;
+        }
+
+        if(type === "flag_pickedup"){
+            this.parseGeneric(timestamp, subString, "pickedup");
             return;
         }
     }
@@ -104,6 +111,24 @@ export class CTF{
         const playerId = parseInt(result[1]);
 
         this.events.push({"type": type, "playerId": playerId, "timestamp": timestamp}); 
+    }
+
+
+    setPlayerStats(playerManager){
+
+        for(let i = 0; i < this.events.length; i++){
+
+            const e = this.events[i];
+
+            const player = playerManager.getPlayerById(e.playerId);
+    
+            if(player === null){
+                new Message(`player is null ctf.setPlayerStats`,"warning");
+                continue;
+            }
+
+            player.stats.ctf[e.type]++;
+        }
     }
 
 }
