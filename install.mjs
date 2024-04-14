@@ -136,7 +136,14 @@ const queries = [
             multi_3 int NOT NULL,
             multi_4 int NOT NULL,
             multi_best int NOT NULL,
-            headshots int NOT NULL
+            headshots int NOT NULL,
+            item_amp int NOT NULL,
+            item_belt int NOT NULL,
+            item_boots int NOT NULL,
+            item_body int NOT NULL,
+            item_pads int NOT NULL,
+            item_invis int NOT NULL,
+            item_shp int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (

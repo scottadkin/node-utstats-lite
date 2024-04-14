@@ -68,6 +68,15 @@ export class Player{
             },
             "dom": {
                 "controlPoints": {}
+            },
+            "items": {
+                "amp": 0,
+                "belt": 0,
+                "boots": 0,
+                "body": 0,
+                "pads": 0,
+                "invis": 0,
+                "shp": 0
             }
         };
 

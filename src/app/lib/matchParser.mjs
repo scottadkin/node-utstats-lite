@@ -10,6 +10,7 @@ import { KillsManager } from "./importer/killsmanager.mjs";
 import { scalePlaytime } from "./generic.mjs";
 import { CTF } from "./importer/ctf.mjs";
 import { Domination } from "./importer/domination.mjs";
+import Items from "./importer/items.mjs";
 
 export class MatchParser{
 
@@ -27,6 +28,7 @@ export class MatchParser{
         this.kills = new KillsManager();
         this.ctf = new CTF();
         this.dom = new Domination();
+        this.items = new Items();
 
         this.matchStart = 0;
         this.matchEnd = 0;
@@ -48,7 +50,7 @@ export class MatchParser{
             await this.dom.setPointIds();
             this.dom.setPlayerCapStats(this.players);
             this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
-
+            this.items.setPlayerStats(this.players);
 
             this.players.mergePlayers();
 
@@ -56,6 +58,7 @@ export class MatchParser{
             this.players.matchEnded(this.matchStart, this.matchEnd);
             this.players.setPlayerPlaytime(this.matchStart, this.matchEnd);
             this.players.scalePlaytimes(this.gametype.bHardcore);
+
 
             await this.players.setPlayerMasterIds();
 
@@ -148,6 +151,8 @@ export class MatchParser{
 
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
         const domCapReg = /^controlpoint_capture\t.+$/i;
+
+        const itemGetReg = /^item_get\t(.+)$/i;
 
         for(let i = 0; i < lines.length; i++){
             
@@ -244,6 +249,11 @@ export class MatchParser{
             if(domCapReg.test(subString)){
 
                 this.dom.parseLine(timestamp, subString);
+                continue;
+            }
+
+            if(itemGetReg.test(subString)){
+                this.items.parseLine(timestamp, subString);
                 continue;
             }
         }

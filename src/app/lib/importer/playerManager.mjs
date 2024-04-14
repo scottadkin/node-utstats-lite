@@ -467,6 +467,11 @@ export class PlayerManager{
                 master.stats.dom.controlPoints[pointId] += pointCaps;
             }
 
+            for(const [itemType, timesUsed] of Object.entries(p.stats.items)){
+
+                master.stats.items[itemType] += timesUsed;
+            }
+
             master.connects = [... new Set([...master.connects, ...p.connects])];
 
             master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];
