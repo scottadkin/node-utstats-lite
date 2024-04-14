@@ -65,6 +65,9 @@ export class Player{
                 "taken": 0,
                 "pickedup": 0,
                 "seal": 0
+            },
+            "dom": {
+                "controlPoints": {}
             }
         };
 

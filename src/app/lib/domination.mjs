@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { simpleQuery, bulkInsert } from "./database.mjs";
 
 export async function getPointsIds(names){
 
@@ -26,4 +26,22 @@ export async function createControlPoint(name){
     const result = await simpleQuery(query, [name]);
 
     return result.insertId;
+}
+
+
+export async function insertPlayerMatchData(players, matchId){
+
+    const query = `INSERT INTO nstats_match_dom (match_id,player_id,point_id,total_caps) VALUES ?`;
+
+    const insertVars = [];
+
+    for(const player of Object.values(players)){
+
+        for(const [pointId, pointCaps] of Object.entries(player.stats.dom.controlPoints)){
+
+            insertVars.push([matchId, player.masterId, pointId, pointCaps]);
+        }
+    }
+
+    await bulkInsert(query, insertVars);
 }

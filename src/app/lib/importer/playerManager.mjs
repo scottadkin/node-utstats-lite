@@ -458,6 +458,15 @@ export class PlayerManager{
                 master.stats.ctf[type] += p.stats.ctf[type];
             }
 
+            for(const [pointId, pointCaps] of Object.entries(p.stats.dom.controlPoints)){
+                
+                if(master.stats.dom.controlPoints[pointId] === undefined){
+                    master.stats.dom.controlPoints[pointId] = 0;
+                }
+
+                master.stats.dom.controlPoints[pointId] += pointCaps;
+            }
+
             master.connects = [... new Set([...master.connects, ...p.connects])];
 
             master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];

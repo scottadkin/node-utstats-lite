@@ -1,4 +1,5 @@
-import { getPointsIds, createControlPoint } from "../domination.mjs";
+import { getPointsIds, createControlPoint, insertPlayerMatchData } from "../domination.mjs";
+import Message from "../message.mjs";
 
 export class Domination{
 
@@ -6,8 +7,7 @@ export class Domination{
 
         this.controlPoints = {};
 
-        this.capEvents = [];
-        
+        this.capEvents = [];  
     }
 
 
@@ -54,5 +54,33 @@ export class Domination{
 
             c.point = this.controlPoints[c.point] ?? -1;
         }
+    }
+
+
+    setPlayerCapStats(playerManager){
+  
+        for(let i = 0; i < this.capEvents.length; i++){
+
+            const c = this.capEvents[i];
+
+            const player = playerManager.getPlayerById(c.playerId);
+            
+            if(player === null){
+                new Message(`dom.setPlayerCapStats() player is null`,"warning");
+                continue;
+            }
+
+
+            if(player.stats.dom.controlPoints[c.point] === undefined){
+                player.stats.dom.controlPoints[c.point] = 0;
+            }
+
+            player.stats.dom.controlPoints[c.point]++;
+        }
+    }
+
+    async insertPlayerMatchData(players, matchId){
+
+        await insertPlayerMatchData(players, matchId);
     }
 }

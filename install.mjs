@@ -187,6 +187,14 @@ const queries = [
         `CREATE TABLE IF NOT EXISTS nstats_dom_control_points (
             id int NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_match_dom (
+            id int NOT NULL AUTO_INCREMENT,
+            match_id int NOT NULL,
+            player_id int NOT NULL,
+            point_id int NOT NULL,
+            total_caps int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
 ];
