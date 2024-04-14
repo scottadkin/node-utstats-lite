@@ -42,7 +42,6 @@ export class MatchParser{
 
         try{
 
-            console.log(this.ctf.events);
             this.ctf.setPlayerStats(this.players);
             this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
             this.players.mergePlayers();
@@ -96,12 +95,13 @@ export class MatchParser{
             }
 
             await this.players.insertPlayerMatchData(this.matchId);
+            await this.ctf.insertPlayerMatchData(this.players, this.matchId);
             await this.weapons.setWeaponIds();
             this.kills.setWeaponIds(this.weapons.weapons);
             this.kills.setPlayerIds(this.players);
             await this.kills.insertKills(this.matchId);
             
-            this.players.debugListAllPlayers();
+           // this.players.debugListAllPlayers();
 
             this.weapons.setPlayerStats(this.kills.kills);
             await this.weapons.insertPlayerMatchStats(this.matchId);

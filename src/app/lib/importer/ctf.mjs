@@ -1,4 +1,5 @@
 import Message from "../message.mjs";
+import { insertPlayerMatchData } from "../ctf.mjs";
 
 export class CTF{
 
@@ -85,6 +86,12 @@ export class CTF{
             this.parseGeneric(timestamp, subString, "pickedup");
             return;
         }
+
+        if(type === "flag_seal"){
+
+            this.parseSeal(timestamp, subString);
+            return;
+        }
     }
 
     parseFlagCover(timestamp, line){
@@ -113,6 +120,19 @@ export class CTF{
         this.events.push({"type": type, "playerId": playerId, "timestamp": timestamp}); 
     }
 
+    parseSeal(timestamp, string){
+
+        const reg = /^(\d+?)\t(\d+)\t\d+$/i;
+
+        const result = reg.exec(string);
+
+        if(result === null) return;
+
+        const playerId = parseInt(result[1]);
+
+        this.events.push({"type": "seal", "playerId": playerId, "timestamp": timestamp}); 
+    }
+
 
     setPlayerStats(playerManager){
 
@@ -129,6 +149,11 @@ export class CTF{
 
             player.stats.ctf[e.type]++;
         }
+    }
+
+    async insertPlayerMatchData(playerManager, matchId){
+
+        await insertPlayerMatchData(playerManager, matchId);
     }
 
 }

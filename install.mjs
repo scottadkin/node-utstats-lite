@@ -166,7 +166,7 @@ const queries = [
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE nstats_match_ctf (
-            id int NOT NULL,
+            id int NOT NULL AUTO_INCREMENT,
             match_id int NOT NULL,
             player_id int NOT NULL,
             flag_taken int NOT NULL,

@@ -64,6 +64,7 @@ export class Player{
                 "cover": 0,
                 "taken": 0,
                 "pickedup": 0,
+                "seal": 0
             }
         };
 
