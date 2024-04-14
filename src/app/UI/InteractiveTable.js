@@ -1,5 +1,4 @@
 "use client"
-
 import { useReducer } from "react";
 import TableHeader from "./TableHeader";
 
@@ -80,7 +79,15 @@ function sortRows(rows, sortBy, order){
     rows.sort((a, b) =>{
 
         if(a[sortBy] === undefined || b[sortBy] === undefined){
-            throw new Error(`Can't sort by key: ${sortBy}`);
+
+            const keys = Object.keys(a);
+            
+            if(keys.length === 0){
+                throw new Error(`Can't sort by key: ${sortBy}`);
+            }else{
+                sortBy = keys[0];
+                order = "ASC";
+            }
         }
 
         a = a[sortBy].value;
