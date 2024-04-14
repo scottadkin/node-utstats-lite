@@ -151,9 +151,28 @@ export class CTF{
         }
     }
 
+    bAnyCTFEvents(players){
+
+        let keys = null;
+
+        for(const playerData of Object.values(players)){
+
+            if(keys === null) keys = Object.keys(playerData.stats.ctf);
+
+            for(let i = 0; i < keys.length; i++){
+
+                if(playerData.stats.ctf[keys[i]] !== 0) return true;
+            }
+        }
+
+        return false;
+    }
+
     async insertPlayerMatchData(playerManager, matchId){
 
-        await insertPlayerMatchData(playerManager, matchId);
+        if(this.bAnyCTFEvents(playerManager.mergedPlayers)){
+            await insertPlayerMatchData(playerManager, matchId);
+        }
     }
 
 }

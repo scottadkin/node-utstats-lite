@@ -48,6 +48,8 @@ export default function CTFTable({players, data}){
 
     const [selectedTab, setSelectedTab] = useState("general");
 
+    if(data.length === 0) return null;
+
     const rows = {};
 
     const tableHeaders = {
@@ -79,6 +81,8 @@ export default function CTFTable({players, data}){
         const d = data[i];
 
         const player = getPlayer(players, d.player_id); 
+
+        if(player.bSpectator !== 0) continue;
 
 
         if(rows[player.team] === undefined){

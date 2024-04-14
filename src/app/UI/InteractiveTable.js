@@ -137,7 +137,6 @@ export default function InteractiveTable({headers, rows, sortBy, order, width, t
     sortRows(rows, state.sortBy, state.order);
     
 
-
     let widthClass = "";
 
     if(width !== undefined){
