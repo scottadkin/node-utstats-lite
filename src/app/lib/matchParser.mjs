@@ -8,6 +8,7 @@ import { Map } from "./importer/map.mjs";
 import { WeaponsManager } from "./importer/weaponsManager.mjs";
 import { KillsManager } from "./importer/killsmanager.mjs";
 import { scalePlaytime } from "./generic.mjs";
+import {CTF} from "./importer/ctf.mjs";
 
 export class MatchParser{
 
@@ -23,6 +24,7 @@ export class MatchParser{
         this.map = new Map();
         this.weapons = new WeaponsManager();
         this.kills = new KillsManager();
+        this.ctf = new CTF();
 
         this.matchStart = 0;
         this.matchEnd = 0;
@@ -40,6 +42,7 @@ export class MatchParser{
 
         try{
 
+            console.log(this.ctf.events);
             this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
             this.players.mergePlayers();
 
@@ -134,6 +137,8 @@ export class MatchParser{
 
         const firstBloodReg = /^first_blood\t(\d+)$/i;
 
+        const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
+
         for(let i = 0; i < lines.length; i++){
             
             const line = lines[i];
@@ -216,6 +221,12 @@ export class MatchParser{
                 const result = firstBloodReg.exec(subString);
 
                 this.kills.setFirstBloodId(result[1]);
+                continue;
+            }
+
+            if(ctfFlagReg.test(subString)){
+
+                this.ctf.parseLine(timestamp, subString);
             }
         }
     }
