@@ -7,6 +7,7 @@ import FragTable from "@/app/UI/Match/FragTable";
 import SpecialEvents from "@/app/UI/Match/SpecialEvents";
 import WeaponStats from "@/app/UI/Match/WeaponStats";
 import KillsMatchUp from "@/app/UI/Match/KillsMatchUp";
+import CTFTable from "@/app/UI/Match/CTFTable";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -41,12 +42,15 @@ export default async function MatchPage({params, searchParams}) {
     const matchData = await getMatchData(matchId);
 	const totalTeams = matchData.basic.total_teams;
 
+    console.log(matchData);
+
 
     return (
 		<main>
 			<Header>Match Report</Header> 
 			<MatchScoreBox data={matchData.basic}/>
 			<FragTable data={matchData} totalTeams={totalTeams}/>
+            <CTFTable data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/>
             <WeaponStats data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers}/>
             <SpecialEvents data={matchData} totalTeams={totalTeams}/>
             <KillsMatchUp kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/>

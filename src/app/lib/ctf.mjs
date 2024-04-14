@@ -27,3 +27,11 @@ export async function insertPlayerMatchData(playerManager, matchId){
     await bulkInsert(query, insertVars);
 }
 
+export async function getMatchData(matchId){
+
+    const query = `SELECT player_id,flag_taken,flag_pickup,flag_drop,flag_assist,flag_cover,
+    flag_seal,flag_cap,flag_kill,flag_return,flag_return_base,flag_return_mid,flag_return_enemy_base,flag_return_save
+    FROM nstats_match_ctf WHERE match_id=?`;
+
+    return await simpleQuery(query, [matchId]);
+}

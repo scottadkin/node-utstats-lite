@@ -6,6 +6,7 @@ import { getMapImages } from "./map.mjs";
 import { getPlayersById, getBasicPlayerInfo } from "./players.mjs";
 import { getMatchWeaponStats } from "./weapons.mjs";
 import { getMatchKills } from "./kills.mjs";
+import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
@@ -177,5 +178,8 @@ export async function getMatchData(id){
     const weaponStats = await getMatchWeaponStats(id);
     const kills = await getMatchKills(id);
 
-    return {basic, playerData, playerNames, weaponStats, basicPlayers, kills};
+    const ctf = await ctfGetMatchData(id);
+
+
+    return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf};
 }
