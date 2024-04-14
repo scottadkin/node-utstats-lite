@@ -8,7 +8,8 @@ import { Map } from "./importer/map.mjs";
 import { WeaponsManager } from "./importer/weaponsManager.mjs";
 import { KillsManager } from "./importer/killsmanager.mjs";
 import { scalePlaytime } from "./generic.mjs";
-import {CTF} from "./importer/ctf.mjs";
+import { CTF } from "./importer/ctf.mjs";
+import { Domination } from "./importer/domination.mjs";
 
 export class MatchParser{
 
@@ -25,6 +26,7 @@ export class MatchParser{
         this.weapons = new WeaponsManager();
         this.kills = new KillsManager();
         this.ctf = new CTF();
+        this.dom = new Domination();
 
         this.matchStart = 0;
         this.matchEnd = 0;
@@ -43,7 +45,12 @@ export class MatchParser{
         try{
 
             this.ctf.setPlayerStats(this.players);
+            console.log(this.dom.controlPoints);
+            console.log(this.dom.capEvents);
+            await this.dom.setPointIds();
             this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
+
+
             this.players.mergePlayers();
 
             this.players.setCountries();
@@ -140,6 +147,7 @@ export class MatchParser{
         const firstBloodReg = /^first_blood\t(\d+)$/i;
 
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
+        const domCapReg = /^controlpoint_capture\t.+$/i;
 
         for(let i = 0; i < lines.length; i++){
             
@@ -227,8 +235,16 @@ export class MatchParser{
             }
 
             if(ctfFlagReg.test(subString)){
-
+                //ignore events in warm up
+                if(timestamp < this.matchStart) continue;
                 this.ctf.parseLine(timestamp, subString);
+                continue;
+            }
+
+            if(domCapReg.test(subString)){
+
+                this.dom.parseLine(timestamp, subString);
+                continue;
             }
         }
     }
