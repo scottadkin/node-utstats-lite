@@ -45,3 +45,37 @@ export async function insertPlayerMatchData(players, matchId){
 
     await bulkInsert(query, insertVars);
 }
+
+async function getControlPointNames(ids){
+
+    if(ids.length === 0) return {};
+
+    const query = `SELECT id,name FROM nstats_dom_control_points WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [ids]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r.name;
+    }
+
+    return data;
+}
+
+export async function getMatchData(matchId){
+
+    const query = `SELECT player_id,point_id,total_caps FROM nstats_match_dom WHERE match_id=?`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    const pointIds = [...new Set(result.map((r) =>{
+        return r.point_id;
+    }))];
+
+    const pointNames = await getControlPointNames(pointIds);
+
+    return {"data": result, "controlPoints": pointNames};
+}
