@@ -105,6 +105,12 @@ export default async function Page({params, searchParams}) {
         </tr>);
     }
 
+    if(rows.length === 0){
+        rows.push(<tr>
+            <td colSpan={10}>No matches found</td>
+        </tr>);
+    }
+
     let pageUrl = `/players?name=${name}&sortBy=${sortBy}&order=${order}&perPage=${perPage}&page=`;
 
     return <div>

@@ -284,3 +284,14 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 	font-size:var(--font-size-small);
 }
 
+select{
+	background-color:var(--bg-color-3);
+	color:var(--font-color-1);
+	font-size:var(--font-size-1);
+    line-height:var(--line-height-1);
+}
+
+option{
+	font-size:var(--font-size-1);
+    line-height:var(--line-height-1);
+}

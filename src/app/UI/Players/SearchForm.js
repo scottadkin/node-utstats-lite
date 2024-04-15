@@ -1,7 +1,6 @@
 "use client"
 import Link from "next/link";
 import { useState } from "react";
-import DropDown from "../DropDown";
 
 export default function SearchForm({originalName, originalSortBy, originalOrder, originalPerPage}){
 
@@ -34,17 +33,6 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
 
     ];
 
-    const perPageOptions = [
-        {"value": 5, "display": "5"}, 
-        {"value": 10, "display": "10"}, 
-        {"value": 25, "display": "25"}, 
-        {"value": 50, "display": "50"}, 
-        {"value": 75, "display": "75"}, 
-        {"value": 100, "display": "100"}, 
-        {"value": 250, "display": "250"}
-
-    ];
-
 
     return <div className="form margin-bottom-1">
         <div className="form-row">
@@ -65,25 +53,42 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
             <label htmlFor="sort-by">
                 Sort By
             </label>
-            <DropDown options={sortByOptions} selectedValue={sortBy} changeSelected={(value) =>{
-                setSortBy(value);
-            }}/>
+
+            <select defaultValue={sortByOptions} onChange={(e) =>{
+                setSortBy(e.target.value);
+            }}>
+                {sortByOptions.map((o, i) =>{
+                    return <option key={i} value={o.value}>{o.display}</option>
+                })}
+            </select>
         </div>
         <div className="form-row">
             <label htmlFor="order">
                Order
             </label>
-            <DropDown options={orderOptions} selectedValue={order} changeSelected={(value) =>{
-                setOrder(value);
-            }}/>
+            <select defaultValue={order} onChange={(e) =>{
+                setOrder(e.target.value);
+            }}>
+                {orderOptions.map((o, i) =>{
+                    return <option key={i} value={o.value}>{o.display}</option>
+                })}
+            </select>
         </div>
         <div className="form-row">
             <label htmlFor="per-page">
                Per Page
             </label>
-            <DropDown options={perPageOptions} selectedValue={perPage} changeSelected={(value) =>{
-                setPerPage(value);
-            }}/>
+            <select defaultValue={perPage} onChange={(e) =>{
+                setPerPage(e.target.value);
+            }}>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="75">75</option>
+                <option value="100">100</option>
+            </select>
         </div>
 
         <div className="text-center">
