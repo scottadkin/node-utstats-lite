@@ -185,9 +185,28 @@ export async function getBasicPlayerInfo(ids){
 }
 
 
-export async function getPlayersList(){
+export async function searchPlayers(sortBy, order){
 
-    const query = `SELECT * FROM nstats_players ORDER BY name ASC`;
+    sortBy = sortBy.toLowerCase();
+    order = order.toUpperCase();
 
+    if(order !== "ASC" && order !== "DESC"){
+        order = "ASC";
+    }
+
+    const validSortBys = [
+        "name", "last_active", "score", "frags", "kills", "deaths",
+        "suicides", "eff", "matches", "playtime"
+    ];
+
+    const sortIndex = validSortBys.indexOf(sortBy);
+
+    if(sortIndex === -1){
+        throw new Error(`${sortBy} is not a valid sortBy option`);
+    }
+
+    const query = `SELECT * FROM nstats_players ORDER BY ${validSortBys[sortIndex]} ${order}`;
+
+    console.log(query);
     return await simpleQuery(query);
 }

@@ -1,5 +1,5 @@
 "use server"
-import { getPlayersList } from "../lib/players.mjs";
+import { searchPlayers } from "../lib/players.mjs";
 import Header from "../UI/Header";
 import CountryFlag from "../UI/CountryFlag";
 import { convertTimestamp, ignore0, toPlaytime } from "../lib/generic.mjs";
@@ -7,13 +7,50 @@ import SearchForm from "../UI/Players/SearchForm";
 import Link from "next/link";
 
 
+function createHeaderURL(targetSortBy, currentSortBy, order){
+
+    if(targetSortBy === currentSortBy){
+
+        if(order === "ASC"){
+            order = "DESC";
+        }else{
+            order = "ASC";
+        }
+    }
+
+    return `/players/?sortBy=${targetSortBy}&order=${order}`;
+}
+
 export default async function Page({params, searchParams}) {
 
 
-    //click on headers should be a link to search result ordered by that column
+    console.log(searchParams);
 
+    let sortBy = "name";
+    let order = "ASC";
+    let error = "";
+
+    if(searchParams.sortBy !== undefined){
+        sortBy = searchParams.sortBy;
+    }
+
+    if(searchParams.order !== undefined){
+
+        order = searchParams.order.toUpperCase();
+
+        if(order !== "ASC" && order !== "DESC"){
+            order = "ASC";
+        }
+    }
+
+    let players = [];
     
-    const players = await getPlayersList();
+    try{
+        players = await searchPlayers(sortBy, order);
+    }catch(err){
+        console.trace(err);
+        error = err.toString();
+    }
 
 
     const rows = [];
@@ -46,19 +83,21 @@ export default async function Page({params, searchParams}) {
     return <div>
         <Header>Player List</Header>
         <SearchForm />
+        sortBy = {sortBy}, order = {order}<br/>
+        error = {error}
         <table className="t-width-1">
             <tbody>
                 <tr>
-                    <th><Link href={`/players/?sortby=name`}>Name</Link></th>
-                    <th><Link href={`/players/?sortby=active`}>Last Active</Link></th>
-                    <th><Link href={`/players/?sortby=score`}>Score</Link></th>
-                    <th><Link href={`/players/?sortby=frags`}>Frags</Link></th>
-                    <th><Link href={`/players/?sortby=kills`}>Kills</Link></th>
-                    <th><Link href={`/players/?sortby=deaths`}>Deaths</Link></th>
-                    <th><Link href={`/players/?sortby=suicides`}>Suicides</Link></th>
-                    <th><Link href={`/players/?sortby=eff`}>Eff</Link></th>
-                    <th><Link href={`/players/?sortby=matches`}>Matches</Link></th>
-                    <th><Link href={`/players/?sortby=playtime`}>Playtime</Link></th>
+                    <th><Link href={createHeaderURL("name", sortBy, order)}>Name</Link></th>
+                    <th><Link href={createHeaderURL("last_active", sortBy, order)}>Last Active</Link></th>
+                    <th><Link href={createHeaderURL("score", sortBy, order)}>Score</Link></th>
+                    <th><Link href={createHeaderURL("frags", sortBy, order)}>Frags</Link></th>
+                    <th><Link href={createHeaderURL("kills", sortBy, order)}>Kills</Link></th>
+                    <th><Link href={createHeaderURL("deaths", sortBy, order)}>Deaths</Link></th>
+                    <th><Link href={createHeaderURL("suicides", sortBy, order)}>Suicides</Link></th>
+                    <th><Link href={createHeaderURL("eff", sortBy, order)}>Eff</Link></th>
+                    <th><Link href={createHeaderURL("matches", sortBy, order)}>Matches</Link></th>
+                    <th><Link href={createHeaderURL("playtime", sortBy, order)}>Playtime</Link></th>
                 </tr>
                 {rows}
             </tbody>
