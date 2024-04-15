@@ -1,7 +1,7 @@
 "use client"
 import { useState, useRef, useEffect } from "react";
 
-export default function TableHeader({children, onClick, mouseOverBox}){
+export default function TableHeader({children, onClick, mouseOverBox, bNoSorting}){
 
     const [bDisplayMouseOver, setBDisplayMouseOver] = useState(false);
     const [marginTop, setMarginTop] = useState(0);

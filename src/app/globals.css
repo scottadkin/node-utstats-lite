@@ -27,6 +27,7 @@
 	--padding-3:3px;
 	--font-size-1:14px;
 	--line-height-1:22px;
+	--line-height-2:32px;
 	--font-size-2:16px;
 	--font-size-3:18px;
 	--transition-1:background-color 0.5s;
@@ -105,7 +106,7 @@ a{
 	text-align:left;
 }
 
-.tect-center{
+.text-center{
 	text-align:center;
 }
 
@@ -113,6 +114,7 @@ label{
 	text-align:right;
 	padding-right:var(--padding-1);
 	color:var(--font-color-1);
+	line-height:var(--line-height-2);
 }
 
 form{
@@ -147,6 +149,7 @@ form{
 }
 
 .submit-button{
+	display:inline-block;
 	background-color: var(--bg-color-2);
 	padding:var(--padding-1);
 	color:var(--font-color-1);
@@ -188,6 +191,10 @@ th{
     font-weight:normal;
 	background-color:var(--bg-color-5);
 	border:1px solid var(--border-color-1);
+}
+
+th a{
+	color:yellow;
 }
 
 th:hover{
@@ -275,3 +282,4 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 .font-small{
 	font-size:var(--font-size-small);
 }
+

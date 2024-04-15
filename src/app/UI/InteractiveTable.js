@@ -3,7 +3,7 @@ import { useReducer } from "react";
 import TableHeader from "./TableHeader";
 
 
-function createHeaders(headers, state, dispatch){
+function createHeaders(headers, state, dispatch, bNoHeaderSorting){
 
     const elems = [];
 
@@ -27,6 +27,7 @@ function createHeaders(headers, state, dispatch){
         elems.push(
             <TableHeader 
                 key={name} onClick={() =>{
+                    if(bNoHeaderSorting) return;
                     dispatch({"type": "changeSort", "value": name});
                 }}
                 mouseOverBox={{
@@ -134,14 +135,16 @@ function reducer(state, action){
     return state;
 }
 
-export default function InteractiveTable({headers, rows, sortBy, order, width, title}){
+export default function InteractiveTable({headers, rows, sortBy, order, width, title, bNoHeaderSorting}){
 
     const [state, dispatch] = useReducer(reducer, {
-        "order": (order !== undefined) ? order.toUpperCase() : "DESC",
+        "order": (order !== undefined) ? order.toUpperCase() : "ASC",
         "sortBy": (sortBy !== undefined) ? sortBy : (Object.keys(headers).length > 0) ? Object.keys(headers)[0] : ""
     });
 
     sortRows(rows, state.sortBy, state.order);
+
+    if(bNoHeaderSorting === undefined) bNoHeaderSorting = false;
     
 
     let widthClass = "";
@@ -159,7 +162,7 @@ export default function InteractiveTable({headers, rows, sortBy, order, width, t
         {titleElem}
         <table className={widthClass}>
             <tbody>
-                {createHeaders(headers, state, dispatch)}
+                {createHeaders(headers, state, dispatch, bNoHeaderSorting)}
                 {createRows(headers, rows)}
             </tbody>
         </table>
