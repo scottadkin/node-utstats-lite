@@ -213,8 +213,8 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 }
 
 .player-name-td{
-	min-width:150px;
-	width:150px;
+	min-width:175px;
+	width:175px;
 }
 
 .t-width-1{

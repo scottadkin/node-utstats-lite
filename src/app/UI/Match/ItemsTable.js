@@ -29,6 +29,7 @@ export default function ItemsTable({data, totalTeams}){
         "invis": {"title": "Invisibility"},
         "belt": {"title": "Shield Belt"},
         "amp": {"title": "Damage Amp"},
+        "boots": {"title": "Jump Boots"},
     };
 
     const rows = [];
@@ -53,6 +54,7 @@ export default function ItemsTable({data, totalTeams}){
             "invis": {"value": d.item_invis, "displayValue": ignore0(d.item_invis)},
             "belt": {"value": d.item_belt, "displayValue": ignore0(d.item_belt)},
             "amp": {"value": d.item_amp, "displayValue": ignore0(d.item_amp)},
+            "boots": {"value": d.item_boots, "displayValue": ignore0(d.item_boots)},
         });
     }
 

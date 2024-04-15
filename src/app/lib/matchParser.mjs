@@ -115,6 +115,9 @@ export class MatchParser{
 
             this.weapons.setPlayerStats(this.kills.kills);
             await this.weapons.insertPlayerMatchStats(this.matchId);
+
+
+            await this.players.updatePlayerTotals();
             
             
 

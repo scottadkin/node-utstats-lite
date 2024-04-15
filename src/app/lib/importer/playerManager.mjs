@@ -1,6 +1,6 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData } from "../players.mjs";
+import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData, updateMasterPlayers } from "../players.mjs";
 import geoip from "geoip-lite";
 import { scalePlaytime } from "../generic.mjs";
 
@@ -516,5 +516,19 @@ export class PlayerManager{
         for(const player of Object.values(this.mergedPlayers)){
             player.playtime = scalePlaytime(player.playtime, bHardcore);
         }
+    }
+
+    async updatePlayerTotals(){
+
+        const masterIds = [];
+
+
+
+        for(const p of Object.values(this.mergedPlayers)){
+            if(p.bSpectator === 0) masterIds.push(p.masterId);
+           // await updateMasterPlayer(p.masterId);
+        }
+
+        await updateMasterPlayers(masterIds);
     }
 }

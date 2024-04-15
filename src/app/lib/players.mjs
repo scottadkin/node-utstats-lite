@@ -14,12 +14,77 @@ export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
 export async function createMasterPlayer(name, ip, hwid, mac1, mac2){
 
-    const query = `INSERT INTO nstats_players VALUES(NULL,?,"")`;
+    const query = `INSERT INTO nstats_players VALUES(NULL,?,"",0,0,0,0,0,0,0,0,0,0)`;
 
     //const result = await simpleQuery(query, [name, ip, hwid, mac1, mac2]);
     const result = await simpleQuery(query, [name]);
 
     return result.insertId;
+}
+
+async function getMasterPlayersStats(playerIds){
+
+    if(playerIds.length === 0) return null;
+
+    const query = `SELECT 
+    player_id,
+    COUNT(*) as total_matches,
+    SUM(score) as total_score,
+    SUM(frags) as total_frags,
+    SUM(kills) as total_kills,
+    SUM(deaths) as total_deaths,
+    SUM(suicides) as total_suicides,
+    AVG(TTL) as total_ttl,
+    SUM(time_on_server) as total_playtime
+    FROM nstats_match_players
+    WHERE player_id IN (?) GROUP BY player_id`;
+
+    const result = await simpleQuery(query, [playerIds]);
+
+    return result;
+}
+
+async function updateMasterPlayer(totals){
+
+    const query = `UPDATE nstats_players SET 
+    matches=?,score=?,frags=?,kills=?,deaths=?,suicides=?,eff=?,ttl=?,playtime=? 
+    WHERE id=?`;
+
+    const t = totals;
+
+    let eff = 0;
+
+    const totalKills = parseInt(t.total_kills);
+    const allDeaths = parseInt(t.total_deaths) + parseInt(t.total_suicides);
+
+    if(totalKills > 0){
+ 
+        if(allDeaths === 0){
+            eff = 100;
+        }else{
+            eff = (totalKills / (totalKills + allDeaths)) * 100;
+        }
+    }
+
+    const vars = [t.total_matches, t.total_score, t.total_frags, totalKills, 
+        t.total_deaths, t.total_suicides, eff, t.total_ttl, t.total_playtime, t.player_id
+    ];
+
+    await simpleQuery(query, vars);
+}
+
+export async function updateMasterPlayers(playerIds){
+
+    const totals = await getMasterPlayersStats(playerIds);
+
+    if(totals === null) return;
+
+    for(let i = 0; i < totals.length; i++){
+
+        const t = totals[i];
+
+        await updateMasterPlayer(t);
+    }
 }
 
 

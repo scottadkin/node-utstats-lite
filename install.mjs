@@ -64,7 +64,16 @@ const queries = [
         `CREATE TABLE IF NOT EXISTS nstats_players (
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(32) NOT NULL,
-            country varchar(3) NOT NULL
+            country varchar(3) NOT NULL,
+            matches int NOT NULL,
+            score int NOT NULL,
+            frags int NOT NULL,
+            kills int NOT NULL,
+            deaths int NOT NULL,
+            suicides int NOT NULL,
+            eff float NOT NULL,
+            ttl int NOT NULL,
+            playtime float NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_matches (
