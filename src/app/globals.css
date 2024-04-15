@@ -115,6 +115,7 @@ label{
 	padding-right:var(--padding-1);
 	color:var(--font-color-1);
 	line-height:var(--line-height-2);
+	font-size:var(--font-size-2);
 }
 
 form{

@@ -18,6 +18,7 @@ function Button({url, targetPage, currentPage}){
 }
 
 export default function Pagination({url, results, currentPage, perPage}){
+    
 
     results = parseInt(results);
     if(results !== results) results = 0;
@@ -32,6 +33,8 @@ export default function Pagination({url, results, currentPage, perPage}){
     if(perPage < 1) perPage = 1;
 
     let totalPages = Math.ceil(results / perPage);
+
+    if(totalPages < 2) return null;
 
     const nextPage = currentPage + 1;
     const previousPage = currentPage - 1;

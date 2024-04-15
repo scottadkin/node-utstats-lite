@@ -3,15 +3,16 @@ import Link from "next/link";
 import { useState } from "react";
 import DropDown from "../DropDown";
 
-export default function SearchForm({originalName, originalSortBy, originalOrder}){
+export default function SearchForm({originalName, originalSortBy, originalOrder, originalPerPage}){
 
     const [name, setName] = useState(originalName);
     const [sortBy, setSortBy] = useState(originalSortBy);
     const [order, setOrder] = useState(originalOrder);
+    const [perPage, setPerPage] = useState(originalPerPage);
 
     let url = `/players/`;
 
-    url += `?name=${name}&sortBy=${sortBy}&order=${order}`;
+    url += `?name=${name}&sortBy=${sortBy}&order=${order}&perPage=${perPage}`;
     
 
     const sortByOptions =  [
@@ -30,6 +31,17 @@ export default function SearchForm({originalName, originalSortBy, originalOrder}
     const orderOptions = [
         {"value": "ASC", "display": "Ascending"}, 
         {"value": "DESC", "display": "Descending"}, 
+
+    ];
+
+    const perPageOptions = [
+        {"value": 5, "display": "5"}, 
+        {"value": 10, "display": "10"}, 
+        {"value": 25, "display": "25"}, 
+        {"value": 50, "display": "50"}, 
+        {"value": 75, "display": "75"}, 
+        {"value": 100, "display": "100"}, 
+        {"value": 250, "display": "250"}
 
     ];
 
@@ -63,6 +75,14 @@ export default function SearchForm({originalName, originalSortBy, originalOrder}
             </label>
             <DropDown options={orderOptions} selectedValue={order} changeSelected={(value) =>{
                 setOrder(value);
+            }}/>
+        </div>
+        <div className="form-row">
+            <label htmlFor="per-page">
+               Per Page
+            </label>
+            <DropDown options={perPageOptions} selectedValue={perPage} changeSelected={(value) =>{
+                setPerPage(value);
             }}/>
         </div>
 

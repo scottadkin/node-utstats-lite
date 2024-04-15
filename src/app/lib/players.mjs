@@ -184,11 +184,30 @@ export async function getBasicPlayerInfo(ids){
     return data;
 }
 
+export async function getTotalPlayers(name){
 
-export async function searchPlayers(sortBy, order){
+    const query = `SELECT COUNT(*) as total_players FROM nstats_players WHERE name LIKE ?`;
+    const result = await simpleQuery(query, [`%${name}%`]);
+
+    return result[0].total_players;
+}
+
+
+export async function searchPlayers(name, sortBy, order, page, perPage){
 
     sortBy = sortBy.toLowerCase();
     order = order.toUpperCase();
+    perPage = parseInt(perPage);
+    page = parseInt(page);
+
+    if(page !== page) page = 1;
+    page--;
+
+    if(page < 0) page = 0;
+
+    if(perPage !== perPage) perPage = 25;
+    if(perPage < 0) perPage = 25;
+    if(perPage > 100) perPage = 100;
 
     if(order !== "ASC" && order !== "DESC"){
         order = "ASC";
@@ -205,8 +224,12 @@ export async function searchPlayers(sortBy, order){
         throw new Error(`${sortBy} is not a valid sortBy option`);
     }
 
-    const query = `SELECT * FROM nstats_players ORDER BY ${validSortBys[sortIndex]} ${order}`;
+    let start = page * perPage;
 
-    console.log(query);
-    return await simpleQuery(query);
+    const query = `SELECT * FROM nstats_players WHERE name LIKE ? ORDER BY ${validSortBys[sortIndex]} ${order} LIMIT ?, ?`;
+
+    const totalPlayers = await getTotalPlayers(name);
+    const result = await simpleQuery(query, [`%${name}%`, start, perPage]);
+
+    return {"players": result, "totalPlayers": totalPlayers};
 }

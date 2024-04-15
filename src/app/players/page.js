@@ -5,6 +5,8 @@ import CountryFlag from "../UI/CountryFlag";
 import { convertTimestamp, ignore0, toPlaytime } from "../lib/generic.mjs";
 import SearchForm from "../UI/Players/SearchForm";
 import Link from "next/link";
+import ErrorBox from "../UI/ErrorBox"; 
+import Pagination from "../UI/Pagination";
 
 
 function createHeaderURL(targetSortBy, currentSortBy, order){
@@ -28,8 +30,16 @@ export default async function Page({params, searchParams}) {
 
     let sortBy = "name";
     let order = "ASC";
-    let error = "";
+    let error = null;
     let name = "";
+    let page = 1;
+
+    if(searchParams.page !== undefined){
+
+        page = parseInt(searchParams.page);
+        if(page !== page) page = 1;
+        if(page < 1) page = 1;
+    }
 
     if(searchParams.sortBy !== undefined){
         sortBy = searchParams.sortBy;
@@ -49,9 +59,14 @@ export default async function Page({params, searchParams}) {
     }
 
     let players = [];
+    let totalPlayers = 0;
+    let perPage = 50;
     
     try{
-        players = await searchPlayers(sortBy, order);
+        const data = await searchPlayers(name, sortBy, order, page, perPage);
+        players = data.players;
+        totalPlayers = data.totalPlayers;
+
     }catch(err){
         console.trace(err);
         error = err.toString();
@@ -66,10 +81,15 @@ export default async function Page({params, searchParams}) {
 
         const active = Math.floor(new Date(p.last_active) * 0.001);
 
+        const url = `/player/${p.id}`;
 
         rows.push(<tr key={p.id}>
             <td className="player-name-td text-left">
-                <><CountryFlag code={p.country}/>{p.name}</>
+                <>
+                    <Link href={url}>
+                        <CountryFlag code={p.country}/>{p.name}
+                    </Link>
+                </>
             </td>
             <td className="font-small">
                 {convertTimestamp(active, true)}
@@ -85,11 +105,13 @@ export default async function Page({params, searchParams}) {
         </tr>);
     }
 
+    let pageUrl = `/players?name=${name}&sortBy=${sortBy}&order=${order}&perPage=${perPage}&page=`;
+
     return <div>
         <Header>Player List</Header>
-        <SearchForm originalName={name} originalSortBy={sortBy} originalOrder={order}/>
-        sortBy = {sortBy}, order = {order}<br/>
-        error = {error}
+        <SearchForm originalName={name} originalSortBy={sortBy} originalOrder={order} originalPerPage={perPage}/>
+        <ErrorBox title="Failed To Fetch Players">{error}</ErrorBox>
+        <Pagination url={pageUrl} results={totalPlayers} perPage={perPage} currentPage={page}/>
         <table className="t-width-1">
             <tbody>
                 <tr>
@@ -107,6 +129,6 @@ export default async function Page({params, searchParams}) {
                 {rows}
             </tbody>
         </table>
-        
+        <Pagination url={pageUrl} results={totalPlayers} perPage={perPage} currentPage={page}/>
     </div>
 }
