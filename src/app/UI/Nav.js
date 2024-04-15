@@ -24,10 +24,18 @@ export default function Nav({username, bAdmin}){
                 "/match/",
                 "/matches"
             ]
+        }, 
+        {
+            "name": "Players",
+            "url": "/players",
+            "matches": [
+                "/players"
+            ]
         }
     ];
 
     if(bAdmin){
+
         options.push({
             "name": "Admin",
             "url": "/admin",

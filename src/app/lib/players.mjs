@@ -180,3 +180,11 @@ export async function getBasicPlayerInfo(ids){
 
     return data;
 }
+
+
+export async function getPlayersList(){
+
+    const query = `SELECT * FROM nstats_players ORDER BY name ASC`;
+
+    return await simpleQuery(query);
+}
