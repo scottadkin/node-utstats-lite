@@ -29,6 +29,7 @@ export default async function Page({params, searchParams}) {
     let sortBy = "name";
     let order = "ASC";
     let error = "";
+    let name = "";
 
     if(searchParams.sortBy !== undefined){
         sortBy = searchParams.sortBy;
@@ -41,6 +42,10 @@ export default async function Page({params, searchParams}) {
         if(order !== "ASC" && order !== "DESC"){
             order = "ASC";
         }
+    }
+
+    if(searchParams.name !== undefined){
+        name = searchParams.name;
     }
 
     let players = [];
@@ -82,7 +87,7 @@ export default async function Page({params, searchParams}) {
 
     return <div>
         <Header>Player List</Header>
-        <SearchForm />
+        <SearchForm originalName={name} originalSortBy={sortBy} originalOrder={order}/>
         sortBy = {sortBy}, order = {order}<br/>
         error = {error}
         <table className="t-width-1">
