@@ -270,3 +270,8 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 .hidden{
 	display:none;
 }
+
+
+.font-small{
+	font-size:var(--font-size-small);
+}

@@ -12,13 +12,13 @@ export default async function Page({params, searchParams}) {
 
     const headers = {
         "name": {"title": "Name"},
+        "active": {"title": "Last Active"},
         "score": {"title": "Score"},
         "frags": {"title": "Frags"},
         "kills": {"title": "Kills"},
         "deaths": {"title": "Deaths"},
         "suicides": {"title": "Suicides"},
         "eff": {"title": "Eff"},
-        "ttl": {"title": "TTL"},
         "matches": {"title": "Matches"},
         "playtime": {"title": "Playtime"}
     };
@@ -41,14 +41,17 @@ export default async function Page({params, searchParams}) {
             "deaths": {"value": p.deaths, "displayValue": ignore0(p.deaths)},
             "suicides": {"value": p.suicides, "displayValue": ignore0(p.suicides)},
             "eff": {"value": p.eff, "displayValue": `${p.eff.toFixed(2)}%`},
-            "ttl": {"value": p.ttl, "displayValue": p.ttl.toFixed(2)},
             "matches": {"value": p.matches, "displayValue": p.matches},
-            "playtime": {"value": p.playtime, "displayValue": toPlaytime(p.playtime)},
+            "playtime": {
+                "value": p.playtime, 
+                "displayValue": toPlaytime(p.playtime),
+                "className": "font-small"
+            },
         });
     }
 
     return <div>
         <Header>Player List</Header>
-        <InteractiveTable headers={headers} rows={rows}/>
+        <InteractiveTable width={1} headers={headers} rows={rows}/>
     </div>
 }

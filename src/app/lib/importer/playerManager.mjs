@@ -518,21 +518,19 @@ export class PlayerManager{
         }
     }
 
-    async updatePlayerTotals(){
+    async updatePlayerTotals(date){
 
         const masterIds = [];
         const idsToCountries = {};
 
-
-
         for(const p of Object.values(this.mergedPlayers)){
+            
             if(p.bSpectator === 0){
                 masterIds.push(p.masterId);
                 idsToCountries[p.masterId] = p.country;
             }
-           // await updateMasterPlayer(p.masterId);
         }
 
-        await updateMasterPlayers(masterIds, idsToCountries);
+        await updateMasterPlayers(masterIds, idsToCountries, date);
     }
 }

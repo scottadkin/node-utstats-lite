@@ -117,7 +117,7 @@ export class MatchParser{
             await this.weapons.insertPlayerMatchStats(this.matchId);
 
 
-            await this.players.updatePlayerTotals();
+            await this.players.updatePlayerTotals(this.match.date);
             
             
 
