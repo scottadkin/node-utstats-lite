@@ -58,6 +58,8 @@ export default function ItemsTable({data, totalTeams}){
         });
     }
 
+    if(rows.length === 0) return null;
+
     return <>
         <Header>Items Summary</Header>
         <InteractiveTable headers={headers} rows={rows}/>

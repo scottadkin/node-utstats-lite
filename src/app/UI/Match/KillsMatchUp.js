@@ -43,6 +43,8 @@ export default function KillsMatchUp({kills, totalTeams, players}){
         return 0;
     });
 
+    if(orderedPlayers.length <= 1) return null;
+
     const rows = [];
 
     

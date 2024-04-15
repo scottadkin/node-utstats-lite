@@ -206,7 +206,9 @@ export default function SpecialEvents({data, totalTeams}){
         }
     }
 
-    return <div className="test">
+    if(spreeRows.length === 0 && multiRows.length === 0) return null;
+    
+    return <div>
         <Header>Special Events</Header>
         {renderFirstBlood(data.playerData, totalTeams)}
         {(spreeRows.length === 0) ? null : <InteractiveTable width={3} headers={spreeHeaders} rows={spreeRows}/>}

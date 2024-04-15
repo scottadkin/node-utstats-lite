@@ -169,6 +169,8 @@ export default function WeaponStats({data, totalTeams, players}){
         return 0;
     });
 
+    if(orderedNames.length === 0) return null;
+
     let tables = renderKDTable(orderedNames, data.data, players, totalTeams, selectedType);
 
     

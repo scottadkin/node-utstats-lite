@@ -54,7 +54,7 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
                 Sort By
             </label>
 
-            <select defaultValue={sortByOptions} onChange={(e) =>{
+            <select defaultValue={sortByOptions} multiple={false} onChange={(e) =>{
                 setSortBy(e.target.value);
             }}>
                 {sortByOptions.map((o, i) =>{
@@ -66,7 +66,7 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
             <label htmlFor="order">
                Order
             </label>
-            <select defaultValue={order} onChange={(e) =>{
+            <select defaultValue={order} multiple={false} onChange={(e) =>{
                 setOrder(e.target.value);
             }}>
                 {orderOptions.map((o, i) =>{
@@ -78,7 +78,7 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
             <label htmlFor="per-page">
                Per Page
             </label>
-            <select defaultValue={perPage} onChange={(e) =>{
+            <select defaultValue={perPage} multiple={false} onChange={(e) =>{
                 setPerPage(e.target.value);
             }}>
                 <option value="5">5</option>
