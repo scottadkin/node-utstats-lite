@@ -44,7 +44,7 @@ async function getMasterPlayersStats(playerIds){
     return result;
 }
 
-async function updateMasterPlayer(totals){
+async function updateMasterPlayer(totals, country){
 
     const query = `UPDATE nstats_players SET 
     matches=?,score=?,frags=?,kills=?,deaths=?,suicides=?,eff=?,ttl=?,playtime=? 
@@ -69,11 +69,11 @@ async function updateMasterPlayer(totals){
     const vars = [t.total_matches, t.total_score, t.total_frags, totalKills, 
         t.total_deaths, t.total_suicides, eff, t.total_ttl, t.total_playtime, t.player_id
     ];
-
+    
     await simpleQuery(query, vars);
 }
 
-export async function updateMasterPlayers(playerIds){
+export async function updateMasterPlayers(playerIds, idsToCountries){
 
     const totals = await getMasterPlayersStats(playerIds);
 
@@ -83,7 +83,7 @@ export async function updateMasterPlayers(playerIds){
 
         const t = totals[i];
 
-        await updateMasterPlayer(t);
+        await updateMasterPlayer(t, idsToCountries[t.player_id]);
     }
 }
 
