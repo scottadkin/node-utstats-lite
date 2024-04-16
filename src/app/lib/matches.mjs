@@ -186,3 +186,61 @@ export async function getMatchData(id){
 
     return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom};
 }
+
+
+async function getMatchMapGametypes(matchIds){
+
+
+    const query = `SELECT id,gametype_id,map_id FROM nstats_matches WHERE id IN(?)`;
+    const result = await simpleQuery(query, [matchIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = {"gametype": r.gametype_id, "map": r.map_id};
+    }
+
+    return data;
+  
+}
+
+/**
+ * get one or more match details(map_id, gametype_id)
+ * @param {*} matchIds 
+ * @returns 
+ */
+export async function getMultipleMatchDetails(matchIds){
+
+    if(matchIds.length === 0) return {};
+
+    return await getMatchMapGametypes(matchIds);
+
+    /*const gametypeIds = new Set();
+    const mapIds = new Set();
+
+    for(let i = 0; i < details.length; i++){
+
+        const d = details[i];
+
+        gametypeIds.add(d.gametype_id);
+        mapIds.add(d.map_id);
+    }
+
+    console.log(details);
+
+   //const gametypeNames = await getGametypeNames([...gametypeIds]);
+    //const mapNames = await getGametypeNames([...mapIds]);
+    //console.log(gametypeNames);
+    //console.log(mapNames);
+    return;
+
+    const query = `SELECT id,name FROM nstats_gametypes WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [gametypeIds]);
+
+    console.log(result);*/
+    
+}

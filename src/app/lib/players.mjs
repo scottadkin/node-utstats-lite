@@ -1,4 +1,5 @@
 import {simpleQuery} from "./database.mjs";
+import {getMultipleMatchDetails} from "./matches.mjs";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
@@ -243,4 +244,169 @@ export async function searchPlayers(name, sortBy, order, page, perPage){
     const result = await simpleQuery(query, [`%${name}%`, start, perPage]);
 
     return {"players": result, "totalPlayers": totalPlayers};
+}
+
+
+async function getPlayersAllMatchData(playerIds){
+
+    if(playerIds.length === 0) return [];
+
+    const totalQuery = `SELECT 
+    player_id,
+    match_id,
+    score,
+    frags,
+    kills,
+    deaths,
+    suicides,
+    team_kills,
+    time_on_server,
+    ttl,
+    first_blood,
+    spree_1,
+    spree_2,
+    spree_3,
+    spree_4,
+    spree_5,
+    spree_best,
+    multi_1,
+    multi_2,
+    multi_3,
+    multi_4,
+    multi_best,
+    headshots,
+    item_amp,
+    item_belt,
+    item_boots,
+    item_body,
+    item_pads,
+    item_invis,
+    item_shp
+    FROM nstats_match_players WHERE player_id IN (?)`;
+
+    const result = await simpleQuery(totalQuery, [playerIds]);
+
+    const matchIds = [... new Set(result.map((r) =>{
+        return r.match_id;
+    }))]
+
+
+    return {"data": result, "matchIds": matchIds}
+}
+
+function _updateTotals(totals, gametypeId, playerData){
+
+    if(totals[playerData.player_id] === undefined){
+        totals[playerData.player_id] = {};
+    }
+
+    if(totals[playerData.player_id][gametypeId] === undefined){
+
+        totals[playerData.player_id][gametypeId] = {
+            "matches": 1,
+            "playtime": playerData.time_on_server,
+            "totalTtl": playerData.ttl,
+            ...playerData
+        };
+
+        return;
+    }
+
+    const mergeTypes = [
+      "score",
+      "frags",
+      "kills",
+      "deaths",
+      "suicides",
+      "team_kills",
+      "time_on_server",
+      //ttl,
+      "first_blood",
+      "spree_1",
+      "spree_2",
+      "spree_3",
+      "spree_4",
+      "spree_5",
+      //spree_best,
+      "multi_1",
+      "multi_2",
+      "multi_3",
+      "multi_4",
+      //multi_best,
+      "headshots",
+      "item_amp",
+      "item_belt",
+      "item_boots",
+      "item_body",
+      "item_pads",
+      "item_invis",
+      "item_shp"
+    ];
+
+    const higherBetter = [
+        "spree_best",
+        "multi_best"
+    ];
+
+    const t = totals[playerData.player_id][gametypeId];
+
+    t.matches++;
+
+    for(let i = 0; i < mergeTypes.length; i++){
+
+        const m = mergeTypes[i];
+
+        t[m] += playerData[m];
+    }
+
+    for(let i = 0; i < higherBetter.length; i++){
+
+        const h = higherBetter[i];
+
+        if(t[h] < playerData[h]){
+            t[h] = playerData[h];
+        }
+    }
+
+    t.totalTtl += playerData.ttl;
+
+    if(t.totalTtl !== 0){
+        t.ttl = t.totalTtl / t.matches;
+    }
+
+}
+
+/**
+ * 
+ * @param {*} playerId 
+ * @returns 
+ */
+export async function calcPlayerTotals(playerIds){
+
+    if(playerIds.length === 0) return [];
+
+    const matchData = await getPlayersAllMatchData(playerIds);
+
+    //get gametype and map id for every played match
+    const matchTypeIds = await getMultipleMatchDetails(matchData.matchIds);
+
+    //playerId => gametypes => gametypeId => gametypeTotals
+    const totals = {};
+
+    for(let i = 0; i < matchData.data.length; i++){
+
+        const m = matchData.data[i];
+
+        const gametypeId = matchTypeIds[m.match_id].gametype;
+        //const mapId = matchTypeIds[m.match_id].map;
+        //console.log(gametypeId, mapId);
+
+        //all time totals
+        _updateTotals(totals, 0, m);
+        //gametype totals
+        _updateTotals(totals, gametypeId, m);
+        
+    }
+
+    console.log(totals);
 }

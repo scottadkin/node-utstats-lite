@@ -212,7 +212,43 @@ const queries = [
             player_id int NOT NULL,
             point_id int NOT NULL,
             total_caps int NOT NULL
-        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_match_player_totals (     
+            id int NOT NULL,
+            player_id int NOT NULL,
+            gametype_id int NOT NULL,
+            playtime float NOT NULL,
+            total_matches int NOT NULL,
+            score int NOT NULL,
+            frags int NOT NULL,
+            kills int NOT NULL,
+            deaths int NOT NULL,
+            suicides int NOT NULL,
+            team_kills int NOT NULL,
+            efficiency float NOT NULL,
+            ttl float NOT NULL,
+            first_blood int(1) NOT NULL,
+            spree_1 int NOT NULL,
+            spree_2 int NOT NULL,
+            spree_3 int NOT NULL,
+            spree_4 int NOT NULL,
+            spree_5 int NOT NULL,
+            spree_best int NOT NULL,
+            multi_1 int NOT NULL,
+            multi_2 int NOT NULL,
+            multi_3 int NOT NULL,
+            multi_4 int NOT NULL,
+            multi_best int NOT NULL,
+            headshots int NOT NULL,
+            item_amp int NOT NULL,
+            item_belt int NOT NULL,
+            item_boots int NOT NULL,
+            item_body int NOT NULL,
+            item_pads int NOT NULL,
+            item_invis int NOT NULL,
+            item_shp int NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
 ];
 

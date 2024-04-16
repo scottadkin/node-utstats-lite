@@ -118,6 +118,7 @@ export class MatchParser{
 
 
             await this.players.updatePlayerTotals(this.match.date);
+            await this.players.updatePlayerFullTotals();
             
             
 

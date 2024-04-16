@@ -47,13 +47,13 @@ export async function updateGametype(name){
 }
 
 
-export async function getGametypeNames(names){
+export async function getGametypeNames(ids){
 
-    if(names.length === 0) return [];
+    if(ids.length === 0) return [];
 
     const query = `SELECT id,name FROM nstats_gametypes WHERE id IN(?)`;
 
-    const result = await simpleQuery(query, [names]);
+    const result = await simpleQuery(query, [ids]);
 
     const data = {};
 

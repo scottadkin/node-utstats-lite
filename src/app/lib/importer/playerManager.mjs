@@ -1,6 +1,6 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData, updateMasterPlayers } from "../players.mjs";
+import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData, updateMasterPlayers, calcPlayerTotals } from "../players.mjs";
 import geoip from "geoip-lite";
 import { scalePlaytime } from "../generic.mjs";
 
@@ -532,5 +532,19 @@ export class PlayerManager{
         }
 
         await updateMasterPlayers(masterIds, idsToCountries, date);
+        await calcPlayerTotals(masterIds);
+        
+    }
+    /**
+     * Update totals that are used for player profiles
+     */
+    async updatePlayerFullTotals(){
+
+       // console.log(Object.keys(this.mergedPlayers));
+
+        //for(const [playerId, playerData] of Object.entries(this.mergedPlayers)){
+
+            //const totals = await calcPlayerTotals(playerData.masterId);
+        //}
     }
 }
