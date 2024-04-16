@@ -164,6 +164,17 @@ export async function getPlayersById(ids){
     return data;
 }
 
+export async function getPlayerById(id){
+
+    const query = `SELECT * FROM nstats_players WHERE id=?`;
+
+    const result = await simpleQuery(query, [id]);
+
+    if(result.length > 0) return result[0];
+
+    return null;
+}
+
 
 export async function getBasicPlayerInfo(ids){
 

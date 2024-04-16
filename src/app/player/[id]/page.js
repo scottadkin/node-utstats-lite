@@ -1,0 +1,59 @@
+import CountryFlag from "@/app/UI/CountryFlag";
+import Header from "@/app/UI/Header";
+import { getPlayerById } from "@/app/lib/players.mjs";
+
+export async function generateMetadata({ params, searchParams }, parent) {
+    // read route params
+    const id = params.id;
+
+    let player = await getPlayerById(id);
+
+    if(player === null){
+
+        player = {
+            "name": "Not Found",
+            "id": id,
+            "country": "xx",
+            "playtime": 0
+        };
+    }
+
+   
+    // optionally access and extend (rather than replace) parent metadata
+    //const previousImages = (await parent).openGraph?.images || []
+   
+    return {
+        "title": `${player.name} - Player Profile`,
+        "description": `View ${player.name} player summary.`
+        /*openGraph: {
+            images: ['/some-specific-page-image.jpg', ...previousImages],
+        },*/
+    }
+  }
+
+export default async function Page({params, searchParams}){
+
+    console.log("searchParams");
+    console.log(searchParams);
+    console.log(params);
+   
+
+    let id = 0;
+
+    if(params.id !== undefined){
+
+        id = parseInt(params.id);
+        if(id !== id) id = 0;
+
+    }
+
+    let player = await getPlayerById(id);
+
+    if(player === null){
+        player = {"name": "Not Found", "country": "", "id": 0};
+    }
+
+    return <main>
+        <Header><CountryFlag code={player.country}/>{player.name}'s Player Summary</Header> 
+    </main>
+}

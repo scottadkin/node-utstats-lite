@@ -29,7 +29,8 @@ export default function Nav({username, bAdmin}){
             "name": "Players",
             "url": "/players",
             "matches": [
-                "/players"
+                "/players",
+                "/player/"
             ]
         }
     ];
