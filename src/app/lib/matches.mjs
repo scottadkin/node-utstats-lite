@@ -188,24 +188,6 @@ export async function getMatchData(id){
 }
 
 
-async function getMatchMapGametypesDate(matchIds){
-
-
-    const query = `SELECT id,gametype_id,map_id,date FROM nstats_matches WHERE id IN(?)`;
-    const result = await simpleQuery(query, [matchIds]);
-
-    const data = {};
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        data[r.id] = {"gametype": r.gametype_id, "map": r.map_id, "date": r.date};
-    }
-
-    return data;
-  
-}
 
 /**
  * get one or more match details(map_id, gametype_id)
@@ -216,7 +198,32 @@ export async function getMultipleMatchDetails(matchIds){
 
     if(matchIds.length === 0) return {};
 
-    return await getMatchMapGametypesDate(matchIds);
+    const query = `SELECT id,gametype_id,map_id,date,total_teams,team_0_score,team_1_score,team_2_score,team_3_score,solo_winner 
+    FROM nstats_matches WHERE id IN(?)`;
+    const result = await simpleQuery(query, [matchIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = {
+            "gametype": r.gametype_id, 
+            "map": r.map_id, 
+            "date": r.date,
+            "teams": r.total_teams,
+            "teamScores": [
+                r.team_0_score,
+                r.team_1_score,
+                r.team_2_score,
+                r.team_3_score,
+            ],
+            "soloWinner": r.solo_winner
+        };
+    }
+
+    return data;
 
     /*const gametypeIds = new Set();
     const mapIds = new Set();
@@ -243,4 +250,45 @@ export async function getMultipleMatchDetails(matchIds){
 
     console.log(result);*/
     
+}
+
+
+export function getWinner(matchData){
+    
+    if(matchData.total_teams < 2){
+        return {"type": "solo", "winnerId": matchData.solo_winner};
+    }
+
+    const scores = [];
+
+    for(let i = 0; i < 4; i++){
+
+        scores.push({"team": i, "score": matchData.teamScores[i]});
+    }
+
+    scores.sort((a, b) =>{
+
+        if(a.score < b.score) return 1;
+        if(a.score > b.score) return -1;
+        return 0;
+    });
+
+    let bDraw = false;
+
+    const winners = [scores[0].team];
+    const firstScore = scores[0].score;
+
+    //check for draws in team games
+    for(let i = 1; i < scores.length; i++){
+
+        const s = scores[i];
+
+        if(s.score === firstScore){
+            bDraw = true;
+            winners.push(s.team);
+        }
+    }
+
+    return {"type": "teams", "winners": winners, "bDraw": bDraw};
+
 }

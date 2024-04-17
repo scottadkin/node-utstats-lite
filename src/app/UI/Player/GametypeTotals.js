@@ -32,9 +32,16 @@ export default function GametypeTotals({data, names}){
                 "displayValue": names[d.gametype_id],
                 "className": "text-left"
             },
-            "last": {"value": date, "displayValue": convertTimestamp(date, true)},
+            "last": {
+                "value": date, "displayValue": convertTimestamp(date, true),
+                "className": "font-small"
+            },
             "matches": {"value": d.total_matches, "displayValue": d.total_matches},
-            "playtime": {"value": d.playtime, "displayValue": toPlaytime(d.playtime)},
+            "playtime": {
+                "value": d.playtime, 
+                "displayValue": toPlaytime(d.playtime),
+                "className": "font-small"
+            },
             "score": {"value": d.score, "displayValue": ignore0(d.score)},
             "frags": {"value": d.frags, "displayValue": ignore0(d.frags)},
             "deaths": {"value": d.deaths, "displayValue": ignore0(d.deaths)},

@@ -1,5 +1,5 @@
 import {simpleQuery, bulkInsert} from "./database.mjs";
-import {getMultipleMatchDetails} from "./matches.mjs";
+import {getMultipleMatchDetails, getWinner} from "./matches.mjs";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
@@ -254,6 +254,7 @@ async function getPlayersAllMatchData(playerIds){
     const totalQuery = `SELECT 
     player_id,
     match_id,
+    team,
     score,
     frags,
     kills,
@@ -294,7 +295,7 @@ async function getPlayersAllMatchData(playerIds){
     return {"data": result, "matchIds": matchIds}
 }
 
-function _updateTotals(totals, gametypeId, playerData, date){
+function _updateTotals(totals, gametypeId, playerData, date, bWinner, bDraw){
 
 
     if(totals[playerData.player_id] === undefined){
@@ -319,6 +320,9 @@ function _updateTotals(totals, gametypeId, playerData, date){
             "totalTtl": playerData.ttl,
             "eff": eff,
             "lastActive": date,
+            "wins": (bWinner === 1) ? 1 : 0,
+            "losses": (bWinner === 0) ? 1 : 0,
+            "draws": (bDraw === 1) ? 1 : 0,
             ...playerData
         };
 
@@ -406,6 +410,10 @@ function _updateTotals(totals, gametypeId, playerData, date){
     }
 
     t.playtime += parseFloat(playerData.time_on_server);
+
+    if(bWinner === 1) t.wins++;
+    if(bWinner === 0 && bDraw === 0) t.losses++;
+    if(bDraw === 1) t.draws++;
 }
 
 /**
@@ -420,7 +428,7 @@ async function calcPlayerTotals(playerIds){
     const matchData = await getPlayersAllMatchData(playerIds);
 
     //get gametype and map id for every played match
-    const matchTypeIds = await getMultipleMatchDetails(matchData.matchIds);
+    const matchBasicInfo = await getMultipleMatchDetails(matchData.matchIds);
 
     //playerId => gametypes => gametypeId => gametypeTotals
     const totals = {};
@@ -428,16 +436,40 @@ async function calcPlayerTotals(playerIds){
     for(let i = 0; i < matchData.data.length; i++){
 
         const m = matchData.data[i];
+        const info = matchBasicInfo[m.match_id];
 
-        const gametypeId = matchTypeIds[m.match_id].gametype;
-        const date = matchTypeIds[m.match_id].date;
+        const matchResult = getWinner(info);
+        const playerTeam = m.team;
+        //console.log(matchResult);
+
+        let bWinner = 0;
+        let bDraw = 0;
+
+        const gametypeId = info.gametype;
+        const date = info.date;
         //const mapId = matchTypeIds[m.match_id].map;
         //console.log(gametypeId, mapId);
 
+        if(matchResult.type === "solo"){
+
+            if(info.winnerId === m.player_id){
+                bWinner = 1;
+            }
+
+        }else{
+
+            if(info.bDraw){
+                bDraw = (matchResult.winners.indexOf(playerTeam) !== -1) ? 1 : 0;
+            }else{
+                bWinner = (matchResult.winners.indexOf(playerTeam) !== -1) ? 1 : 0;
+            }
+        }
+
+        //console.log(m);
         //all time totals
-        _updateTotals(totals, 0, m, date);
+        _updateTotals(totals, 0, m, date, bWinner, bDraw);
         //gametype totals
-        _updateTotals(totals, gametypeId, m, date);
+        _updateTotals(totals, gametypeId, m, date, bWinner, bDraw);
         
     }
 
@@ -471,7 +503,8 @@ async function insertPlayerGametypeTotals(data){
             await deletePlayerGametypeTotals(playerId, gametypeId);
 
             insertVars.push([
-                playerId, gametypeId,g.lastActive, g.playtime, g.matches, g.score,
+                playerId, gametypeId,g.lastActive, g.playtime, g.matches, 
+                g.wins,g.draws,g.losses,g.score,
                 g.frags, g.kills, g.deaths, g.suicides, g.team_kills,
                 g.eff, g.ttl, g.first_blood, g.spree_1, g.spree_2,
                 g.spree_3,g.spree_4,g.spree_5,g.spree_best,g.multi_1,
@@ -482,7 +515,8 @@ async function insertPlayerGametypeTotals(data){
         }
     }
 
-    const query = `INSERT INTO nstats_player_totals (player_id, gametype_id,last_active,playtime,total_matches,score,
+    const query = `INSERT INTO nstats_player_totals (player_id, gametype_id,last_active,playtime,total_matches,
+            wins,draws,losses,score,
             frags,kills,deaths,suicides,team_kills,
             efficiency,ttl, first_blood, spree_1,spree_2,
             spree_3,spree_4, spree_5, spree_best, multi_1,
