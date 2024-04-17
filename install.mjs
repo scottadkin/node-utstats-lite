@@ -224,6 +224,7 @@ const queries = [
             wins int NOT NULL,
             draws int NOT NULL,
             losses int NOT NULL,
+            winrate float NOT NULL,
             score int NOT NULL,
             frags int NOT NULL,
             kills int NOT NULL,

@@ -323,6 +323,7 @@ function _updateTotals(totals, gametypeId, playerData, date, bWinner, bDraw){
             "wins": (bWinner === 1) ? 1 : 0,
             "losses": (bWinner === 0) ? 1 : 0,
             "draws": (bDraw === 1) ? 1 : 0,
+            "winRate": (bWinner === 1) ? 100  : 0,
             ...playerData
         };
 
@@ -414,6 +415,10 @@ function _updateTotals(totals, gametypeId, playerData, date, bWinner, bDraw){
     if(bWinner === 1) t.wins++;
     if(bWinner === 0 && bDraw === 0) t.losses++;
     if(bDraw === 1) t.draws++;
+
+    if(t.wins > 0){
+        t.winRate = t.wins / t.matches * 100;
+    }
 }
 
 /**
@@ -504,7 +509,7 @@ async function insertPlayerGametypeTotals(data){
 
             insertVars.push([
                 playerId, gametypeId,g.lastActive, g.playtime, g.matches, 
-                g.wins,g.draws,g.losses,g.score,
+                g.wins, g.draws, g.losses, g.winRate, g.score,
                 g.frags, g.kills, g.deaths, g.suicides, g.team_kills,
                 g.eff, g.ttl, g.first_blood, g.spree_1, g.spree_2,
                 g.spree_3,g.spree_4,g.spree_5,g.spree_best,g.multi_1,
@@ -516,7 +521,7 @@ async function insertPlayerGametypeTotals(data){
     }
 
     const query = `INSERT INTO nstats_player_totals (player_id, gametype_id,last_active,playtime,total_matches,
-            wins,draws,losses,score,
+            wins,draws,losses,winrate,score,
             frags,kills,deaths,suicides,team_kills,
             efficiency,ttl, first_blood, spree_1,spree_2,
             spree_3,spree_4, spree_5, spree_best, multi_1,
