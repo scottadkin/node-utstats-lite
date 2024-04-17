@@ -1,4 +1,4 @@
-import {simpleQuery} from "./database.mjs";
+import {simpleQuery, bulkInsert} from "./database.mjs";
 import {getMultipleMatchDetails} from "./matches.mjs";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
@@ -302,10 +302,21 @@ function _updateTotals(totals, gametypeId, playerData){
 
     if(totals[playerData.player_id][gametypeId] === undefined){
 
+        let eff = 0;
+
+        const p = playerData;
+
+        if(p.deaths === 0){
+            eff = 100;
+        }else{
+            eff = (p.kills / (p.kills + p.deaths + p.deaths)) * 100;
+        }
+
         totals[playerData.player_id][gametypeId] = {
             "matches": 1,
             "playtime": playerData.time_on_server,
             "totalTtl": playerData.ttl,
+            "eff": eff,
             ...playerData
         };
 
@@ -374,6 +385,14 @@ function _updateTotals(totals, gametypeId, playerData){
         t.ttl = t.totalTtl / t.matches;
     }
 
+    if(t.kills > 0){
+
+        if(t.deaths === 0){
+            t.eff = 100;
+        }else{
+            t.eff = (t.kills / (t.kills + t.deaths + t.deaths)) * 100;
+        }
+    }
 }
 
 /**
@@ -381,7 +400,7 @@ function _updateTotals(totals, gametypeId, playerData){
  * @param {*} playerId 
  * @returns 
  */
-export async function calcPlayerTotals(playerIds){
+async function calcPlayerTotals(playerIds){
 
     if(playerIds.length === 0) return [];
 
@@ -408,5 +427,62 @@ export async function calcPlayerTotals(playerIds){
         
     }
 
-    console.log(totals);
+    //delete old player totals in nstats_player_totals
+    //insert new data
+
+    return totals;
+
+}
+
+
+async function deletePlayerGametypeTotals(playerId, gametypeId){
+
+    const query = `DELETE FROM nstats_player_totals WHERE player_id=? AND gametype_id=?`;
+
+    return await simpleQuery(query, [playerId, gametypeId]);
+}
+
+
+
+async function insertPlayerGametypeTotals(data){
+
+
+    const insertVars = [];
+
+    for(const [playerId, gametypes] of Object.entries(data)){
+
+        for(const [gametypeId, g] of Object.entries(gametypes)){
+
+
+            await deletePlayerGametypeTotals(playerId, gametypeId);
+
+            insertVars.push([
+                playerId, gametypeId, g.playtime, g.matches, g.score,
+                g.frags, g.kills, g.deaths, g.suicides, g.team_kills,
+                g.eff, g.ttl, g.first_blood, g.spree_1, g.spree_2,
+                g.spree_3,g.spree_4,g.spree_5,g.spree_best,g.multi_1,
+                g.multi_2,g.multi_3,g.multi_4,g.multi_best,g.headshots,
+                g.item_amp,g.item_belt,g.item_boots,g.item_body,g.item_pads,
+                g.item_invis, g.item_shp
+            ]);
+        }
+    }
+
+    const query = `INSERT INTO nstats_player_totals (player_id, gametype_id,playtime,total_matches,score,
+            frags,kills,deaths,suicides,team_kills,
+            efficiency,ttl, first_blood, spree_1,spree_2,
+            spree_3,spree_4, spree_5, spree_best, multi_1,
+            multi_2,multi_3,multi_4,multi_best,headshots,
+            item_amp, item_belt, item_boots, item_body, item_pads,
+            item_invis, item_shp ) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
+}
+
+
+export async function updatePlayerGametypeTotals(playerIds){
+
+    const totals = await calcPlayerTotals(playerIds);
+
+    await insertPlayerGametypeTotals(totals);
 }

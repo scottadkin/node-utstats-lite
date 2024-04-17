@@ -214,8 +214,8 @@ const queries = [
             total_caps int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_match_player_totals (     
-            id int NOT NULL,
+        `CREATE TABLE IF NOT EXISTS nstats_player_totals (     
+            id int NOT NULL AUTO_INCREMENT,
             player_id int NOT NULL,
             gametype_id int NOT NULL,
             playtime float NOT NULL,

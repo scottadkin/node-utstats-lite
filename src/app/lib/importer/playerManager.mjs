@@ -1,6 +1,6 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData, updateMasterPlayers, calcPlayerTotals } from "../players.mjs";
+import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData, updateMasterPlayers, updatePlayerGametypeTotals } from "../players.mjs";
 import geoip from "geoip-lite";
 import { scalePlaytime } from "../generic.mjs";
 
@@ -532,7 +532,7 @@ export class PlayerManager{
         }
 
         await updateMasterPlayers(masterIds, idsToCountries, date);
-        await calcPlayerTotals(masterIds);
+        await updatePlayerGametypeTotals(masterIds);
         
     }
     /**
