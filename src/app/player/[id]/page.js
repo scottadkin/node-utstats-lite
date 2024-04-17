@@ -3,6 +3,7 @@ import Header from "@/app/UI/Header";
 import { getPlayerById, getPlayerGametypeTotals } from "@/app/lib/players.mjs";
 import GametypeTotals from "@/app/UI/Player/GametypeTotals";
 import { getGametypeNames } from "@/app/lib/gametypes.mjs";
+import SpecialEvents from "@/app/UI/Player/SpecialEvents";
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
@@ -68,5 +69,6 @@ export default async function Page({params, searchParams}){
     return <main>
         <Header><CountryFlag code={player.country}/>{player.name}'s Player Summary</Header> 
         <GametypeTotals data={totals} names={gametypeNames}/>
+        <SpecialEvents data={totals} gametypeNames={gametypeNames}/>
     </main>
 }

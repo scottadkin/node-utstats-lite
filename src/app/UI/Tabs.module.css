@@ -7,8 +7,7 @@
 
 .tab{
     display:inline-block;
-    padding:5px 10px;
-    transition: var(--transition-1);
+    padding:var(--padding-2) var(--padding-1);
 }
 
 .tab:hover{
@@ -18,5 +17,5 @@
 }
 
 .selected{
-    background-color:red;
+    background-color:rgb(164,0,0);
 }
