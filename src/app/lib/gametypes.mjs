@@ -55,7 +55,9 @@ export async function getGametypeNames(ids){
 
     const result = await simpleQuery(query, [ids]);
 
-    const data = {};
+    const data = {
+        "0": "All"
+    };
 
     for(let i = 0; i < result.length; i++){
 

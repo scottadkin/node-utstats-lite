@@ -315,7 +315,7 @@ function _updateTotals(totals, gametypeId, playerData, date){
 
         totals[playerData.player_id][gametypeId] = {
             "matches": 1,
-            "playtime": playerData.time_on_server,
+            "playtime": parseFloat(playerData.time_on_server),
             "totalTtl": playerData.ttl,
             "eff": eff,
             "lastActive": date,
@@ -332,7 +332,7 @@ function _updateTotals(totals, gametypeId, playerData, date){
       "deaths",
       "suicides",
       "team_kills",
-      "time_on_server",
+      //"time_on_server",
       //ttl,
       "first_blood",
       "spree_1",
@@ -404,6 +404,8 @@ function _updateTotals(totals, gametypeId, playerData, date){
     if(matchDate > totalsDate){
         t.lastActive = date;
     }
+
+    t.playtime += parseFloat(playerData.time_on_server);
 }
 
 /**
