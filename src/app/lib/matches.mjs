@@ -188,10 +188,10 @@ export async function getMatchData(id){
 }
 
 
-async function getMatchMapGametypes(matchIds){
+async function getMatchMapGametypesDate(matchIds){
 
 
-    const query = `SELECT id,gametype_id,map_id FROM nstats_matches WHERE id IN(?)`;
+    const query = `SELECT id,gametype_id,map_id,date FROM nstats_matches WHERE id IN(?)`;
     const result = await simpleQuery(query, [matchIds]);
 
     const data = {};
@@ -200,7 +200,7 @@ async function getMatchMapGametypes(matchIds){
 
         const r = result[i];
 
-        data[r.id] = {"gametype": r.gametype_id, "map": r.map_id};
+        data[r.id] = {"gametype": r.gametype_id, "map": r.map_id, "date": r.date};
     }
 
     return data;
@@ -216,7 +216,7 @@ export async function getMultipleMatchDetails(matchIds){
 
     if(matchIds.length === 0) return {};
 
-    return await getMatchMapGametypes(matchIds);
+    return await getMatchMapGametypesDate(matchIds);
 
     /*const gametypeIds = new Set();
     const mapIds = new Set();

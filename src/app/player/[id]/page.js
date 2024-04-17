@@ -1,6 +1,7 @@
 import CountryFlag from "@/app/UI/CountryFlag";
 import Header from "@/app/UI/Header";
-import { getPlayerById } from "@/app/lib/players.mjs";
+import { getPlayerById, getPlayerGametypeTotals } from "@/app/lib/players.mjs";
+import GametypeTotals from "@/app/UI/Player/GametypeTotals";
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
@@ -48,12 +49,18 @@ export default async function Page({params, searchParams}){
     }
 
     let player = await getPlayerById(id);
+    let totals = [];
 
     if(player === null){
         player = {"name": "Not Found", "country": "", "id": 0};
+    }else{
+        totals = await getPlayerGametypeTotals(id);
     }
+
+    console.log(totals);
 
     return <main>
         <Header><CountryFlag code={player.country}/>{player.name}'s Player Summary</Header> 
+        <GametypeTotals data={totals}/>
     </main>
 }

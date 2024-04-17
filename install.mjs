@@ -218,6 +218,7 @@ const queries = [
             id int NOT NULL AUTO_INCREMENT,
             player_id int NOT NULL,
             gametype_id int NOT NULL,
+            last_active datetime NOT NULL,
             playtime float NOT NULL,
             total_matches int NOT NULL,
             score int NOT NULL,

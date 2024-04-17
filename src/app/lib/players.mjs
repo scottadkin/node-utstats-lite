@@ -294,7 +294,8 @@ async function getPlayersAllMatchData(playerIds){
     return {"data": result, "matchIds": matchIds}
 }
 
-function _updateTotals(totals, gametypeId, playerData){
+function _updateTotals(totals, gametypeId, playerData, date){
+
 
     if(totals[playerData.player_id] === undefined){
         totals[playerData.player_id] = {};
@@ -317,6 +318,7 @@ function _updateTotals(totals, gametypeId, playerData){
             "playtime": playerData.time_on_server,
             "totalTtl": playerData.ttl,
             "eff": eff,
+            "lastActive": date,
             ...playerData
         };
 
@@ -393,6 +395,15 @@ function _updateTotals(totals, gametypeId, playerData){
             t.eff = (t.kills / (t.kills + t.deaths + t.deaths)) * 100;
         }
     }
+
+    const matchDate = Math.floor(new Date(date) * 0.001);
+    const totalsDate = Math.floor(new Date(t.lastActive) * 0.001);
+
+    //console.log(matchDate, totalsDate);
+
+    if(matchDate > totalsDate){
+        t.lastActive = date;
+    }
 }
 
 /**
@@ -417,13 +428,14 @@ async function calcPlayerTotals(playerIds){
         const m = matchData.data[i];
 
         const gametypeId = matchTypeIds[m.match_id].gametype;
+        const date = matchTypeIds[m.match_id].date;
         //const mapId = matchTypeIds[m.match_id].map;
         //console.log(gametypeId, mapId);
 
         //all time totals
-        _updateTotals(totals, 0, m);
+        _updateTotals(totals, 0, m, date);
         //gametype totals
-        _updateTotals(totals, gametypeId, m);
+        _updateTotals(totals, gametypeId, m, date);
         
     }
 
@@ -457,7 +469,7 @@ async function insertPlayerGametypeTotals(data){
             await deletePlayerGametypeTotals(playerId, gametypeId);
 
             insertVars.push([
-                playerId, gametypeId, g.playtime, g.matches, g.score,
+                playerId, gametypeId,g.lastActive, g.playtime, g.matches, g.score,
                 g.frags, g.kills, g.deaths, g.suicides, g.team_kills,
                 g.eff, g.ttl, g.first_blood, g.spree_1, g.spree_2,
                 g.spree_3,g.spree_4,g.spree_5,g.spree_best,g.multi_1,
@@ -468,7 +480,7 @@ async function insertPlayerGametypeTotals(data){
         }
     }
 
-    const query = `INSERT INTO nstats_player_totals (player_id, gametype_id,playtime,total_matches,score,
+    const query = `INSERT INTO nstats_player_totals (player_id, gametype_id,last_active,playtime,total_matches,score,
             frags,kills,deaths,suicides,team_kills,
             efficiency,ttl, first_blood, spree_1,spree_2,
             spree_3,spree_4, spree_5, spree_best, multi_1,
@@ -485,4 +497,12 @@ export async function updatePlayerGametypeTotals(playerIds){
     const totals = await calcPlayerTotals(playerIds);
 
     await insertPlayerGametypeTotals(totals);
+}
+
+
+export async function getPlayerGametypeTotals(playerId){
+
+    const query = `SELECT * FROM nstats_player_totals WHERE player_id=?`;
+
+    return await simpleQuery(query, [playerId]);
 }
