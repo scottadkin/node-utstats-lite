@@ -1,4 +1,6 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
+import { getMatchesGametype } from "./matches.mjs";
+import { getGametypeNames } from "./gametypes.mjs";
 
 
 
@@ -79,4 +81,170 @@ export async function getMatchWeaponStats(matchId){
     const names = await getWeaponNames(uniqueWeapons);
 
     return {"data": result, "names": names}
+}
+
+
+
+async function _getAllPlayerMatchData(playerIds){
+
+    const query = `SELECT match_id,player_id,weapon_id,kills,deaths,team_kills FROM nstats_match_weapon_stats WHERE player_id IN (?)`;
+
+    const result = await simpleQuery(query, [playerIds]);
+
+    const matchIds = [...new Set(result.map((r) =>{
+        return r.match_id;
+    }))];
+
+
+    return {"data": result, "matchIds": matchIds}
+
+}
+
+function calcPlayerTotals(playerIds){
+
+    
+    //playerid => gametypeid => weaponStats
+    const totals = {};
+
+    console.log(data);
+
+
+    return {"data": data, "matchIds": matchIds}
+}
+
+
+function _updatePlayerTotals(totals, data, gametypeId){
+
+
+    const playerId = data.player_id;
+    const weaponId = data.weapon_id;
+
+    if(totals[playerId] === undefined){
+        totals[playerId] = {};
+    }
+
+    if(totals[playerId][gametypeId] === undefined){
+        
+        totals[playerId][gametypeId] = {}; 
+    }
+
+    if(totals[playerId][gametypeId][weaponId] === undefined){
+
+        let eff = 0;
+
+        if(data.kills > 0){
+
+            if(data.deaths > 0){
+                eff = data.kills / (data.kills + data.deaths + data.team_kills) * 100;
+            }else{
+                eff = 100;
+            }
+        }
+
+
+        totals[playerId][gametypeId][weaponId]  = {      
+            "matches": 1,
+            "kills": data.kills,
+            "deaths": data.deaths,
+            "team_kills": data.team_kills,
+            "eff": eff       
+        };
+
+        return;
+    }
+
+    const t = totals[playerId][gametypeId][weaponId];
+
+    t.kills += data.kills;
+    t.deaths += data.deaths;
+    t.team_kills += data.team_kills;
+
+    let eff = 0;
+
+    if(t.kills > 0){
+
+        if(t.deaths > 0){
+            eff = t.kills / (t.kills + t.deaths + t.team_kills) * 100;
+        }else{
+            eff = 100;
+        }
+    }
+
+    t.eff = eff;
+
+    t.matches++;
+}
+
+async function deletePlayerTotals(playerId, gametypeId, weaponId){
+
+    const query = `DELETE FROM nstats_player_totals_weapons WHERE player_id=? AND gametype_id=? AND weapon_id=?`;
+
+    return await simpleQuery(query, [playerId, gametypeId, weaponId]);
+}
+
+async function bulkInsertPlayerTotals(totals){
+
+    const insertVars = [];
+
+    for(const [playerId, playerData] of Object.entries(totals)){
+
+        for(const [gametypeId, gametypeData] of Object.entries(playerData)){
+
+            for(const [weaponId, weaponData] of Object.entries(gametypeData)){
+
+                await deletePlayerTotals(playerId, gametypeId, weaponId);
+
+                insertVars.push([
+                    playerId, gametypeId, weaponId,
+                    weaponData.matches, weaponData.kills, weaponData.deaths,
+                    weaponData.team_kills, weaponData.eff
+                ]);
+            }
+        }
+    }
+
+    const query = `INSERT INTO nstats_player_totals_weapons (
+        player_id, gametype_id, weapon_id,
+        total_matches, kills, deaths, team_kills, eff
+    ) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
+   //console.log(insertVars);
+   //console.log(insertVars.length);
+}
+
+export async function updatePlayerTotals(playerIds){
+
+    if(playerIds.length === 0) return null;
+
+    const {data, matchIds} = await _getAllPlayerMatchData(playerIds);
+
+    const matchGametypeIds = await getMatchesGametype(matchIds);
+    //console.log(matchIds);
+
+    //const gametypeIds = [...new Set(Object.values(matchGametypeIds))];
+    //const gametypeNames = await getGametypeNames(gametypeIds);
+
+    //console.log(matchGametypeIds);
+    const totals = {};
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const gametypeId = matchGametypeIds[d.match_id];
+
+        //all time totals
+        _updatePlayerTotals(totals, d, 0);
+        //gametype specific 
+        _updatePlayerTotals(totals, d, gametypeId);
+    }
+
+   // console.log(totals);
+
+
+    await bulkInsertPlayerTotals(totals);
+
+
+
 }

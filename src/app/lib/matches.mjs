@@ -292,3 +292,23 @@ export function getWinner(matchData){
     return {"type": "teams", "winners": winners, "bDraw": bDraw};
 
 }
+
+
+export async function getMatchesGametype(matchIds){
+
+    if(matchIds.length === 0) return {};
+
+    const query = `SELECT id,gametype_id FROM nstats_matches WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [matchIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r.gametype_id;
+    }
+
+    return data;
+}

@@ -158,12 +158,12 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
             id int(11) NOT NULL AUTO_INCREMENT,
-            match_id int(11) NOT NULL AUTO_INCREMENT,
-            player_id int(11) NOT NULL AUTO_INCREMENT,
-            weapon_id int(11) NOT NULL AUTO_INCREMENT,
-            kills int(11) NOT NULL AUTO_INCREMENT,
-            deaths int(11) NOT NULL AUTO_INCREMENT,
-            team_kills int(11) NOT NULL AUTO_INCREMENT
+            match_id int(11) NOT NULL,
+            player_id int(11) NOT NULL,
+            weapon_id int(11) NOT NULL,
+            kills int(11) NOT NULL,
+            deaths int(11) NOT NULL,
+            team_kills int(11) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_weapons (
@@ -253,6 +253,18 @@ const queries = [
             item_pads int NOT NULL,
             item_invis int NOT NULL,
             item_shp int NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_player_totals_weapons (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            player_id int(11) NOT NULL,
+            gametype_id int(11) NOT NULL,
+            weapon_id int(11) NOT NULL,
+            total_matches int(11) NOT NULL,
+            kills int(11) NOT NULL,
+            deaths int(11) NOT NULL,
+            team_kills int(11) NOT NULL,
+            eff float NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
 ];

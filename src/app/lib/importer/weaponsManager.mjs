@@ -1,4 +1,4 @@
-import { getWeaponId, createWeapon, bulkInsertMatchWeaponStats } from "../weapons.mjs";
+import { getWeaponId, createWeapon, bulkInsertMatchWeaponStats, updatePlayerTotals } from "../weapons.mjs";
 import { removeDoubleEnforcer } from "../generic.mjs";
 
 export class WeaponsManager{
@@ -85,5 +85,17 @@ export class WeaponsManager{
     async insertPlayerMatchStats(matchId){
 
         await bulkInsertMatchWeaponStats(this.playerStats, matchId);
+    }
+
+    async updatePlayerTotals(players){
+
+        const playerIds = [];
+
+        for(const player of Object.values(players)){
+
+            playerIds.push(player.masterId);
+        }
+
+        await updatePlayerTotals(playerIds);
     }
 }
