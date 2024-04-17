@@ -50,7 +50,7 @@ export async function bulkInsertMatchWeaponStats(data, matchId){
 
 }
 
-async function getWeaponNames(ids){
+export async function getWeaponNames(ids){
 
     if(ids.length === 0) return {};
 
@@ -58,7 +58,9 @@ async function getWeaponNames(ids){
 
     const result = await simpleQuery(query, [ids]);
 
-    const data = {};
+    const data = {
+        "0": "All"
+    };
 
     for(let i = 0; i < result.length; i++){
 
@@ -245,6 +247,11 @@ export async function updatePlayerTotals(playerIds){
 
     await bulkInsertPlayerTotals(totals);
 
+}
 
+export async function getPlayerTotals(playerId){
 
+    const query = `SELECT gametype_id,weapon_id,total_matches,kills,deaths,team_kills,eff FROM nstats_player_totals_weapons WHERE player_id=?`;
+
+    return await simpleQuery(query, [playerId]);
 }

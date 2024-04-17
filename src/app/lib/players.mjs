@@ -547,3 +547,4 @@ export async function getPlayerGametypeTotals(playerId){
 
     return await simpleQuery(query, [playerId]);
 }
+

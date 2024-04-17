@@ -4,6 +4,9 @@ import { getPlayerById, getPlayerGametypeTotals } from "@/app/lib/players.mjs";
 import GametypeTotals from "@/app/UI/Player/GametypeTotals";
 import { getGametypeNames } from "@/app/lib/gametypes.mjs";
 import SpecialEvents from "@/app/UI/Player/SpecialEvents";
+import WeaponStats from "@/app/UI/Player/WeaponStats";
+import { getPlayerTotals as weaponsGetPlayerTotals, getWeaponNames } from "@/app/lib/weapons.mjs";
+//import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
@@ -66,9 +69,18 @@ export default async function Page({params, searchParams}){
 
     const gametypeNames = await getGametypeNames(gametypeIds);
 
+    const weaponTotals = await weaponsGetPlayerTotals(id);
+
+    const weaponIds = [... new Set(weaponTotals.map((w) =>{
+        return w.weapon_id;
+    }))]
+
+    const weaponNames = await getWeaponNames(weaponIds);
+
     return <main>
         <Header><CountryFlag code={player.country}/>{player.name}'s Player Summary</Header> 
         <GametypeTotals data={totals} names={gametypeNames}/>
         <SpecialEvents data={totals} gametypeNames={gametypeNames}/>
+        <WeaponStats totals={weaponTotals} weaponNames={weaponNames} gametypeNames={gametypeNames}/>
     </main>
 }
