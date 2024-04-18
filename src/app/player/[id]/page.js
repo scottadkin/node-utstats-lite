@@ -7,6 +7,7 @@ import SpecialEvents from "@/app/UI/Player/SpecialEvents";
 import WeaponStats from "@/app/UI/Player/WeaponStats";
 import { getPlayerTotals as weaponsGetPlayerTotals, getWeaponNames } from "@/app/lib/weapons.mjs";
 import RecentMatches from "@/app/UI/Player/RecentMatches";
+import ItemStats from "@/app/UI/Player/ItemStats";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -98,6 +99,7 @@ export default async function Page({params, searchParams}){
         <GametypeTotals data={totals} names={gametypeNames}/>
         <SpecialEvents data={totals} gametypeNames={gametypeNames}/>
         <WeaponStats totals={weaponTotals} weaponNames={weaponNames} gametypeNames={gametypeNames}/>
+        <ItemStats data={totals} gametypeNames={gametypeNames}/>
         <RecentMatches playerId={id}/>
     </main>
 }

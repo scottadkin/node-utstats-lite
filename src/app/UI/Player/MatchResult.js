@@ -71,6 +71,7 @@ export default function matchResult({playerId, data}){
 
  
     return <div>
+        ADD NEXT AND PREVIOUS PAGE BUTTONS AND DISPLAY TOTAL MATCHES COUNT
         {result}
     </div>
 }
