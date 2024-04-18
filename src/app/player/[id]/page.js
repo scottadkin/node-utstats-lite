@@ -62,12 +62,6 @@ export default async function Page({params, searchParams}){
         totals = await getPlayerGametypeTotals(id);
     }
 
-    const gametypeIds = [...new Set(totals.map((t) =>{
-        return t.gametype_id;
-    }))]
-
-
-    const gametypeNames = await getGametypeNames(gametypeIds);
 
     const weaponTotals = await weaponsGetPlayerTotals(id);
 
@@ -76,6 +70,17 @@ export default async function Page({params, searchParams}){
     }))]
 
     const weaponNames = await getWeaponNames(weaponIds);
+
+    const gametypeIds = [...new Set(
+        totals.map((t) =>{
+            return t.gametype_id;
+         }), 
+        ...weaponTotals.map((wt) =>{
+        return wt.gametype_id;
+    }))];
+
+
+    const gametypeNames = await getGametypeNames(gametypeIds);
 
     return <main>
         <Header><CountryFlag code={player.country}/>{player.name}'s Player Summary</Header> 

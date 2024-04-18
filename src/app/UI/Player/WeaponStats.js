@@ -2,8 +2,12 @@
 import { ignore0 } from "@/app/lib/generic.mjs";
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
+import Tabs from "../Tabs";
+import { useState } from "react";
 
 export default function WeaponStats({totals, weaponNames, gametypeNames}){
+
+    const [mode, setMode] = useState("0");
 
     const headers = {
         "weapon": {"title": "Weapon"},
@@ -13,16 +17,17 @@ export default function WeaponStats({totals, weaponNames, gametypeNames}){
         "kills": {"title": "Kills"},
         "eff": {"title": "Efficiency"},
     };
+
     const rows = [];
 
 
     for(let i = 0; i < totals.length; i++){
 
         const t = totals[i];
-        if(t.gametype_id !== 0) continue;
+        if(t.gametype_id != mode) continue;
 
         const weapon = weaponNames[t.weapon_id] ?? "Not Found";
-        
+
         rows.push({
             "weapon": {
                 "value": weapon.toLowerCase(), 
@@ -53,8 +58,23 @@ export default function WeaponStats({totals, weaponNames, gametypeNames}){
         });
     }
 
+    const tabOptions = [];
+
+    for(const [id, name] of Object.entries(gametypeNames)){
+
+        tabOptions.push({
+            "name": name,
+            "value": id
+        });
+    }
+
+    const tabsElem = (totals.length < 2 ) ? null : <Tabs options={tabOptions} selectedValue={mode} changeSelected={(value) =>{
+        setMode(value);
+    }}/>;
+
     return <>
         <Header>Weapon Stats</Header>
+        {tabsElem}
         <InteractiveTable headers={headers} rows={rows}/>
     </>
 }

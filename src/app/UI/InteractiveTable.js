@@ -68,6 +68,11 @@ function createRows(headers, rows){
     }
 
     
+    if(elems.length === 0){
+        elems.push(<tr key="none">
+            <td colSpan={Object.keys(headers).length}>No data</td>
+        </tr>);
+    }
 
     return elems;
 }
