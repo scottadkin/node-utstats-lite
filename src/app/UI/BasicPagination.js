@@ -10,6 +10,8 @@ export default function BasicPagination({results, page, perPage, setPage}){
         totalPages = Math.ceil(results / perPage);
     }
 
+    if(totalPages < 2) return null;
+
     let previousPage = page - 1;
     let nextPage = page + 1;
 
