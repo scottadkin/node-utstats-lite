@@ -22,8 +22,6 @@ async function loadData(playerId, page, perPage, dispatch){
             throw new Error(res.error);
         }
 
-        console.log(res);
-
         dispatch({
             "type": "set-data", 
             "matches": res.matches, 
@@ -47,7 +45,6 @@ function reducer(state, action){
 
         case "set-data":{
 
-            console.log(action);
             return {
                 ...state,
                 "totalMatches": action.totalMatches,
@@ -65,6 +62,13 @@ function reducer(state, action){
             return {
                 ...state,
                 "error": action.error
+            }
+        }
+
+        case "set-page": {
+            return {
+                ...state,
+                "page": action.page
             }
         }
     }
@@ -105,7 +109,6 @@ export default function RecentMatches({playerId}){
 
     const rows = [];
 
-    console.log(state);
 
     for(let i = 0; i < state.data.matches.length; i++){
 
@@ -141,12 +144,14 @@ export default function RecentMatches({playerId}){
         });
     }
 
-    console.log(state.totalMatches);
 
     return <>
         <Header>Recent Matches</Header>
         <ErrorBox title="Failed to load recent matches">{state.error}</ErrorBox>
-        <BasicPagination results={state.totalMatches} page={state.page} perPage={state.perPage}/>
+        <BasicPagination results={state.totalMatches} page={state.page} perPage={state.perPage} setPage={(page) =>{
+
+            dispatch({"type": "set-page", "page": page});
+        }}/>
         <InteractiveTable width={1} headers={headers} rows={rows} srotBy={"date"} order={"DESC"} bNoHeaderSorting={true}/>
     </>
 }
