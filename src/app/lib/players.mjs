@@ -620,9 +620,20 @@ export async function getPlayerGametypeTotals(playerId){
 
 
 // add page and perpage filtering
-export async function getPlayerRecentMatches(playerId){
+export async function getPlayerRecentMatches(playerId, page, perPage){
 
-    const query = `SELECT match_id,match_date,team,time_on_server FROM nstats_match_players WHERE player_id=? ORDER BY match_date DESC`;
+    page = parseInt(page);
+    perPage = parseInt(perPage);
 
-    return await simpleQuery(query, [playerId]);
+    if(page !== page || perPage !== perPage) throw new Error(`Page, or perPage is not a valid integer.`);
+
+    page = page - 1;
+
+    if(page < 0) page = 0;
+    if(perPage < 5 || perPage > 100) perPage = 50;
+    const query = `SELECT match_id,match_date,team,time_on_server FROM nstats_match_players WHERE player_id=? ORDER BY match_date DESC LIMIT ?, ?`;
+
+    let start = page * perPage;
+
+    return await simpleQuery(query, [playerId, start, perPage]);
 }

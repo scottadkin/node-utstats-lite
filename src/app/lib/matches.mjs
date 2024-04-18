@@ -313,7 +313,23 @@ export async function getMatchesGametype(matchIds){
     return data;
 }
 
-export async function getPlayerMatches(playerId){
+export async function getMatchesResultByIds(ids){
 
-    const query = `SELECT match_id FROM nstats_match_players WHERE player_id=?`;
+    if(ids.length === 0) return {};
+
+    const query = `SELECT 
+    id,server_id,gametype_id,map_id,total_teams,team_0_score,team_1_score,
+    team_2_score,team_3_score,solo_winner,solo_winner_score FROM nstats_matches WHERE id IN (?)`;
+
+    const result = await simpleQuery(query, [ids]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r;
+    }
+
+    return data;
 }

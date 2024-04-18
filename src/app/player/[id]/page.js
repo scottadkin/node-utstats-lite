@@ -83,7 +83,7 @@ export default async function Page({params, searchParams}){
 
     const gametypeNames = await getGametypeNames(gametypeIds);
 
-    const recentMatches = await getPlayerRecentMatches(id);
+    /*const recentMatches = await getPlayerRecentMatches(id);
 
     console.log(recentMatches);
 
@@ -91,13 +91,13 @@ export default async function Page({params, searchParams}){
         return r.match_date;
     }))]
 
-    console.log(dates);
+    console.log(dates);*/
 
     return <main>
         <Header><CountryFlag code={player.country}/>{player.name}'s Player Summary</Header> 
         <GametypeTotals data={totals} names={gametypeNames}/>
         <SpecialEvents data={totals} gametypeNames={gametypeNames}/>
         <WeaponStats totals={weaponTotals} weaponNames={weaponNames} gametypeNames={gametypeNames}/>
-        <RecentMatches data={recentMatches}/>
+        <RecentMatches playerId={id}/>
     </main>
 }
