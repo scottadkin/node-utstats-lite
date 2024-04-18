@@ -92,12 +92,66 @@ export async function updateMasterPlayers(playerIds, idsToCountries, date){
 }
 
 
-export async function insertPlayerMatchData(playerData, matchId){
+export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
+
+    if(Object.keys(players).length === 0) return;
+
+    const insertVars = [];
+
+    for(const p of Object.values(players)){
+
+        insertVars.push(
+            p.masterId,
+            p.bSpectator,
+            p.ip,
+            p.country,
+            p.hwid,
+            p.mac1,
+            p.mac2,
+            matchId,
+            matchDate,
+            p.bBot,
+            p.team,
+            p.stats.score,
+            p.stats.frags,
+            p.stats.kills,
+            p.stats.deaths,
+            p.stats.suicides,
+            p.stats.teamKills,
+            p.stats.efficiency,
+            p.playtime,
+            p.stats.ttl,
+            p.bFirstBlood,
+            p.stats.sprees.spree,
+            p.stats.sprees.rampage,
+            p.stats.sprees.dominating,
+            p.stats.sprees.unstoppable,
+            p.stats.sprees.godlike,
+            p.stats.sprees.best,
+            p.stats.multis.double,
+            p.stats.multis.multi,
+            p.stats.multis.ultra,
+            p.stats.multis.monster,
+            p.stats.multis.best,
+            p.stats.headshots,
+            p.stats.items.amp,
+            p.stats.items.belt,
+            p.stats.items.boots,
+            p.stats.items.body,
+            p.stats.items.pads,
+            p.stats.items.invis,
+            p.stats.items.shp
+        );
+    }
+}
+
+/*
+export async function insertPlayerMatchData(playerData, matchId, matchDate){
 
     const p = playerData;
 
     const query = `INSERT INTO nstats_match_players VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
-    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
     const vars = [
         p.masterId,
@@ -108,6 +162,7 @@ export async function insertPlayerMatchData(playerData, matchId){
         p.mac1,
         p.mac2,
         matchId,
+        matchDate,
         p.bBot,
         p.team,
         p.stats.score,
@@ -142,7 +197,7 @@ export async function insertPlayerMatchData(playerData, matchId){
     ];
 
     await simpleQuery(query, vars);
-}
+}*/
 
 
 export async function getPlayersById(ids){
@@ -548,3 +603,12 @@ export async function getPlayerGametypeTotals(playerId){
     return await simpleQuery(query, [playerId]);
 }
 
+
+
+// add page and perpage filtering
+export async function getPlayerRecentMatches(playerId){
+
+    const query = `SELECT match_id,match_date,team,time_on_server FROM nstats_match_players WHERE player_id=? ORDER BY match_date DESC`;
+
+    return await simpleQuery(query, [playerId]);
+}

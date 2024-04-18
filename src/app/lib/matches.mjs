@@ -312,3 +312,8 @@ export async function getMatchesGametype(matchIds){
 
     return data;
 }
+
+export async function getPlayerMatches(playerId){
+
+    const query = `SELECT match_id FROM nstats_match_players WHERE player_id=?`;
+}

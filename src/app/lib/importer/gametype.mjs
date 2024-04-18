@@ -61,6 +61,6 @@ export class Gametype{
 
         if(this.bInsta === 0) return;
 
-        this.name = `${this.name} (Instagib)`
+        this.name = `${this.name} (Instagib)`;
     }
 }

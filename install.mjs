@@ -123,6 +123,7 @@ const queries = [
             mac1 varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
             mac2 varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
             match_id int NOT NULL,
+            match_date datetime NOT NULL,
             bot int(1) NOT NULL,
             team int(3) NOT NULL,
             score int NOT NULL,

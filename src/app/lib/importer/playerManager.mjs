@@ -1,6 +1,6 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId, createMasterPlayer, insertPlayerMatchData, updateMasterPlayers, updatePlayerGametypeTotals } from "../players.mjs";
+import { getPlayerMasterId, createMasterPlayer, updateMasterPlayers, updatePlayerGametypeTotals, bulkInsertPlayerMatchData } from "../players.mjs";
 import geoip from "geoip-lite";
 import { scalePlaytime } from "../generic.mjs";
 
@@ -279,12 +279,16 @@ export class PlayerManager{
     }
 
 
-    async insertPlayerMatchData(matchId){
+    //change to bulkinsert
+    async insertPlayerMatchData(matchId, matchDate){
 
-        for(const p of Object.values(this.mergedPlayers)){
 
-            await insertPlayerMatchData(p, matchId);
-        }
+        await bulkInsertPlayerMatchData(this.mergedPlayers, matchId, matchDate);
+
+        /*for(const p of Object.values(this.mergedPlayers)){
+
+            await insertPlayerMatchData(p, matchId, matchDate);
+        }*/
     }
 
 

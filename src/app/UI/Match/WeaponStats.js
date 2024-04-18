@@ -156,6 +156,9 @@ export default function WeaponStats({data, totalTeams, players}){
     const orderedNames = [];
     
     for(const [weaponId, weaponName] of Object.entries(data.names)){
+
+        if(weaponName.toLowerCase() === "all") continue;
+        
         orderedNames.push({"id": weaponId, "name": weaponName});
     }
 
