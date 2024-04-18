@@ -8,7 +8,7 @@ export class Player{
         this.name = name;
         this.id = playerId;
 
-        this.ip = null;
+        this.ip = "";
         this.hwid = "";
         this.mac1 = "";
         this.mac2 = "";

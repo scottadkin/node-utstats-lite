@@ -50,7 +50,6 @@ export default function matchResult({playerId, data}){
                     if(t.score === winnerScore){
                         bWinner = false;
                         bDraw = true;
-                    }else{
                         break;
                     }
                 }
@@ -63,7 +62,7 @@ export default function matchResult({playerId, data}){
     }else{
 
         if(bDraw){
-            <span className="yellow-font">Draw</span>
+            result = <span className="yellow-font">Draw</span>
         }else{
             result = <span className="red-font">Loser</span>
         }
