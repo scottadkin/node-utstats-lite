@@ -43,11 +43,22 @@
 
 .team-none{
 	background-color:var(--team-color-none);
-	
 }
 
 .team-red{
 	background-color:var(--team-color-red);
+}
+
+.red-font{
+	color:red;
+}
+
+.green-font{
+	color:green;
+}
+
+.yellow-font{
+	color:yellow;
 }
 
 

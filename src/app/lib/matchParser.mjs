@@ -63,7 +63,7 @@ export class MatchParser{
             this.players.scalePlaytimes(this.gametype.bHardcore);
 
 
-            await this.players.setPlayerMasterIds();
+            await this.players.setPlayerMasterIds(this.match.date);
 
             const soloStats = this.players.getSoloWinner();
 

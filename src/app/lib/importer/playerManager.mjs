@@ -255,7 +255,7 @@ export class PlayerManager{
         }
     }
 
-    async setPlayerMasterIds(){
+    async setPlayerMasterIds(matchDate){
 
         for(const p of Object.values(this.mergedPlayers)){
 
@@ -263,7 +263,7 @@ export class PlayerManager{
 
             if(masterId === null){
 
-                masterId = await createMasterPlayer(p.name, p.ip, p.hwid, p.mac1, p.mac2);
+                masterId = await createMasterPlayer(p.name, p.ip, p.hwid, p.mac1, p.mac2, matchDate);
 
             }
 

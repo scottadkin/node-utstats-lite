@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import { useReducer } from "react";
 import ErrorBox from "../ErrorBox";
 import { MMSS, convertTimestamp } from "@/app/lib/generic.mjs";
+import MatchResult from "./MatchResult";
+import Link from "next/link";
 
 
 async function loadData(playerId, page, perPage, dispatch){
@@ -99,32 +101,32 @@ export default function RecentMatches({playerId}){
 
         const m = state.data.matches[i];
 
-        console.log(m);
-
         const date = new Date(m.date) * 0.001;
         const gametype = state.data.gametypeNames[m.gametype_id] ?? "Not Found";
         const map = state.data.mapNames[m.map_id] ?? "Not Found";
 
+        const url = `/match/${m.id}`;
+
         rows.push({
             "date": {
                 "value": date,
-                "displayValue": convertTimestamp(date, true)
+                "displayValue": <Link href={url}>{convertTimestamp(date, true)}</Link>
             },
             "gametype": {
                 "value": gametype.toLowerCase(),
-                "displayValue": gametype
+                "displayValue": <Link href={url}>{gametype}</Link>
             },
             "map": {
                 "value": map.toLowerCase(),
-                "displayValue": map
+                "displayValue": <Link href={url}>{map}</Link>
             },
             "playtime": {
                 "value": m.playtime,
-                "displayValue": MMSS(m.playtime)
+                "displayValue": <Link href={url}>{MMSS(m.playtime)}</Link>
             },
             "result": {
                 "value": "",
-                "displayValue": <>Winner/loser/draw</>
+                "displayValue": <Link href={url}><MatchResult playerId={playerId} data={m}/></Link>
             }
         });
 
@@ -133,6 +135,6 @@ export default function RecentMatches({playerId}){
     return <>
         <Header>Recent Matches</Header>
         <ErrorBox title="Failed to load recent matches">{state.error}</ErrorBox>
-        <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true}/>
+        <InteractiveTable width={1} headers={headers} rows={rows} srotBy={"date"} order={"DESC"} bNoHeaderSorting={true}/>
     </>
 }

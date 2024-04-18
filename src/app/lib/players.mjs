@@ -13,12 +13,12 @@ export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
     return result[0].id;
 }
 
-export async function createMasterPlayer(name, ip, hwid, mac1, mac2){
+export async function createMasterPlayer(name, ip, hwid, mac1, mac2, matchDate){
 
-    const query = `INSERT INTO nstats_players VALUES(NULL,?,"",0,0,0,0,0,0,0,0,0,0)`;
+    const query = `INSERT INTO nstats_players VALUES(NULL,?,"",0,0,0,0,0,0,0,0,0,?)`;
 
     //const result = await simpleQuery(query, [name, ip, hwid, mac1, mac2]);
-    const result = await simpleQuery(query, [name]);
+    const result = await simpleQuery(query, [name, matchDate]);
 
     return result.insertId;
 }
