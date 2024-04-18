@@ -32,7 +32,7 @@ export async function GET(request){
 
         const basicInfo = await getPlayerRecentMatches(id, page, perPage);
 
-        const matchIds = [... new Set(basicInfo.map((b) =>{
+        const matchIds = [... new Set(basicInfo.matches.map((b) =>{
             return b.match_id;
         }))];
 
@@ -57,9 +57,9 @@ export async function GET(request){
 
         const matches = [];
 
-        for(let i = 0; i < basicInfo.length; i++){
+        for(let i = 0; i < basicInfo.matches.length; i++){
 
-            const b = basicInfo[i];
+            const b = basicInfo.matches[i];
 
             const result = matchResults[b.match_id];
 
@@ -71,7 +71,13 @@ export async function GET(request){
             });
         }
 
-        return Response.json({"matches": matches, "serverNames": serverNames, "gametypeNames": gametypeNames, "mapNames": mapNames});
+        return Response.json({
+            "matches": matches, 
+            "serverNames": serverNames, 
+            "gametypeNames": gametypeNames, 
+            "mapNames": mapNames,
+            "totalMatches": basicInfo.totalMatches
+        });
 
     }catch(err){
         console.trace(err);

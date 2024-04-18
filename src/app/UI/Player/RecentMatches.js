@@ -4,9 +4,10 @@ import InteractiveTable from "../InteractiveTable";
 import { useEffect } from "react";
 import { useReducer } from "react";
 import ErrorBox from "../ErrorBox";
-import { MMSS, convertTimestamp } from "@/app/lib/generic.mjs";
+import { MMSS, convertTimestamp, plural } from "@/app/lib/generic.mjs";
 import MatchResult from "./MatchResult";
 import Link from "next/link";
+import BasicPagination from "../BasicPagination";
 
 
 async function loadData(playerId, page, perPage, dispatch){
@@ -23,7 +24,14 @@ async function loadData(playerId, page, perPage, dispatch){
 
         console.log(res);
 
-        dispatch({"type": "set-data", "matches": res.matches, "serverNames": res.serverNames, "gametypeNames": res.gametypeNames, "mapNames": res.mapNames});
+        dispatch({
+            "type": "set-data", 
+            "matches": res.matches, 
+            "serverNames": res.serverNames, 
+            "gametypeNames": res.gametypeNames, 
+            "mapNames": res.mapNames,
+            "totalMatches": res.totalMatches
+        });
 
 
     }catch(err){
@@ -42,6 +50,7 @@ function reducer(state, action){
             console.log(action);
             return {
                 ...state,
+                "totalMatches": action.totalMatches,
                 "data": {
                     "matches": action.matches,
                     "serverNames": action.serverNames,
@@ -70,6 +79,7 @@ export default function RecentMatches({playerId}){
         "bLoading": true,
         "page": 1,
         "perPage": 50,
+        "totalMatches": 0,
         "data": {"matches":[], "serverNames": {}, "gametypeNames": {}, "mapNames": {}}
     });
 
@@ -129,12 +139,14 @@ export default function RecentMatches({playerId}){
                 "displayValue": <Link href={url}><MatchResult playerId={playerId} data={m}/></Link>
             }
         });
-
     }
+
+    console.log(state.totalMatches);
 
     return <>
         <Header>Recent Matches</Header>
         <ErrorBox title="Failed to load recent matches">{state.error}</ErrorBox>
+        <BasicPagination results={state.totalMatches} page={state.page} perPage={state.perPage}/>
         <InteractiveTable width={1} headers={headers} rows={rows} srotBy={"date"} order={"DESC"} bNoHeaderSorting={true}/>
     </>
 }

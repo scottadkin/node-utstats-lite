@@ -618,6 +618,14 @@ export async function getPlayerGametypeTotals(playerId){
 }
 
 
+async function getPlayerTotalMatches(playerId){
+
+    const query = `SELECT total_matches FROM nstats_player_totals WHERE player_id=? and gametype_id=0`;
+
+    const result = await simpleQuery(query, [playerId]);
+
+    return result[0].total_matches;
+}
 
 // add page and perpage filtering
 export async function getPlayerRecentMatches(playerId, page, perPage){
@@ -635,5 +643,9 @@ export async function getPlayerRecentMatches(playerId, page, perPage){
 
     let start = page * perPage;
 
-    return await simpleQuery(query, [playerId, start, perPage]);
+    const totalMatches = await getPlayerTotalMatches(playerId);
+
+    const matches = await simpleQuery(query, [playerId, start, perPage]);
+
+    return {totalMatches, matches};
 }
