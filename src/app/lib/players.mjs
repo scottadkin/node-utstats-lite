@@ -100,7 +100,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
 
     for(const p of Object.values(players)){
 
-        insertVars.push(
+        insertVars.push([
             p.masterId,
             p.bSpectator,
             p.ip,
@@ -141,8 +141,22 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
             p.stats.items.pads,
             p.stats.items.invis,
             p.stats.items.shp
-        );
+        ]);
     }
+
+    const query = `INSERT INTO nstats_match_players (
+        player_id, spectator, ip, country, hwid,
+        mac1, mac2, match_id, match_date, bot,
+        team, score, frags, kills, deaths,
+        suicides, team_kills, efficiency, time_on_server, ttl,
+        first_blood, spree_1, spree_2, spree_3, spree_4,
+        spree_5, spree_best, multi_1, multi_2, multi_3,
+        multi_4, multi_best, headshots, item_amp, item_belt,
+        item_boots, item_body, item_pads, item_invis, item_shp
+    ) VALUES ?`;
+
+
+    await bulkInsert(query, insertVars);
 }
 
 /*
