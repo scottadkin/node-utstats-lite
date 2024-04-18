@@ -46,6 +46,9 @@ export class MatchParser{
 
         try{
 
+            //append (insta) if game is instagib
+            this.gametype.updateName();
+
             this.ctf.setPlayerStats(this.players);
             await this.dom.setPointIds();
             this.dom.setPlayerCapStats(this.players);

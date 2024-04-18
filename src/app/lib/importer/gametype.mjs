@@ -55,4 +55,12 @@ export class Gametype{
         
         this.id = await updateGametype(this.name);
     }
+
+
+    updateName(){
+
+        if(this.bInsta === 0) return;
+
+        this.name = `${this.name} (Instagib)`
+    }
 }
