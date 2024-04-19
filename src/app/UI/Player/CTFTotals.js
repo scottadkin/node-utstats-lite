@@ -2,10 +2,10 @@
 import { ignore0 } from "@/app/lib/generic.mjs";
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
+import Tabs from "../Tabs";
+import { useState } from "react";
 
-export default function CTFTotals({data, gametypeNames}){
-
-    console.log(data);
+function createGeneral(data, gametypeNames){
 
     const headers = {
         "name": {"title": "Gametype"},
@@ -119,8 +119,81 @@ export default function CTFTotals({data, gametypeNames}){
         }
     });
 
+    return {headers, rows};
+}
+
+function createReturns(data, gametypeNames){
+
+    const headers = {
+        "gametype": {"title": "Gametype"},
+        "return": {"title": "Return"},
+        "returnBase": {"title": "Return Home Base"},
+        "returnMid": {"title": "Return Mid"},
+        "returnEB": {"title": "Return Enemy Base"},
+        "returnSave": {"title": "Return Close Save"}
+    };
+
+    const rows = data.map((d) =>{
+
+        const gametypeName = gametypeNames[d.gametype_id] ?? "Not found";
+
+        return {
+            "gametype": {
+                "value": gametypeName.toLowerCase(),
+                "displayValue": gametypeName,
+                "className": "text-left"
+            },
+            "return": {
+                "value": d.flag_return, "displayValue": ignore0(d.flag_return)
+            },
+            "returnBase": {
+                "value": d.flag_return_base, "displayValue": ignore0(d.flag_return_base)
+            },
+            "returnMid": {
+                "value": d.flag_return_mid, "displayValue": ignore0(d.flag_return_mid)
+            },
+            "returnEB": {
+                "value": d.flag_return_enemy_base, "displayValue": ignore0(d.flag_return_enemy_base)
+            },
+            "returnSave": {
+                "value": d.flag_return_save, "displayValue": ignore0(d.flag_return_save)
+            }
+        }
+    });
+
+    return {headers, rows};
+}
+
+export default function CTFTotals({data, gametypeNames}){
+
+    const [mode, setMode] = useState("1");
+
+    let headers = {};
+    let rows = [];
+
+    if(mode === "0"){
+        const gData = createGeneral(data, gametypeNames);
+        headers = gData.headers;
+        rows = gData.rows;
+    }else{
+        const cData = createReturns(data, gametypeNames);
+        headers = cData.headers;
+        rows = cData.rows;
+    }
+
+
     return <>
         <Header>CTF Stats</Header>
+        <Tabs 
+            options={[
+                {"name": "General", "value": "0"},
+                {"name": "Returns", "value": "1"},
+            ]} 
+            selectedValue={mode}
+            changeSelected={(value) =>{
+                setMode(value);
+            }}
+        />
         <InteractiveTable width={1} headers={headers} rows={rows}/>
     </>
 }
