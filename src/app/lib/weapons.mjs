@@ -177,11 +177,20 @@ function _updatePlayerTotals(totals, data, gametypeId){
     t.matches++;
 }
 
-async function deletePlayerTotals(playerId, gametypeId, weaponId){
+/*async function deletePlayerTotals(playerId, gametypeId, weaponId){
 
     const query = `DELETE FROM nstats_player_totals_weapons WHERE player_id=? AND gametype_id=? AND weapon_id=?`;
 
     return await simpleQuery(query, [playerId, gametypeId, weaponId]);
+}*/
+
+async function deletePlayerTotals(playerId, gametypeIds, weaponIds){
+
+    if(gametypeIds.length === 0 || weaponIds.length === 0) return;
+
+    const query = `DELETE FROM nstats_player_totals_weapons WHERE player_id=? AND gametype_id IN (?) AND weapon_id IN (?)`;
+
+    return await simpleQuery(query, [playerId, gametypeIds, weaponIds]);
 }
 
 async function bulkInsertPlayerTotals(totals){
@@ -190,11 +199,18 @@ async function bulkInsertPlayerTotals(totals){
 
     for(const [playerId, playerData] of Object.entries(totals)){
 
+        const gametypeIdsToDelete = [];
+        const weaponIdsToDelete = [];
+
         for(const [gametypeId, gametypeData] of Object.entries(playerData)){
+
+            gametypeIdsToDelete.push(gametypeId);
 
             for(const [weaponId, weaponData] of Object.entries(gametypeData)){
 
-                await deletePlayerTotals(playerId, gametypeId, weaponId);
+                weaponIdsToDelete.push(weaponId);
+
+                //await deletePlayerTotals(playerId, gametypeId, weaponId);
 
                 insertVars.push([
                     playerId, gametypeId, weaponId,
@@ -203,6 +219,8 @@ async function bulkInsertPlayerTotals(totals){
                 ]);
             }
         }
+
+        await deletePlayerTotals(playerId, gametypeIdsToDelete, weaponIdsToDelete);
     }
 
     const query = `INSERT INTO nstats_player_totals_weapons (
