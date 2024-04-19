@@ -6,8 +6,10 @@ import { getGametypeNames } from "@/app/lib/gametypes.mjs";
 import SpecialEvents from "@/app/UI/Player/SpecialEvents";
 import WeaponStats from "@/app/UI/Player/WeaponStats";
 import { getPlayerTotals as weaponsGetPlayerTotals, getWeaponNames } from "@/app/lib/weapons.mjs";
+import { getPlayerCTFTotals } from "@/app/lib/ctf.mjs";
 import RecentMatches from "@/app/UI/Player/RecentMatches";
 import ItemStats from "@/app/UI/Player/ItemStats";
+import CTFTotals from "@/app/UI/Player/CTFTotals";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -84,6 +86,8 @@ export default async function Page({params, searchParams}){
 
     const gametypeNames = await getGametypeNames(gametypeIds);
 
+    const ctfTotals = await getPlayerCTFTotals(id);
+
     /*const recentMatches = await getPlayerRecentMatches(id);
 
     console.log(recentMatches);
@@ -97,6 +101,7 @@ export default async function Page({params, searchParams}){
     return <main>
         <Header><CountryFlag code={player.country}/>{player.name}'s Player Summary</Header> 
         <GametypeTotals data={totals} names={gametypeNames}/>
+        <CTFTotals data={ctfTotals} gametypeNames={gametypeNames}/>
         <SpecialEvents data={totals} gametypeNames={gametypeNames}/>
         <WeaponStats totals={weaponTotals} weaponNames={weaponNames} gametypeNames={gametypeNames}/>
         <ItemStats data={totals} gametypeNames={gametypeNames}/>

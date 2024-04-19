@@ -179,3 +179,10 @@ export async function updatePlayerTotals(playerIds){
     await insertPlayerTotals(insertVars);
     
 }
+
+export async function getPlayerCTFTotals(playerId){
+
+    const query = `SELECT * FROM nstats_player_totals_ctf WHERE player_id=?`;
+
+    return await simpleQuery(query, [playerId]);
+}
