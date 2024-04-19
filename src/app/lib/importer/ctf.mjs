@@ -1,5 +1,5 @@
 import Message from "../message.mjs";
-import { insertPlayerMatchData } from "../ctf.mjs";
+import { insertPlayerMatchData, updatePlayerTotals } from "../ctf.mjs";
 
 export class CTF{
 
@@ -172,6 +172,22 @@ export class CTF{
 
         if(this.bAnyCTFEvents(playerManager.mergedPlayers)){
             await insertPlayerMatchData(playerManager, matchId);
+        }
+    }
+
+
+    async updatePlayerTotals(playerManager){
+
+        if(this.bAnyCTFEvents(playerManager.mergedPlayers)){
+
+            const playerIds = [];
+
+            for(const player of Object.values(playerManager.mergedPlayers)){
+
+                playerIds.push(player.masterId);
+            }
+
+            await updatePlayerTotals(playerIds);
         }
     }
 

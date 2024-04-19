@@ -1,4 +1,5 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
+import { getMatchesGametype } from "./matches.mjs";
 
 
 export async function insertPlayerMatchData(playerManager, matchId){
@@ -34,4 +35,147 @@ export async function getMatchData(matchId){
     FROM nstats_match_ctf WHERE match_id=?`;
 
     return await simpleQuery(query, [matchId]);
+}
+
+function _updatePlayerTotals(totals, gametypeId, matchData){
+
+    const playerId = matchData.player_id;
+
+    const ignore = ["id", "match_id", "player_id", "gametype"];
+
+    if(totals[playerId] === undefined){
+        totals[playerId] = {};
+    }
+
+    if(totals[playerId][gametypeId] === undefined){
+
+        const current = {
+            "matches": 1
+        };
+
+        for(const key of Object.keys(matchData)){
+
+            if(ignore.indexOf(key) !== -1) continue;
+
+            current[key] = matchData[key];
+
+        }
+
+        totals[playerId][gametypeId] = current;
+        return;
+    }
+
+    const t = totals[playerId][gametypeId];
+
+    t.matches++;
+
+    for(const key of Object.keys(matchData)){
+
+        if(ignore.indexOf(key) !== -1) continue;
+
+        t[key] += matchData[key];
+
+    }
+}
+
+async function getPlayersMatchesData(playerIds){
+
+    const query = `SELECT * FROM nstats_match_ctf WHERE player_id IN (?)`;
+
+    const result = await simpleQuery(query, [playerIds]);
+
+    const matchIds = [...new Set(result.map((r) =>{
+        return r.match_id;
+    }))]
+
+    const gametypeIds = await getMatchesGametype(matchIds);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        r.gametype = gametypeIds[r.match_id] ?? -1;
+    }
+
+    return result;
+}
+
+async function calcPlayerTotals(playerIds){
+
+    
+    const result = await getPlayersMatchesData(playerIds);
+
+    //console.log(result);
+
+    const totals = {};
+
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        //all time totals
+        _updatePlayerTotals(totals, 0, r);
+
+        //gametype totals
+        _updatePlayerTotals(totals, r.gametype, r);
+    }
+
+    return totals;
+}
+
+
+async function deletePlayerTotals(playerId, gametypeIds){
+
+    if(gametypeIds.length === 0) return;
+
+    const query = `DELETE FROM nstats_player_totals_ctf WHERE player_id=? AND gametype_id IN (?)`;
+
+    return await simpleQuery(query, [playerId, gametypeIds]);
+}
+
+
+async function insertPlayerTotals(insertVars){
+
+    const query = `INSERT INTO nstats_player_totals_ctf (
+        player_id, gametype_id, total_matches, flag_taken,
+        flag_pickup, flag_drop, flag_assist, flag_cover,
+        flag_seal, flag_cap, flag_kill, flag_return,
+        flag_return_base, flag_return_mid, flag_return_enemy_base,
+        flag_return_save
+    ) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
+}
+
+export async function updatePlayerTotals(playerIds){
+
+    if(playerIds.length === 0) return;
+
+    const data = await calcPlayerTotals(playerIds);
+
+    const insertVars = [];
+
+    for(const [playerId, playerData] of Object.entries(data)){
+
+        let gametypeIdsToDelete = [];
+
+        for(const [gametypeId, d] of Object.entries(playerData)){
+
+            gametypeIdsToDelete.push(gametypeId);
+
+            insertVars.push([
+                playerId, gametypeId, d.matches,
+                d.flag_taken, d.flag_pickup, d.flag_drop,
+                d.flag_assist, d.flag_cover, d.flag_seal, d.flag_cap,
+                d.flag_kill, d.flag_return, d.flag_return_base,
+                d.flag_return_mid, d.flag_return_enemy_base, d.flag_return_save
+            ]);
+        }
+
+        await deletePlayerTotals(playerId, gametypeIdsToDelete);
+    }
+
+    await insertPlayerTotals(insertVars);
+    
 }

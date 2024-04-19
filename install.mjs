@@ -268,6 +268,27 @@ const queries = [
             eff float NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_player_totals_ctf (
+            id int NOT NULL AUTO_INCREMENT,
+            player_id int NOT NULL,
+            gametype_id int NOT NULL,
+            total_matches int NOT NULL,
+            flag_taken int NOT NULL,
+            flag_pickup int NOT NULL,
+            flag_drop int NOT NULL,
+            flag_assist int NOT NULL,
+            flag_cover int NOT NULL,
+            flag_seal int NOT NULL,
+            flag_cap int NOT NULL,
+            flag_kill int NOT NULL,
+            flag_return int NOT NULL,
+            flag_return_base int NOT NULL,
+            flag_return_mid int NOT NULL,
+            flag_return_enemy_base int NOT NULL,
+            flag_return_save int NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+        
+
 ];
 
 
