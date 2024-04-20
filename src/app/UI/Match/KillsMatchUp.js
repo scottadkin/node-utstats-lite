@@ -1,7 +1,7 @@
 "use client"
 import Header from "../Header";
 import { ignore0, getTeamColorClass } from "@/app/lib/generic.mjs";
-import CountryFlag from "../CountryFlag";
+import PlayerLink from "../PlayerLink";
 
 function mergePlayerWeaponKills(kills){
 
@@ -57,9 +57,9 @@ export default function KillsMatchUp({kills, totalTeams, players}){
 
         const player = players[victim.playerId];
 
-        headers.push(<th key={i} style={{"writingMode":"vertical-lr", "color": "white"}} className={`text-left ${(totalTeams < 2) ? "" : getTeamColorClass(victim.team)}`}>
-            {<><CountryFlag code={player.country}/> {player.name}</> ?? "Not Found"}
-        </th>);
+        headers.push(<td key={i} style={{"writingMode":"vertical-lr"}} className={`text-left ${(totalTeams < 2) ? "" : getTeamColorClass(victim.team)}`}>
+            {<PlayerLink id={victim.playerId} country={player.country}>&nbsp;{player.name}</PlayerLink> ?? "Not Found"}
+        </td>);
     }
 
     rows.push(<tr key={"headers"}><th>&nbsp;</th>{headers}</tr>);
@@ -73,7 +73,7 @@ export default function KillsMatchUp({kills, totalTeams, players}){
         
         const columns = [
             <td key={`${i}_name`} className={`text-left ${(totalTeams < 2) ? "" : getTeamColorClass(killer.team)}`}>
-                {<><CountryFlag code={player.country}/>{player.name}</> ?? "Not Found"}
+                {<PlayerLink id={killer.playerId} country={player.country}>{player.name}</PlayerLink> ?? "Not Found"}
             </td>
         ];
 
@@ -98,7 +98,6 @@ export default function KillsMatchUp({kills, totalTeams, players}){
         <Header>Kill Match Up</Header>
         <table>
             <tbody>
-    
                 {rows}
             </tbody>
         </table>

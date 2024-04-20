@@ -2,10 +2,10 @@
 import InteractiveTable from "../InteractiveTable";
 import Header from "../Header";
 import { ignore0, getPlayer, getTeamColorClass, cleanWeaponName } from "@/app/lib/generic.mjs";
-import CountryFlag from "../CountryFlag";
 import Tabs from "../Tabs";
 import { useState } from "react";
 import Image from "next/image";
+import PlayerLink from "../PlayerLink";
 
 function renderBasicTables(orderedNames, data, players, totalTeams){
 
@@ -36,7 +36,7 @@ function renderBasicTables(orderedNames, data, players, totalTeams){
                 "player": {
                     "className": `player-name-td text-left ${(totalTeams < 2) ? "" : getTeamColorClass(player.team)}`,
                     "value": player.name.toLowerCase(), 
-                    "displayValue": <><CountryFlag code={player.country}/>{player.name}</>
+                    "displayValue": <PlayerLink id={d.player_id} country={player.country}>{player.name}</PlayerLink>
                 },
                 "kills": {"value": d.kills, "displayValue": ignore0(d.kills)},
                 "deaths": {"value": d.deaths, "displayValue": ignore0(d.deaths)},
@@ -116,7 +116,7 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
 
         columns.player = {
             "value": player.name.toLowerCase(), 
-            "displayValue": <><CountryFlag code={player.country}/>{player.name}</>,
+            "displayValue": <PlayerLink id={playerId} country={player.country}>{player.name}</PlayerLink>,
             "className": `player-name-td text-left ${(totalTeams < 2) ? "" : getTeamColorClass(player.team)}`
         };
 

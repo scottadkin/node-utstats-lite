@@ -2,7 +2,7 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { getPlayer, getTeamColorClass, ignore0 } from "../../lib/generic.mjs";
-import CountryFlag from "../CountryFlag";
+import PlayerLink from "../PlayerLink";
 
 
 function createPlayerData(data){
@@ -63,7 +63,7 @@ export default function DomTable({data, players}){
             "player": {
                 "className":`player-name-td ${getTeamColorClass(player.team)} text-left`,
                 "value": player.name.toLowerCase(), 
-                "displayValue": <><CountryFlag code={player.country}/>{player.name}</>
+                "displayValue": <PlayerLink id={playerId} country={player.country}>{player.name}</PlayerLink>
             }
         }
 

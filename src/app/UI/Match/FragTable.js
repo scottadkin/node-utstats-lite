@@ -2,7 +2,7 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { getTeamColorClass, MMSS, ignore0, convertTimestamp } from "@/app/lib/generic.mjs";
-import CountryFlag from "../CountryFlag";
+import PlayerLink from "../PlayerLink";
 
 export default function FragTable({data, totalTeams}){
 
@@ -47,7 +47,7 @@ export default function FragTable({data, totalTeams}){
         test[team].push({
             "name": {
                 "value": name.toLowerCase(), 
-                "displayValue": <><CountryFlag code={d.country}/>{name}</>, 
+                "displayValue": <PlayerLink id={d.player_id} country={d.country}>{name}</PlayerLink>, 
                 "className": `player-name-td ${getTeamColorClass((totalTeams > 1) ? d.team : 255)} text-left`
             },
             "playtime": {"value": d.time_on_server, "displayValue": MMSS(d.time_on_server)},

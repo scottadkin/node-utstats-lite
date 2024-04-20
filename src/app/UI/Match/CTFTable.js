@@ -2,9 +2,9 @@
 import InteractiveTable from "../InteractiveTable";
 import { getTeamColorClass, getPlayer, ignore0 } from "@/app/lib/generic.mjs";
 import Header from "../Header";
-import CountryFlag from "../CountryFlag";
 import Tabs from "../Tabs";
 import { useState } from "react";
+import PlayerLink from "../PlayerLink";
 
 
 function createGeneralRow(player, d){
@@ -12,7 +12,7 @@ function createGeneralRow(player, d){
     return {
         "player": {
             "value": player.name.toLowerCase(), 
-            "displayValue": <><CountryFlag code={player.country}/>{player.name}</>,
+            "displayValue": <PlayerLink id={d.player_id} country={player.country}>{player.name}</PlayerLink>,
             "className": `player-name-td text-left ${getTeamColorClass(player.team)}`
         },
         "taken": {"value": d.flag_taken, "displayValue": ignore0(d.flag_taken)},
@@ -33,7 +33,7 @@ function createReturnRow(player, d){
     return {
         "player": {
             "value": player.name.toLowerCase(), 
-            "displayValue": <><CountryFlag code={player.country}/>{player.name}</>,
+            "displayValue": <PlayerLink id={d.player_id} country={player.country}>{player.name}</PlayerLink>,
             "className": `player-name-td text-left ${getTeamColorClass(player.team)}`
         },
         "return": {"value": d.flag_return, "displayValue": ignore0(d.flag_return)},

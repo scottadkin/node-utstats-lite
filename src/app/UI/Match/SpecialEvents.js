@@ -1,7 +1,7 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { ignore0, plural, getTeamColorClass } from "@/app/lib/generic.mjs";
-import CountryFlag from "../CountryFlag";
+import PlayerLink from "../PlayerLink";
 
 function bHadAnyMultiEvents(playerData){
 
@@ -64,7 +64,7 @@ function renderFirstBlood(data, totalTeams){
         <tbody>
             <tr>
                 <td>First Blood</td>
-                <td className={teamColor}><CountryFlag code={player.country}/>{player.name}</td>
+                <td className={teamColor}><PlayerLink id={player.player_id} country={player.country}>{player.name}</PlayerLink></td>
             </tr>
         </tbody>
     </table>
@@ -177,7 +177,7 @@ export default function SpecialEvents({data, totalTeams}){
             multiRows.push({
                 "player": {
                     "value": p.name.toLowerCase(), 
-                    "displayValue": <><CountryFlag code={p.country}/>{p.name}</>,
+                    "displayValue": <PlayerLink id={p.player_id} country={p.country}>{p.name}</PlayerLink>,
                     "className": `text-left ${teamColor} player-name-td`
                 },
                 "double": {"value": p.multi_1, "displayValue": ignore0(p.multi_1)},
@@ -193,7 +193,7 @@ export default function SpecialEvents({data, totalTeams}){
             spreeRows.push({
                 "player": {
                     "value": p.name.toLowerCase(), 
-                    "displayValue": <><CountryFlag code={p.country}/>{p.name}</>,
+                    "displayValue": <PlayerLink id={p.player_id} country={p.country}>{p.name}</PlayerLink>,
                     "className": `text-left ${teamColor} player-name-td`
                 },
                 "spree": {"value": p.spree_1, "displayValue":  ignore0(p.spree_1)},

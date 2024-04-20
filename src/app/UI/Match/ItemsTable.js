@@ -2,7 +2,7 @@
 import InteractiveTable from "../InteractiveTable";
 import Header from "../Header";
 import { getTeamColorClass, ignore0 } from "@/app/lib/generic.mjs";
-import CountryFlag from "../CountryFlag";
+import PlayerLink from "../PlayerLink";
 
 function bAnyData(data){
 
@@ -46,7 +46,7 @@ export default function ItemsTable({data, totalTeams}){
         rows.push({
             "player": {
                 "value": d.name.toLowerCase(), 
-                "displayValue":<><CountryFlag code={d.country}/>{d.name}</>,
+                "displayValue":<PlayerLink id={d.player_id} country={d.country}>{d.name}</PlayerLink>,
                 "className": `player-name-td ${(totalTeams > 0) ? getTeamColorClass(d.team) : ""} text-left`
             },
             "pads": {"value": d.item_pads, "displayValue": ignore0(d.item_pads)},
