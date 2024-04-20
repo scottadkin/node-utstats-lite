@@ -1,4 +1,4 @@
-import { updateServer } from "../servers.mjs";
+import { updateServer, updateServerTotals } from "../servers.mjs";
 
 export class Server{
 
@@ -12,5 +12,10 @@ export class Server{
     async setId(){
 
         this.id = await updateServer(this.name, this.ip, this.port);
+    }
+
+    async updateTotals(){
+
+        await updateServerTotals(this.id);
     }
 }

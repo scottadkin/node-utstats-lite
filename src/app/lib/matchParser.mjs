@@ -107,6 +107,8 @@ export class MatchParser{
                 return;
             }
 
+            await this.server.updateTotals();
+
             await this.players.insertPlayerMatchData(this.matchId, this.match.date);
             await this.ctf.insertPlayerMatchData(this.players, this.matchId);
             await this.dom.insertPlayerMatchData(this.players.players, this.matchId);

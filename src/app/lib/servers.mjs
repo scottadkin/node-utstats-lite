@@ -16,7 +16,7 @@ async function bServerExist(name){
 
 async function createServer(name, ip, port){
 
-    const query = `INSERT INTO nstats_servers VALUES(NULL,?,?,?)`;
+    const query = `INSERT INTO nstats_servers VALUES(NULL,?,?,?,0,0,"1999-11-30 00:00:00","1999-11-30 00:00:00")`;
 
     const result = await simpleQuery(query, [name, ip, port]);
 
@@ -72,4 +72,37 @@ export async function getServerNames(names){
     }
 
     return data;
+}
+
+
+async function createServerTotals(serverId){
+
+    const query = `SELECT COUNT(*) as total_matches, MIN(date) as first_match, MAX(date) as last_match, SUM(playtime) as playtime
+    FROM nstats_matches WHERE server_id=?`;
+
+    const result = await simpleQuery(query, [serverId]);
+
+    if(result.length === 0) return null;
+
+    return result[0];
+}
+
+
+async function updateTotals(id, totals){
+
+    const query = `UPDATE nstats_servers SET matches=?,playtime=?,first_match=?,last_match=? WHERE id=?`;
+
+    return await simpleQuery(query, [totals.total_matches, totals.playtime, totals.first_match, totals.last_match, id]);
+}
+
+export async function updateServerTotals(serverId){
+
+    const totals = await createServerTotals(serverId);
+
+    if(totals === null){
+        new Message(`Failed to createServerTotals (servers.updateServerTotals)`,"warning");
+        return;
+    }
+
+    await updateTotals(serverId, totals);
 }
