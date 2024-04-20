@@ -127,8 +127,6 @@ async function getMatch(id){
 
     if(result.length === 0) return null;
 
-    
-
     const data = result[0];
 
     const serverName = await getServerNames([data.server_id]);

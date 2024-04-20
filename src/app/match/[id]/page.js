@@ -8,27 +8,25 @@ import CTFTable from "@/app/UI/Match/CTFTable";
 import DomTable from "@/app/UI/Match/DomTable";
 import ItemsTable from "@/app/UI/Match/ItemsTable";
 import BasicInfo from "@/app/UI/Match/BasicInfo";
+import { convertTimestamp, plural, toPlaytime } from "@/app/lib/generic.mjs";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
 
     //const match = new Match();
-    const id = params.id;
+    const matchId = params.id ?? -1;
 
-    //const matchData = await match.get(1);
-   
-    // fetch data
-    //const product = await fetch(`https://.../${id}`).then((res) => res.json())
-   
-    // optionally access and extend (rather than replace) parent metadata
-    //const previousImages = (await parent).openGraph?.images || []
+    const matchData = await getMatchData(matchId);
+
+    const b = matchData.basic;
+
+    const date = Math.floor(new Date(matchData.basic.date) * 0.001);
+
    
     return {
-        title: `Match ${id}`,
-        /*openGraph: {
-            images: ['/some-specific-page-image.jpg'],
-        },*/
+        "title": `${b.mapName} - ${convertTimestamp(date, true)}`,
+        "description": `Match report for ${b.mapName} (${b.gametypeName}), ${convertTimestamp(date, true)}, ${b.players} ${plural(b.players, "player")}, match length ${toPlaytime(b.playtime)}, server ${b.serverName}.`
     }
 }
 

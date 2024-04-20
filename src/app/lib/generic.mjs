@@ -257,7 +257,7 @@ export function convertTimestamp(timestamp, noDayName, noTime){
         timeString = ` ${hour}:${minute}`;
     }
 
-    return `${dayNameString}${day}${getOrdinal(day)} ${getMonthName(month)} ${year}${timeString}`;
+    return `${dayNameString}${day}${getOrdinal(day)} ${getMonthName(month, true)} ${year}${timeString}`;
 }
 
 
