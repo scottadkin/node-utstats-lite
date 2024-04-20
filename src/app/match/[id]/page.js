@@ -1,8 +1,5 @@
 "use server"
-import Image from "next/image";
 import {getMatchData} from "@/app/lib/matches.mjs";
-import Header from "@/app/UI/Header";
-import MatchScoreBox from "@/app/UI/MatchScoreBox";
 import FragTable from "@/app/UI/Match/FragTable";
 import SpecialEvents from "@/app/UI/Match/SpecialEvents";
 import WeaponStats from "@/app/UI/Match/WeaponStats";
@@ -10,6 +7,7 @@ import KillsMatchUp from "@/app/UI/Match/KillsMatchUp";
 import CTFTable from "@/app/UI/Match/CTFTable";
 import DomTable from "@/app/UI/Match/DomTable";
 import ItemsTable from "@/app/UI/Match/ItemsTable";
+import BasicInfo from "@/app/UI/Match/BasicInfo";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -44,12 +42,9 @@ export default async function MatchPage({params, searchParams}) {
     const matchData = await getMatchData(matchId);
 	const totalTeams = matchData.basic.total_teams;
 
-    console.log(matchData);
-
     return (
 		<main>
-			<Header>Match Report</Header> 
-			<MatchScoreBox data={matchData.basic}/>
+			<BasicInfo matchData={matchData}/>
 			<FragTable data={matchData} totalTeams={totalTeams}/>
             <CTFTable data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/>
             <DomTable data={matchData.dom} players={matchData.basicPlayers}/>

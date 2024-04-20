@@ -56,7 +56,7 @@ export async function updateServer(name, ip, port){
 
 export async function getServerNames(names){
 
-    if(names.length === 0) return [];
+    if(names.length === 0) return {};
 
     const query = `SELECT id,name FROM nstats_servers WHERE id IN(?)`;
 

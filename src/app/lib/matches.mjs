@@ -125,9 +125,21 @@ async function getMatch(id){
 
     const result = await simpleQuery(query, [id]);
 
-    if(result.length > 0) return result[0];
+    if(result.length === 0) return null;
 
-    return null;
+    
+
+    const data = result[0];
+
+    const serverName = await getServerNames([data.server_id]);
+    const gametypeName = await getGametypeNames([data.gametype_id]);
+    const mapName = await getMapNames([data.map_id]);
+
+    data.serverName = (serverName[data.server_id] !== undefined) ? serverName[data.server_id] : "Not Found";
+    data.gametypeName = (gametypeName[data.gametype_id] !== undefined) ? gametypeName[data.gametype_id] : "Not Found";
+    data.mapName = (mapName[data.map_id] !== undefined) ? mapName[data.map_id] : "Not Found";
+
+    return data;
 }
 
 async function getPlayerMatchData(id){
