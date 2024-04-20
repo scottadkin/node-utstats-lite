@@ -111,6 +111,9 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
             matchId,
             matchDate,
             p.bBot,
+            (p.ping.min !== null) ? p.ping.min : -1,
+            (p.ping.avg !== null) ? p.ping.avg : -1,
+            (p.ping.max !== null) ? p.ping.max : -1,
             p.team,
             p.stats.score,
             p.stats.frags,
@@ -146,7 +149,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
 
     const query = `INSERT INTO nstats_match_players (
         player_id, spectator, ip, country, hwid,
-        mac1, mac2, match_id, match_date, bot,
+        mac1, mac2, match_id, match_date, bot, ping_min, ping_avg, ping_max,
         team, score, frags, kills, deaths,
         suicides, team_kills, efficiency, time_on_server, ttl,
         first_blood, spree_1, spree_2, spree_3, spree_4,

@@ -20,6 +20,14 @@ export class Player{
         this.masterId = null;
         this.bFirstBlood = 0;
 
+        this.ping = {
+            "min": null,
+            "avg": null,
+            "max": null
+        };
+
+        this.pings = [];
+
         this.connects = [];
         this.disconnects = [];
 

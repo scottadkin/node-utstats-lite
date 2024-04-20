@@ -56,6 +56,7 @@ export class MatchParser{
             this.items.setPlayerStats(this.players);
 
             this.players.mergePlayers();
+            this.players.setPlayerPingStats();
 
             this.players.setCountries();
             this.players.matchEnded(this.matchStart, this.matchEnd);

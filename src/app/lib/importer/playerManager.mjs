@@ -113,6 +113,12 @@ export class PlayerManager{
         }
 
 
+        if(type === "ping"){
+            this.parsePing(line);
+            return;
+        }
+
+
         const genericResult = genericReg.exec(line);
 
         if(genericResult === null) return;
@@ -128,6 +134,30 @@ export class PlayerManager{
         
         this.setPlayerProperty(playerId, subType, subValue);
         
+    }
+
+    parsePing(line){
+
+        const reg = /^ping\t(\d+)\t(\d+)$/i;
+
+        const result = reg.exec(line);
+
+        if(result === null) return;
+
+        const playerId = parseInt(result[1]);
+        const ping = parseInt(result[2]);
+
+        const player = this.getPlayerById(playerId);
+
+        if(player === null){
+            //sometimes ping with playerid 0 is logged even though there is no player connected yet?
+            if(playerId === 0) return;
+            new Message(`Failed to get player by id ${playerId}, parsePing()`,"warning");
+            return;
+        }
+
+        player.pings.push(ping);
+
     }
 
     parseStatLine(timestamp, line){
@@ -476,6 +506,8 @@ export class PlayerManager{
                 master.stats.items[itemType] += timesUsed;
             }
 
+            master.pings = [...master.pings, ...p.pings];
+
             master.connects = [... new Set([...master.connects, ...p.connects])];
 
             master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];
@@ -550,5 +582,39 @@ export class PlayerManager{
 
             //const totals = await calcPlayerTotals(playerData.masterId);
         //}
+    }
+
+
+    setPlayerPingStats(){
+
+        for(const player of Object.values(this.mergedPlayers)){
+
+            let total = 0;
+            let min = -1;
+            let avg = -1;
+            let max = -1;
+
+            for(let i = 0; i < player.pings.length; i++){
+                const p = player.pings[i];
+
+                if(i === 0 || p < min){
+                    min = p;
+                }
+
+                if(i === 0 || p > max){
+                    max = p;
+                }
+
+                total += p;
+            }
+
+            if(total !== 0 && player.pings.length > 0){
+                avg = Math.round(total / player.pings.length);
+            }
+
+            player.ping.min = min;
+            player.ping.avg = avg;
+            player.ping.max = max;
+        }
     }
 }
