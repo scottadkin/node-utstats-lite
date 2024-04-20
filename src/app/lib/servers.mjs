@@ -106,3 +106,11 @@ export async function updateServerTotals(serverId){
 
     await updateTotals(serverId, totals);
 }
+
+
+export async function getBasicList(){
+
+    const query = `SELECT * FROM nstats_servers ORDER by NAME ASC`;
+
+    return await simpleQuery(query);
+}
