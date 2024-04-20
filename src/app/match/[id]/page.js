@@ -9,6 +9,7 @@ import DomTable from "@/app/UI/Match/DomTable";
 import ItemsTable from "@/app/UI/Match/ItemsTable";
 import BasicInfo from "@/app/UI/Match/BasicInfo";
 import { convertTimestamp, plural, toPlaytime } from "@/app/lib/generic.mjs";
+import Pings from "@/app/UI/Match/Pings";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -50,6 +51,7 @@ export default async function MatchPage({params, searchParams}) {
             <ItemsTable data={matchData.playerData} totalTeams={totalTeams}/>
             <SpecialEvents data={matchData} totalTeams={totalTeams}/>
             <KillsMatchUp kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/>
+            <Pings data={matchData.playerData} totalTeams={totalTeams}/>
 		</main>
     );
 }

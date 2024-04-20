@@ -147,6 +147,8 @@ export class PlayerManager{
         const playerId = parseInt(result[1]);
         const ping = parseInt(result[2]);
 
+        if(ping === 0) return;
+
         const player = this.getPlayerById(playerId);
 
         if(player === null){
