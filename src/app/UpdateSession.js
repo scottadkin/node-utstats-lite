@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 //probably not the right way of doing this
+//TODO: use middleware.js to update users cookie expires
 async function fart(){
 
     try{

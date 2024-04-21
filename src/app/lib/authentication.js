@@ -180,12 +180,6 @@ export async function logout(){
         
         const cookieStore = cookies();
 
-       // ..const userId = cookieStore.get("nstats_userid");
-       // ,,const sessionId = cookieStore.get("nstats_sid");
-
-        //if(userId === undefined) throw new Error("UserId is undefined");
-        //if(sessionId === undefined) throw new Error("sessionId is undefined");
-
         cookieStore.delete("nstats_name");
         cookieStore.delete("nstats_sid");
         cookieStore.delete("nstats_userid");
@@ -211,14 +205,6 @@ export async function bSessionValid(userId, sessionId){
     return false;
 }
 
-async function updateSessionExpires(userId, sessionId, expires){
-
-    const query = `UPDATE nstats_sessions SET date=? WHERE user=? AND hash=?`;
-
-    expires = Math.floor(expires * 0.001);
-
-    await simpleQuery(query, [expires, userId, sessionId]);
-}
 
 export async function updateSession(){
 
@@ -258,9 +244,6 @@ export async function updateSession(){
        cookieStore.set("nstats_userid", userId.value, {expires, "httpOnly": true, "path": "/"});
        cookieStore.set("nstats_sid", sId.value, {expires, "httpOnly": true, "path": "/"});
 
-       //await updateSessionExpires(userId.value, sId.value, expires);
-
-       //return res;
        return userName;
 
     }catch(err){
@@ -269,36 +252,15 @@ export async function updateSession(){
     }
 }
 
-/*export async function bSessionAdminUser(){
 
-    try{
+export async function getSessionInfo(){
 
-        const userId = cookies().get("nstats_userid");
-        const sId = cookies().get("nstats_sid");
+    const cookieStore = cookies();
 
-        if(userId === undefined || sId === undefined){
-            throw new Error("UserId or Session is undefined");
-        }
+    const userId = cookieStore.get("nstats_userid")?.value;
+    const sessionId = cookieStore.get("nstats_sid")?.value;
 
-        if(!await bSessionValid(userId.value, sId.value)){
-            throw new Error("You are not logged in, or Session is not valid");
-        }
-
-        if(!await bAccountAdmin(userId.value)){
-            throw new Error("You do not have the required permissions.");
-        }
-
-        return {"bAdmin": true, "error": null};
-
-    }catch(err){
-        return {"bAdmin": false, "error": err.toString()};
-    }
-}*/
-
-
-export async function getSessionInfo(userId, sessionId){
-
-    if(userId === null || sessionId === null) return null; 
+    if(userId === undefined || sessionId === undefined) return null; 
 
     if(!await bSessionValid(userId, sessionId)){
         return null;
@@ -309,7 +271,6 @@ export async function getSessionInfo(userId, sessionId){
 
     if(!bActive) return null; 
 
-    console.log(`userId = ${userId}, sessionId=${sessionId}`);
 
     return {username}
 }

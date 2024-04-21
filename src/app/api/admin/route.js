@@ -6,12 +6,7 @@ export async function POST(req){
 
     try{
 
-        const cookieStore = cookies();
-
-        const userId = cookieStore.get("nstats_userid")?.value ?? null;
-        const sessionId = cookieStore.get("nstats_sid")?.value ?? null;
-
-        const sessionInfo = await getSessionInfo(userId, sessionId);
+        const sessionInfo = await getSessionInfo();
 
         if(sessionInfo === null) throw new Error(`You are not logged in`);
 
@@ -32,12 +27,7 @@ export async function GET(req){
     
     try{
 
-        const cookieStore = cookies();
-
-        const userId = cookieStore.get("nstats_userid")?.value ?? null;
-        const sessionId = cookieStore.get("nstats_sid")?.value ?? null;
-
-        const sessionInfo = await getSessionInfo(userId, sessionId);
+        const sessionInfo = await getSessionInfo();
 
         if(sessionInfo === null) throw new Error(`You are not logged in`);
 

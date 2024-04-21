@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import ErrorBox from "../UI/ErrorBox";
 import Header from "../UI/Header";
-import { bSessionValid  } from "../lib/authentication";
+import { getSessionInfo  } from "../lib/authentication";
 import Tabs from "../UI/Tabs";
 import FTPManager from "../UI/admin/FTPManager";
 

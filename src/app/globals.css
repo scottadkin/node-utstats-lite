@@ -93,9 +93,11 @@ body{
 
 
 footer{ 
-	min-height:50px; 
+	padding:var(--padding-1);
 	background:var(--bg-color-2); 
-	color:white;
+	color:var(--font-color-2);
+	text-align:center;
+	font-size:var(--font-size-small);
 }
 
 a{
