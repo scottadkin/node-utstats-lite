@@ -118,6 +118,11 @@ export class PlayerManager{
             return;
         }
 
+        if(type === "teamchange"){
+            this.parseTeamChange(line);
+            return;
+        }
+
 
         const genericResult = genericReg.exec(line);
 
@@ -136,9 +141,30 @@ export class PlayerManager{
         
     }
 
+    parseTeamChange(line){
+
+        const reg = /^teamchange\t(\d+?)\t(\d+)$/i;
+
+        const result = reg.exec(line);
+
+        if(result === null) return;
+
+        const playerId = parseInt(result[1]);
+        const team = parseInt(result[2]);
+
+        const player = this.getPlayerById(playerId);
+
+        if(player === null){
+            new Message(`Failed to get player by id ${playerId}, parseTeamChange()`,"warning");
+            return;
+        }
+
+        player.team = team;
+    }
+
     parsePing(line){
 
-        const reg = /^ping\t(\d+)\t(\d+)$/i;
+        const reg = /^ping\t(\d+?)\t(\d+)$/i;
 
         const result = reg.exec(line);
 

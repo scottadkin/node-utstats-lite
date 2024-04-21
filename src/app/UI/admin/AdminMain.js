@@ -12,6 +12,7 @@ export default function AdminMain(){
             options={[
                 {"name": "Test", "value": "0"},
                 {"name": "FTP Manager", "value": "ftp"},
+                {"name": "Importer Settings", "value": "importer"},
             ]}
             selectedValue={mode}
             changeSelected={(value) =>{
