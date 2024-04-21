@@ -1,4 +1,5 @@
 import { simpleQuery } from "./database.mjs";
+import Message from "./message.mjs";
 
 
 
@@ -15,7 +16,7 @@ async function bGametypeExist(name){
 
 async function createGametype(name){
 
-    const query = `INSERT INTO nstats_gametypes VALUES(NULL,?)`;
+    const query = `INSERT INTO nstats_gametypes VALUES(NULL,?,0,0,"1999-11-30 00:00:00","1999-11-30 00:00:00")`;
 
     const result = await simpleQuery(query, [name]);
 
@@ -67,4 +68,43 @@ export async function getGametypeNames(ids){
     }
 
     return data;
+}
+
+async function createTotals(gametypeId){
+
+    const query = `SELECT COUNT(*) as total_matches, MIN(date) as first_match, MAX(date) as last_match, SUM(playtime) as playtime
+    FROM nstats_matches WHERE gametype_id=?`;
+
+    const result = await simpleQuery(query, [gametypeId]);
+
+    if(result.length === 0) return null;
+
+    return result[0];
+}
+
+async function updateTotals(id, totals){
+
+    const query = `UPDATE nstats_gametypes SET matches=?,playtime=?,first_match=?,last_match=? WHERE id=?`;
+
+    return await simpleQuery(query, [totals.total_matches, totals.playtime, totals.first_match, totals.last_match, id]);
+}
+
+export async function updateBasicTotals(gametypeId){
+
+    const totals = await createTotals(gametypeId);
+
+    if(totals === null){
+        new Message(`Failed to create totals (gametypes.updateBasicTotals)`,"warning");
+        return;
+    }
+
+    await updateTotals(gametypeId, totals);
+}
+
+
+export async function getAll(){
+
+    const query = `SELECT * FROM nstats_gametypes ORDER BY name ASC`;
+
+    return await simpleQuery(query);
 }

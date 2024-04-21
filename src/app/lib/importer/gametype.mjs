@@ -1,4 +1,4 @@
-import { updateGametype } from "../gametypes.mjs";
+import { updateBasicTotals, updateGametype } from "../gametypes.mjs";
 
 export class Gametype{
 
@@ -62,5 +62,11 @@ export class Gametype{
         if(this.bInsta === 0) return;
 
         this.name = `${this.name} (Instagib)`;
+    }
+
+
+    async updateTotals(){
+
+        await updateBasicTotals(this.id);
     }
 }
