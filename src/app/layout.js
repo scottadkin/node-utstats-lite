@@ -3,7 +3,7 @@ import "./globals.css";
 import Nav from "./UI/Nav";
 import { cookies } from "next/headers";
 import UpdateSession from "./UpdateSession";
-import { bSessionAdminUser } from "./lib/authentication";
+import { getSessionInfo } from "./lib/authentication";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,20 +17,28 @@ export default async function RootLayout({ children }) {
 	const cookieStore = cookies();
 
 	const username = cookieStore.get("nstats_name")?.value ?? null;
+	const sid = cookieStore.get("nstats_sid")?.value ?? null;
+	const userId = cookieStore.get("nstats_userid")?.value ?? null;
 
-	const {bAdmin, error} = await bSessionAdminUser();
+	//const bValidSession = await bSessionValid("userId", "sessionId");
 
-	console.log("bAdmin, error");
-	console.log(bAdmin, error);
+	//console.log(`bValidSession = ${bValidSession}`);
 
-	console.log(`userName = ${username}`);
+	const sessionInfo = await getSessionInfo(userId, sid);
+
+	//const {bAdmin, error} = await bSessionAdminUser();
+
+	//console.log("bAdmin, error");
+	//console.log(bAdmin, error);
+
+	//console.log(`userName = ${username}`);
 
 	
 	return (
 		<html lang="en">
 		<body className={inter.className}>
 			<UpdateSession />
-			<Nav username={username} bAdmin={bAdmin}/>
+			<Nav sessionInfo={sessionInfo} bAdmin={true}/>
 			<div className="padding-top"></div>
 			{children}
 			<footer>Horse Noise</footer>

@@ -298,6 +298,20 @@ const queries = [
             flag_return_enemy_base int NOT NULL,
             flag_return_save int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_users (
+            id int NOT NULL AUTO_INCREMENT,
+            name varchar(100) NOT NULL,
+            password varchar(64) NOT NULL,
+            activated tinyint NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_sessions (
+            id int NOT NULL AUTO_INCREMENT,
+            user int NOT NULL,
+            hash varchar(64) NOT NULL,
+            ip varchar(50) NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
         
 
 ];

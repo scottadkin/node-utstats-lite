@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import ErrorBox from "../UI/ErrorBox";
 import Header from "../UI/Header";
-import { bSessionValid, bAccountAdmin, bSessionAdminUser } from "../lib/authentication";
+import { bSessionValid  } from "../lib/authentication";
 import Tabs from "../UI/Tabs";
 import FTPManager from "../UI/admin/FTPManager";
 
@@ -22,14 +22,20 @@ export default async function AdminPage({params, searchParams}){
         </div>
     }
 
-    const {bAdmin, error} = await bSessionAdminUser();
+    //const {bAdmin, error} = await bSessionAdminUser();
 
+   // const a = await bSessionValid(userId, sId);
 
-    if(!bAdmin){
+    let error = "a";
+
+    console.log(sId);
+
+    if(!false){
 
         return <div>
             <Header>Admin Control Panel</Header>
-            <ErrorBox title="Access Denied">{error}</ErrorBox>
+            {sId.value}
+            <ErrorBox title="Access Denied">{sId.value}</ErrorBox>
         </div>
     }
 

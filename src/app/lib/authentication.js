@@ -31,53 +31,14 @@ async function bAccountActive(id){
     return false;
 }
 
-async function bAccountBanned(id){
-
-    const query = `SELECT banned FROM nstats_users WHERE id=?`;
-
-    const result = await simpleQuery(query, [id]);
-
-    if(result.length === 0) throw new Error(`There is no user with the account id of ${id}`);
-
-    if(result[0].banned === 1) return true;
-
-    return false;
-}
-
-export async function bAccountAdmin(id){
-
-    try{
-        const query = `SELECT admin FROM nstats_users WHERE id=?`;
-
-        const result = await simpleQuery(query, [id]);
-
-        if(result.length === 0) throw new Error(`There is no user with the account id of ${id}`);
-
-        if(result[0].admin === 1) return true;
-
-        return false;
-
-    }catch(err){
-
-        console.trace(err);
-
-        return false;
-    }
-}
-
 
 
 async function createSession(userId, hash, expires){
 
-    const query = `INSERT INTO nstats_sessions VALUES(NULL,?,?,?,?)`;
+    const query = `INSERT INTO nstats_sessions VALUES(NULL,?,?,?)`;
 
     expires = Math.floor(expires * 0.001);
-    const now = Math.floor(Date.now() * 0.001);
-    await simpleQuery(query, [now, userId, hash, "0.0.0.0"]);
-}
-
-async function bUserLoggedIn(userId){
-
+    await simpleQuery(query, [ userId, hash, "0.0.0.0"]);
 }
 
 async function deleteSession(userId, sId){
@@ -87,16 +48,6 @@ async function deleteSession(userId, sId){
     return await simpleQuery(query, [userId, sId]);
 }
 
-async function getAccountPermissions(id){
-
-    const query = `SELECT name,activated,admin,banned,upload_images FROM nstats_users WHERE id=?`;
-
-    const result = await simpleQuery(query, [id]);
-
-    if(result.length > 0) return result[0];
-
-    throw new Error(`There is no user with the account id of ${id}`);
-}
 
 async function bNameTaken(username){
 
@@ -111,21 +62,17 @@ async function bNameTaken(username){
 
 async function createAccount(username, password){
 
-    const now = Math.floor(Date.now() * 0.001);
-
-    let bAdmin = 1;
     let bActive = 0;
 
     const bAnyUsers = await bAnyAccounts();
 
     if(!bAnyUsers){
-        bAdmin = 1;
         bActive = 1;
     }
 
-    const query = `INSERT INTO nstats_users VALUES(NULL, ?,?,?,?,0,?,0,0,"",0,0)`;
+    const query = `INSERT INTO nstats_users VALUES(NULL, ?,?,?)`;
 
-    await simpleQuery(query, [username, password, now, bActive, bAdmin]);
+    await simpleQuery(query, [username, password, bActive]);
 
 }
 
@@ -203,9 +150,9 @@ export async function login(currentState, formData){
 
         const userId = result[0].id;
 
-        const permissions = await getAccountPermissions(userId);
+        const permissions = await bAccountActive(userId);
 
-        if(permissions.banned === 1) throw new Error("User account has been banned.");
+        //if(permissions.banned === 1) throw new Error("User account has been banned.");
         if(permissions.activated === 0) throw new Error("User account has not been activated.");
 
         const expires = new Date(Date.now() + 60 * 60 * 1000);
@@ -311,7 +258,7 @@ export async function updateSession(){
        cookieStore.set("nstats_userid", userId.value, {expires, "httpOnly": true, "path": "/"});
        cookieStore.set("nstats_sid", sId.value, {expires, "httpOnly": true, "path": "/"});
 
-       await updateSessionExpires(userId.value, sId.value, expires);
+       //await updateSessionExpires(userId.value, sId.value, expires);
 
        //return res;
        return userName;
@@ -322,7 +269,7 @@ export async function updateSession(){
     }
 }
 
-export async function bSessionAdminUser(){
+/*export async function bSessionAdminUser(){
 
     try{
 
@@ -346,4 +293,23 @@ export async function bSessionAdminUser(){
     }catch(err){
         return {"bAdmin": false, "error": err.toString()};
     }
+}*/
+
+
+export async function getSessionInfo(userId, sessionId){
+
+    if(userId === null || sessionId === null) return null; 
+
+    if(!await bSessionValid(userId, sessionId)){
+        return null;
+    }
+
+    const bActive = await bAccountActive(userId);
+    const username = await getUserName(userId);
+
+    if(!bActive) return null; 
+
+    console.log(`userId = ${userId}, sessionId=${sessionId}`);
+
+    return {username}
 }

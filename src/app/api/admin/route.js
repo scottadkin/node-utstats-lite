@@ -1,32 +1,56 @@
-import { bSessionAdminUser } from "@/app/lib/authentication";
+import { getSessionInfo } from "@/app/lib/authentication";
 import { getAllFTPSettings } from "@/app/lib/ftp";
+import { cookies } from "next/headers";
 
 export async function POST(req){
 
-    const {bAdmin, error} = await bSessionAdminUser();
+    try{
 
-    if(!bAdmin){
-        return Response.json({"error": error});
+        const cookieStore = cookies();
+
+        const userId = cookieStore.get("nstats_userid")?.value ?? null;
+        const sessionId = cookieStore.get("nstats_sid")?.value ?? null;
+
+        const sessionInfo = await getSessionInfo(userId, sessionId);
+
+        if(sessionInfo === null) throw new Error(`You are not logged in`);
+
+        console.log(sessionInfo);
+
+        return Response.json({"message": "hi"});
+
+    }catch(err){
+
+        return Response.json({"error": err.toString()});
     }
-;
-
-    const {mode} = await req.json();
-
-
-    if(mode === undefined){
-        return Response.json({"error": "Mode is undefined"});
-    }
-
-    console.log(`mode = ${mode}`);
-    //Check if admin, if not return error message
-
-    return Response.json({"message": "hi"});
 }
 
 
 export async function GET(req){
 
+
+    
     try{
+
+        const cookieStore = cookies();
+
+        const userId = cookieStore.get("nstats_userid")?.value ?? null;
+        const sessionId = cookieStore.get("nstats_sid")?.value ?? null;
+
+        const sessionInfo = await getSessionInfo(userId, sessionId);
+
+        if(sessionInfo === null) throw new Error(`You are not logged in`);
+
+        console.log(sessionInfo);
+
+        return Response.json({"message": "hi"});
+
+    }catch(err){
+
+        return Response.json({"error": err.toString()});
+    }
+
+    /*try{
         const {bAdmin, error} = await bSessionAdminUser();
 
         const { searchParams } = new URL(req.url);
@@ -48,11 +72,11 @@ export async function GET(req){
 
         if(!bAdmin){
             throw new Error(error);
-        }
+        }*/
 
-        return Response.json({"message": "hi"});
-
+        //return Response.json({"message": "hi"});
+        /*
     }catch(err){
         return Response.json({"error": err.toString()});
-    }
+    }*/
 }

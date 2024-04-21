@@ -5,7 +5,7 @@ import Link from "next/link";
 import { logout } from "../lib/authentication";
 
 
-export default function Nav({username, bAdmin}){
+export default function Nav({sessionInfo, bAdmin}){
 
     const router = useRouter();
     const pathname = usePathname().toLowerCase();
@@ -35,7 +35,7 @@ export default function Nav({username, bAdmin}){
         }
     ];
 
-    if(bAdmin){
+    //if(bAdmin){
 
         options.push({
             "name": "Admin",
@@ -44,9 +44,9 @@ export default function Nav({username, bAdmin}){
                 "/admin"
             ]
         });
-    }
+   // }
 
-    if(username === null){
+    if(sessionInfo === null){
 
         options.push({
             "name": "Login",
@@ -63,7 +63,7 @@ export default function Nav({username, bAdmin}){
     }else{
 
         options.push({
-            "name": `Logout ${username}`,
+            "name": `Logout ${sessionInfo.username}`,
             "url": "#",
             "matches": ["#"],
             "onClick": async () =>{
