@@ -12,6 +12,7 @@ export async function POST(req){
 
         console.log(sessionInfo);
 
+
         return Response.json({"message": "hi"});
 
     }catch(err){
@@ -32,6 +33,24 @@ export async function GET(req){
         if(sessionInfo === null) throw new Error(`You are not logged in`);
 
         console.log(sessionInfo);
+
+        const { searchParams } = new URL(req.url);
+
+        const mode = searchParams.get("mode");
+
+        if(mode === undefined){
+            throw new Error("Mode is undefined");
+        }
+
+        console.log("mode");
+        console.log(mode);
+
+        if(mode === "load-ftp"){
+
+            const data = await getAllFTPSettings();
+
+            return Response.json(data);
+        }
 
         return Response.json({"message": "hi"});
 

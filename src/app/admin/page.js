@@ -1,20 +1,13 @@
-import { cookies } from "next/headers";
 import ErrorBox from "../UI/ErrorBox";
 import Header from "../UI/Header";
 import { getSessionInfo  } from "../lib/authentication";
-import Tabs from "../UI/Tabs";
-import FTPManager from "../UI/admin/FTPManager";
+import AdminMain from "../UI/admin/AdminMain";
 
 export default async function AdminPage({params, searchParams}){
 
-    console.log(params, searchParams);
-    const sId = cookies().get("nstats_sid");
-    const userId = cookies().get("nstats_userid");
+    const sessionInfo = await getSessionInfo();
 
-    let selectedMode = (searchParams.mode === undefined) ? "" : searchParams.mode;
-
-
-    if(sId === undefined || userId === undefined){
+    if(sessionInfo === null){
 
         return <div>
             <Header>Admin Control Panel</Header>
@@ -22,35 +15,16 @@ export default async function AdminPage({params, searchParams}){
         </div>
     }
 
-    //const {bAdmin, error} = await bSessionAdminUser();
-
-   // const a = await bSessionValid(userId, sId);
-
-    let error = "a";
-
-    console.log(sId);
-
-    if(!false){
+    if(sessionInfo === null){
 
         return <div>
             <Header>Admin Control Panel</Header>
-            {sId.value}
-            <ErrorBox title="Access Denied">{sId.value}</ErrorBox>
+            <ErrorBox title="Access Denied">You do not have the required permissions.</ErrorBox>
         </div>
     }
 
     return <div>
         <Header>Admin Control Panel</Header>
-        ADMIN PAGE
-        <Tabs 
-            options={[
-                {"name": "Test", "value": "test"},
-                {"name": "FTP Manager", "value": "ftp"},
-            ]}
-            selectedValue={selectedMode}
-            tabName="mode"
-            url="/admin/"
-        />
-        {(selectedMode === "ftp") ? <FTPManager /> : null }
+        <AdminMain />
     </div>
 }

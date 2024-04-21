@@ -73,12 +73,6 @@ function renderSettings(state, dispatch){
         "user": {"title": "User"},
         "password": {"title": "Password"},
         "target": {"title": "Target Folder"},
-        /*"delete": {"title": "Delete After Import"},
-        "deleteTmp": {"title": "Delete TMP Files"},
-        "bots": {"title": "Ignore Bots"},
-        "duplicates": {"title": "Ignore Duplicates"},
-        "minPlayers": {"title": "Min Players"},
-        "minPlaytime": {"title": "Min Playtime"},*/
         "action": {"title": "Action"}
     };
 
@@ -97,19 +91,13 @@ function renderSettings(state, dispatch){
             "user": {"value": f.user.toLowerCase(), "displayValue": f.user},
             "password": {"value": f.password.toLowerCase(), "displayValue": f.password},
             "target": {"value": f.target_folder.toLowerCase(), "displayValue": f.target_folder},
-            /*"delete": {"value": f.delete_after_import, "displayValue": f.delete_after_import},
-            "deleteTmp": {"value": f.delete_tmp_files, "displayValue": f.delete_tmp_files},
-            "bots": {"value": f.ignore_bots, "displayValue": f.ignore_bots},
-            "duplicates": {"value": f.ignore_duplicates, "displayValue": f.ignore_duplicates},
-            "minPlayers": {"value": f.min_players},
-            "minPlaytime": {"value": f.min_playtime},*/
             "action": {"value": "", "displayValue": "Select Server"}
    
         });
     }
 
     return <>
-        <InteractiveTable headers={headers} rows={rows}/>
+        <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true}/>
     </>
 }
 
@@ -131,7 +119,6 @@ export default function FTPManager(){
         loadData(controller, dispatch);
 
         return () =>{
-            console.log("aa");
             controller.abort();
         }
 
@@ -144,7 +131,7 @@ export default function FTPManager(){
         for(let i = 0; i < state.ftp.length; i++){
             
             const f = state.ftp[i];
-            serverOptions.push({"value": f.id, "display": <><b>f.name</b> ({f.host}:{f.port})</>});
+            serverOptions.push(<option key={f.id} value={f.id}>{f.name} ({f.host}:{f.port})</option>);
         }
     }
 
@@ -152,12 +139,16 @@ export default function FTPManager(){
         <Header>FTP Manager</Header>
         <div className="form-row">
             <div className="form-label">Selected Server</div>
-            <DropDown selectedValue={state.selectedServer} options={serverOptions} changeSelected={(value) =>{
-                console.log(value);
-                dispatch({"type": "select-server", "value": value});
-            }}/>
+            <select onChange={(e) =>{
+                console.log(e.target.value);
+                dispatch({"type": "select-server", "value": e.target.value});
+            }}>
+                <option value="0">Please select an ftp server to edit</option>
+                {serverOptions}
+            </select>
         </div>
         
+        <Header>Current FTP Servers</Header>
         <ErrorBox title="There was a problem loading FTP settings.">{state.error}</ErrorBox>
         {renderSettings(state, dispatch)}
     </div>

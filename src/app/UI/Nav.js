@@ -35,7 +35,7 @@ export default function Nav({sessionInfo, bAdmin}){
         }
     ];
 
-    //if(bAdmin){
+    if(sessionInfo !== null){
 
         options.push({
             "name": "Admin",
@@ -44,7 +44,7 @@ export default function Nav({sessionInfo, bAdmin}){
                 "/admin"
             ]
         });
-   // }
+    }
 
     if(sessionInfo === null){
 
