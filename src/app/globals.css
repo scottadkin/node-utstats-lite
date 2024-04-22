@@ -155,7 +155,7 @@ form{
 }
 
 .textbox{
-	font-size:22px;
+	font-size:var(--font-size-1);
 	background-color:var(--bg-color-3);
 	border:1px solid var(--border-color-1);
 	color:var(--font-color-1);
@@ -314,4 +314,25 @@ option{
 	color:var(--font-color-1);
 	font-size:var(--font-size-small);
 	text-align: center;
+}
+
+.tf-button{
+	color:var(--font-color-1);
+	font-size:var(--font-size-2);
+	line-height: var(--line-height-1);
+	padding:3px;
+}
+
+.tf-button:hover{
+	user-select: none;
+	cursor: pointer;
+}
+
+.true{
+	background-color:var(--team-color-green);
+	
+}
+
+.false{
+	background-color:var(--team-color-red);
 }

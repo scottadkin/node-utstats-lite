@@ -3,7 +3,8 @@ import Header from "../Header";
 import { useEffect, useReducer } from "react";
 import ErrorBox from "../ErrorBox";
 import InteractiveTable from "../InteractiveTable";
-import DropDown from "../DropDown";
+import Tabs from "../Tabs";
+import TrueFalseButton from "../TrueFalseButton";
 
 async function loadData(controller, dispatch){
 
@@ -56,12 +57,29 @@ const reducer = function (state, action){
                 "selectedServer": action.value
             }
         }
+
+        case "change-mode": {
+            return {
+                ...state,
+                "mode": action.value
+            }
+        }
+
+        case "update-create-form": {
+
+            state.createForm[action.key] = action.value;
+
+            return {
+                ...state
+            }
+        }
     }
     return state;
 }
 
-function renderSettings(state, dispatch){
+function renderServers(state, dispatch){
 
+    if(state.mode !== "0") return null;
     if(state.ftp === null && state.logsFolder === null) return null;
 
     const headers = {
@@ -72,8 +90,7 @@ function renderSettings(state, dispatch){
         "port": {"title": "Port"},
         "user": {"title": "User"},
         "password": {"title": "Password"},
-        "target": {"title": "Target Folder"},
-        "action": {"title": "Action"}
+        "target": {"title": "Target Folder"}
     };
 
     const rows = [];
@@ -90,14 +107,143 @@ function renderSettings(state, dispatch){
             "port": {"value": f.port },
             "user": {"value": f.user.toLowerCase(), "displayValue": f.user},
             "password": {"value": f.password.toLowerCase(), "displayValue": f.password},
-            "target": {"value": f.target_folder.toLowerCase(), "displayValue": f.target_folder},
-            "action": {"value": "", "displayValue": "Select Server"}
+            "target": {"value": f.target_folder.toLowerCase(), "displayValue": f.target_folder}
    
         });
     }
 
     return <>
+        <Header>Current FTP Servers</Header>
         <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true}/>
+    </>
+}
+
+
+function renderEditServers(state, dispatch){
+
+    if(state.mode !== "1") return null;
+
+    const serverOptions = [];
+
+    if(state.ftp !== null){
+
+        for(let i = 0; i < state.ftp.length; i++){
+            
+            const f = state.ftp[i];
+            serverOptions.push(<option key={f.id} value={f.id}>{f.name} ({f.host}:{f.port})</option>);
+        }
+    }
+
+    return <>
+        <Header>Edit FTP Servers</Header>
+        <div className="form-row">
+            <div className="form-label">Selected Server</div>
+            <select onChange={(e) =>{
+                console.log(e.target.value);
+                dispatch({"type": "select-server", "value": e.target.value});
+            }}>
+                <option value="0">Please select an ftp server to edit</option>
+                {serverOptions}
+            </select>
+        </div>
+    </>
+}
+
+function renderAddServer(state, dispatch){
+
+    if(state.mode !== "2") return null;
+
+    return <>
+        <Header>Add FTP Server</Header>
+        <div className="form text-center">
+            <div className="form-row">
+                <label htmlFor="name">Name</label>
+                <input className="textbox" type="text" name="name" placeholder="name..." value={state.createForm.name} onChange={(e) =>{
+                        dispatch({"type": "update-create-form", "key": "name", "value": e.target.value});
+                    }}
+                />
+            </div>
+            <div className="form-row">
+                <label htmlFor="host">Host</label>
+                <input className="textbox" type="text" name="host" placeholder="127.0.0.1..." value={state.createForm.host} onChange={(e) =>{
+                        dispatch({"type": "update-create-form", "key": "host", "value": e.target.value});
+                    }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="user">User</label>
+                <input className="textbox" type="text" name="user" placeholder="FTP username" value={state.createForm.user} onChange={(e) =>{
+                        dispatch({"type": "update-create-form", "key": "user", "value": e.target.value});
+                    }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="password">Password</label>
+                <input className="textbox" type="password" name="password" placeholder="password..." value={state.createForm.password} onChange={(e) =>{
+                        dispatch({"type": "update-create-form", "key": "password", "value": e.target.value});
+                    }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="folder">Target Folder</label>
+                <input className="textbox" type="text" name="folder" placeholder="/UTServer/..." value={state.createForm.folder} onChange={(e) =>{
+                        dispatch({"type": "update-create-form", "key": "folder", "value": e.target.value});
+                    }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="min-players">Min Players</label>
+                <input className="textbox" type="number" name="min-players" placeholder="0" min="0" value={state.createForm.minPlayers}
+                    onChange={(e) =>{
+                        dispatch({"type": "update-create-form", "key": "minPlayers", "value": e.target.value});
+                    }}
+                />
+            </div>
+            <div className="form-row">
+                <label htmlFor="min-playtime">Min Playtime(Seconds)</label>
+                <input className="textbox" type="number" name="min-playtime" placeholder="0" min="0" value={state.createForm.minPlaytime}
+                    onChange={(e) =>{
+                        dispatch({"type": "update-create-form", "key": "minPlaytime", "value":e.target.value});
+                    }}
+                />
+            </div>
+            <div className="form-row">
+                <label>Ignore Bots</label>
+                <TrueFalseButton value={state.createForm.bIgnoreBots} setValue={() =>{
+        
+                    let newValue = 1;
+
+                    if(state.createForm.bIgnoreBots){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-create-form", "key": "bIgnoreBots", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label>Ignore Duplicates</label>
+                <TrueFalseButton value={state.createForm.bIgnoreDuplicates} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.createForm.bIgnoreDuplicates){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-create-form", "key": "bIgnoreDuplicates", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label>Enabled</label>
+                <TrueFalseButton value={state.createForm.bEnabled} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.createForm.bEnabled){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-create-form", "key": "bEnabled", "value": newValue});
+                }}/>
+            </div>
+            <input type="button" className="submit-button margin-bottom-1" value="Add Server"/>
+        </div>
     </>
 }
 
@@ -109,7 +255,20 @@ export default function FTPManager(){
         "ftp": null,
         "logsFolder": null,
         "loadError": null,
-        "selectedServer": null
+        "selectedServer": null,
+        "mode": "2",
+        "createForm": {
+            "name": "",
+            "host": "",
+            "user": "",
+            "password": "",
+            "folder": "",
+            "bIgnoreBots": 0,
+            "bIgnoreDuplicates": 0,
+            "minPlayers": 0,
+            "minPlaytime": 0,
+            "bEnabled": 1,
+        }
     });
 
     useEffect(() =>{
@@ -124,32 +283,25 @@ export default function FTPManager(){
 
     },[]);
 
-    const serverOptions = [];
 
-    if(state.ftp !== null){
-
-        for(let i = 0; i < state.ftp.length; i++){
-            
-            const f = state.ftp[i];
-            serverOptions.push(<option key={f.id} value={f.id}>{f.name} ({f.host}:{f.port})</option>);
-        }
-    }
 
     return <div>
         <Header>FTP Manager</Header>
-        <div className="form-row">
-            <div className="form-label">Selected Server</div>
-            <select onChange={(e) =>{
-                console.log(e.target.value);
-                dispatch({"type": "select-server", "value": e.target.value});
-            }}>
-                <option value="0">Please select an ftp server to edit</option>
-                {serverOptions}
-            </select>
-        </div>
+        <Tabs 
+            options={[
+                {"name": "Server List", "value": "0"},
+                {"name": "Edit Servers", "value": "1"},
+                {"name": "Add Server", "value": "2"},
+            ]} 
+            selectedValue={state.mode} 
+            changeSelected={(value)=>{
+                dispatch({"type": "change-mode", "value": value});
+            }
+        }/>
         
-        <Header>Current FTP Servers</Header>
         <ErrorBox title="There was a problem loading FTP settings.">{state.error}</ErrorBox>
-        {renderSettings(state, dispatch)}
+        {renderServers(state)}
+        {renderEditServers(state, dispatch)}
+        {renderAddServer(state, dispatch)}
     </div>
 }
