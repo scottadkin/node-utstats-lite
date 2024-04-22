@@ -79,6 +79,7 @@ async function deleteServer(state, dispatch){
         }
 
         dispatch({"type": "clear-edit-form", "message": "Server Deleted Successfully"});
+        dispatch({"type": "select-server", "value": null});
 
         await loadData("controller", dispatch);
 
@@ -149,7 +150,10 @@ const reducer = function (state, action){
 
             const d = action.data;
 
-            if(d === null) return {...state};
+            if(d === null) return {
+                ...state,
+                "selectedServer": null,
+            };
 
             return {
                 ...state,
@@ -321,6 +325,18 @@ function getServerData(ftpServers, selectedId){
     return null;
 }
 
+function renderDeleteServerButton(state, dispatch){
+
+    if(state.selectedServer === null) return null;
+    
+    return <>
+        <Header>Delete Selected Server</Header>
+        <input type="button" className="warning-button margin-bottom-1" value="Delete Server" onClick={async () =>{
+        await deleteServer(state, dispatch);
+        }}/>
+    </>
+}
+
 function renderEditServers(state, dispatch){
 
     if(state.mode !== "1") return null;
@@ -458,11 +474,7 @@ function renderEditServers(state, dispatch){
                await updateServer(state, dispatch);
             }}/>
 
-            <Header>Delete Selected Server</Header>
-
-            <input type="button" className="warning-button margin-bottom-1" value="Delete Server" onClick={async () =>{
-               await deleteServer(state, dispatch);
-            }}/>
+            {renderDeleteServerButton(state, dispatch)}
         </div>
     </>
 }
