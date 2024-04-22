@@ -172,8 +172,22 @@ form{
 	transition:var(--transition-1)
 }
 
+.warning-button{
+	display:inline-block;
+	background-color: var(--team-color-red);
+	padding:var(--padding-1);
+	color:var(--font-color-1);
+	border:1px solid var(--border-color-1);
+	font-size:var(--font-size-3);
+	transition:var(--transition-1)
+}
+
 .submit-button:hover{
 	background-color: var(--bg-color-4);
+	cursor: pointer;
+}
+
+.warning-button:hover{
 	cursor: pointer;
 }
 

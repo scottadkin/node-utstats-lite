@@ -69,3 +69,67 @@ export async function addServer(settings){
 
     await simpleQuery(query, vars);
 }
+
+export async function editServer(serverId, settings){
+
+    if(serverId === undefined) throw new Error(`ServerId is undefined`);
+
+    serverId = parseInt(serverId);
+
+    if(serverId !== serverId) throw new Error(`Server Id must be a valid integer`);
+
+    if(settings.name === "") throw new Error(`Name can not be a blank string`);
+    if(settings.host === "") throw new Error(`Host can not be a blank string`);
+    if(settings.port === "") throw new Error(`Port can not be a blank string`);
+    if(settings.user === "") throw new Error(`User can not be a blank string`);
+    if(settings.password === "") throw new Error(`Password can not be a blank string`);
+
+    //need to check for duplicates that are also not the same id
+ 
+    const query = `UPDATE nstats_ftp SET
+    name=?,
+    host=?,
+    port=?,
+    user=?,
+    password=?,
+    target_folder=?,
+    delete_after_import=?,
+    ignore_bots=?,
+    ignore_duplicates=?,
+    min_players=?,
+    min_playtime=?,
+    enabled=?
+    WHERE id=?`;
+
+    const vars = [
+        settings.name,
+        settings.host,
+        settings.port,
+        settings.user,
+        settings.password,
+        settings.folder,
+        settings.bDeleteFromFTP,
+        settings.bIgnoreBots,
+        settings.bIgnoreDuplicates,
+        settings.minPlayers,
+        settings.minPlaytime,
+        settings.bEnabled,
+        serverId
+    ];
+
+    await simpleQuery(query, vars);
+}
+
+
+export async function deleteServer(serverId){
+
+    if(serverId === undefined) throw new Error(`ServerId is undefined`);
+
+    serverId = parseInt(serverId);
+
+    if(serverId !== serverId) throw new Error(`Server Id must be a valid integer`);
+
+    const query = `DELETE FROM nstats_ftp WHERE id=?`;
+
+    return await simpleQuery(query, [serverId]);
+}

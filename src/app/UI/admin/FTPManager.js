@@ -7,6 +7,8 @@ import Tabs from "../Tabs";
 import TrueFalseButton from "../TrueFalseButton";
 import MessageBox from "../MessageBox";
 
+// I really should clean up/remove duplicate code after initial testing
+
 async function loadData(controller, dispatch){
 
     try{
@@ -59,6 +61,63 @@ async function addServer(state, dispatch){
     }
 }
 
+async function deleteServer(state, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin/", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "delete-server", "serverId": state.selectedServer})
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined){
+            dispatch({"type": "delete-error", "message": res.error.toString()});
+            return;
+        }
+
+        dispatch({"type": "clear-edit-form", "message": "Server Deleted Successfully"});
+
+        await loadData("controller", dispatch);
+
+    }catch(err){
+        console.trace(err);
+    }
+}
+
+
+
+async function updateServer(state, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin/", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "update-server", ...state.editForm, "serverId": state.selectedServer})
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined){
+            dispatch({"type": "edit-error", "message": res.error.toString()});
+            return;
+        }
+
+        dispatch({"type": "update-edit-message", "message": `Server Updated Successfully`});
+
+        await loadData("controller", dispatch);
+
+    }catch(err){
+        console.trace(err);
+    }
+}
+
+
+
+
 const reducer = function (state, action){
     
     switch(action.type){
@@ -87,9 +146,28 @@ const reducer = function (state, action){
         }
 
         case "select-server": {
+
+            const d = action.data;
+
+            if(d === null) return {...state};
+
             return {
                 ...state,
-                "selectedServer": action.value
+                "selectedServer": action.value,
+                "editForm": {
+                    "name": d.name,
+                    "host": d.host,
+                    "port": d.port,
+                    "user": d.user,
+                    "password": d.password,
+                    "folder": d.target_folder,
+                    "bIgnoreBots": d.ignore_bots,
+                    "bIgnoreDuplicates": d.ignore_duplicates,
+                    "minPlayers": d.min_players,
+                    "minPlaytime": d.min_playtime,
+                    "bEnabled": d.enabled,
+                    "bDeleteFromFTP": d.delete_after_import
+                }
             }
         }
 
@@ -99,13 +177,33 @@ const reducer = function (state, action){
                 "mode": action.value,
                 "createError": null,
                 "createMessage": null,
+                "editForm": {
+                    "name": "",
+                    "host": "",
+                    "port": 21,
+                    "user": "",
+                    "password": "",
+                    "folder": "",
+                    "bIgnoreBots": 0,
+                    "bIgnoreDuplicates": 0,
+                    "minPlayers": 0,
+                    "minPlaytime": 0,
+                    "bEnabled": 1,
+                    "bDeleteFromFTP": 1
+                }
             }
         }
 
         case "update-create-form": {
 
             state.createForm[action.key] = action.value;
+            return {
+                ...state
+            }
+        }
+        case "update-edit-form": {
 
+            state.editForm[action.key] = action.value;
             return {
                 ...state
             }
@@ -131,7 +229,37 @@ const reducer = function (state, action){
                     "bDeleteFromFTP": 1
                 }
             }
-            
+        }
+
+        case "clear-edit-form": {
+
+            return {
+                ...state,
+                "editError": null,
+                "editMessage": action.message,
+                "editForm": {
+                    "name": "",
+                    "host": "",
+                    "port": 21,
+                    "user": "",
+                    "password": "",
+                    "folder": "",
+                    "bIgnoreBots": 0,
+                    "bIgnoreDuplicates": 0,
+                    "minPlayers": 0,
+                    "minPlaytime": 0,
+                    "bEnabled": 1,
+                    "bDeleteFromFTP": 1
+                }
+            }
+        }
+
+        case "update-edit-message": {
+
+            return {
+                ...state,
+                "editMessage": action.message
+            }
         }
     }
     return state;
@@ -179,6 +307,20 @@ function renderServers(state, dispatch){
 }
 
 
+function getServerData(ftpServers, selectedId){
+
+    for(let i = 0; i < ftpServers.length; i++){
+
+        const f = ftpServers[i];
+
+        if(f.id === selectedId){
+            return f;
+        }
+    }
+
+    return null;
+}
+
 function renderEditServers(state, dispatch){
 
     if(state.mode !== "1") return null;
@@ -195,16 +337,132 @@ function renderEditServers(state, dispatch){
     }
 
     return <>
-        <Header>Edit FTP Servers</Header>
+        <Header>Edit FTP Server</Header>
+        <MessageBox title="Server Added">{state.editMessage}</MessageBox>
         <div className="form-row">
             <div className="form-label">Selected Server</div>
             <select onChange={(e) =>{
-                console.log(e.target.value);
-                dispatch({"type": "select-server", "value": e.target.value});
+                dispatch({"type": "select-server", "value": e.target.value, "data": getServerData(state.ftp, parseInt(e.target.value))});
             }}>
                 <option value="0">Please select an ftp server to edit</option>
                 {serverOptions}
             </select>
+        </div>
+        <div className="form text-center">
+            <div className="form-row">
+                <label htmlFor="name">Name</label>
+                <input className="textbox" type="text" name="name" placeholder="name..." value={state.editForm.name} onChange={(e) =>{
+                    dispatch({"type": "update-edit-form", "key": "name", "value": e.target.value});
+                }}
+                />
+            </div>
+            <div className="form-row">
+                <label htmlFor="host">Host</label>
+                <input className="textbox" type="text" name="host" placeholder="127.0.0.1..." value={state.editForm.host} onChange={(e) =>{
+                    dispatch({"type": "update-edit-form", "key": "host", "value": e.target.value});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="port">Port</label>
+                <input className="textbox" type="number" name="port" placeholder="21" min={0} max={65535} value={state.editForm.port} onChange={(e) =>{
+                    dispatch({"type": "update-edit-form", "key": "port", "value": e.target.value});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="user">User</label>
+                <input className="textbox" type="text" name="user" placeholder="FTP username" value={state.editForm.user} onChange={(e) =>{
+                    dispatch({"type": "update-edit-form", "key": "user", "value": e.target.value});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="password">Password</label>
+                <input className="textbox" type="password" name="password" placeholder="password..." value={state.editForm.password} onChange={(e) =>{
+                    dispatch({"type": "update-edit-form", "key": "password", "value": e.target.value});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="folder">Target Folder</label>
+                <input className="textbox" type="text" name="folder" placeholder="/UTServer/..." value={state.editForm.folder} onChange={(e) =>{
+                    dispatch({"type": "update-edit-form", "key": "folder", "value": e.target.value});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label htmlFor="min-players">Min Players</label>
+                <input className="textbox" type="number" name="min-players" placeholder="0" min="0" value={state.editForm.minPlayers}
+                    onChange={(e) =>{
+                        dispatch({"type": "update-edit-form", "key": "minPlayers", "value": e.target.value});
+                    }}
+                />
+            </div>
+            <div className="form-row">
+                <label htmlFor="min-playtime">Min Playtime(Seconds)</label>
+                <input className="textbox" type="number" name="min-playtime" placeholder="0" min="0" value={state.editForm.minPlaytime}
+                    onChange={(e) =>{
+                        dispatch({"type": "update-edit-form", "key": "minPlaytime", "value":e.target.value});
+                    }}
+                />
+            </div>
+            <div className="form-row">
+                <label>Ignore Bots</label>
+                <TrueFalseButton value={state.editForm.bIgnoreBots} setValue={() =>{
+        
+                    let newValue = 1;
+
+                    if(state.editForm.bIgnoreBots){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-edit-form", "key": "bIgnoreBots", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label>Ignore Duplicates</label>
+                <TrueFalseButton value={state.editForm.bIgnoreDuplicates} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.editForm.bIgnoreDuplicates){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-edit-form", "key": "bIgnoreDuplicates", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label>Delete Logs From FTP Server</label>
+                <TrueFalseButton value={state.editForm.bDeleteFromFTP} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.editForm.bDeleteFromFTP){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-edit-form", "key": "bDeleteFromFTP", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label>Enabled</label>
+                <TrueFalseButton value={state.editForm.bEnabled} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.editForm.bEnabled){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-edit-form", "key": "bEnabled", "value": newValue});
+                }}/>
+            </div>
+            <input type="button" className="submit-button margin-bottom-1" value="Update Server" onClick={async () =>{
+               await updateServer(state, dispatch);
+            }}/>
+
+            <Header>Delete Selected Server</Header>
+
+            <input type="button" className="warning-button margin-bottom-1" value="Delete Server" onClick={async () =>{
+               await deleteServer(state, dispatch);
+            }}/>
         </div>
     </>
 }
@@ -340,9 +598,25 @@ export default function FTPManager(){
         "loadError": null,
         "createError": null,
         "createMessage": null,
+        "editError": null,
+        "editMessage": null,
         "selectedServer": null,
-        "mode": "2",
+        "mode": "1",
         "createForm": {
+            "name": "",
+            "host": "",
+            "port": 21,
+            "user": "",
+            "password": "",
+            "folder": "",
+            "bIgnoreBots": 0,
+            "bIgnoreDuplicates": 0,
+            "minPlayers": 0,
+            "minPlaytime": 0,
+            "bEnabled": 1,
+            "bDeleteFromFTP": 1
+        },
+        "editForm": {
             "name": "",
             "host": "",
             "port": 21,

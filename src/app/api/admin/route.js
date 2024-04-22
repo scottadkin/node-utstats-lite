@@ -1,5 +1,5 @@
 import { getSessionInfo } from "@/app/lib/authentication";
-import { getAllFTPSettings, addServer } from "@/app/lib/ftp";
+import { getAllFTPSettings, addServer, editServer, deleteServer } from "@/app/lib/ftp";
 import { cookies } from "next/headers";
 
 export async function POST(req){
@@ -27,9 +27,24 @@ export async function POST(req){
             return Response.json({"message": "passed"});
         }
 
+        if(mode === "update-server"){
+            if(res.serverId == undefined) throw new Error(`ServerId is undefined/null`);
+            await editServer(res.serverId, res);
+            return Response.json({"message": "passed"});
+        }
+
+        if(mode === "delete-server"){
+
+            if(res.serverId == undefined) throw new Error(`ServerId is undefined/null`);
+            await deleteServer(res.serverId);
+            return Response.json({"message": "passed"});
+        }
+
         return Response.json({"message": "hi"});
 
     }catch(err){
+
+        console.trace(err);
 
         return Response.json({"error": err.toString()});
     }

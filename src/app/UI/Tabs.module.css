@@ -9,6 +9,7 @@
 .tab{
     display:inline-block;
     padding:var(--padding-2) var(--padding-1);
+    user-select: none;
 }
 
 .tab:hover{
