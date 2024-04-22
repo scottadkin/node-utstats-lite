@@ -1,5 +1,5 @@
 import { getSessionInfo } from "@/app/lib/authentication";
-import { getAllFTPSettings } from "@/app/lib/ftp";
+import { getAllFTPSettings, addServer } from "@/app/lib/ftp";
 import { cookies } from "next/headers";
 
 export async function POST(req){
@@ -12,6 +12,19 @@ export async function POST(req){
 
         console.log(sessionInfo);
 
+        console.log("req.body");
+        console.log(req.body);
+
+        const res = await req.json();
+        console.log(res);
+
+        if(res.mode === undefined) throw new Error(`No mode specified`);
+
+        const mode = res.mode.toLowerCase();
+
+        if(mode === "add-server"){
+            await addServer(res);
+        }
 
         return Response.json({"message": "hi"});
 

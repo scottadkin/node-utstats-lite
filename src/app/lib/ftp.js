@@ -20,5 +20,52 @@ export async function getAllFTPSettings(){
     const logsFolder = await getLogsFolderSettings();
 
     return {"ftp": result, "logsFolder": logsFolder}
+}
 
+async function bServerExist(host, port){
+
+    const query = `SELECT COUNT(*) as total_servers FROM nstats_ftp WHERE host=? AND port=?`;
+    const result = await simpleQuery(query, [host, port]);
+
+    if(result[0].total_servers > 0) return true;
+
+    return false;
+}
+
+export async function addServer(settings){
+
+
+    if(settings.name === "") throw new Error(`Name can not be a blank string`);
+    if(settings.host === "") throw new Error(`Host can not be a blank string`);
+    if(settings.port === "") throw new Error(`Port can not be a blank string`);
+    if(settings.user === "") throw new Error(`User can not be a blank string`);
+    if(settings.password === "") throw new Error(`Password can not be a blank string`);
+
+    if(await bServerExist(settings.host, settings.port)){
+        throw new Error(`That server already exists!`);
+    }
+
+    const query = `INSERT INTO nstats_ftp VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+
+    const vars = [
+        settings.name,
+        settings.host,
+        settings.port,
+        settings.user,
+        settings.password,
+        settings.folder,
+        settings.bDeleteFromFTP,
+        "1999-11-30 00:00:00",
+        "1999-11-30 00:00:00",
+        0,
+        0,
+        settings.bIgnoreBots,
+        settings.bIgnoreDuplicates,
+        settings.minPlayers,
+        settings.minPlaytime,
+        0,
+        settings.bEnabled
+    ];
+
+    await simpleQuery(query, vars);
 }

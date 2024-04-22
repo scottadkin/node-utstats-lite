@@ -31,6 +31,31 @@ async function loadData(controller, dispatch){
     }
 }
 
+
+async function addServer(state, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin/", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "add-server",...state.createForm})
+        });
+
+        const res = await req.json();
+
+        console.log(res);
+
+        if(res.error !== undefined){
+            dispatch({"type": "create-error", "message": res.error.toString()});
+            return;
+        }
+
+    }catch(err){
+        console.trace(err);
+    }
+}
+
 const reducer = function (state, action){
     
     switch(action.type){
@@ -48,6 +73,13 @@ const reducer = function (state, action){
             return {
                 ...state,
                 "loadError": action.message
+            }
+        }
+
+        case "create-error": {
+            return {
+                ...state,
+                "createError": action.message
             }
         }
 
@@ -170,6 +202,12 @@ function renderAddServer(state, dispatch){
                     }}/>
             </div>
             <div className="form-row">
+                <label htmlFor="port">Port</label>
+                <input className="textbox" type="number" name="port" placeholder="21" min={0} max={65535} value={state.createForm.port} onChange={(e) =>{
+                        dispatch({"type": "update-create-form", "key": "port", "value": e.target.value});
+                    }}/>
+            </div>
+            <div className="form-row">
                 <label htmlFor="user">User</label>
                 <input className="textbox" type="text" name="user" placeholder="FTP username" value={state.createForm.user} onChange={(e) =>{
                         dispatch({"type": "update-create-form", "key": "user", "value": e.target.value});
@@ -230,6 +268,19 @@ function renderAddServer(state, dispatch){
                 }}/>
             </div>
             <div className="form-row">
+                <label>Delete Logs From FTP Server</label>
+                <TrueFalseButton value={state.createForm.bDeleteFromFTP} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.createForm.bDeleteFromFTP){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-create-form", "key": "bDeleteFromFTP", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
                 <label>Enabled</label>
                 <TrueFalseButton value={state.createForm.bEnabled} setValue={() =>{
                     
@@ -242,7 +293,9 @@ function renderAddServer(state, dispatch){
                     dispatch({"type": "update-create-form", "key": "bEnabled", "value": newValue});
                 }}/>
             </div>
-            <input type="button" className="submit-button margin-bottom-1" value="Add Server"/>
+            <input type="button" className="submit-button margin-bottom-1" value="Add Server" onClick={async () =>{
+                await addServer(state, dispatch);
+            }}/>
         </div>
     </>
 }
@@ -255,11 +308,13 @@ export default function FTPManager(){
         "ftp": null,
         "logsFolder": null,
         "loadError": null,
+        "createError": null,
         "selectedServer": null,
         "mode": "2",
         "createForm": {
             "name": "",
             "host": "",
+            "port": 21,
             "user": "",
             "password": "",
             "folder": "",
@@ -268,6 +323,7 @@ export default function FTPManager(){
             "minPlayers": 0,
             "minPlaytime": 0,
             "bEnabled": 1,
+            "bDeleteFromFTP": 1
         }
     });
 
@@ -299,7 +355,8 @@ export default function FTPManager(){
             }
         }/>
         
-        <ErrorBox title="There was a problem loading FTP settings.">{state.error}</ErrorBox>
+        <ErrorBox title="There was a problem loading FTP settings">{state.loadError}</ErrorBox>
+        <ErrorBox title="There was a problem adding the ftp server">{state.createError}</ErrorBox>
         {renderServers(state)}
         {renderEditServers(state, dispatch)}
         {renderAddServer(state, dispatch)}
