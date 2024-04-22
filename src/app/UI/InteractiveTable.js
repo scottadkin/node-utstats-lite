@@ -57,10 +57,21 @@ function createRows(headers, rows){
         for(const name of Object.keys(headers)){
 
             const currentClass = r[name]?.className ?? "";
-            
-            columns.push(<td key={name} className={currentClass}>
-                {r[name]?.displayValue ?? r[name]?.value}
-            </td>);
+
+            if(r[name].bIgnoreTD === undefined || !r[name].bIgnoreTD){
+
+                columns.push(<td key={name} className={currentClass}>
+                    {r[name]?.displayValue ?? r[name]?.value}
+                </td>);
+                
+            }else{
+
+                if(r[name].displayValue !== undefined){
+                    columns.push(r[name].displayValue);
+                }else{
+                    columns.push(r[name].value);
+                }
+            }
             
         }
 

@@ -5,15 +5,16 @@ import ErrorBox from "../ErrorBox";
 import InteractiveTable from "../InteractiveTable";
 import Tabs from "../Tabs";
 import TrueFalseButton from "../TrueFalseButton";
+import MessageBox from "../MessageBox";
 
 async function loadData(controller, dispatch){
 
     try{
 
         const req = await fetch("/api/admin?mode=load-ftp", {
-            "headers": {"Cotnent-type": "application/json"},
+            "headers": {"Content-type": "application/json"},
             "method": "GET",
-            "signal": controller.signal
+            //"signal": controller.signal
         });
 
         const res = await req.json();
@@ -44,12 +45,14 @@ async function addServer(state, dispatch){
 
         const res = await req.json();
 
-        console.log(res);
-
         if(res.error !== undefined){
             dispatch({"type": "create-error", "message": res.error.toString()});
             return;
         }
+
+        dispatch({"type": "clear-create-form"});
+
+        await loadData("controller", dispatch);
 
     }catch(err){
         console.trace(err);
@@ -93,7 +96,9 @@ const reducer = function (state, action){
         case "change-mode": {
             return {
                 ...state,
-                "mode": action.value
+                "mode": action.value,
+                "createError": null,
+                "createMessage": null,
             }
         }
 
@@ -104,6 +109,29 @@ const reducer = function (state, action){
             return {
                 ...state
             }
+        }
+        case "clear-create-form": {
+
+            return {
+                ...state,
+                "createError": null,
+                "createMessage": "Server added successfully",
+                "createForm": {
+                    "name": "",
+                    "host": "",
+                    "port": 21,
+                    "user": "",
+                    "password": "",
+                    "folder": "",
+                    "bIgnoreBots": 0,
+                    "bIgnoreDuplicates": 0,
+                    "minPlayers": 0,
+                    "minPlaytime": 0,
+                    "bEnabled": 1,
+                    "bDeleteFromFTP": 1
+                }
+            }
+            
         }
     }
     return state;
@@ -116,7 +144,7 @@ function renderServers(state, dispatch){
 
     const headers = {
         "active": {"title": "Enabled"},
-        "method": {"title": "Protocol"},
+        //"method": {"title": "Protocol"},
         "name": {"title": "Name"},
         "host": {"title": "Host"},
         "port": {"title": "Port"},
@@ -132,8 +160,8 @@ function renderServers(state, dispatch){
         const f = state.ftp[i];
 
         rows.push({
-            "active": {"value": (f.enabled === 0) ? "False" : "True"},
-            "method": {"value": (f.sftp === 0) ? "FTP" : "FTP"},
+            "active": {"value": <TrueFalseButton key={i} value={f.enabled} bTableElem={true}/>, "bIgnoreTD": true},
+           // "method": {"value": (f.sftp === 0) ? "FTP" : "FTP"},
             "name": {"value": f.name.toLowerCase(), "displayValue": f.name},
             "host": {"value": f.host, "displayValue": f.host},
             "port": {"value": f.port },
@@ -187,6 +215,7 @@ function renderAddServer(state, dispatch){
 
     return <>
         <Header>Add FTP Server</Header>
+        <MessageBox title="Server Added">{state.createMessage}</MessageBox>
         <div className="form text-center">
             <div className="form-row">
                 <label htmlFor="name">Name</label>
@@ -294,7 +323,8 @@ function renderAddServer(state, dispatch){
                 }}/>
             </div>
             <input type="button" className="submit-button margin-bottom-1" value="Add Server" onClick={async () =>{
-                await addServer(state, dispatch);
+               await addServer(state, dispatch);
+
             }}/>
         </div>
     </>
@@ -309,6 +339,7 @@ export default function FTPManager(){
         "logsFolder": null,
         "loadError": null,
         "createError": null,
+        "createMessage": null,
         "selectedServer": null,
         "mode": "2",
         "createForm": {

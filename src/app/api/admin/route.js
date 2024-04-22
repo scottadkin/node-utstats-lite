@@ -24,6 +24,7 @@ export async function POST(req){
 
         if(mode === "add-server"){
             await addServer(res);
+            return Response.json({"message": "passed"});
         }
 
         return Response.json({"message": "hi"});
