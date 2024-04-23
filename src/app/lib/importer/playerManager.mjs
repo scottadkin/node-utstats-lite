@@ -375,14 +375,24 @@ export class PlayerManager{
 
 
     //ignore spectators
-    getTotalUniquePlayers(){
+    getTotalUniquePlayers(bIgnoreBots){
 
         const uniqueNames = [];
 
         for(const p of Object.values(this.mergedPlayers)){
-            if(p.bSpectator === 0 && p.bBot === 0) uniqueNames.push(p.name);
+
+            if(p.bSpectator === 1) continue;
+
+            if(p.bBot === 0){
+                uniqueNames.push(p.name);
+            }
+
+            if(p.bBot === 1 && !bIgnoreBots){
+                uniqueNames.push(p.name);
+            }
         }
-    
+        
+
         return uniqueNames.length;
     }
 

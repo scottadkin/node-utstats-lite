@@ -14,9 +14,13 @@ import Items from "./importer/items.mjs";
 
 export class MatchParser{
 
-    constructor(rawData){
+    constructor(rawData, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime){
 
         this.rawData = rawData;
+        this.bIgnoreBots = bIgnoreBots;
+        this.bIgnoreDuplicates = bIgnoreDuplicates;
+        this.minPlayers = minPlayers;
+        this.minPlaytime = minPlaytime;
 
         this.players = new PlayerManager();
         //console.log(`${this.rawData}`);
@@ -30,8 +34,8 @@ export class MatchParser{
         this.dom = new Domination();
         this.items = new Items();
 
-        this.matchStart = 0;
-        this.matchEnd = 0;
+        this.matchStart = -1;
+        this.matchEnd = -1;
         this.matchLength = 0;
         this.totalTeams = 0;
         this.teamScores = [0,0,0,0];
@@ -44,98 +48,116 @@ export class MatchParser{
 
     async main(){
 
-        try{
-
-            //append (insta) if game is instagib
-            this.gametype.updateName();
-
-            this.ctf.setPlayerStats(this.players);
-            await this.dom.setPointIds();
-            this.dom.setPlayerCapStats(this.players);
-            this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
-            this.items.setPlayerStats(this.players);
-
-            this.players.mergePlayers();
-            this.players.setPlayerPingStats();
-
-            this.players.setCountries();
-            this.players.matchEnded(this.matchStart, this.matchEnd);
-            this.players.setPlayerPlaytime(this.matchStart, this.matchEnd);
-            this.players.scalePlaytimes(this.gametype.bHardcore);
-
-
-            await this.players.setPlayerMasterIds(this.match.date);
-
-            const soloStats = this.players.getSoloWinner();
-
-            if(soloStats !== null){
-
-                this.soloWinner = soloStats.id;
-                this.soloWinnerScore = soloStats.score;
-            }
-
-            await this.server.setId();
-            await this.gametype.setId();
-            await this.map.setId();
-
-            this.matchLength = this.matchEnd - this.matchStart;
-            if(this.gametype.bHardcore){
-                this.matchLength = scalePlaytime(this.matchLength, true);
-            }
-
-            //serverId, gametypeId, mapId, date, players
-            this.matchId = await createMatch(
-                this.server.id, 
-                this.gametype.id, 
-                this.map.id, 
-                this.gametype.bHardcore,
-                this.gametype.bInsta,
-                this.match.date, 
-                this.matchLength,
-                this.players.getTotalUniquePlayers(),
-                this.totalTeams,
-                this.teamScores[0],
-                this.teamScores[1],
-                this.teamScores[2],
-                this.teamScores[3],
-                this.soloWinner,
-                this.soloWinnerScore
-            );
-
-            if(this.matchId === null){
-                new Message(`Failed to create match id.`,"error")
-                return;
-            }
-
-            await this.server.updateTotals();
-            await this.gametype.updateTotals();
-
-            await this.players.insertPlayerMatchData(this.matchId, this.match.date);
-            await this.ctf.insertPlayerMatchData(this.players, this.matchId);
-            await this.dom.insertPlayerMatchData(this.players.players, this.matchId);
-            await this.weapons.setWeaponIds();
-            this.kills.setWeaponIds(this.weapons.weapons);
-            this.kills.setPlayerIds(this.players);
-            await this.kills.insertKills(this.matchId);
-            
-           // this.players.debugListAllPlayers();
-
-            this.weapons.setPlayerStats(this.kills.kills);
-            await this.weapons.insertPlayerMatchStats(this.matchId);
-            await this.weapons.updatePlayerTotals(this.players.mergedPlayers);
-
-
-            await this.players.updatePlayerTotals(this.match.date);
-            await this.players.updatePlayerFullTotals();
-
-            await this.ctf.updatePlayerTotals(this.players);
-            
-            
-
-        }catch(err){
-            console.trace(err);
-            new Message(err.toString(),"error");
+        if(this.matchStart === -1){
+            throw new Error(`There was no match start event in this log.`);
         }
+
+        if(this.matchEnd === -1){
+            throw new Error(`There was no match end event in this log.`);
+        }
+
+        this.matchLength = this.matchEnd - this.matchStart;
+
+        if(this.gametype.bHardcore){
+            this.matchLength = scalePlaytime(this.matchLength, true);
+        }
+
+        if(this.matchLength < this.minPlaytime){
+            throw new Error(`Match length is shorter than minPlaytime (${this.minPlaytime} seconds).`);
+        }   
+
+
+
+        //append (insta) if game is instagib
+        this.gametype.updateName();
+
+        this.ctf.setPlayerStats(this.players);
+        await this.dom.setPointIds();
+        this.dom.setPlayerCapStats(this.players);
+        this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
+        this.items.setPlayerStats(this.players);
+
+        this.players.mergePlayers();
+
+        const totalPlayers = this.players.getTotalUniquePlayers(this.bIgnoreBots);
+
+        if(totalPlayers < this.minPlayers){
+            throw new Error(`Match has less then the minimum players limit (found ${totalPlayers} out of a target of ${this.minPlayers}).`);
+        }
+
+
+        
+        this.players.setPlayerPingStats();
+
+        this.players.setCountries();
+        this.players.matchEnded(this.matchStart, this.matchEnd);
+        this.players.setPlayerPlaytime(this.matchStart, this.matchEnd);
+        this.players.scalePlaytimes(this.gametype.bHardcore);
+
+
+        await this.players.setPlayerMasterIds(this.match.date);
+
+        const soloStats = this.players.getSoloWinner();
+
+        if(soloStats !== null){
+
+            this.soloWinner = soloStats.id;
+            this.soloWinnerScore = soloStats.score;
+        }
+
+        await this.server.setId();
+        await this.gametype.setId();
+        await this.map.setId();
+
+        
+
+        //serverId, gametypeId, mapId, date, players
+        this.matchId = await createMatch(
+            this.server.id, 
+            this.gametype.id, 
+            this.map.id, 
+            this.gametype.bHardcore,
+            this.gametype.bInsta,
+            this.match.date, 
+            this.matchLength,
+            this.players.getTotalUniquePlayers(),
+            this.totalTeams,
+            this.teamScores[0],
+            this.teamScores[1],
+            this.teamScores[2],
+            this.teamScores[3],
+            this.soloWinner,
+            this.soloWinnerScore
+        );
+
+        if(this.matchId === null){
+            new Message(`Failed to create match id.`,"error")
+            return;
+        }
+
+        await this.server.updateTotals();
+        await this.gametype.updateTotals();
+
+        await this.players.insertPlayerMatchData(this.matchId, this.match.date);
+        await this.ctf.insertPlayerMatchData(this.players, this.matchId);
+        await this.dom.insertPlayerMatchData(this.players.players, this.matchId);
+        await this.weapons.setWeaponIds();
+        this.kills.setWeaponIds(this.weapons.weapons);
+        this.kills.setPlayerIds(this.players);
+        await this.kills.insertKills(this.matchId);
+        
+        // this.players.debugListAllPlayers();
+
+        this.weapons.setPlayerStats(this.kills.kills);
+        await this.weapons.insertPlayerMatchStats(this.matchId);
+        await this.weapons.updatePlayerTotals(this.players.mergedPlayers);
+
+
+        await this.players.updatePlayerTotals(this.match.date);
+        await this.players.updatePlayerFullTotals();
+
+        await this.ctf.updatePlayerTotals(this.players);
+        
         
         
     }

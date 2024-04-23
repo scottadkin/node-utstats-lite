@@ -13,6 +13,7 @@ export class FTPImporter{
         this.secure = secure;
         this.targetFolder = targetFolder;
     }
+   
 
 
     async connect(){
