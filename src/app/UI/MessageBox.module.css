@@ -1,6 +1,7 @@
 .wrapper{
     background-color:var(--team-color-green);
     color:var(--font-color-1);
+    margin-bottom:var(--margin-1);
 }
 
 .title{

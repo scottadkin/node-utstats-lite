@@ -1,5 +1,6 @@
 import { getSessionInfo } from "@/app/lib/authentication";
 import { getAllFTPSettings, addServer, editServer, deleteServer } from "@/app/lib/ftp";
+import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolderSettings} from "@/app/lib/logsfoldersettings.mjs";
 import { cookies } from "next/headers";
 
 export async function POST(req){
@@ -11,9 +12,6 @@ export async function POST(req){
         if(sessionInfo === null) throw new Error(`You are not logged in`);
 
         console.log(sessionInfo);
-
-        console.log("req.body");
-        console.log(req.body);
 
         const res = await req.json();
         console.log(res);
@@ -37,6 +35,18 @@ export async function POST(req){
 
             if(res.serverId == undefined) throw new Error(`ServerId is undefined/null`);
             await deleteServer(res.serverId);
+            return Response.json({"message": "passed"});
+        }
+
+        if(mode === "update-importer-settings"){
+
+            const ignoreBots = (res.ignoreBots !== undefined) ? res.ignoreBots : 0;
+            const ignoreDuplicates = (res.ignoreDuplicates !== undefined) ? res.ignoreDuplicates : 0;
+            const minPlayers = (res.minPlayers !== undefined) ? res.minPlayers : 0;
+            const minPlaytime = (res.minPlaytime !== undefined) ? res.minPlaytime : 0;
+
+            await updateLogsFolderSettings(ignoreBots, ignoreDuplicates, minPlayers, minPlaytime);
+
             return Response.json({"message": "passed"});
         }
 
@@ -77,6 +87,13 @@ export async function GET(req){
         if(mode === "load-ftp"){
 
             const data = await getAllFTPSettings();
+
+            return Response.json(data);
+        }
+
+        if(mode === "get-log-settings"){
+
+            const data = await getLogsFolderSettings();
 
             return Response.json(data);
         }

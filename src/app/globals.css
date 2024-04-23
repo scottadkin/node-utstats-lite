@@ -154,6 +154,13 @@ form{
 	padding:var(--padding-2);
 }
 
+.form-info{
+	text-align: center;
+	font-size:var(--font-size-1);
+	color:var(--font-color-1);
+	margin-bottom:var(--margin-1);
+}
+
 .textbox{
 	font-size:var(--font-size-1);
 	background-color:var(--bg-color-3);

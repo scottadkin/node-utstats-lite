@@ -4,6 +4,7 @@ import Message from "./src/app/lib/message.mjs";
 import { mysqlSettings } from "./config.mjs";
 import mysql from "mysql2/promise";
 import {createRandomString} from "./src/app/lib/generic.mjs";
+import { simpleQuery } from "./src/app/lib/database.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -37,20 +38,14 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_logs_folder (
         id int(11) NOT NULL AUTO_INCREMENT,
-        name varchar(100) NOT NULL,
-        first int(11) NOT NULL,
-        last int(11) NOT NULL,
+        first datetime NOT NULL,
+        last datetime NOT NULL,
         total_imports int(11) NOT NULL,
         total_logs_imported int(11) NOT NULL,
         ignore_bots int(1) NOT NULL,
         ignore_duplicates int(1) NOT NULL,
         min_players int(2) NOT NULL,
-        min_playtime int(11) NOT NULL,
-        import_ace INT(1) NOT NULL,
-        total_ace_kick_logs INT(1) NOT NULL,
-        total_ace_join_logs INT(1) NOT NULL,
-        total_ace_screenshots INT(1) NOT NULL,
-        use_ace_player_hwid INT(1) NOT NULL
+        min_playtime int(11) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,  
 
         `CREATE TABLE IF NOT EXISTS nstats_players (
@@ -304,10 +299,20 @@ const queries = [
             hash varchar(64) NOT NULL,
             ip varchar(50) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
-        
+
 
 ];
 
+
+async function bLogsSettingsExist(){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_logs_folder`;
+    const result = await simpleQuery(query);
+
+    if(result[0].total_rows > 0) return true;
+
+    return false;
+}
 
 (async () =>{
  
@@ -334,6 +339,10 @@ const queries = [
         }
 
         connection.end();
+
+        if(!await bLogsSettingsExist()){
+            await simpleQuery(`INSERT INTO nstats_logs_folder VALUES(NULL, "1999-11-30 00:00:00","1999-11-30 00:00:00",0,0,0,0,0,0)`);
+        }
 
 
         if(!fs.existsSync("./salt.mjs")){

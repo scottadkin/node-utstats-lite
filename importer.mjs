@@ -62,12 +62,15 @@ async function parseLogs(){
 
         const r = result[i];
 
-        const test = new FTPImporter(r.host, r.user, r.password, false, r.target_folder);
+        new Message(`Attempting to connect to ${r.host}:${r.user}`,"note");
+
+        const test = new FTPImporter(r.host, r.port, r.user, r.password, false, r.target_folder);
 
         await test.connect();
+        await parseLogs();
     }
 
-    await parseLogs();
+    
 
     new Message(`Import Completed`,"pass");
     process.exit();

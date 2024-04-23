@@ -9,12 +9,12 @@ export default function TrueFalseButton({value, setValue, bTableElem}){
     }
 
     if(bTableElem){
-        return <td className={`tf-button ${text.toLowerCase()}`} onClick={setValue}>
+        return <td className={`tf-button ${text.toLowerCase()} text-center`} onClick={setValue}>
             {text}
         </td>
     }
 
-    return <div className={`tf-button ${text.toLowerCase()}`} onClick={setValue}>
+    return <div className={`tf-button ${text.toLowerCase()} text-center`} onClick={setValue}>
         {text}
     </div>
 }

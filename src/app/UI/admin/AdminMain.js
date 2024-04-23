@@ -1,11 +1,12 @@
 "use client"
 import Tabs from "../Tabs";
 import FTPManager from "./FTPManager";
+import ImporterSettings from "./ImporterSettings";
 import { useState } from "react";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("ftp");
+    const [mode, setMode] = useState("importer");
 
     return <>
         <Tabs 
@@ -20,5 +21,6 @@ export default function AdminMain(){
             }}
         />
         {(mode === "ftp") ? <FTPManager /> : null }
+        {(mode === "importer") ? <ImporterSettings /> : null }
     </>
 }

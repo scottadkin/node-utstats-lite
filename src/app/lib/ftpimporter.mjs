@@ -4,9 +4,10 @@ import { logFilePrefix, importedLogsFolder } from "../../../config.mjs";
 
 export class FTPImporter{
 
-    constructor(host, user, password, secure, targetFolder){
+    constructor(host, port, user, password, secure, targetFolder){
 
         this.host = host;
+        this.port = port;
         this.user = user;
         this.password = password;
         this.secure = secure;
@@ -24,12 +25,13 @@ export class FTPImporter{
 
             await this.client.access({
                 "host": this.host,
+                "port": this.port,
                 "user": this.user,
                 "password": this.password,
                 "secure": false
             });
 
-            new Message(`Connected to ${this.host}`,"pass");
+            new Message(`Connected to ${this.host}:${this.port}`,"pass");
 
             await this.downloadMatchLogs();
 
