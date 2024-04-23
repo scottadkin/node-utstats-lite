@@ -2,18 +2,19 @@
 import Tabs from "../Tabs";
 import FTPManager from "./FTPManager";
 import ImporterSettings from "./ImporterSettings";
+import ImporterHistory from "./ImporterHistory";
 import { useState } from "react";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("importer");
+    const [mode, setMode] = useState("importer-history");
 
     return <>
         <Tabs 
             options={[
-                {"name": "Test", "value": "0"},
                 {"name": "FTP Manager", "value": "ftp"},
                 {"name": "Importer Settings", "value": "importer"},
+                {"name": "Importer History", "value": "importer-history"},
             ]}
             selectedValue={mode}
             changeSelected={(value) =>{
@@ -22,5 +23,6 @@ export default function AdminMain(){
         />
         {(mode === "ftp") ? <FTPManager /> : null }
         {(mode === "importer") ? <ImporterSettings /> : null }
+        {(mode === "importer-history") ? <ImporterHistory /> : null }
     </>
 }
