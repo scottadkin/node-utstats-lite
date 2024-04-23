@@ -42,11 +42,49 @@ async function insertRejectedHistory(fileName, reason){
     return await simpleQuery(query, [fileName, date, reason]);
 }
 
+async function updateFTPStats(serverId, totalImports){
+
+    const date = new Date();
+
+    const query = `UPDATE nstats_ftp SET 
+    first = IF(total_imports = 0, ?, first),
+    last=?,
+    total_imports = total_imports+1,
+    total_logs_imported = total_logs_imported + ?
+    WHERE id=?`;
+
+    const vars = [
+        date, date, totalImports, serverId
+    ];
+
+    await simpleQuery(query, vars);
+
+}
+
+async function updateLogsFolderStats(totalImports){
+
+    const date = new Date();
+
+    const query = `UPDATE nstats_logs_folder SET 
+    first = IF(total_imports = 0, ?, first),
+    last=?,
+    total_imports = total_imports+1,
+    total_logs_imported = total_logs_imported + ?`;
+
+    const vars = [
+        date, date, totalImports
+    ];
+
+    await simpleQuery(query, vars);
+
+}
+
 async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime){
 
     try{
 
         new Message(`Starting parsing of log ${file}`,"note");
+
 
         if(bIgnoreDuplicates){
 
@@ -81,12 +119,14 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
         await InsertLogHistory(file);
         new Message(`Finished parsing log ${file}`,"pass");
+        return true;
 
     }catch(err){
 
         await rename(`./Logs/${file}`, `./Logs/rejected/${file}`);
         await insertRejectedHistory(file, err.toString());
         new Message(err.toString(),"error");
+        return false;
     }
 }
 
@@ -95,13 +135,25 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
     const files = await readdir(importedLogsFolder);
 
+    let imported = 0;
+
     for(let i = 0; i < files.length; i++){
 
         const f = files[i];
         
         if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
 
-        await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime);
+        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime)){
+            imported++;
+        }
+    }
+    
+    if(serverId !== -1){
+
+        await updateFTPStats(serverId, imported);
+    }else{
+
+        await updateLogsFolderStats(imported);
     }
 }
 
