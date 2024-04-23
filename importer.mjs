@@ -26,8 +26,20 @@ async function InsertLogHistory(fileName){
 
     fileName = fileName.toLowerCase();
 
-    const query = `INSERT INTO nstats_logs VALUES(NULL,?)`;
-    return await simpleQuery(query, [fileName]);
+    const date = new Date();
+
+    const query = `INSERT INTO nstats_logs VALUES(NULL,?,?)`;
+    return await simpleQuery(query, [fileName, date]);
+}
+
+async function insertRejectedHistory(fileName, reason){
+
+    fileName = fileName.toLowerCase();
+
+    const query = `INSERT INTO nstats_logs_rejected VALUES(NULL,?,?,?)`;
+    const date = new Date();
+
+    return await simpleQuery(query, [fileName, date, reason]);
 }
 
 async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime){
@@ -35,8 +47,6 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
     try{
 
         new Message(`Starting parsing of log ${file}`,"note");
-
-        
 
         if(bIgnoreDuplicates){
 
@@ -46,8 +56,6 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
                 new Message(`The match log ${file} has already been imported, skipping(bIgnore Duplicates is set to true).`,"note");
                 return;
             }
-
-
         }
 
         const url = `${importedLogsFolder}/${file}`;
@@ -76,6 +84,8 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
     }catch(err){
 
+        await rename(`./Logs/${file}`, `./Logs/rejected/${file}`);
+        await insertRejectedHistory(file, err.toString());
         new Message(err.toString(),"error");
     }
 }
