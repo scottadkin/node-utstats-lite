@@ -79,6 +79,16 @@ async function updateLogsFolderStats(totalImports){
 
 }
 
+
+async function insertImporterHistory(serverId, logsFound, passed, failed, totalTime){
+
+    const date = new Date();
+
+    const query = `INSERT INTO nstats_importer_history VALUES(NULL,?,?,?,?,?,?)`;
+
+    await simpleQuery(query, [serverId, date, logsFound, passed, failed, totalTime]);
+}
+
 async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime){
 
     try{
@@ -133,9 +143,12 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 //serverId is -1 if logs are from the websites /Logs folder
 async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime){
 
+    const start = performance.now();
+
     const files = await readdir(importedLogsFolder);
 
     let imported = 0;
+    let failed = 0;
 
     for(let i = 0; i < files.length; i++){
 
@@ -145,8 +158,16 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
         if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime)){
             imported++;
+        }else{
+            failed++;
         }
     }
+
+    const end = performance.now();
+
+    const importTime = (end - start) * 0.001;
+
+    await insertImporterHistory(serverId, imported + failed, imported, failed, importTime);
     
     if(serverId !== -1){
 
@@ -155,6 +176,8 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
         await updateLogsFolderStats(imported);
     }
+
+    
 }
 
 

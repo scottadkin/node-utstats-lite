@@ -313,6 +313,15 @@ const queries = [
             reason varchar(255) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_logs_history (
+            id int NOT NULL AUTO_INCREMENT,
+            importer_id int NOT NULL,
+            date datetime NOT NULL,
+            logs_found int NOT NULL,
+            imported int NOT NULL,
+            failed int NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
 
 ];
 
