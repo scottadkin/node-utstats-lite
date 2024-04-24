@@ -22,24 +22,24 @@ async function bLogAlreadyImported(fileName){
     return false;
 }
 
-async function InsertLogHistory(fileName){
+async function InsertLogHistory(fileName, serverId){
 
     fileName = fileName.toLowerCase();
 
     const date = new Date();
 
-    const query = `INSERT INTO nstats_logs VALUES(NULL,?,?)`;
-    return await simpleQuery(query, [fileName, date]);
+    const query = `INSERT INTO nstats_logs VALUES(NULL,?,?,?)`;
+    return await simpleQuery(query, [fileName, date, serverId]);
 }
 
-async function insertRejectedHistory(fileName, reason){
+async function insertRejectedHistory(serverId, fileName, reason){
 
     fileName = fileName.toLowerCase();
 
-    const query = `INSERT INTO nstats_logs_rejected VALUES(NULL,?,?,?)`;
+    const query = `INSERT INTO nstats_logs_rejected VALUES(NULL,?,?,?,?)`;
     const date = new Date();
 
-    return await simpleQuery(query, [fileName, date, reason]);
+    return await simpleQuery(query, [fileName, date, serverId, reason]);
 }
 
 async function updateFTPStats(serverId, totalImports){
@@ -89,12 +89,11 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
     await simpleQuery(query, [serverId, date, logsFound, passed, failed, totalTime]);
 }
 
-async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime){
+async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId){
 
     try{
 
         new Message(`Starting parsing of log ${file}`,"note");
-
 
         if(bIgnoreDuplicates){
 
@@ -127,14 +126,14 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
         await m.main();
 
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
-        await InsertLogHistory(file);
+        await InsertLogHistory(file, serverId);
         new Message(`Finished parsing log ${file}`,"pass");
         return true;
 
     }catch(err){
 
         await rename(`./Logs/${file}`, `./Logs/rejected/${file}`);
-        await insertRejectedHistory(file, err.toString());
+        await insertRejectedHistory(serverId, file, err.toString());
         new Message(err.toString(),"error");
         return false;
     }
@@ -156,7 +155,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
         
         if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
 
-        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime)){
+        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId)){
             imported++;
         }else{
             failed++;

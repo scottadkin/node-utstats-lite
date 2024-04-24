@@ -2,7 +2,7 @@
 import Header from "../Header";
 import { useEffect, useReducer } from "react";
 import InteractiveTable from "../InteractiveTable";
-import { convertTimestamp, ignore0, toPlaytime } from "@/app/lib/generic.mjs";
+import { convertTimestamp, ignore0 } from "@/app/lib/generic.mjs";
 import Tabs from "../Tabs";
 import BasicPagination from "../BasicPagination";
 
@@ -40,6 +40,24 @@ async function loadPreviousImports(controller, state, dispatch){
         if(res.error !== undefined) throw new Error(res.error);
 
         dispatch({"type": "loaded-previous", "data": res.data, "totals": res.totals});
+
+    }catch(err){
+        console.trace(err);
+    }
+}
+
+async function loadRejected(state, dispatch){
+
+    try{
+
+        const req = await fetch(`/api/admin?mode=get-rejected-history&page=${state.page}&perPage=${state.perPage}`);
+
+        const res = await req.json();
+
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        dispatch({"type": "loaded-rejected", "data": res.data, "totals": res.totals});
 
     }catch(err){
         console.trace(err);
@@ -104,6 +122,58 @@ function renderPreviousImports(state, dispatch){
     </>
 }
 
+
+function renderRejectedImports(state, dispatch){
+
+    if(state.mode !== "1") return null;
+
+    const headers = {
+        "importer": {"title": "Importer"},
+        "file": {"title": "File"},
+        "date": {"title": "Date"},
+        "reason": {"title": "Rejected Reason"}
+    };
+
+    const rows = state.rejectedImports.map((d) =>{
+
+        const date = Math.floor(new Date(d.date) * 0.001);
+
+        const importerInfo = state.names[d.importer_id] ?? {"name": "Not Found", "host": "", "port": ""};
+
+        let hostString = (d.importer_id === -1) ? "" : ` (${importerInfo.host}:${importerInfo.port})`;
+
+        return {
+            "date": {
+                "value": date, 
+                "displayValue": convertTimestamp(date, true),
+                "className": "font-small"
+            },
+            "importer": {
+                "value": importerInfo.name.toLowerCase(),
+                "displayValue": <>{importerInfo.name}{hostString}</>,
+                "className": "text-left"
+            },
+            "reason": {
+                "value": d.reason.toLowerCase(),
+                "displayValue": d.reason,
+                "className": "font-small"
+            },
+            "file": {
+                "value": d.file_name.toLowerCase(),
+                "displayValue": d.file_name,
+                "className": "font-small"
+            }
+        }
+    });
+
+    return <>
+        <BasicPagination results={state.totalRejected} perPage={state.perPage} page={state.page} setPage={(value) =>{
+            dispatch({"type": "change-page", "value": value});
+        }}/>
+        <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true} sortBy={"date"} order={"DESC"}/>
+    </>
+}
+
 function reducer(state, action){
 
 
@@ -113,6 +183,13 @@ function reducer(state, action){
                 ...state,
                 "previousImports": action.data,
                 "totalPreviousImports": action.totals
+            }
+        }
+        case "loaded-rejected": {
+            return {
+                ...state,
+                "rejectedImports": action.data,
+                "totalRejected": action.totals
             }
         }
         case "set-names": {
@@ -144,6 +221,8 @@ export default function ImporterHistory(){
     const [state, dispatch] = useReducer(reducer, {
         "previousImports": [],
         "totalPreviousImports": 0,
+        "rejectedImports": [],
+        "totalRejected": 0,
         "names": {},
         "mode": "0",
         "page": 1,
@@ -160,13 +239,18 @@ export default function ImporterHistory(){
         return () =>{
            // controller.abort();
         }
+
     }, []);
 
     useEffect(() =>{
 
-        loadPreviousImports("controller", state, dispatch);
+        if(state.mode === "0"){
+            loadPreviousImports("controller", state, dispatch);
+        }else if(state.mode === "1"){
+            loadRejected(state, dispatch);
+        }
 
-    }, [state.page]);
+    }, [state.page, state.mode]);
 
 
     const tabOptions = [
@@ -182,5 +266,6 @@ export default function ImporterHistory(){
             dispatch({"type": "change-mode", "value": value});
         }}/>
         {renderPreviousImports(state, dispatch)}
+        {renderRejectedImports(state, dispatch)}
     </>
 }

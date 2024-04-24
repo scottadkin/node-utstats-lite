@@ -303,13 +303,15 @@ const queries = [
         `CREATE TABLE IF NOT EXISTS nstats_logs (
             id int NOT NULL AUTO_INCREMENT,
             file_name varchar(255) NOT NULL,
-            date datetime NOT NULL
+            date datetime NOT NULL,
+            importer_id int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_logs_rejected (
             id int NOT NULL AUTO_INCREMENT,
             file_name varchar(255) NOT NULL,
             date datetime NOT NULL,
+            importer_id int NOT NULL,
             reason varchar(255) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 

@@ -1,7 +1,7 @@
 import { getSessionInfo } from "@/app/lib/authentication";
 import { getAllFTPSettings, addServer, editServer, deleteServer } from "@/app/lib/ftp";
 import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolderSettings} from "@/app/lib/logsfoldersettings.mjs";
-import { getHistory as getImporterHistory, getImporterNames } from "@/app/lib/importer.mjs";
+import { getHistory as getImporterHistory, getImporterNames, getRejectedHistory } from "@/app/lib/importer.mjs";
 
 export async function POST(req){
 
@@ -129,6 +129,15 @@ export async function GET(req){
             const data = await getImporterNames();
             
             return Response.json({"data": data});
+        }
+
+        if(mode === "get-rejected-history"){
+
+            const result = await getRejectedHistory(page, perPage);
+
+            const {totals, data} = result;
+            
+            return Response.json({"data": data, "totals": totals});
         }
 
         return Response.json({"message": "hi"});
