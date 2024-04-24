@@ -1,6 +1,25 @@
 import { simpleQuery } from "./database.mjs";
 
 
+export async function getImporterNames(){
+
+    const query = `SELECT id,name,host,port FROM nstats_ftp`;
+
+    const result = await simpleQuery(query);
+
+    const data = {
+        "-1": {"id": -1, "name": "Logs Folder", "host": "", "port": ""}
+    };
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r;
+    }
+
+    return data;
+}
+
 export async function getHistory(page, perPage){
 
 
@@ -14,5 +33,7 @@ export async function getHistory(page, perPage){
 
     const query = `SELECT * FROM nstats_importer_history ORDER BY date DESC LIMIT ?, ?`;
 
-    return await simpleQuery(query, [start, perPage]);
+    const result = await simpleQuery(query, [start, perPage]);
+
+    return result;
 }

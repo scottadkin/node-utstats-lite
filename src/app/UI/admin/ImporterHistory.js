@@ -3,8 +3,29 @@ import Header from "../Header";
 import { useEffect, useReducer } from "react";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, ignore0, toPlaytime } from "@/app/lib/generic.mjs";
+import Tabs from "../Tabs";
 
-async function loadData(controller, dispatch){
+async function loadNames(controller, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin?mode=get-importer-names", {
+            "signal": controller.signal
+        });
+
+        const res = await req.json();
+
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        dispatch({"type": "set-names", "data": res.data});
+
+    }catch(err){
+        console.trace(err);
+    }
+}
+
+async function loadPreviousImports(controller, dispatch){
 
     try{
 
@@ -14,66 +35,48 @@ async function loadData(controller, dispatch){
 
         const res = await req.json();
 
-        console.log(res);
 
         if(res.error !== undefined) throw new Error(res.error);
 
-        dispatch({"type": "loaded", "data": res.data});
+        dispatch({"type": "loaded-previous", "data": res.data});
 
     }catch(err){
         console.trace(err);
     }
 }
 
-function reducer(state, action){
 
+function renderPreviousImports(state){
 
-    switch(action.type){
-        case "loaded": {
-            return {
-                ...state,
-                "data": action.data
-            }
-        }
-    }
-
-    return state;
-}
-
-export default function ImporterHistory(){
-
-    const [state, dispatch] = useReducer(reducer, {
-        "data": []
-    });
-
-    useEffect(() =>{
-
-        const controller = new AbortController();
-
-        loadData(controller, dispatch);
-
-    }, []);
-
+    if(state.mode !== "0") return null;
 
     const headers = {
-        "date": {"title": "Date"},
         "importer": {"title": "Importer"},
+        "date": {"title": "Date"},
         "found": {"title": "Logs Found"},
         "passed": {"title": "Logs Imported"},
         "failed": {"title": "Logs Rejected"},
         "time": {"title": "Import Time"}
     };
 
-    const rows = state.data.map((d) =>{
+    const rows = state.previousImports.map((d) =>{
+
         const date = Math.floor(new Date() * 0.001);
+
+        const importerInfo = state.names[d.importer_id] ?? {"name": "Not Found", "host": "", "port": ""};
+
+        let hostString = (d.importer_id === -1) ? "" : ` (${importerInfo.host}:${importerInfo.port})`;
+
         return {
             "date": {
                 "value": date, 
                 "displayValue": convertTimestamp(date, true),
-                "className": "text-left"
+                "className": "font-small"
             },
             "importer": {
-                "value": d.importer_id
+                "value": importerInfo.name.toLowerCase(),
+                "displayValue": <>{importerInfo.name}{hostString}</>,
+                "className": "text-left"
             },
             "found": {
                 "value": ignore0(d.logs_found)
@@ -86,13 +89,77 @@ export default function ImporterHistory(){
             },
             "time": {
                 "value": d.total_time,
-                "displayValue": toPlaytime(d.total_time)
+                "displayValue": `${d.total_time.toFixed(4)} Seconds`,
+                "className": "font-small"
             }
         }
     });
 
     return <>
-        <Header>Importer History</Header>
         <InteractiveTable width={1} headers={headers} rows={rows}/>
+    </>
+}
+
+function reducer(state, action){
+
+
+    switch(action.type){
+        case "loaded-previous": {
+            return {
+                ...state,
+                "previousImports": action.data
+            }
+        }
+        case "set-names": {
+            return {
+                ...state,
+                "names": action.data
+            }
+        }
+        case "change-mode": {
+            return {
+                ...state,
+                "mode": action.value
+            }
+        }
+    }
+
+    return state;
+}
+
+export default function ImporterHistory(){
+
+    const [state, dispatch] = useReducer(reducer, {
+        "previousImports": [],
+        "names": {},
+        "mode": "0"
+    });
+
+    useEffect(() =>{
+
+        const controller = new AbortController();
+
+        loadNames(controller, dispatch);
+        loadPreviousImports(controller, dispatch);
+
+        return () =>{
+           // controller.abort();
+        }
+    }, []);
+
+
+    const tabOptions = [
+        {"name": "Previous Imports", "value": "0"},
+        {"name": "Rejected Logs", "value": "1"},
+        {"name": "Imported Logs", "value": "2"},
+    ];
+
+
+    return <>
+        <Header>Importer History</Header>
+        <Tabs options={tabOptions} selectedValue={state.mode} changeSelected={(value) =>{
+            dispatch({"type": "change-mode", "value": value});
+        }}/>
+        {renderPreviousImports(state)}
     </>
 }

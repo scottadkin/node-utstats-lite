@@ -1,7 +1,7 @@
 import { getSessionInfo } from "@/app/lib/authentication";
 import { getAllFTPSettings, addServer, editServer, deleteServer } from "@/app/lib/ftp";
 import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolderSettings} from "@/app/lib/logsfoldersettings.mjs";
-import { getHistory as getImporterHistory } from "@/app/lib/importer.mjs";
+import { getHistory as getImporterHistory, getImporterNames } from "@/app/lib/importer.mjs";
 
 export async function POST(req){
 
@@ -101,6 +101,14 @@ export async function GET(req){
         if(mode === "get-importer-history"){
 
             const data = await getImporterHistory(1, 50);
+            
+            return Response.json({"data": data});
+        }
+
+        if(mode === "get-importer-names"){
+
+            const data = await getImporterNames();
+            
             return Response.json({"data": data});
         }
 
