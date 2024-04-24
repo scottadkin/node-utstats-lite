@@ -75,6 +75,23 @@ export async function GET(req){
 
         const { searchParams } = new URL(req.url);
 
+        let page = searchParams.get("page");
+        let perPage = searchParams.get("perPage");
+
+        
+        if(page === null) page = 1;
+        if(perPage === null) perPage = 25;
+
+        page = parseInt(page);
+        if(page !== page) throw new Error(`Page must be a valid integer`);
+
+        perPage = parseInt(perPage);
+        if(perPage !== perPage) throw new Error(`perPage must be a valid integer`);
+
+        if(page < 1) page = 1;
+        if(perPage > 100) perPage = 100;
+        if(perPage < 5) perPage = 5;
+
         const mode = searchParams.get("mode");
 
         if(mode === undefined){
@@ -100,9 +117,11 @@ export async function GET(req){
 
         if(mode === "get-importer-history"){
 
-            const data = await getImporterHistory(1, 50);
+            const result = await getImporterHistory(page, perPage);
+
+            const {totals, data} = result;
             
-            return Response.json({"data": data});
+            return Response.json({"data": data, "totals": totals});
         }
 
         if(mode === "get-importer-names"){

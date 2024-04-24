@@ -4,6 +4,7 @@ import { useEffect, useReducer } from "react";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, ignore0, toPlaytime } from "@/app/lib/generic.mjs";
 import Tabs from "../Tabs";
+import BasicPagination from "../BasicPagination";
 
 async function loadNames(controller, dispatch){
 
@@ -25,11 +26,11 @@ async function loadNames(controller, dispatch){
     }
 }
 
-async function loadPreviousImports(controller, dispatch){
+async function loadPreviousImports(controller, state, dispatch){
 
     try{
 
-        const req = await fetch("/api/admin?mode=get-importer-history&page=1&perPage=50", {
+        const req = await fetch(`/api/admin?mode=get-importer-history&page=${state.page}&perPage=${state.perPage}`, {
             "signal": controller.signal
         });
 
@@ -38,7 +39,7 @@ async function loadPreviousImports(controller, dispatch){
 
         if(res.error !== undefined) throw new Error(res.error);
 
-        dispatch({"type": "loaded-previous", "data": res.data});
+        dispatch({"type": "loaded-previous", "data": res.data, "totals": res.totals});
 
     }catch(err){
         console.trace(err);
@@ -46,7 +47,7 @@ async function loadPreviousImports(controller, dispatch){
 }
 
 
-function renderPreviousImports(state){
+function renderPreviousImports(state, dispatch){
 
     if(state.mode !== "0") return null;
 
@@ -61,7 +62,7 @@ function renderPreviousImports(state){
 
     const rows = state.previousImports.map((d) =>{
 
-        const date = Math.floor(new Date() * 0.001);
+        const date = Math.floor(new Date(d.date) * 0.001);
 
         const importerInfo = state.names[d.importer_id] ?? {"name": "Not Found", "host": "", "port": ""};
 
@@ -96,7 +97,10 @@ function renderPreviousImports(state){
     });
 
     return <>
-        <InteractiveTable width={1} headers={headers} rows={rows}/>
+        <BasicPagination results={state.totalPreviousImports} perPage={state.perPage} page={state.page} setPage={(value) =>{
+            dispatch({"type": "change-page", "value": value});
+        }}/>
+        <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true} sortBy={"date"} order={"DESC"}/>
     </>
 }
 
@@ -107,7 +111,8 @@ function reducer(state, action){
         case "loaded-previous": {
             return {
                 ...state,
-                "previousImports": action.data
+                "previousImports": action.data,
+                "totalPreviousImports": action.totals
             }
         }
         case "set-names": {
@@ -119,7 +124,14 @@ function reducer(state, action){
         case "change-mode": {
             return {
                 ...state,
-                "mode": action.value
+                "mode": action.value,
+                "page": 1
+            }
+        }
+        case "change-page": {
+            return {
+                ...state,
+                "page": action.value
             }
         }
     }
@@ -131,8 +143,11 @@ export default function ImporterHistory(){
 
     const [state, dispatch] = useReducer(reducer, {
         "previousImports": [],
+        "totalPreviousImports": 0,
         "names": {},
-        "mode": "0"
+        "mode": "0",
+        "page": 1,
+        "perPage": 50
     });
 
     useEffect(() =>{
@@ -140,12 +155,18 @@ export default function ImporterHistory(){
         const controller = new AbortController();
 
         loadNames(controller, dispatch);
-        loadPreviousImports(controller, dispatch);
+        loadPreviousImports(controller, state, dispatch);
 
         return () =>{
            // controller.abort();
         }
     }, []);
+
+    useEffect(() =>{
+
+        loadPreviousImports("controller", state, dispatch);
+
+    }, [state.page]);
 
 
     const tabOptions = [
@@ -160,6 +181,6 @@ export default function ImporterHistory(){
         <Tabs options={tabOptions} selectedValue={state.mode} changeSelected={(value) =>{
             dispatch({"type": "change-mode", "value": value});
         }}/>
-        {renderPreviousImports(state)}
+        {renderPreviousImports(state, dispatch)}
     </>
 }

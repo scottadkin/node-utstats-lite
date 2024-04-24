@@ -20,8 +20,16 @@ export async function getImporterNames(){
     return data;
 }
 
-export async function getHistory(page, perPage){
+async function getTotalImportHistoryCount(){
 
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_importer_history`;
+
+    const result = await simpleQuery(query);
+
+    return result[0].total_rows;
+}
+
+export async function getHistory(page, perPage){
 
     if(page !== page || perPage !== perPage) throw new Error(`Page and perPage must be valid integers`);
     page--;
@@ -31,9 +39,12 @@ export async function getHistory(page, perPage){
 
     if(start < 0) start = 0;
 
+
     const query = `SELECT * FROM nstats_importer_history ORDER BY date DESC LIMIT ?, ?`;
 
     const result = await simpleQuery(query, [start, perPage]);
 
-    return result;
+    const totals = await getTotalImportHistoryCount();
+
+    return {"data": result, "totals": totals};
 }
