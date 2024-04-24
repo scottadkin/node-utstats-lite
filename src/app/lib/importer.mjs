@@ -63,7 +63,27 @@ export async function getRejectedHistory(page, perPage){
 
     const totals = await getRejectedLogsCount();
 
-
     return {"data": result, "totals": totals};
+}
 
+async function getLogsCount(){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_logs`;
+
+    const result = await simpleQuery(query);
+
+    return result[0].total_rows;
+}
+
+export async function getLogImportHistory(page, perPage){
+
+    const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
+
+    const query = `SELECT * FROM nstats_logs ORDER BY date DESC LIMIT ?, ?`;
+
+    const result = await simpleQuery(query, [start, cleanPerPage]);
+
+    const totals = await getLogsCount();
+
+    return {"data": result, "totals": totals}
 }

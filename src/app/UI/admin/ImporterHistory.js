@@ -54,7 +54,6 @@ async function loadRejected(state, dispatch){
 
         const res = await req.json();
 
-
         if(res.error !== undefined) throw new Error(res.error);
 
         dispatch({"type": "loaded-rejected", "data": res.data, "totals": res.totals});
@@ -64,6 +63,24 @@ async function loadRejected(state, dispatch){
     }
 }
 
+async function loadLogsHistory(state, dispatch){
+
+    try{
+
+        const req = await fetch(`/api/admin?mode=get-importer-logs&page=${state.page}&perPage=${state.perPage}`);
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        console.log(res);
+
+        dispatch({"type": "loaded-logs-history", "data": res.data, "totals": res.totals});
+
+    }catch(err){
+        console.trace(err);
+    }
+}
 
 function renderPreviousImports(state, dispatch){
 
@@ -156,7 +173,7 @@ function renderRejectedImports(state, dispatch){
             "reason": {
                 "value": d.reason.toLowerCase(),
                 "displayValue": d.reason,
-                "className": "font-small"
+                "className": "font-small team-red"
             },
             "file": {
                 "value": d.file_name.toLowerCase(),
@@ -168,6 +185,52 @@ function renderRejectedImports(state, dispatch){
 
     return <>
         <BasicPagination results={state.totalRejected} perPage={state.perPage} page={state.page} setPage={(value) =>{
+            dispatch({"type": "change-page", "value": value});
+        }}/>
+        <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true} sortBy={"date"} order={"DESC"}/>
+    </>
+}
+
+
+function renderLogsHistory(state, dispatch){
+
+    if(state.mode !== "2") return null;
+
+    const headers = {
+        "importer": {"title": "Importer"},
+        "file": {"title": "File"},
+        "date": {"title": "Date"},
+    };
+
+    const rows = state.logsHistory.map((d) =>{
+
+        const date = Math.floor(new Date(d.date) * 0.001);
+
+        const importerInfo = state.names[d.importer_id] ?? {"name": "Not Found", "host": "", "port": ""};
+
+        let hostString = (d.importer_id === -1) ? "" : ` (${importerInfo.host}:${importerInfo.port})`;
+
+        return {
+            "date": {
+                "value": date, 
+                "displayValue": convertTimestamp(date, true),
+                "className": "font-small"
+            },
+            "importer": {
+                "value": importerInfo.name.toLowerCase(),
+                "displayValue": <>{importerInfo.name}{hostString}</>,
+                "className": "text-left"
+            },
+            "file": {
+                "value": d.file_name.toLowerCase(),
+                "displayValue": d.file_name,
+                "className": "font-small"
+            }
+        }
+    });
+
+    return <>
+        <BasicPagination results={state.totalLogs} perPage={state.perPage} page={state.page} setPage={(value) =>{
             dispatch({"type": "change-page", "value": value});
         }}/>
         <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true} sortBy={"date"} order={"DESC"}/>
@@ -190,6 +253,13 @@ function reducer(state, action){
                 ...state,
                 "rejectedImports": action.data,
                 "totalRejected": action.totals
+            }
+        }
+        case "loaded-logs-history": {
+            return {
+                ...state,
+                "logsHistory": action.data,
+                "totalLogs": action.totals
             }
         }
         case "set-names": {
@@ -223,8 +293,10 @@ export default function ImporterHistory(){
         "totalPreviousImports": 0,
         "rejectedImports": [],
         "totalRejected": 0,
+        "logsHistory": [],
+        "totalLogs": 0,
         "names": {},
-        "mode": "0",
+        "mode": "2",
         "page": 1,
         "perPage": 50
     });
@@ -235,6 +307,7 @@ export default function ImporterHistory(){
 
         loadNames(controller, dispatch);
         loadPreviousImports(controller, state, dispatch);
+        loadLogsHistory(state, dispatch);
 
         return () =>{
            // controller.abort();
@@ -248,6 +321,8 @@ export default function ImporterHistory(){
             loadPreviousImports("controller", state, dispatch);
         }else if(state.mode === "1"){
             loadRejected(state, dispatch);
+        }else if(state.mode === "2"){
+            loadLogsHistory(state, dispatch);
         }
 
     }, [state.page, state.mode]);
@@ -267,5 +342,6 @@ export default function ImporterHistory(){
         }}/>
         {renderPreviousImports(state, dispatch)}
         {renderRejectedImports(state, dispatch)}
+        {renderLogsHistory(state, dispatch)}
     </>
 }

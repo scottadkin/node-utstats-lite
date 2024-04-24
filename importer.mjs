@@ -22,13 +22,13 @@ async function bLogAlreadyImported(fileName){
     return false;
 }
 
-async function InsertLogHistory(fileName, serverId){
+async function InsertLogHistory(fileName, serverId, matchId){
 
     fileName = fileName.toLowerCase();
 
     const date = new Date();
 
-    const query = `INSERT INTO nstats_logs VALUES(NULL,?,?,?)`;
+    const query = `INSERT INTO nstats_logs VALUES(NULL,?,?,?,?)`;
     return await simpleQuery(query, [fileName, date, serverId]);
 }
 
@@ -98,7 +98,6 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
         if(bIgnoreDuplicates){
 
             if(await bLogAlreadyImported(file)){
-
                 await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
                 new Message(`The match log ${file} has already been imported, skipping(bIgnore Duplicates is set to true).`,"note");
                 return;
@@ -125,8 +124,9 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await m.main();
 
+
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
-        await InsertLogHistory(file, serverId);
+        //await InsertLogHistory(file, serverId, m.matchId);
         new Message(`Finished parsing log ${file}`,"pass");
         return true;
 

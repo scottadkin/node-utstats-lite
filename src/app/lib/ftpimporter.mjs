@@ -59,7 +59,7 @@ export class FTPImporter{
 
                 if(f.name.toLowerCase().startsWith(lowerPrefix) && fileExt.test(f.name)){
 
-                    await this.client.downloadTo(`${importedLogsFolder}/${f.name}`, `/Logs/${f.name}`);
+                    await this.client.downloadTo(`${importedLogsFolder}/${f.name}`, `./Logs/${f.name}`);
                     new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass");
                 }
 
