@@ -29,7 +29,7 @@ async function InsertLogHistory(fileName, serverId, matchId){
     const date = new Date();
 
     const query = `INSERT INTO nstats_logs VALUES(NULL,?,?,?,?)`;
-    return await simpleQuery(query, [fileName, date, serverId]);
+    return await simpleQuery(query, [fileName, date, serverId, matchId]);
 }
 
 async function insertRejectedHistory(serverId, fileName, reason){
@@ -124,9 +124,10 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await m.main();
 
+        await InsertLogHistory(file, serverId, m.matchId);
 
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
-        //await InsertLogHistory(file, serverId, m.matchId);
+        
         new Message(`Finished parsing log ${file}`,"pass");
         return true;
 

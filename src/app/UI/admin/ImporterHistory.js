@@ -5,6 +5,7 @@ import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, ignore0 } from "@/app/lib/generic.mjs";
 import Tabs from "../Tabs";
 import BasicPagination from "../BasicPagination";
+import Link from "next/link";
 
 async function loadNames(controller, dispatch){
 
@@ -200,6 +201,7 @@ function renderLogsHistory(state, dispatch){
         "importer": {"title": "Importer"},
         "file": {"title": "File"},
         "date": {"title": "Date"},
+        "match": {"title": "Match Id"}
     };
 
     const rows = state.logsHistory.map((d) =>{
@@ -225,6 +227,10 @@ function renderLogsHistory(state, dispatch){
                 "value": d.file_name.toLowerCase(),
                 "displayValue": d.file_name,
                 "className": "font-small"
+            },
+            "match": {
+                "value": d.match_id,
+                "displayValue": <Link href={`/match/${d.match_id}`}>{d.match_id}</Link>
             }
         }
     });
