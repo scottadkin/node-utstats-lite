@@ -107,7 +107,7 @@ const queries = [
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,
             matches int NOT NULL,
-            playtime int NOT NULL,
+            playtime float NOT NULL,
             first_match datetime NOT NULL,
             last_match datetime NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,

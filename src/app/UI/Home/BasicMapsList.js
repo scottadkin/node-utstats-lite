@@ -2,25 +2,25 @@ import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
 
-export default function BasicServerList({servers}){
+export default function BasicMapsList({data}){
 
     const headers = {
         "name": {"title": "Name"},
         "first": {"title": "First Match"},
         "last": {"title": "Last Match"},
+        "matches": {"title": "Matches Played"},
         "playtime": {"title": "Playtime"},
-        "matches": {"title": "Matches"}
     };
 
-    const rows = servers.map((s) =>{
+    const rows = data.map((d) =>{
 
-        const first = Math.floor(new Date(s.first_match) * 0.001);
-        const last = Math.floor(new Date(s.last_match) * 0.001);
+        const first = Math.floor(new Date(d.first_match) * 0.001);
+        const last = Math.floor(new Date(d.last_match) * 0.001);
 
         return {
             "name": {
-                "value": s.name.toLowerCase(), 
-                "displayValue": s.name,
+                "value": d.name.toLowerCase(), 
+                "displayValue": d.name,
                 "className": "text-left"
             },
             "first": {
@@ -33,13 +33,13 @@ export default function BasicServerList({servers}){
                 "displayValue": convertTimestamp(last, true),  
                 "className": "date"
             },
-            "playtime": {"value": s.playtime, "displayValue": toPlaytime(s.playtime)},
-            "matches": {"value": s.matches},
+            "matches": {"value": d.matches},
+            "playtime": {"value": d.playtime, "displayValue": toPlaytime(d.playtime)},
         }
     });
 
     return <>
-        <Header>Servers</Header>
-        <InteractiveTable width={1} headers={headers} rows={rows}/>
+        <Header>Most Played Maps</Header>
+        <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true} sortBy="playtime" order="DESC"/>
     </>
 }

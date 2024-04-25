@@ -23,8 +23,16 @@ export default function BasicGametypeList({gametypes}){
                 "displayValue": g.name,
                 "className": "text-left"
             },
-            "first": {"value": first, "displayValue": convertTimestamp(first, true)},
-            "last": {"value": last, "displayValue": convertTimestamp(last, true)},
+            "first": {
+                "value": first, 
+                "displayValue": convertTimestamp(first, true),  
+                "className": "date"
+            },
+            "last": {
+                "value": last, 
+                "displayValue": convertTimestamp(last, true),  
+                "className": "date"
+            },
             "playtime": {"value": g.playtime, "displayValue": toPlaytime(g.playtime)},
             "matches": {"value": g.matches},
         }

@@ -318,6 +318,11 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 	font-size:var(--font-size-small);
 }
 
+.date{
+	font-size:var(--font-size-small);
+	color:var(--font-color-2);
+}
+
 select{
 	background-color:var(--bg-color-3);
 	color:var(--font-color-1);

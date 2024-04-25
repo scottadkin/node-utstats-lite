@@ -121,5 +121,19 @@ export async function updateTotals(mapId){
         new Message(`Failed to calculate map totals.`,`error`);
     }
 
-    console.log(totals);
+    const query = `UPDATE nstats_maps SET matches=?, playtime=?, first_match=?, last_match=? WHERE id=?`;
+
+    await simpleQuery(query, [totals.total_matches, totals.playtime, totals.first_match, totals.last_match, mapId]);
+}
+
+
+export async function getMostPlayedMaps(limit){
+
+    limit = parseInt(limit);
+
+    if(limit !== limit) throw new Error(`getMostPlayedMaps(limit) limit must be a valid integer`);
+
+    const query = `SELECT * FROM nstats_maps ORDER by playtime DESC LIMIT ?`;
+
+    return await simpleQuery(query, [limit]);
 }
