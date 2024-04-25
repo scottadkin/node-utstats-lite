@@ -2,7 +2,7 @@ import { getPlayerRecentMatches } from "@/app/lib/players.mjs";
 import { getMatchesResultByIds } from "@/app/lib/matches.mjs";
 import { getServerNames } from "@/app/lib/servers.mjs";
 import { getGametypeNames } from "@/app/lib/gametypes.mjs";
-import { getMapNames } from "@/app/lib/map.mjs";
+import { getMapNames } from "@/app/lib/maps.mjs";
 
 export async function GET(request){
 

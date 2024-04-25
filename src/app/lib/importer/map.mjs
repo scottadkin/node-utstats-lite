@@ -1,5 +1,5 @@
 import { removeUNR } from "../generic.mjs";
-import { updateMap } from "../map.mjs";
+import { updateMap, updateTotals } from "../maps.mjs";
 
 export class Map{
 
@@ -27,5 +27,9 @@ export class Map{
     async setId(){
 
         this.id = await updateMap(this.name);
+    }
+
+    async updateTotals(){
+        await updateTotals(this.id);
     }
 }

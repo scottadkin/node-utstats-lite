@@ -1,8 +1,8 @@
 import {simpleQuery} from "./database.mjs";
-import {getMapNames} from "./map.mjs";
+import {getMapNames} from "./maps.mjs";
 import { getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
-import { getMapImages } from "./map.mjs";
+import { getMapImages } from "./maps.mjs";
 import { getPlayersById, getBasicPlayerInfo } from "./players.mjs";
 import { getMatchWeaponStats } from "./weapons.mjs";
 import { getMatchKills } from "./kills.mjs";

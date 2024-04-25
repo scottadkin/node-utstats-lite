@@ -157,6 +157,7 @@ export class MatchParser{
         await this.players.updatePlayerFullTotals();
 
         await this.ctf.updatePlayerTotals(this.players);
+        await this.map.updateTotals();
         
         
         
