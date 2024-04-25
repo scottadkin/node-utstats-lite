@@ -2,6 +2,7 @@ import { getSessionInfo } from "@/app/lib/authentication";
 import { getAllFTPSettings, addServer, editServer, deleteServer } from "@/app/lib/ftp";
 import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolderSettings} from "@/app/lib/logsfoldersettings.mjs";
 import { getHistory as getImporterHistory, getImporterNames, getRejectedHistory, getLogImportHistory } from "@/app/lib/importer.mjs";
+import { getAllUsers } from "@/app/lib/users.mjs";
 
 export async function POST(req){
 
@@ -48,6 +49,14 @@ export async function POST(req){
             await updateLogsFolderSettings(ignoreBots, ignoreDuplicates, minPlayers, minPlaytime);
 
             return Response.json({"message": "passed"});
+        }
+
+        if(mode === "get-users"){
+
+            const data = await getAllUsers();
+
+            return Response.json({"data": data});
+
         }
 
         return Response.json({"message": "hi"});

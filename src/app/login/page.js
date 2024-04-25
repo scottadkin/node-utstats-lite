@@ -18,7 +18,7 @@ export default function Login(){
     const router = useRouter();
 
     useEffect(() =>{
-     
+
         if(state.message === "ok"){
             router.push("/");
         }

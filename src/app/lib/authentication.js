@@ -82,12 +82,8 @@ async function bAnyAccounts(){
 
     const result = await simpleQuery(query);
 
-    if(result.length > 0){
+    return result[0].total_users >= 1;
 
-        return result[0].total_users > 1;
-    }
-
-    return 99999;
 }
 
 export async function register(currentState, formData){
@@ -150,10 +146,8 @@ export async function login(currentState, formData){
 
         const userId = result[0].id;
 
-        const permissions = await bAccountActive(userId);
-
         //if(permissions.banned === 1) throw new Error("User account has been banned.");
-        if(permissions.activated === 0) throw new Error("User account has not been activated.");
+        if(!await bAccountActive(userId)) throw new Error("User account has not been activated.");
 
         const expires = new Date(Date.now() + 60 * 60 * 1000);
 
@@ -163,7 +157,7 @@ export async function login(currentState, formData){
 
         await createSession(userId, sid, expires);
 
-        cookies().set("nstats_name", permissions.name,{expires, "httpOnly": true, "path": "/"});
+        cookies().set("nstats_name", username,{expires, "httpOnly": true, "path": "/"});
         cookies().set("nstats_userid", userId,{expires, "httpOnly": true, "path": "/"});
         cookies().set("nstats_sid", sid,{expires, "httpOnly": true, "path": "/"});
         return {"message": "ok", "error": null};

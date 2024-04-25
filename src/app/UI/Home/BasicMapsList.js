@@ -8,7 +8,7 @@ export default function BasicMapsList({data}){
         "name": {"title": "Name"},
         "first": {"title": "First Match"},
         "last": {"title": "Last Match"},
-        "matches": {"title": "Matches Played"},
+        "matches": {"title": "Matches"},
         "playtime": {"title": "Playtime"},
     };
 

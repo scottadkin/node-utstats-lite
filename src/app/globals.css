@@ -238,9 +238,10 @@ th:hover{
 }
 
 td{
-    padding:var(--padding-2) var(--padding-3);
 	border:1px solid var(--border-color-1);
+	padding: 0px var(--padding-2);
 	font-size:var(--font-size-1);
+	line-height:32px;
 }
 
 tr:nth-child(even){
@@ -249,6 +250,7 @@ tr:nth-child(even){
 tr:nth-child(odd){
     background-color:var(--bg-color-3);
 }
+
 
 tr:nth-child(even):hover, tr:nth-child(odd):hover{
 	background-color:var(--bg-color-1);

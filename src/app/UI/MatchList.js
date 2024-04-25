@@ -6,7 +6,6 @@ import MatchListTable from "./MatchListTable";
 
 export default function MatchesList({data}){
 
-    data = JSON.parse(data);
 
     console.log(data);
 

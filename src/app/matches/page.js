@@ -24,7 +24,8 @@ export default async function Page({params, searchParams}) {
       <main className={"styles.main"}>
         <div>
             <Header>Recent Matches</Header>
-            <MatchList data={JSON.stringify(data)} />
+            <Pagination url="/matches?page=" currentPage={page} results={total} perPage={perPage}/>
+            <MatchList data={data} />
             <Pagination url="/matches?page=" currentPage={page} results={total} perPage={perPage}/>
         </div>
       </main>
