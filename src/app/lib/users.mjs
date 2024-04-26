@@ -8,9 +8,19 @@ export async function getAllUsers(){
 }
 
 
+async function destoryUserSessions(userId){
+
+    const query = `DELETE FROM nstats_sessions WHERE user=?`;
+
+    await simpleQuery(query, [userId]);
+}
+
 export async function adminUpdateUser(id, bActive){
 
     const query = `UPDATE nstats_users SET activated=? WHERE id=?`;
 
     await simpleQuery(query, [bActive, id]);
+    //logout all user sessions
+    await destoryUserSessions(id);
 }
+
