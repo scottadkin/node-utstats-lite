@@ -114,3 +114,24 @@ export async function getBasicList(){
 
     return await simpleQuery(query);
 }
+
+
+export async function getAllNames(){
+
+    const query = `SELECT id,name FROM nstats_servers`;
+
+    const result = await simpleQuery(query);
+
+    const data = {
+        "0": "Any"
+    };
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = r.name;
+    }
+
+    return data;
+}

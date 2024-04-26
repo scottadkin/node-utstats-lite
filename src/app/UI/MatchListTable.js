@@ -26,6 +26,12 @@ export default function MatchListTable({data}){
         </tr>);
     }
 
+    if(rows.length === 0){
+        rows.push(<tr key={"none"}>
+            <td colSpan={7}>No matches found</td>
+        </tr>);
+    }
+
     return <>
         <table className="t-width-1">
             <tbody>

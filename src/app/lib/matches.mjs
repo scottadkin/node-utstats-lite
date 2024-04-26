@@ -61,17 +61,57 @@ async function setMatchTypeNames(matches){
 }
 
 
-async function getTotalMatches(){
 
-    const query = `SELECT COUNT(*) as total_matches FROM nstats_matches`;
+function createSearchWhere(server, gametype, map){
 
-    const result = await simpleQuery(query);
+    let where = ``;
+
+    const whereVars = [];
+    const vars = [];
+
+    if(server !== 0){
+        whereVars.push(`server_id=?`);
+        vars.push(server);
+    }
+
+    if(gametype !== 0){
+        whereVars.push(`gametype_id=?`);
+        vars.push(gametype);
+    }
+
+    if(map !== 0){
+        whereVars.push(`map_id=?`);
+        vars.push(map);
+    }
+
+    for(let i = 0; i < whereVars.length; i++){
+
+        const w = whereVars[i];
+
+        if(i === 0){
+            where = `WHERE ${w} `;
+        }else{
+            where += ` AND ${w} `;
+        }
+    }
+
+
+    return {where, vars}
+}
+
+
+async function getTotalMatches(server, gametype, map){
+
+    const {where, vars} = createSearchWhere(server, gametype, map);
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_matches ${where}`;
+
+    const result = await simpleQuery(query, vars);
 
     if(result.length > 0) return result[0].total_matches;
     return 0;
 }
 
-export async function getRecentMatches(page, perPage){
+export async function getRecentMatches(page, perPage, server, gametype, map){
 
     const DEFAULT_PER_PAGE = 25;
 
@@ -95,8 +135,19 @@ export async function getRecentMatches(page, perPage){
     let start = page * perPage;
     if(start < 0) start = 0;
 
-    const query = `SELECT * FROM nstats_matches ORDER BY date DESC, id DESC LIMIT ?, ?`;
-    const result = await simpleQuery(query, [start, perPage]);
+    server = parseInt(server);
+    gametype = parseInt(gametype);
+    map = parseInt(map);
+
+    if(server !== server || gametype !== gametype || map !== map){
+        throw new Error(`server, gametype, and map must be a valid integer`);
+    }
+
+    const {where, vars} = createSearchWhere(server, gametype, map);
+
+    let query = `SELECT * FROM nstats_matches ${where} ORDER BY date DESC, id DESC LIMIT ?, ?`;
+
+    const result = await simpleQuery(query, [...vars, start, perPage]);
 
     const soloWinners = [... new Set(result.map((r) =>{
         return r.solo_winner;
@@ -114,7 +165,7 @@ export async function getRecentMatches(page, perPage){
     }
 
     await setMatchTypeNames(result);
-    const totalMatches = await getTotalMatches();
+    const totalMatches = await getTotalMatches(server, gametype, map);
     return {"data": result, "total": totalMatches};
 }
 

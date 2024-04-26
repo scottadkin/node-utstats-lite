@@ -137,3 +137,22 @@ export async function getMostPlayedMaps(limit){
 
     return await simpleQuery(query, [limit]);
 }
+
+
+export async function getAllNames(){
+
+    const result = await simpleQuery(`SELECT id,name FROM nstats_maps`);
+
+    const data = {
+        "0": "Any"
+    };
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = r.name;
+    }
+
+    return data;
+}

@@ -108,3 +108,22 @@ export async function getAll(){
 
     return await simpleQuery(query);
 }
+
+
+export async function getAllNames(){
+
+    const result = await simpleQuery(`SELECT id,name FROM nstats_gametypes`);
+
+    const data = {
+        "0": "Any"
+    };
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = r.name;
+    }
+
+    return data;
+}
