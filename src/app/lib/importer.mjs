@@ -87,3 +87,15 @@ export async function getLogImportHistory(page, perPage){
 
     return {"data": result, "totals": totals}
 }
+
+export async function bLogAlreadyImported(fileName){
+
+    fileName = fileName.toLowerCase();
+
+    const query = `SELECT COUNT(*) as total_logs FROM nstats_logs WHERE file_name=?`;
+    const result = await simpleQuery(query, [fileName]);
+
+    if(result[0].total_logs > 0) return true;
+
+    return false;
+}

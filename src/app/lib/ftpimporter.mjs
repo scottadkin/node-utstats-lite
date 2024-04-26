@@ -1,10 +1,11 @@
 import { Client } from "basic-ftp"; 
 import Message from "./message.mjs";
 import { logFilePrefix, importedLogsFolder } from "../../../config.mjs";
+import { bLogAlreadyImported } from "./importer.mjs";
 
 export class FTPImporter{
 
-    constructor(host, port, user, password, secure, targetFolder){
+    constructor(host, port, user, password, secure, targetFolder, bIgnoreDuplicates, bDeleteAfterImport){
 
         this.host = host;
         this.port = port;
@@ -12,6 +13,8 @@ export class FTPImporter{
         this.password = password;
         this.secure = secure;
         this.targetFolder = targetFolder;
+        this.bIgnoreDuplicates = bIgnoreDuplicates;
+        this.bDeleteAfterImport = bDeleteAfterImport;
     }
    
 
@@ -53,14 +56,25 @@ export class FTPImporter{
        
         for(let i = 0; i < files.length; i++){
 
+
             try{
 
                 const f = files[i];
 
-                if(f.name.toLowerCase().startsWith(lowerPrefix) && fileExt.test(f.name)){
+                if(!fileExt.test(f.name) || !f.name.toLowerCase().startsWith(lowerPrefix)) continue;
+
+                if(this.bIgnoreDuplicates && await bLogAlreadyImported(f.name)){
+                    new Message(`${f.name} has already been imported, skipping.`, "note");
+                
+                }else{
 
                     await this.client.downloadTo(`${importedLogsFolder}/${f.name}`, `./Logs/${f.name}`);
-                    new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass");
+                    new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass"); 
+                }
+
+                if(this.bDeleteAfterImport === 1){
+                    new Message(`Deleting file ${f.name} from ftp server.`,"note");
+                    await this.client.remove(`./Logs/${f.name}`);
                 }
 
             }catch(err){

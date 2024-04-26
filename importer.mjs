@@ -6,21 +6,11 @@ import { MatchParser } from "./src/app/lib/matchParser.mjs";
 import {importedLogsFolder, logFilePrefix} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/app/lib/logsfoldersettings.mjs";
+import { bLogAlreadyImported } from "./src/app/lib/importer.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
 
 
-async function bLogAlreadyImported(fileName){
-
-    fileName = fileName.toLowerCase();
-
-    const query = `SELECT COUNT(*) as total_logs FROM nstats_logs WHERE file_name=?`;
-    const result = await simpleQuery(query, [fileName]);
-
-    if(result[0].total_logs > 0) return true;
-
-    return false;
-}
 
 async function InsertLogHistory(fileName, serverId, matchId){
 
@@ -214,6 +204,8 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
             r.password, 
             false, 
             r.target_folder,
+            r.ignore_duplicates,
+            r.delete_after_import
         );
 
         await test.connect();

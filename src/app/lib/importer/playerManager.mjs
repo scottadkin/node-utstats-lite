@@ -398,7 +398,9 @@ export class PlayerManager{
 
 
 
-    getSoloWinner(){
+    getSoloWinner(totalTeams){
+
+        if(totalTeams >= 2) return {"id": 0, "score": 0};
 
         const basicPlayers = [];
         

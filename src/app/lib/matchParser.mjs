@@ -97,7 +97,7 @@ export class MatchParser{
 
         await this.players.setPlayerMasterIds(this.match.date);
 
-        const soloStats = this.players.getSoloWinner();
+        const soloStats = this.players.getSoloWinner(this.totalTeams);
 
         if(soloStats !== null){
 
