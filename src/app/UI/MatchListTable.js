@@ -22,9 +22,7 @@ export default function MatchListTable({data}){
             <td><Link href={url}>{convertTimestamp(date, true)}</Link></td>
             <td><Link href={url}>{d.players}</Link></td>
             <td><Link href={url}>{MMSS(d.playtime)}</Link></td>
-            <td>
-                <MatchScoreBox data={d} small={true}/>
-            </td>
+            <MatchScoreBox data={d} small={true} bTableElem={true}/>
         </tr>);
     }
 

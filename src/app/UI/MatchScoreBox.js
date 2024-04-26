@@ -2,11 +2,12 @@ import styles from "./MatchScoreBox.module.css";
 import { getTeamColorClass, getTeamIcon } from "../lib/generic.mjs";
 import Image from "next/image";
 
-export default function MatchScoreBox({data, small}){
+export default function MatchScoreBox({data, small, bTableElem}){
 
     let wrapperClassName = "solo";
 
     if(small === undefined) small = false;
+    if(bTableElem === undefined) bTableElem = false;
     
     if(data.total_teams === 2) wrapperClassName = "duo";
     if(data.total_teams === 3) wrapperClassName = "trio";
@@ -36,7 +37,15 @@ export default function MatchScoreBox({data, small}){
         </div>);
     }
 
-    return <div className={`${(!small) ? styles.wrapper: ""} ${wrapperClassName}`}>
-        {scoreElems}
-    </div>
+    if(!bTableElem){
+
+        return <div className={`${(!small) ? styles.wrapper: ""} ${wrapperClassName}`}>
+            {scoreElems}
+        </div>
+        
+    }else{
+        return <td className={`${(!small) ? styles.wrapper: ""} ${wrapperClassName}`}>
+            {scoreElems}
+        </td>
+    }
 }

@@ -239,9 +239,9 @@ th:hover{
 
 td{
 	border:1px solid var(--border-color-1);
-	padding: 0px var(--padding-2);
+	padding:var(--padding-3);
 	font-size:var(--font-size-1);
-	line-height:32px;
+	line-height:var(--line-height-1);
 }
 
 tr:nth-child(even){
@@ -330,6 +330,7 @@ select{
 	color:var(--font-color-1);
 	font-size:var(--font-size-1);
     line-height:var(--line-height-1);
+	border:1px solid var(--border-color-1);
 }
 
 option{
