@@ -25,11 +25,43 @@ async function loadData(dispatch, controller){
 
     }catch(err){
         console.trace(err);
-        console.log(err.name);
 
         if(err.name === "AbortError") return;
 
         dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
+
+async function saveChanges(state, dispatch){
+
+    try{
+
+        dispatch({"type": "set-action-progress", "value": true});
+
+        const req = await fetch("/api/admin", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({
+                "mode": "save-user-changes",
+                "userId": state.editForm.selectedId,
+                "bEnabled": state.editForm.enabledAccount
+            })
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined){
+            throw new Error(res.error);
+        }
+
+        await loadData(dispatch, "controller");
+
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "error", "message": err.toString()});
+    }finally{
+        dispatch({"type": "set-action-progress", "value": false});
     }
 }
 
@@ -75,6 +107,17 @@ function getUser(state, targetId){
 function renderEditUser(state, dispatch){
 
     if(state.mode !== "1") return null;
+
+    let button = null;
+
+    if(!state.bActionInProgress && state.editForm.selectedId != -1){
+        button =  <div className="text-center">
+        <input type="button" className="submit-button" value="Apply Changes" onClick={async () =>{
+            saveChanges(state, dispatch);
+            //dispatch();
+        }}/>
+    </div>
+    }
     
     return <div className="form">
         <div className="form-row">
@@ -109,11 +152,7 @@ function renderEditUser(state, dispatch){
                 dispatch({"type": "set-edit-enabled", "value": newValue});
             }}/>
         </div>
-        <div className="text-center">
-            <input type="button" className="submit-button" value="Apply Changes" onClick={() =>{
-                dispatch();
-            }}/>
-        </div>
+        {button}
     </div>
 }
 
@@ -155,6 +194,12 @@ function reducer(state, action){
                     ...state.editForm,
                     "enabledAccount": action.value
                 }
+            }
+        }
+        case "set-action-progress": {
+            return {
+                ...state,
+                "bActionInProgress": action.value
             }
         }
     }

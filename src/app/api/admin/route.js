@@ -2,7 +2,7 @@ import { getSessionInfo } from "@/app/lib/authentication";
 import { getAllFTPSettings, addServer, editServer, deleteServer } from "@/app/lib/ftp";
 import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolderSettings} from "@/app/lib/logsfoldersettings.mjs";
 import { getHistory as getImporterHistory, getImporterNames, getRejectedHistory, getLogImportHistory } from "@/app/lib/importer.mjs";
-import { getAllUsers } from "@/app/lib/users.mjs";
+import { getAllUsers, adminUpdateUser } from "@/app/lib/users.mjs";
 
 export async function POST(req){
 
@@ -56,6 +56,18 @@ export async function POST(req){
             const data = await getAllUsers();
 
             return Response.json({"data": data});
+
+        }
+
+        if(mode === "save-user-changes"){
+
+            const userId = res.userId;
+            const bEnabled = res.bEnabled;
+            
+            if(userId === undefined || bEnabled === undefined) throw new Error(`userId and bEnabled must be set if you want to update a user account`);
+
+            await adminUpdateUser(userId, bEnabled);
+            return Response.json({"message": "passed"});
 
         }
 
@@ -155,6 +167,7 @@ export async function GET(req){
 
             return Response.json({"data": data, "totals": totals});
         }
+
 
         return Response.json({"message": "hi"});
 

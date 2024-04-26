@@ -6,3 +6,11 @@ export async function getAllUsers(){
 
     return await simpleQuery(query);
 }
+
+
+export async function adminUpdateUser(id, bActive){
+
+    const query = `UPDATE nstats_users SET activated=? WHERE id=?`;
+
+    await simpleQuery(query, [bActive, id]);
+}
