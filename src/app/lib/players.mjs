@@ -627,6 +627,8 @@ async function getPlayerTotalMatches(playerId){
 
     const result = await simpleQuery(query, [playerId]);
 
+    if(result.length === 0) return 0;
+
     return result[0].total_matches;
 }
 
