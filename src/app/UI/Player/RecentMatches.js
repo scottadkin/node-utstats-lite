@@ -1,10 +1,9 @@
 "use client"
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
-import { useEffect } from "react";
-import { useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import ErrorBox from "../ErrorBox";
-import { MMSS, convertTimestamp, plural } from "@/app/lib/generic.mjs";
+import { MMSS, convertTimestamp } from "@/app/lib/generic.mjs";
 import MatchResult from "./MatchResult";
 import Link from "next/link";
 import BasicPagination from "../BasicPagination";

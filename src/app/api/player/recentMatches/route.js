@@ -4,13 +4,15 @@ import { getServerNames } from "@/app/lib/servers.mjs";
 import { getGametypeNames } from "@/app/lib/gametypes.mjs";
 import { getMapNames } from "@/app/lib/maps.mjs";
 
-export async function GET(request){
+export const dynamic = "force-dynamic";
+
+export async function GET(req){
 
     try{
-
+        
         const DEFAULT_PER_PAGE = 50;
 
-        const { searchParams } = new URL(request.url);
+        const { searchParams } = new URL(req.url);
 
         const id = searchParams.get("id");
         let perPage = searchParams.get("perPage");

@@ -99,7 +99,7 @@ export default async function Page({params, searchParams}){
     console.log(dates);*/
 
     return <main>
-        <Header><CountryFlag code={player.country}/>{player.name}'s Player Summary</Header> 
+        <Header><CountryFlag code={player.country}/>{player.name}&apos;s Player Summary</Header> 
         <GametypeTotals data={totals} names={gametypeNames}/>
         <CTFTotals data={ctfTotals} gametypeNames={gametypeNames}/>
         <SpecialEvents data={totals} gametypeNames={gametypeNames}/>

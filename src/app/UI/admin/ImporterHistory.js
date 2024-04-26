@@ -27,11 +27,11 @@ async function loadNames(controller, dispatch){
     }
 }
 
-async function loadPreviousImports(controller, state, dispatch){
+async function loadPreviousImports(controller, page, perPage, dispatch){
 
     try{
 
-        const req = await fetch(`/api/admin?mode=get-importer-history&page=${state.page}&perPage=${state.perPage}`, {
+        const req = await fetch(`/api/admin?mode=get-importer-history&page=${page}&perPage=${perPage}`, {
             "signal": controller.signal
         });
 
@@ -47,11 +47,11 @@ async function loadPreviousImports(controller, state, dispatch){
     }
 }
 
-async function loadRejected(state, dispatch){
+async function loadRejected(page, perPage, dispatch){
 
     try{
 
-        const req = await fetch(`/api/admin?mode=get-rejected-history&page=${state.page}&perPage=${state.perPage}`);
+        const req = await fetch(`/api/admin?mode=get-rejected-history&page=${page}&perPage=${perPage}`);
 
         const res = await req.json();
 
@@ -64,11 +64,11 @@ async function loadRejected(state, dispatch){
     }
 }
 
-async function loadLogsHistory(state, dispatch){
+async function loadLogsHistory(page, perPage, dispatch){
 
     try{
 
-        const req = await fetch(`/api/admin?mode=get-importer-logs&page=${state.page}&perPage=${state.perPage}`);
+        const req = await fetch(`/api/admin?mode=get-importer-logs&page=${page}&perPage=${perPage}`);
 
         const res = await req.json();
 
@@ -312,26 +312,26 @@ export default function ImporterHistory(){
         const controller = new AbortController();
 
         loadNames(controller, dispatch);
-        loadPreviousImports(controller, state, dispatch);
-        loadLogsHistory(state, dispatch);
+        loadPreviousImports(controller, state.page, state.perPage, dispatch);
+        loadLogsHistory(state.page, state.perPage, dispatch);
 
         return () =>{
            // controller.abort();
         }
 
-    }, []);
+    }, [state.page, state.perPage]);
 
     useEffect(() =>{
 
         if(state.mode === "0"){
-            loadPreviousImports("controller", state, dispatch);
+            loadPreviousImports("controller", state.page, state.perPage, dispatch);
         }else if(state.mode === "1"){
-            loadRejected(state, dispatch);
+            loadRejected(state.page, state.perPage, dispatch);
         }else if(state.mode === "2"){
-            loadLogsHistory(state, dispatch);
+            loadLogsHistory(state.page, state.perPage, dispatch);
         }
 
-    }, [state.page, state.mode]);
+    }, [state.page, state.perPage, state.mode]);
 
 
     const tabOptions = [

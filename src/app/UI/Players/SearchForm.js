@@ -1,6 +1,8 @@
 "use client"
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect} from "react";
+import { useRouter } from "next/navigation";
+
+
 
 export default function SearchForm({originalName, originalSortBy, originalOrder, originalPerPage}){
 
@@ -9,9 +11,18 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
     const [order, setOrder] = useState(originalOrder);
     const [perPage, setPerPage] = useState(originalPerPage);
 
+    const router = useRouter()
+
+
     let url = `/players/`;
 
     url += `?name=${name}&sortBy=${sortBy}&order=${order}&perPage=${perPage}`;
+
+
+
+    useEffect(() =>{
+        router.push(url)
+    },[router, url]);
     
 
     const sortByOptions =  [
@@ -43,8 +54,8 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
                 name={"name"} 
                 placeholder="player name..."
                 onChange={(e) =>{
-                    console.log(e.target.value);
                     setName(e.target.value);
+                    
                 }}
 
             />
@@ -89,10 +100,6 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
                 <option value="75">75</option>
                 <option value="100">100</option>
             </select>
-        </div>
-
-        <div className="text-center">
-            <Link href={url}><div className="submit-button">Search</div></Link>
         </div>
     </div>
 }
