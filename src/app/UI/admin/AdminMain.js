@@ -8,7 +8,7 @@ import UserAccounts from "./UserAccounts";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("users");
+    const [mode, setMode] = useState("ftp");
 
     return <>
         <Tabs 

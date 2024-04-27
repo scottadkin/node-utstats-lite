@@ -63,7 +63,7 @@ export async function addServer(settings){
         settings.bIgnoreDuplicates,
         settings.minPlayers,
         settings.minPlaytime,
-        0,
+        settings.sftp,
         settings.bEnabled
     ];
 
@@ -98,6 +98,7 @@ export async function editServer(serverId, settings){
     ignore_duplicates=?,
     min_players=?,
     min_playtime=?,
+    sftp=?,
     enabled=?
     WHERE id=?`;
 
@@ -113,6 +114,7 @@ export async function editServer(serverId, settings){
         settings.bIgnoreDuplicates,
         settings.minPlayers,
         settings.minPlaytime,
+        settings.sftp,
         settings.bEnabled,
         serverId
     ];

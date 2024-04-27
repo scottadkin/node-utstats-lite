@@ -148,12 +148,16 @@ const reducer = function (state, action){
 
         case "select-server": {
 
-            const d = action.data;
+            
 
-            if(d === null) return {
-                ...state,
-                "selectedServer": null,
-            };
+            if(action.value === null){
+                return {
+                    ...state,
+                    "selectedServer": null,
+                };
+            }
+
+            const d = action.data;
 
             return {
                 ...state,
@@ -170,7 +174,8 @@ const reducer = function (state, action){
                     "minPlayers": d.min_players,
                     "minPlaytime": d.min_playtime,
                     "bEnabled": d.enabled,
-                    "bDeleteFromFTP": d.delete_after_import
+                    "bDeleteFromFTP": d.delete_after_import,
+                    "sftp": d.sftp
                 }
             }
         }
@@ -193,7 +198,8 @@ const reducer = function (state, action){
                     "minPlayers": 0,
                     "minPlaytime": 0,
                     "bEnabled": 1,
-                    "bDeleteFromFTP": 1
+                    "bDeleteFromFTP": 1,
+                    "sftp": 0
                 }
             }
         }
@@ -230,7 +236,8 @@ const reducer = function (state, action){
                     "minPlayers": 0,
                     "minPlaytime": 0,
                     "bEnabled": 1,
-                    "bDeleteFromFTP": 1
+                    "bDeleteFromFTP": 1,
+                    "sftp": 0
                 }
             }
         }
@@ -239,6 +246,7 @@ const reducer = function (state, action){
 
             return {
                 ...state,
+                "mode": "0",
                 "editError": null,
                 "editMessage": action.message,
                 "editForm": {
@@ -253,7 +261,8 @@ const reducer = function (state, action){
                     "minPlayers": 0,
                     "minPlaytime": 0,
                     "bEnabled": 1,
-                    "bDeleteFromFTP": 1
+                    "bDeleteFromFTP": 1,
+                    "sftp": 0
                 }
             }
         }
@@ -276,7 +285,7 @@ function renderServers(state, dispatch){
 
     const headers = {
         "active": {"title": "Enabled"},
-        //"method": {"title": "Protocol"},
+        "method": {"title": "Protocol"},
         "name": {"title": "Name"},
         "host": {"title": "Host"},
         "port": {"title": "Port"},
@@ -293,7 +302,7 @@ function renderServers(state, dispatch){
 
         rows.push({
             "active": {"value": <TrueFalseButton key={i} value={f.enabled} bTableElem={true}/>, "bIgnoreTD": true},
-           // "method": {"value": (f.sftp === 0) ? "FTP" : "FTP"},
+            "method": {"value": (f.sftp === 0) ? "FTP" : "SFTP"},
             "name": {"value": f.name.toLowerCase(), "displayValue": f.name},
             "host": {"value": f.host, "displayValue": f.host},
             "port": {"value": f.port },
@@ -382,6 +391,19 @@ function renderEditServers(state, dispatch){
                 <label htmlFor="port">Port</label>
                 <input className="textbox" type="number" name="port" placeholder="21" min={0} max={65535} value={state.editForm.port} onChange={(e) =>{
                     dispatch({"type": "update-edit-form", "key": "port", "value": e.target.value});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label>Use SFTP</label>
+                <TrueFalseButton value={state.editForm.sftp} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.editForm.sftp){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-edit-form", "key": "sftp", "value": newValue});
                 }}/>
             </div>
             <div className="form-row">
@@ -507,6 +529,19 @@ function renderAddServer(state, dispatch){
                     }}/>
             </div>
             <div className="form-row">
+                <label>Use SFTP</label>
+                <TrueFalseButton value={state.createForm.sftp} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.createForm.sftp){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-create-form", "key": "sftp", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
                 <label htmlFor="user">User</label>
                 <input className="textbox" type="text" name="user" placeholder="FTP username" value={state.createForm.user} onChange={(e) =>{
                         dispatch({"type": "update-create-form", "key": "user", "value": e.target.value});
@@ -626,7 +661,8 @@ export default function FTPManager(){
             "minPlayers": 0,
             "minPlaytime": 0,
             "bEnabled": 1,
-            "bDeleteFromFTP": 1
+            "bDeleteFromFTP": 1,
+            "sftp": 0
         },
         "editForm": {
             "name": "",
