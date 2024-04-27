@@ -1,6 +1,7 @@
 import Message from "./src/app/lib/message.mjs";
 import {simpleQuery} from "./src/app/lib/database.mjs";
 import { FTPImporter } from "./src/app/lib/ftpimporter.mjs";
+import { SFTPImporter } from "./src/app/lib/sftpimporter.mjs";
 import { readFile, readdir, rename } from 'node:fs/promises';
 import { MatchParser } from "./src/app/lib/matchParser.mjs";
 import {importedLogsFolder, logFilePrefix} from "./config.mjs";
@@ -194,19 +195,37 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
         const r = result[i];
 
+        if(!r.enabled) continue;
+
         new Message(`Attempting to connect to ${r.host}:${r.user}`,"note");
 
+        let test = null;
 
-        const test = new FTPImporter(
-            r.host, 
-            r.port, 
-            r.user, 
-            r.password, 
-            false, 
-            r.target_folder,
-            r.ignore_duplicates,
-            r.delete_after_import
-        );
+        if(r.sftp){
+
+            test = new SFTPImporter(
+                r.host, 
+                r.port, 
+                r.user, 
+                r.password, 
+                false, 
+                r.target_folder,
+                r.ignore_duplicates,
+                r.delete_after_import
+            );
+        }else{
+
+            test = new FTPImporter(
+                r.host, 
+                r.port, 
+                r.user, 
+                r.password, 
+                false, 
+                r.target_folder,
+                r.ignore_duplicates,
+                r.delete_after_import
+            );
+        }
 
         await test.connect();
         await parseLogs(
