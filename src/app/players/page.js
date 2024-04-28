@@ -32,9 +32,8 @@ export default async function Page({params, searchParams}) {
     let error = null;
     let name = "";
     let page = 1;
-
+    
     if(searchParams.page !== undefined){
-
         page = parseInt(searchParams.page);
         if(page !== page) page = 1;
         if(page < 1) page = 1;
