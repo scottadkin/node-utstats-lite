@@ -179,7 +179,8 @@ function renderSelectedOptions(state, dispatch){
                 value={parseInt(s.setting_value)} 
                 bTableElem={true}
                 setValue={() =>{
-                    let value = s.setting_value;
+                    
+                    let value = parseInt(s.setting_value);
 
                     if(value === 1){
                         value = 0;
