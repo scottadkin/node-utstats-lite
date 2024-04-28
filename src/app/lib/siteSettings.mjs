@@ -62,3 +62,23 @@ export async function insertSetting(category, type, name, value){
 
     await simpleQuery(query, [category, type, name, value]);
 }
+
+
+export async function getCategorySettings(category){
+
+    const query = `SELECT setting_name,setting_value FROM nstats_site_settings WHERE category=?`;
+
+    const result = await simpleQuery(query, [category]);
+
+    const data = {};
+
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.setting_name] = r.setting_value;
+    }
+
+    return data;
+}

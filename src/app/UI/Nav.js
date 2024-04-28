@@ -5,7 +5,7 @@ import Link from "next/link";
 import { logout } from "../lib/authentication";
 
 
-export default function Nav({sessionInfo, bAdmin}){
+export default function Nav({settings, sessionInfo, bAdmin}){
 
     const router = useRouter();
     const pathname = usePathname().toLowerCase();
@@ -48,17 +48,21 @@ export default function Nav({sessionInfo, bAdmin}){
 
     if(sessionInfo === null){
 
-        options.push({
-            "name": "Login",
-            "url": "/login",
-            "matches": ["/login"]
-        });
+        if(settings["Display Login/Register"] === "1"){
 
-        options.push({
-            "name": "Register",
-            "url": "/register",
-            "matches": ["/register"]
-        });
+            options.push({
+                "name": "Login",
+                "url": "/login",
+                "matches": ["/login"]
+            });
+
+            options.push({
+                "name": "Register",
+                "url": "/register",
+                "matches": ["/register"]
+            });
+            
+        }
 
     }else{
 

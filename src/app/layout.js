@@ -3,6 +3,7 @@ import "./globals.css";
 import Nav from "./UI/Nav";
 import UpdateSession from "./UpdateSession";
 import { getSessionInfo } from "./lib/authentication";
+import { getCategorySettings } from "./lib/siteSettings.mjs";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,12 +15,16 @@ export const metadata = {
 export default async function RootLayout({ children }) {
 
 	const sessionInfo = await getSessionInfo();
+
+	const navSettings = await getCategorySettings("Nav");
+
+	console.log(navSettings);
 	
 	return (
 		<html lang="en">
 		<body className={inter.className}>
 			<UpdateSession />
-			<Nav sessionInfo={sessionInfo} bAdmin={true}/>
+			<Nav settings={navSettings} sessionInfo={sessionInfo} bAdmin={true}/>
 			<div className="padding-top"></div>
 			{children}
 			<footer>Node UTStats Lite</footer>
