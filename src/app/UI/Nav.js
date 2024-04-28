@@ -111,9 +111,9 @@ export default function Nav({sessionInfo, bAdmin}){
         
         const className = (bActive) ? styles.active : "";
 
-        const elem = <Link href={o.url} key={i} className={className} onClick={(o.onClick !== undefined) ? o.onClick : null}>
+        const elem = <a href={o.url} key={i} className={className} onClick={(o.onClick !== undefined) ? o.onClick : null}>
             {o.name}
-        </Link>;
+        </a>;
 
         elems.push(elem);
     }
