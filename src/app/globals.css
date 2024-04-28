@@ -365,3 +365,16 @@ option{
 .false{
 	background-color:var(--team-color-red);
 }
+
+.warning{
+	background-color:var(--team-color-yellow);
+	color:var(--font-color-1);
+	text-align:center;
+	padding-bottom:var(--padding-1);
+	margin-top:var(--margin-1);
+	margin-bottom:var(--margin-1);
+}
+
+.warning-title{
+	padding:var(--padding-1);
+}

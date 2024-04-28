@@ -10,7 +10,7 @@ import SiteSettings from "./SiteSettings";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("backup");
+    const [mode, setMode] = useState("settings");
 
     return <>
         <Tabs 
@@ -20,7 +20,7 @@ export default function AdminMain(){
                 {"name": "Importer Settings", "value": "importer"},
                 {"name": "Importer History", "value": "importer-history"},
                 {"name": "User Accounts", "value": "users"},
-                {"name": "Backup Manager", "value": "backup"},
+                //{"name": "Backup Manager", "value": "backup"},
             ]}
             selectedValue={mode}
             changeSelected={(value) =>{

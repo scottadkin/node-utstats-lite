@@ -3,6 +3,7 @@ import { getAllFTPSettings, addServer, editServer, deleteServer } from "@/app/li
 import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolderSettings} from "@/app/lib/logsfoldersettings.mjs";
 import { getHistory as getImporterHistory, getImporterNames, getRejectedHistory, getLogImportHistory } from "@/app/lib/importer.mjs";
 import { getAllUsers, adminUpdateUser } from "@/app/lib/users.mjs";
+import { getAllSettings as getAllSiteSettings } from "@/app/lib/siteSettings.mjs";
 
 export async function POST(req){
 
@@ -166,6 +167,14 @@ export async function GET(req){
             const {totals, data} = await getLogImportHistory(page, perPage);
 
             return Response.json({"data": data, "totals": totals});
+        }
+
+        if(mode === "get-site-settings"){
+
+            const data = await getAllSiteSettings();
+
+            return Response.json({"data": data});
+
         }
 
 
