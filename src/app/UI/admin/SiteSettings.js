@@ -17,8 +17,6 @@ async function loadData(dispatch){
 
         if(res.error !== undefined) throw new Error(res.error);
 
-        console.log(res.data);
-
         const tabs = [... new Set(res.data.map((d) =>{
             return d.category;
         }))];
@@ -40,6 +38,49 @@ async function loadData(dispatch){
         }
 
         dispatch({"type": "loaded", "data": res.data, "tabs": tabs, "selectedTab": selectedTab});
+
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
+async function saveChanges(state, dispatch){
+
+    try{
+
+        const changes = [];
+
+        for(let i = 0; i < state.settings.length; i++){
+
+            const s = state.settings[i];
+
+            if(s.bSettingChanged !== undefined && s.bSettingChanged){
+                changes.push(s);
+            }
+        }
+
+        if(changes.length === 0) return;
+
+        const req = await fetch("/api/admin", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "save-site-settings", "settings": changes})
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        const passedIds = [];
+
+        for(let i = 0; i < res.messages.length; i++){
+
+            const m = res.messages[i];
+            if(m.type === "pass") passedIds.push(m.id);
+        }
+
+        dispatch({"type": "remove-settings-changed", "passedIds": passedIds});
 
     }catch(err){
         console.trace(err);
@@ -79,7 +120,7 @@ function reducer(state, action){
 
                 const s = currentSettings[i];
 
-                if(s.category === action.category && s.setting_type === action.key){
+                if(s.category === action.category && s.setting_name === action.key){
 
                     s.setting_value = action.value;
 
@@ -94,6 +135,23 @@ function reducer(state, action){
             return {
                 ...state,
                 "settings": currentSettings        
+            }
+        }
+        case "remove-settings-changed":{
+
+            const currentSettings = JSON.parse(JSON.stringify(state.settings));
+
+            for(let i = 0; i < currentSettings.length; i++){
+
+                const s = currentSettings[i];
+
+                if(action.passedIds.indexOf(s.id) !== -1){
+                    delete s.bSettingChanged;
+                }
+            }
+            return {
+                ...state,
+                "settings": currentSettings
             }
         }
     }
@@ -115,23 +173,24 @@ function renderSelectedOptions(state, dispatch){
 
         let valueElem = <td>{s.setting_value}</td>;
 
-        if(s.setting_value === "True" || s.setting_value === "False"){
+        if(s.setting_type === "bool"){
+
             valueElem = <TrueFalseButton 
-                value={(s.setting_value === "True") ? 1 : 0} 
+                value={parseInt(s.setting_value)} 
                 bTableElem={true}
                 setValue={() =>{
                     let value = s.setting_value;
 
-                    if(value === "False"){
-                        value = "True";
+                    if(value === 1){
+                        value = 0;
                     }else{
-                        value = "False";
+                        value = 1;
                     }
 
                     dispatch({
                         "type": "change-setting-value", 
                         "category": s.category, 
-                        "key": s.setting_type, 
+                        "key": s.setting_name, 
                         "value": value
                     });
                 }}
@@ -140,7 +199,7 @@ function renderSelectedOptions(state, dispatch){
 
 
         rows.push(<tr key={s.id}>
-            <td>{s.setting_type}</td>
+            <td className="text-left">{s.setting_name}</td>
             {valueElem}
         </tr>);
 
@@ -197,6 +256,11 @@ export default function SiteSettings(){
         }}/>
         <ErrorBox title="Error">{state.error}</ErrorBox>
         {renderSelectedOptions(state, dispatch)}
-        <WarningBox>{(bAnyUnsavedChanges(state)) ? <>You have unsaved changes</> : null}</WarningBox>
+        <WarningBox>{(bAnyUnsavedChanges(state)) ? <>
+            You have unsaved changes<br/><br/>
+            <input type="button" className="submit-button" value="Save Changes" onClick={async () =>{
+                saveChanges(state, dispatch);
+            }}/>
+        </> : null}</WarningBox>
     </>
 }

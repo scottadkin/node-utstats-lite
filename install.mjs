@@ -333,6 +333,7 @@ const queries = [
             id int NOT NULL AUTO_INCREMENT,
             category varchar(255) NOT NULL,
             setting_type varchar(255) NOT NULL,
+            setting_name varchar(255) NOT NULL,
             setting_value varchar(255) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 

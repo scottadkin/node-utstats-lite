@@ -3,7 +3,7 @@ import { getAllFTPSettings, addServer, editServer, deleteServer } from "@/app/li
 import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolderSettings} from "@/app/lib/logsfoldersettings.mjs";
 import { getHistory as getImporterHistory, getImporterNames, getRejectedHistory, getLogImportHistory } from "@/app/lib/importer.mjs";
 import { getAllUsers, adminUpdateUser } from "@/app/lib/users.mjs";
-import { getAllSettings as getAllSiteSettings } from "@/app/lib/siteSettings.mjs";
+import { getAllSettings as getAllSiteSettings, updateSettings as updateSiteSettings } from "@/app/lib/siteSettings.mjs";
 
 export async function POST(req){
 
@@ -70,6 +70,13 @@ export async function POST(req){
             await adminUpdateUser(userId, bEnabled);
             return Response.json({"message": "passed"});
 
+        }
+
+        if(mode === "save-site-settings"){
+
+            const messages = await updateSiteSettings(res.settings);
+
+            return Response.json({"messages": messages});
         }
 
         return Response.json({"message": "hi"});
