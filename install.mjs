@@ -114,7 +114,7 @@ const queries = [
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_players (     
-            id int NOT NULL,
+            id int NOT NULL AUTO_INCREMENT,
             player_id int NOT NULL,
             spectator int(1) NOT NULL,
             ip varchar(39) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -339,6 +339,17 @@ const queries = [
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
 
+        `CREATE TABLE IF NOT EXISTS nstats_importer_history (
+            id int NOT NULL AUTO_INCREMENT,
+            importer_id int NOT NULL,
+            date datetime NOT NULL,
+            logs_found int NOT NULL,
+            imported int NOT NULL,
+            failed int NOT NULL,
+            total_time float NOT NULL
+            ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+
+
 ];
 
 
@@ -356,7 +367,7 @@ async function bLogsSettingsExist(){
 async function insertSiteSettings(){
 
     const settings = [
-        {"category": "Navs" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
         {"category": "Matches" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
         {"category": "Players" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
     ];

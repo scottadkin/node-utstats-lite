@@ -46,6 +46,7 @@ export default function Nav({settings, sessionInfo, bAdmin}){
         });
     }
 
+
     if(sessionInfo === null){
 
         if(settings["Display Login/Register"] === "1"){
@@ -60,8 +61,7 @@ export default function Nav({settings, sessionInfo, bAdmin}){
                 "name": "Register",
                 "url": "/register",
                 "matches": ["/register"]
-            });
-            
+            });   
         }
 
     }else{

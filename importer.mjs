@@ -126,6 +126,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await rename(`./Logs/${file}`, `./Logs/rejected/${file}`);
         await insertRejectedHistory(serverId, file, err.toString());
+        console.trace(err);
         new Message(err.toString(),"error");
         return false;
     }
