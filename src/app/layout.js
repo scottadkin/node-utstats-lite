@@ -17,8 +17,6 @@ export default async function RootLayout({ children }) {
 	const sessionInfo = await getSessionInfo();
 
 	const navSettings = await getCategorySettings("Nav");
-
-	console.log(navSettings);
 	
 	return (
 		<html lang="en">

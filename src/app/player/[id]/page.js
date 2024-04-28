@@ -10,6 +10,7 @@ import { getPlayerCTFTotals } from "@/app/lib/ctf.mjs";
 import RecentMatches from "@/app/UI/Player/RecentMatches";
 import ItemStats from "@/app/UI/Player/ItemStats";
 import CTFTotals from "@/app/UI/Player/CTFTotals";
+import ErrorBox from "@/app/UI/ErrorBox";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -43,11 +44,6 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
 export default async function Page({params, searchParams}){
 
-    console.log("searchParams");
-    console.log(searchParams);
-    console.log(params);
-   
-
     let id = 0;
 
     if(params.id !== undefined){
@@ -58,6 +54,14 @@ export default async function Page({params, searchParams}){
     }
 
     let player = await getPlayerById(id);
+
+    if(player === null){
+
+        return <main>
+            <ErrorBox title="Failed to load player">Player doesn&apos;t exist</ErrorBox>
+        </main>
+    }
+
     let totals = [];
 
     if(player === null){
@@ -87,16 +91,6 @@ export default async function Page({params, searchParams}){
     const gametypeNames = await getGametypeNames(gametypeIds);
 
     const ctfTotals = await getPlayerCTFTotals(id);
-
-    /*const recentMatches = await getPlayerRecentMatches(id);
-
-    console.log(recentMatches);
-
-    const dates = [...new Set(recentMatches.map((r) =>{
-        return r.match_date;
-    }))]
-
-    console.log(dates);*/
 
     return <main>
         <Header><CountryFlag code={player.country}/>{player.name}&apos;s Player Summary</Header> 

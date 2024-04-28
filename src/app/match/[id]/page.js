@@ -10,6 +10,7 @@ import ItemsTable from "@/app/UI/Match/ItemsTable";
 import BasicInfo from "@/app/UI/Match/BasicInfo";
 import { convertTimestamp, plural, toPlaytime } from "@/app/lib/generic.mjs";
 import Pings from "@/app/UI/Match/Pings";
+import ErrorBox from "@/app/UI/ErrorBox";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -19,6 +20,13 @@ export async function generateMetadata({ params, searchParams }, parent) {
     const matchId = params.id ?? -1;
 
     const matchData = await getMatchData(matchId);
+
+    if(matchData.error !== undefined){
+        return {
+            "title": `Match doesn't exist`,
+            "description": `Match with that id does not exist`
+        }
+    }
 
     const b = matchData.basic;
 
@@ -39,6 +47,15 @@ export default async function MatchPage({params, searchParams}) {
     let matchId = params.id ?? -1;
 
     const matchData = await getMatchData(matchId);
+    
+    if(matchData.error !== undefined){
+        return (
+            <main>
+                <ErrorBox title="Failed to load match">{matchData.error}</ErrorBox>
+            </main>
+        );
+    }
+
 	const totalTeams = matchData.basic.total_teams;
 
     return (

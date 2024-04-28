@@ -208,48 +208,56 @@ async function getPlayerMatchData(id){
 
 export async function getMatchData(id){
 
-    id = parseInt(id);
-    if(id !== id) throw new Error(`MatchId must be a valid integer`);
+    try{
 
-    const basic = await getMatch(id);
+        id = parseInt(id);
+        if(id !== id) throw new Error(`MatchId must be a valid integer`);
 
-    const playerData = await getPlayerMatchData(id);
+        const basic = await getMatch(id);
+        if(basic === null) throw new Error(`Match doesnt exist`);
 
-    const uniquePlayers = [...new Set(playerData.map((p) =>{
-        return p.player_id;
-    }))]
+        const playerData = await getPlayerMatchData(id);
 
-    const playerNames = await getPlayersById(uniquePlayers);
+        const uniquePlayers = [...new Set(playerData.map((p) =>{
+            return p.player_id;
+        }))]
 
-    for(let i = 0; i < playerData.length; i++){
+        const playerNames = await getPlayersById(uniquePlayers);
 
-        const p = playerData[i];
+        for(let i = 0; i < playerData.length; i++){
 
-        p.name = playerNames[p.player_id] ?? "Not Found";
+            const p = playerData[i];
+
+            p.name = playerNames[p.player_id] ?? "Not Found";
+        }
+
+        const basicPlayers = {};
+
+        for(let i = 0; i < playerData.length; i++){
+
+            const p = playerData[i];
+
+            basicPlayers[p.player_id] = {
+                "name": p.name,
+                "country": p.country,
+                "team": p.team,
+                "bSpectator": p.spectator
+            };
+        }
+
+        const weaponStats = await getMatchWeaponStats(id);
+        const kills = await getMatchKills(id);
+
+        const ctf = await ctfGetMatchData(id);
+        const dom = await domGetMatchData(id);
+
+
+        return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom};
+        
+    }catch(err){
+        console.trace(err);
+        return {"error": err.toString()};
     }
-
-    const basicPlayers = {};
-
-    for(let i = 0; i < playerData.length; i++){
-
-        const p = playerData[i];
-
-        basicPlayers[p.player_id] = {
-            "name": p.name,
-            "country": p.country,
-            "team": p.team,
-            "bSpectator": p.spectator
-        };
-    }
-
-    const weaponStats = await getMatchWeaponStats(id);
-    const kills = await getMatchKills(id);
-
-    const ctf = await ctfGetMatchData(id);
-    const dom = await domGetMatchData(id);
-
-
-    return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom};
 }
 
 
