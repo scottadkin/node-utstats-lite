@@ -7,6 +7,7 @@ import SearchForm from "../UI/Players/SearchForm";
 import Link from "next/link";
 import ErrorBox from "../UI/ErrorBox"; 
 import Pagination from "../UI/Pagination";
+import { getCategorySettings } from "../lib/siteSettings.mjs";
 
 
 function createHeaderURL(targetSortBy, currentSortBy, order){
@@ -24,9 +25,7 @@ function createHeaderURL(targetSortBy, currentSortBy, order){
 }
 
 export default async function Page({params, searchParams}) {
-
-
-    console.log(searchParams);
+    
 
     let sortBy = "name";
     let order = "ASC";
@@ -58,9 +57,25 @@ export default async function Page({params, searchParams}) {
         name = searchParams.name;
     }
 
+    let perPage = NaN;
+
+    if(searchParams.perPage !== undefined){
+        perPage = searchParams.perPage;
+    }
+
+    perPage = parseInt(perPage);
+
+
+    const pageSettings = await getCategorySettings("Players");
+
+    if(perPage !== perPage){
+        perPage = pageSettings["Results Per Page"];
+    }
+    
+    if(perPage > 100) perPage = 100;
+
     let players = [];
     let totalPlayers = 0;
-    let perPage = 50;
     
     try{
         const data = await searchPlayers(name, sortBy, order, page, perPage);

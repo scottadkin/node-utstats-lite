@@ -6,22 +6,27 @@ import MatchList from "../UI/MatchList";
 import Header from "../UI/Header";
 import Pagination from "../UI/Pagination";
 import SearchForm from "../UI/Matches/SearchForm";
+import { getCategorySettings } from "../lib/siteSettings.mjs";
 
 
 
 export default async function Page({params, searchParams}) {
 
-    const perPage = searchParams?.pp ?? 250;
-    const page = searchParams?.p ?? 1;
+    const pageSettings = await getCategorySettings("Matches");
+
+    const perPage = searchParams?.pp ?? pageSettings["Results Per Page"] ?? 50;
+    const page = searchParams?.page ?? 1;
     const server = searchParams?.s ?? 0;
     const gametype = searchParams?.g ?? 0;
     const map = searchParams?.m ?? 0;
+
 
     const {data, total} = await getRecentMatches(page, perPage, server, gametype, map);
 
     const serverNames = await getAllServerNames();
     const gametypeNames = await getAllGametypeNames();
     const mapNames = await getAllMapNames();
+    
 
   
     return (

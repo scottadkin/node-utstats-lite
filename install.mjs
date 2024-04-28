@@ -356,7 +356,9 @@ async function bLogsSettingsExist(){
 async function insertSiteSettings(){
 
     const settings = [
-        {"category": "Navs" ,"type": `bool`, "name": "Display Login/Register", "value": 1}
+        {"category": "Navs" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
+        {"category": "Matches" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
+        {"category": "Players" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
     ];
 
     for(let i = 0; i < settings.length; i++){

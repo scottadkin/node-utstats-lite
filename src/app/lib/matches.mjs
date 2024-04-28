@@ -117,7 +117,7 @@ async function getTotalMatches(server, gametype, map){
 
 export async function getRecentMatches(page, perPage, server, gametype, map){
 
-    const DEFAULT_PER_PAGE = 25;
+    const DEFAULT_PER_PAGE = 50;
 
     if(perPage === undefined){
         perPage = DEFAULT_PER_PAGE;

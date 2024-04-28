@@ -5,6 +5,8 @@ import ErrorBox from "../ErrorBox";
 import WarningBox from "../WarningBox";
 import Tabs from "../Tabs";
 import TrueFalseButton from "../TrueFalseButton";
+import PerPageDropDown from "../PerPageDropDown";
+
 
 
 async function loadData(dispatch){
@@ -55,7 +57,7 @@ async function saveChanges(state, dispatch){
 
             const s = state.settings[i];
 
-            if(s.bSettingChanged !== undefined && s.bSettingChanged){
+            if(s.bSettingChanged !== undefined){
                 changes.push(s);
             }
         }
@@ -126,9 +128,10 @@ function reducer(state, action){
 
                     if(s.bSettingChanged === undefined){
                         s.bSettingChanged = true;
-                    }else{
-                        s.bSettingChanged = !s.bSettingChanged;
-                    };
+                    }
+                    //}else{
+                    //    s.bSettingChanged = !s.bSettingChanged;
+                   // };
                 }
             }
 
@@ -196,6 +199,22 @@ function renderSelectedOptions(state, dispatch){
                     });
                 }}
             />
+
+        }else if(s.setting_type === "perPage"){
+
+            valueElem = <td>
+                <PerPageDropDown 
+                    selectedValue={parseInt(s.setting_value)}
+                    setValue={(value) =>{
+                        dispatch({
+                            "type": "change-setting-value", 
+                            "category": s.category, 
+                            "key": s.setting_name, 
+                            "value": value
+                        });
+                    }}
+                />
+            </td>
         }
 
 

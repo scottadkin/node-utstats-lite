@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect} from "react";
 import { useRouter } from "next/navigation";
+import PerPageDropDown from "../PerPageDropDown";
 
 
 
@@ -89,17 +90,9 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
             <label htmlFor="per-page">
                Per Page
             </label>
-            <select defaultValue={perPage} multiple={false} onChange={(e) =>{
-                setPerPage(e.target.value);
-            }}>
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="25">25</option>
-                <option value="50">50</option>
-                <option value="75">75</option>
-                <option value="100">100</option>
-            </select>
+            <PerPageDropDown selectedValue={perPage} setValue={(value) =>{
+                setPerPage(value);
+            }}/>
         </div>
     </div>
 }
