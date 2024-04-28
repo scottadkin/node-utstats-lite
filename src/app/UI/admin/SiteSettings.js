@@ -252,7 +252,7 @@ export default function SiteSettings(){
             Site Settings
         </Header>
         <Tabs options={tabOptions} selectedValue={state.selectedTab} changeSelected={(value) =>{
-            dispatch({"type": "selectedTab", "value": value});
+            dispatch({"type": "change-tab", "value": value});
         }}/>
         <ErrorBox title="Error">{state.error}</ErrorBox>
         {renderSelectedOptions(state, dispatch)}

@@ -5,6 +5,7 @@ import { mysqlSettings } from "./config.mjs";
 import mysql from "mysql2/promise";
 import {createRandomString} from "./src/app/lib/generic.mjs";
 import { simpleQuery } from "./src/app/lib/database.mjs";
+import { bSettingExist, insertSetting } from "./src/app/lib/siteSettings.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -351,6 +352,23 @@ async function bLogsSettingsExist(){
     return false;
 }
 
+
+async function insertSiteSettings(){
+
+    const settings = [
+        {"category": "Navs" ,"type": `bool`, "name": "Display Login/Register", "value": 1}
+    ];
+
+    for(let i = 0; i < settings.length; i++){
+
+        const s = settings[i];
+
+        if(!await bSettingExist(s.category, s.name)){
+            await insertSetting(s.category, s.type, s.name, s.value);
+        }
+    }
+}
+
 (async () =>{
  
     try{
@@ -380,6 +398,8 @@ async function bLogsSettingsExist(){
         if(!await bLogsSettingsExist()){
             await simpleQuery(`INSERT INTO nstats_logs_folder VALUES(NULL, "1999-11-30 00:00:00","1999-11-30 00:00:00",0,0,0,0,0,0)`);
         }
+
+        await insertSiteSettings();
 
 
         if(!fs.existsSync("./salt.mjs")){

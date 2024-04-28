@@ -44,3 +44,21 @@ export async function updateSettings(changes){
     
     return messages;
 }
+
+
+export async function bSettingExist(category, name){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_site_settings WHERE category=? AND setting_name=?`;
+
+    const result = await simpleQuery(query, [category, name]);
+
+    return result[0].total_rows > 0;
+}
+
+
+export async function insertSetting(category, type, name, value){
+
+    const query = `INSERT INTO nstats_site_settings VALUES(NULL,?,?,?,?)`;
+
+    await simpleQuery(query, [category, type, name, value]);
+}
