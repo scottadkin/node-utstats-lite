@@ -61,15 +61,15 @@ async function bulkInsertRankings(gametypeId, data){
 
     const insertVars = [];
 
-    for(const [playerId, p] of Object.entries(data)){
+    for(const p of Object.values(data)){
 
         insertVars.push([
-            playerId,
+            p.player_id,
             gametypeId,
-            p.totalMatches,
+            p.total_matches,
             p.playtime,
-            p.rankingPoints,
-            p.lastActive
+            p.ranking_points,
+            p.last_active
         ]);
     }
 
@@ -77,22 +77,48 @@ async function bulkInsertRankings(gametypeId, data){
     await bulkInsert(query, insertVars);
 }
 
-function _updateTotals(settings, totals, playerData){
+function _mergeTotalsData(fragTotals, ctfTotals){
 
-    const id = playerData.player_id;
+    const data = {};
 
-    const t = totals[id];
+    for(let i = 0; i < fragTotals.length; i++){
+
+        const f = fragTotals[i];
+        f.rankingPoints = 0;
+
+        data[f.player_id] = f;
+    }
+
+    for(let i = 0; i < ctfTotals.length; i++){
+
+        const c = ctfTotals[i];
+
+        if(data[c.player_id] !== undefined){
+ 
+            data[c.player_id] = {...data[c.player_id], ...c};
+        }
+    }
+
+    return data;
+}
+
+function _setRankingPoints(settings, playerData){
+
+    const t = playerData;
 
     let currentPoints = 0;
 
     for(const category of Object.keys(settings)){
 
         for(const [type, typeData] of Object.entries(settings[category])){
-            currentPoints += playerData[type] * typeData.points;
+
+            if(playerData[type] !== undefined){
+                currentPoints += playerData[type] * typeData.points;
+            }
         }
     }
 
-    t.rankingPoints = currentPoints;
+    t.ranking_points = currentPoints;
 
     let mins = 0;
 
@@ -100,13 +126,12 @@ function _updateTotals(settings, totals, playerData){
         mins = t.playtime / 60;
     }
 
-    if(t.playtime > 0){
-        t.rankingPoints = t.rankingPoints / mins;
+    if(t.playtime > 0 && t.ranking_points !== 0){
+        t.ranking_points = t.ranking_points / mins;
     }else{
-        t.rankingPoints = 0;
+        t.ranking_points = 0;
     }
 }
-
 
 export async function calculateRankings(gametypeId, playerIds){
 
@@ -114,38 +139,17 @@ export async function calculateRankings(gametypeId, playerIds){
 
     const fragTotals = await getPlayerFragTotals(gametypeId, playerIds);
     const ctfTotals = await getPlayerCTFTotals(gametypeId, playerIds);
+    
+    const mergedData = _mergeTotalsData(fragTotals, ctfTotals);
 
     const settings = await getRankingSettings();
 
-    //console.log(settings);
-    const totals = {};
-
-    for(let i = 0; i < fragTotals.length; i++){
-
-        const f = fragTotals[i];
-
-        totals[f.player_id] = {
-            "rankingPoints": 0,
-            "totalMatches": f.total_matches,
-            "playtime": f.playtime,
-            "lastActive": f.last_active
-        };
+    for(const playerData of Object.values(mergedData)){
+        _setRankingPoints(settings, playerData);
     }
-
-    console.log(totals);
-
-    for(let i = 0; i < fragTotals.length; i++){
-
-        const f = fragTotals[i];
-        _updateTotals(settings, totals, f);
-    }
-
-    console.log(totals);
-
-
 
     await deletePlayerRankings(gametypeId, playerIds);
 
-    await bulkInsertRankings(gametypeId, totals);
+    await bulkInsertRankings(gametypeId, Object.values(mergedData));
 
 }

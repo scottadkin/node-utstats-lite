@@ -163,7 +163,7 @@ export class MatchParser{
         await this.map.updateTotals();
 
         const validMergedPlayerIds = this.players.getMergedPlayerIds();
-        console.log(validMergedPlayerIds);
+
         await calculateRankings(this.gametype.id, validMergedPlayerIds);
         
         
