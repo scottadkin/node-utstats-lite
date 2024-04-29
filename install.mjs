@@ -347,6 +347,24 @@ const queries = [
             imported int NOT NULL,
             failed int NOT NULL,
             total_time float NOT NULL
+            ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_rankings (
+            id int NOT NULL AUTO_INCREMENT,
+            player_id int NOT NULL,
+            gametype_id int NOT NULL,
+            matches int NOT NULL,
+            playtime float NOT NULL,
+            score float NOT NULL,
+            last_active datetime NOT NULL
+            ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_ranking_settings (
+            id int NOT NULL AUTO_INCREMENT,
+            category varchar(255) NOT NULL,
+            name varchar(255) NOT NULL,
+            display_name varchar(255) NOT NULL,
+            points int NOT NULL
             ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
 
@@ -378,6 +396,57 @@ async function insertSiteSettings(){
 
         if(!await bSettingExist(s.category, s.name)){
             await insertSetting(s.category, s.type, s.name, s.value);
+        }
+    }
+}
+
+
+async function bRankingSettingExist(category, name){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_ranking_settings WHERE category=? AND name=?`;
+    const result = await simpleQuery(query, [category, name]);
+
+    return result[0].total_rows > 0;
+}
+
+
+async function insertRankingSetting(data){
+    const query = `INSERT INTO nstats_ranking_settings VALUES(NULL,?,?,?,?)`;
+
+    await simpleQuery(query,[
+        data.category,
+        data.name,
+        data.displayName,
+        data.points
+    ]);
+}
+
+
+async function insertRankingSettings(){
+
+    const settings = [
+        {"category": "general", "name": "kills", "displayName": "Kill", "points": 150},
+        {"category": "general", "name": "deaths", "displayName": "Death", "points": -150},
+        {"category": "general", "name": "suicides", "displayName": "Suicide", "points": -300},
+        {"category": "general", "name": "team_kills", "displayName": "Team Kill", "points": -750},
+        {"category": "general", "name": "spree_1", "displayName": "Killing Spree", "points": 50},
+        {"category": "general", "name": "spree_2", "displayName": "Rampage", "points": 100},
+        {"category": "general", "name": "spree_3", "displayName": "Dominating", "points": 150},
+        {"category": "general", "name": "spree_4", "displayName": "Unstoppable", "points": 200},
+        {"category": "general", "name": "spree_5", "displayName": "Godlike", "points": 250},
+        {"category": "general", "name": "multi_1", "displayName": "Double Kill", "points": 25},
+        {"category": "general", "name": "multi_2", "displayName": "Multi Kill", "points": 50},
+        {"category": "general", "name": "multi_3", "displayName": "Ultra Kill", "points": 75},
+        {"category": "general", "name": "multi_4", "displayName": "Monster Kill", "points": 100},
+    ];
+
+
+    for(let i = 0; i < settings.length; i++){
+
+        const s = settings[i];
+
+        if(!await bRankingSettingExist(s.category, s.name)){
+            await insertRankingSetting(s);
         }
     }
 }
@@ -414,6 +483,7 @@ async function insertSiteSettings(){
 
         await insertSiteSettings();
 
+        await insertRankingSettings();
 
         if(!fs.existsSync("./salt.mjs")){
 

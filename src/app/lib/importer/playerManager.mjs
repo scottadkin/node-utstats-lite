@@ -375,7 +375,7 @@ export class PlayerManager{
 
 
     //ignore spectators
-    getTotalUniquePlayers(bIgnoreBots){
+    getTotalUniquePlayers(){
 
         const uniqueNames = [];
 
@@ -387,7 +387,7 @@ export class PlayerManager{
                 uniqueNames.push(p.name);
             }
 
-            if(p.bBot === 1 && !bIgnoreBots){
+            if(p.bBot === 1 && !this.bIgnoreBots){
                 uniqueNames.push(p.name);
             }
         }
@@ -656,5 +656,26 @@ export class PlayerManager{
             player.ping.avg = avg;
             player.ping.max = max;
         }
+    }
+
+
+    getMergedPlayerIds(){
+
+        const ids = [];
+
+        for(const player of Object.values(this.mergedPlayers)){
+
+            if(player.bSpectator === 1) continue;
+
+            if(player.bBot === 0){
+                ids.push(player.masterId);
+            }
+
+            if(player.bBot === 1 && !this.bIgnoreBots){
+                ids.push(player.masterId);
+            }
+        }
+
+        return ids;
     }
 }

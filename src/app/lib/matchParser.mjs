@@ -11,6 +11,7 @@ import { scalePlaytime } from "./generic.mjs";
 import { CTF } from "./importer/ctf.mjs";
 import { Domination } from "./importer/domination.mjs";
 import Items from "./importer/items.mjs";
+import {calculateRankings} from "./rankings.mjs"
 
 export class MatchParser{
 
@@ -67,6 +68,8 @@ export class MatchParser{
         }   
 
 
+        this.players.bIgnoreBots = this.bIgnoreBots;
+
 
         //append (insta) if game is instagib
         this.gametype.updateName();
@@ -79,7 +82,7 @@ export class MatchParser{
 
         this.players.mergePlayers();
 
-        const totalPlayers = this.players.getTotalUniquePlayers(this.bIgnoreBots);
+        const totalPlayers = this.players.getTotalUniquePlayers();
 
         if(totalPlayers < this.minPlayers){
             throw new Error(`Match has less then the minimum players limit (found ${totalPlayers} out of a target of ${this.minPlayers}).`);
@@ -158,7 +161,10 @@ export class MatchParser{
 
         await this.ctf.updatePlayerTotals(this.players);
         await this.map.updateTotals();
-        
+
+        const validMergedPlayerIds = this.players.getMergedPlayerIds();
+        console.log(validMergedPlayerIds);
+        await calculateRankings(this.gametype.id, validMergedPlayerIds);
         
         
     }
