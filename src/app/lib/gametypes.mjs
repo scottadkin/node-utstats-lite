@@ -110,9 +110,13 @@ export async function getAll(){
 }
 
 
-export async function getAllNames(){
+export async function getAllNames(bReturnArray){
+
+    if(bReturnArray === undefined) bReturnArray = false;
 
     const result = await simpleQuery(`SELECT id,name FROM nstats_gametypes`);
+
+    if(bReturnArray) return result;
 
     const data = {
         "0": "Any"

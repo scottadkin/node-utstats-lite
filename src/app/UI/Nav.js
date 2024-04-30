@@ -32,6 +32,13 @@ export default function Nav({settings, sessionInfo, bAdmin}){
                 "/players",
                 "/player/"
             ]
+        },
+        {
+            "name": "Rankings",
+            "url": "/rankings",
+            "matches": [
+                "/rankings",
+            ]
         }
     ];
 

@@ -153,3 +153,11 @@ export async function calculateRankings(gametypeId, playerIds){
     await bulkInsertRankings(gametypeId, Object.values(mergedData));
 
 }
+
+
+export async function getRankings(gametypeId){
+
+    const query = `SELECT * FROM nstats_rankings WHERE gametype_id=? ORDER by score DESC`;
+
+    return await simpleQuery(query, [gametypeId]);
+}
