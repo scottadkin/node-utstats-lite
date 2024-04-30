@@ -1,11 +1,14 @@
 "use client"
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import PerPageDropDown from "../PerPageDropDown";
 
-export default function SearchForm({gametypeNames, gametypeId, timeFrame}){
+export default function SearchForm({gametypeNames, gametypeId, timeFrame, perPage, page}){
 
     const [gametype, setGametype] = useState(gametypeId);
     const [tf, setTf] = useState(timeFrame);
+    const [pp, setPp] = useState(perPage);
+    const [p, setP] = useState(page);
 
     const router = useRouter();
 
@@ -34,7 +37,7 @@ export default function SearchForm({gametypeNames, gametypeId, timeFrame}){
             <label>Gametype</label>
             <select value={gametype} onChange={(e) =>{
                 setGametype(e.target.value);
-                router.push(`/rankings?gid=${e.target.value}&tf=${tf}`);
+                router.push(`/rankings?gid=${e.target.value}&tf=${tf}&pp=${pp}&p=1`);
             }}>
                 {gametypeNames.map((g, i) =>{
                     return <option key={i} value={g.id}>{g.name}</option>
@@ -45,12 +48,20 @@ export default function SearchForm({gametypeNames, gametypeId, timeFrame}){
             <label>Active In Previous</label>
             <select value={timeFrame} onChange={(e) =>{
                 setTf(e.target.value);
-                router.push(`/rankings?gid=${gametype}&tf=${e.target.value}`);
+                router.push(`/rankings?gid=${gametype}&tf=${e.target.value}&pp=${pp}&p=1`);
             }}>
                 {activeOptions.map((o, i) =>{
                     return <option key={i} value={o.value}>{o.display}</option>
                 })}
             </select>
         </div>
+        <div className="form-row">
+            <label>Results Per Page</label>
+            <PerPageDropDown selectedValue={pp} setValue={(value) =>{
+                setPp(value);
+                router.push(`/rankings?gid=${gametype}&tf=${tf}&pp=${value}&p=1`);
+            }}/>
+        </div>
+            
     </div>
 }

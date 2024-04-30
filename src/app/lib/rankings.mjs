@@ -1,4 +1,5 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
+import { sanitizePagePerPage } from "./generic.mjs";
 
 
 async function getPlayerFragTotals(gametypeId, playerIds){
@@ -155,9 +156,25 @@ export async function calculateRankings(gametypeId, playerIds){
 }
 
 
-export async function getRankings(gametypeId){
+async function getRankingPlayerCount(gametypeId){
 
-    const query = `SELECT * FROM nstats_rankings WHERE gametype_id=? ORDER by score DESC`;
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=?`;
 
-    return await simpleQuery(query, [gametypeId]);
+    const result = await simpleQuery(query, [gametypeId]);
+
+    console.log(result);
+
+    return result[0].total_rows;
+}
+
+export async function getRankings(gametypeId, page, perPage){
+
+    const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage)
+
+    const query = `SELECT * FROM nstats_rankings WHERE gametype_id=? ORDER by score DESC LIMIT ?, ?`;
+
+    const data = await simpleQuery(query, [gametypeId, start, cleanPerPage]);
+    const totalResults = await getRankingPlayerCount(gametypeId);
+    
+    return {data, totalResults};
 }

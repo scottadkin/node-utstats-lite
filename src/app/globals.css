@@ -378,3 +378,8 @@ option{
 .warning-title{
 	padding:var(--padding-1);
 }
+
+.ordinal{
+	font-size:var(--font-size-small);
+	color:var(--font-color-2);
+}
