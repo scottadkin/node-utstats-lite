@@ -425,6 +425,16 @@ async function insertRankingSetting(data){
 async function insertRankingSettings(){
 
     const settings = [
+        // penalty is score * points
+        {"category": "penalty", "name": "under_30", "displayName": "Under 30 Minutes Playtime Penalty", "points": 0.10},
+        {"category": "penalty", "name": "under_60", "displayName": "Under 60 Minutes Playtime Penalty", "points": 0.15},
+        {"category": "penalty", "name": "under_90", "displayName": "Under 90 Minutes Playtime Penalty", "points": 0.20},
+        {"category": "penalty", "name": "under_120", "displayName": "Under 2 Hours Playtime Penalty", "points": 0.25},
+        {"category": "penalty", "name": "under_180", "displayName": "Under 3 Hours Playtime Penalty", "points": 0.40},
+        {"category": "penalty", "name": "under_240", "displayName": "Under 4 Hours Playtime Penalty", "points": 0.50},
+        {"category": "penalty", "name": "under_300", "displayName": "Under 5 Hours Playtime Penalty", "points": 0.66},
+        {"category": "penalty", "name": "under_600", "displayName": "Under 10 Hours Playtime Penalty", "points": 0.75},
+
         {"category": "general", "name": "kills", "displayName": "Kill", "points": 300},
         {"category": "general", "name": "deaths", "displayName": "Death", "points": -150},
         {"category": "general", "name": "suicides", "displayName": "Suicide", "points": -150},

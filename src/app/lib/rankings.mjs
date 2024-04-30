@@ -181,3 +181,8 @@ export async function getRankings(gametypeId, page, perPage, timeRange){
 
     return {data, totalResults};
 }
+
+export async function getAllSettings(){
+
+    return await simpleQuery(`SELECT * FROM nstats_ranking_settings`);
+}

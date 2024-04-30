@@ -7,15 +7,17 @@ import { useState } from "react";
 import UserAccounts from "./UserAccounts";
 import BackupManager from "./BackupManager";
 import SiteSettings from "./SiteSettings";
+import RankingSettings from "./RankingSettings";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("settings");
+    const [mode, setMode] = useState("rankings");
 
     return <>
         <Tabs 
             options={[
                 {"name": "Site Settings", "value": "settings"},
+                {"name": "Ranking Settings", "value": "rankings"},
                 {"name": "FTP Manager", "value": "ftp"},
                 {"name": "Importer Settings", "value": "importer"},
                 {"name": "Importer History", "value": "importer-history"},
@@ -33,6 +35,7 @@ export default function AdminMain(){
         {(mode === "users") ? <UserAccounts /> : null }
         {(mode === "settings") ? <SiteSettings /> : null }
         {(mode === "backup") ? <BackupManager /> : null}
+        {(mode === "rankings") ? <RankingSettings /> : null}
 
     </>
 }

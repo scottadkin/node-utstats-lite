@@ -4,6 +4,7 @@ import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolde
 import { getHistory as getImporterHistory, getImporterNames, getRejectedHistory, getLogImportHistory } from "@/app/lib/importer.mjs";
 import { getAllUsers, adminUpdateUser } from "@/app/lib/users.mjs";
 import { getAllSettings as getAllSiteSettings, updateSettings as updateSiteSettings } from "@/app/lib/siteSettings.mjs";
+import { getAllSettings as getAllRankingSettings } from "@/app/lib/rankings.mjs";
 
 export async function POST(req){
 
@@ -181,7 +182,13 @@ export async function GET(req){
             const data = await getAllSiteSettings();
 
             return Response.json({"data": data});
+        }
 
+        if(mode === "get-ranking-settings"){
+
+            const data = await getAllRankingSettings();
+
+            return Response.json({"data": data});
         }
 
 
@@ -191,34 +198,4 @@ export async function GET(req){
 
         return Response.json({"error": err.toString()});
     }
-
-    /*try{
-        const {bAdmin, error} = await bSessionAdminUser();
-
-        const { searchParams } = new URL(req.url);
-
-        const mode = searchParams.get("mode");
-
-        if(mode === undefined){
-            throw new Error("Mode is undefined");
-        }
-
-        console.log(mode);
-
-        if(mode === "load-ftp"){
-
-            const data = await getAllFTPSettings();
-
-            return Response.json(data);
-        }
-
-        if(!bAdmin){
-            throw new Error(error);
-        }*/
-
-        //return Response.json({"message": "hi"});
-        /*
-    }catch(err){
-        return Response.json({"error": err.toString()});
-    }*/
 }
