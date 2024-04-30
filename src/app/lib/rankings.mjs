@@ -186,3 +186,32 @@ export async function getAllSettings(){
 
     return await simpleQuery(`SELECT * FROM nstats_ranking_settings`);
 }
+
+
+async function updateSetting(id, value){
+
+    const query = `UPDATE nstats_ranking_settings SET points=? WHERE id=?`;
+
+    return await simpleQuery(query, [value, id]);
+}
+
+export async function updateSettings(settings){
+
+    let passes = 0;
+    let fails = 0;
+
+    for(let i = 0; i < settings.length; i++){
+
+        const s = settings[i];
+
+        const result = await updateSetting(s.id, s.points);
+
+        if(result.affectedRows > 0){
+            passes++;
+        }else{
+            fails++;
+        }
+    }
+
+    return {passes, fails};
+}

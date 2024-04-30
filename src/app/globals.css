@@ -383,3 +383,13 @@ option{
 	font-size:var(--font-size-small);
 	color:var(--font-color-2);
 }
+
+.info{
+	background-color:var(--bg-color-3);
+	text-align: center;
+	color:var(--font-color-1);
+	padding:var(--padding-1);
+	margin-bottom:var(--margin-1);
+	font-size:var(--font-size-1);
+	line-height: var(--line-height-1);
+}

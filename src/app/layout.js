@@ -25,7 +25,9 @@ export default async function RootLayout({ children }) {
 			<Nav settings={navSettings} sessionInfo={sessionInfo} bAdmin={true}/>
 			<div className="padding-top"></div>
 			{children}
-			<footer>Node UTStats Lite</footer>
+			<footer>
+				Node UTStats Lite for website <a href="https://github.com/rxut/UTStatsLite">UTStats Lite Mutator</a>
+			</footer>
 		</body>
 		</html>
 	);

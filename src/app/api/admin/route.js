@@ -5,6 +5,7 @@ import { getHistory as getImporterHistory, getImporterNames, getRejectedHistory,
 import { getAllUsers, adminUpdateUser } from "@/app/lib/users.mjs";
 import { getAllSettings as getAllSiteSettings, updateSettings as updateSiteSettings } from "@/app/lib/siteSettings.mjs";
 import { getAllSettings as getAllRankingSettings } from "@/app/lib/rankings.mjs";
+import { updateSettings as updateRankingSettings } from "@/app/lib/rankings.mjs";
 
 export async function POST(req){
 
@@ -78,6 +79,23 @@ export async function POST(req){
             const messages = await updateSiteSettings(res.settings);
 
             return Response.json({"messages": messages});
+        }
+
+        if(mode === "save-ranking-settings"){
+
+            if(res.data === undefined) throw new Error(`save-ranking-settings no data supplied`);
+
+            const {passes, fails} = await updateRankingSettings(res.data);
+
+            if(fails === 0){
+                return Response.json({"message": "All changes applied successfully."});
+            }
+
+            if(passes === 0){
+                return Response.json({"error": "Failed to apply any changes."});
+            }
+
+            return Response.json({"message": `Some settings failed to apply. (${passes}/${passes + fails})`});
         }
 
         return Response.json({"message": "hi"});

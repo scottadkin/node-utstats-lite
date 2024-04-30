@@ -3,6 +3,7 @@ import Header from "../Header";
 import ErrorBox from "../ErrorBox";
 import Tabs from "../Tabs";
 import WarningBox from "../WarningBox";
+import MessageBox from "../MessageBox";
 import { useReducer, useEffect } from "react";
 
 function reducer(state, action){
@@ -24,7 +25,15 @@ function reducer(state, action){
         case "error": {
             return {
                 ...state,
-                "error": action.message
+                "error": action.message,
+                "message": null
+            }
+        }
+        case "message": {
+            return {
+                ...state,
+                "error": null,
+                "message": action.message
             }
         }
         case "change-tab": {
@@ -43,7 +52,7 @@ function reducer(state, action){
 
                 if(u.category === action.category && u.name === action.name){
 
-                    u.points = (action.category === "penalty") ? parseFloat(action.value) : parseInt(action.value);
+                    u.points = action.value;
                     u.bChanged = true;
                 }
             }
@@ -57,17 +66,16 @@ function reducer(state, action){
     return state;
 }
 
-async function loadData(controller, dispatch){
+async function loadData(dispatch){
 
     try{
 
-        const req = await fetch("/api/admin/?mode=get-ranking-settings", {
-            "signal": controller.signal
-        });
+        const req = await fetch("/api/admin/?mode=get-ranking-settings");
 
         const res = await req.json();
 
         dispatch({"type": "loaded-data", "data": res.data});
+
 
     }catch(err){
 
@@ -92,7 +100,8 @@ function renderData(state, dispatch){
             </tr>
             {
                 state.data.filter(filter).map((d, i) =>{
-                    return <tr key={i}>
+
+                    return <tr key={`${d.category}-${i}`}>
                         <td className="text-left">{d.display_name}</td>
                         <td>
                             <input 
@@ -141,16 +150,76 @@ async function saveChanges(state, dispatch){
             const d = state.data[i];
 
             if(d.bChanged !== undefined){
-                changed.push(d);
+
+                let points = d.points;
+
+                if(d.category === "penalty"){
+                    points = parseFloat(points);
+                }else{
+                    points = parseInt(points);
+                }
+
+                if(points !== points){
+
+                    dispatch({
+                        "type": "error", 
+                        "message": `${d.category}.${d.name} must be a valid ${(d.category === "penalty") ? "Float" : "Integer"}`
+                    });
+
+                    continue;
+                }
+
+                changed.push({
+                    "id": d.id,
+                    "points": points
+                });
             }
         }
 
+        if(changed.length === 0) return;
 
-        console.log(changed);
+        const req = await fetch("/api/admin", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "save-ranking-settings", "data": changed})
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined){
+            throw new Error(res.error);
+        }
+
+
+        await loadData(dispatch);
+        dispatch({"type": "error", "message": null});
+        dispatch({"type": "message", "message": res.message});
+
 
     }catch(err){
         console.trace(err);
+
+        dispatch({"type": "error", "message": err.toString()});
     }
+}
+
+
+function displayInfo(state){
+
+    const info = {
+        "general": <>Basic frag related events, kills, deaths, and so on.</>,
+        "ctf":  <>CTF specific events.</>,
+        "penalty": 
+            <>
+                Penalties that are applied to players ranking scores if they have played under a certain time frame.<br/>
+                A value of 0.1 means the players total score will be 10&#37; of the players inital score.
+            </>
+    };
+
+
+    return <div className="info">
+        {info[state.selectedTab]}
+    </div>
 }
 
 export default function RankingSettings({}){
@@ -158,17 +227,14 @@ export default function RankingSettings({}){
     const [state, dispatch] = useReducer(reducer, {
         "data": [],
         "error": null,
-        "selectedTab": ""
+        "selectedTab": "",
+        "message": null
     });
 
     useEffect(() =>{
 
-        const controller = new AbortController();
-        loadData(controller, dispatch);
+        loadData(dispatch);
 
-        return () =>{
-            controller.abort();
-        }
 
     },[]);
 
@@ -191,9 +257,11 @@ export default function RankingSettings({}){
         <Header>Ranking Settings</Header>
         <ErrorBox title="Failed to load ranking settings">{state.error}</ErrorBox>
         <WarningBox>{(bAnyUnsavedChanges(state)) ? saveElem : null}</WarningBox>
+        <MessageBox title="Save successful">{state.message}</MessageBox>
         <Tabs options={tabOptions} selectedValue={state.selectedTab} changeSelected={(value) =>{
             dispatch({"type": "change-tab", "value": value});
         }}/>
+        {displayInfo(state)}
         {renderData(state, dispatch)}
     </>
 }
