@@ -156,25 +156,28 @@ export async function calculateRankings(gametypeId, playerIds){
 }
 
 
-async function getRankingPlayerCount(gametypeId){
+async function getRankingPlayerCount(gametypeId, minDate){
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=?`;
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=? AND last_active>=?`;
 
-    const result = await simpleQuery(query, [gametypeId]);
-
-    console.log(result);
+    const result = await simpleQuery(query, [gametypeId, minDate]);
 
     return result[0].total_rows;
 }
 
-export async function getRankings(gametypeId, page, perPage){
+export async function getRankings(gametypeId, page, perPage, timeRange){
+
+    const day = 60 * 60 * 24;
+
+    const now = new Date();
+    const minDate = (timeRange > 0) ? new Date(now - day * timeRange * 1000) : new Date(0);
 
     const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage)
 
-    const query = `SELECT * FROM nstats_rankings WHERE gametype_id=? ORDER by score DESC LIMIT ?, ?`;
+    const query = `SELECT * FROM nstats_rankings WHERE gametype_id=? AND last_active>=? ORDER by score DESC LIMIT ?, ?`;
 
-    const data = await simpleQuery(query, [gametypeId, start, cleanPerPage]);
-    const totalResults = await getRankingPlayerCount(gametypeId);
-    
+    const data = await simpleQuery(query, [gametypeId, minDate, start, cleanPerPage]);
+    const totalResults = await getRankingPlayerCount(gametypeId, minDate);
+
     return {data, totalResults};
 }

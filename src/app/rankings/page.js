@@ -15,15 +15,11 @@ export default async function Page({params, searchParams}){
 
     let gametypeId = (searchParams.gid !== undefined) ? searchParams.gid : (gametypeNames.length > 0) ? gametypeNames[0].id : 0;
 
-    let timeFrame = searchParams?.tf ?? 0;
 
     gametypeId = parseInt(gametypeId);
     if(gametypeId !== gametypeId) gametypeId = 0;
 
-    timeFrame = parseInt(timeFrame);
-    if(timeFrame !== timeFrame) timeFrame = 0;
-
-    if(timeFrame > 365) timeFrame = 365;
+    
 
     let page = (searchParams.p !== undefined) ? parseInt(searchParams.p) : 1;
     if(page !== page) page = 1;
@@ -32,7 +28,14 @@ export default async function Page({params, searchParams}){
     if(perPage !== perPage) perPage = 25;
     if(perPage > 100) perPage = 100;
 
-    const {data, totalResults} = await getRankings(gametypeId, page, perPage);
+
+    let timeFrame = (searchParams.tf !== undefined) ? parseInt(searchParams.tf) : 0;
+
+    if(timeFrame !== timeFrame) timeFrame = 0;
+
+    if(timeFrame > 365) timeFrame = 365;
+
+    const {data, totalResults} = await getRankings(gametypeId, page, perPage, timeFrame);
 
     const playerIds = data.map((d) =>{
         return d.player_id;
