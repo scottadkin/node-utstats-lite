@@ -2,24 +2,74 @@ import Header from "../UI/Header";
 import SearchForm from "../UI/Rankings/SearchForm";
 import { getAllNames } from "../lib/gametypes.mjs";
 import { getRankings } from "../lib/rankings.mjs";
-import { convertTimestamp, getPlayer, toPlaytime, getOrdinal } from "../lib/generic.mjs";
+import { convertTimestamp, getPlayer, toPlaytime, getOrdinal, plural } from "../lib/generic.mjs";
 import { getBasicPlayerInfo } from "../lib/players.mjs";
 import PlayerLink from "../UI/PlayerLink";
 import Pagination from "../UI/Pagination";
+
+
+function setGametypeId(searchParams, gametypeNames){
+
+    let firstGametypeId = 0;
+
+    if(gametypeNames.length > 0) firstGametypeId = gametypeNames[0].id;
+
+    let gametypeId = (searchParams.gid !== undefined) ? searchParams.gid : firstGametypeId;
+
+    if(gametypeId !== gametypeId) gametypeId = firstGametypeId;
+
+    return gametypeId;
+}
+
+function setGametypeName(gametypeNames, targetId){
+
+    targetId = parseInt(targetId);
+
+    for(let i = 0; i < gametypeNames.length; i++){
+
+        const g = gametypeNames[i];
+        if(g.id === targetId) return g.name;
+    }
+
+    return "Not Found";
+}
+
+function setTimeFrame(searchParams){
+
+    let timeFrame = (searchParams.tf !== undefined) ? parseInt(searchParams.tf) : 0;
+
+    if(timeFrame !== timeFrame) timeFrame = 0;
+
+    if(timeFrame > 365) timeFrame = 365;
+
+    return timeFrame;
+}
+
+export async function generateMetadata({ params, searchParams }, parent) {
+
+    const gametypeNames = await getAllNames(true);
+
+    const gametypeId = setGametypeId(searchParams, gametypeNames);
+
+    const gametypeName = setGametypeName(gametypeNames, gametypeId);
+    const timeFrame = setTimeFrame(searchParams);
+
+    let timeFrameString = `, all time rankings.`;
+    if(timeFrame > 0){
+        timeFrameString = `, active players in the last ${timeFrame} ${plural(timeFrame, "day")}`;
+    }
+
+    return {
+        "title": `${gametypeName} Rankings`,
+        "description": `View the top ranking players for the gametype ${gametypeName}${timeFrameString}`
+    }
+}
 
 export default async function Page({params, searchParams}){
 
     const gametypeNames = await getAllNames(true);
 
-    //console.log(gametypeNames);
-
-    let gametypeId = (searchParams.gid !== undefined) ? searchParams.gid : (gametypeNames.length > 0) ? gametypeNames[0].id : 0;
-
-
-    gametypeId = parseInt(gametypeId);
-    if(gametypeId !== gametypeId) gametypeId = 0;
-
-    
+    let gametypeId = setGametypeId(searchParams, gametypeNames);
 
     let page = (searchParams.p !== undefined) ? parseInt(searchParams.p) : 1;
     if(page !== page) page = 1;
@@ -29,11 +79,7 @@ export default async function Page({params, searchParams}){
     if(perPage > 100) perPage = 100;
 
 
-    let timeFrame = (searchParams.tf !== undefined) ? parseInt(searchParams.tf) : 0;
-
-    if(timeFrame !== timeFrame) timeFrame = 0;
-
-    if(timeFrame > 365) timeFrame = 365;
+    const timeFrame = setTimeFrame(searchParams);
 
     const {data, totalResults} = await getRankings(gametypeId, page, perPage, timeFrame);
 
@@ -63,7 +109,7 @@ export default async function Page({params, searchParams}){
 
         const place = perPage * (page - 1) + i + 1;
 
-        return <tr key={d.player_id}>
+        return <tr key={i}>
             <td className="ordinal">{place}{getOrdinal(place)}</td>
             <td className="text-left"><PlayerLink id={player.id} country={player.country}>{player.name}</PlayerLink></td>
             <td className="date">{convertTimestamp(Math.floor(new Date(d.last_active)) * 0.001, true)}</td>
@@ -75,7 +121,7 @@ export default async function Page({params, searchParams}){
 
     if(rows.length === 0){
 
-        rows.push(<tr>
+        rows.push(<tr key="-1">
             <td key="-1" colSpan={6}>No data</td>
         </tr>);
     }
@@ -87,7 +133,7 @@ export default async function Page({params, searchParams}){
         <Pagination url={`/rankings/?gid=${gametypeId}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
         <table className="t-width-4">
             <tbody>
-                <tr>
+                <tr key={-2}>
                     <th>Place</th>
                     <th>Player</th>
                     <th>Last Active</th>
