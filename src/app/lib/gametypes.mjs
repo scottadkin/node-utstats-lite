@@ -114,7 +114,7 @@ export async function getAllNames(bReturnArray){
 
     if(bReturnArray === undefined) bReturnArray = false;
 
-    const result = await simpleQuery(`SELECT id,name FROM nstats_gametypes`);
+    const result = await simpleQuery(`SELECT id,name FROM nstats_gametypes ORDER BY name ASC`);
 
     if(bReturnArray) return result;
 

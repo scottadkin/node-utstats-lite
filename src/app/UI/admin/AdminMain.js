@@ -8,20 +8,22 @@ import UserAccounts from "./UserAccounts";
 import BackupManager from "./BackupManager";
 import SiteSettings from "./SiteSettings";
 import RankingSettings from "./RankingSettings";
+import RecalculateRankings from "./RecalculateRankings";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("rankings");
+    const [mode, setMode] = useState("rankings-all");
 
     return <>
         <Tabs 
             options={[
                 {"name": "Site Settings", "value": "settings"},
-                {"name": "Ranking Settings", "value": "rankings"},
                 {"name": "FTP Manager", "value": "ftp"},
                 {"name": "Importer Settings", "value": "importer"},
                 {"name": "Importer History", "value": "importer-history"},
                 {"name": "User Accounts", "value": "users"},
+                {"name": "Ranking Settings", "value": "rankings"},
+                {"name": "Recalculate All Rankings", "value": "rankings-all"},
                 //{"name": "Backup Manager", "value": "backup"},
             ]}
             selectedValue={mode}
@@ -36,6 +38,7 @@ export default function AdminMain(){
         {(mode === "settings") ? <SiteSettings /> : null }
         {(mode === "backup") ? <BackupManager /> : null}
         {(mode === "rankings") ? <RankingSettings /> : null}
+        {(mode === "rankings-all") ? <RecalculateRankings /> : null}
 
     </>
 }

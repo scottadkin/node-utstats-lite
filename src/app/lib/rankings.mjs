@@ -224,7 +224,7 @@ export async function recalculateAll(){
     const gametypeIds = await getAllGametypeIds();
 
     for(let i = 0; i < gametypeIds.length; i++){
-
+        
         const g = gametypeIds[i];
 
         const playerIds = await getAllPlayerGametypeIds(g);

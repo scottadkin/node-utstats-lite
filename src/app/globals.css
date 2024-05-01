@@ -393,3 +393,10 @@ option{
 	font-size:var(--font-size-1);
 	line-height: var(--line-height-1);
 }
+
+.loading{
+	text-align: center;
+	font-size: var(--font-size-small);
+	color:var(--font-color-1);
+	padding:var(--padding-1);
+}

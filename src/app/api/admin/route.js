@@ -4,8 +4,12 @@ import { updateSettings as updateLogsFolderSettings, getSettings as getLogsFolde
 import { getHistory as getImporterHistory, getImporterNames, getRejectedHistory, getLogImportHistory } from "@/app/lib/importer.mjs";
 import { getAllUsers, adminUpdateUser } from "@/app/lib/users.mjs";
 import { getAllSettings as getAllSiteSettings, updateSettings as updateSiteSettings } from "@/app/lib/siteSettings.mjs";
-import { getAllSettings as getAllRankingSettings } from "@/app/lib/rankings.mjs";
-import { updateSettings as updateRankingSettings } from "@/app/lib/rankings.mjs";
+import { 
+    getAllSettings as getAllRankingSettings, 
+    recalculateAll as recalculateAllRankings, 
+    updateSettings as updateRankingSettings } 
+from "@/app/lib/rankings.mjs";
+
 
 export async function POST(req){
 
@@ -207,6 +211,13 @@ export async function GET(req){
             const data = await getAllRankingSettings();
 
             return Response.json({"data": data});
+        }
+
+        if(mode === "recalculate-rankings"){
+
+            const data = await recalculateAllRankings();
+
+            console.log(data);
         }
 
 
