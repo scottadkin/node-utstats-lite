@@ -131,3 +131,15 @@ export async function getAllNames(bReturnArray){
 
     return data;
 }
+
+
+export async function getAllIds(){
+
+    const query = `SELECT id FROM nstats_gametypes`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) =>{
+        return r.id;
+    });
+}

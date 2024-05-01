@@ -654,3 +654,15 @@ export async function getPlayerRecentMatches(playerId, page, perPage){
 
     return {totalMatches, matches};
 }
+
+
+export async function getAllGametypeIds(gametypeId){
+
+    const query = `SELECT player_id FROM nstats_player_totals WHERE gametype_id=?`;
+
+    const result = await simpleQuery(query, [gametypeId]);
+
+    return result.map((r) =>{
+        return r.player_id;
+    });
+}

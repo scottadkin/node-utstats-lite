@@ -1,5 +1,7 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
+import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
+import { getAllGametypeIds as getAllPlayerGametypeIds } from "./players.mjs";
 
 
 async function getPlayerFragTotals(gametypeId, playerIds){
@@ -214,4 +216,20 @@ export async function updateSettings(settings){
     }
 
     return {passes, fails};
+}
+
+
+export async function recalculateAll(){
+
+    const gametypeIds = await getAllGametypeIds();
+
+    for(let i = 0; i < gametypeIds.length; i++){
+
+        const g = gametypeIds[i];
+
+        const playerIds = await getAllPlayerGametypeIds(g);
+
+        await calculateRankings(g, playerIds)
+    }
+
 }
