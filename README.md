@@ -21,6 +21,7 @@ Unreal Tournament stats website for the [https://github.com/rxut/UTStatsLite](ut
 - To Create an admin account go to [http://localhost:3000/register](http://localhost:3000/register), the first account is auto activated, every following account needs to be activated.
 - To Login go to [http://localhost:3000/login](http://localhost:3000/login)
 - To go to the admin area go to [http://localhost:3000/admin](http://localhost:3000/admin)
+- In the admin you can then add S/FTP servers to the importer list. ![ftp admin image](https://i.imgur.com/gA2WpT4.png "FTP Admin Image")
 
 ## Running The Log Importer
 - Open a terminal in the folder you installed to.

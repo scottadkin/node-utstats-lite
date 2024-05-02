@@ -4,7 +4,7 @@ import { FTPImporter } from "./src/app/lib/ftpimporter.mjs";
 import { SFTPImporter } from "./src/app/lib/sftpimporter.mjs";
 import { readFile, readdir, rename } from 'node:fs/promises';
 import { MatchParser } from "./src/app/lib/matchParser.mjs";
-import {importedLogsFolder, logFilePrefix} from "./config.mjs";
+import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/app/lib/logsfoldersettings.mjs";
 import { bLogAlreadyImported } from "./src/app/lib/importer.mjs";
@@ -173,8 +173,8 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 }
 
 
+async function main(){
 
-(async () =>{
 
     const logsFolderSettings = await getLogsFolderSettings();
 
@@ -183,8 +183,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
         return;
     }
 
-
-    new Message(`Checking for leftover logs...`,"note");
+    new Message(`Checking for leftover logs...`,"progress");
     const ls = logsFolderSettings;
     await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime);
     new Message(`Completed parsing Leftover logs completed`,"pass");
@@ -200,11 +199,11 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
         new Message(`Attempting to connect to ${r.host}:${r.user}`,"note");
 
-        let test = null;
+        let ftp = null;
 
         if(r.sftp){
 
-            test = new SFTPImporter(
+            ftp = new SFTPImporter(
                 r.host, 
                 r.port, 
                 r.user, 
@@ -216,7 +215,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
             );
         }else{
 
-            test = new FTPImporter(
+            ftp = new FTPImporter(
                 r.host, 
                 r.port, 
                 r.user, 
@@ -228,7 +227,8 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
             );
         }
 
-        await test.connect();
+        await ftp.connect();
+
         await parseLogs(
             r.id,
             r.ignore_bots,
@@ -236,12 +236,40 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
             r.min_players,
             r.min_playtime
         );
+    }  
+
+    new Message(`Import Completed`,"progress");
+
+}
+
+
+
+(async () =>{
+
+    if(importInterval === 0){
+
+        new Message(`ImportInterval is set to 0, the importer will run just once and then exit.`,"note");
+        await main();
+
+        process.exit();
+
+    }else{
+
+        let bPreviousImportCompleted = true;
+
+        setInterval(async () =>{
+
+            if(bPreviousImportCompleted){
+
+                bPreviousImportCompleted = false;
+                await main();
+                bPreviousImportCompleted = true;
+
+            }else{
+                new Message(`Previous import cycle is running, skipping this cycle.`,"progress");
+            }
+        }, importInterval * 1000);
     }
-
-    
-
-    new Message(`Import Completed`,"pass");
-    process.exit();
 
 })();
 
