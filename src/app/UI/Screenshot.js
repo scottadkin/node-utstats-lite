@@ -435,9 +435,6 @@ class ScreenshotImage{
 
             index++;
         }
-
-
-
     }
 
     renderPlayers(){
@@ -456,6 +453,38 @@ class ScreenshotImage{
         this.renderSolo();
     }
 
+    renderSpectators(){
+
+        let string = "";
+
+        for(let i = 0; i < this.data.playerData.length; i++){
+
+            const p = this.data.playerData[i];
+
+            if(!p.spectator) continue;
+
+            if(string !== "") string += `, `;
+            string += p.name;
+        }
+
+        if(string.length === 0){
+            string = `There were no spectators during the match.`;
+        }else{
+            string = `Spectators: ${string}.`
+        }
+
+        const options = {
+            "text": string,
+            "x": 50,
+            "y": 90,
+            "fontSize": 1.4,
+            "textAlign": "center",
+            "color": "white"
+        };
+
+        this.fillText(options);
+    }
+
     async render(){
 
         try{
@@ -466,6 +495,7 @@ class ScreenshotImage{
             await this.loadFlags();
             this.renderTitle();
             this.renderPlayers();
+            this.renderSpectators();
             
 
         }catch(err){
