@@ -329,46 +329,6 @@ export async function getMultipleMatchDetails(matchIds){
 }
 
 
-export function getWinner(matchData){
-    
-    if(matchData.total_teams < 2){
-        return {"type": "solo", "winnerId": matchData.solo_winner};
-    }
-
-    const scores = [];
-
-    for(let i = 0; i < 4; i++){
-
-        scores.push({"team": i, "score": matchData.teamScores[i]});
-    }
-
-    scores.sort((a, b) =>{
-
-        if(a.score < b.score) return 1;
-        if(a.score > b.score) return -1;
-        return 0;
-    });
-
-    let bDraw = false;
-
-    const winners = [scores[0].team];
-    const firstScore = scores[0].score;
-
-    //check for draws in team games
-    for(let i = 1; i < scores.length; i++){
-
-        const s = scores[i];
-
-        if(s.score === firstScore){
-            bDraw = true;
-            winners.push(s.team);
-        }
-    }
-
-    return {"type": "teams", "winners": winners, "bDraw": bDraw};
-
-}
-
 
 export async function getMatchesGametype(matchIds){
 

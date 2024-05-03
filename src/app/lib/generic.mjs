@@ -23,6 +23,18 @@ export function getTeamIcon(value){
     return "controlpoint.png"
 }
 
+export function getTeamName(id){
+
+    id = parseInt(id);
+
+    if(id === 0) return "Red";
+    if(id === 1) return "Blue";
+    if(id === 2) return "Green";
+    if(id === 3) return "Gold";
+
+    return "None";
+}
+
 export function MMSS(timestamp){
 
     let seconds = Math.floor(timestamp % 60);
@@ -333,4 +345,43 @@ export function sanitizePagePerPage(page, perPage){
     if(start < 0) start = 0;
 
     return [page, perPage, start];
+}
+
+export function getWinner(matchData){
+    
+    if(matchData.basic.total_teams < 2){
+        return {"type": "solo", "winnerId": matchData.basic.solo_winner};
+    }
+
+    const scores = [];
+
+    for(let i = 0; i < matchData.basic.total_teams; i++){
+        scores.push({"team": i, "score": matchData.basic[`team_${i}_score`]});
+    }
+
+    scores.sort((a, b) =>{
+
+        if(a.score < b.score) return 1;
+        if(a.score > b.score) return -1;
+        return 0;
+    });
+
+    let bDraw = false;
+
+    const winners = [scores[0].team];
+    const firstScore = scores[0].score;
+
+    //check for draws in team games
+    for(let i = 1; i < scores.length; i++){
+
+        const s = scores[i];
+
+        if(s.score === firstScore){
+            bDraw = true;
+            winners.push(s.team);
+        }
+    }
+
+    return {"type": "teams", "winners": winners, "bDraw": bDraw};
+
 }

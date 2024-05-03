@@ -61,7 +61,7 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
-            <MatchScreenshot basic={matchData.basic} players={matchData.playerData}/>
+            <MatchScreenshot data={matchData}/>
 			<BasicInfo matchData={matchData}/>
 			<FragTable data={matchData} totalTeams={totalTeams}/>
             <CTFTable data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/>

@@ -1,5 +1,6 @@
 import {simpleQuery, bulkInsert} from "./database.mjs";
-import {getMultipleMatchDetails, getWinner} from "./matches.mjs";
+import {getMultipleMatchDetails} from "./matches.mjs";
+import { getWinner } from "./generic.mjs";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
