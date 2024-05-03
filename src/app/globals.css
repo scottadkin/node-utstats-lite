@@ -400,3 +400,7 @@ option{
 	color:var(--font-color-1);
 	padding:var(--padding-1);
 }
+
+canvas{
+	display:inline-block;
+}
