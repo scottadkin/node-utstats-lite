@@ -187,11 +187,14 @@ async function getMatch(id){
     const serverName = await getServerNames([data.server_id]);
     const gametypeName = await getGametypeNames([data.gametype_id]);
     const mapName = await getMapNames([data.map_id]);
+    
 
     data.serverName = (serverName[data.server_id] !== undefined) ? serverName[data.server_id] : "Not Found";
     data.gametypeName = (gametypeName[data.gametype_id] !== undefined) ? gametypeName[data.gametype_id] : "Not Found";
     data.mapName = (mapName[data.map_id] !== undefined) ? mapName[data.map_id] : "Not Found";
 
+    const mapImages = await getMapImages([data.mapName]);
+    data.mapImage = Object.values(mapImages)[0];
     return data;
 }
 

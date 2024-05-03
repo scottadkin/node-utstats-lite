@@ -1,16 +1,20 @@
 "use client"
 import { useEffect, useRef } from "react";
+import { MMSS } from "../lib/generic.mjs";
 
-class Screenshot{
+class ScreenshotImage{
 
-    constructor(canvas, image){
+    constructor(canvas, basic, players){
 
         this.canvas = canvas.current;
         this.context = this.canvas.getContext("2d");
 
-        this.context.textBaseline = "top";
+        console.log(basic);
 
-        this.bgImage = image;
+        this.basic = basic;
+        this.players = players;
+
+        this.context.textBaseline = "top";
 
         this.render();
 
@@ -77,7 +81,7 @@ class Screenshot{
         this.context.drawImage(image, scaledX, scaledY, scaledWidth, scaledHeight);
     }
 
-    drawText(options){
+    fillText(options){
 
         const [x, y] = this.scaleXY(options.x, options.y);
 
@@ -95,10 +99,68 @@ class Screenshot{
             maxWidth = options.maxWidth;
         }
 
-        this.context.fillStyle = "white";
-
+        if(options.color !== undefined){
+            this.context.fillStyle = options.color;
+        }
+        
         this.context.fillText(options.text, x, y, this.scale(maxWidth, "x"));
 
+    }
+
+    async renderBG(){
+
+        let mapImageURL = `/images/maps/${this.basic.mapImage}`;
+
+            try{
+
+                await this.loadImage(mapImageURL);
+            }catch(err){
+
+                mapImageURL = `/images/maps/default.jpg`;
+                await this.loadImage(mapImageURL);
+            }
+
+            this.drawImage(mapImageURL, 0, 0, 100, 100);
+    }
+    
+    renderTitle(){
+
+        const titleOptions = {
+            "text": this.basic.gametypeName,
+            "x": 50,
+            "y": 3,
+            "fontSize": 4,
+            "textAlign": "center",
+            "color": "white"
+        };
+
+        this.fillText(titleOptions);
+
+        const endedOptions = {
+            "text": "The match has ended. Hit [Fire] to continue!",
+            "x": 50,
+            "y": 92,
+            "color": "rgb(0,255,0)",
+            "fontSize": 1.8
+        };
+
+        const footerAOptions = {
+            "text": `${this.basic.gametypeName} in ${this.basic.mapName}`,
+            "x": 50,
+            "y": 96,
+            "fontSize": 1.8,
+            "color": "white"
+        };
+
+        const footerBOptions = {
+            "text": `Elapsed Time: ${MMSS(this.basic.playtime)}`,
+            "x": 50,
+            "y": 97.8
+        };
+
+        this.fillText(endedOptions);
+        this.fillText(footerAOptions);
+        this.fillText(footerBOptions);
     }
 
     async render(){
@@ -107,25 +169,16 @@ class Screenshot{
 
             this.fillRect(0, 0, 100, 100, "black");
 
-            await this.loadImage(`/images/maps/${this.bgImage}.jpg`);
-
-            this.drawImage(`/images/maps/${this.bgImage}.jpg`, 0, 0, 100, 100);
-
-            this.drawText({
-                "text": "test",
-                "x": 50,
-                "y": 10,
-                "fontSize": 25,
-                "textAlign": "center",
-                "maxWidth": 100
-            });
+            await this.renderBG();
+            this.renderTitle();
+            
 
         }catch(err){
 
             console.trace(err);
 
             this.fillRect(0, 0, 100, 100, "red");
-            this.drawText({
+            this.fillText({
                 "text": "Error",
                 "x": 50,
                 "y": 10,
@@ -138,13 +191,15 @@ class Screenshot{
 
 }
 
-export default function MatchScreenshot({}){
+export default function Screenshot({basic, players}){
 
     const canvasRef = useRef(null);
 
     useEffect(() =>{
 
-        new Screenshot(canvasRef, "condemned");
+        new ScreenshotImage(canvasRef, basic, players);
+
+        console.log(basic);
     }, [])
 
     return <>

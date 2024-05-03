@@ -11,7 +11,7 @@ import BasicInfo from "@/app/UI/Match/BasicInfo";
 import { convertTimestamp, plural, toPlaytime } from "@/app/lib/generic.mjs";
 import Pings from "@/app/UI/Match/Pings";
 import ErrorBox from "@/app/UI/ErrorBox";
-import MatchScreenshot from "@/app/UI/MatchScreenshot";
+import MatchScreenshot from "@/app/UI/Match/MatchScreenshot";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -61,9 +61,7 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
-            <div className="text-center">
-                <MatchScreenshot />
-            </div>
+            <MatchScreenshot basic={matchData.basic} players={matchData.playerData}/>
 			<BasicInfo matchData={matchData}/>
 			<FragTable data={matchData} totalTeams={totalTeams}/>
             <CTFTable data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/>
