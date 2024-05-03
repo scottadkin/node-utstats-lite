@@ -17,8 +17,8 @@ class ScreenshotImage{
         console.log(data);
 
         this.data = data;
-        
 
+        
         this.context.textBaseline = "top";
 
         this.render();
@@ -41,6 +41,28 @@ class ScreenshotImage{
                 reject(`Failed to load image ${url}`);
             }    
         });
+    }
+
+    async loadFlags(){
+
+        const uniqueCountries = [... new Set(this.data.playerData.map((p) =>{
+            return p.country;
+        }))];
+
+        const images = [];
+
+        uniqueCountries.unshift("xx");
+
+        for(let i = 0; i < uniqueCountries.length; i++){
+
+            const u = uniqueCountries[i];
+
+            if(u === "") continue;
+
+            images.push(this.loadImage(`/images/flags/${u}.svg`));
+        }
+
+        return await Promise.all(images);
     }
 
     scale(value, axis){
@@ -211,6 +233,9 @@ class ScreenshotImage{
         const pingFontSize = 1.1;
         const pingFontRowHeight = 1.4;
         const pingColor = "white";
+        const flagOffset = 5.5;
+
+        const y = startY + rowHeight * index
 
         const timeOptions = {
             "text": `TIME: ${Math.floor(p.time_on_server / 60)}`,
@@ -218,7 +243,7 @@ class ScreenshotImage{
             "color": pingColor,
             "textAlign": "right",
             "x": startX - 0.5,
-            "y": startY + rowHeight * index,
+            "y": y,
         };
 
         this.fillText(timeOptions);
@@ -229,15 +254,24 @@ class ScreenshotImage{
             "color": pingColor,
             "textAlign": "right",
             "x": startX - 0.5,
-            "y": startY + pingFontRowHeight + rowHeight * index,
+            "y": y + pingFontRowHeight,
         };
 
+        //if(p.country === "") p.country = "xx";
+
+        let country = "xx";
+
+        console.log(p.country)
+
+
+
+        this.drawImage(`/images/flags/${country}.svg`, startX - flagOffset, y, 1.8, 1.8);
         this.fillText(pingOptions);
     }
 
     renderTeam(teamId){
 
-        const startX = (teamId % 2 === 0) ? 15 : 55;
+        const startX = (teamId % 2 === 0) ? 10 : 55;
         const startY = (teamId < 2) ? 15 : 55;
 
         let teamColor = "white";
@@ -331,6 +365,7 @@ class ScreenshotImage{
             this.fillRect(0, 0, 100, 100, "black");
 
             await this.renderBG();
+            await this.loadFlags();
             this.renderTitle();
             this.renderPlayers();
             
@@ -341,7 +376,7 @@ class ScreenshotImage{
 
             this.fillRect(0, 0, 100, 100, "red");
             this.fillText({
-                "text": "Error",
+                "text": `Error: ${err.toString()}`,
                 "x": 50,
                 "y": 10,
                 "fontSize": 25,
