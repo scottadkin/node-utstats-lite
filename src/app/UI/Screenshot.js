@@ -149,7 +149,7 @@ class ScreenshotImage{
 
         this.drawImage(mapImageURL, 0, 0, 100, 100);
 
-        this.fillRect(0,0, 100, 100, "rgba(0,0,0,0.6)");
+        this.fillRect(0,0, 100, 100, "rgba(0,0,0,0.75)");
     }
 
     renderWinner(){
@@ -228,12 +228,12 @@ class ScreenshotImage{
     }
 
 
-    renderTimePing(p, startX, startY, rowHeight, index){
+    renderTimePing(p, startX, startY, rowHeight, index, bSolo){
 
-        const pingFontSize = 1.1;
-        const pingFontRowHeight = 1.4;
+        const pingFontSize = rowHeight * 0.33;
+        const pingFontRowHeight = rowHeight * 0.35;
         const pingColor = "white";
-        const flagOffset = 5.5;
+        const flagOffset = 4.8;
 
         const y = startY + rowHeight * index
 
@@ -259,13 +259,11 @@ class ScreenshotImage{
 
         //if(p.country === "") p.country = "xx";
 
-        let country = "xx";
+        let country = p.country;
 
-        console.log(p.country)
+        if(country === "") country = "xx";
 
-
-
-        this.drawImage(`/images/flags/${country}.svg`, startX - flagOffset, y, 1.8, 1.8);
+        this.drawImage(`/images/flags/${country}.svg`, startX - flagOffset, y, rowHeight * 0.5, rowHeight * 0.5);
         this.fillText(pingOptions);
     }
 
@@ -281,7 +279,7 @@ class ScreenshotImage{
         if(teamId === 2) teamColor = greenTeamColor;
         if(teamId === 3) teamColor = yellowTeamColor;
 
-        const nameScoreFontSize = 2.5;
+        const nameScoreFontSize = 2.3;
         const rowHeight = 3.2;
         const scoreOffset = 35;
 
@@ -316,8 +314,9 @@ class ScreenshotImage{
             const p = this.data.playerData[i];
 
             if(p.team !== teamId) continue;
+            if(p.spectator) continue;
 
-            this.renderTimePing(p, startX, startY, rowHeight, index);
+            this.renderTimePing(p, startX, startY, rowHeight, index, false);
 
             const nameOptions = {
                 "text": p.name,
@@ -346,6 +345,101 @@ class ScreenshotImage{
         }
     }
 
+    renderSolo(){
+
+        const nameColor = `rgb(0,194,255)`;
+        const scoreColor = `rgb(194,255,255)`;
+
+        const nameOffset = 25;
+        const col2Offset = 70;
+        const col3Offset = 85;
+        const fontSize = 2;
+        const rowHeight = 2.6;
+        const startY = 12;
+
+        const nameTitleOptions = {
+            "text": "Player",
+            "x": nameOffset,
+            "y": startY + rowHeight,
+            "color": "white",
+            "fontSize": fontSize,
+            "textAlign": "left"
+        };
+
+        const col2Options = {
+            "text": "Frags",
+            "x": col2Offset,
+            "y": startY + rowHeight,
+            "textAlign": "right"
+        };
+
+        const col3Options = {
+            "text": "Deaths",
+            "x": col3Offset,
+            "y": startY + rowHeight,
+        };
+
+        this.fillText(nameTitleOptions);
+        this.fillText(col2Options);
+        this.fillText(col3Options);
+
+        this.data.playerData.sort((a, b) =>{
+
+            if(a.frags > b.frags) return -1;
+            if(b.frags > a.frags) return 1;
+
+            if(a.deaths < b.deaths) return -1;
+            if(a.deaths > b.deaths) return 1;
+            return 0;
+        });
+
+        let index = 2;
+
+        for(let i = 0; i < this.data.playerData.length; i++){
+
+            const p = this.data.playerData[i];
+
+            if(p.spectator) continue;
+
+            const y = startY + rowHeight * index;
+
+            const nameOptions = {
+                "text": p.name,
+                "x": nameOffset,
+                "y": y,
+                "color": nameColor,
+                "fontSize": fontSize,
+                "textAlign": "left"
+            };
+
+            this.fillText(nameOptions);
+
+            const col2Options = {
+                "text": p.frags,
+                "x": col2Offset,
+                "y": y,
+                "color": scoreColor,
+                "textAlign": "right"
+            };
+    
+            const col3Options = {
+                "text": p.deaths,
+                "x": col3Offset,
+                "y": y,
+            };
+
+            this.fillText(col2Options);
+            this.fillText(col3Options);
+
+            this.renderTimePing(p, nameOffset, startY, rowHeight, index, true);
+
+            index++;
+        }
+
+
+
+    }
+
     renderPlayers(){
 
         const totalTeams = this.data.basic.total_teams;
@@ -354,8 +448,12 @@ class ScreenshotImage{
 
             for(let i = 0; i < totalTeams; i++){
                 this.renderTeam(i);
-            }          
+            }         
+            
+            return;
         }
+
+        this.renderSolo();
     }
 
     async render(){
@@ -400,6 +498,6 @@ export default function Screenshot({data}){
     }, [])
 
     return <>
-        <canvas width={1920 * 0.75} height={1080 * 0.75} ref={canvasRef}></canvas>
+        <canvas width={1920 * 0.9} height={1080 * 0.9} ref={canvasRef}></canvas>
     </>
 }
