@@ -96,6 +96,18 @@ class ScreenshotImage{
         this.context.fillRect(scaledX, scaledY, scaledWidth, scaledHeight);
     }
 
+    strokeRect(x, y, width, height, color, lineWidth){
+
+        this.context.strokeStyle = color;
+        this.context.lineWidth = this.scale(lineWidth, "y");
+
+        const [scaledX, scaledY] = this.scaleXY(x, y);
+        const [scaledWidth, scaledHeight] = this.scaleXY(width, height);
+
+
+        this.context.strokeRect(scaledX, scaledY, scaledWidth, scaledHeight);
+    }
+
 
     drawImage(url, x, y, width, height){
 
@@ -118,6 +130,10 @@ class ScreenshotImage{
 
         if(options.fontSize !== undefined){
             this.context.font = `${this.scale(options.fontSize, "y")}px Arial`;
+        }
+
+        if(options.font !== undefined){
+            this.context.font = options.font;
         }
 
         let maxWidth = 100;
@@ -149,7 +165,7 @@ class ScreenshotImage{
 
         this.drawImage(mapImageURL, 0, 0, 100, 100);
 
-        this.fillRect(0,0, 100, 100, "rgba(0,0,0,0.75)");
+        this.fillRect(0,0, 100, 100, "rgba(0,0,0,0.66)");
     }
 
     renderWinner(){
@@ -189,7 +205,7 @@ class ScreenshotImage{
             "text": this.data.basic.gametypeName,
             "x": 50,
             "y": 2,
-            "fontSize": 2.5,
+            "font": `300 ${this.scale(2.5, "y")}px Roboto`,
             "textAlign": "center",
             "color": "white"
         };
@@ -203,14 +219,14 @@ class ScreenshotImage{
             "x": 50,
             "y": 92,
             "color": "rgb(0,255,0)",
-            "fontSize": 1.8
+            "font": `300 ${this.scale(1.8, "y")}px Roboto`,
         };
 
         const footerAOptions = {
             "text": `${this.data.basic.gametypeName} in ${this.data.basic.mapName}`,
             "x": 50,
             "y": 96,
-            "fontSize": 1.8,
+            "font": `300 ${this.scale(1.8, "y")}px Roboto`,
             "color": "white"
         };
 
@@ -321,7 +337,8 @@ class ScreenshotImage{
             const nameOptions = {
                 "text": p.name,
                 "textAlign": "left",
-                "fontSize": nameScoreFontSize,
+                //"fontSize": nameScoreFontSize,
+                "font": `300 ${this.scale(nameScoreFontSize, "y")}px Roboto`,
                 "x": startX,
                 "y": startY + rowHeight * index,
                 "color": teamColor
@@ -332,7 +349,7 @@ class ScreenshotImage{
             const scoreOptions = {
                 "text": p.frags,
                 "textAlign": "right",
-                "fontSize": nameScoreFontSize,
+                "font": `300 ${this.scale(nameScoreFontSize, "y")}px Roboto`,
                 "x": startX + scoreOffset,
                 "y": startY + rowHeight * index,
                 "color": teamColor
@@ -343,6 +360,108 @@ class ScreenshotImage{
 
             index++;
         }
+    }
+
+    renderSmartCTFTeam(teamId){
+
+        if(teamId > 1) return;
+
+        const startX = (teamId === 0) ? 10 : 60;
+        const startY = 15;
+
+        const bgShade = "rgba(0,0,0,0.25)";
+        const headerBgColor = (teamId === 0) ? "rgba(255,0,0,0.5)" : "rgba(0,0,255,0.5)";
+        const fontColor = (teamId === 0) ? redTeamColor : blueTeamColor;
+        const headerIconSize = 3.8;
+        const headerIcon = (teamId === 0) ? "/images/red.png" : "/images/blue.png";
+        const headerFont = `700 ${this.scale(4,"y")}px Roboto`;
+        const fpFont = `700 ${this.scale(2.5,"y")}px Roboto`;
+
+        const width = 35;
+        const headerHeight = 5;
+        const playerHeight = 9;
+
+        let totalPlayers = 0;
+
+        for(let i = 0; i < this.data.playerData.length; i++){
+
+            const p = this.data.playerData[i];
+            if(p.team === teamId) totalPlayers++;
+
+        }
+
+        this.fillRect(startX, startY, width, headerHeight + playerHeight * totalPlayers, bgShade);
+        this.drawImage("/images/smartctfbg.png", startX, startY, width, headerHeight);
+        this.fillRect(startX, startY, width, headerHeight, headerBgColor);
+        this.drawImage(headerIcon, startX + 0.5, startY + 0.5, headerIconSize * 0.5625, headerIconSize);
+
+        const teamScoreOptions = {
+            "text": this.data.basic[`team_${teamId}_score`],
+            "x": startX + headerIconSize * 0.9,
+            "y": startY + 0.75,
+            "font": headerFont,
+            "textAlign": "left",
+            "color": fontColor
+        };
+
+        this.fillText(teamScoreOptions);
+
+        const fpOptions = {
+            "text": "Frags / Pts",
+            "x": startX + width - 1,
+            "y": startY + 0.75,
+            "font": fpFont,
+            "textAlign": "right",
+            "color": fontColor
+        };
+
+        this.fillText(fpOptions);
+
+        const faceIconSize = 4.6;
+        const nameFontSize = 2;
+
+
+        let index = 0;
+
+        for(let i = 0; i < this.data.playerData.length; i++){
+
+            const p = this.data.playerData[i];
+
+            if(p.team !== teamId) continue;
+
+            let y = startY + headerHeight + playerHeight * index;
+            let x = startX;
+
+            this.drawImage("/images/faceless.png", startX + 0.5, y + 0.4, faceIconSize * 0.5625, faceIconSize);
+            this.strokeRect(startX + 0.5, y + 0.4, faceIconSize * 0.5625, faceIconSize, "rgba(255,255,255,0.5)", 0.05);
+
+            x += 0.5 + 0.5 + faceIconSize * 0.5625;
+            y += 0.4;
+
+            console.log(p.name);
+
+            const nameOptions = {
+                "text": p.name,
+                "x": x,
+                "y": y,
+                "font": `400 ${this.scale(nameFontSize,"y")}px Roboto`,
+                "color": fontColor,
+                "textAlign": "left"
+            };
+
+            this.fillText(nameOptions);
+
+            nameOptions.text = `${p.kills}/${p.score}`;
+            nameOptions.x = startX + width - 1;
+            nameOptions.textAlign = "right"
+            this.fillText(nameOptions);
+
+            index++;
+
+        }
+
+
+
     }
 
     renderSolo(){
@@ -408,7 +527,7 @@ class ScreenshotImage{
                 "x": nameOffset,
                 "y": y,
                 "color": nameColor,
-                "fontSize": fontSize,
+                "font": `300 ${this.scale(fontSize, "y")}px Roboto`,
                 "textAlign": "left"
             };
 
@@ -437,14 +556,25 @@ class ScreenshotImage{
         }
     }
 
+    bCTF(){
+        return this.data.ctf.length > 0;
+    }
+
     renderPlayers(){
 
         const totalTeams = this.data.basic.total_teams;
 
+        const bCTF = this.bCTF();
+
         if(totalTeams >= 2){
 
             for(let i = 0; i < totalTeams; i++){
-                this.renderTeam(i);
+
+                if(!bCTF){
+                    this.renderTeam(i);
+                }else{
+                    this.renderSmartCTFTeam(i);
+                }
             }         
             
             return;
@@ -477,7 +607,7 @@ class ScreenshotImage{
             "text": string,
             "x": 50,
             "y": 90,
-            "fontSize": 1.4,
+            "font": `300 ${this.scale(1.4, "y")}px Roboto`,
             "textAlign": "center",
             "color": "white"
         };
@@ -493,6 +623,12 @@ class ScreenshotImage{
 
             await this.renderBG();
             await this.loadFlags();
+            await this.loadImage("/images/smartctfbg.png");
+            await this.loadImage("/images/red.png");
+            await this.loadImage("/images/blue.png");
+            await this.loadImage("/images/green.png");
+            await this.loadImage("/images/yellow.png");
+            await this.loadImage("/images/faceless.png");
             this.renderTitle();
             this.renderPlayers();
             this.renderSpectators();
@@ -507,7 +643,7 @@ class ScreenshotImage{
                 "text": `Error: ${err.toString()}`,
                 "x": 50,
                 "y": 10,
-                "fontSize": 25,
+                "fontSize": 12,
                 "textAlign": "center",
                 "maxWidth": 100,
                 "color": "white"
