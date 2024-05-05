@@ -228,6 +228,12 @@ class ScreenshotImage{
 
         this.renderWinner();
 
+
+        if(this.bCTF()){
+            this.renderSmartCTFFooter();
+            return;
+        }
+
         const endedOptions = {
             "text": "The match has ended. Hit [Fire] to continue!",
             "x": 50,
@@ -440,6 +446,56 @@ class ScreenshotImage{
         this.fillRect(x + offsetX + barOffsetX, y + offsetY + 0.25, barWidth, barHeight, `rgb(${colorOffset},255,${colorOffset})`);
     }
 
+    renderSmartCTFFooter(){
+
+        const fontSize = 1.5;
+
+        const line1 = "[SmartCTF 4E {PiN}Kev | {DnF2}SiNiSTeR | [es]Rush | adminthis & The_Cowboy & Sp0ngeb0b]";
+        const line2 = `${convertTimestamp(new Date(this.data.basic.date) * 0.001)} | Elapsed Time: ${MMSS(this.data.basic.playtime)}`;
+        const line3 = `Playing ${this.data.basic.mapName} on ${this.data.basic.serverName}`;
+
+        this.fillText({
+            "text": line1,
+            "font": `${this.scale(fontSize,"y")}px Arial`,
+            "textAlign": "center",
+            "color": "yellow",
+            "x": 50,
+            "y": 94
+        });
+
+        this.fillText({
+            "text": line2,
+            "color": "white",
+            "x": 50,
+            "y": 96
+        });
+
+        this.fillText({
+            "text": line3,
+            "x": 50,
+            "y": 98
+        });
+    }
+
+    getTeamAverageValue(key, teamId){
+
+        let total = 0;
+        let playersFound = 0;
+
+        for(let i = 0; i < this.data.playerData.length; i++){
+
+            const p = this.data.playerData[i];
+
+            if(p.team !== teamId) continue;
+            total += p[key];
+            playersFound++;
+        }
+
+        if(playersFound === 0 || total === 0) return 0;
+
+        return Math.floor(total / playersFound);
+    }
+
     renderSmartCTFTeam(teamId){
 
         if(teamId > 1) return;
@@ -464,6 +520,8 @@ class ScreenshotImage{
         const headerIcon = (teamId === 0) ? "/images/red.png" : "/images/blue.png";
         const headerFont = `700 ${this.scale(4,"y")}px Arial`;
         const fpFont = `700 ${this.scale(2.5,"y")}px Arial`;
+
+        const pingFontSize = 0.9;
 
         const width = 35;
         const headerHeight = 5;
@@ -505,15 +563,29 @@ class ScreenshotImage{
 
         this.fillText(fpOptions);
 
+
+        const teamPingAverage = this.getTeamAverageValue("ping_avg", teamId);
+
+        this.fillText({
+            "text": `PING: ${teamPingAverage}`,
+            "font": `${this.scale(pingFontSize,"y")}px monospace`,
+            "x": startX + 6,
+            "y": startY + 2,
+            "textAlign": "left",
+            "color": "white"
+        });
+
+        this.fillText({
+            "text": `TM: ${Math.floor(this.data.basic.playtime / 60)}`,
+            "x": startX + 6,
+            "y": startY + 3,
+        });
+
         const faceIconSize = 4.6;
         const nameFontSize = 2;
         const effTimeFontColor = "rgb(188,188,188)";
-        const effTimeFontSize = 0.9;
+        const effTimeFontSize = pingFontSize;
         const faceOffsetX = 0.5;
-
-        const pingFontSize = 0.9;
-        
-
 
         let index = 0;
 
@@ -873,6 +945,6 @@ export default function Screenshot({data}){
     }, [])
 
     return <>
-        <canvas width={1920 * 0.9} height={1080 * 0.9} ref={canvasRef}></canvas>
+        <canvas width={1920 * 0.75} height={1080 * 0.75} ref={canvasRef}></canvas>
     </>
 }
