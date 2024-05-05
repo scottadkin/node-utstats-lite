@@ -362,9 +362,82 @@ class ScreenshotImage{
         }
     }
 
+    getPlayerCTFData(playerId){
+
+
+        for(let i = 0; i < this.data.ctf.length; i++){
+
+            const d = this.data.ctf[i];
+
+            if(d.player_id === playerId) return d;
+        }
+
+        return null;
+    }
+
+    renderSmartCTFBar(name, typeName, value, x, y, index){
+
+        const maxWidth = 11;
+
+        const barHeight = 0.4;
+        const barOffsetX = 4.2;
+        const rowOffset = 1.6;
+
+        const offsetX = (index % 2 === 0) ? 0 : 15.6;
+        const offsetY = Math.floor(index * 0.5) * rowOffset;
+        const fontSize = this.scale(1.1,"y");
+
+        const nameOptions = {
+            "text": `${name}:`,
+            "font": `300 ${fontSize}px Roboto`,
+            "textAlign": "left",
+            "color":"white",
+            "x": x + offsetX,
+            "y": y + offsetY,
+            "maxWidth": 2.5
+        };
+
+        const valueOptions = {
+            "text": value,
+            "textAlign": "right",
+            "color":"white",
+            "x": x + offsetX + 3.8,
+            "y": y + offsetY,
+            "maxWidth": 2
+        };
+
+        this.fillText(nameOptions);
+        this.fillText(valueOptions);
+
+        let barWidth = 0;
+
+        let totalPercent = 0;
+
+        if(this.ctfMax[typeName] > 0 && value > 0){
+
+            const bit = maxWidth / this.ctfMax[typeName];
+            barWidth = bit * value;
+            totalPercent = Math.floor(value / this.ctfMax[typeName] * 100);
+          
+        }
+
+        const colorOffset = Math.floor(255 - totalPercent * 2.55);
+
+        this.fillRect(x + offsetX + barOffsetX, y + offsetY + 0.25, barWidth, barHeight, `rgb(${colorOffset},255,${colorOffset})`);
+    }
+
     renderSmartCTFTeam(teamId){
 
         if(teamId > 1) return;
+
+
+        const barNames = [
+            "Caps", "Covers", "Grabs", "Returns", "Assists", "FlagKills"
+        ];
+
+        const typeNames = [
+            "flag_cap", "flag_cover", "flag_taken", "flag_return", "flag_assist", "flag_kill"
+        ];
 
         const startX = (teamId === 0) ? 10 : 60;
         const startY = 15;
@@ -438,8 +511,6 @@ class ScreenshotImage{
             x += 0.5 + 0.5 + faceIconSize * 0.5625;
             y += 0.4;
 
-            console.log(p.name);
-
             const nameOptions = {
                 "text": p.name,
                 "x": x,
@@ -452,9 +523,26 @@ class ScreenshotImage{
             this.fillText(nameOptions);
 
             nameOptions.text = `${p.kills}/${p.score}`;
-            nameOptions.x = startX + width - 1;
+            nameOptions.x = startX + width - 0.5;
             nameOptions.textAlign = "right"
             this.fillText(nameOptions);
+
+            y += nameFontSize + 0.5;
+
+            const ctfData = this.getPlayerCTFData(p.player_id);
+
+            for(let z = 0; z < barNames.length; z++){
+
+                const currentKey = typeNames[z];
+
+                let value = 0;
+
+                if(ctfData !== null){
+                    value = ctfData[currentKey];
+                }
+
+                this.renderSmartCTFBar(barNames[z], currentKey, value, x, y, z);
+            }
 
             index++;
 
@@ -560,11 +648,51 @@ class ScreenshotImage{
         return this.data.ctf.length > 0;
     }
 
+    setCTFMaxValues(){
+
+        this.ctfMax = {
+            "flag_cap": 0, 
+            "flag_cover": 0, 
+            "flag_taken": 0, 
+            "flag_return": 0, 
+            "flag_assist": 0, 
+            "flag_kill": 0
+        };
+
+        this.ctfTotals = {
+            "flag_cap": 0, 
+            "flag_cover": 0, 
+            "flag_taken": 0, 
+            "flag_return": 0, 
+            "flag_assist": 0, 
+            "flag_kill": 0
+        };
+
+        for(let i = 0; i < this.data.ctf.length; i++){
+
+            const d = this.data.ctf[i];
+
+            for(const key of Object.keys(this.ctfMax)){
+
+                const current = d[key];
+                const max = this.ctfMax[key];
+
+                if(current > max) this.ctfMax[key] = current;
+
+                this.ctfTotals[key] += current;
+            }
+        }
+    }
+
     renderPlayers(){
 
         const totalTeams = this.data.basic.total_teams;
 
         const bCTF = this.bCTF();
+
+        if(bCTF){
+            this.setCTFMaxValues();
+        }
 
         if(totalTeams >= 2){
 
