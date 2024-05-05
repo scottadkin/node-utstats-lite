@@ -219,7 +219,7 @@ class ScreenshotImage{
             "text": this.data.basic.gametypeName,
             "x": 50,
             "y": 2,
-            "font": `300 ${this.scale(2.5, "y")}px Roboto`,
+            "font": `300 ${this.scale(2.5, "y")}px Arial`,
             "textAlign": "center",
             "color": "white"
         };
@@ -233,14 +233,14 @@ class ScreenshotImage{
             "x": 50,
             "y": 92,
             "color": "rgb(0,255,0)",
-            "font": `300 ${this.scale(1.8, "y")}px Roboto`,
+            "font": `300 ${this.scale(1.8, "y")}px Arial`,
         };
 
         const footerAOptions = {
             "text": `${this.data.basic.gametypeName} in ${this.data.basic.mapName}`,
             "x": 50,
             "y": 96,
-            "font": `300 ${this.scale(1.8, "y")}px Roboto`,
+            "font": `300 ${this.scale(1.8, "y")}px Arial`,
             "color": "white"
         };
 
@@ -352,7 +352,7 @@ class ScreenshotImage{
                 "text": p.name,
                 "textAlign": "left",
                 //"fontSize": nameScoreFontSize,
-                "font": `300 ${this.scale(nameScoreFontSize, "y")}px Roboto`,
+                "font": `300 ${this.scale(nameScoreFontSize, "y")}px Arial`,
                 "x": startX,
                 "y": startY + rowHeight * index,
                 "color": teamColor
@@ -363,7 +363,7 @@ class ScreenshotImage{
             const scoreOptions = {
                 "text": p.frags,
                 "textAlign": "right",
-                "font": `300 ${this.scale(nameScoreFontSize, "y")}px Roboto`,
+                "font": `300 ${this.scale(nameScoreFontSize, "y")}px Arial`,
                 "x": startX + scoreOffset,
                 "y": startY + rowHeight * index,
                 "color": teamColor
@@ -403,7 +403,7 @@ class ScreenshotImage{
 
         const nameOptions = {
             "text": `${name}:`,
-            "font": `300 ${fontSize}px Roboto`,
+            "font": `300 ${fontSize}px Arial`,
             "textAlign": "left",
             "color":"white",
             "x": x + offsetX,
@@ -462,8 +462,8 @@ class ScreenshotImage{
         const fontColor = (teamId === 0) ? redTeamColor : blueTeamColor;
         const headerIconSize = 3.8;
         const headerIcon = (teamId === 0) ? "/images/red.png" : "/images/blue.png";
-        const headerFont = `700 ${this.scale(4,"y")}px Roboto`;
-        const fpFont = `700 ${this.scale(2.5,"y")}px Roboto`;
+        const headerFont = `700 ${this.scale(4,"y")}px Arial`;
+        const fpFont = `700 ${this.scale(2.5,"y")}px Arial`;
 
         const width = 35;
         const headerHeight = 5;
@@ -509,6 +509,11 @@ class ScreenshotImage{
         const nameFontSize = 2;
         const effTimeFontColor = "rgb(188,188,188)";
         const effTimeFontSize = 0.9;
+        const faceOffsetX = 0.5;
+
+        const pingFontSize = 0.9;
+        
+
 
         let index = 0;
 
@@ -521,8 +526,20 @@ class ScreenshotImage{
             let y = startY + headerHeight + playerHeight * index;
             let x = startX;
 
-            this.drawImage("/images/faceless.png", startX + 0.5, y + 0.4, faceIconSize * 0.5625, faceIconSize);
-            this.strokeRect(startX + 0.5, y + 0.4, faceIconSize * 0.5625, faceIconSize, "rgba(255,255,255,0.5)", 0.05);
+            this.drawImage("/images/faceless.png", startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize);
+            this.strokeRect(startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize, "rgba(255,255,255,0.5)", 0.05);
+
+            this.drawImage(`/images/flags/${p.country}.svg`, x + faceOffsetX + 0.5, y + faceIconSize + 1, 1.4, 1.3);
+
+
+            this.fillText({
+                "text": `PING:${p.ping_avg}`,
+                "font": `${this.scale(pingFontSize,"y")}px arial`,
+                "color": "white",
+                "x": x + 1.7,
+                "y": y + faceIconSize + 3,
+                "textAlign": "center"
+            });
 
             x += 0.5 + 0.5 + faceIconSize * 0.5625;
             y += 0.4;
@@ -531,7 +548,7 @@ class ScreenshotImage{
                 "text": p.name,
                 "x": x,
                 "y": y,
-                "font": `400 ${this.scale(nameFontSize,"y")}px Roboto`,
+                "font": `400 ${this.scale(nameFontSize,"y")}px Arial`,
                 "color": fontColor,
                 "textAlign": "left"
             };
@@ -589,6 +606,7 @@ class ScreenshotImage{
                 "x": x + this.reverseScale(nameWidth, "x"),
                 "y": y + effTimeFontSize
             });
+
 
             y += nameFontSize + 0.5;
 
@@ -678,7 +696,7 @@ class ScreenshotImage{
                 "x": nameOffset,
                 "y": y,
                 "color": nameColor,
-                "font": `300 ${this.scale(fontSize, "y")}px Roboto`,
+                "font": `300 ${this.scale(fontSize, "y")}px Arial`,
                 "textAlign": "left"
             };
 
@@ -798,7 +816,7 @@ class ScreenshotImage{
             "text": string,
             "x": 50,
             "y": 90,
-            "font": `300 ${this.scale(1.4, "y")}px Roboto`,
+            "font": `300 ${this.scale(1.4, "y")}px Arial`,
             "textAlign": "center",
             "color": "white"
         };
