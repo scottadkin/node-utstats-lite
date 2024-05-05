@@ -86,6 +86,20 @@ class ScreenshotImage{
         return [x, y];
     }
 
+    //pixels to percent
+    reverseScale(value, axis){
+
+        axis = axis.toLowerCase();
+
+        const size = (axis === "x") ? this.canvas.width : this.canvas.height;
+
+        if(size === 0 || value === 0) return 0;
+
+        const bit = size / 100;
+
+        return value / bit;
+    }
+
     fillRect(x, y, width, height, color){
 
         if(color !== undefined) this.context.fillStyle = color;
@@ -439,6 +453,7 @@ class ScreenshotImage{
             "flag_cap", "flag_cover", "flag_taken", "flag_return", "flag_assist", "flag_kill"
         ];
 
+
         const startX = (teamId === 0) ? 10 : 60;
         const startY = 15;
 
@@ -492,7 +507,8 @@ class ScreenshotImage{
 
         const faceIconSize = 4.6;
         const nameFontSize = 2;
-
+        const effTimeFontColor = "rgb(188,188,188)";
+        const effTimeFontSize = 0.9;
 
         let index = 0;
 
@@ -526,6 +542,53 @@ class ScreenshotImage{
             nameOptions.x = startX + width - 0.5;
             nameOptions.textAlign = "right"
             this.fillText(nameOptions);
+
+            const nameWidth = this.context.measureText(`${p.name} `).width;
+
+            const time = (p.time_on_server > 0) ? Math.floor(p.time_on_server / 60) : 1;
+            let eff = 0;
+
+            if(p.kills > 0){
+                if(p.deaths > 0){
+                    eff = parseInt(p.kills / (p.kills + p.deaths + p.team_kills) * 100);   
+                }
+            }
+
+            let itemString = "";
+
+            if(p.headshots > 0){
+                itemString += `HS:${p.headshots} `
+            }
+
+            if(p.item_belt > 0){
+                itemString += `SB:${p.item_belt} `;
+            }
+
+            if(p.item_amp > 0){
+                itemString += `AMP:${p.item_amp}`;
+            }
+
+            if(p.item_invis > 0){
+                itemString += `INV:${p.item_invis}`;
+            }
+
+            this.fillText({
+                "text": itemString,
+                "font": `${this.scale(effTimeFontSize,"y")}px monospace`,
+                "color": effTimeFontColor,
+                "textAlign": "left",
+                "x": x + this.reverseScale(nameWidth, "x"),
+                "y": y
+            });
+
+            this.fillText({
+                "text": `TM:${time} EFF:${eff}%`,
+                "font": `${this.scale(effTimeFontSize,"y")}px monospace`,
+                "color": effTimeFontColor,
+                "textAlign": "left",
+                "x": x + this.reverseScale(nameWidth, "x"),
+                "y": y + effTimeFontSize
+            });
 
             y += nameFontSize + 0.5;
 
