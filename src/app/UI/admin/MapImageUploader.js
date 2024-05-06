@@ -1,14 +1,153 @@
 "use client"
 import Header from "../Header";
 import { getMapImageName } from "@/app/lib/generic.mjs";
+import { useEffect, useReducer } from "react";
+import ErrorBox from "../ErrorBox";
 
+const acceptFiles = ".jpg,.jpeg,.png,.bmp,.gif";
+
+async function loadData(dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin?mode=get-map-images");
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        dispatch({"type": "loaded", "images": res.images, "names": res.mapNames});
+
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
+function reducer(state, action){
+
+    switch(action.type){
+        case "loaded": {
+            return {
+                ...state,
+                "names": action.names,
+                "images": action.images
+            }
+        }
+        case "error": {
+            return {
+                ...state,
+                "error": action.message
+            }
+        }
+    }
+    return state;
+}
+
+
+async function uploadSingle(dispatch, fileName, e){
+
+    try{
+
+        e.preventDefault();
+
+        console.log(e.target.file);
+
+        const formData = new FormData();
+
+        formData.append(fileName, e.target.file.files[0]);
+        console.log(e.target.file.files[0]);
+
+        console.log(fileName);
+        console.log(formData);
+
+        const req = await fetch("/api/admin/imageUploader", {
+            "method": "POST",
+            "body": formData
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+        console.log(res);
+
+        await loadData(dispatch);
+
+        e.target.reset();
+        
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
+function getFileStatus(images, targetFile){
+
+    for(let i = 0; i < images.length; i++){
+
+        const img = images[i];
+
+        if(img === `${targetFile}.jpg`){
+            return <td className="team-green">Found</td>;
+        }
+    }
+
+    return <td className="team-red">Missing</td>
+}
+
+function renderSingleUploads(state, dispatch){
+
+    const rows = [];
+
+    for(let i = 0; i < state.names.length; i++){
+
+        const n = state.names[i];
+
+        const cleanName = getMapImageName(n.name)
+
+        rows.push(<tr key={i}>
+            <td className="text-left">{n.name}</td>
+            <td>{cleanName}.jpg</td>
+            {getFileStatus(state.images, cleanName)}
+            <td>
+                <form onSubmit={(e) =>{
+                    uploadSingle(dispatch, cleanName, e);
+                }}>
+                    <input type="file" name="file" accept={acceptFiles}/>
+                    <input type="submit" value="Upload Image" />
+                </form>
+            </td>
+        </tr>);
+    }
+    return <table className="t-width-1">
+        <tbody>
+            <tr>
+                <th>Name</th>
+                <th>Required File</th>
+                <th>File Status</th>
+                <th>Action</th>
+            </tr>
+            {rows}
+        </tbody>
+    </table>
+}
 
 export default function MapImageUploader({}){
     
+    const [state, dispatch] = useReducer(reducer, {
+        "names": [],
+        "images": [],
+        "error": null
+    });
+
+    useEffect(() =>{
+
+        loadData(dispatch);
+
+    }, []);
 
     return <>
         <Header>Map Image Uploader</Header>
-        <form className="form" onSubmit={async (e) =>{
+        <form className="form margin-bottom-1" onSubmit={async (e) =>{
             e.preventDefault();
             console.log(e);
             console.log(e.target.file.files);
@@ -31,6 +170,9 @@ export default function MapImageUploader({}){
             });
 
             const res = await req.json();
+            await loadData(dispatch);
+
+            e.target.reset();
 
             console.log(res);
 
@@ -48,9 +190,14 @@ export default function MapImageUploader({}){
             <Header>Bulk Image Uploader</Header>
             <div className="form-row">
                 <label>Choose Files</label>
-                <input type="file" name="file" id="file" multiple={true} accept=".jpg,.jpeg,.png,.bmp,.gif"/>
+                <input type="file" name="file" id="file" multiple={true} accept={acceptFiles}/>
             </div>
             <input type="submit" className="submit-button" value="Upload Images"/>
         </form>
+        <ErrorBox title="Error">{state.error}</ErrorBox>
+        <Header>
+            Single Map Uploads
+        </Header>
+        {renderSingleUploads(state, dispatch)}
     </>
 }

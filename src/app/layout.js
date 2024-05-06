@@ -26,7 +26,7 @@ export default async function RootLayout({ children }) {
 			<div className="padding-top"></div>
 			{children}
 			<footer>
-				Node UTStats Lite for website <a href="https://github.com/rxut/UTStatsLite">UTStats Lite Mutator</a>
+				Node UTStats Lite website for the <a href="https://github.com/rxut/UTStatsLite">UTStats Lite Mutator</a>
 			</footer>
 		</body>
 		</html>

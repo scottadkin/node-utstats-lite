@@ -131,9 +131,13 @@ export async function getMostPlayedMaps(limit){
 }
 
 
-export async function getAllNames(){
+export async function getAllNames(bReturnArray){
 
-    const result = await simpleQuery(`SELECT id,name FROM nstats_maps`);
+    if(bReturnArray === undefined) bReturnArray = false;
+
+    const result = await simpleQuery(`SELECT id,name FROM nstats_maps ORDER BY name ASC`);
+
+    if(bReturnArray) return result;
 
     const data = {
         "0": "Any"
@@ -147,4 +151,21 @@ export async function getAllNames(){
     }
 
     return data;
+}
+
+
+export async function getAllImages(){
+
+    const files = await readdir("./public/images/maps/");
+
+    const reg = /^.+?\.jpg$/i;
+    const valid = [];
+
+    for(let i = 0; i < files.length; i++){
+
+        const f = files[i];
+        if(reg.test(f)) valid.push(f);
+    }
+
+    return valid;
 }

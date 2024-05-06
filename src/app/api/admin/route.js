@@ -9,6 +9,7 @@ import {
     recalculateAll as recalculateAllRankings, 
     updateSettings as updateRankingSettings } 
 from "@/app/lib/rankings.mjs";
+import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
 
 
 export async function POST(req){
@@ -216,6 +217,14 @@ export async function GET(req){
             const data = await recalculateAllRankings();
 
             console.log(data);
+        }
+
+        if(mode === "get-map-images"){
+
+            const mapNames = await getAllMapNames(true);
+            const images = await getAllMapImages();
+
+            return Response.json({mapNames, images});
         }
 
 

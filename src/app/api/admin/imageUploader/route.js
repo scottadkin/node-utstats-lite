@@ -29,15 +29,13 @@ function bValidFile(file){
     return true;
 }
 
-async function convertImage(imagePath, fileName){
+async function convertImage(imagePath, fileName, targetDir, newFileName){
 
-    console.log(`0--------------------`);
     const cleanName = getMapImageName(fileName);
 
 
     const reg = /^(.+)\..+$/i;
     const regResult = reg.exec(cleanName);
-    console.log(regResult);
 
     if(regResult === null){
         throw new Error(`convertImage regResult was null`);
@@ -48,9 +46,8 @@ async function convertImage(imagePath, fileName){
     await Jimp.read(`${imagePath}${fileName}`)
     .then((image) => {
         // Do stuff with the image.
-        console.log("a");
         image.quality(66);
-        image.write(`${imagePath}${regResult[1]}.jpg`);
+        image.write(`${targetDir}${newFileName}`);
     })
     .catch((err) => {
         // Handle an exception.
@@ -63,13 +60,13 @@ async function convertImage(imagePath, fileName){
 export async function POST(req, res){
 
     try{
+        
         const sessionInfo = await getSessionInfo();
         if(sessionInfo === null) throw new Error(`You are not logged in`);
 
 
         const formData = await req.formData();
-        console.log(formData);
-        console.log(formData.get("file_0"));
+
         console.log([...formData.keys()]);
 
         const files = [...formData.entries()];
@@ -89,7 +86,7 @@ export async function POST(req, res){
                 const filePath = `./public/images/temp/${file[1].name.toLowerCase()}`;
                 await writeFile(filePath, buffer);
 
-                await convertImage(`./public/images/temp/`, file[1].name.toLowerCase());
+                await convertImage(`./public/images/temp/`, file[1].name.toLowerCase(), "./public/images/maps/", `${file[0]}.jpg`);
                 await unlink(filePath);
                 messages.push({"type": "pass", "content": `${file[1].name} uploaded successfully`});
                 
