@@ -1,11 +1,13 @@
 import { getSessionInfo } from "@/app/lib/authentication";
-import {writeFile} from "node:fs/promises";
+import {writeFile, unlink} from "node:fs/promises";
+import Jimp from "jimp";
+import { getMapImageName } from "@/app/lib/generic.mjs";
 
 
 function bValidFile(file){
 
-    const validTypes = ["image/png", "image/jpg", "image/jpeg"];
-    const validExt = [".jpg", ".jpeg", ".png"];
+    const validTypes = ["image/png", "image/jpg", "image/jpeg", "image/gif", "image/bmp"];
+    const validExt = [".jpg", ".jpeg", ".png", ".gif", ".bmp"];
 
     if(file.type == undefined) return false;
     if(file.name == undefined) return false;
@@ -25,6 +27,36 @@ function bValidFile(file){
     if(validExt.indexOf(ext) === -1) return false;
     
     return true;
+}
+
+async function convertImage(imagePath, fileName){
+
+    console.log(`0--------------------`);
+    const cleanName = getMapImageName(fileName);
+
+
+    const reg = /^(.+)\..+$/i;
+    const regResult = reg.exec(cleanName);
+    console.log(regResult);
+
+    if(regResult === null){
+        throw new Error(`convertImage regResult was null`);
+    }
+
+    console.log(`imagePath = ${imagePath}, fileName = ${fileName}, cleanName=${cleanName}`);
+
+    await Jimp.read(`${imagePath}${fileName}`)
+    .then((image) => {
+        // Do stuff with the image.
+        console.log("a");
+        image.quality(66);
+        image.write(`${imagePath}${regResult[1]}.jpg`);
+    })
+    .catch((err) => {
+        // Handle an exception.
+        console.trace(err);
+    });
+
 }
 
 
@@ -54,8 +86,11 @@ export async function POST(req, res){
             if(bValidFile(file[1])){
 
                 const buffer = Buffer.from(await file[1].arrayBuffer());
+                const filePath = `./public/images/temp/${file[1].name.toLowerCase()}`;
+                await writeFile(filePath, buffer);
 
-                await writeFile(`./public/images/test/${file[1].name.toLowerCase()}`, buffer);
+                await convertImage(`./public/images/temp/`, file[1].name.toLowerCase());
+                await unlink(filePath);
                 messages.push({"type": "pass", "content": `${file[1].name} uploaded successfully`});
                 
             }else{

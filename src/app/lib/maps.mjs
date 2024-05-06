@@ -1,5 +1,6 @@
 import { simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
+import { getMapImageName as genericGetMapImageName } from "./generic.mjs";
 
 async function getMapId(name){
 
@@ -62,16 +63,7 @@ export async function getMapNames(names){
 
 export function getMapImageName(name){
 
-    const reg = /^.+?-(.+)$/i;
-
-    const result = reg.exec(name);
-
-    if(result === null) return name;
-
-    name = result[1].toLowerCase();
-    name = name.replace(/[\[\]\'\`]/ig,"");
-
-    return name;
+    return genericGetMapImageName(name);
 }
 
 
