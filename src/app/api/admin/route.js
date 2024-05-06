@@ -101,7 +101,7 @@ export async function POST(req){
 
             return Response.json({"message": `Some settings failed to apply. (${passes}/${passes + fails})`});
         }
-
+        
         return Response.json({"message": "hi"});
 
     }catch(err){
@@ -115,8 +115,6 @@ export async function POST(req){
 
 export async function GET(req){
 
-
-    
     try{
 
         const sessionInfo = await getSessionInfo();

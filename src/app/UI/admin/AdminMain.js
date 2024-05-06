@@ -9,10 +9,11 @@ import BackupManager from "./BackupManager";
 import SiteSettings from "./SiteSettings";
 import RankingSettings from "./RankingSettings";
 import RecalculateRankings from "./RecalculateRankings";
+import MapImageUploader from "./MapImageUploader";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("rankings-all");
+    const [mode, setMode] = useState("map-img");
 
     return <>
         <Tabs 
@@ -24,6 +25,7 @@ export default function AdminMain(){
                 {"name": "User Accounts", "value": "users"},
                 {"name": "Ranking Settings", "value": "rankings"},
                 {"name": "Recalculate All Rankings", "value": "rankings-all"},
+                {"name": "Map Image Uploader", "value": "map-img"}
                 //{"name": "Backup Manager", "value": "backup"},
             ]}
             selectedValue={mode}
@@ -39,6 +41,7 @@ export default function AdminMain(){
         {(mode === "backup") ? <BackupManager /> : null}
         {(mode === "rankings") ? <RankingSettings /> : null}
         {(mode === "rankings-all") ? <RecalculateRankings /> : null}
+        {(mode === "map-img") ? <MapImageUploader /> : null}
 
     </>
 }
