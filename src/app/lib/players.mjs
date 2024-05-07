@@ -501,6 +501,8 @@ function _updateTotals(totals, gametypeId, playerData, date, bWinner, bDraw){
  */
 async function calcPlayerTotals(playerIds){
 
+
+
     if(playerIds.length === 0) return [];
 
     const matchData = await getPlayersAllMatchData(playerIds);

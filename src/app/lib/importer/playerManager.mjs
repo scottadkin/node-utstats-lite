@@ -615,13 +615,6 @@ export class PlayerManager{
      * Update totals that are used for player profiles
      */
     async updatePlayerFullTotals(){
-
-       // console.log(Object.keys(this.mergedPlayers));
-
-        //for(const [playerId, playerData] of Object.entries(this.mergedPlayers)){
-
-            //const totals = await calcPlayerTotals(playerData.masterId);
-        //}
     }
 
 

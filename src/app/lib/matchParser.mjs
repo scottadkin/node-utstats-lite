@@ -62,6 +62,7 @@ export class MatchParser{
         if(this.gametype.bHardcore){
             this.matchLength = scalePlaytime(this.matchLength, true);
         }
+        
 
         if(this.matchLength < this.minPlaytime){
             throw new Error(`Match length is shorter than minPlaytime (${this.minPlaytime} seconds).`);

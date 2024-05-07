@@ -348,15 +348,24 @@ export function sanitizePagePerPage(page, perPage){
 }
 
 export function getWinner(matchData){
+
+    const bIncludeBasic = matchData.basic !== undefined;
+
+    const totalTeams = (bIncludeBasic) ? matchData.basic.total_teams : matchData.teams;
     
-    if(matchData.basic.total_teams < 2){
-        return {"type": "solo", "winnerId": matchData.basic.solo_winner};
+    if(totalTeams < 2){
+
+        const soloWinner = (bIncludeBasic) ? matchData.basic.solo_winner : matchData.soloWinner;
+
+        return {"type": "solo", "winnerId": soloWinner};
     }
 
     const scores = [];
 
-    for(let i = 0; i < matchData.basic.total_teams; i++){
-        scores.push({"team": i, "score": matchData.basic[`team_${i}_score`]});
+    for(let i = 0; i < totalTeams; i++){
+
+        const teamScore = (bIncludeBasic) ? matchData.basic[`team_${i}_score`] : matchData.teamScores[i];
+        scores.push({"team": i, "score": teamScore});
     }
 
     scores.sort((a, b) =>{
