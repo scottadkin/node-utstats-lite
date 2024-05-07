@@ -14,7 +14,7 @@ function setGametypeId(searchParams, gametypeNames){
 
     if(gametypeNames.length > 0) firstGametypeId = gametypeNames[0].id;
 
-    let gametypeId = (searchParams.gid !== undefined) ? searchParams.gid : firstGametypeId;
+    let gametypeId = (searchParams.gid !== undefined) ? parseInt(searchParams.gid) : firstGametypeId;
 
     if(gametypeId !== gametypeId) gametypeId = firstGametypeId;
 
@@ -36,7 +36,7 @@ function setGametypeName(gametypeNames, targetId){
 
 function setTimeFrame(searchParams){
 
-    let timeFrame = (searchParams.tf !== undefined) ? parseInt(searchParams.tf) : 0;
+    let timeFrame = (searchParams.tf !== undefined) ? parseInt(searchParams.tf) : 28;
 
     if(timeFrame !== timeFrame) timeFrame = 0;
 

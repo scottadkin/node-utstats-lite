@@ -35,7 +35,7 @@ export default function Rankings({data, gametypeNames}){
     return <>
         <Header>Rankings</Header>
         <div className="info">
-            Displaying ranking positions based on gametypes where player has been active in the last 28 days.
+            Ranking positions based on gametypes where player has been active in the last 28 days.
         </div>
         <InteractiveTable width={3} headers={headers} rows={rows}/>
     </>
