@@ -26,7 +26,11 @@ export default async function RootLayout({ children }) {
 			<div className="padding-top"></div>
 			{children}
 			<footer>
-				Node UTStats Lite website for the <a href="https://github.com/rxut/UTStatsLite">UTStats Lite Mutator</a>
+				<a href="https://github.com/scottadkin/node-utstats-lite">Node UTStats Lite website</a> for the <a href="https://github.com/rxut/UTStatsLite">UTStats Lite Mutator</a><br/>
+				Version preview 1<br/>
+				Website &copy; 2024 Scott Adkin<br/>
+				UTStats mod was originally created by azazel, AnthraX, and toa, with additions by Skillz, killereye, Enakin, Loki and rork.<br/>
+				UTStats-lite changes by rX
 			</footer>
 		</body>
 		</html>

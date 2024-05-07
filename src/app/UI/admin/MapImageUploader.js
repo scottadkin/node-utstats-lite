@@ -188,8 +188,9 @@ export default function MapImageUploader({}){
                 When bulk image uploading you have to manually name the image files, the uploader will remove certain characters.<br/> 
                 If you use a single file upload the image is automatically named so the website can use it.<br/>
                 Names should all be lowercase(website will automatically do that anyway), and should not contain &#91; &#93; &apos; &#96;<br/><br/>
-                <b>Example:</b>
-                To manually name a jpg image for the map CTF-Face, name an image file face.jpg, you do not need to include the gametype prefix.
+                <b>Example: </b>
+                To manually name a jpg image for the map CTF-Face, name an image file face.jpg, you do not need to include the gametype prefix.<br/>
+                If you have multiple different version of the same map e.g CTF-Face, CTF-Face-LE100, CTF-Another-Face, the website will fallback and find a partial match for an image an use face.jpg.
                 <br/><br/>
                 Allowed file types, .jpg, .jpeg, .png, .gif, .bmp.<br/><br/>
                 <span className="red-font">You need to rebuild the website after uploading all your images for the website to be able to display them.</span>
