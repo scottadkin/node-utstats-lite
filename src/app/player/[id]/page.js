@@ -11,6 +11,8 @@ import RecentMatches from "@/app/UI/Player/RecentMatches";
 import ItemStats from "@/app/UI/Player/ItemStats";
 import CTFTotals from "@/app/UI/Player/CTFTotals";
 import ErrorBox from "@/app/UI/ErrorBox";
+import { getPlayerRankings } from "@/app/lib/rankings.mjs";
+import Rankings from "@/app/UI/Player/Rankings";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -92,12 +94,21 @@ export default async function Page({params, searchParams}){
 
     const ctfTotals = await getPlayerCTFTotals(id);
 
+    const month = 60 * 60 * 24 * 28;
+
+    const minDate = new Date(Date.now() - month * 1000);
+
+    const rankings = await getPlayerRankings(id, minDate);
+
+    
+
     return <main>
         <Header><CountryFlag code={player.country}/>{player.name}&apos;s Player Summary</Header> 
         <GametypeTotals data={totals} names={gametypeNames}/>
         <CTFTotals data={ctfTotals} gametypeNames={gametypeNames}/>
         <SpecialEvents data={totals} gametypeNames={gametypeNames}/>
         <WeaponStats totals={weaponTotals} weaponNames={weaponNames} gametypeNames={gametypeNames}/>
+        <Rankings data={rankings} gametypeNames={gametypeNames}/>
         <ItemStats data={totals} gametypeNames={gametypeNames}/>
         <RecentMatches playerId={id}/>
     </main>

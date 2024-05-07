@@ -36,7 +36,7 @@ export default function GametypeTotals({data, names}){
             },
             "last": {
                 "value": date, "displayValue": convertTimestamp(date, true),
-                "className": "font-small"
+                "className": "date"
             },
             "matches": {"value": d.total_matches, "displayValue": d.total_matches},
             "playtime": {

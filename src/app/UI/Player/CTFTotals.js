@@ -166,7 +166,7 @@ function createReturns(data, gametypeNames){
 
 export default function CTFTotals({data, gametypeNames}){
 
-    const [mode, setMode] = useState("1");
+    const [mode, setMode] = useState("0");
 
     let headers = {};
     let rows = [];

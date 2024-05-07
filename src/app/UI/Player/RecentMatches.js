@@ -122,7 +122,8 @@ export default function RecentMatches({playerId}){
         rows.push({
             "date": {
                 "value": date,
-                "displayValue": <Link href={url}>{convertTimestamp(date, true)}</Link>
+                "displayValue": <Link href={url}>{convertTimestamp(date, true)}</Link>,
+                "className": "date"
             },
             "gametype": {
                 "value": gametype.toLowerCase(),

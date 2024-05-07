@@ -231,5 +231,31 @@ export async function recalculateAll(){
 
         await calculateRankings(g, playerIds)
     }
+}
 
+
+async function getRankingPosition(score, gametypeId, minDate){
+
+    const query = `SELECT COUNT(*) as position FROM nstats_rankings WHERE score>? AND gametype_id=? AND last_active>? ORDER BY score DESC`;
+
+    const result = await simpleQuery(query, [score, gametypeId, minDate]);
+    
+    return result[0].position;
+}
+
+export async function getPlayerRankings(playerId, minDate){
+
+    const query = `SELECT gametype_id,matches,playtime,score,last_active FROM nstats_rankings WHERE player_id=? AND last_active>?`;
+
+    const result = await simpleQuery(query, [playerId, minDate]);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        const pos = await getRankingPosition(r.score, r.gametype_id, minDate);
+        r.position = (pos !== null) ? pos + 1 : -1;
+        
+    }
+
+    return result;
 }
