@@ -65,7 +65,7 @@ export default function SearchForm({serverNames, gametypeNames, mapNames, server
             </div>
             <div className="form-row">
             <label>Gametype</label>
-            <select onChange={(e) =>{
+            <select value={gametype} onChange={(e) =>{
                 router.push(`/matches?s=${server}&g=${e.target.value}&m=${map}`);
             }}>
                 {gametypeOptions.map((g) =>{
@@ -75,7 +75,7 @@ export default function SearchForm({serverNames, gametypeNames, mapNames, server
             </div>
             <div className="form-row">
             <label>Map</label>
-            <select  onChange={(e) =>{
+            <select value={map} onChange={(e) =>{
                 router.push(`/matches?s=${server}&g=${gametype}&m=${e.target.value}`);
             }}>
                 {mapOptions.map((m) =>{

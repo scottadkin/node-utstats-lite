@@ -1,6 +1,7 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
+import Link from "next/link";
 
 export default function BasicServerList({servers}){
 
@@ -20,7 +21,7 @@ export default function BasicServerList({servers}){
         return {
             "name": {
                 "value": s.name.toLowerCase(), 
-                "displayValue": s.name,
+                "displayValue": <Link href={`/matches/?s=${s.id}`}>{s.name}</Link>,
                 "className": "text-left"
             },
             "first": {

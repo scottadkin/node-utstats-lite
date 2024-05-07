@@ -1,6 +1,7 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
+import Link from "next/link";
 
 export default function BasicMapsList({data}){
 
@@ -20,7 +21,7 @@ export default function BasicMapsList({data}){
         return {
             "name": {
                 "value": d.name.toLowerCase(), 
-                "displayValue": d.name,
+                "displayValue": <Link href={`/matches?m=${d.id}`}>{d.name}</Link>,
                 "className": "text-left"
             },
             "first": {

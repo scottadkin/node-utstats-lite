@@ -1,6 +1,7 @@
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
+import Link from "next/link";
 
 export default function BasicGametypeList({gametypes}){
 
@@ -20,7 +21,7 @@ export default function BasicGametypeList({gametypes}){
         return {
             "name": {
                 "value": g.name.toLowerCase(), 
-                "displayValue": g.name,
+                "displayValue": <Link href={`/matches/?g=${g.id}`}>{g.name}</Link>,
                 "className": "text-left"
             },
             "first": {
