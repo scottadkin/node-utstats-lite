@@ -50,15 +50,9 @@ async function uploadSingle(dispatch, fileName, e){
 
         e.preventDefault();
 
-        console.log(e.target.file);
-
         const formData = new FormData();
 
         formData.append(fileName, e.target.file.files[0]);
-        console.log(e.target.file.files[0]);
-
-        console.log(fileName);
-        console.log(formData);
 
         const req = await fetch("/api/admin/imageUploader", {
             "method": "POST",
@@ -68,7 +62,6 @@ async function uploadSingle(dispatch, fileName, e){
         const res = await req.json();
 
         if(res.error !== undefined) throw new Error(res.error);
-        console.log(res);
 
         await loadData(dispatch);
 
@@ -82,12 +75,26 @@ async function uploadSingle(dispatch, fileName, e){
 
 function getFileStatus(images, targetFile){
 
+    const imageIndex = images.indexOf(`${targetFile}.jpg`)
+
+    if(imageIndex !== -1) return <td className="team-green">Found</td>;
+
+    const stripExtReg = /^(.+)\..+$/i;
+
     for(let i = 0; i < images.length; i++){
 
         const img = images[i];
 
-        if(img === `${targetFile}.jpg`){
-            return <td className="team-green">Found</td>;
+        const eResult = stripExtReg.exec(img);
+
+        if(eResult === null) continue;
+
+        //console.log(eResult);
+        const sIndex = targetFile.indexOf(eResult[1]);
+
+        if(sIndex !== -1){
+
+            return <td className="team-yellow font-small">Partial Match<br/>({img})</td>
         }
     }
 

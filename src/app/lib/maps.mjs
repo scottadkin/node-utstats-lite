@@ -66,6 +66,25 @@ export function getMapImageName(name){
     return genericGetMapImageName(name);
 }
 
+function getPartialNameMatchImage(images, targetName){
+
+    const strExt = /^(.+)\..+$/i;
+
+    for(let i = 0; i < images.length; i++){
+
+        const img = images[i];
+
+        const result = strExt.exec(img);
+
+        if(result === null) continue;
+
+        if(targetName.indexOf(result[1]) !== -1){
+            return img;
+        }
+    }
+
+    return null;
+}
 
 export async function getMapImages(names){
 
@@ -87,6 +106,17 @@ export async function getMapImages(names){
         const index = files.indexOf(currentTarget);
         let targetImageFile = "default.jpg";
         if(index !== -1) targetImageFile = currentTarget;
+
+        
+        if(index === -1){
+
+            const partial = getPartialNameMatchImage(files, currentTarget);
+
+            if(partial !== null){
+                targetImageFile = partial;
+            }
+        }
+
         images[name] = targetImageFile;
     }
     
