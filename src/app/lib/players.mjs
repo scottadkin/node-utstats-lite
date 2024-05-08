@@ -715,3 +715,10 @@ export async function adminGetAllHistory(){
 
     return result;
 }
+
+export async function getAllNames(){
+
+    const query = `SELECT id,name FROM nstats_players ORDER BY name ASC`;
+
+    return await simpleQuery(query);
+}

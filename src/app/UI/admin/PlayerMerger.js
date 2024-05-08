@@ -20,7 +20,8 @@ function reducer(state, action){
         case "set-history": {
             return {
                 ...state,
-                "history": action.data
+                "history": action.data,
+                "playerNames": action.playerNames
             }
         }
         case "error": {
@@ -54,7 +55,7 @@ async function loadData(dispatch){
 
         if(res.error !== undefined) throw new Error(res.error);
 
-        dispatch({"type": "set-history", "data": res.history});
+        dispatch({"type": "set-history", "data": res.history, "playerNames": res.playerNames});
 
     }catch(err){
       
@@ -146,6 +147,7 @@ function renderHistoryTable(state, dispatch){
     }
 
     return <>
+        <Header>Player History</Header>
         <div className="info">
             The data displayed below is taken from the player match table.<br/>
             Use the form below to filter results.
@@ -192,10 +194,101 @@ function renderHistoryTable(state, dispatch){
     </>
 }
 
+
+function renderHWIDInfo(state){
+
+    const headers = {
+        "name": {"title": "Name"},
+        "mac": {"title": "Mac Addresses"},
+        "dates": {"title": "First & Last Seen"},
+        "playtime": {"title": "Playtime & Matches Played"}
+    };
+    const rows = [];
+
+    for(let i = 0; i < state.history.length; i++){
+
+        const h = state.history[i];
+
+        if(h.hwid === state.historyForm.hwid && state.historyForm.hwid !== ""){
+            rows.push({
+                "name": {
+                    "value": h.name.toLowerCase(), 
+                    "displayValue": <><CountryFlag code={h.country}/>{h.name}</>,
+                    "className": "text-left"
+                },
+                "mac": {
+                    "value": `${h.mac1}_${h.mac2}`,
+                    "displayValue": <>
+                        <span className="dull">MAC1:</span> {h.mac1}<br/>
+                        <span className="dull">MAC2:</span> {h.mac2}
+                    </>
+                },
+                "dates": {
+                    "value": `${h.first_match}_${h.last_match}`,
+                    "displayValue": <>
+                        <span className="dull">First Seen:</span> {convertTimestamp(Math.floor(new Date(h.first_match) * 0.001), true)}<br/>
+                        <span className="dull">Last Seen:</span> {convertTimestamp(Math.floor(new Date(h.last_match) * 0.001), true)}
+                    </>
+                },
+                "playtime": {
+                    "value": h.playtime,
+                    "displayValue": <>
+                        <span className="dull">Playtime:</span> {toPlaytime(h.playtime)}<br/>
+                        <span className="dull">Matches:</span> {h.total_matches}
+                    </>
+                }
+            });
+        }
+    }
+
+    return <>
+        <Header>HWID Usage</Header>
+        <InteractiveTable width={1} headers={headers} rows={rows}/>
+    </>
+}
+
+function renderHWIDMerger(state, dispatch){
+
+    if(state.mode !== "hwid") return null;
+
+    return <>
+        <Header>Merge Player By HWID</Header>
+        <div className="info">
+            Merge all match data with a target HWID into a single player profile.
+        </div>
+        <div className="form">
+            <div className="form-row">
+                <label>HWID</label>
+                <input type="text" 
+                    className="textbox" 
+                    placeholder="hwid..." 
+                    value={state.historyForm.hwid}
+                    onChange={(e) =>{
+                        dispatch({"type": "update-history-form", "key": "hwid", "value": e.target.value});
+                    }}
+                />
+            </div>
+            <div className="form-row">
+                <label>Target Profile</label>
+                <select>
+                    <option value="-1" key="-1">Select a player</option>
+                    {state.playerNames.map((p) =>{
+                        return <option key={p.id} value={p.id}>{p.name}</option>
+                    })}
+                </select>
+            </div>
+            <div className="text-center margin-bottom-1">
+                <input type="button" className="submit-button" value="Merge HWID Into Single Player Profile"/>
+            </div>
+        </div>
+        {renderHWIDInfo(state)}
+    </>
+}
+
 export default function PlayerMerger(){
 
     const [state, dispatch] = useReducer(reducer, {
-        "mode": "history",
+        "mode": "hwid",
         "history": [],
         "error": null,
         "historyForm":{
@@ -203,7 +296,8 @@ export default function PlayerMerger(){
             "hwid": "",
             "mac1": "",
             "mac2": ""
-        }
+        },
+        "playerNames": []
     });
 
     const tabOptions = [
@@ -224,5 +318,6 @@ export default function PlayerMerger(){
         }}/>
         <ErrorBox title="Error">{state.error}</ErrorBox>
         {renderHistoryTable(state, dispatch)}
+        {renderHWIDMerger(state, dispatch)}
     </>
 }
