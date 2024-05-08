@@ -7,6 +7,9 @@ export class Gametype{
         this.name = "";
         this.bHardcore = 0;
         this.bInsta = 0;
+        this.targetScore = 0;
+        this.timeLimit = 0;
+        this.mutators = "";
     }
 
     parseLine(line){
@@ -16,6 +19,8 @@ export class Gametype{
         const result = reg.exec(line);
 
         if(result === null) return;
+
+        //console.log(result);
 
         const type = result[1].toLowerCase();
         let value = result[2];
@@ -46,8 +51,25 @@ export class Gametype{
             }else{
                 this.bInsta = 0;
             }
-
             return;
+        }
+
+        if(type === "timelimit"){
+            this.timeLimit = parseInt(result[2]);
+        }
+
+        if(type === "fraglimit"){
+            this.targetScore = parseInt(result[2]);
+        }
+
+        if(type === "goalteamscore"){
+            this.targetScore = parseInt(result[2]);
+        }
+
+        if(type === "goodmutator"){
+
+            if(this.mutators !== "") this.mutators += ", "
+            this.mutators += result[2];
         }
     }
 

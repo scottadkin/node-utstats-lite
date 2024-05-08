@@ -11,14 +11,15 @@ import { getMatchData as domGetMatchData } from "./domination.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
-    team2Scores, team3Score, soloWinner, soloWinnerScore){
+    team2Scores, team3Score, soloWinner, soloWinnerScore, targetScore, timeLimit, mutators){
 
-    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
     const vars = [
         serverId, gametypeId, mapId, bHardcore, bInsta, 
         date, playtime, players, totalTeams, team0Scores, 
-        team1Scores, team2Scores, team3Score, soloWinner, soloWinnerScore
+        team1Scores, team2Scores, team3Score, soloWinner, soloWinnerScore,
+        targetScore, timeLimit, mutators
     ];
 
     const result = await simpleQuery(query, vars);

@@ -81,7 +81,10 @@ const queries = [
             team_2_score int(11) NOT NULL,   
             team_3_score int(11) NOT NULL,   
             solo_winner int(11) NOT NULL,
-            solo_winner_score int(11) NOT NULL
+            solo_winner_score int(11) NOT NULL,
+            target_score int(11) NOT NULL,
+            time_limit int(11) NOT NULL,
+            mutators text NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_servers (
@@ -176,7 +179,7 @@ const queries = [
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_kills (
-            id int(11) NOT NULL AUTO_INCREMENT,
+            id bigint NOT NULL AUTO_INCREMENT,
             match_id int(11) NOT NULL,
             timestamp float NOT NULL,
             kill_type int(11) NOT NULL,

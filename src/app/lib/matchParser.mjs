@@ -42,6 +42,7 @@ export class MatchParser{
         this.teamScores = [0,0,0,0];
         this.soloWinner = 0;
         this.soloWinnerScore = 0;
+        
 
         this.parseLines();
 
@@ -131,7 +132,10 @@ export class MatchParser{
             this.teamScores[2],
             this.teamScores[3],
             this.soloWinner,
-            this.soloWinnerScore
+            this.soloWinnerScore,
+            this.gametype.targetScore,
+            this.gametype.timeLimit,
+            this.gametype.mutators
         );
 
         if(this.matchId === null){
