@@ -408,3 +408,11 @@ option{
 canvas{
 	display:inline-block;
 }
+
+.dull{
+    color:var(--font-color-2);
+}
+
+.match-sshot{
+	max-width:66%;
+}

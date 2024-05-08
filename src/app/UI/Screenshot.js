@@ -14,16 +14,23 @@ class ScreenshotImage{
         this.canvas = canvas.current;
         this.context = this.canvas.getContext("2d");
 
-        console.log(data);
+        this.canvas.addEventListener("click", () =>{
+            
+            
+            this.canvas.requestFullscreen().catch((err) =>{
+                console.trace(err);
+            });
+            
+        });
 
         this.data = data;
-
-        
+    
         this.context.textBaseline = "top";
 
         this.render();
 
     }
+
 
     loadImage(url){
 
@@ -945,6 +952,6 @@ export default function Screenshot({data}){
     }, [])
 
     return <>
-        <canvas width={1920 * 0.75} height={1080 * 0.75} ref={canvasRef}></canvas>
+        <canvas className="match-sshot" width={1920} height={1080} ref={canvasRef}></canvas>
     </>
 }
