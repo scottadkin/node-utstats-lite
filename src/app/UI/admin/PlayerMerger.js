@@ -101,11 +101,32 @@ function renderHistoryTable(state, dispatch){
             "name": {
                 "value": h.name.toLowerCase(), 
                 "displayValue": <><CountryFlag code={h.country}/>{h.name}</>,
-                "className": "text-left"
+                "className": "text-left",
+                "onClick": () =>{
+                    dispatch({"type": "update-history-form", "key": "username", "value": h.name});
+                }
             },
-            "hwid": {"value": h.hwid, "className": "font-small"},
-            "mac1": {"value": h.mac1, "className": "font-small"},
-            "mac2": {"value": h.mac2, "className": "font-small"},
+            "hwid": {
+                "value": h.hwid, 
+                "className": "font-small",
+                "onClick": () =>{
+                    dispatch({"type": "update-history-form", "key": "hwid", "value": h.hwid});
+                }
+            },
+            "mac1": {
+                "value": h.mac1, 
+                "className": "font-small",
+                "onClick": () =>{
+                    dispatch({"type": "update-history-form", "key": "mac1", "value": h.mac1});
+                }
+            },
+            "mac2": {
+                "value": h.mac2, 
+                "className": "font-small",
+                "onClick": () =>{
+                    dispatch({"type": "update-history-form", "key": "mac2", "value": h.mac2});
+                }
+            },
             "first": {
                 "value": h.first_match, 
                 "displayValue": convertTimestamp(Math.floor(new Date(h.first_match) * 0.001), true, true),

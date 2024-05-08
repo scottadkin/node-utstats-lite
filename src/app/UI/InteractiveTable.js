@@ -58,9 +58,11 @@ function createRows(headers, rows){
 
             const currentClass = r[name]?.className ?? "";
 
+            const onClick = (r[name].onClick !== undefined) ? r[name].onClick : null;
+
             if(r[name].bIgnoreTD === undefined || !r[name].bIgnoreTD){
 
-                columns.push(<td key={name} className={currentClass}>
+                columns.push(<td key={name} className={currentClass} onClick={onClick}>
                     {r[name]?.displayValue ?? r[name]?.value}
                 </td>);
                 
