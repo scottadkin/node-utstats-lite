@@ -10,6 +10,7 @@ import {
     updateSettings as updateRankingSettings } 
 from "@/app/lib/rankings.mjs";
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
+import { adminGetAllHistory as getAllUserHistory } from "@/app/lib/players.mjs";
 
 
 export async function POST(req){
@@ -225,6 +226,13 @@ export async function GET(req){
             const images = await getAllMapImages();
 
             return Response.json({mapNames, images});
+        }
+
+        if(mode === "get-all-player-history"){
+
+            const history = await getAllUserHistory();
+            return Response.json({"history": history});
+
         }
 
 

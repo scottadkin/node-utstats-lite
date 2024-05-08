@@ -1,6 +1,6 @@
 import {simpleQuery, bulkInsert} from "./database.mjs";
 import {getMultipleMatchDetails} from "./matches.mjs";
-import { getWinner } from "./generic.mjs";
+import { getWinner, getPlayer } from "./generic.mjs";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
@@ -249,6 +249,24 @@ export async function getPlayerById(id){
     return null;
 }
 
+export async function getPlayerNamesByIds(playerIds){
+     
+    if(playerIds.length === 0) return {};
+
+    const query = `SELECT id,name FROM nstats_players WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [playerIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r.name;
+    }
+
+    return data;
+}
 
 export async function getBasicPlayerInfo(ids){
 
@@ -668,4 +686,32 @@ export async function getAllGametypeIds(gametypeId){
     return result.map((r) =>{
         return r.player_id;
     });
+}
+
+
+export async function adminGetAllHistory(){
+
+    const query = `SELECT player_id,hwid,mac1,mac2,MIN(match_date) as first_match,MAX(match_date) as last_match,
+    COUNT(*) as total_matches, SUM(time_on_server) as playtime
+    FROM nstats_match_players GROUP BY player_id,hwid,mac1,mac2`;
+
+    const result = await simpleQuery(query);
+
+    const playerIds = [...new Set(result.map((r) =>{
+        return r.player_id;
+    }))]
+
+    const basicPlayers = await getBasicPlayerInfo(playerIds);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const p = getPlayer(basicPlayers, r.player_id);
+
+        r.name = p.name;
+        r.country = p.country;
+    }
+
+    return result;
 }

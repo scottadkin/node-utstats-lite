@@ -952,6 +952,6 @@ export default function Screenshot({data}){
     }, [])
 
     return <>
-        <canvas className="match-sshot" width={1920} height={1080} ref={canvasRef}></canvas>
+        <canvas className="match-sshot" width={2560} height={1440} ref={canvasRef}></canvas>
     </>
 }

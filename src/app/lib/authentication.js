@@ -225,7 +225,7 @@ export async function updateSession(){
             //throw new Error("Not a valid session");   
         }
 
-        const expires = new Date(Date.now() + 60 * 60 * 1000);
+        const expires = new Date(Date.now() + 60 * 60 * 24 * 1000);
 
         const userName = await getUserName(userId.value);
 

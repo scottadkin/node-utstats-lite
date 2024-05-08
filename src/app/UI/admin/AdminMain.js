@@ -10,10 +10,11 @@ import SiteSettings from "./SiteSettings";
 import RankingSettings from "./RankingSettings";
 import RecalculateRankings from "./RecalculateRankings";
 import MapImageUploader from "./MapImageUploader";
+import PlayerMerger from "./PlayerMerger";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("map-img");
+    const [mode, setMode] = useState("player-merge");
 
     return <>
         <Tabs 
@@ -25,7 +26,8 @@ export default function AdminMain(){
                 {"name": "User Accounts", "value": "users"},
                 {"name": "Ranking Settings", "value": "rankings"},
                 {"name": "Recalculate All Rankings", "value": "rankings-all"},
-                {"name": "Map Image Uploader", "value": "map-img"}
+                {"name": "Map Image Uploader", "value": "map-img"},
+                {"name": "Player Merger", "value": "player-merge"},
                 //{"name": "Backup Manager", "value": "backup"},
             ]}
             selectedValue={mode}
@@ -42,6 +44,7 @@ export default function AdminMain(){
         {(mode === "rankings") ? <RankingSettings /> : null}
         {(mode === "rankings-all") ? <RecalculateRankings /> : null}
         {(mode === "map-img") ? <MapImageUploader /> : null}
+        {(mode === "player-merge") ? <PlayerMerger /> : null}
 
     </>
 }
