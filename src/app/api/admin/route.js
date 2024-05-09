@@ -10,9 +10,13 @@ import {
     updateSettings as updateRankingSettings } 
 from "@/app/lib/rankings.mjs";
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
-import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId } from "@/app/lib/players.mjs";
+import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId, 
+    updatePlayerGametypeTotals } from "@/app/lib/players.mjs";
 import { changePlayerIds as changeKillsPlayerIds } from "@/app/lib/kills.mjs";
 import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
+import { changePlayerMatchIds as changeWeaponPlayerMatchIds } from "@/app/lib/weapons.mjs";
+import { changePlayerMatchIds as changeDominationPlayerMatchIds} from "@/app/lib/domination.mjs";
+
 
 
 export async function POST(req){
@@ -117,14 +121,17 @@ export async function POST(req){
             if(hwid === null) throw new Error(`HWID is null.`);
             if(hwid.length === 0) throw new Error(`HWID can't be an empty string.`);
 
+
             const {affectedPlayers, result} = await adminAssignHWIDUsageToPlayerId(hwid, playerId);
             const killsResult = await changeKillsPlayerIds(affectedPlayers, playerId);
             const ctfResult = await changeCTFPlayerIds(affectedPlayers, playerId);
-            console.log(affectedPlayers);
-            console.log(killsResult);
-            console.log(ctfResult);
+            const weaponsResult = await changeWeaponPlayerMatchIds(affectedPlayers, playerId);
+            const domResult = await changeDominationPlayerMatchIds(affectedPlayers, playerId);
 
-            let changedRows = result.changedRows;
+            let changedRows = result.changedRows + killsResult.changedRows + ctfResult.changedRows + 
+            weaponsResult.changedRows + domResult.changedRows;
+
+            await updatePlayerGametypeTotals([... new Set([...affectedPlayers, playerId])]);
 
             return Response.json({"changedRows": changedRows});
         }

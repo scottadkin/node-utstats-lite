@@ -1,7 +1,5 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
 import { getMatchesGametype } from "./matches.mjs";
-import { getGametypeNames } from "./gametypes.mjs";
-
 
 
 export async function getWeaponId(name){
@@ -272,4 +270,14 @@ export async function getPlayerTotals(playerId){
     const query = `SELECT gametype_id,weapon_id,total_matches,kills,deaths,team_kills,eff FROM nstats_player_totals_weapons WHERE player_id=?`;
 
     return await simpleQuery(query, [playerId]);
+}
+
+
+export async function changePlayerMatchIds(oldIds, newId){
+
+    if(oldIds.length === 0) return {"changedRows": 0};
+
+    const query = `UPDATE nstats_match_weapon_stats SET player_id=? WHERE player_id IN (?)`;
+
+    return await simpleQuery(query, [newId, oldIds]);
 }

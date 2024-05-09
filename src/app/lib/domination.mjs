@@ -79,3 +79,13 @@ export async function getMatchData(matchId){
 
     return {"data": result, "controlPoints": pointNames};
 }
+
+
+export async function changePlayerMatchIds(oldIds, newId){
+
+    if(oldIds.length === 0) return {"changedRows": 0};
+
+    const query = `UPDATE nstats_match_dom SET player_id=? WHERE player_id IN (?)`;
+
+    return await simpleQuery(query, [newId, oldIds]);
+}
