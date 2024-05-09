@@ -722,3 +722,14 @@ export async function getAllNames(){
 
     return await simpleQuery(query);
 }
+
+export async function adminAssignHWIDUsageToPlayerId(targetHWID, targetPlayerId){
+
+    if(targetHWID.length === 0) throw new Error(`You can't assign a player to a blank hwid string.`);
+
+    const query = `UPDATE nstats_match_players set player_id=? WHERE hwid=?`;
+
+    return await simpleQuery(query, [targetPlayerId, targetHWID]);
+}
+
+

@@ -10,7 +10,7 @@ import {
     updateSettings as updateRankingSettings } 
 from "@/app/lib/rankings.mjs";
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
-import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames } from "@/app/lib/players.mjs";
+import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId } from "@/app/lib/players.mjs";
 
 
 export async function POST(req){
@@ -102,6 +102,25 @@ export async function POST(req){
             }
 
             return Response.json({"message": `Some settings failed to apply. (${passes}/${passes + fails})`});
+        }
+
+
+        if(mode === "merge-hwid-usage-to-player"){
+
+            const playerId = (res.playerId !== undefined) ? parseInt(res.playerId) : NaN;
+            const hwid = (res.hwid !== undefined) ? res.hwid : null;
+
+            if(playerId !== playerId) throw new Error(`Player ID must be a valid integer.`);
+            if(playerId === -1) throw new Error(`You have not selected a target player profile.`);
+            if(hwid === null) throw new Error(`HWID is null.`);
+            if(hwid.length === 0) throw new Error(`HWID can't be an empty string.`);
+
+            const result = await adminAssignHWIDUsageToPlayerId(hwid, playerId);
+            console.log(result);
+
+            let changedRows = result.changedRows;
+
+            return Response.json({"changedRows": changedRows});
         }
         
         return Response.json({"message": "hi"});

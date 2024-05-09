@@ -3,6 +3,7 @@ import Header from "../Header";
 import Tabs from "../Tabs";
 import { useEffect, useReducer } from "react";
 import ErrorBox from "../ErrorBox";
+import MessageBox from "../MessageBox";
 import InteractiveTable from "../InteractiveTable";
 import CountryFlag from "../CountryFlag";
 import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
@@ -30,6 +31,12 @@ function reducer(state, action){
                 "error": action.message
             }
         }
+        case "set-message": {
+            return {
+                ...state,
+                "message": action.message
+            }
+        }
         case "update-history-form": {
 
             const historyForm = JSON.parse(JSON.stringify(state.historyForm));
@@ -39,6 +46,17 @@ function reducer(state, action){
             return {
                 ...state,
                 "historyForm": historyForm
+            }
+        }
+        case "update-hwid-merge-form": {
+
+            const data = JSON.parse(JSON.stringify(state.hwidMergeForm));
+
+            data[action.key] = action.value;
+
+            return {
+                ...state,
+                "hwidMergeForm": data
             }
         }
     }
@@ -59,6 +77,34 @@ async function loadData(dispatch){
 
     }catch(err){
       
+        dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
+
+async function mergeHWIDUsage(state, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({
+                "mode": "merge-hwid-usage-to-player",
+                "playerId": state.hwidMergeForm.selectedPlayer,
+                "hwid": state.historyForm.hwid
+            })
+        });
+
+        const res = await req.json();
+
+        if(res.error) throw new Error(res.error);
+
+        dispatch({"type": "set-message", "message": `${res.changedRows} rows updated.`});
+        console.log(res);
+
+    }catch(err){
+        console.trace(err);
         dispatch({"type": "error", "message": err.toString()});
     }
 }
@@ -270,7 +316,10 @@ function renderHWIDMerger(state, dispatch){
             </div>
             <div className="form-row">
                 <label>Target Profile</label>
-                <select>
+                <select value={state.hwidMergeForm.selectedPlayer} onChange={(e) =>{
+                    console.log(e.target.value);
+                    dispatch({"type": "update-hwid-merge-form", "key": "selectedPlayer", "value": e.target.value});
+                }}> 
                     <option value="-1" key="-1">Select a player</option>
                     {state.playerNames.map((p) =>{
                         return <option key={p.id} value={p.id}>{p.name}</option>
@@ -278,7 +327,11 @@ function renderHWIDMerger(state, dispatch){
                 </select>
             </div>
             <div className="text-center margin-bottom-1">
-                <input type="button" className="submit-button" value="Merge HWID Into Single Player Profile"/>
+                <input type="button" className="submit-button" value="Merge HWID Into Single Player Profile"
+                    onClick={() =>{
+                        mergeHWIDUsage(state, dispatch);
+                    }}
+                />
             </div>
         </div>
         {renderHWIDInfo(state)}
@@ -297,7 +350,11 @@ export default function PlayerMerger(){
             "mac1": "",
             "mac2": ""
         },
-        "playerNames": []
+        "playerNames": [],
+        "hwidMergeForm": {
+            "selectedPlayer": -1
+        },
+        "message": null
     });
 
     const tabOptions = [
@@ -317,6 +374,7 @@ export default function PlayerMerger(){
             dispatch({"type": "change-mode", "value": value});
         }}/>
         <ErrorBox title="Error">{state.error}</ErrorBox>
+        <MessageBox title="Merge Successful">{state.message}</MessageBox>
         {renderHistoryTable(state, dispatch)}
         {renderHWIDMerger(state, dispatch)}
     </>
