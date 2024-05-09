@@ -78,6 +78,9 @@ export default async function Page({params, searchParams}){
     if(perPage !== perPage) perPage = 25;
     if(perPage > 100) perPage = 100;
 
+    let tf = (searchParams.tf !== undefined) ? parseInt(searchParams.tf) : 28;
+    if(tf !== tf) tf = 28; 
+
 
     const timeFrame = setTimeFrame(searchParams);
 
@@ -130,7 +133,7 @@ export default async function Page({params, searchParams}){
         <Header>Rankings</Header>
         <SearchForm gametypeNames={gametypeNames} gametypeId={gametypeId} timeFrame={timeFrame} perPage={perPage} page={page}/>
         <Header>Top {gametypeName} Players</Header>
-        <Pagination url={`/rankings/?gid=${gametypeId}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
+        <Pagination url={`/rankings/?gid=${gametypeId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
         <table className="t-width-4">
             <tbody>
                 <tr key={-2}>
@@ -144,6 +147,6 @@ export default async function Page({params, searchParams}){
                 {rows}
             </tbody>
         </table>
-        <Pagination url={`/rankings/?gid=${gametypeId}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
+        <Pagination url={`/rankings/?gid=${gametypeId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
     </main>
 }
