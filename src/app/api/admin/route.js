@@ -11,7 +11,7 @@ import {
 from "@/app/lib/rankings.mjs";
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
 import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId, 
-    updatePlayerGametypeTotals } from "@/app/lib/players.mjs";
+    updatePlayerGametypeTotals, getMasterPlayersStats, updateMasterPlayer } from "@/app/lib/players.mjs";
 import { changePlayerIds as changeKillsPlayerIds } from "@/app/lib/kills.mjs";
 import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
 import { changePlayerMatchIds as changeWeaponPlayerMatchIds } from "@/app/lib/weapons.mjs";
@@ -132,6 +132,15 @@ export async function POST(req){
             weaponsResult.changedRows + domResult.changedRows;
 
             await updatePlayerGametypeTotals([... new Set([...affectedPlayers, playerId])]);
+
+            //nstats_players
+            const masterTotals = await getMasterPlayersStats(affectedPlayers);
+
+            for(let i = 0; i < masterTotals.length; i++){
+
+                const m = masterTotals[i];
+                await updateMasterPlayer(m, null, null);
+            }
 
             return Response.json({"changedRows": changedRows});
         }

@@ -24,7 +24,7 @@ export async function createMasterPlayer(name, ip, hwid, mac1, mac2, matchDate){
     return result.insertId;
 }
 
-async function getMasterPlayersStats(playerIds){
+export async function getMasterPlayersStats(playerIds){
 
     if(playerIds.length === 0) return null;
 
@@ -46,19 +46,17 @@ async function getMasterPlayersStats(playerIds){
     return result;
 }
 
-async function updateMasterPlayer(totals, country, date){
+export async function updateMasterPlayer(totals, country, date){
 
-    const query = `UPDATE nstats_players SET 
-    country=?,matches=?,score=?,frags=?,kills=?,deaths=?,suicides=?,eff=?,ttl=?,playtime=?,
-    last_active = IF(last_active IS NULL, ?, IF(last_active < ?, ?, last_active)) 
-    WHERE id=?`;
+    let query = ``;
+    let vars = [];
 
     const t = totals;
 
     let eff = 0;
 
     const totalKills = parseInt(t.total_kills);
-    const allDeaths = parseInt(t.total_deaths) + parseInt(t.total_suicides);
+    const allDeaths = parseInt(t.total_deaths);
 
     if(totalKills > 0){
  
@@ -69,11 +67,30 @@ async function updateMasterPlayer(totals, country, date){
         }
     }
 
-    const vars = [country, t.total_matches, t.total_score, t.total_frags, totalKills, 
-        t.total_deaths, t.total_suicides, eff, t.total_ttl, t.total_playtime, 
-        date, date, date,
-        t.player_id
-    ];
+    if(country !== null && date !== null){
+
+        query = `UPDATE nstats_players SET 
+        country=?,matches=?,score=?,frags=?,kills=?,deaths=?,suicides=?,eff=?,ttl=?,playtime=?,
+        last_active = IF(last_active IS NULL, ?, IF(last_active < ?, ?, last_active)) 
+        WHERE id=?`;
+
+        vars = [country, t.total_matches, t.total_score, t.total_frags, totalKills, 
+            t.total_deaths, t.total_suicides, eff, t.total_ttl, t.total_playtime, 
+            date, date, date,
+            t.player_id
+        ];
+
+    }else{
+        query = `UPDATE nstats_players SET 
+        matches=?,score=?,frags=?,kills=?,deaths=?,suicides=?,eff=?,ttl=?,playtime=? 
+        WHERE id=?`;
+
+        vars = [t.total_matches, t.total_score, t.total_frags, totalKills, 
+            t.total_deaths, t.total_suicides, eff, t.total_ttl, t.total_playtime, 
+            t.player_id
+        ];
+    }
+
     
     await simpleQuery(query, vars);
 }
