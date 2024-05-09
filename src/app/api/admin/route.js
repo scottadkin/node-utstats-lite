@@ -7,8 +7,9 @@ import { getAllSettings as getAllSiteSettings, updateSettings as updateSiteSetti
 import { 
     getAllSettings as getAllRankingSettings, 
     recalculateAll as recalculateAllRankings, 
-    updateSettings as updateRankingSettings } 
-from "@/app/lib/rankings.mjs";
+    updateSettings as updateRankingSettings, 
+    recalculatePlayersByIds as recalculatePlayersRankingByIds
+} from "@/app/lib/rankings.mjs";
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
 import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId, 
     updatePlayerGametypeTotals, getMasterPlayersStats, updateMasterPlayer } from "@/app/lib/players.mjs";
@@ -131,16 +132,19 @@ export async function POST(req){
             let changedRows = result.changedRows + killsResult.changedRows + ctfResult.changedRows + 
             weaponsResult.changedRows + domResult.changedRows;
 
-            await updatePlayerGametypeTotals([... new Set([...affectedPlayers, playerId])]);
+            const allPlayers = [... new Set([...affectedPlayers, playerId])];
+            await updatePlayerGametypeTotals(allPlayers);
 
             //nstats_players
-            const masterTotals = await getMasterPlayersStats(affectedPlayers);
+            const masterTotals = await getMasterPlayersStats(allPlayers);
 
             for(let i = 0; i < masterTotals.length; i++){
 
                 const m = masterTotals[i];
                 await updateMasterPlayer(m, null, null);
             }
+
+            await recalculatePlayersRankingByIds(allPlayers);
 
             return Response.json({"changedRows": changedRows});
         }

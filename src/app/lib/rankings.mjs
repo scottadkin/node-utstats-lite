@@ -233,6 +233,23 @@ export async function recalculateAll(){
     }
 }
 
+export async function recalculatePlayersByIds(playerIds){
+
+    if(playerIds.length === 0) return null;
+
+    const gametypeIds = await getAllGametypeIds();
+
+    for(let i = 0; i < gametypeIds.length; i++){
+        
+        const g = gametypeIds[i];
+
+        const playerIds = await getAllPlayerGametypeIds(g);
+
+        await calculateRankings(g, playerIds)
+    }
+
+}
+
 
 async function getRankingPosition(score, gametypeId, minDate){
 

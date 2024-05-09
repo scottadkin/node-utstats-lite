@@ -66,7 +66,7 @@ export default function SearchForm({originalName, originalSortBy, originalOrder,
                 Sort By
             </label>
 
-            <select defaultValue={sortByOptions} multiple={false} onChange={(e) =>{
+            <select defaultValue={originalSortBy} multiple={false} onChange={(e) =>{
                 setSortBy(e.target.value);
             }}>
                 {sortByOptions.map((o, i) =>{
