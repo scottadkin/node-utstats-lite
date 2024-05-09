@@ -723,13 +723,27 @@ export async function getAllNames(){
     return await simpleQuery(query);
 }
 
+async function _getAffectedPlayerIds(targetHWID){
+
+    const query = `SELECT player_id,COUNT(*) as total_matches FROM nstats_match_players WHERE hwid=? GROUP BY player_id`;
+    const result = await simpleQuery(query, [targetHWID]);
+
+    return result.map((r) =>{
+        return r.player_id;
+    });
+}
+
 export async function adminAssignHWIDUsageToPlayerId(targetHWID, targetPlayerId){
 
     if(targetHWID.length === 0) throw new Error(`You can't assign a player to a blank hwid string.`);
 
+    const affectedPlayers = await _getAffectedPlayerIds(targetHWID);
+
     const query = `UPDATE nstats_match_players set player_id=? WHERE hwid=?`;
 
-    return await simpleQuery(query, [targetPlayerId, targetHWID]);
+    const result = await simpleQuery(query, [targetPlayerId, targetHWID]);
+
+    return {"affectedPlayers": affectedPlayers, "result": result};
 }
 
 

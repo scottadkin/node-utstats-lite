@@ -11,6 +11,8 @@ import {
 from "@/app/lib/rankings.mjs";
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
 import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId } from "@/app/lib/players.mjs";
+import { changePlayerIds as changeKillsPlayerIds } from "@/app/lib/kills.mjs";
+import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
 
 
 export async function POST(req){
@@ -115,8 +117,12 @@ export async function POST(req){
             if(hwid === null) throw new Error(`HWID is null.`);
             if(hwid.length === 0) throw new Error(`HWID can't be an empty string.`);
 
-            const result = await adminAssignHWIDUsageToPlayerId(hwid, playerId);
-            console.log(result);
+            const {affectedPlayers, result} = await adminAssignHWIDUsageToPlayerId(hwid, playerId);
+            const killsResult = await changeKillsPlayerIds(affectedPlayers, playerId);
+            const ctfResult = await changeCTFPlayerIds(affectedPlayers, playerId);
+            console.log(affectedPlayers);
+            console.log(killsResult);
+            console.log(ctfResult);
 
             let changedRows = result.changedRows;
 

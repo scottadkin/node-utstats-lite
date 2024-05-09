@@ -30,3 +30,14 @@ export async function getMatchKills(matchId){
 
     return await simpleQuery(query, [matchId]);
 }
+
+export async function changePlayerIds(oldIds, newId){
+
+    if(oldIds.length === 0) return {"changedRows": 0};
+
+    const query = `UPDATE nstats_kills SET
+    killer_id = IF(killer_id IN (?),?,killer_id),
+    victim_id = IF(victim_id IN (?),?,victim_id)`;
+
+    return await simpleQuery(query, [oldIds, newId, oldIds, newId]);
+}

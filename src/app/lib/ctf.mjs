@@ -186,3 +186,14 @@ export async function getPlayerCTFTotals(playerId){
 
     return await simpleQuery(query, [playerId]);
 }
+
+
+export async function changePlayerIds(oldIds, newId){
+
+    if(oldIds.length === 0) return {"changedRows": 0};
+
+    const query = `UPDATE nstats_match_ctf SET
+    player_id = IF(player_id IN (?), ?, player_id)`;
+
+    return await simpleQuery(query, [oldIds, newId]);
+}
