@@ -12,7 +12,9 @@ import {
 } from "@/app/lib/rankings.mjs";
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
 import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId, 
-    updatePlayerGametypeTotals, getMasterPlayersStats, updateMasterPlayer } from "@/app/lib/players.mjs";
+    updatePlayerGametypeTotals, getMasterPlayersStats, updateMasterPlayer,
+    adminRenamePlayer 
+} from "@/app/lib/players.mjs";
 import { changePlayerIds as changeKillsPlayerIds } from "@/app/lib/kills.mjs";
 import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
 import { changePlayerMatchIds as changeWeaponPlayerMatchIds } from "@/app/lib/weapons.mjs";
@@ -147,6 +149,23 @@ export async function POST(req){
             await recalculatePlayersRankingByIds(allPlayers);
 
             return Response.json({"changedRows": changedRows});
+        }
+
+        if(mode === "rename-player"){
+
+            let playerId = res.playerId ?? -1;
+            playerId = parseInt(playerId);
+
+            if(playerId !== playerId) throw new Error(`PlayerId must be a valid integer.`);
+            if(playerId === -1) throw new Error(`PlayerId was not set.`);
+
+            const playerName = res.playerName ?? null;
+
+            if(playerName === null) throw new Error(`playerName was not set`);
+            if(playerName.length === 0) throw new Error(`Playername can not be a blank string.`);
+
+            await adminRenamePlayer(playerId, playerName);
+            return Response.json({"message": "passed"});
         }
         
         return Response.json({"message": "hi"});

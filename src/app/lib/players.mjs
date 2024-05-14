@@ -764,3 +764,10 @@ export async function adminAssignHWIDUsageToPlayerId(targetHWID, targetPlayerId)
 }
 
 
+export async function adminRenamePlayer(playerId, newName){
+
+    const query = `UPDATE nstats_players SET name=? WHERE id=?`;
+
+    return await simpleQuery(query, [newName, playerId]);
+}
+

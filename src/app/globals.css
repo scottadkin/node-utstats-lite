@@ -60,6 +60,9 @@
 .yellow-font{
 	color:yellow;
 }
+.font-color-1{
+	color:var(--font-color-1);
+}
 
 
 .team-blue{
