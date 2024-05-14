@@ -282,6 +282,12 @@ export async function GET(req){
 
         }
 
+        if(mode === "get-all-player-names"){
+
+            const playerNames = await getAllPlayerNames();
+            return Response.json({playerNames});
+        }
+
 
         return Response.json({"message": "hi"});
 

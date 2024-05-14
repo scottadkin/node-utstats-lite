@@ -86,6 +86,9 @@ async function mergeHWIDUsage(state, dispatch){
 
     try{
 
+        dispatch({"type": "set-message", "message": null});
+        dispatch({"type": "error", "message": null});
+
         const req = await fetch("/api/admin", {
             "headers": {"Content-type": "application/json"},
             "method": "POST",
@@ -101,7 +104,6 @@ async function mergeHWIDUsage(state, dispatch){
         if(res.error) throw new Error(res.error);
 
         dispatch({"type": "set-message", "message": `${res.changedRows} rows updated.`});
-        console.log(res);
 
     }catch(err){
         console.trace(err);
