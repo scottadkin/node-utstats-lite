@@ -13,7 +13,7 @@ import {
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
 import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId, 
     updatePlayerGametypeTotals, getMasterPlayersStats, updateMasterPlayer,
-    adminRenamePlayer 
+    adminRenamePlayer, adminDeletePlayer 
 } from "@/app/lib/players.mjs";
 import { changePlayerIds as changeKillsPlayerIds } from "@/app/lib/kills.mjs";
 import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
@@ -166,6 +166,18 @@ export async function POST(req){
 
             await adminRenamePlayer(playerId, playerName);
             return Response.json({"message": "passed"});
+        }
+
+        if(mode === "delete-player"){
+
+            let playerId = res.playerId ?? -1;
+            playerId = parseInt(playerId);
+
+            if(playerId !== playerId) throw new Error(`PlayerId must be a valid integer.`);
+            if(playerId === -1) throw new Error(`PlayerId was not set.`);
+
+            const rowsDeleted = await adminDeletePlayer(playerId);
+            return Response.json({"rowsDeleted": rowsDeleted});
         }
         
         return Response.json({"message": "hi"});

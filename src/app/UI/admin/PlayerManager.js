@@ -30,6 +30,20 @@ function reducer(state, action){
                 }
             }
         }
+        case "update-delete-form": {
+            return {
+                ...state,
+                "deleteForm": {
+                    "selectedPlayer": action.selectedPlayer
+                }
+            }
+        }
+        case "change-mode": {
+            return {
+                ...state,
+                "mode": action.value
+            }
+        }
     }
 
     return state;
@@ -114,41 +128,101 @@ function renderRenameForm(state, dispatch){
 
     const bNameTaken = bNameAlreadyTaken(state, state.renameForm.newName);
 
-    return <div className="form">
+    return <>
+        <Header>Rename Player</Header>
+        <div className="form">
+            <div className="form-row">
+                <label>Target Player</label>
+                <select value={state.renameForm.selectedPlayer} onChange={(e) =>{
+                        dispatch({"type": "update-rename-form", "newName": state.renameForm.newName, "selectedPlayer": e.target.value});
+                    }}>
+                    <option value="-1">Please select a player</option>
+                    {createPlayerOptions(state)}
+                </select>
+            </div>
+            <div className="form-row">
+                <label>New Name</label>
+                <input type="text" value={state.renameForm.newName} className="textbox" placeholder="new name..." onChange={(e) =>{
+                    dispatch({"type": "update-rename-form", "newName": e.target.value, "selectedPlayer": state.renameForm.selectedPlayer});
+                }}/>
+            </div>
+            <div className="text-center">
+                {(!bNameTaken) ? 
+                    <input type="button" className="submit-button" value="Rename Player" onClick={() =>{
+                        renamePlayer(state, dispatch);
+                    }}/> 
+                    : 
+                    <div className="font-color-1">Name already taken!</div>}
+            </div>
+        </div>
+    </>
+}
+
+
+async function deletePlayer(state, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "delete-player", "playerId": state.deleteForm.selectedPlayer})
+        });
+
+        const res = await req.json();
+
+        console.log(res);
+
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
+function renderDeletePlayer(state, dispatch){
+
+    if(state.mode !== "delete") return null;
+
+    let buttonElem = null;
+
+    if(state.deleteForm.selectedPlayer !== -1){
+
+        buttonElem = <div className="text-center">     
+            <input type="button" className="submit-button" value="Delete Player" onClick={() =>{  
+                deletePlayer(state, dispatch);
+            }}/>
+        </div>
+    }
+
+    return <>
+        <Header>Delete Player</Header>
+        <div className="form">
         <div className="form-row">
             <label>Target Player</label>
-            <select value={state.renameForm.selectedPlayer} onChange={(e) =>{
-                    dispatch({"type": "update-rename-form", "newName": state.renameForm.newName, "selectedPlayer": e.target.value});
+            <select value={state.deleteForm.selectedPlayer} onChange={(e) =>{         
+                    dispatch({"type": "update-delete-form", "selectedPlayer": e.target.value});
                 }}>
                 <option value="-1">Please select a player</option>
                 {createPlayerOptions(state)}
             </select>
         </div>
-        <div className="form-row">
-            <label>New Name</label>
-            <input type="text" value={state.renameForm.newName} className="textbox" placeholder="new name..." onChange={(e) =>{
-                dispatch({"type": "update-rename-form", "newName": e.target.value, "selectedPlayer": state.renameForm.selectedPlayer});
-            }}/>
-        </div>
-        <div className="text-center">
-            {(!bNameTaken) ? 
-                <input type="button" className="submit-button" value="Rename Player" onClick={() =>{
-                    renamePlayer(state, dispatch);
-                }}/> 
-                : 
-                <div className="font-color-1">Name already taken!</div>}
-        </div>
+
+        {buttonElem}
     </div>
+    </>
 }
 
 export default function PlayerManager(){
 
     const [state, dispatch] = useReducer(reducer,{
-        "mode": "rename",
+        "mode": "delete",
         "error": null,
         "players": [],
         "renameForm": {
             "newName": "",
+            "selectedPlayer": -1
+        },
+        "deleteForm": {
             "selectedPlayer": -1
         }
     });
@@ -160,12 +234,17 @@ export default function PlayerManager(){
     }, []);
 
     const tabOptions = [
-        {"value": "rename", "name": "Rename Player"}
+        {"value": "rename", "name": "Rename Player"},
+        {"value": "delete", "name": "Delete Player"},
     ];
     return <>
         <Header>Player Manager</Header>
-        <Tabs options={tabOptions} selectedValue={state.mode}/>
+        <Tabs options={tabOptions} selectedValue={state.mode} changeSelected={(value) =>{
+            console.log(value);
+            dispatch({"type": "change-mode", "value": value});
+        }}/>
         <ErrorBox title="Error">{state.error}</ErrorBox>
         {renderRenameForm(state, dispatch)}
+        {renderDeletePlayer(state, dispatch)}
     </>
 }

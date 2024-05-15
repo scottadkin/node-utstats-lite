@@ -771,3 +771,40 @@ export async function adminRenamePlayer(playerId, newName){
     return await simpleQuery(query, [newName, playerId]);
 }
 
+
+export async function adminDeletePlayer(playerId){
+
+    playerId = parseInt(playerId);
+
+    if(playerId !== playerId) throw new Error(`PlayerId must be a valid integer.`);
+
+    const queries = [
+        {"table": "nstats_kills", "playerColumn": "killer_id"},
+        {"table": "nstats_kills", "playerColumn": "victim_id"},
+        {"table": "nstats_match_ctf", "playerColumn": "player_id"},
+        {"table": "nstats_match_dom", "playerColumn": "player_id"},
+        {"table": "nstats_match_players", "playerColumn": "player_id"},
+        {"table": "nstats_match_weapon_stats", "playerColumn": "player_id"},
+        {"table": "nstats_players", "playerColumn": "id"},
+        {"table": "nstats_player_totals", "playerColumn": "player_id"},
+        {"table": "nstats_player_totals_ctf", "playerColumn": "player_id"},
+        {"table": "nstats_player_totals_weapons", "playerColumn": "player_id"},
+        {"table": "nstats_rankings", "playerColumn": "player_id"}
+    ];
+
+    let totalRows = 0;
+
+    for(let i = 0; i < queries.length; i++){
+
+        const {table, playerColumn} = queries[i];
+
+        const query = `DELETE FROM ${table} WHERE ${playerColumn}=?`;
+        const vars = [playerId];
+
+        const result = await simpleQuery(query, vars);
+
+        totalRows += result.affectedRows;
+    }
+
+    return totalRows;
+}
