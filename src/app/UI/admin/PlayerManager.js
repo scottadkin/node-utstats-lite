@@ -1,8 +1,10 @@
 "use client"
 import { useEffect, useReducer } from "react";
+import { notificationReducer, initialNotificationState } from "../../reducers/notificationReducer";
 import Header from "../Header";
 import Tabs from "../Tabs";
-import ErrorBox from "../ErrorBox";
+import { plural } from "@/app/lib/generic.mjs";
+import NotificationCluster from "../NotificationCluster";
 
 
 function reducer(state, action){
@@ -41,7 +43,15 @@ function reducer(state, action){
         case "change-mode": {
             return {
                 ...state,
-                "mode": action.value
+                "mode": action.value,
+                "message": null,
+                "error": null
+            }
+        }
+        case "message": {
+            return {
+                ...state,
+                "message": action.message
             }
         }
     }
@@ -92,7 +102,7 @@ function createPlayerOptions(state){
 }
 
 
-async function renamePlayer(state, dispatch){
+async function renamePlayer(state, dispatch, nDispatch){
 
     try{
 
@@ -110,19 +120,18 @@ async function renamePlayer(state, dispatch){
 
         if(res.error !== undefined) throw new Error(res.error);
 
-        console.log(res);
 
         await getPlayerNames(dispatch);
-
+        nDispatch({"type": "add", "content": {"type": "pass", "message": `Player rename successful`}});
         dispatch({"type": "update-rename-form", "newName": "", "selectedPlayer": -1});
 
     }catch(err){
         console.trace(err);
-        dispatch({"type": "error", "message": err.toString()});
+        nDispatch({"type": "add", "content": {"type": "error", "message": err.toString()}});
     }
 }
 
-function renderRenameForm(state, dispatch){
+function renderRenameForm(state, dispatch, nDispatch){
 
     if(state.mode !== "rename") return null;
 
@@ -149,7 +158,7 @@ function renderRenameForm(state, dispatch){
             <div className="text-center">
                 {(!bNameTaken) ? 
                     <input type="button" className="submit-button" value="Rename Player" onClick={() =>{
-                        renamePlayer(state, dispatch);
+                        renamePlayer(state, dispatch, nDispatch);
                     }}/> 
                     : 
                     <div className="font-color-1">Name already taken!</div>}
@@ -159,7 +168,7 @@ function renderRenameForm(state, dispatch){
 }
 
 
-async function deletePlayer(state, dispatch){
+async function deletePlayer(state, dispatch, nDispatch){
 
     try{
 
@@ -171,15 +180,20 @@ async function deletePlayer(state, dispatch){
 
         const res = await req.json();
 
-        console.log(res);
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        nDispatch({"type": "add", "content": {"type": "pass", "message": `Deleted ${res.rowsDeleted} ${plural(res.rowsDeleted, "row")}`}});
+        dispatch({"type": "set-delete-form", "selectedPlayer": -1});
+        await getPlayerNames(dispatch);
 
     }catch(err){
         console.trace(err);
-        dispatch({"type": "error", "message": err.toString()});
+        nDispatch({"type": "add", "content": {"type": "error", "message": err.toString()}});
     }
 }
 
-function renderDeletePlayer(state, dispatch){
+function renderDeletePlayer(state, dispatch, nDispatch){
 
     if(state.mode !== "delete") return null;
 
@@ -189,7 +203,7 @@ function renderDeletePlayer(state, dispatch){
 
         buttonElem = <div className="text-center">     
             <input type="button" className="submit-button" value="Delete Player" onClick={() =>{  
-                deletePlayer(state, dispatch);
+                deletePlayer(state, dispatch, nDispatch);
             }}/>
         </div>
     }
@@ -216,7 +230,8 @@ export default function PlayerManager(){
 
     const [state, dispatch] = useReducer(reducer,{
         "mode": "delete",
-        "error": null,
+        "error": "null",
+        "message": "null",
         "players": [],
         "renameForm": {
             "newName": "",
@@ -226,6 +241,8 @@ export default function PlayerManager(){
             "selectedPlayer": -1
         }
     });
+
+    const [nState, nDispatch] = useReducer(notificationReducer, initialNotificationState);
 
     useEffect(() =>{
 
@@ -243,8 +260,8 @@ export default function PlayerManager(){
             console.log(value);
             dispatch({"type": "change-mode", "value": value});
         }}/>
-        <ErrorBox title="Error">{state.error}</ErrorBox>
-        {renderRenameForm(state, dispatch)}
-        {renderDeletePlayer(state, dispatch)}
+        <NotificationCluster state={nState} dispatch={nDispatch}/>
+        {renderRenameForm(state, dispatch, nDispatch)}
+        {renderDeletePlayer(state, dispatch, nDispatch)}
     </>
 }

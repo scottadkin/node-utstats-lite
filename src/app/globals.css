@@ -419,3 +419,15 @@ canvas{
 .match-sshot{
 	max-width:66%;
 }
+
+.close-button{
+	display:inline-block;
+	margin-left:auto;
+	position:fixed;
+	right:0;
+	padding:5px;
+}
+
+.close-button:hover{
+	cursor: pointer;
+}
