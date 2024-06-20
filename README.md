@@ -12,6 +12,12 @@ Unreal Tournament stats website for the [https://github.com/rxut/UTStatsLite](ut
 - Open **config.mjs** and change the settings to connect to your mysql server.
 - Run the command **node install.mjs** to create the database and other settings.
 
+## How to change website port
+- Open package.json in the main directory.
+- Find the "scripts" block.
+- Find the line ```"start": "next start",```.
+- To change the port simply add **-p portnumber** after next start, for example ```"start": "next start -p 8080",``` will run the website on port 8080.
+- You can also do the same with the dev mode ```"dev": "next dev",``` -> "dev": "next dev -p 8080",
 
 ## Starting The Website
 - Open a terminal in the folder you installed to.

@@ -4,6 +4,7 @@ import { getPlayerMasterId, createMasterPlayer, updateMasterPlayers, updatePlaye
 import geoip from "geoip-lite";
 import { scalePlaytime } from "../generic.mjs";
 
+
 export class PlayerManager{
 
     constructor(){

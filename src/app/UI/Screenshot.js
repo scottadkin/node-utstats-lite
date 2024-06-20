@@ -949,7 +949,7 @@ export default function Screenshot({data}){
 
         new ScreenshotImage(canvasRef, data);
 
-    }, [])
+    }, [data])
 
     return <>
         <canvas className="match-sshot" width={2560} height={1440} ref={canvasRef}></canvas>
