@@ -32,3 +32,10 @@ Unreal Tournament stats website for the [https://github.com/rxut/UTStatsLite](ut
 ## Running The Log Importer
 - Open a terminal in the folder you installed to.
 - Run the command **node importer.mjs**.
+
+## Converting Node UTStats 2 FTP Settings To Lite
+- If you want to insert all your ftp settings from node utstats-2 you need to create a backup with the node utstats 2 admin tool.
+- Open the archive.
+- Place **nstats_ftp.json** in the main directory of your node utstats lite folder.
+- Run the command **node nutsftptolite.mjs**
+- You should now see the settings added in the admin area.
