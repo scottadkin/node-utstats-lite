@@ -51,11 +51,13 @@ export class MatchParser{
     async main(){
 
         if(this.matchStart === -1){
-            throw new Error(`There was no match start event in this log.`);
+            new Message(`There was no match start event in this log.`, "error");
+            throw new Error("NO START");
         }
 
         if(this.matchEnd === -1){
-            throw new Error(`There was no match end event in this log.`);
+            new Message(`There was no match end event in this log.`, "error");
+            throw new Error("NO END");
         }
 
         this.matchLength = this.matchEnd - this.matchStart;
@@ -66,7 +68,9 @@ export class MatchParser{
         
 
         if(this.matchLength < this.minPlaytime){
-            throw new Error(`Match length is shorter than minPlaytime (${this.minPlaytime} seconds).`);
+
+            new Message(`Match length is shorter than minPlaytime (${this.minPlaytime} seconds).`,"error");
+            throw new Error("MIN PLAYTIME");
         }   
 
 
@@ -87,7 +91,8 @@ export class MatchParser{
         const totalPlayers = this.players.getTotalUniquePlayers();
 
         if(totalPlayers < this.minPlayers){
-            throw new Error(`Match has less then the minimum players limit (found ${totalPlayers} out of a target of ${this.minPlayers}).`);
+            new Message(`Match has less then the minimum players limit (found ${totalPlayers} out of a target of ${this.minPlayers}).`,"error");
+            throw new Error("MIN PLAYERS");
         }
 
 

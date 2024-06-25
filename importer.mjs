@@ -126,6 +126,8 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await rename(`./Logs/${file}`, `./Logs/rejected/${file}`);
         await insertRejectedHistory(serverId, file, err.toString());
+
+        if(err.message === "MIN PLAYERS" || err.message === "MIN PLAYTIME" || err.message === "NO START" || err.message === "NO END") return;
         console.trace(err);
         new Message(err.toString(),"error");
         return false;
