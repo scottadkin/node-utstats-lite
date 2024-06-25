@@ -120,7 +120,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
 
         insertVars.push([
             p.masterId,
-            p.bSpectator,
+            (p.playtime > 0) ? p.bSpectator : 1,
             p.ip,
             p.country,
             p.hwid,
@@ -132,7 +132,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
             (p.ping.min !== null) ? p.ping.min : -1,
             (p.ping.avg !== null) ? p.ping.avg : -1,
             (p.ping.max !== null) ? p.ping.max : -1,
-            p.team,
+            (p.playtime > 0) ? p.team : 255,
             p.stats.score,
             p.stats.frags,
             p.stats.kills,
