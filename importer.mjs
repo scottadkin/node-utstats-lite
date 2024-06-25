@@ -167,9 +167,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
     }else{
 
         await updateLogsFolderStats(imported);
-    }
-
-    
+    }  
 }
 
 

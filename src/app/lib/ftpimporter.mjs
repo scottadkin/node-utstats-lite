@@ -68,13 +68,13 @@ export class FTPImporter{
                 
                 }else{
 
-                    await this.client.downloadTo(`${importedLogsFolder}/${f.name}`, `./Logs/${f.name}`);
+                    await this.client.downloadTo(`${importedLogsFolder}/${f.name}`, `${this.targetFolder}/Logs/${f.name}`);
                     new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass"); 
                 }
 
                 if(this.bDeleteAfterImport === 1){
                     new Message(`Deleting file ${f.name} from ftp server.`,"note");
-                    await this.client.remove(`./Logs/${f.name}`);
+                    await this.client.remove(`${this.targetFolder}/Logs/${f.name}`);
                 }
 
             }catch(err){
