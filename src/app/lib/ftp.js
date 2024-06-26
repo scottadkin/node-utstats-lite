@@ -41,9 +41,9 @@ export async function addServer(settings){
     if(settings.user === "") throw new Error(`User can not be a blank string`);
     if(settings.password === "") throw new Error(`Password can not be a blank string`);
 
-    if(await bServerExist(settings.host, settings.port)){
+    /*if(await bServerExist(settings.host, settings.port)){
         throw new Error(`That server already exists!`);
-    }
+    }*/
 
     const query = `INSERT INTO nstats_ftp VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
