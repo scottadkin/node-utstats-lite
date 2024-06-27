@@ -416,6 +416,7 @@ async function bRankingSettingExist(category, name){
 
 
 async function insertRankingSetting(data){
+
     const query = `INSERT INTO nstats_ranking_settings VALUES(NULL,?,?,?,?)`;
 
     await simpleQuery(query,[
@@ -480,6 +481,41 @@ async function insertRankingSettings(){
     }
 }
 
+
+async function bColumnExist(table, column){
+
+    const query = `SHOW COLUMNS FROM ${table}`;
+
+    const result = await simpleQuery(query);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(r["Field"] === column) return true;
+    }
+
+    return false;
+}
+
+
+async function addColumn(table, name, type){
+
+    try{
+
+        if(await bColumnExist(table, name)) return;
+
+        const query = `ALTER TABLE ${table} ADD COLUMN ${name} ${type}`;
+
+        await simpleQuery(query);
+
+        new Message(`Added column ${name} to TABLE ${table}`,"pass");
+
+    }catch(err){
+        new Message(err.message, "error");
+    }
+}
+
 (async () =>{
  
     try{
@@ -524,6 +560,8 @@ async function insertRankingSettings(){
             fs.writeFileSync("./salt.mjs", fileContents);
         }
 
+        //Just in case user had an early test build that was missing this column
+        await addColumn("nstats_ftp", "delete_tmp_files", "INT(1) NOT NULL AFTER enabled");
         
         process.exit();
 
