@@ -211,7 +211,8 @@ async function main(){
                 false, 
                 r.target_folder,
                 r.ignore_duplicates,
-                r.delete_after_import
+                r.delete_after_import,
+                r.delete_tmp_files
             );
         }else{
 
@@ -223,7 +224,8 @@ async function main(){
                 false, 
                 r.target_folder,
                 r.ignore_duplicates,
-                r.delete_after_import
+                r.delete_after_import,
+                r.delete_tmp_files
             );
         }
 

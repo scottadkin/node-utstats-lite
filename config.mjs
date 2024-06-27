@@ -15,3 +15,6 @@ export const importedLogsFolder = "./Logs";
 export const importInterval = 0;
 
 export const multiKillTimeLimit = 3;
+
+//how old a tmp file must be before it's deleted(seconds)
+export const minTmpFileLifetime = 60 * 60 * 6;

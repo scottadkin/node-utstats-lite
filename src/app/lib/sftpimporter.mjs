@@ -1,12 +1,12 @@
 import Client from "ssh2-sftp-client";
 import Message from "./message.mjs";
-import { logFilePrefix, importedLogsFolder } from "../../../config.mjs";
+import { logFilePrefix, importedLogsFolder, minTmpFileLifetime } from "../../../config.mjs";
 import { bLogAlreadyImported } from "./importer.mjs";
 import { createWriteStream } from "fs";
 
 export class SFTPImporter{
 
-    constructor(host, port, user, password, secure, targetFolder, bIgnoreDuplicates, bDeleteAfterImport){
+    constructor(host, port, user, password, secure, targetFolder, bIgnoreDuplicates, bDeleteAfterImport, bDeleteTmpFiles){
 
         this.host = host;
         this.port = port;
@@ -16,6 +16,7 @@ export class SFTPImporter{
         this.targetFolder = targetFolder;
         this.bIgnoreDuplicates = bIgnoreDuplicates;
         this.bDeleteAfterImport = bDeleteAfterImport;
+        this.bDeleteTmpFiles = bDeleteTmpFiles;
     }
    
 
@@ -48,12 +49,31 @@ export class SFTPImporter{
         new Message(`Disconnected from ${this.host}(SFTP)`,"note");
     }
 
+    async deleteTmpFile(file){
+
+        if(!this.bDeleteTmpFiles){
+            new Message(`Delete tmp files is turned off.`,"note");
+            return;
+        }
+
+        const now = Math.floor(new Date() * 0.001);
+
+        const diff = now - Math.floor(new Date(file.modifiedAt) * 0.001);
+
+        if(diff < minTmpFileLifetime) return;
+
+        await this.client.delete(`${this.targetFolder}/Logs/${file.name}`);
+        new Message(`Deleting tmp file ${file.name}`, "note");
+    }
+
+
     async downloadMatchLogs(){
 
         const files = await this.client.list(`${this.targetFolder}/Logs`);
 
         const lowerPrefix = logFilePrefix.toLowerCase();
-        const fileExt = /^.+\.log$/i;
+
+        const extReg = /^.+\.(.+)$/i;
        
        // for(let i = 0; i < files.length; i++){
         for(const file of Object.values(files)){
@@ -62,7 +82,21 @@ export class SFTPImporter{
 
                 const f = file;
 
-                if(!fileExt.test(f.name) || !f.name.toLowerCase().startsWith(lowerPrefix)) continue;
+                const extResult = extReg.exec(f.name);
+
+                if(extResult === null) continue;
+
+                const ext = extResult[1].toLowerCase();
+
+                if(ext !== "tmp" && ext !== "log") continue;
+
+                if(ext === "tmp"){
+
+                    await this.deleteTmpFile(file);
+                    continue;
+                }
+
+                if(!f.name.toLowerCase().startsWith(lowerPrefix)) continue;
 
                 if(this.bIgnoreDuplicates && await bLogAlreadyImported(f.name)){
                     new Message(`${f.name} has already been imported, skipping.`, "note");
