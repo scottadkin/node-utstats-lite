@@ -98,9 +98,11 @@ export class PlayerManager{
 
             const player = this.getPlayerById(playerId);
 
+            if(player === null) return;
 
-            if(player !== null && teamId === 255 && player.team !== 255){
-                //console.log(`Player was on a team but then went to spec`);
+
+            if(teamId === 255 && player.team !== 255){
+               // console.log(`Player was on a team but then went to spec`);
                 return;  
             }
 
@@ -486,6 +488,10 @@ export class PlayerManager{
             if(master.bHadConnectEvent || p.bHadConnectEvent) master.bHadConnectEvent = true;
             //if player played at any point don't mark them as a spectator even after reconnects
             if(master.bSpectator === 0 || p.bSpectator === 0) master.bSpectator = 0;
+
+            master.team = p.team;
+            
+       
 
             master.stats.totalEff += p.stats.efficiency;
             master.stats.totalTTL += p.stats.ttl;
