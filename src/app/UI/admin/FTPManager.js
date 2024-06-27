@@ -175,7 +175,8 @@ const reducer = function (state, action){
                     "minPlaytime": d.min_playtime,
                     "bEnabled": d.enabled,
                     "bDeleteFromFTP": d.delete_after_import,
-                    "sftp": d.sftp
+                    "sftp": d.sftp,
+                    "bDeleteTmpFiles": d.delete_tmp_files
                 }
             }
         }
@@ -199,7 +200,8 @@ const reducer = function (state, action){
                     "minPlaytime": 0,
                     "bEnabled": 1,
                     "bDeleteFromFTP": 1,
-                    "sftp": 0
+                    "sftp": 0,
+                    "bDeleteTmpFiles": 0
                 }
             }
         }
@@ -237,7 +239,8 @@ const reducer = function (state, action){
                     "minPlaytime": 0,
                     "bEnabled": 1,
                     "bDeleteFromFTP": 1,
-                    "sftp": 0
+                    "sftp": 0,
+                    "bDeleteTmpFiles": 0
                 }
             }
         }
@@ -262,7 +265,8 @@ const reducer = function (state, action){
                     "minPlaytime": 0,
                     "bEnabled": 1,
                     "bDeleteFromFTP": 1,
-                    "sftp": 0
+                    "sftp": 0,
+                    "bDeleteTmpFiles": 0
                 }
             }
         }
@@ -480,6 +484,19 @@ function renderEditServers(state, dispatch){
                 }}/>
             </div>
             <div className="form-row">
+                <label>Delete TMP Files</label>
+                <TrueFalseButton value={state.editForm.bDeleteTmpFiles} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.editForm.bDeleteTmpFiles){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-edit-form", "key": "bDeleteTmpFiles", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
                 <label>Enabled</label>
                 <TrueFalseButton value={state.editForm.bEnabled} setValue={() =>{
                     
@@ -612,6 +629,19 @@ function renderAddServer(state, dispatch){
                     }
 
                     dispatch({"type": "update-create-form", "key": "bDeleteFromFTP", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label>Delete TMP Files</label>
+                <TrueFalseButton value={state.createForm.bDeleteTmpFiles} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.createForm.bDeleteTmpFiles){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-create-form", "key": "bDeleteTmpFiles", "value": newValue});
                 }}/>
             </div>
             <div className="form-row">

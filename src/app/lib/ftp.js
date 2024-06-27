@@ -45,7 +45,7 @@ export async function addServer(settings){
         throw new Error(`That server already exists!`);
     }*/
 
-    const query = `INSERT INTO nstats_ftp VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const query = `INSERT INTO nstats_ftp VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
     const vars = [
         settings.name,
@@ -64,7 +64,8 @@ export async function addServer(settings){
         settings.minPlayers,
         settings.minPlaytime,
         settings.sftp,
-        settings.bEnabled
+        settings.bEnabled,
+        settings.bDeleteTmpFiles
     ];
 
     await simpleQuery(query, vars);
@@ -99,6 +100,7 @@ export async function editServer(serverId, settings){
     min_players=?,
     min_playtime=?,
     sftp=?,
+    delete_tmp_files=?,
     enabled=?
     WHERE id=?`;
 
@@ -115,6 +117,7 @@ export async function editServer(serverId, settings){
         settings.minPlayers,
         settings.minPlaytime,
         settings.sftp,
+        settings.bDeleteTmpFiles,
         settings.bEnabled,
         serverId
     ];

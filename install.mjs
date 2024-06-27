@@ -34,7 +34,8 @@ const queries = [
         min_players int(2) NOT NULL,
         min_playtime int(11) NOT NULL,
         sftp int(1) NOT NULL,
-        enabled INT(1) NOT NULL
+        enabled INT(1) NOT NULL,
+        delete_tmp_files INT(1) NOT NULL
       ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
         `CREATE TABLE IF NOT EXISTS nstats_logs_folder (

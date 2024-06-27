@@ -19,7 +19,7 @@ export default function MatchListTable({data}){
             <td><Link href={url}>{d.mapName}</Link></td>
             <td><Link href={url}>{d.gametypeName}</Link></td>
             <td><Link href={url}>{d.serverName}</Link></td>
-            <td><Link href={url}>{convertTimestamp(date, true)}</Link></td>
+            <td className="date"><Link href={url}>{convertTimestamp(date, true)}</Link></td>
             <td><Link href={url}>{d.players}</Link></td>
             <td><Link href={url}>{MMSS(d.playtime)}</Link></td>
             <MatchScoreBox data={d} small={true} bTableElem={true}/>
