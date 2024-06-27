@@ -391,6 +391,7 @@ async function insertSiteSettings(){
         {"category": "Nav" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
         {"category": "Matches" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
         {"category": "Players" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
+        {"category": "Menu" ,"type": `string`, "name": "Discord URL", "value": ""},
     ];
 
     for(let i = 0; i < settings.length; i++){

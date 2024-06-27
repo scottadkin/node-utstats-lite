@@ -431,3 +431,8 @@ canvas{
 .close-button:hover{
 	cursor: pointer;
 }
+
+.social-media-icon{
+	width:64px;
+	height:64px;
+}

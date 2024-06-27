@@ -200,7 +200,9 @@ function renderSelectedOptions(state, dispatch){
                 }}
             />
 
-        }else if(s.setting_type === "perPage"){
+        }
+        
+        if(s.setting_type === "perPage"){
 
             valueElem = <td>
                 <PerPageDropDown 
@@ -214,6 +216,19 @@ function renderSelectedOptions(state, dispatch){
                         });
                     }}
                 />
+            </td>
+        }
+
+        if(s.setting_type === "string"){
+            valueElem = <td>
+                <input type="text" className="textbox" value={s.setting_value} onChange={(e) =>{
+                    dispatch({
+                        "type": "change-setting-value", 
+                        "category": s.category, 
+                        "key": s.setting_name, 
+                        "value": e.target.value
+                    });
+                }}/>
             </td>
         }
 

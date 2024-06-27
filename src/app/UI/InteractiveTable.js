@@ -7,7 +7,6 @@ function createHeaders(headers, state, dispatch, bNoHeaderSorting){
 
     const elems = [];
 
-
     for(const [name, content] of Object.entries(headers)){
 
         let mouseOverContent = null;
@@ -21,8 +20,6 @@ function createHeaders(headers, state, dispatch, bNoHeaderSorting){
                 mouseOverTitle = content.mouseOverBox.title;
             }
         }
-
-
 
         elems.push(
             <TableHeader 

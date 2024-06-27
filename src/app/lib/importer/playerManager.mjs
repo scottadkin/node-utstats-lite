@@ -95,6 +95,15 @@ export class PlayerManager{
             const playerId = parseInt(result[1]);
             const teamId = parseInt(result[2]);
 
+
+            const player = this.getPlayerById(playerId);
+
+
+            if(player !== null && teamId === 255 && player.team !== 255){
+                //console.log(`Player was on a team but then went to spec`);
+                return;  
+            }
+
             this.setPlayerProperty(playerId, "team", teamId);
             return;
 
