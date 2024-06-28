@@ -5,6 +5,7 @@ import MatchScoreBox from "@/app/UI/MatchScoreBox";
 import styles from "./BasicInfo.module.css";
 import { convertTimestamp, plural, toPlaytime } from "@/app/lib/generic.mjs";
 import Mutators from "./Mutators";
+import PermaLink from "../PermaLink";
 
 export default function BasicInfo({matchData}){
 
@@ -19,17 +20,20 @@ export default function BasicInfo({matchData}){
         <Header>Match Report</Header> 
         <div className={styles.wrapper}>
         
-        <div className={styles.info}>
-            {convertTimestamp(date)}<br/>
-            {basic.gametypeName} <span className={"dull"}>on</span> {basic.mapName}<br/>
-            {basic.players} {plural(basic.players, "Player")}<br/>
-            <span className={"dull"}>Match Length</span> {toPlaytime(basic.playtime)}<br/>
-            <span className={"dull"}>Server</span> {basic.serverName}<br/>
-            {targetScore}
-            {timeLimit}
-            <Mutators data={basic.mutators}/>
-        </div>
-		<MatchScoreBox data={matchData.basic}/>
+            <div className={styles.info}>
+                {convertTimestamp(date)}<br/>
+                {basic.gametypeName} <span className={"dull"}>on</span> {basic.mapName}<br/>
+                {basic.players} {plural(basic.players, "Player")}<br/>
+                <span className={"dull"}>Match Length</span> {toPlaytime(basic.playtime)}<br/>
+                <span className={"dull"}>Server</span> {basic.serverName}<br/>
+                {targetScore}
+                {timeLimit}
+                <Mutators data={basic.mutators}/>
+            </div>
+            <PermaLink url={`/match/${matchData.basic.hash}`} />
+            <MatchScoreBox data={matchData.basic}/>
+            
+            
         </div>
     </>
 }

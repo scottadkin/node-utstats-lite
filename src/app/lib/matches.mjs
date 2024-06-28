@@ -211,12 +211,33 @@ async function getPlayerMatchData(id){
     return await simpleQuery(query, [id]);
 }
 
+
+async function getMatchIdFromHash(hash){
+
+    const query = `SELECT id FROM nstats_matches WHERE hash=?`;
+
+    const result = await simpleQuery(query, [hash]);
+
+    if(result.length > 0) return result[0].id;
+
+    return null;
+}
+
 export async function getMatchData(id){
 
     try{
 
-        id = parseInt(id);
-        if(id !== id) throw new Error(`MatchId must be a valid integer`);
+        if(id.length !== 32){
+
+            id = parseInt(id);
+            if(id !== id) throw new Error(`MatchId must be a valid integer`);
+
+        }else{
+
+            id = await getMatchIdFromHash(id);
+            if(id === null) throw new Error(`No match with that hash exists`);
+
+        }
 
         const basic = await getMatch(id);
         if(basic === null) throw new Error(`Match doesnt exist`);

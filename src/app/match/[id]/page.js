@@ -57,6 +57,7 @@ export default async function MatchPage({params, searchParams}) {
         );
     }
 
+    console.log(matchData.basic.hash);
 	const totalTeams = matchData.basic.total_teams;
 
     return (
