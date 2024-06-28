@@ -8,12 +8,13 @@ import { getMatchWeaponStats } from "./weapons.mjs";
 import { getMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
+import md5 from "md5";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
     team2Scores, team3Score, soloWinner, soloWinnerScore, targetScore, timeLimit, mutators){
 
-    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"")`;
 
     const vars = [
         serverId, gametypeId, mapId, bHardcore, bInsta, 
@@ -369,4 +370,14 @@ export async function getMatchesResultByIds(ids){
     }
 
     return data;
+}
+
+
+export async function setMatchHash(id, hash){
+
+    const query = `UPDATE nstats_matches SET hash=? WHERE id=?`;
+
+    hash = md5(hash);
+
+    return await simpleQuery(query, [hash, id]);
 }

@@ -85,7 +85,8 @@ const queries = [
             solo_winner_score int(11) NOT NULL,
             target_score int(11) NOT NULL,
             time_limit int(11) NOT NULL,
-            mutators text NOT NULL
+            mutators text NOT NULL,
+            hash varchar(32) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_servers (
@@ -562,6 +563,7 @@ async function addColumn(table, name, type){
 
         //Just in case user had an early test build that was missing this column
         await addColumn("nstats_ftp", "delete_tmp_files", "INT(1) NOT NULL AFTER enabled");
+        await addColumn("nstats_matches", "hash", "varchar(32) NOT NULL AFTER mutators");
         
         process.exit();
 

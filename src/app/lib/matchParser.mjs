@@ -1,5 +1,5 @@
 import { PlayerManager } from "./importer/playerManager.mjs";
-import { createMatch } from "./matches.mjs";
+import { createMatch, setMatchHash } from "./matches.mjs";
 import Message from "./message.mjs";
 import {Match} from "./importer/match.mjs";
 import { Server } from "./importer/server.mjs";
@@ -11,7 +11,7 @@ import { scalePlaytime } from "./generic.mjs";
 import { CTF } from "./importer/ctf.mjs";
 import { Domination } from "./importer/domination.mjs";
 import Items from "./importer/items.mjs";
-import {calculateRankings} from "./rankings.mjs"
+import {calculateRankings} from "./rankings.mjs";
 
 export class MatchParser{
 
@@ -176,7 +176,26 @@ export class MatchParser{
 
         await calculateRankings(this.gametype.id, validMergedPlayerIds);
         
-        
+
+        const hashVars = [this.map.name, 
+            this.gametype.name, 
+            this.server.name, 
+            this.match.date, 
+            this.gametype.mutators,
+            this.totalTeams,
+            this.teamScores[0],
+            this.teamScores[1],
+            this.teamScores[2],
+            this.teamScores[3],
+            this.soloWinner,
+            this.soloWinnerScore,
+            this.gametype.targetScore,
+            this.gametype.timeLimit];
+
+
+
+        await setMatchHash(this.matchId, hashVars.toString());
+
     }
 
     parseLines(){
