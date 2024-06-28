@@ -371,6 +371,7 @@ function renderEditServers(state, dispatch){
         <div className="form-row">
             <div className="form-label">Selected Server</div>
             <select onChange={(e) =>{
+                if(e.target.value === "0") return;
                 dispatch({"type": "select-server", "value": e.target.value, "data": getServerData(state.ftp, parseInt(e.target.value))});
             }}>
                 <option value="0">Please select an ftp server to edit</option>
