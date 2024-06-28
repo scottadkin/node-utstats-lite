@@ -19,6 +19,7 @@ import { changePlayerIds as changeKillsPlayerIds } from "@/app/lib/kills.mjs";
 import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
 import { changePlayerMatchIds as changeWeaponPlayerMatchIds } from "@/app/lib/weapons.mjs";
 import { changePlayerMatchIds as changeDominationPlayerMatchIds} from "@/app/lib/domination.mjs";
+import { clearAllDataTables } from "@/app/lib/admin";
 
 
 
@@ -178,6 +179,14 @@ export async function POST(req){
 
             const rowsDeleted = await adminDeletePlayer(playerId);
             return Response.json({"rowsDeleted": rowsDeleted});
+        }
+
+
+        if(mode === "clear-tables"){
+ 
+            await clearAllDataTables();
+
+            return Response.json({"message": "passed"});
         }
         
         return Response.json({"message": "hi"});

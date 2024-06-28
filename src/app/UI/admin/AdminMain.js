@@ -12,10 +12,11 @@ import RecalculateRankings from "./RecalculateRankings";
 import MapImageUploader from "./MapImageUploader";
 import PlayerMerger from "./PlayerMerger";
 import PlayerManager from "./PlayerManager";
+import ClearDatabase from "./ClearDatabase";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("player-manager");
+    const [mode, setMode] = useState("clear-database");
 
     return <>
         <Tabs 
@@ -30,6 +31,7 @@ export default function AdminMain(){
                 {"name": "Map Image Uploader", "value": "map-img"},
                 {"name": "Player Merger", "value": "player-merge"},
                 {"name": "Player Manager", "value": "player-manager"},
+                {"name": "Clear Database Tables", "value": "clear-database"}
                 //{"name": "Backup Manager", "value": "backup"},
             ]}
             selectedValue={mode}
@@ -48,6 +50,7 @@ export default function AdminMain(){
         {(mode === "map-img") ? <MapImageUploader /> : null}
         {(mode === "player-merge") ? <PlayerMerger /> : null}
         {(mode === "player-manager") ? <PlayerManager /> : null}
+        {(mode === "clear-database") ? <ClearDatabase /> : null}
 
     </>
 }
