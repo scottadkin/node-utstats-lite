@@ -199,3 +199,73 @@ export async function getAllImages(){
 
     return valid;
 }
+
+async function getLatestMatchId(mapId){
+
+    const query = `SELECT id from nstats_matches WHERE map_id=? ORDER BY date DESC LIMIT 1`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    if(result.length > 0) return result[0].id;
+
+    return null;
+}
+
+async function getLatestMatches(mapIds){
+
+    if(mapIds.length === 0) return {};
+
+    const data = {};
+
+    for(let i = 0; i < mapIds.length; i++){
+
+        const m = mapIds[i];
+
+        data[m] = await getLatestMatchId(m);
+    }
+
+    return data;
+}
+
+async function getFirstMatch(mapId){
+
+    const query = `SELECT id from nstats_matches WHERE map_id=? ORDER BY date ASC LIMIT 1`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    if(result.length > 0) return result[0].id;
+
+    return null;
+}
+
+async function getFirstMatches(mapIds){
+
+    if(mapIds.length === 0) return {};
+
+    const data = {};
+
+    for(let i = 0; i < mapIds.length; i++){
+
+        const m = mapIds[i];
+
+        data[m] = await getFirstMatch(m);
+    }
+
+    return data;
+}
+
+export async function getAllStats(){
+
+    const query = `SELECT * FROM nstats_maps ORDER BY name ASC`;
+
+    const result = await simpleQuery(query);
+
+    const mapIds = result.map((r) =>{
+        return r.id;
+    });
+
+    const first = await getFirstMatches(mapIds);
+    const latest = await getLatestMatches(mapIds);
+
+    return {"maps": result, "earliest": first, "latest": latest};
+}
