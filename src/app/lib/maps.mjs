@@ -269,3 +269,17 @@ export async function getAllStats(){
 
     return {"maps": result, "earliest": first, "latest": latest};
 }
+
+
+export async function getMapInfo(mapId){
+
+    const query = `SELECT * FROM nstats_maps WHERE id=?`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    if(result.length > 0) return result[0];
+
+    return {
+        "name": "Not Found"
+    }
+}

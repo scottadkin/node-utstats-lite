@@ -447,3 +447,16 @@ canvas{
 .perma-link:hover{
 	cursor: pointer;
 }
+
+.map-sshot{
+	margin-left:auto;
+	margin-right:auto;
+	max-width:66vw;
+	overflow:hidden;
+}
+
+.map-sshot img{
+	display: block;
+	width: 100%;
+	height: auto;
+}
