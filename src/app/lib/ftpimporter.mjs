@@ -55,6 +55,7 @@ export class FTPImporter{
             return;
         }
 
+
         const now = Math.floor(new Date() * 0.001);
 
         const diff = now - Math.floor(new Date(file.modifiedAt) * 0.001);

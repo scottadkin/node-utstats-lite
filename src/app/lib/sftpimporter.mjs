@@ -58,7 +58,7 @@ export class SFTPImporter{
 
         const now = Math.floor(new Date() * 0.001);
 
-        const diff = now - Math.floor(new Date(file.modifiedAt) * 0.001);
+        const diff = now - Math.floor(new Date(file.modifyTime) * 0.001);
 
         if(diff < minTmpFileLifetime) return;
 

@@ -68,7 +68,7 @@ export default function FragTable({data, totalTeams}){
 
     if(totalTeams < 2){
 
-        elems = <InteractiveTable width={3} headers={headers} rows={test[0]}/>;
+        elems = <InteractiveTable width={3} headers={headers} rows={test[0]} sortBy="score" order="DESC"/>;
 
     }else{
 
