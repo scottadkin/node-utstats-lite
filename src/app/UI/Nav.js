@@ -39,6 +39,13 @@ export default function Nav({settings, sessionInfo, bAdmin}){
             "matches": [
                 "/rankings",
             ]
+        },
+        {
+            "name": "Maps",
+            "url": "/maps",
+            "matches": [
+                "/map",
+            ]
         }
     ];
 

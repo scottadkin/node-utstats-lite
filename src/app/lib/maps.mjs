@@ -1,6 +1,9 @@
 import { simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName } from "./generic.mjs";
+import { getGametypeNames } from "./gametypes.mjs";
+import { getServerNames } from "./servers.mjs";
+import { getBasicPlayerInfo } from "./players.mjs";
 
 async function getMapId(name){
 
@@ -282,4 +285,66 @@ export async function getMapInfo(mapId){
     return {
         "name": "Not Found"
     }
+}
+
+
+export async function getRecentMatches(mapId, page, perPage){
+
+    page = parseInt(page);
+    perPage = parseInt(perPage);
+
+    if(page !== page) page = 1;
+    page--;
+    if(page < 0) page = 0;
+
+    if(perPage !== perPage) perPage = 25;
+    if(perPage < 0 || perPage > 100) perPage = 25;
+
+    let start = page * perPage;
+    if(start < 0) start = 0;
+
+
+    const query = `SELECT id,server_id,gametype_id,date,playtime,players,total_teams,team_0_score,team_1_score,team_2_score,
+    team_3_score,solo_winner,solo_winner_score,hash FROM nstats_matches WHERE map_id=? ORDER BY date DESC, id DESC LIMIT ?, ?`;
+
+
+    const result = await simpleQuery(query, [mapId, start, perPage]);
+
+    const serverIds = new Set();
+    const gametypeIds = new Set();
+    const soloIds = new Set();
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        serverIds.add(r.server_id);
+        gametypeIds.add(r.gametype_id);
+        if(r.solo_winner !== 0) soloIds.add(r.solo_winner);
+    }
+
+    const gametypeNames = await getGametypeNames([...gametypeIds]);
+    const serverNames = await getServerNames([...serverIds]);
+    const soloWinners = await getBasicPlayerInfo([...soloIds]);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        r.serverName = serverNames[r.server_id] ?? "Not Found";
+        r.gametypeName = gametypeNames[r.gametype_id] ?? "Not Found";
+        if(r.solo_winner !== 0){
+            r.soloWinnerName = soloWinners[r.solo_winner].name ?? "Not Found";
+        }
+    }
+
+    return result;
+}
+
+
+export async function getTotalMatches(id){
+
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_matches WHERE map_id=?`;
+
+    const result = await simpleQuery(query, [id]);
+    return result[0].total_matches;
 }

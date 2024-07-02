@@ -54,13 +54,13 @@ export async function updateServer(name, ip, port){
 }
 
 
-export async function getServerNames(names){
+export async function getServerNames(ids){
 
-    if(names.length === 0) return {};
+    if(ids.length === 0) return {};
 
     const query = `SELECT id,name FROM nstats_servers WHERE id IN(?)`;
 
-    const result = await simpleQuery(query, [names]);
+    const result = await simpleQuery(query, [ids]);
 
     const data = {};
 

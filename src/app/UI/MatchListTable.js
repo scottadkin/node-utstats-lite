@@ -3,9 +3,10 @@ import MatchScoreBox from "./MatchScoreBox";
 import Link from "next/link";
 
 
-export default function MatchListTable({data}){
+export default function MatchListTable({data, bIgnoreMap}){
 
     const rows = [];
+
 
     for(let i = 0; i < data.length; i++){
 
@@ -16,7 +17,7 @@ export default function MatchListTable({data}){
         const url = `/match/${d.id}`;
 
         rows.push(<tr key={d.id}>
-            <td><Link href={url}>{d.mapName}</Link></td>
+            {(!bIgnoreMap) ? <td><Link href={url}>{d.mapName}</Link></td> : null}
             <td><Link href={url}>{d.gametypeName}</Link></td>
             <td><Link href={url}>{d.serverName}</Link></td>
             <td className="date"><Link href={url}>{convertTimestamp(date, true)}</Link></td>
@@ -36,7 +37,7 @@ export default function MatchListTable({data}){
         <table className="t-width-1">
             <tbody>
                 <tr>   
-                    <th>Map</th>
+                    {(!bIgnoreMap) ? <th>Map</th> : null}
                     <th>Gametype</th>
                     <th>Server</th>
                     <th>Date</th>
