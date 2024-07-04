@@ -2,6 +2,7 @@ import { Client } from "basic-ftp";
 import Message from "./message.mjs";
 import { logFilePrefix, importedLogsFolder, minTmpFileLifetime } from "../../../config.mjs";
 import { bLogAlreadyImported } from "./importer.mjs";
+import { bTMPFileOldEnough } from "./generic.mjs";
 
 export class FTPImporter{
 
@@ -55,13 +56,15 @@ export class FTPImporter{
             return;
         }
 
+        const bValid = bTMPFileOldEnough(file.name, minTmpFileLifetime);
 
-        const now = Math.floor(new Date() * 0.001);
+        if(bValid === null){
+            new Message(`Could not parse a valid datetimestamp from filename.`,"error");
+            return;
+        }
 
-        const diff = now - Math.floor(new Date(file.modifiedAt) * 0.001);
-
-        if(diff < minTmpFileLifetime) return;
-
+        if(!bValid) return;
+ 
         await this.client.remove(`${this.targetFolder}/Logs/${file.name}`);
         new Message(`Deleting tmp file ${file.name}`, "note");
     }

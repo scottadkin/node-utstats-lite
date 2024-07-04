@@ -408,3 +408,36 @@ export function getMapImageName(name){
 
     return name;
 }
+
+export function fileNameToDate(fileName){
+
+    const reg = /.*\.(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\d+).*/i;
+
+    const r = reg.exec(fileName);
+
+    if(r === null) return null;
+ 
+    return new Date(`${r[1]}-${r[2]}-${r[3]}T${r[4]}:${r[5]}:${r[6]}`);
+}
+
+/**
+ * 
+ * @param {*} fileName 
+ * @param {*} minLifetime 
+ * @returns 
+ */
+export function bTMPFileOldEnough(fileName, minLifetime){
+
+    const now = Math.floor(new Date());
+
+    const fileDate = fileNameToDate(fileName);
+
+    if(fileDate === null) return null;
+    
+    //time in ms
+    const realMinLifeTime = minLifetime * 1000;
+
+    const diff = now - fileDate;
+
+    return diff > realMinLifeTime;
+}

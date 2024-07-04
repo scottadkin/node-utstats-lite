@@ -3,6 +3,7 @@ import Message from "./message.mjs";
 import { logFilePrefix, importedLogsFolder, minTmpFileLifetime } from "../../../config.mjs";
 import { bLogAlreadyImported } from "./importer.mjs";
 import { createWriteStream } from "fs";
+import { bTMPFileOldEnough } from "./generic.mjs";
 
 export class SFTPImporter{
 
@@ -56,12 +57,15 @@ export class SFTPImporter{
             return;
         }
 
-        const now = Math.floor(new Date() * 0.001);
+        const bValid = bTMPFileOldEnough(file.name, minTmpFileLifetime);
 
-        const diff = now - Math.floor(new Date(file.modifyTime) * 0.001);
+        if(bValid === null){
+            new Message(`Could not parse a valid datetimestamp from filename.`,"error");
+            return;
+        }
 
-        if(diff < minTmpFileLifetime) return;
-
+        if(!bValid) return;
+        
         await this.client.delete(`${this.targetFolder}/Logs/${file.name}`);
         new Message(`Deleting tmp file ${file.name}`, "note");
     }
