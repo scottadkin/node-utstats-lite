@@ -196,6 +196,7 @@ export class MatchParser{
 
         await setMatchHash(this.matchId, hashVars.toString());
 
+
     }
 
     parseLines(){
@@ -239,12 +240,14 @@ export class MatchParser{
 
             if(playerReg.test(subString)){
 
+                //this.players.lines.push({"timestamp": timestamp, "line": subString});
+
                 this.players.parseLine(timestamp, subString);
                 continue;
             }
 
             if(statPlayerReg.test(subString)){
-
+                //this.players.statLines.push({"timestamp": timestamp, "line": subString});
                 this.players.parseStatLine(timestamp, subString);
                 continue;
             }

@@ -1,8 +1,9 @@
 import Header from "@/app/UI/Header";
-import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches } from "@/app/lib/maps.mjs";
+import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches, getAllMatchIds } from "@/app/lib/maps.mjs";
 import Image from "next/image";
 import MatchesList from "@/app/UI/MatchList";
 import Pagination from "@/app/UI/Pagination";
+import { simpleQuery } from "@/app/lib/database.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -42,6 +43,15 @@ export default async function MapPage({params, searchParams}){
 
     const recentMatches = await getRecentMatches(id,page,perPage);
     const totalMatches = await getTotalMatches(id);
+
+    //const matchIds = await getAllMatchIds(id);
+
+    //console.log(matchIds);
+
+   // const query = `SELECT nstats_matches.id,nstats_matches.map_id, nstats_match_players.* 
+    //FROM nstats_matches LEFT JOIN nstats_match_players ON nstats_matches.id=nstats_match_players.match_id ORDER BY kills DESC LIMIT 10`;
+
+    //console.log(await simpleQuery(query));
 
     return <main>
         <Header>{info.name}</Header>

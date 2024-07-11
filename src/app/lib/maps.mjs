@@ -348,3 +348,15 @@ export async function getTotalMatches(id){
     const result = await simpleQuery(query, [id]);
     return result[0].total_matches;
 }
+
+
+export async function getAllMatchIds(id){
+
+    const query = `SELECT id FROM nstats_matches WHERE map_id=?`;
+
+    const result = await simpleQuery(query, [id]);
+
+    return result.map((r) =>{
+        return r.id;
+    });
+}

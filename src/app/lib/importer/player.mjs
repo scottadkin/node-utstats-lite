@@ -19,6 +19,7 @@ export class Player{
         this.bSpectator = 1;
         this.masterId = null;
         this.bFirstBlood = 0;
+        this.playtime = 0;
 
         this.ping = {
             "min": null,
@@ -28,7 +29,7 @@ export class Player{
 
         this.pings = [];
 
-        this.connects = [];
+        this.connects = [timestamp];
         this.disconnects = [];
 
         this.stats = {
@@ -92,11 +93,14 @@ export class Player{
         this.lastFragEvent = -99999;
     }
 
-    connected(timestamp){
+    connected(timestamp, bAsPlayer){
 
-        this.connects.push(timestamp);
-        this.bHadConnectEvent = true;
-        this.bSpectator = 0;
+        if(this.connects.indexOf(timestamp) === -1) this.connects.push(timestamp);
+
+        if(bAsPlayer){
+            this.bHadConnectEvent = true;
+            this.bSpectator = 0;
+        }
     }
 
     disconnect(timestamp){
@@ -195,19 +199,20 @@ export class Player{
         for(let i = 0; i < this.connects.length; i++){
 
             let con = this.connects[i];
-            const disc = this.disconnects[i];
+            let disc = this.disconnects[i];
+
+            if(disc === undefined) disc = matchEnd;
 
             if(con < matchStart) con = matchStart;
 
-            const diff = disc - con;
+            let diff = disc - con;
 
             //ignore connects before match start, if diff < 0 disconnect happened before match start
-            if(diff < 0) continue;
+            if(diff <= 0) continue;
 
             playtime += diff;
 
         }
-
         this.playtime = playtime;
     }
 }

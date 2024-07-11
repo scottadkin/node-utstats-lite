@@ -12,6 +12,12 @@ export class PlayerManager{
         this.players = [];
 
         this.mergedPlayers = {};
+
+
+        this.renameHistory = [];
+
+        this.idsToNames = {};
+        this.namesToIds = {};
     }
 
     parseLine(timestamp, line){
@@ -39,6 +45,8 @@ export class PlayerManager{
 
             const result = playerNameReg.exec(line);
             if(result === null) return;
+
+            this.namesToIds[result[1]] = parseInt(result[2]);
 
             this.addPlayer(timestamp, result[1], parseInt(result[2]));
             return;
@@ -131,7 +139,7 @@ export class PlayerManager{
         }
 
         if(type === "teamchange"){
-            this.parseTeamChange(line);
+            this.parseTeamChange(timestamp, line);
             return;
         }
 
@@ -153,7 +161,7 @@ export class PlayerManager{
         
     }
 
-    parseTeamChange(line){
+    parseTeamChange(timestamp, line){
 
         const reg = /^teamchange\t(\d+?)\t(\d+)$/i;
 
@@ -167,6 +175,8 @@ export class PlayerManager{
         const player = this.getPlayerById(playerId);
 
         if(player === null){
+
+            this.addPlayer(timestamp, "", playerId);
             new Message(`Failed to get player by id ${playerId}, parseTeamChange()`,"warning");
             return;
         }
@@ -243,6 +253,8 @@ export class PlayerManager{
 
     getPlayerById(id){
 
+       // create player if not exists, just set id set name and everything else to null
+
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
@@ -255,6 +267,18 @@ export class PlayerManager{
 
     addPlayer(timestamp, name, playerId){
 
+        const testPlayer = this.getPlayerById(playerId);
+
+        this.idsToNames[playerId] = name;
+
+        if(testPlayer !== null){
+            //process.exit();
+            this.renameHistory.push({"playerId": playerId, "newName": name});
+            testPlayer.name = name;
+           // testPlayer.connected(timestamp);
+            return;
+        }
+
         this.players.push(new Player(timestamp, name, playerId));
     }
 
@@ -264,7 +288,7 @@ export class PlayerManager{
 
             const p = this.players[i];
 
-            if(p.name === playerName) p.connected(timestamp);
+            if(p.name === playerName) p.connected(timestamp, true);
         }
     }
 
@@ -393,7 +417,7 @@ export class PlayerManager{
 
         for(const p of Object.values(this.mergedPlayers)){
 
-            if(p.bSpectator === 1) continue;
+            if(p.bSpectator === 1 && p.stats.timeOnServer === 0) continue;
 
             if(p.bBot === 0){
                 uniqueNames.push(p.name);
@@ -438,6 +462,27 @@ export class PlayerManager{
     }
 
 
+    getFinalName(oldName){
+
+        if(this.renameHistory.length === 0) return oldName;
+
+        let lastName = null;
+
+        for(let i = 0; i < this.renameHistory.length; i++){
+
+            const h = this.renameHistory[i];
+
+            if(h.oldName.toLowerCase() === oldName.toLowerCase()){
+                lastName = h.newName;
+            }
+        }
+
+        if(lastName !== null) return lastName;
+
+        return oldName;
+    }
+
+
     mergePlayers(){
 
         const mergeKeys = [
@@ -470,15 +515,20 @@ export class PlayerManager{
 
             const p = this.players[i];
 
-            if(this.mergedPlayers[p.name] === undefined){
-                this.mergedPlayers[p.name] = p;
-                this.mergedPlayers[p.name].merges = 1;
-                this.mergedPlayers[p.name].totalEff = p.stats.efficiency;
-                this.mergedPlayers[p.name].totalTTL = p.stats.ttl;
+            const finalName = this.idsToNames[p.id];
+            
+
+            if(this.mergedPlayers[finalName] === undefined){
+                this.mergedPlayers[finalName] = p;
+                this.mergedPlayers[finalName].merges = 1;
+                this.mergedPlayers[finalName].totalEff = parseFloat(p.stats.efficiency);
+                this.mergedPlayers[finalName].totalTTL = parseFloat(p.stats.ttl);
+
+                if(p.stats.timeOnServer > 0) this.mergedPlayers[finalName].bSpectator = 0;
                 continue;
             }
 
-            const master = this.mergedPlayers[p.name];
+            const master = this.mergedPlayers[finalName];
             master.merges += 1;
 
             if(master.hwid === "") master.hwid = p.hwid;
@@ -489,20 +539,21 @@ export class PlayerManager{
             //if player played at any point don't mark them as a spectator even after reconnects
             if(master.bSpectator === 0 || p.bSpectator === 0) master.bSpectator = 0;
 
+
             master.team = p.team;
             
        
 
-            master.stats.totalEff += p.stats.efficiency;
-            master.stats.totalTTL += p.stats.ttl;
+            //master.stats.totalEff += parseFloat(p.stats.efficiency);
+            //master.stats.totalTTL += parseFloat(p.stats.ttl);
 
-            if(master.stats.totalEff > 0){
+            /*if(master.stats.totalEff > 0){
                 master.stats.efficiency = master.stats.totalEff / master.stats.merges;
             }
 
             if(master.stats.totalTTL > 0){
                 master.stats.ttl = master.stats.totalTTL / master.stats.merges;
-            }
+            }*/
 
             //merge basic stats events
             for(let x = 0; x < mergeKeys.length; x++){
@@ -562,13 +613,36 @@ export class PlayerManager{
                 master.stats.items[itemType] += timesUsed;
             }
 
+
+            if(master.stats.kills > 0){
+
+                if(master.stats.deaths > 0){
+                    master.stats.efficiency = master.stats.kills / (master.stats.kills + master.stats.deaths) * 100;
+                }else{
+                    master.stats.efficiency = 100;
+                }
+            }else{
+                master.stats.efficiency = 0;
+            }
+
+
+            if(master.stats.totalTTL > 0){
+                master.stats.ttl = master.stats.totalTTL / master.stats.merges;
+            }
+
             master.pings = [...master.pings, ...p.pings];
 
             master.connects = [... new Set([...master.connects, ...p.connects])];
 
             master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];
 
+            if(master.stats.timeOnServer > 0) master.bSpectator = 0;
         }
+
+       // console.log(this.renameHistory);
+        //console.log(Object.keys(this.mergedPlayers));
+        //console.log(this.idsToNames);
+        //console.log(this.namesToIds);
     }
 
     matchEnded(matchStart, matchEnd){
@@ -596,7 +670,7 @@ export class PlayerManager{
     setPlayerPlaytime(matchStart, matchEnd){
 
         for(const p of Object.values(this.mergedPlayers)){
-            
+
             p.setPlaytime(matchStart, matchEnd);
         }
     }
@@ -606,6 +680,7 @@ export class PlayerManager{
         if(bHardcore === 0) return;
 
         for(const player of Object.values(this.mergedPlayers)){
+
             player.playtime = scalePlaytime(player.playtime, bHardcore);
         }
     }
@@ -674,7 +749,7 @@ export class PlayerManager{
 
         for(const player of Object.values(this.mergedPlayers)){
 
-            if(player.bSpectator === 1) continue;
+            if(player.bSpectator === 1 && player.stats.timeOnServer === 0) continue;
 
             if(player.bBot === 0){
                 ids.push(player.masterId);

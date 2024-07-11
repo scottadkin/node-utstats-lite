@@ -296,7 +296,9 @@ export function plural(value, word){
 
 export function scalePlaytime(playtime, bHardcore){
 
-    if(bHardcore && playtime !== 0){
+    if(playtime <= 0) return 0;
+
+    if(bHardcore){
         return playtime / 1.1;      
     }
 
