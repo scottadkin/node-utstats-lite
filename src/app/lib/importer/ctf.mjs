@@ -6,6 +6,7 @@ export class CTF{
     constructor(){
 
         this.events = [];
+
     }
 
     parseLine(timestamp, line){
@@ -30,10 +31,10 @@ export class CTF{
             return;
         }
 
-        if(type === "flag_kill"){
+        /*if(type === "flag_kill"){
             this.events.push({"type": "kill", "playerId": parseInt(subString), "timestamp": timestamp});
             return;
-        }
+        }*/
 
         if(type === "flag_cover"){
 
@@ -134,7 +135,7 @@ export class CTF{
     }
 
 
-    setPlayerStats(playerManager){
+    setPlayerStats(playerManager, killsManager){
 
         for(let i = 0; i < this.events.length; i++){
 
@@ -149,6 +150,8 @@ export class CTF{
 
             player.stats.ctf[e.type]++;
         }
+
+        this.setFlagKills(playerManager, killsManager);
     }
 
     bAnyCTFEvents(players){
@@ -188,6 +191,54 @@ export class CTF{
             }
 
             await updatePlayerTotals(playerIds);
+        }
+    }
+
+
+    setFlagKills(playerManager, killsManager){
+
+        for(let i = 0; i < this.events.length; i++){
+
+            const e = this.events[i];
+
+            let killer = null;
+
+            const player = playerManager.getPlayerById(e.playerId);
+
+            const deathInfo = killsManager.getDeath(e.timestamp, e.playerId);
+
+            if(deathInfo !== null){
+
+                killer = playerManager.getPlayerById(deathInfo.killer);
+                //suicide
+                if(killer === null){
+                    player.bHasFlag = false;
+                    //new Message(`ctf deathInfo killer is null`,"warning");
+                    continue;
+                }
+
+                if(player.bHasFlag && !deathInfo.bTeamKill){
+
+                    killer.stats.ctf.kill++;
+                    player.bHasFlag = false;
+                    continue;
+                }
+            }
+            
+
+            if(e.type === "taken" || e.type === "pickedup"){
+                player.bHasFlag = true;      
+                continue; 
+            }
+
+            if(e.type === "dropped"){
+                player.bHasFlag = false;
+                continue;
+            }
+
+            if(e.type === "capture"){
+                player.bHasFlag = false;
+            }
         }
     }
 

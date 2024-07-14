@@ -89,6 +89,10 @@ export class Player{
             }
         };
 
+
+        //work around flag_kill event not always logging in smartCTF
+        this.bHasFlag = false;
+
         //last time player killed or died
         this.lastFragEvent = -99999;
     }

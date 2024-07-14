@@ -77,12 +77,14 @@ export class MatchParser{
         this.players.bIgnoreBots = this.bIgnoreBots;
 
 
+        this.kills.setAllDeaths();
         //append (insta) if game is instagib
         this.gametype.updateName();
 
-        this.ctf.setPlayerStats(this.players);
+        this.ctf.setPlayerStats(this.players, this.kills);
         await this.dom.setPointIds();
         this.dom.setPlayerCapStats(this.players);
+        
         this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
         this.items.setPlayerStats(this.players);
 
@@ -214,6 +216,7 @@ export class MatchParser{
         const gameReg = /^game\t(.+)$/i;        
         const mapReg = /^map\t(.+)$/i;
         const killReg = /^(kill|teamkill)\t(.+)$/i
+        const suicideReg = /^suicide\t(.+)$/i;
 
         const teamScoreReg = /^teamscore\t(\d+)\t(.+)$/i;
         const headshotReg = /^headshot\t.+$/i;
@@ -287,6 +290,11 @@ export class MatchParser{
 
                 this.kills.parseLine(timestamp, subString);
                 this.weapons.parseLine(subString);
+                continue;
+            }
+
+            if(suicideReg.test(subString)){
+                this.kills.parseSuicide(timestamp, subString);
                 continue;
             }
 

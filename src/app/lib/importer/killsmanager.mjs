@@ -10,19 +10,25 @@ export class KillsManager{
         this.kills = [];
         this.teamKills = [];
         this.headshots = [];
+        this.suicides = [];
+
+        //all deaths used for CTF
+        this.deaths = [];
+
         this.firstBloodId = -1;
     }
 
     parseLine(timestamp, line){
 
-        const reg = /^(kill|teamkill)\t(\d+?)\t(.+?)\t(\d+?)\t(.+?)\t(.+)$/i;
-    
+        const reg = /^(kill|teamkill)\t(\d+?)\t(.+?)\t(\d+?)\t(.+?)\t(.+)$/i;    
         const result = reg.exec(line);
+
 
         if(result === null){
             this.parseHeadshot(timestamp, line);
             return;
         }
+        
 
         const killType = result[1].toLowerCase();
         const killerId = parseInt(result[2]);
@@ -57,6 +63,20 @@ export class KillsManager{
             "timestamp": timestamp,
             "killerId": parseInt(result[1])
         });
+    }
+
+
+    parseSuicide(timestamp, line){
+
+        const suicideReg = /^suicide\t(\d+)\t.+$/i;
+
+        const result = suicideReg.exec(line);
+
+        if(result === null) return;
+
+        const playerId = parseInt(result[1]);
+
+        this.suicides.push({"timestamp": parseFloat(timestamp), "playerId": playerId});
     }
 
 
@@ -182,8 +202,58 @@ export class KillsManager{
         }
     }
 
-
     setFirstBloodId(id){
         this.firstBloodId = parseInt(id);
+    }
+
+
+
+    setAllDeaths(){
+
+        for(let i = 0; i < this.kills.length; i++){
+
+            const k = this.kills[i];
+            this.deaths.push({"timestamp": k.timestamp, "victim": k.victimId, "killer": k.killerId, "bTeamKill": false});
+        }
+
+        for(let i = 0; i < this.teamKills.length; i++){
+
+            const k = this.teamKills[i];
+            this.deaths.push({"timestamp": k.timestamp, "victim": k.victimId, "killer": k.killerId, "bTeamKill": true});
+        }
+
+        for(let i = 0; i < this.suicides.length; i++){
+
+            const s = this.suicides[i];
+
+            this.deaths.push({"timestamp": s.timestamp, "victim": s.playerId});
+        }
+
+
+        this.deaths.sort((a, b) =>{
+
+            a = a.timestamp;
+            b = b.timestamp;
+
+            if(a < b) return -1;
+            if(a > b) return 1;
+            return 0;
+        });
+    }
+
+    getDeath(timestamp, playerId){
+
+        for(let i = 0; i < this.deaths.length; i++){
+
+            const d = this.deaths[i];
+
+            if(d.timestamp > timestamp) return null;
+
+            if(d.timestamp === timestamp && d.victim === playerId){
+                return d;
+            }
+        }
+
+        return null;
     }
 }

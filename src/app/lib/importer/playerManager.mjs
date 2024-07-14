@@ -510,7 +510,6 @@ export class PlayerManager{
             ctfKeys = Object.keys(this.players[0].stats.ctf);
         }
 
-
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
