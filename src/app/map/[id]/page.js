@@ -4,6 +4,8 @@ import Image from "next/image";
 import MatchesList from "@/app/UI/MatchList";
 import Pagination from "@/app/UI/Pagination";
 import { simpleQuery } from "@/app/lib/database.mjs";
+import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
+import { headers } from 'next/headers';
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -13,9 +15,25 @@ export async function generateMetadata({ params, searchParams }, parent) {
     const info = await getMapInfo(id);
 
 
+    const images = await getMapImages([info.name]);
+    const image = images[Object.keys(images)[0]];
+
+    //console.log(`image`, image);
+
+    const headersList = headers();
+  
+    const host = headersList.get("host"); // to get domain
+    //console.log(headersList.get('next-url')); // to get url
+
+    const protocal = headersList.get("x-forwarded-proto");
+
     return {
+        "metadataBase": `${protocal}://${host}`,
         "title": `${info.name} - Node UTStats Lite`,
-        "description": `View all matches for the map called ${info.name}`
+        "description": `View all matches for the map called ${info.name}`,
+        "openGraph": {
+            "images": [`./images/maps/${image}`]
+        }
     }
 }
 
@@ -58,6 +76,23 @@ export default async function MapPage({params, searchParams}){
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>
+        <table className="t-width-1">
+            <tbody>
+                <tr>
+                    <th>First Match</th>
+                    <th>Last Match</th>
+                    <th>Matches Played</th>
+                    <th>Playtime</th>
+                    
+                </tr>
+                <tr>
+                    <td className="date">{convertTimestamp(new Date(info.first_match) * 0.001, true)}</td>
+                    <td className="date">{convertTimestamp(new Date(info.last_match * 0.001), true)}</td>
+                    <td>{info.matches}</td>
+                    <td className="date">{toPlaytime(info.playtime)}</td>
+                </tr>
+            </tbody>
+        </table>
         <Header>Recent Matches</Header>
         <Pagination currentPage={page} perPage={perPage} url={`/map/${id}/?pp=${perPage}&page=`} results={totalMatches}/>
         <MatchesList data={recentMatches} bIgnoreMap={true}/>
