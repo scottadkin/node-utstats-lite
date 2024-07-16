@@ -281,9 +281,6 @@ export class MatchParser{
                 continue;
             }   
 
-            //we don't want to save stuff in warmpup
-            if(this.matchStart === -1) continue;
-
 
             if(statPlayerReg.test(subString)){
                 //this.players.statLines.push({"timestamp": timestamp, "line": subString});
@@ -295,6 +292,13 @@ export class MatchParser{
                 this.matchEnd = timestamp;
                 continue;
             }
+
+            if(this.matchStart !== -1 && headshotReg.test(subString)){
+
+                this.kills.parseHeadshot(timestamp, subString);
+                continue;
+            }
+
 
             if(killReg.test(subString)){
 
@@ -314,12 +318,7 @@ export class MatchParser{
                 continue;
             } 
 
-            if(headshotReg.test(subString)){
-
-                this.kills.parseLine(timestamp, subString);
-                continue;
-            }
-
+    
             if(firstBloodReg.test(subString)){
 
                 const result = firstBloodReg.exec(subString);

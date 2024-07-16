@@ -487,7 +487,7 @@ export class PlayerManager{
 
         const mergeKeys = [
             "score", "frags", "kills", "deaths",
-            "suicides", "teamKills", "timeOnServer"
+            "suicides", "teamKills", "timeOnServer", "headshots"
         ];
 
         const intTypes = [
