@@ -249,11 +249,6 @@ export class MatchParser{
                 continue;
             }
 
-            if(statPlayerReg.test(subString)){
-                //this.players.statLines.push({"timestamp": timestamp, "line": subString});
-                this.players.parseStatLine(timestamp, subString);
-                continue;
-            }
 
             if(infoReg.test(subString)){
 
@@ -284,6 +279,21 @@ export class MatchParser{
                 const result = mapReg.exec(subString);
                 this.map.parseLine(result[1]);
                 continue;
+            }   
+
+            //we don't want to save stuff in warmpup
+            if(this.matchStart === -1) continue;
+
+
+            if(statPlayerReg.test(subString)){
+                //this.players.statLines.push({"timestamp": timestamp, "line": subString});
+                this.players.parseStatLine(timestamp, subString);
+                continue;
+            }
+
+            if(endReg.test(subString)){
+                this.matchEnd = timestamp;
+                continue;
             }
 
             if(killReg.test(subString)){
@@ -302,14 +312,10 @@ export class MatchParser{
 
                 this.setTeamScores(teamScoreReg.exec(subString));
                 continue;
-            }    
-
-            if(endReg.test(subString)){
-                this.matchEnd = timestamp;
-                continue;
-            }
+            } 
 
             if(headshotReg.test(subString)){
+
                 this.kills.parseLine(timestamp, subString);
                 continue;
             }
