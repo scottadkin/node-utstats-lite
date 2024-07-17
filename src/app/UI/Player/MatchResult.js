@@ -6,7 +6,9 @@ export default function matchResult({playerId, data}){
     let result = "";
 
     let bWinner = false;
-    let bDraw = false;
+    //total amount of teams on the winners score
+    let totalWinners = 0;
+
 
     if(data.total_teams < 2){
 
@@ -34,41 +36,30 @@ export default function matchResult({playerId, data}){
             return 0;
         });
 
-
         const winnerScore = teamScores[0].score;
 
         for(let i = 0; i < teamScores.length; i++){
 
             const t = teamScores[i];
 
-            if(t.team === data.team){
+            if(t.score === winnerScore){
 
-                if(i === 0){
-                    bWinner = true;
-                }else{
+                totalWinners++;
 
-                    if(t.score === winnerScore){
-                        bWinner = false;
-                        bDraw = true;
-                        break;
-                    }
-                }
+                if(t.team === data.team) bWinner = true;      
             }
         }
     }
 
-    if(bWinner){
+    if(bWinner && totalWinners === 1){
         result = <span className="green-font">Winner</span>
+
+    }else if(bWinner && totalWinners > 1){
+        result = <span className="yellow-font">Draw</span>
     }else{
-
-        if(bDraw){
-            result = <span className="yellow-font">Draw</span>
-        }else{
-            result = <span className="red-font">Loser</span>
-        }
+        result = <span className="red-font">Loser</span>
     }
-
- 
+    
     return <div>
         {result}
     </div>
