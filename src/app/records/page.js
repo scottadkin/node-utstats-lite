@@ -39,14 +39,11 @@ function renderDefaultMatchLists(data){
 
         const rows = [];
 
-
-
         for(let i = 0; i < records.length; i++){
 
             const r = records[i];
 
             const player = getPlayer(players, r.player_id);
-
             const matchInfo = getMatchInfo(matchData, r.match_id);
 
             rows.push({
@@ -82,6 +79,10 @@ function renderDefaultMatchLists(data){
     </>
 }
 
+function changeMode(a){
+
+}
+
 export default async function Records({params, searchParams}){
 
     try{
@@ -90,9 +91,16 @@ export default async function Records({params, searchParams}){
     
         let data = await getDefaultMatchLists();
 
-        console.log(data);
+        const tabs = [
+            {"value": "match", "display": "Single Match"},
+            {"value": "lifetime", "display": "Lifetime"},
+        ];
 
         return <main>
+            <div className="tabs-wrapper">
+                <div className="tab">Single Match</div>
+                <div className="tab">Lifetime</div>
+            </div>
             {renderDefaultMatchLists(data)}
         </main>
 

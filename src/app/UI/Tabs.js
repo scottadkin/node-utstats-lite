@@ -1,5 +1,3 @@
-import styles from "./Tabs.module.css";
-
 export default function Tabs({options, selectedValue, changeSelected}){
 
     if(options === undefined) return null;
@@ -11,10 +9,10 @@ export default function Tabs({options, selectedValue, changeSelected}){
 
         const o = options[i];
  
-        let currentClass = styles.tab;
+        let currentClass = "tab";
 
         if(o.value.toLowerCase() === selectedValue.toLowerCase()){
-            currentClass += ` ${styles.selected}`;
+            currentClass += ` tab-selected`;
         }
 
         elems.push(<div key={i} className={currentClass} onClick={() =>{
@@ -24,7 +22,7 @@ export default function Tabs({options, selectedValue, changeSelected}){
         </div>);
     }
 
-    return <div className={styles.wrapper}>
+    return <div className="tabs-wrapper">
         {elems}
     </div>
 }
