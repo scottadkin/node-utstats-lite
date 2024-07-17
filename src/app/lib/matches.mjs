@@ -402,3 +402,45 @@ export async function setMatchHash(id, hash){
 
     return await simpleQuery(query, [hash, id]);
 }
+
+export async function getBasicMatchesInfo(matchIds){
+
+    if(matchIds.length === 0) return {};
+
+    const query = `SELECT id,server_id,gametype_id,map_id FROM nstats_matches WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [matchIds]);
+
+    const serverIds = new Set();
+    const gametypeIds = new Set();
+    const mapIds = new Set();
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        serverIds.add(r.server_id);
+        gametypeIds.add(r.gametype_id);
+        mapIds.add(r.map_id);
+    }
+
+    const serverNames = await getServerNames([...serverIds]);
+    const gametypeNames = await getGametypeNames([...gametypeIds]);
+    const mapNames = await getMapNames([...mapIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = r;
+
+        r.serverName = serverNames[r.server_id];
+        r.gametypeName = gametypeNames[r.gametype_id];
+        r.mapName = mapNames[r.map_id];
+    }
+
+
+    return data;
+
+}
