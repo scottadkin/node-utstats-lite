@@ -28,7 +28,7 @@ function renderDefaultMatchLists(mode, data){
     
     for(const [type, records] of Object.entries(data.records)){
         
-        elems.push(<Header key={type}>{type} Records</Header>);
+        elems.push(<Header key={type}>{type}</Header>);
 
         const headers = {
             "rank": {"title": "#"},
@@ -88,13 +88,12 @@ function renderDefaultLifetimeLists(mode, data){
     if(mode !== "lifetime" || data === null) return null;
 
     const players = data.playerData;
-    const matchData = data.matchData;
 
     const elems = [];
     
     for(const [type, records] of Object.entries(data.records)){
         
-        elems.push(<Header key={type}>{type} Records</Header>);
+        elems.push(<Header key={type}>{type}</Header>);
 
         const headers = {
             "rank": {"title": "#"},
@@ -139,6 +138,43 @@ function renderDefaultLifetimeLists(mode, data){
     </>
 }
 
+function renderSelect(mode, cat){
+    
+    //create as a component instead of having it in this file and mark use client
+
+    const match = [
+        {"display": "Score", "value": "score"},
+        {"display": "Frags", "value": "frags"},
+        {"display": "Kills", "value": "kills"},
+        {"display": "Deaths", "value": "deaths"},
+        {"display": "Suicides", "value": "suicides"},
+        {"display": "Team Kills", "value": "team_kills"},
+        {"display": "Playtime", "value": "time_on_server"},
+        {"display": "TTL", "value": "ttl"},
+        {"display": "Best Spree", "value": "spree_best"},
+        {"display": "Best Multi Kill", "value": "multi_best"},
+        {"display": "Headshots", "value": "headshots"},
+    ];
+
+    const lifetime = [];
+
+    const options = (mode === "match") ? match : lifetime;
+
+    
+
+    return <div className="form">
+        <div className="form-row">
+            <label>Record Type</label>
+            <select className="select" value={cat}>
+                <option value="" key="-1">-</option>
+                {options.map((o, i) =>{
+                    return <option key={i} value={o.value}>{o.display}</option>
+                })}
+            </select>
+        </div>
+    </div>;
+}
+
 export default async function Records({params, searchParams}){
 
     try{
@@ -166,6 +202,8 @@ export default async function Records({params, searchParams}){
         ];
 
         return <main>
+            <Header>Records</Header>
+            {renderSelect(mode, cat)}
             <TabsLinks options={tabs} selectedValue={mode} url="/records/?mode="/>
             {renderDefaultMatchLists(mode, data)}
             {renderDefaultLifetimeLists(mode, data)}

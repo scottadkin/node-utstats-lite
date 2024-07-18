@@ -68,10 +68,10 @@ export async function getDefaultMatchLists(){
 
     return {
         "records": {
-            "Score": scores,
-            "Kill": kills,
-            "Death": deaths,
-            "Suicide": suicides,
+            "Highest Score": scores,
+            "Most Kills": kills,
+            "Most Deaths": deaths,
+            "Most Suicides": suicides,
             "Best Spree": sprees,
             "Best Multi Kill": multis,
         }, 
@@ -111,11 +111,11 @@ export async function getDefaultLifetimeLists(){
 
     return {
         "records": {
-            "Wins": wins,
-            "Kills": kills,
-            "Deaths": deaths,
-            "Most Godlike": sprees,
-            "Most Monster Kill": multis
+            "Total Wins": wins,
+            "Total Kills": kills,
+            "Total Deaths": deaths,
+            "Total Godlikes": sprees,
+            "Total Monster Kills": multis
         },
         "playerData": playerData
     };
