@@ -1,38 +1,41 @@
 import { simpleQuery } from "./database.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
 import { getBasicMatchesInfo } from "./matches.mjs";
+import { sanitizePagePerPage } from "./generic.mjs";
 
 
-const VALID_PLAYER_TYPES = [
+const VALID_PLAYER_MATCH_TYPES = [
     "score", "frags", "kills", "deaths", "suicides", "spree_best", "multi_best"
 ];
 
-function bValidPlayerType(type){
+const VALID_PLAYER_LIFETIME_TYPES = [
+    "wins", "score", "frags", "kills", "deaths", "suicides", "spree_5", "multi_4"
+];
+
+function bValidPlayerMatchType(type){
 
     type = type.toLowerCase();
 
-    return VALID_PLAYER_TYPES.indexOf(type) !== -1;
+    return VALID_PLAYER_MATCH_TYPES.indexOf(type) !== -1;
+}
+
+function bValidPlayerLifetimeType(type){
+
+    type = type.toLowerCase();
+
+    return VALID_PLAYER_LIFETIME_TYPES.indexOf(type) !== -1;
 }
 
 export async function getPlayersMatchRecords(type, page, perPage){
 
-    page = parseInt(page);
-    perPage = parseInt(perPage);
 
-    if(page !== page) page = 1;
-    page--;
-    if(page < 0) page = 0;
+    const [cleanPage, cleanPerPage, cleanStart] = sanitizePagePerPage(page, perPage);
 
-    if(perPage !== perPage) perPage = 25;
-    if(perPage < 1 || perPage > 100) perPage = 25;
+    if(!bValidPlayerMatchType(type)) throw new Error(`Not a valid Player Record type!`);
 
-    if(!bValidPlayerType(type)) throw new Error(`Not a valid Player Record type!`);
-
-    let start = page * perPage;
-    
     const query = `SELECT player_id,country,match_id,match_date,${type} as record_type,time_on_server FROM nstats_match_players ORDER BY record_type DESC LIMIT ?, ?`;
 
-    return await simpleQuery(query, [start, perPage]);
+    return await simpleQuery(query, [cleanStart, cleanPerPage]);
 }
 
 
@@ -74,5 +77,46 @@ export async function getDefaultMatchLists(){
         }, 
         "playerData": players, 
         "matchData": matchesInfo
+    };
+}
+
+
+export async function getPlayersLifetimeRecords(type, gametype, page, perPage){
+
+    if(!bValidPlayerLifetimeType(type)) throw new Error("Not a valid player lifetime type");
+
+    const [cleanPage, cleanPerPage, cleanStart] = sanitizePagePerPage(page, perPage);
+
+    const query = `SELECT player_id,last_active,playtime,total_matches,${type} as record_value 
+    FROM nstats_player_totals WHERE gametype_id=? ORDER BY record_value DESC LIMIT ?, ?`;
+
+    return await simpleQuery(query, [gametype, cleanStart, cleanPerPage]);
+}
+
+export async function getDefaultLifetimeLists(){
+
+    const wins = await getPlayersLifetimeRecords("wins", 0, 1, 5);
+    const kills = await getPlayersLifetimeRecords("kills", 0, 1, 5);
+    const deaths = await getPlayersLifetimeRecords("deaths", 0, 1, 5);
+    const sprees = await getPlayersLifetimeRecords("spree_5", 0, 1, 5);
+    const multis = await getPlayersLifetimeRecords("multi_4", 0, 1, 5);
+
+    const allData = [...wins, ...kills, ...deaths, ...sprees, ...multis];
+
+    const playerIds = [...new Set(allData.map((d) =>{
+        return d.player_id;
+    }))]
+
+    const playerData = await getBasicPlayerInfo(playerIds);
+
+    return {
+        "records": {
+            "Wins": wins,
+            "Kills": kills,
+            "Deaths": deaths,
+            "Most Godlike": sprees,
+            "Most Monster Kill": multis
+        },
+        "playerData": playerData
     };
 }
