@@ -5,6 +5,7 @@ import InteractiveTable from "../UI/InteractiveTable";
 import CountryFlag from "../UI/CountryFlag";
 import { convertTimestamp, getOrdinal, getPlayer, toPlaytime } from "../lib/generic.mjs";
 import Link from "next/link";
+import TabsLinks from "../UI/TabsLinks";
 
 
 function getMatchInfo(matches, matchId){
@@ -19,6 +20,8 @@ function getMatchInfo(matches, matchId){
 function renderDefaultMatchLists(data){
 
     const elems = [];
+
+    if(data === null) return null;
 
     const players = data.playerData;
     const matchData = data.matchData;
@@ -79,17 +82,25 @@ function renderDefaultMatchLists(data){
     </>
 }
 
-function changeMode(a){
-
-}
-
 export default async function Records({params, searchParams}){
 
     try{
 
         console.log(params, searchParams);
+
+        let mode = (searchParams.mode !== undefined) ? searchParams.mode : "match";
+        let cat = (searchParams.cat !== undefined) ? searchParams.cat : "";
     
-        let data = await getDefaultMatchLists();
+        let data = null;
+
+
+        if(mode === "match" && cat === ""){
+
+            data = await getDefaultMatchLists();
+            
+        }else if(mode === "lifetime" && cat === ""){
+
+        }
 
         const tabs = [
             {"value": "match", "display": "Single Match"},
@@ -97,10 +108,7 @@ export default async function Records({params, searchParams}){
         ];
 
         return <main>
-            <div className="tabs-wrapper">
-                <div className="tab">Single Match</div>
-                <div className="tab">Lifetime</div>
-            </div>
+            <TabsLinks options={tabs} selectedValue={mode} url="/records/?mode="/>
             {renderDefaultMatchLists(data)}
         </main>
 

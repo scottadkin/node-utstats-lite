@@ -66,13 +66,13 @@ export async function getDefaultMatchLists(){
     return {
         "records": {
             "Score": scores,
-            "Best Spree": sprees,
-            "Best Multi Kill": multis,
             "Kill": kills,
             "Death": deaths,
-            "Suicide": suicides
+            "Suicide": suicides,
+            "Best Spree": sprees,
+            "Best Multi Kill": multis,
         }, 
         "playerData": players, 
-        "matchData": matchesInfo};
-  
+        "matchData": matchesInfo
+    };
 }
