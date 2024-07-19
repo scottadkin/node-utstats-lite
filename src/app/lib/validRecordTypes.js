@@ -1,0 +1,38 @@
+export const VALID_PLAYER_MATCH_TYPES = [
+    {"display": "Score", "value": "score"},
+    {"display": "Frags", "value": "frags"},
+    {"display": "Kills", "value": "kills"},
+    {"display": "Deaths", "value": "deaths"},
+    {"display": "Suicides", "value": "suicides"},
+    {"display": "Team Kills", "value": "team_kills"},
+    {"display": "Playtime", "value": "time_on_server"},
+    {"display": "TTL", "value": "ttl"},
+    {"display": "Best Spree", "value": "spree_best"},
+    {"display": "Best Multi Kill", "value": "multi_best"},
+    {"display": "Headshots", "value": "headshots"},
+];
+
+export const VALID_PLAYER_LIFETIME_TYPES = [
+    {"display": "Wins", "value": "wins"},
+    {"display": "Draws", "value": "draws"},
+    {"display": "Losses", "value": "losses"},
+    {"display": "WinRate", "value": "winrate"},
+    {"display": "Frags", "value": "frags"},
+    {"display": "Kills", "value": "kills"},
+    {"display": "Deaths", "value": "deaths"},
+    {"display": "Suicides", "value": "suicides"},
+    {"display": "Team Kills", "value": "team_kills"},
+    {"display": "Playtime", "value": "time_on_server"},
+    {"display": "Headshots", "value": "headshots"},
+    {"display": "First Bloods", "value": "first_blood"},
+    {"display": "Godlikes", "value": "spree_5"},
+    {"display": "Monster Kills", "value": "multi_4"},
+    {"display": "UDamage Pickups", "value": "item_amp"},
+    {"display": "Shield Belt Pickups", "value": "item_belt"},
+    {"display": "Jump Boots Pickups", "value": "item_boots"},
+    {"display": "Body Armour Pickups", "value": "item_body"},
+    {"display": "Thigh Pads Pickups", "value": "item_pads"},
+    {"display": "Invisibility Pickups", "value": "item_invis"},
+    {"display": "Super Health Pickups", "value": "item_shp"},
+];
+

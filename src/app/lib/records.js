@@ -2,32 +2,49 @@ import { simpleQuery } from "./database.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
 import { getBasicMatchesInfo } from "./matches.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
-
-
-const VALID_PLAYER_MATCH_TYPES = [
-    "score", "frags", "kills", "deaths", "suicides", "spree_best", "multi_best"
-];
-
-const VALID_PLAYER_LIFETIME_TYPES = [
-    "wins", "score", "frags", "kills", "deaths", "suicides", "spree_5", "multi_4"
-];
+import { VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES } from "./validRecordTypes";
 
 function bValidPlayerMatchType(type){
 
     type = type.toLowerCase();
 
-    return VALID_PLAYER_MATCH_TYPES.indexOf(type) !== -1;
+    for(let i = 0; i < VALID_PLAYER_MATCH_TYPES.length; i++){
+
+        const v = VALID_PLAYER_MATCH_TYPES[i];
+
+        if(v.value === type) return true;
+    }
+
+    return false;
+
 }
 
 function bValidPlayerLifetimeType(type){
 
     type = type.toLowerCase();
 
-    return VALID_PLAYER_LIFETIME_TYPES.indexOf(type) !== -1;
+    for(let i = 0; i < VALID_PLAYER_LIFETIME_TYPES.length; i++){
+
+        const v = VALID_PLAYER_LIFETIME_TYPES[i];
+        
+        if(v.value === type) return true;
+    }
+
+    return false;
+
 }
 
-export async function getPlayersMatchRecords(type, page, perPage){
+/**
+ * 
+ * @param {*} type 
+ * @param {*} page 
+ * @param {*} perPage 
+ * @param {*} bOnlyRecords set to false if you want player,map,gametype,server details
+ * @returns 
+ */
+export async function getPlayersMatchRecords(type, page, perPage, bOnlyRecords){
 
+    if(bOnlyRecords === undefined) bOnlyRecords = true;
 
     const [cleanPage, cleanPerPage, cleanStart] = sanitizePagePerPage(page, perPage);
 
@@ -35,7 +52,29 @@ export async function getPlayersMatchRecords(type, page, perPage){
 
     const query = `SELECT player_id,country,match_id,match_date,${type} as record_type,time_on_server FROM nstats_match_players ORDER BY record_type DESC LIMIT ?, ?`;
 
-    return await simpleQuery(query, [cleanStart, cleanPerPage]);
+    const result = await simpleQuery(query, [cleanStart, cleanPerPage]);
+
+    if(bOnlyRecords) return result;
+
+    const playerIds = new Set();
+    const matchIds = new Set();
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        playerIds.add(r.player_id);
+        matchIds.add(r.match_id);
+    }
+
+    const players = await getBasicPlayerInfo([...playerIds]);
+    const matchesInfo = await getBasicMatchesInfo([...matchIds]);
+
+    return {
+        "records": result, 
+        "playerData": players, 
+        "matchData": matchesInfo
+    };
 }
 
 
@@ -81,7 +120,18 @@ export async function getDefaultMatchLists(){
 }
 
 
-export async function getPlayersLifetimeRecords(type, gametype, page, perPage){
+/**
+ * 
+ * @param {*} type 
+ * @param {*} page 
+ * @param {*} perPage 
+ * @param {*} bOnlyRecords set to false if you want player,map,gametype,server details
+ * @returns 
+ */
+
+export async function getPlayersLifetimeRecords(type, gametype, page, perPage, bOnlyRecords){
+
+    if(bOnlyRecords === undefined) bOnlyRecords = true;
 
     if(!bValidPlayerLifetimeType(type)) throw new Error("Not a valid player lifetime type");
 
@@ -90,7 +140,21 @@ export async function getPlayersLifetimeRecords(type, gametype, page, perPage){
     const query = `SELECT player_id,last_active,playtime,total_matches,${type} as record_value 
     FROM nstats_player_totals WHERE gametype_id=? ORDER BY record_value DESC LIMIT ?, ?`;
 
-    return await simpleQuery(query, [gametype, cleanStart, cleanPerPage]);
+    const result = await simpleQuery(query, [gametype, cleanStart, cleanPerPage]);
+
+    if(bOnlyRecords) return result;
+
+    const playerIds = [...new Set(result.map((r) =>{
+        return r.player_id;
+    }))]
+
+    const playerData = await getBasicPlayerInfo(playerIds);
+
+    return {
+        "records": result,
+        "playerData": playerData
+    };
+
 }
 
 export async function getDefaultLifetimeLists(){
