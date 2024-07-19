@@ -22,7 +22,7 @@ export const VALID_PLAYER_LIFETIME_TYPES = [
     {"display": "Deaths", "value": "deaths"},
     {"display": "Suicides", "value": "suicides"},
     {"display": "Team Kills", "value": "team_kills"},
-    {"display": "Playtime", "value": "time_on_server"},
+    {"display": "Playtime", "value": "playtime"},
     {"display": "Headshots", "value": "headshots"},
     {"display": "First Bloods", "value": "first_blood"},
     {"display": "Godlikes", "value": "spree_5"},

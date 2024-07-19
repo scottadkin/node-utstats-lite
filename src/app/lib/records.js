@@ -34,6 +34,29 @@ function bValidPlayerLifetimeType(type){
 
 }
 
+
+export async function getTotalMatchRecords(){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_match_players WHERE time_on_server>0`;
+
+    const result = await simpleQuery(query);
+
+    if(result.length > 0) return result[0].total_rows;
+
+    return 0;
+}
+
+export async function getTotalLifetimeRecords(){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals WHERE gametype_id=0 AND playtime>0`;
+
+    const result = await simpleQuery(query);
+
+    if(result.length > 0) return result[0].total_rows;
+
+    return 0;
+}
+
 /**
  * 
  * @param {*} type 
@@ -50,7 +73,8 @@ export async function getPlayersMatchRecords(type, page, perPage, bOnlyRecords){
 
     if(!bValidPlayerMatchType(type)) throw new Error(`Not a valid Player Record type!`);
 
-    const query = `SELECT player_id,country,match_id,match_date,${type} as record_type,time_on_server FROM nstats_match_players ORDER BY record_type DESC LIMIT ?, ?`;
+    const query = `SELECT player_id,country,match_id,match_date,${type} as record_type,time_on_server FROM nstats_match_players WHERE time_on_server>0
+     ORDER BY record_type DESC LIMIT ?, ?`;
 
     const result = await simpleQuery(query, [cleanStart, cleanPerPage]);
 
@@ -138,7 +162,7 @@ export async function getPlayersLifetimeRecords(type, gametype, page, perPage, b
     const [cleanPage, cleanPerPage, cleanStart] = sanitizePagePerPage(page, perPage);
 
     const query = `SELECT player_id,last_active,playtime,total_matches,${type} as record_value 
-    FROM nstats_player_totals WHERE gametype_id=? ORDER BY record_value DESC LIMIT ?, ?`;
+    FROM nstats_player_totals WHERE gametype_id=? AND playtime>0 ORDER BY record_value DESC LIMIT ?, ?`;
 
     const result = await simpleQuery(query, [gametype, cleanStart, cleanPerPage]);
 

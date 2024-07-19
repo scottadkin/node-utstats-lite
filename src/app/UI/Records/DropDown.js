@@ -14,7 +14,7 @@ export default function DropDown({mode, cat}){
             <select className="select" value={cat} onChange={(e) =>{
                 router.push(`/records?mode=${mode}&cat=${e.target.value}`);
             }}>
-                <option value="" key="-1">-</option>
+                <option value="" key="-1">Select a category</option>
                 {options.map((o, i) =>{
                     return <option key={i} value={o.value}>{o.display}</option>
                 })}

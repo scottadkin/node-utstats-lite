@@ -1,5 +1,6 @@
 import Header from "../UI/Header";
-import { getDefaultLifetimeLists, getDefaultMatchLists, getPlayersMatchRecords } from "../lib/records";
+import { getDefaultLifetimeLists, getDefaultMatchLists, getPlayersLifetimeRecords, 
+    getPlayersMatchRecords, getTotalMatchRecords, getTotalLifetimeRecords } from "../lib/records";
 import ErrorBox from "../UI/ErrorBox";
 import InteractiveTable from "../UI/InteractiveTable";
 import CountryFlag from "../UI/CountryFlag";
@@ -8,6 +9,7 @@ import Link from "next/link";
 import TabsLinks from "../UI/TabsLinks";
 import DropDown from "../UI/Records/DropDown";
 import {VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES} from "@/app/lib/validRecordTypes";
+import Pagination from "../UI/Pagination";
 
 
 function getMatchInfo(matches, matchId){
@@ -105,11 +107,9 @@ function renderDefaultLifetimeLists(mode, cat, data){
 
     const elems = [];
 
-    const title = getRecordTitle(VALID_PLAYER_LIFETIME_TYPES, cat);
-    
     for(const [type, records] of Object.entries(data.records)){
-        
-        elems.push(<Header key={cat}>{title}</Header>);
+
+        elems.push(<Header key={type}>{type}</Header>);
 
         const headers = {
             "rank": {"title": "#"},
@@ -146,7 +146,7 @@ function renderDefaultLifetimeLists(mode, cat, data){
             });
         }
 
-        elems.push(<InteractiveTable key={cat} headers={headers} rows={rows} bNoHeaderSorting={true} width={3}/>);
+        elems.push(<InteractiveTable key={type} headers={headers} rows={rows} bNoHeaderSorting={true} width={3}/>);
     }
 
     return <>
@@ -160,17 +160,12 @@ function renderSelect(mode, cat){
 }
 
 
-function renderSingleMatchList(mode, cat, data){
+function renderSingleMatchList(mode, cat, data, totalResults, page, perPage){
 
     if(mode !== "match" || data === null || cat === "") return null;
 
-    //console.log(data);
-
     const players = data.playerData;
     const records = data.records;
-
-
-   // console.log(Object.keys(data));
 
     const elems = [];
 
@@ -199,8 +194,13 @@ function renderSingleMatchList(mode, cat, data){
         const player = getPlayer(players, r.player_id);
         const matchInfo = getMatchInfo(data.matchData, r.match_id);
 
+        let value = r.record_type;
+        let displayValue = r.record_type;
+
+        const place = i + perPage * (page - 1) + 1;
+
         rows.push({
-            "rank": {"displayValue": `${i+1}${getOrdinal(i+1)}`, "className": "ordinal"},
+            "rank": {"displayValue": `${place}${getOrdinal(place)}`, "className": "ordinal"},
             "name": {
                 "displayValue": <>
                     <Link href={`/match/${r.match_id}`}><CountryFlag code={player.country}/>{player.name}</Link>
@@ -220,14 +220,75 @@ function renderSingleMatchList(mode, cat, data){
             "map": {
                 "displayValue": matchInfo.mapName
             },
-            "value": {"value": r.record_type}
+            "value": {"value": value, "displayValue": displayValue}
         });
     }
 
-    elems.push(<InteractiveTable key={cat} headers={headers} rows={rows} bNoHeaderSorting={true} width={3}/>)
+    elems.push(<InteractiveTable key={`table_${cat}`} headers={headers} rows={rows} bNoHeaderSorting={true} width={3}/>)
 
     return <>
         {elems}
+        <Pagination url={`/records?mode=${mode}&cat=${cat}&perPage=${perPage}&page=`} currentPage={page} perPage={perPage} results={totalResults}/>
+    </>
+}
+
+function renderSingleLifetimeList(mode, cat, data, totalResults, page, perPage){
+
+    if(mode !== "lifetime" || data === null || cat === "") return null;
+
+    const players = data.playerData;
+    const records = data.records;
+
+    const elems = [];
+
+    const title = getRecordTitle(VALID_PLAYER_LIFETIME_TYPES, cat);
+    
+    
+    elems.push(<Header key={cat}>{title}</Header>);
+
+    const headers = {
+        "rank": {"title": "#"},
+        "name": {"title": "Player"},
+        "date": {"title": "Last Active"},
+        "playtime": {"title": "Playtime"},
+        "value": {"title": "Value"}
+    };
+
+    const rows = [];
+
+    for(let i = 0; i < records.length; i++){
+
+        const r = records[i];
+
+        const player = getPlayer(players, r.player_id);
+
+        const place = i + perPage * (page - 1) + 1;
+
+        rows.push({
+            "rank": {"displayValue": `${place}${getOrdinal(place)}`, "className": "ordinal"},
+            "name": {
+                "displayValue": <>
+                    <Link href={`/player/${r.player_id}`}><CountryFlag code={player.country}/>{player.name}</Link>
+                </>
+            },
+            "date": {
+                "displayValue": convertTimestamp(new Date(r.last_active) * 0.001, true),
+                "className": "date"
+            },
+            "playtime": {
+                "displayValue": toPlaytime(r.playtime),
+                "className": "date"
+            },
+            "value": {"value": r.record_value}
+        });
+    }
+
+    elems.push(<InteractiveTable key={cat} headers={headers} rows={rows} bNoHeaderSorting={true} width={3}/>);
+
+
+    return <>
+        {elems}
+        <Pagination url={`/records?mode=${mode}&cat=${cat}&perPage=${perPage}&page=`} currentPage={page} perPage={perPage} results={totalResults}/>
     </>
 }
 
@@ -236,8 +297,14 @@ export default async function Records({params, searchParams}){
     try{
 
 
-        let page = 1;
-        let perPage = 25;
+        let page = (searchParams.page !== undefined) ? parseInt(searchParams.page) : 1;
+        let perPage = (searchParams.perPage !== undefined) ? parseInt(searchParams.perPage) : 25;
+
+        if(page !== page) page = 1;
+        if(page < 1) page = 1;
+
+        if(perPage !== perPage) perPage = 25;
+        if(perPage < 5 || perPage > 100) perPage = 25;
 
         console.log(params, searchParams);
 
@@ -246,6 +313,15 @@ export default async function Records({params, searchParams}){
     
         let data = null;
 
+        let totalResults = 0;
+
+        if(mode === "match"){
+            totalResults = await getTotalMatchRecords();
+        }else{
+            totalResults = await getTotalLifetimeRecords();
+        }
+
+        console.log(`totalRecords = ${totalResults}`);
 
         if(mode === "match" && cat === ""){
 
@@ -256,7 +332,12 @@ export default async function Records({params, searchParams}){
             data = await getDefaultLifetimeLists();
 
         }else if(mode === "match"){
+
             data = await getPlayersMatchRecords(cat, page, perPage, false);
+
+        }else if(mode === "lifetime"){
+            
+            data = await getPlayersLifetimeRecords(cat, 0, page, perPage, false);
         }
 
         const tabs = [
@@ -270,7 +351,8 @@ export default async function Records({params, searchParams}){
             <TabsLinks options={tabs} selectedValue={mode} url={`/records/?mode=`}/>
             {renderDefaultMatchLists(mode, cat, data)}
             {renderDefaultLifetimeLists(mode, cat, data)}
-            {renderSingleMatchList(mode, cat, data)}
+            {renderSingleMatchList(mode, cat, data, totalResults, page, perPage)}
+            {renderSingleLifetimeList(mode, cat, data, totalResults, page, perPage)}
         </main>
 
     }catch(err){
