@@ -24,6 +24,7 @@ export default function ItemsTable({data, totalTeams}){
 
     const headers = {
         "player": {"title": "Player"},
+        "body": {"title": "Body Armour"},
         "pads": {"title": "Thigh Pads"},
         "shp": {"title": "Super Health Pack"},
         "invis": {"title": "Invisibility"},
@@ -49,6 +50,7 @@ export default function ItemsTable({data, totalTeams}){
                 "displayValue":<PlayerLink id={d.player_id} country={d.country}>{d.name}</PlayerLink>,
                 "className": `player-name-td ${(totalTeams > 0) ? getTeamColorClass(d.team) : ""} text-left`
             },
+            "body": {"value": d.item_body, "displayValue": ignore0(d.item_body)},
             "pads": {"value": d.item_pads, "displayValue": ignore0(d.item_pads)},
             "shp": {"value": d.item_shp, "displayValue": ignore0(d.item_shp)},
             "invis": {"value": d.item_invis, "displayValue": ignore0(d.item_invis)},

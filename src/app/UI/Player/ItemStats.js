@@ -11,6 +11,7 @@ export default function ItemStats({data, gametypeNames}){
     const headers = {
         "gametype": {"title": "Gametype"},
         "item_boots": {"title": "Jump Boots"},
+        "item_body": {"title": "Body Armour"},
         "item_pads": {"title": "Thigh Pads"},
         "item_invis": {"title": "Invisibility"},
         "item_shp": {"title": "Super Health Pack"},
@@ -35,6 +36,7 @@ export default function ItemStats({data, gametypeNames}){
                 "className": "text-left"
             },
             "item_boots": {"value": d.item_boots, "displayValue": ignore0(d.item_boots)},
+            "item_body": {"value": d.item_body, "displayValue": ignore0(d.item_body)},
             "item_pads": {"value": d.item_pads, "displayValue": ignore0(d.item_pads)},
             "item_invis": {"value": d.item_invis, "displayValue": ignore0(d.item_invis)},
             "item_shp": {"value": d.item_shp, "displayValue": ignore0(d.item_shp)},
