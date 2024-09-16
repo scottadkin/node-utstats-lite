@@ -486,3 +486,9 @@ canvas{
 .tab-selected{
 	background-color:rgb(164,0,0);
 }
+
+.no-image{
+	color:white;
+	font-size:12px;
+	text-transform:uppercase;
+}

@@ -1,5 +1,6 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
 import { getMatchesGametype } from "./matches.mjs";
+import { readdir } from 'node:fs/promises';
 
 
 export async function getWeaponId(name){
@@ -280,4 +281,48 @@ export async function changePlayerMatchIds(oldIds, newId){
     const query = `UPDATE nstats_match_weapon_stats SET player_id=? WHERE player_id IN (?)`;
 
     return await simpleQuery(query, [newId, oldIds]);
+}
+
+
+export function bWeaponImageExist(images, name){
+
+    if(Object.keys(images).length === 0) return false;
+
+    name = name.toLowerCase();
+
+    for(const [key, value] of Object.entries(images)){
+
+        if(key === name) return true;
+    }
+
+    return false;
+
+}
+
+export async function getAllImages(){
+
+    try {
+
+        const reg = /^(.+)\..+$/i;
+
+        const files = await readdir("./public/images/weapons/");
+
+        const data = {};
+
+        for(let i = 0; i < files.length; i++){
+
+            const f = files[i];
+
+            const result = reg.exec(f);
+
+            if(result === null) continue;
+
+            data[result[1]] = f;
+        }
+
+        return data;
+
+    } catch (err) {
+        console.error(err);
+    } 
 }

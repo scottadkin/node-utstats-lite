@@ -80,7 +80,7 @@ function getPlayerWeaponStats(data, playerId, weaponId){
     return null;
 }
 
-function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
+function renderKDTable(orderedNames, data, players, totalTeams, selectedType, weaponImages){
 
     const rows = [];
 
@@ -97,8 +97,12 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
 
         const name = cleanWeaponName(n.name);
 
+        const image = weaponImages[n.name.toLowerCase()];
+
+        let elem = (image !== undefined) ? <Image src={`/images/weapons/${name}.png`} width={68} height={26} alt="image"/> : <span className="no-image">{n.name}</span>;
+
         headers[`weapon_${n.id}`] = {
-            "title": <><Image  src={`/images/weapons/${name}.png`} width={68} height={26} alt="image"/></>,
+            "title": <>{elem}</>,
             "mouseOverBox": {
                 "content": n.name
             }
@@ -150,7 +154,7 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType){
     
 }
 
-export default function WeaponStats({data, totalTeams, players}){
+export default function WeaponStats({data, totalTeams, players, weaponImages}){
 
     const [selectedType, setSelectedType] = useState("kills");
     const orderedNames = [];
@@ -174,9 +178,8 @@ export default function WeaponStats({data, totalTeams, players}){
 
     if(orderedNames.length === 0) return null;
 
-    let tables = renderKDTable(orderedNames, data.data, players, totalTeams, selectedType);
+    let tables = renderKDTable(orderedNames, data.data, players, totalTeams, selectedType, weaponImages);
 
-    
     return <>
         <Header>Weapon Stats</Header>
         <Tabs 

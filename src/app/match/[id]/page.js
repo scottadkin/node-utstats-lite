@@ -12,6 +12,7 @@ import { convertTimestamp, plural, toPlaytime } from "@/app/lib/generic.mjs";
 import Pings from "@/app/UI/Match/Pings";
 import ErrorBox from "@/app/UI/ErrorBox";
 import MatchScreenshot from "@/app/UI/Match/MatchScreenshot";
+import { getAllImages as getAllWeaponImages, bWeaponImageExist } from "@/app/lib/weapons.mjs";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -48,6 +49,9 @@ export default async function MatchPage({params, searchParams}) {
     let matchId = params.id ?? -1;
 
     const matchData = await getMatchData(matchId);
+
+    const weaponImages = await getAllWeaponImages();
+
     
     if(matchData.error !== undefined){
         return (
@@ -67,7 +71,7 @@ export default async function MatchPage({params, searchParams}) {
 			<FragTable data={matchData} totalTeams={totalTeams}/>
             <CTFTable data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/>
             <DomTable data={matchData.dom} players={matchData.basicPlayers}/>
-            <WeaponStats data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers}/>
+            <WeaponStats data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers} weaponImages={weaponImages}/>
             <ItemsTable data={matchData.playerData} totalTeams={totalTeams}/>
             <SpecialEvents data={matchData} totalTeams={totalTeams}/>
             <KillsMatchUp kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/>
