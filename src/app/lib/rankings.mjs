@@ -105,6 +105,58 @@ function _mergeTotalsData(fragTotals, ctfTotals){
     return data;
 }
 
+
+function _applyTimePenalty(playerData, settings, minutesPlayed){
+
+    //ranking_points
+
+    const reg = /^under_(.+)$/i;
+
+    const keys = Object.keys(settings);
+    
+    //this will allow admins to set custom time limits if wanted
+    let closestMatch = null;
+
+    //minutesPlayed *= Math.random() * 1000;
+
+    let targetKey = null;
+
+    for(let i = 0; i < keys.length; i++){
+
+        const k = keys[i];
+
+        const regResult = reg.exec(k);
+        
+        if(regResult === null) continue;
+
+        const current = parseInt(regResult[1]);
+        if(current !== current) continue;
+
+        if(current > minutesPlayed){
+
+            if(closestMatch === null){
+                closestMatch = current;
+                targetKey = k;
+                continue;
+            }
+
+            if(current < closestMatch){
+                closestMatch = k;
+                targetKey = k;
+            }
+        }
+    }
+
+
+    if(targetKey === null) return;
+
+    const penalty = settings[targetKey].points;
+
+    if(penalty !== penalty || penalty === 0) return;
+
+    playerData.ranking_points *= penalty;
+}
+
 function _setRankingPoints(settings, playerData){
 
     const t = playerData;
@@ -115,8 +167,13 @@ function _setRankingPoints(settings, playerData){
 
         for(const [type, typeData] of Object.entries(settings[category])){
 
+            //don't apply penalty until get full total
+            if(type === "penalty") continue;
+            
+            
             if(playerData[type] !== undefined){
                 currentPoints += playerData[type] * typeData.points;
+                //console.log(category, type, typeData);
             }
         }
     }
@@ -134,6 +191,8 @@ function _setRankingPoints(settings, playerData){
     }else{
         t.ranking_points = 0;
     }
+
+    _applyTimePenalty(t, settings.penalty, mins);
 }
 
 export async function calculateRankings(gametypeId, playerIds){
@@ -144,6 +203,7 @@ export async function calculateRankings(gametypeId, playerIds){
     const ctfTotals = await getPlayerCTFTotals(gametypeId, playerIds);
     
     const mergedData = _mergeTotalsData(fragTotals, ctfTotals);
+
 
     const settings = await getRankingSettings();
 
