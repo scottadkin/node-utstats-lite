@@ -27,10 +27,9 @@ export default function TableHeader({children, onClick, mouseOverBox, bNoSorting
     if(mouseOverBox !== undefined){
 
         if(mouseOverBox.content !== null){
-            onMouseOver = () =>{
-                
-                setBDisplayMouseOver(true);
-                
+
+            onMouseOver = () =>{      
+                setBDisplayMouseOver(true);    
             }
 
             onMouseLeave = () =>{
@@ -41,7 +40,7 @@ export default function TableHeader({children, onClick, mouseOverBox, bNoSorting
 
     const mouseTitleElem = (mouseOverBox.title === null) ? null : <div className="mouse-over-title">{mouseOverBox.title}</div>;
     
-    return <th onClick={onClick} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave}>
+    return <th onClick={onClick} onMouseOver={onMouseOver} onMouseLeave={onMouseLeave} className={`${(bNoSorting) ? "" : "sort-hover" }`}>
         <div className={`mouse-over ${(bDisplayMouseOver) ? "" : "hidden"}`} ref={mouseRef}>
             {mouseTitleElem}
             {mouseOverBox.content}

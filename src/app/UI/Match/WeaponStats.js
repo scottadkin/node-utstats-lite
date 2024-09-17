@@ -97,7 +97,7 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType, we
 
         const name = cleanWeaponName(n.name);
 
-        const image = weaponImages[n.name.toLowerCase()];
+        const image = weaponImages[name];
 
         let elem = (image !== undefined) ? <Image src={`/images/weapons/${name}.png`} width={68} height={26} alt="image"/> : <span className="no-image">{n.name}</span>;
 
@@ -114,7 +114,6 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType, we
         const playerId = parseInt(pId);
 
         if(player.team < 0 || player.team > 3) continue;
-
 
         const columns = {};
 

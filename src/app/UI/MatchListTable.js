@@ -17,7 +17,7 @@ export default function MatchListTable({data, bIgnoreMap}){
         const url = `/match/${d.id}`;
 
         rows.push(<tr key={d.id}>
-            {(!bIgnoreMap) ? <td><Link href={url}>{d.mapName}</Link></td> : null}
+            {(!bIgnoreMap) ? <td className="text-left"><Link href={url}>{d.mapName}</Link></td> : null}
             <td><Link href={url}>{d.gametypeName}</Link></td>
             <td><Link href={url}>{d.serverName}</Link></td>
             <td className="date"><Link href={url}>{convertTimestamp(date, true)}</Link></td>

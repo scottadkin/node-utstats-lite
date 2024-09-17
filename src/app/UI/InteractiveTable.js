@@ -22,7 +22,7 @@ function createHeaders(headers, state, dispatch, bNoHeaderSorting){
         }
 
         elems.push(
-            <TableHeader 
+            <TableHeader bNoSorting={bNoHeaderSorting}
                 key={name} onClick={() =>{
                     if(bNoHeaderSorting) return;
                     dispatch({"type": "changeSort", "value": name});

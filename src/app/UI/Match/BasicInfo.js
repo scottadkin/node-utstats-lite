@@ -19,8 +19,9 @@ export default function BasicInfo({matchData}){
     return <>
         <Header>Match Report</Header> 
         <div className={styles.wrapper}>
-        
+        <MatchScoreBox data={matchData.basic}/>
             <div className={styles.info}>
+                
                 {convertTimestamp(date)}<br/>
                 {basic.gametypeName} <span className={"dull"}>on</span> {basic.mapName}<br/>
                 {basic.players} {plural(basic.players, "Player")}<br/>
@@ -31,9 +32,6 @@ export default function BasicInfo({matchData}){
                 <Mutators data={basic.mutators}/>
             </div>
             <PermaLink url={`/match/${matchData.basic.hash}`} />
-            <MatchScoreBox data={matchData.basic}/>
-            
-            
         </div>
     </>
 }

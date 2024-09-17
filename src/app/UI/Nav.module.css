@@ -1,6 +1,9 @@
 .wrapper{
     background-color:var(--bg-color-2);
     color:var(--font-color-2);
+    position:fixed;
+    top:0;
+    width:100%;
 }
 
 .wrapper a{

@@ -2,19 +2,20 @@
     text-align: center;
     margin-top:var(--margin-1);
     margin-bottom:var(--margin-1);
-    background-color: var(--bg-color-2);
+    background-color: var(--bg-color-3);
     padding-bottom:var(--padding-1);
 }
 
 .button{
     display:inline-block;
     padding:var(--padding-2);
-    background-color:var(--bg-color-3);
-    border:1px solid var(--border-color-1);
+    background-color:var(--bg-color-2);
+    border:1px solid var(--border-color-2);
     margin-right:5px;
     color:var(--font-color-1);
     user-select: none;
     font-size:18px;
+    padding:10px;
 }
 
 .button:hover{
@@ -30,5 +31,5 @@
     font-size:var(--font-size-small);
     color:var(--font-color-1);
     padding:var(--padding-1);
-    line-height:22px;
+    line-height:20px;
 }
