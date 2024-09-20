@@ -1,0 +1,26 @@
+.wrapper{
+    display:inline-block;
+	background-color:var(--bg-color-2);
+	margin-right:var(--margin-2);
+	margin-left:var(--margin-2);
+	margin-bottom: var(--margin-2);
+	width:350px;
+    border:1px solid var(--border-color-1);
+}
+
+.title{
+	color:var(--font-color-1);
+	padding:var(--padding-1);
+    
+}
+
+.info{
+    color:var(--font-color-2);
+    font-size:var(--font-size-4);
+    line-height: var(--line-height-1);
+    margin-bottom:var(--margin-2);
+}
+
+.white{
+    color:white;
+}

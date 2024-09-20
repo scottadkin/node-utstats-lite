@@ -32,6 +32,7 @@
 	--line-height-2:32px;
 	--font-size-2:16px;
 	--font-size-3:18px;
+	--font-size-4:13px;
 	--transition-1:background-color 0.5s;
 	--width-1:90%;
 	--width-2:75%;
@@ -498,4 +499,10 @@ canvas{
 
 .sort-hover:hover{
 	cursor: pointer;
+}
+
+.match-rich-view-wrapper{
+	text-align:center;
+	margin-top:var(--margin-1);
+	margin-bottom:var(--margin-1);
 }

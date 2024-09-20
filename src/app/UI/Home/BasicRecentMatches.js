@@ -1,10 +1,10 @@
 import Header from "../Header";
-import MatchList from "../MatchList";
+import MatchesBoxView from "../MatchesBoxView";
 
 export default function BasicRecentMatches({data}){
 
     return <>
         <Header>Recent Matches</Header>
-        <MatchList data={data}/>
+        <MatchesBoxView data={data}/>
     </>
 }

@@ -18,7 +18,9 @@ export async function generateMetadata({ params, searchParams }, parent) {
     console.log(searchParams);
 
     const mode = (searchParams.mode !== undefined) ? searchParams.mode.toLowerCase() : "match"; 
-    const cat = (searchParams.cat !== undefined) ? searchParams.cat.toLowerCase() : "kills";
+    let cat = (searchParams.cat !== undefined) ? searchParams.cat.toLowerCase() : "kills";
+
+    if(cat === "") cat = "kills";
     
     const catDisplayName = getTypeDisplayName(mode, cat);
 
@@ -200,6 +202,8 @@ export default async function Records({params, searchParams}){
         let mode = (searchParams.mode !== undefined) ? searchParams.mode : "match";
         let cat = (searchParams.cat !== undefined) ? searchParams.cat : "kills";
     
+        if(cat === "") cat = "kills";
+
         let data = null;
 
         let totalResults = 0;
