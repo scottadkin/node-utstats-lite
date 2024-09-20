@@ -4,7 +4,7 @@ import styles from "./MatchRichBox.module.css";
 import { convertTimestamp, toPlaytime } from "../lib/generic.mjs";
 import MatchScoreBox from "./MatchScoreBox";
 
-export default function MatchesBoxView({data}){
+export default function MatchesRichBox({data}){
 
     return <Link href={`/match/${data.id}`}>
         <div className={styles.wrapper}>

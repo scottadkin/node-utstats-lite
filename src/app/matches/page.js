@@ -3,6 +3,7 @@ import { getAllNames as getAllServerNames } from "../lib/servers.mjs";
 import { getAllNames as getAllGametypeNames } from "../lib/gametypes.mjs";
 import { getAllNames as getAllMapNames } from "../lib/maps.mjs";
 import MatchList from "../UI/MatchList";
+import MatchesBoxView from "../UI/MatchesBoxView";
 import Header from "../UI/Header";
 import Pagination from "../UI/Pagination";
 import SearchForm from "../UI/Matches/SearchForm";
@@ -42,7 +43,7 @@ export default async function Page({params, searchParams}) {
               map={map}
             />
             <Pagination url="/matches?page=" currentPage={page} results={total} perPage={perPage}/>
-            <MatchList data={data} />
+            <MatchesBoxView data={data}/>
             <Pagination url="/matches?page=" currentPage={page} results={total} perPage={perPage}/>
         </div>
       </main>

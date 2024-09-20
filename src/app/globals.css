@@ -505,4 +505,7 @@ canvas{
 	text-align:center;
 	margin-top:var(--margin-1);
 	margin-bottom:var(--margin-1);
+	max-width:var(--max-width-1);
+	margin-left:auto;
+	margin-right:auto;
 }
