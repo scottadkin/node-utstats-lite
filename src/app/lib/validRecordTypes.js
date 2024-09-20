@@ -36,3 +36,58 @@ export const VALID_PLAYER_LIFETIME_TYPES = [
     {"display": "Super Health Pickups", "value": "item_shp"},
 ];
 
+export function bValidRecordType(mode, cat){
+
+    mode = mode.toLowerCase();
+    cat = cat.toLowerCase();
+
+    let types = null;
+
+    if(mode === "match"){
+
+        types = VALID_PLAYER_MATCH_TYPES.map((t) =>{
+            return t.value;
+        });
+
+    }else if(mode === "lifetime"){
+
+        types = VALID_PLAYER_LIFETIME_TYPES.map((t) =>{
+            return t.value;
+        });
+
+    }else{
+        throw new Error(`${mode} is not a valid record mode`);
+    }
+
+    return types.indexOf(cat) !== -1;
+}
+
+
+export function getTypeDisplayName(mode, cat){
+
+    mode = mode.toLowerCase();
+    cat = cat.toLowerCase();
+
+    let types = null;
+
+    if(mode === "match"){
+
+        types = VALID_PLAYER_MATCH_TYPES;
+
+    }else if(mode === "lifetime"){
+
+        types = VALID_PLAYER_LIFETIME_TYPES;
+
+    }else{
+        throw new Error(`${mode} is not a valid record mode`);
+    }
+
+    for(let i = 0; i < types.length; i++){
+
+        const t = types[i];
+
+        if(t.value === cat) return t.display;
+    }
+
+    return null;
+}

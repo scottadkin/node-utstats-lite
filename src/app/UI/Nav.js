@@ -41,6 +41,13 @@ export default function Nav({settings, sessionInfo, bAdmin}){
             ]
         },
         {
+            "name": "Records",
+            "url": "/records",
+            "matches": [
+                "/records",
+            ]
+        },
+        {
             "name": "Maps",
             "url": "/maps",
             "matches": [
