@@ -240,13 +240,19 @@ export function getOrdinal(value){
     return 'th';   
 }
 
-export function convertTimestamp(timestamp, noDayName, noTime){
+export function convertTimestamp(timestamp, noDayName, noTime, bSkipMSConversion){
 
     noDayName = (noDayName !== undefined) ? noDayName : false;
     noTime = (noTime !== undefined) ? noTime : false;
+    bSkipMSConversion = (bSkipMSConversion !== undefined) ? bSkipMSConversion : false;
 
     const now = new Date();
-    now.setTime(timestamp * 1000);
+
+    if(!bSkipMSConversion){
+        timestamp *= 1000;
+    }
+
+    now.setTime(timestamp);
 
     const year = now.getFullYear();
     const month = now.getMonth();

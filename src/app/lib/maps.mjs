@@ -1,7 +1,7 @@
 import { simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName } from "./generic.mjs";
-import { getGametypeNames } from "./gametypes.mjs";
+import { getAll, getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
 
@@ -257,6 +257,20 @@ async function getFirstMatches(mapIds){
     return data;
 }
 
+export async function getFullImageList(){
+
+    const query = `SELECT name FROM nstats_maps ORDER BY name ASC`;
+
+    const result = await simpleQuery(query);
+
+    const names = result.map((r) =>{
+        return r.name;
+    });
+
+    return await getMapImages(names);
+
+}
+
 export async function getAllStats(){
 
     const query = `SELECT * FROM nstats_maps ORDER BY name ASC`;
@@ -264,13 +278,15 @@ export async function getAllStats(){
     const result = await simpleQuery(query);
 
     const mapIds = result.map((r) =>{
+        
         return r.id;
     });
 
     const first = await getFirstMatches(mapIds);
     const latest = await getLatestMatches(mapIds);
+    const images = await getFullImageList();
 
-    return {"maps": result, "earliest": first, "latest": latest};
+    return {"maps": result, "earliest": first, "latest": latest, images};
 }
 
 

@@ -1,10 +1,8 @@
 import MatchRichBox from "./MatchRichBox";
 
 export default function MatchesBoxView({data}){
-
-    
+ 
     const elems = [];
-
 
     for(let i = 0; i < data.length; i++){
 
@@ -15,7 +13,7 @@ export default function MatchesBoxView({data}){
         );
     }
 
-    return <div className="match-rich-view-wrapper">
+    return <div className="rich-outter">
         {elems}
     </div>
 }
