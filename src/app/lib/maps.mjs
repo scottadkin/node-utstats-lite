@@ -160,7 +160,11 @@ export async function getMostPlayedMaps(limit){
 
     const query = `SELECT * FROM nstats_maps ORDER by playtime DESC LIMIT ?`;
 
-    return await simpleQuery(query, [limit]);
+    const result = await simpleQuery(query, [limit]);
+
+    const images = await getMapImages(...[result.map(r => r.name.toLowerCase())]);
+
+    return {"data": result, images};
 }
 
 
@@ -273,20 +277,28 @@ export async function getFullImageList(){
 
 export async function getAllStats(){
 
-    const query = `SELECT * FROM nstats_maps ORDER BY name ASC`;
+    const [result, images] = await getAllBasicAndImages();
 
-    const result = await simpleQuery(query);
-
-    const mapIds = result.map((r) =>{
-        
+    const mapIds = result.map((r) =>{     
         return r.id;
     });
 
     const first = await getFirstMatches(mapIds);
     const latest = await getLatestMatches(mapIds);
-    const images = await getFullImageList();
 
     return {"maps": result, "earliest": first, "latest": latest, images};
+}
+
+
+export async function getAllBasicAndImages(){
+
+    const query = `SELECT * FROM nstats_maps ORDER BY name ASC`;
+
+    const result = await simpleQuery(query);
+
+    const images = await getFullImageList();
+
+    return {"maps": result, images};
 }
 
 

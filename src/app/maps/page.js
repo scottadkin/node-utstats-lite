@@ -1,6 +1,6 @@
 import Header from "../UI/Header";
-import {getAllStats} from "../lib/maps.mjs";
-import MapRichBox from "../UI/MapRichBox";
+import {getAllBasicAndImages} from "../lib/maps.mjs";
+import MapRichBoxes from "../UI/MapRichBoxes";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -13,26 +13,12 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
 export default async function MapsPage({}){
 
-    const {maps, earliest, latest, images} = await getAllStats();
-
-    const elems = [];
-
-    for(let i = 0; i < maps.length; i++){
-
-        const m = maps[i];
-
-        let image = images[m.name.toLowerCase()];
-
-        if(image === undefined) image = "default.jpg";
-
-        elems.push(<MapRichBox key={i} data={m} image={image}/>);
-    }
+    const {maps, images} = await getAllBasicAndImages();
 
     return <main>
         <Header>Maps</Header>
         <div className="rich-outter">
-            {elems}
-        </div>
-        
+            <MapRichBoxes data={maps} images={images}/>
+        </div> 
     </main>;
 }

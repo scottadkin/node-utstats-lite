@@ -12,13 +12,13 @@ export default async function Home() {
 
 	const servers = await getBasicList();
 	const gametypes = await getAllGametypes();
-	const mapsData = await getMostPlayedMaps(10);
+	const mapsData = await getMostPlayedMaps(3);
 	const recentMatches = await getRecentMatches(1, 3, 0, 0, 0);
 
 	return <main className={styles.main}>
 		<div>
 			<BasicRecentMatches data={recentMatches.data}/>
-			<BasicMapsList data={mapsData}/>
+			<BasicMapsList data={mapsData.data} images={mapsData.images}/>
 			<BasicGametypeList gametypes={gametypes}/>
 			<BasicServerList servers={servers}/>
 		</div>
