@@ -16,7 +16,7 @@ import ClearDatabase from "./ClearDatabase";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("clear-database");
+    const [mode, setMode] = useState("settings");
 
     return <>
         <Tabs 

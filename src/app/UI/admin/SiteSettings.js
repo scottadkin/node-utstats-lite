@@ -282,6 +282,16 @@ export default function SiteSettings(){
         return {"name": t, "value": t}
     });
 
+    tabOptions.sort((a, b) =>{
+        
+        a = a.name.toLowerCase();
+        b = b.name.toLowerCase();
+
+        if(a < b) return -1;
+        if(a > b) return 1;
+        return 0;
+    });
+
     return <>
         <Header>
             Site Settings

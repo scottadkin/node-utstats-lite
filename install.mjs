@@ -394,6 +394,10 @@ async function insertSiteSettings(){
         {"category": "Matches" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
         {"category": "Players" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
         {"category": "Menu" ,"type": `string`, "name": "Discord URL", "value": ""},
+        {"category": "Home" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
+        {"category": "Home" ,"type": `bool`, "name": "Display Most Played Maps", "value": 1},
+        {"category": "Home" ,"type": `bool`, "name": "Display Most Played Gametypes", "value": 1},
+        {"category": "Home" ,"type": `bool`, "name": "Display Servers", "value": 1},
     ];
 
     for(let i = 0; i < settings.length; i++){

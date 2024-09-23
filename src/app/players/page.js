@@ -98,7 +98,7 @@ export default async function Page({params, searchParams}) {
         const url = `/player/${p.id}`;
 
         rows.push(<tr key={p.id}>
-            <td className="player-name-td text-left">
+            <td className="text-left">
                 <>
                     <Link href={url}>
                         <CountryFlag code={p.country}/>{p.name}
