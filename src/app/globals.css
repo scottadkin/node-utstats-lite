@@ -447,6 +447,7 @@ canvas{
 	padding:5px;
 	display:inline-block;
 	margin-bottom:10px;
+	color:var(--font-color-1);
 }
 
 .perma-link:hover{

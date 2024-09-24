@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function PermaLink({url}){
+export default function PermaLink({url, text}){
 
     const [fullURL, setFullURL] = useState("");
 
@@ -19,6 +19,6 @@ export default function PermaLink({url}){
             console.error('Failed to copy: ', err);
         }
     }}>
-        Copy Match PermaLink To Clipboard
+        {(text !== undefined) ? text : "Copy Match PermaLink To Clipboard"}
     </div>;
 }

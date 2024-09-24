@@ -63,7 +63,8 @@ const queries = [
             eff float NOT NULL,
             ttl int NOT NULL,
             playtime float NOT NULL,
-            last_active DATETIME NOT NULL
+            last_active DATETIME NOT NULL,
+            hash varchar(32) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_matches (
@@ -568,6 +569,8 @@ async function addColumn(table, name, type){
         //Just in case user had an early test build that was missing this column
         await addColumn("nstats_ftp", "delete_tmp_files", "INT(1) NOT NULL AFTER enabled");
         await addColumn("nstats_matches", "hash", "varchar(32) NOT NULL AFTER mutators");
+
+        await addColumn("nstats_players", "hash", "varchar(32) NOT NULL AFTER last_active");
         
         process.exit();
 

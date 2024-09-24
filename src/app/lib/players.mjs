@@ -1,6 +1,7 @@
 import {simpleQuery, bulkInsert} from "./database.mjs";
 import {getMultipleMatchDetails} from "./matches.mjs";
 import { getWinner, getPlayer } from "./generic.mjs";
+import md5 from "md5";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
@@ -16,10 +17,12 @@ export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
 export async function createMasterPlayer(name, ip, hwid, mac1, mac2, matchDate){
 
-    const query = `INSERT INTO nstats_players VALUES(NULL,?,"",0,0,0,0,0,0,0,0,0,?)`;
+    const query = `INSERT INTO nstats_players VALUES(NULL,?,"",0,0,0,0,0,0,0,0,0,?,?)`;
+
+    const hash = md5(name);
 
     //const result = await simpleQuery(query, [name, ip, hwid, mac1, mac2]);
-    const result = await simpleQuery(query, [name, matchDate]);
+    const result = await simpleQuery(query, [name, matchDate, hash]);
 
     return result.insertId;
 }
@@ -264,6 +267,35 @@ export async function getPlayerById(id){
     if(result.length > 0) return result[0];
 
     return null;
+}
+
+export async function getPlayerByHash(hash){
+
+    const query = `SELECT * FROM nstats_players WHERE hash=?`;
+
+    const result = await simpleQuery(query, [hash]);
+
+    if(result.length > 0) return result[0];
+
+    return null;
+}
+
+/**
+ * 
+ * @param {*} id interger or hash auto
+ */
+export async function getPlayerByAuto(id){
+
+    if(id.length === 32){
+        return await getPlayerByHash(id);
+    }
+
+    id = parseInt(id);
+
+    if(id !== id) return null;
+
+    return await getPlayerById(id);
+     
 }
 
 export async function getPlayerNamesByIds(playerIds){
@@ -807,4 +839,20 @@ export async function adminDeletePlayer(playerId){
     }
 
     return totalRows;
+}
+
+
+export async function setAllPlayerHashes(){
+
+    const query = `SELECT id,name FROM nstats_players`;
+
+    const data = await simpleQuery(query);
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const insertQuery = `UPDATE nstats_players SET hash=? WHERE id=?`;
+        await simpleQuery(insertQuery, [md5(d.name), d.id]);
+    }
 }

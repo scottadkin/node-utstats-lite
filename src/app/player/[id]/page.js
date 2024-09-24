@@ -1,6 +1,6 @@
 import CountryFlag from "@/app/UI/CountryFlag";
 import Header from "@/app/UI/Header";
-import { getPlayerById, getPlayerGametypeTotals, getPlayerRecentMatches } from "@/app/lib/players.mjs";
+import { getPlayerByAuto, getPlayerGametypeTotals, getPlayerRecentMatches } from "@/app/lib/players.mjs";
 import GametypeTotals from "@/app/UI/Player/GametypeTotals";
 import { getGametypeNames } from "@/app/lib/gametypes.mjs";
 import SpecialEvents from "@/app/UI/Player/SpecialEvents";
@@ -13,13 +13,14 @@ import CTFTotals from "@/app/UI/Player/CTFTotals";
 import ErrorBox from "@/app/UI/ErrorBox";
 import { getPlayerRankings } from "@/app/lib/rankings.mjs";
 import Rankings from "@/app/UI/Player/Rankings";
+import PermaLink from "@/app/UI/PermaLink";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
     const id = params.id;
 
-    let player = await getPlayerById(id);
+    let player = await getPlayerByAuto(id);
 
     if(player === null){
 
@@ -49,13 +50,11 @@ export default async function Page({params, searchParams}){
     let id = 0;
 
     if(params.id !== undefined){
-
-        id = parseInt(params.id);
-        if(id !== id) id = 0;
-
+        id = params.id;
     }
 
-    let player = await getPlayerById(id);
+
+    let player = await getPlayerByAuto(id);
 
     if(player === null){
 
@@ -64,16 +63,19 @@ export default async function Page({params, searchParams}){
         </main>
     }
 
+    const realId = player.id;
+    const hash = player.hash;
+
     let totals = [];
 
     if(player === null){
         player = {"name": "Not Found", "country": "", "id": 0};
     }else{
-        totals = await getPlayerGametypeTotals(id);
+        totals = await getPlayerGametypeTotals(realId);
     }
 
 
-    const weaponTotals = await weaponsGetPlayerTotals(id);
+    const weaponTotals = await weaponsGetPlayerTotals(realId);
 
     const weaponIds = [... new Set(weaponTotals.map((w) =>{
         return w.weapon_id;
@@ -92,24 +94,29 @@ export default async function Page({params, searchParams}){
 
     const gametypeNames = await getGametypeNames(gametypeIds);
 
-    const ctfTotals = await getPlayerCTFTotals(id);
+    const ctfTotals = await getPlayerCTFTotals(realId);
 
     const month = 60 * 60 * 24 * 28;
 
     const minDate = new Date(Date.now() - month * 1000);
 
-    const rankings = await getPlayerRankings(id, minDate);
+    const rankings = await getPlayerRankings(realId, minDate);
 
     
 
     return <main>
-        <Header><CountryFlag code={player.country}/>{player.name}&apos;s Player Summary</Header> 
+        <Header>
+            <CountryFlag code={player.country}/>{player.name}&apos;s Player Summary
+        </Header> 
+        <div className="text-center">
+            <PermaLink url={`/player/${hash}`} text="Copy Permanent Player Link To Clipboard"/>
+        </div>
         <GametypeTotals data={totals} names={gametypeNames}/>
         <CTFTotals data={ctfTotals} gametypeNames={gametypeNames}/>
         <SpecialEvents data={totals} gametypeNames={gametypeNames}/>
         <WeaponStats totals={weaponTotals} weaponNames={weaponNames} gametypeNames={gametypeNames}/>
         <Rankings data={rankings} gametypeNames={gametypeNames}/>
         <ItemStats data={totals} gametypeNames={gametypeNames}/>
-        <RecentMatches playerId={id}/>
+        <RecentMatches playerId={realId}/>
     </main>
 }
