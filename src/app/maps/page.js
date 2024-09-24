@@ -1,6 +1,6 @@
 import Header from "../UI/Header";
 import {getAllBasicAndImages} from "../lib/maps.mjs";
-import MapRichBoxes from "../UI/MapRichBoxes";
+import MapsSearch from "../UI/MapsSearch";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -11,14 +11,16 @@ export async function generateMetadata({ params, searchParams }, parent) {
 }
 
 
-export default async function MapsPage({}){
+export default async function MapsPage({searchParams}){
 
     const {maps, images} = await getAllBasicAndImages();
 
+    //console.log(searchParams);
+
+    let search = (searchParams.search !== undefined) ? searchParams.search : "";
+
     return <main>
         <Header>Maps</Header>
-        <div className="rich-outter">
-            <MapRichBoxes data={maps} images={images}/>
-        </div> 
+        <MapsSearch maps={maps} images={images} search={search}/>
     </main>;
 }
