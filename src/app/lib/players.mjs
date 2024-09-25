@@ -423,7 +423,7 @@ async function getPlayersAllMatchData(playerIds){
     item_pads,
     item_invis,
     item_shp
-    FROM nstats_match_players WHERE player_id IN (?)`;
+    FROM nstats_match_players WHERE time_on_server > 0 AND spectator=0 AND player_id IN (?)`;
 
     const result = await simpleQuery(totalQuery, [playerIds]);
 
@@ -566,7 +566,7 @@ function _updateTotals(totals, gametypeId, playerData, date, bWinner, bDraw){
  * @param {*} playerId 
  * @returns 
  */
-async function calcPlayerTotals(playerIds){
+export async function calcPlayerTotals(playerIds){
 
 
 
@@ -855,4 +855,22 @@ export async function setAllPlayerHashes(){
         const insertQuery = `UPDATE nstats_players SET hash=? WHERE id=?`;
         await simpleQuery(insertQuery, [md5(d.name), d.id]);
     }
+}
+
+
+export async function getAllIds(){
+
+    const query = `SELECT id FROM nstats_players`;
+
+    const result = await simpleQuery(query);
+
+    return result.map(m => m.id);
+}
+
+
+export async function recalcAllPlayerTotals(){
+
+    const playerIds = await getAllIds();
+
+    await updatePlayerGametypeTotals(playerIds);
 }
