@@ -399,6 +399,8 @@ async function insertSiteSettings(){
         {"category": "Home" ,"type": `bool`, "name": "Display Most Played Maps", "value": 1},
         {"category": "Home" ,"type": `bool`, "name": "Display Most Played Gametypes", "value": 1},
         {"category": "Home" ,"type": `bool`, "name": "Display Servers", "value": 1},
+        {"category": "Home" ,"type": `integer`, "name": "Total Recent Matches", "value": 3},
+        {"category": "Home" ,"type": `integer`, "name": "Total Most Played Maps", "value": 3},
     ];
 
     for(let i = 0; i < settings.length; i++){

@@ -173,41 +173,28 @@ function renderSelectedOptions(state, dispatch){
 
         if(s.category !== state.selectedTab) continue;
 
+        let valueElem = null;
 
-        let valueElem = <td>{s.setting_value}</td>;
+        const type = s.setting_type.toLowerCase();
 
-        if(s.setting_type === "bool"){
 
-            valueElem = <TrueFalseButton 
-                value={parseInt(s.setting_value)} 
-                bTableElem={true}
-                setValue={() =>{
-                    
-                    let value = parseInt(s.setting_value);
+        switch(type){
 
-                    if(value === 1){
-                        value = 0;
-                    }else{
-                        value = 1;
-                    }
+            case "bool": {
 
-                    dispatch({
-                        "type": "change-setting-value", 
-                        "category": s.category, 
-                        "key": s.setting_name, 
-                        "value": value
-                    });
-                }}
-            />
+                valueElem = <TrueFalseButton 
+                    value={parseInt(s.setting_value)} 
+                    bTableElem={true}
+                    setValue={() =>{
+                        
+                        let value = parseInt(s.setting_value);
 
-        }
-        
-        if(s.setting_type === "perPage"){
+                        if(value === 1){
+                            value = 0;
+                        }else{
+                            value = 1;
+                        }
 
-            valueElem = <td>
-                <PerPageDropDown 
-                    selectedValue={parseInt(s.setting_value)}
-                    setValue={(value) =>{
                         dispatch({
                             "type": "change-setting-value", 
                             "category": s.category, 
@@ -216,21 +203,58 @@ function renderSelectedOptions(state, dispatch){
                         });
                     }}
                 />
-            </td>
+
+            } break;
+            case "perpage": {
+
+                valueElem = <td>
+                    <PerPageDropDown 
+                        selectedValue={parseInt(s.setting_value)}
+                        setValue={(value) =>{
+                            dispatch({
+                                "type": "change-setting-value", 
+                                "category": s.category, 
+                                "key": s.setting_name, 
+                                "value": value
+                            });
+                        }}
+                    />
+                </td>
+
+            } break;
+
+            case "string": {
+                valueElem = <td>
+                    <input type="text" className="textbox" value={s.setting_value} onChange={(e) =>{
+                        dispatch({
+                            "type": "change-setting-value", 
+                            "category": s.category, 
+                            "key": s.setting_name, 
+                            "value": e.target.value
+                        });
+                    }}/>
+                </td>
+            } break;
+
+            case "integer": {
+
+                valueElem = <td>
+                    <input type="number" className="textbox" value={s.setting_value} onChange={(e) =>{
+                        dispatch({
+                            "type": "change-setting-value", 
+                            "category": s.category, 
+                            "key": s.setting_name, 
+                            "value": e.target.value
+                        });
+                    }}/>
+                </td>
+            }   break;
+
+            default: {
+                valueElem = <td>{s.setting_value}</td>;
+            }break;
         }
 
-        if(s.setting_type === "string"){
-            valueElem = <td>
-                <input type="text" className="textbox" value={s.setting_value} onChange={(e) =>{
-                    dispatch({
-                        "type": "change-setting-value", 
-                        "category": s.category, 
-                        "key": s.setting_name, 
-                        "value": e.target.value
-                    });
-                }}/>
-            </td>
-        }
 
 
         rows.push(<tr key={s.id}>

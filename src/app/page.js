@@ -13,10 +13,11 @@ export default async function Home() {
 
 	const pageSettings = await getCategorySettings("Home");
 
+
 	const servers = (pageSettings["Display Servers"] === "1") ? await getBasicList() : null;
 	const gametypes = (pageSettings["Display Most Played Gametypes"] === "1") ? await getAllGametypes() : null;
-	const mapsData = (pageSettings["Display Most Played Maps"] === "1") ? await getMostPlayedMaps(3) : null;
-	const recentMatches = (pageSettings["Display Recent Matches"] === "1") ? await getRecentMatches(1, 3, 0, 0, 0) : null;
+	const mapsData = (pageSettings["Display Most Played Maps"] === "1") ? await getMostPlayedMaps(pageSettings["Total Most Played Maps"]) : null;
+	const recentMatches = (pageSettings["Display Recent Matches"] === "1") ? await getRecentMatches(1, pageSettings["Total Recent Matches"], 0, 0, 0) : null;
 
 	return <main className={styles.main}>
 		<div>
