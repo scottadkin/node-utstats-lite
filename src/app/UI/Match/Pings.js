@@ -13,8 +13,15 @@ export default function Pings({data, totalTeams}){
         "max": {"title": "Max"},
     };
 
-    const rows = data.map((d) =>{
-        return {
+    const rows = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        if(d.spectator === 1) continue;
+
+        rows.push({
             "name": {
                 "value": d.name.toLowerCase(), 
                 "displayValue": <PlayerLink id={d.player_id} country={d.country}>{d.name}</PlayerLink>,
@@ -23,8 +30,8 @@ export default function Pings({data, totalTeams}){
             "min": {"value": d.ping_min},
             "avg": {"value": d.ping_avg},
             "max": {"value": d.ping_max},
-        };
-    });
+        });
+    }
 
     return <>
         <Header>Ping Summary</Header>
