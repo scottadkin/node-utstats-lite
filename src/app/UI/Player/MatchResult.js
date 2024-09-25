@@ -5,14 +5,17 @@ export default function matchResult({playerId, data}){
 
     let result = "";
 
-    console.log(data);
-
     let bWinner = false;
     //total amount of teams on the winners score
     let totalWinners = 0;
 
+    let bSpectator = false;
 
-    if(data.total_teams < 2){
+    if(data.spectator === 1){
+
+        bSpectator = true;
+
+    }else if(data.total_teams < 2){
 
         if(data.solo_winner === playerId){
             bWinner = true;
@@ -59,7 +62,12 @@ export default function matchResult({playerId, data}){
     }else if(bWinner && totalWinners > 1){
         result = <span className="yellow-font">Draw</span>
     }else{
-        result = <span className="red-font">Loser</span>
+
+        if(!bSpectator){
+            result = <span className="red-font">Loser</span>
+        }else{
+            result = <span className="font-small dull">Spectator</span>
+        }
     }
     
     return <div>

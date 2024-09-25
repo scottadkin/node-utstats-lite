@@ -152,6 +152,6 @@ export default function RecentMatches({playerId}){
 
             dispatch({"type": "set-page", "page": page});
         }}/>
-        <InteractiveTable width={1} headers={headers} rows={rows} srotBy={"date"} order={"DESC"} bNoHeaderSorting={true}/>
+        <InteractiveTable width={1} headers={headers} rows={rows} sortBy={"date"} order={"DESC"} bNoHeaderSorting={true}/>
     </>
 }

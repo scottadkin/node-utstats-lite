@@ -69,6 +69,7 @@ export async function GET(req){
                 "date": b.match_date,
                 "team": b.team,
                 "playtime": b.time_on_server,
+                "spectator": b.spectator,
                 ...result
             });
         }
