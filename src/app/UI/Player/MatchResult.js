@@ -5,6 +5,8 @@ export default function matchResult({playerId, data}){
 
     let result = "";
 
+    console.log(data);
+
     let bWinner = false;
     //total amount of teams on the winners score
     let totalWinners = 0;

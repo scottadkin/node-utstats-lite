@@ -143,3 +143,11 @@ export async function getAllIds(){
         return r.id;
     });
 }
+
+
+export async function deleteAllPlayerTotals(){
+
+    const query = `DELETE FROM nstats_player_totals`;
+
+    await simpleQuery(query);
+}

@@ -16,7 +16,7 @@ import ClearDatabase from "./ClearDatabase";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("settings");
+    const [mode, setMode] = useState("player-manager");
 
     return <>
         <Tabs 

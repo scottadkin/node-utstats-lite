@@ -1,6 +1,7 @@
 import {simpleQuery, bulkInsert} from "./database.mjs";
 import {getMultipleMatchDetails} from "./matches.mjs";
 import { getWinner, getPlayer } from "./generic.mjs";
+import { deleteAllPlayerTotals as deleteAllPlayerGametypeTotals } from "./gametypes.mjs";
 import md5 from "md5";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
@@ -423,7 +424,7 @@ async function getPlayersAllMatchData(playerIds){
     item_pads,
     item_invis,
     item_shp
-    FROM nstats_match_players WHERE time_on_server > 0 AND spectator=0 AND player_id IN (?)`;
+    FROM nstats_match_players WHERE spectator=0 AND player_id IN (?)`;
 
     const result = await simpleQuery(totalQuery, [playerIds]);
 
@@ -871,6 +872,8 @@ export async function getAllIds(){
 export async function recalcAllPlayerTotals(){
 
     const playerIds = await getAllIds();
+
+    await deleteAllPlayerGametypeTotals();
 
     await updatePlayerGametypeTotals(playerIds);
 }

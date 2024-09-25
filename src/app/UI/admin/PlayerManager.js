@@ -5,6 +5,7 @@ import Header from "../Header";
 import Tabs from "../Tabs";
 import { plural } from "@/app/lib/generic.mjs";
 import NotificationCluster from "../NotificationCluster";
+import Loading from "../Loading";
 
 
 function reducer(state, action){
@@ -52,6 +53,12 @@ function reducer(state, action){
             return {
                 ...state,
                 "message": action.message
+            }
+        }
+        case "set-recalc-status": {
+            return {
+                ...state,
+                "bRecalculatingTotals": action.value
             }
         }
     }
@@ -193,6 +200,38 @@ async function deletePlayer(state, dispatch, nDispatch){
     }
 }
 
+
+async function recaclTotals(state, dispatch, nDispatch){
+
+
+    try{
+
+
+        dispatch({"type": "set-recalc-status", "value": true});
+
+        const req = await fetch("/api/admin?mode=recalculate-totals");
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+
+        if(res.message === "done"){
+            nDispatch({"type": "add", "content": {"type": "pass", "message": `Recalculated player totals.`}});
+            dispatch({"type": "set-recalc-status", "value": false});
+        }
+
+        
+
+    }catch(err){
+        console.trace(err);
+        nDispatch({"type": "add", "content": {"type": "error", "message": err.toString()}});
+        dispatch({"type": "set-recalc-status", "value": false});
+    }
+
+    
+}
+
 function renderDeletePlayer(state, dispatch, nDispatch){
 
     if(state.mode !== "delete") return null;
@@ -226,10 +265,28 @@ function renderDeletePlayer(state, dispatch, nDispatch){
     </>
 }
 
+function renderRecalculateTotals(state, dispatch, nDispatch){
+    
+    if(state.mode !== "recalc-totals") return null;
+
+    return <>
+        <Header>Recalculate Player Totals</Header>
+        <div className="info">
+            Recalculate all player totals from existing match data.
+        </div>
+        <Loading value={state.bRecalculatingTotals}>Recalculating Please Wait...</Loading>
+        <div className={`text-center ${(state.bRecalculatingTotals) ? "hidden" : ""}`}>
+            <input type="button" className="submit-button" value="Recalculate Totals" onClick={() =>{
+                recaclTotals(state, dispatch, nDispatch);
+            }}/>
+        </div>
+    </>
+}
+
 export default function PlayerManager(){
 
     const [state, dispatch] = useReducer(reducer,{
-        "mode": "delete",
+        "mode": "recalc-totals",
         "error": "null",
         "message": "null",
         "players": [],
@@ -239,7 +296,8 @@ export default function PlayerManager(){
         },
         "deleteForm": {
             "selectedPlayer": -1
-        }
+        },
+        "bRecalculatingTotals": false
     });
 
     const [nState, nDispatch] = useReducer(notificationReducer, initialNotificationState);
@@ -253,6 +311,7 @@ export default function PlayerManager(){
     const tabOptions = [
         {"value": "rename", "name": "Rename Player"},
         {"value": "delete", "name": "Delete Player"},
+        {"value": "recalc-totals", "name": "Recalculate Totals"},
     ];
     return <>
         <Header>Player Manager</Header>
@@ -263,5 +322,6 @@ export default function PlayerManager(){
         <NotificationCluster state={nState} dispatch={nDispatch}/>
         {renderRenameForm(state, dispatch, nDispatch)}
         {renderDeletePlayer(state, dispatch, nDispatch)}
+        {renderRecalculateTotals(state, dispatch, nDispatch)}
     </>
 }

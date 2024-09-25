@@ -13,7 +13,7 @@ import {
 import { getAllNames as getAllMapNames, getAllImages as getAllMapImages } from "@/app/lib/maps.mjs";
 import { adminGetAllHistory as getAllUserHistory, getAllNames as getAllPlayerNames, adminAssignHWIDUsageToPlayerId, 
     updatePlayerGametypeTotals, getMasterPlayersStats, updateMasterPlayer,
-    adminRenamePlayer, adminDeletePlayer 
+    adminRenamePlayer, adminDeletePlayer, recalcAllPlayerTotals 
 } from "@/app/lib/players.mjs";
 import { changePlayerIds as changeKillsPlayerIds } from "@/app/lib/kills.mjs";
 import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
@@ -326,6 +326,12 @@ export async function GET(req){
 
             const playerNames = await getAllPlayerNames();
             return Response.json({playerNames});
+        }
+
+        if(mode === "recalculate-totals"){
+
+            await recalcAllPlayerTotals();
+            return Response.json({"message": "done"});
         }
 
 
