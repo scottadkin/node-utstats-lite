@@ -715,7 +715,7 @@ export async function getPlayerRecentMatches(playerId, page, perPage){
 
     if(page < 0) page = 0;
     if(perPage < 1 || perPage > 100) perPage = 50;
-    const query = `SELECT match_id,match_date,team,time_on_server,spectator FROM nstats_match_players WHERE player_id=? ORDER BY match_date DESC LIMIT ?, ?`;
+    const query = `SELECT match_id,match_date,team,time_on_server FROM nstats_match_players WHERE player_id=? AND spectator=0 ORDER BY match_date DESC LIMIT ?, ?`;
 
     let start = page * perPage;
 
