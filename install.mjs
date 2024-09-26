@@ -406,6 +406,7 @@ async function insertSiteSettings(){
         {"category": "Social Media" ,"type": `string`, "name": "External Site", "value": ""},
         {"category": "Social Media" ,"type": `string`, "name": "Discord Link", "value": ""},
         {"category": "Social Media" ,"type": `string`, "name": "Youtube Link", "value": ""},
+        {"category": "Social Media" ,"type": `string`, "name": "Twitch Link", "value": ""},
     ];
 
     for(let i = 0; i < settings.length; i++){

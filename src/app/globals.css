@@ -440,6 +440,15 @@ canvas{
 .social-media-icon{
 	width:64px;
 	height:64px;
+	padding:5px;
+	margin-left:10px;
+	margin-bottom:10px;
+	transition: all 0.5s;
+}
+
+.social-media-icon:hover{
+	background-color:rgba(255,255,255,0.2);
+	cursor: pointer;
 }
 
 .perma-link{
