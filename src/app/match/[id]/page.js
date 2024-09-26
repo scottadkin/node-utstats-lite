@@ -13,10 +13,14 @@ import Pings from "@/app/UI/Match/Pings";
 import ErrorBox from "@/app/UI/ErrorBox";
 import MatchScreenshot from "@/app/UI/Match/MatchScreenshot";
 import { getAllImages as getAllWeaponImages, bWeaponImageExist } from "@/app/lib/weapons.mjs";
+import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
+
+
+    const settings = await getCategorySettings("Branding");
 
     //const match = new Match();
     const matchId = params.id ?? -1;
@@ -25,7 +29,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
     if(matchData.error !== undefined){
         return {
-            "title": `Match doesn't exist`,
+            "title": `Match doesn't exist - ${settings["Site Name"] || "Node UTStats Lite"}`,
             "description": `Match with that id does not exist`
         }
     }
@@ -36,7 +40,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
    
     return {
-        "title": `${b.mapName} - ${convertTimestamp(date, true)}`,
+        "title": `${b.mapName} - ${convertTimestamp(date, true)} - ${settings["Site Name"] || "Node UTStats Lite"}`,
         "description": `Match report for ${b.mapName} (${b.gametypeName}), ${convertTimestamp(date, true)}, ${b.players} ${plural(b.players, "player")}, match length ${toPlaytime(b.playtime)}, server ${b.serverName}.`
     }
 }

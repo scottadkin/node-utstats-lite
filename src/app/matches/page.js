@@ -10,10 +10,22 @@ import SearchForm from "../UI/Matches/SearchForm";
 import { getCategorySettings } from "../lib/siteSettings.mjs";
 
 
+export async function generateMetadata({ params, searchParams }, parent) {
+
+  const settings = await getCategorySettings("Branding");
+
+  return {
+      "title": `Recent Matches - ${settings["Site Name"] || "Node UTStats Lite"}`,
+      "description": `Search through all matches palyed on our servers.`
+  }
+}
+
+
 
 export default async function Page({params, searchParams}) {
 
     const pageSettings = await getCategorySettings("Matches");
+    const setting = await getCategorySettings("Branding");
 
     const perPage = searchParams?.pp ?? pageSettings["Results Per Page"] ?? 50;
     const page = searchParams?.page ?? 1;

@@ -1,11 +1,10 @@
 import Header from "@/app/UI/Header";
-import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches, getAllMatchIds } from "@/app/lib/maps.mjs";
+import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches } from "@/app/lib/maps.mjs";
 import Image from "next/image";
 import MatchesList from "@/app/UI/MatchList";
 import Pagination from "@/app/UI/Pagination";
-import { simpleQuery } from "@/app/lib/database.mjs";
 import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
-import { headers } from 'next/headers';
+import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -14,22 +13,14 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
     const info = await getMapInfo(id);
 
-
     const images = await getMapImages([info.name]);
     const image = images[Object.keys(images)[0]];
 
-    //console.log(`image`, image);
 
-    const headersList = headers();
-  
-    const host = headersList.get("host"); // to get domain
-    //console.log(headersList.get('next-url')); // to get url
-
-    const protocal = headersList.get("x-forwarded-proto");
+	const settings = await getCategorySettings("Branding");
 
     return {
-        "metadataBase": `${protocal}://${host}`,
-        "title": `${info.name} - Node UTStats Lite`,
+        "title": `${info.name} - ${settings["Site Name"] || "Node UTStats Lite"}`,
         "description": `View all matches for the map called ${info.name}`,
         "openGraph": {
             "images": [`./images/maps/${image}`]

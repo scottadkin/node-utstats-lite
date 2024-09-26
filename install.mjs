@@ -401,6 +401,11 @@ async function insertSiteSettings(){
         {"category": "Home" ,"type": `bool`, "name": "Display Servers", "value": 1},
         {"category": "Home" ,"type": `integer`, "name": "Total Recent Matches", "value": 3},
         {"category": "Home" ,"type": `integer`, "name": "Total Most Played Maps", "value": 3},
+        {"category": "Branding" ,"type": `string`, "name": "Site Name", "value": "Node UTStats Lite"},
+        {"category": "Branding" ,"type": `string`, "name": "Description", "value": "Stats based website made for the UTStats-lite mutator."},
+        {"category": "Social Media" ,"type": `string`, "name": "External Site", "value": ""},
+        {"category": "Social Media" ,"type": `string`, "name": "Discord Link", "value": ""},
+        {"category": "Social Media" ,"type": `string`, "name": "Youtube Link", "value": ""},
     ];
 
     for(let i = 0; i < settings.length; i++){

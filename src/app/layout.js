@@ -4,13 +4,33 @@ import Nav from "./UI/Nav";
 import UpdateSession from "./UpdateSession";
 import { getSessionInfo } from "./lib/authentication";
 import { getCategorySettings } from "./lib/siteSettings.mjs";
+import { headers } from 'next/headers';
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: "Node UTStats Lite",
-  description: "Node UTStats for the UTStats-lite mutator",
-};
+
+export async function generateMetadata({ params, searchParams }, parent) {
+
+
+	const headersList = headers();
+  
+    const host = headersList.get("host"); // to get domain
+    //console.log(headersList.get('next-url')); // to get url
+
+    const protocal = headersList.get("x-forwarded-proto");
+
+	const settings = await getCategorySettings("Branding");
+
+	return {
+		"metadataBase": `${protocal}://${host}`,
+	  	"title": settings["Site Name"] || "Node UTStats Lite",
+		"description": settings["Description"] || "Stats based website made for the UTStats-lite mutator.",
+		"siteName": settings["Site Name"],
+		"openGraph": {
+			"images": [`./images/maps/default.jpg`]
+		}
+	}
+}
 
 export default async function RootLayout({ children }) {
 

@@ -14,6 +14,7 @@ import ErrorBox from "@/app/UI/ErrorBox";
 import { getPlayerRankings } from "@/app/lib/rankings.mjs";
 import Rankings from "@/app/UI/Player/Rankings";
 import PermaLink from "@/app/UI/PermaLink";
+import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -31,13 +32,15 @@ export async function generateMetadata({ params, searchParams }, parent) {
             "playtime": 0
         };
     }
+    
+    const settings = await getCategorySettings("Branding");
 
    
     // optionally access and extend (rather than replace) parent metadata
     //const previousImages = (await parent).openGraph?.images || []
    
     return {
-        "title": `${player.name} - Player Profile`,
+        "title": `${player.name} - Player Profile - ${settings["Site Name"] || "Node UTStats Lite"}`,
         "description": `View ${player.name} player summary.`
         /*openGraph: {
             images: ['/some-specific-page-image.jpg', ...previousImages],

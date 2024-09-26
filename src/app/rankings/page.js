@@ -6,6 +6,7 @@ import { convertTimestamp, getPlayer, toPlaytime, getOrdinal, plural } from "../
 import { getBasicPlayerInfo } from "../lib/players.mjs";
 import PlayerLink from "../UI/PlayerLink";
 import Pagination from "../UI/Pagination";
+import { getCategorySettings } from "../lib/siteSettings.mjs";
 
 
 function setGametypeId(searchParams, gametypeNames){
@@ -59,8 +60,10 @@ export async function generateMetadata({ params, searchParams }, parent) {
         timeFrameString = `, active players in the last ${timeFrame} ${plural(timeFrame, "day")}`;
     }
 
+    const settings = await getCategorySettings("Branding");
+
     return {
-        "title": `${gametypeName} Rankings`,
+        "title": `${gametypeName} Rankings - ${settings["Site Name"] || "Node UTStats Lite"}`,
         "description": `View the top ranking players for the gametype ${gametypeName}${timeFrameString}`
     }
 }

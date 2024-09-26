@@ -10,12 +10,11 @@ import TabsLinks from "../UI/TabsLinks";
 import DropDown from "../UI/Records/DropDown";
 import {VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, getTypeDisplayName} from "@/app/lib/validRecordTypes";
 import Pagination from "../UI/Pagination";
+import { getCategorySettings } from "../lib/siteSettings.mjs";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
-    console.log("searchParams");
-    console.log(searchParams);
 
     const mode = (searchParams.mode !== undefined) ? searchParams.mode.toLowerCase() : "match"; 
     let cat = (searchParams.cat !== undefined) ? searchParams.cat.toLowerCase() : "kills";
@@ -28,8 +27,13 @@ export async function generateMetadata({ params, searchParams }, parent) {
     const lifetimeTotals = await getTotalLifetimeRecords();
     
 
+    const settings = await getCategorySettings("Branding");
+
+    const title = (catDisplayName !== null) ? `${catDisplayName} Records - ${(mode === "match") ? "Single Match" : "Lifetime"}` : "Invalid Record Type";
+
+    
     return {
-        "title": (catDisplayName !== null) ? `${catDisplayName} Records - ${(mode === "match") ? "Single Match" : "Lifetime"}` : "Invalid Record Type",
+        "title": `${title} - ${settings["Site Name"] || "Node UTStats Lite"}`,
         "description": `View player records for different match and lifetime events, there are a total of ${singleMatchTotals} data entries for each single match event, and ${lifetimeTotals} data entries for player lifetime totals.`,
         "openGraph": {},
     }

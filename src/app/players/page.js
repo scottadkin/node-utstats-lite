@@ -10,6 +10,18 @@ import Pagination from "../UI/Pagination";
 import { getCategorySettings } from "../lib/siteSettings.mjs";
 
 
+export async function generateMetadata({ params, searchParams }, parent) {
+
+    const settings = await getCategorySettings("Branding");
+
+    return {
+        "title": `Player Search - ${settings["Site Name"] || "Node UTStats Lite"}`,
+        "description": `Search for a player that has played on our servers.`
+
+    }
+  }
+
+
 function createHeaderURL(targetSortBy, currentSortBy, order){
 
     if(targetSortBy === currentSortBy){
