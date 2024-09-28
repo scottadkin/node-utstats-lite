@@ -167,6 +167,8 @@ function renderSelectedOptions(state, dispatch){
 
     const rows = [];
 
+    const textAreaElems = [];
+
     for(let i = 0; i < state.settings.length; i++){
 
         const s = state.settings[i];
@@ -177,6 +179,8 @@ function renderSelectedOptions(state, dispatch){
 
         const type = s.setting_type.toLowerCase();
 
+
+        let bTextArea = false;
 
         switch(type){
 
@@ -250,12 +254,35 @@ function renderSelectedOptions(state, dispatch){
                 </td>
             }   break;
 
+            case "longtext": {
+
+                valueElem = <textarea value={s.setting_value} onChange={(e) =>{
+          
+                    dispatch({
+                        "type": "change-setting-value", 
+                        "category": s.category, 
+                        "key": s.setting_name, 
+                        "value": e.target.value
+                    });
+                }}></textarea>;
+
+                bTextArea = true;
+            }
+            break;
+
             default: {
                 valueElem = <td>{s.setting_value}</td>;
-            }break;
+            } break;
+
         }
 
-
+        if(bTextArea){
+            textAreaElems.push(<div className="admin-textarea-wrapper" key={i}>
+                <div className="admin-textarea-title">{s.setting_name}</div>
+                {valueElem}
+            </div>);
+            continue;
+        }
 
         rows.push(<tr key={s.id}>
             <td className="text-left">{s.setting_name}</td>
@@ -274,6 +301,9 @@ function renderSelectedOptions(state, dispatch){
                 {rows}
             </tbody>
         </table>
+        <div className="text-center center">
+            {textAreaElems}
+        </div>
     </>
 }
 

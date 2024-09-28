@@ -176,6 +176,7 @@ form{
 	padding:3px;
 }
 
+
 .submit-button{
 	display:inline-block;
 	background-color: var(--bg-color-2);
@@ -227,7 +228,7 @@ table{
 }
 
 
-th{
+th, .admin-textarea-title{
     padding:var(--padding-1) var(--padding-3);
     color:yellow;
     font-weight:normal;
@@ -551,4 +552,31 @@ canvas{
     line-height: var(--line-height-1);
     margin-bottom:var(--margin-2);
     text-overflow: ellipsis;
+}
+
+textarea{
+	font-size:var(--font-size-1);
+	background-color:var(--bg-color-3);
+	border:1px solid var(--border-color-1);
+	color:var(--font-color-1);
+	min-height:100px;
+}
+
+.admin-textarea-wrapper{
+	width:90%;
+	margin-left:auto;
+	margin-right:auto;
+	display:inline-block;
+	overflow:hidden;
+}
+
+.admin-textarea-wrapper textarea{
+	display:block;
+	width:100%;
+}
+
+.welcome-message{
+	text-align:center;
+	color:var(--font-color-1);
+	margin-bottom:var(--margin-1);
 }

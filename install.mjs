@@ -407,6 +407,8 @@ async function insertSiteSettings(){
         {"category": "Social Media" ,"type": `string`, "name": "Discord Link", "value": ""},
         {"category": "Social Media" ,"type": `string`, "name": "Youtube Link", "value": ""},
         {"category": "Social Media" ,"type": `string`, "name": "Twitch Link", "value": ""},
+        {"category": "Welcome Message" ,"type": `string`, "name": "Welcome Title", "value": "Welcome to Node UTStats-lite"},
+        {"category": "Welcome Message" ,"type": `longtext`, "name": "Welcome Message", "value": "Welcome to Node UTStats-lite, stats tracking website for our Unreal Tournament servers."},
     ];
 
     for(let i = 0; i < settings.length; i++){

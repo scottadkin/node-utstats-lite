@@ -9,11 +9,13 @@ import BasicMapsList from "./UI/Home/BasicMapsList";
 import BasicRecentMatches from "./UI/Home/BasicRecentMatches";
 import { getCategorySettings } from "./lib/siteSettings.mjs";
 import SocialMedia from "./UI/SocialMedia";
+import WelcomeMessage from "./UI/WelcomeMessage";
 
 export default async function Home() {
 
 	const pageSettings = await getCategorySettings("Home");
 	const socialSettings = await getCategorySettings("Social Media");
+	const welcomeMessageSettings = await getCategorySettings("Welcome Message");
 
 
 	const servers = (pageSettings["Display Servers"] === "1") ? await getBasicList() : null;
@@ -23,6 +25,7 @@ export default async function Home() {
 
 	return <main className={styles.main}>
 		<div>
+			<WelcomeMessage settings={welcomeMessageSettings}/>
 			<SocialMedia settings={socialSettings}/>
 			{(recentMatches !== null) ? <BasicRecentMatches data={recentMatches.data}/> : null}
 			{(mapsData !== null) ? <BasicMapsList data={mapsData.data} images={mapsData.images}/> : null}
