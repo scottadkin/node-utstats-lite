@@ -1,4 +1,6 @@
 import Header from "./Header";
+import BBParser from "../lib/BBParser";
+
 
 export default function WelcomeMessage({settings}){
 
@@ -6,11 +8,13 @@ export default function WelcomeMessage({settings}){
     let message = settings["Welcome Message"] || "";
 
     if(title === "" || message === "") return;
-    
+
+    message = BBParser(message);
+
     return <div>
         <Header>{title}</Header>
         <div className="welcome-message">
-            {message}
+            <div dangerouslySetInnerHTML={{"__html": message}}></div>
         </div>
     </div>
 }

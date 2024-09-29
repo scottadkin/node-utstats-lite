@@ -341,7 +341,7 @@ const queries = [
             category varchar(255) NOT NULL,
             setting_type varchar(255) NOT NULL,
             setting_name varchar(255) NOT NULL,
-            setting_value varchar(255) NOT NULL
+            setting_value text NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
 
@@ -581,6 +581,9 @@ async function addColumn(table, name, type){
         await addColumn("nstats_matches", "hash", "varchar(32) NOT NULL AFTER mutators");
 
         await addColumn("nstats_players", "hash", "varchar(32) NOT NULL AFTER last_active");
+
+
+        await simpleQuery("ALTER TABLE nstats_site_settings MODIFY COLUMN setting_value text NOT NULL");
         
         process.exit();
 
