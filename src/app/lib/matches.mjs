@@ -223,9 +223,11 @@ async function getMatchIdFromHash(hash){
     return null;
 }
 
-export async function getMatchData(id){
+export async function getMatchData(id, bIgnoreKills){
 
     try{
+
+        if(bIgnoreKills === undefined) bIgnoreKills = false;
 
         if(id.length !== 32){
 
@@ -272,7 +274,7 @@ export async function getMatchData(id){
         }
 
         const weaponStats = await getMatchWeaponStats(id);
-        const kills = await getMatchKills(id);
+        const kills = (bIgnoreKills) ? [] : await getMatchKills(id);
 
         const ctf = await ctfGetMatchData(id);
         const dom = await domGetMatchData(id);
@@ -442,5 +444,117 @@ export async function getBasicMatchesInfo(matchIds){
 
 
     return data;
+
+}
+
+
+
+/**
+ * used for /api/json/match
+ */
+export async function getMatchJSON(id, bIgnoreKills){
+
+    if(bIgnoreKills === undefined) bIgnoreKills = false;
+
+    const data = await getMatchData(id, bIgnoreKills);
+
+    const players = data.basicPlayers;
+
+
+    
+    console.log(data);
+
+    console.log(data.ctf);
+
+    console.log(players);
+
+    for(let i = 0; i < data.ctf.length; i++){
+
+        const d = data.ctf[i];
+
+        const player = players[d.player_id] ?? null;
+
+        if(player === null) continue;
+
+        player.ctf = {
+            "taken": d.flag_taken,
+            "pickup": d.flag_pickup,
+            "drop": d.flag_drop,
+            "assist": d.flag_assist,
+            "cover": d.flag_cover,
+            "seal": d.flag_seal,
+            "cap": d.flag_cap,
+            "kill": d.flag_kill,
+            "return": d.flag_return,
+            "returnBase": d.flag_return_base,
+            "returnMid": d.flag_return_mid,
+            "returnEnemyBase": d.flag_return_enemy_base,
+            "returnSave": d.flag_return_save,
+        };
+    }
+
+    //console.log(data.weaponStats.data);
+
+    for(let i = 0; i < data.playerData.length; i++){
+
+        const d = data.playerData[i];
+
+        console.log(d);
+
+        const player = players[d.player_id] ?? null;
+
+        if(player === null) continue;
+
+        player.general = {
+            "score": d.score,
+            "frags": d.frags,
+            "kills": d.kills,
+            "deaths": d.deaths,
+            "suicides": d.suicides,
+            "teamKills": d.team_kills,
+            "efficiency": d.efficiency,
+            "playtime": d.time_on_server,
+            "ttl": d.ttl,
+        };
+
+        player.pickups = {
+            "amp": d.item_amp,
+            "belt": d.item_belt,
+            "boots": d.item_boots,
+            "body": d.item_body,
+            "pads": d.item_pads,
+            "invis": d.item_invis,
+            "shp": d.item_shp,
+        };
+
+        player.events = {
+            "firstBlood": d.first_blood === 1,
+            "sprees": {
+                "spree": d.spree_1,
+                "rampage": d.spree_2,
+                "dominating": d.spree_3,
+                "unstoppable": d.spree_4,
+                "godlike": d.spree_,
+                "best": d.spree_best
+            },
+            "multis": {
+                "double": d.multi_1,
+                "multi": d.multi_2,
+                "ultra": d.multi_3,
+                "monster": d.multi_4,
+                "best": d.multi_best
+            }
+        };
+    }
+
+    console.log(players);
+
+    const finalData = [];
+
+    for(const [key, value] of Object.entries(players)){
+        finalData.push(value);
+    }
+
+    return finalData;
 
 }

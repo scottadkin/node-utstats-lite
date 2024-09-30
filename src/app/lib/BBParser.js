@@ -28,6 +28,7 @@ export default function BBParser(input){
         [/"/ig, "&quot;"],
         [/\n/ig, "<br/>"],
         [/\[b\](.+?)\[\/b\]/ig, "<b>$1</b>"],
+        [/\[img\](.+?)\[\/img\]/ig, `<img src="$1" alt="image"/>`],
         [/\[url\](.+?)\[\/url\]/ig, urlReplacer],
         [/\[url=(.+?)\](.+?)\[\/url\]/ig, urlNamedReplacer],
     ];
