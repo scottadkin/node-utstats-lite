@@ -460,13 +460,14 @@ export async function getMatchJSON(id, bIgnoreKills){
 
     const players = data.basicPlayers;
 
-
+    const weaponNames = data.weaponStats.names;
+    const weaponStats = data.weaponStats.data;
     
     console.log(data);
 
-    console.log(data.ctf);
+    //console.log(data.ctf);
 
-    console.log(players);
+   // console.log(players);
 
     for(let i = 0; i < data.ctf.length; i++){
 
@@ -475,6 +476,8 @@ export async function getMatchJSON(id, bIgnoreKills){
         const player = players[d.player_id] ?? null;
 
         if(player === null) continue;
+
+        player.weaponStats = {};
 
         player.ctf = {
             "taken": d.flag_taken,
@@ -493,17 +496,18 @@ export async function getMatchJSON(id, bIgnoreKills){
         };
     }
 
-    //console.log(data.weaponStats.data);
-
     for(let i = 0; i < data.playerData.length; i++){
 
         const d = data.playerData[i];
 
-        console.log(d);
+        //console.log(d);
 
         const player = players[d.player_id] ?? null;
 
         if(player === null) continue;
+
+        player.team = d.team;
+        player.ping = d.ping_avg;
 
         player.general = {
             "score": d.score,
@@ -547,14 +551,36 @@ export async function getMatchJSON(id, bIgnoreKills){
         };
     }
 
-    console.log(players);
 
-    const finalData = [];
+    for(let i = 0; i < weaponStats.length; i++){
 
-    for(const [key, value] of Object.entries(players)){
-        finalData.push(value);
+        const w = weaponStats[i];
+
+        let weapon = weaponNames[w.weapon_id];
+
+        if(weapon === undefined) weapon = "Not Found";
+
+        const player = players[w.player_id] ?? null;
+
+
+        if(player === null) continue;
+
+        player.weaponStats[weapon] = {
+            "kills": w.kills,
+            "deaths": w.deaths,
+            "teamKills": w.teamKills
+        };
+
     }
 
-    return finalData;
+    const finalPlayers = [];
+
+    for(const p of Object.values(players)){
+        finalPlayers.push(p);
+    }
+
+    console.log(data.basic);
+
+    return {"players":  finalPlayers, "basic": data.basic};
 
 }
