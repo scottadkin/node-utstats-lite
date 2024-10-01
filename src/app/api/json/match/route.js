@@ -11,12 +11,31 @@ export async function GET(req){
 
 
         let id = searchParams.get("id");
+        let ignore = searchParams.get("ignore") ?? "";
 
         if(id === null) return Response.json({"error": "You must supply a match id or perma link hash."});
 
-        const data = await getMatchJSON(id, true);
+        
+
+        console.log(ignore);
+        console.log(ignore.split(","));
+
+        ignore = ignore.split(",").map((i) => i.toLowerCase());
+        console.log(ignore);
+
+        const bIgnoreWeaponStats = ignore.indexOf("weapons") !== -1;
+        const bIgnoreKills = ignore.indexOf("kills") !== -1;
+        const bIgnorePlayers = ignore.indexOf("players") !== -1;
+        const bIgnoreBasic = ignore.indexOf("basic") !== -1;
+        //first blood, sprees, multis
+        const bIgnoreSpecial = ignore.indexOf("special") !== -1;
+        const bIgnorePickups = ignore.indexOf("pickups") !== -1;
+
+        const data = await getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnorePlayers, bIgnoreBasic, bIgnoreSpecial, bIgnorePickups);
 
         return Response.json(data);
+
+
 
         return Response.json({"error": "Unknown Query"});
 

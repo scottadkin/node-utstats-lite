@@ -9,6 +9,7 @@ import { getMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
+import { getWinner } from "./generic.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
@@ -223,11 +224,16 @@ async function getMatchIdFromHash(hash){
     return null;
 }
 
-export async function getMatchData(id, bIgnoreKills){
+export async function getMatchData(id, bIgnoreKills, bIgnoreWeaponStats, bIgnorePlayers, bIgnoreBasic){
 
     try{
 
         if(bIgnoreKills === undefined) bIgnoreKills = false;
+        if(bIgnoreWeaponStats === undefined) bIgnoreWeaponStats = false;
+        if(bIgnorePlayers === undefined) bIgnorePlayers = false;
+        if(bIgnoreBasic === undefined) bIgnoreBasic = false;
+
+        if(bIgnoreBasic && bIgnoreKills && bIgnorePlayers && bIgnoreWeaponStats) return {"error": "Everything is set to ignore"};
 
         if(id.length !== 32){
 
@@ -244,36 +250,43 @@ export async function getMatchData(id, bIgnoreKills){
         const basic = await getMatch(id);
         if(basic === null) throw new Error(`Match doesnt exist`);
 
-        const playerData = await getPlayerMatchData(id);
+        let playerData = null;
+        let playerNames = {};
+        let basicPlayers = {};
 
-        const uniquePlayers = [...new Set(playerData.map((p) =>{
-            return p.player_id;
-        }))]
+        if(!bIgnorePlayers){
 
-        const playerNames = await getPlayersById(uniquePlayers);
+            playerData = await getPlayerMatchData(id);
 
-        for(let i = 0; i < playerData.length; i++){
+            const uniquePlayers = [...new Set(playerData.map((p) =>{
+                return p.player_id;
+            }))]
 
-            const p = playerData[i];
+            playerNames = await getPlayersById(uniquePlayers);
 
-            p.name = playerNames[p.player_id] ?? "Not Found";
+            for(let i = 0; i < playerData.length; i++){
+
+                const p = playerData[i];
+
+                p.name = playerNames[p.player_id] ?? "Not Found";
+            }
+
+
+            for(let i = 0; i < playerData.length; i++){
+
+                const p = playerData[i];
+
+                basicPlayers[p.player_id] = {
+                    "name": p.name,
+                    "country": p.country,
+                    "team": p.team,
+                    "bSpectator": p.spectator
+                };
+            }
+
         }
 
-        const basicPlayers = {};
-
-        for(let i = 0; i < playerData.length; i++){
-
-            const p = playerData[i];
-
-            basicPlayers[p.player_id] = {
-                "name": p.name,
-                "country": p.country,
-                "team": p.team,
-                "bSpectator": p.spectator
-            };
-        }
-
-        const weaponStats = await getMatchWeaponStats(id);
+        const weaponStats = (bIgnoreWeaponStats) ? null : await getMatchWeaponStats(id);
         const kills = (bIgnoreKills) ? [] : await getMatchKills(id);
 
         const ctf = await ctfGetMatchData(id);
@@ -449,25 +462,10 @@ export async function getBasicMatchesInfo(matchIds){
 
 
 
-/**
- * used for /api/json/match
- */
-export async function getMatchJSON(id, bIgnoreKills){
+function _JSONAddPlayerDetails(players, data, weaponNames, weaponStats, bIgnoreSpecial, bIgnorePickups){
 
-    if(bIgnoreKills === undefined) bIgnoreKills = false;
-
-    const data = await getMatchData(id, bIgnoreKills);
-
-    const players = data.basicPlayers;
-
-    const weaponNames = data.weaponStats.names;
-    const weaponStats = data.weaponStats.data;
-    
-    console.log(data);
-
-    //console.log(data.ctf);
-
-   // console.log(players);
+  
+    if(players === null) return;
 
     for(let i = 0; i < data.ctf.length; i++){
 
@@ -476,8 +474,6 @@ export async function getMatchJSON(id, bIgnoreKills){
         const player = players[d.player_id] ?? null;
 
         if(player === null) continue;
-
-        player.weaponStats = {};
 
         player.ctf = {
             "taken": d.flag_taken,
@@ -495,6 +491,8 @@ export async function getMatchJSON(id, bIgnoreKills){
             "returnSave": d.flag_return_save,
         };
     }
+
+    if(data.playerData === null) return;
 
     for(let i = 0; i < data.playerData.length; i++){
 
@@ -521,36 +519,44 @@ export async function getMatchJSON(id, bIgnoreKills){
             "ttl": d.ttl,
         };
 
-        player.pickups = {
-            "amp": d.item_amp,
-            "belt": d.item_belt,
-            "boots": d.item_boots,
-            "body": d.item_body,
-            "pads": d.item_pads,
-            "invis": d.item_invis,
-            "shp": d.item_shp,
-        };
+        if(!bIgnorePickups){
 
-        player.events = {
-            "firstBlood": d.first_blood === 1,
-            "sprees": {
-                "spree": d.spree_1,
-                "rampage": d.spree_2,
-                "dominating": d.spree_3,
-                "unstoppable": d.spree_4,
-                "godlike": d.spree_,
-                "best": d.spree_best
-            },
-            "multis": {
-                "double": d.multi_1,
-                "multi": d.multi_2,
-                "ultra": d.multi_3,
-                "monster": d.multi_4,
-                "best": d.multi_best
-            }
-        };
+            player.pickups = {
+                "amp": d.item_amp,
+                "belt": d.item_belt,
+                "boots": d.item_boots,
+                "body": d.item_body,
+                "pads": d.item_pads,
+                "invis": d.item_invis,
+                "shp": d.item_shp,
+            };
+        }
+
+        if(!bIgnoreSpecial){
+
+            player.events = {
+                "firstBlood": d.first_blood === 1,
+                "sprees": {
+                    "spree": d.spree_1,
+                    "rampage": d.spree_2,
+                    "dominating": d.spree_3,
+                    "unstoppable": d.spree_4,
+                    "godlike": d.spree_5,
+                    "best": d.spree_best
+                },
+                "multis": {
+                    "double": d.multi_1,
+                    "multi": d.multi_2,
+                    "ultra": d.multi_3,
+                    "monster": d.multi_4,
+                    "best": d.multi_best
+                }
+            };
+        }
     }
 
+
+    if(weaponStats === null) return;
 
     for(let i = 0; i < weaponStats.length; i++){
 
@@ -562,25 +568,101 @@ export async function getMatchJSON(id, bIgnoreKills){
 
         const player = players[w.player_id] ?? null;
 
-
         if(player === null) continue;
 
+        if(player.weaponStats === undefined) player.weaponStats = {};
+
         player.weaponStats[weapon] = {
-            "kills": w.kills,
-            "deaths": w.deaths,
-            "teamKills": w.teamKills
+            "kills": w.kills ?? 0,
+            "deaths": w.deaths ?? 0,
+            "teamKills": w.teamKills ?? 0
         };
-
     }
+}
 
-    const finalPlayers = [];
 
-    for(const p of Object.values(players)){
-        finalPlayers.push(p);
+function _JSONCreateMatchInfo(basic){
+
+    const b = basic;
+
+    const winner = getWinner({"basic": basic});
+
+    console.log(winner);
+    const data = {
+        "server": b.serverName,
+        "gametype": b.gametypeName,
+        "map": b.mapName,
+        "playtime": b.playtime,
+        "players": b.players,
+        "matchId": b.id,
+        "matchPermaLinkId": b.hash,
+        "bInstagib": b.insta === 1
+        
+    };
+
+
+
+
+
+    return data;
+}
+
+/**
+ * used for /api/json/match
+ */
+export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnorePlayers, bIgnoreBasic, bIgnoreSpecial, bIgnorePickups){
+
+    try{
+
+        if(bIgnoreKills === undefined) bIgnoreKills = false;
+        if(bIgnoreWeaponStats === undefined) bIgnoreWeaponStats = false;
+        if(bIgnorePlayers === undefined) bIgnorePlayers = false;
+        if(bIgnoreBasic === undefined) bIgnoreBasic = false;
+        if(bIgnoreSpecial === undefined) bIgnoreSpecial = false;
+        if(bIgnorePickups === undefined) bIgnorePickups = false;
+
+        const data = await getMatchData(id, bIgnoreKills, bIgnoreWeaponStats, bIgnorePlayers, bIgnoreBasic);
+
+        if(data.error !== undefined) throw new Error(data.error);
+
+        const players = data.basicPlayers;
+
+
+        const weaponNames = (data.weaponStats === null) ? {} : data.weaponStats.names;
+        const weaponStats = (data.weaponStats === null) ? {} : data.weaponStats.data;
+        
+        //console.log(data);
+
+        _JSONAddPlayerDetails(players, data, weaponNames, weaponStats, bIgnoreSpecial, bIgnorePickups);
+
+        //console.log(data.ctf);
+
+    // console.log(players);
+
+        
+
+        const finalPlayers = [];
+
+        for(const p of Object.values(players)){
+            finalPlayers.push(p);
+        }
+
+        //console.log(data.basic);
+
+        const basic = _JSONCreateMatchInfo(data.basic);
+
+        //console.log(basic);
+
+        const jsonObject = {};
+
+        if(!bIgnoreBasic) jsonObject.basic = basic;
+        if(!bIgnorePlayers) jsonObject.players = finalPlayers;
+
+        return jsonObject;
+
+    }catch(err){
+        return {"error": err.toString()}
     }
-
-    console.log(data.basic);
-
-    return {"players":  finalPlayers, "basic": data.basic};
+    //return {"players":  finalPlayers, "basic": basic};
 
 }
