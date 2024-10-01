@@ -11,18 +11,13 @@ export async function GET(req){
 
 
         let id = searchParams.get("id");
-        let ignore = searchParams.get("ignore") ?? "";
+        
 
         if(id === null) return Response.json({"error": "You must supply a match id or perma link hash."});
 
-        
-
-        console.log(ignore);
-        console.log(ignore.split(","));
-
+        let ignore = searchParams.get("ignore") ?? "";
         ignore = ignore.split(",").map((i) => i.toLowerCase());
-        console.log(ignore);
-
+  
         const bIgnoreWeaponStats = ignore.indexOf("weapons") !== -1;
         const bIgnoreKills = ignore.indexOf("kills") !== -1;
         const bIgnorePlayers = ignore.indexOf("players") !== -1;
@@ -37,7 +32,7 @@ export async function GET(req){
 
 
 
-        return Response.json({"error": "Unknown Query"});
+        //return Response.json({"error": "Unknown Query"});
 
     }catch(err){
         console.trace(err);

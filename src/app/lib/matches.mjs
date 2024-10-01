@@ -587,7 +587,6 @@ function _JSONCreateMatchInfo(basic){
 
     const winner = getWinner({"basic": basic});
 
-    console.log(winner);
     const data = {
         "server": b.serverName,
         "gametype": b.gametypeName,
@@ -596,13 +595,24 @@ function _JSONCreateMatchInfo(basic){
         "players": b.players,
         "matchId": b.id,
         "matchPermaLinkId": b.hash,
-        "bInstagib": b.insta === 1
-        
+        "bInstagib": b.insta === 1,
+        "winners": winner.winners,
+        "timestamp": Math.floor(new Date(basic.date) * 0.001)
+            
     };
 
+    if(winner.type === "teams"){
 
+        data.redTeamScore = b.team_0_score;
+        data.blueTeamScore = b.team_1_score;
+        data.greenTeamScore = b.team_2_score;
+        data.yellowTeamScore = b.team_3_score;
 
+        data.winnerScore = b[`team_${winner.winners[0]}_score`] ?? -9999;
 
+    }else{
+        data.winnerScore = b.solo_winner_score ?? -9999;
+    }
 
     return data;
 }
