@@ -581,7 +581,7 @@ function _JSONAddPlayerDetails(players, data, weaponNames, weaponStats, bIgnoreS
 }
 
 
-function _JSONCreateMatchInfo(basic){
+async function _JSONCreateMatchInfo(basic){
 
     const b = basic;
 
@@ -611,7 +611,15 @@ function _JSONCreateMatchInfo(basic){
         data.winnerScore = b[`team_${winner.winners[0]}_score`] ?? -9999;
 
     }else{
+
         data.winnerScore = b.solo_winner_score ?? -9999;
+        const winningPlayer = await getPlayersById(b.solo_winner);
+
+        if(winningPlayer[b.solo_winner] === undefined){
+            data.winningPlayer = "Not Found";
+        }else{
+            data.winningPlayer = winningPlayer[b.solo_winner];
+        }
     }
 
     return data;
@@ -659,7 +667,7 @@ export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
 
         //console.log(data.basic);
 
-        const basic = _JSONCreateMatchInfo(data.basic);
+        const basic = await _JSONCreateMatchInfo(data.basic);
 
         //console.log(basic);
 
