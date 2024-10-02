@@ -553,6 +553,34 @@ function _JSONAddPlayerDetails(players, data, weaponNames, weaponStats, bIgnoreS
                 }
             };
         }
+
+        if(data.dom.data.length === 0) continue;
+
+
+        for(const [key, value] of Object.entries(players)){
+            value.dom = {
+                "total": 0,
+                "controlPoints": {}
+            };
+        }
+
+
+        for(let i = 0; i < data.dom.data.length; i++){
+
+            const d = data.dom.data[i];
+
+            const pointName = data.dom.controlPoints[d.point_id] ?? `Not Found (${d.point_id})`;
+
+            const player = players[d.player_id] ?? null;
+
+            if(player === null) continue;
+
+            if(player.dom.controlPoints[pointName] === undefined){
+                player.dom.controlPoints[pointName] = d.total_caps;
+            }
+
+            player.dom.total += d.total_caps;
+        }
     }
 
 
@@ -581,7 +609,7 @@ function _JSONAddPlayerDetails(players, data, weaponNames, weaponStats, bIgnoreS
 }
 
 
-async function _JSONCreateMatchInfo(basic){
+async function _JSONCreateMatchInfo(basic, ctf){
 
     const b = basic;
 
@@ -623,6 +651,30 @@ async function _JSONCreateMatchInfo(basic){
     }
 
     return data;
+}
+
+
+function _JSONSetDomData(dom){
+
+    const totals = {
+        "all": 0
+    };
+
+    for(let i = 0; i < dom.data.length; i++){
+
+        const d = dom.data[i];
+
+        const pointName = dom.controlPoints[d.point_id] ?? `Not Found ${d.point_id}`;
+
+        if(totals[pointName] === undefined) totals[pointName] = 0;
+
+        totals[pointName] += d.total_caps;
+        totals.all += d.total_caps;
+    }
+
+    if(totals.all === 0) return null;
+
+    return totals;
 }
 
 /**
@@ -669,10 +721,13 @@ export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
 
         const basic = await _JSONCreateMatchInfo(data.basic);
 
+        const dom = _JSONSetDomData(data.dom);
+
         //console.log(basic);
 
         const jsonObject = {};
 
+        if(!bIgnoreBasic && dom !== null) jsonObject.dom = dom;
         if(!bIgnoreBasic) jsonObject.basic = basic;
         if(!bIgnorePlayers) jsonObject.players = finalPlayers;
 
