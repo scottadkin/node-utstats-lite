@@ -39,3 +39,10 @@ Unreal Tournament stats website for the [https://github.com/rxut/UTStatsLite](ut
 - Place **nstats_ftp.json** in the main directory of your node utstats lite folder.
 - Run the command **node nutsftptolite.mjs**
 - You should now see the settings added in the admin area.
+
+
+## Match JSON API
+You can fetch json data of matches via match ids or **permahashes(recommended)** by using the following path **/api/json/match/?id=matchid**.
+You have options to ignore certain data by appending a comma separated list **&ignore=type1,type2**
+An example for ignoring player weapon stats and multikills,sprees would be https://example.com/api/json/match/?id=1337&ignore=weapons,special
+Valid Ignore types are **weapons,kills,basic,special,pickups,players(this will automatically ignore weapons,special,pickups)**
