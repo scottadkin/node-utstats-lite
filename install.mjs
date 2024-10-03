@@ -371,7 +371,14 @@ const queries = [
             name varchar(255) NOT NULL,
             display_name varchar(255) NOT NULL,
             points int NOT NULL
-            ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_page_layout (
+            id int NOT NULL AUTO_INCREMENT,
+            page varchar(255) NOT NULL,
+            item varchar(255) NOT NULL,
+            page_order int NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
 
 ];
@@ -530,6 +537,29 @@ async function addColumn(table, name, type){
     }catch(err){
         new Message(err.message, "error");
     }
+}
+
+
+async function bPageOrderItemExists(page, itemName){
+
+    page = page.toLowerCase();
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_page_layout WHERE page=? AND item=?`;
+
+    const result = await simpleQuery(query, [page, itemName]);
+
+    return result[0].total_rows > 0;
+}
+
+async function insertPageLayout(page, itemName, pageOrder){
+
+    page = page.toLowerCase();
+
+    if(await bPageOrderItemExists(page, itemName)) return;
+
+    const query = `INSERT INTO nstats_page_layout VALUES(NULL,?,?,?)`;
+
+    await simpleQuery(query, [page, itemName, pageOrder]);
 }
 
 (async () =>{

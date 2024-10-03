@@ -10,6 +10,7 @@ import BasicRecentMatches from "./UI/Home/BasicRecentMatches";
 import { getCategorySettings } from "./lib/siteSettings.mjs";
 import SocialMedia from "./UI/SocialMedia";
 import WelcomeMessage from "./UI/WelcomeMessage";
+import { getPageLayout } from "./lib/pageLayout";
 
 export default async function Home() {
 
@@ -23,6 +24,11 @@ export default async function Home() {
 	const mapsData = (pageSettings["Display Most Played Maps"] === "1") ? await getMostPlayedMaps(pageSettings["Total Most Played Maps"]) : null;
 	const recentMatches = (pageSettings["Display Recent Matches"] === "1") ? await getRecentMatches(1, pageSettings["Total Recent Matches"], 0, 0, 0) : null;
 
+
+	const pageLayout = await getPageLayout("Home");
+	
+	console.log(pageLayout);
+	
 	return <main className={styles.main}>
 		<div>
 			<WelcomeMessage settings={welcomeMessageSettings}/>
