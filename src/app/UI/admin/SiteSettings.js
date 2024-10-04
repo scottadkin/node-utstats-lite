@@ -7,7 +7,91 @@ import Tabs from "../Tabs";
 import TrueFalseButton from "../TrueFalseButton";
 import PerPageDropDown from "../PerPageDropDown";
 
+function reducer(state, action){
 
+    switch(action.type){
+
+        case "loaded": {
+            return {
+                ...state,
+                "settings": action.data,
+                "tabs": action.tabs,
+                "selectedTab": action.selectedTab,
+                "pageLayouts": action.pageLayouts,
+                "pendingLayouts": action.pageLayouts
+            }
+        }
+        case "error": {
+            return {
+                ...state,
+                "error": action.message
+            }
+        }
+        case "change-tab": {
+            return {
+                ...state,
+                "selectedTab": action.value
+            }
+        }
+        case "change-setting-value": {
+
+            const currentSettings = JSON.parse(JSON.stringify(state.settings));
+        
+            for(let i = 0; i < currentSettings.length; i++){
+
+                const s = currentSettings[i];
+
+                if(s.category === action.category && s.setting_name === action.key){
+
+                    s.setting_value = action.value;
+
+                    if(s.bSettingChanged === undefined){
+                        s.bSettingChanged = true;
+                    }
+                    //}else{
+                    //    s.bSettingChanged = !s.bSettingChanged;
+                   // };
+                }
+            }
+
+            return {
+                ...state,
+                "settings": currentSettings        
+            }
+        }
+        case "remove-settings-changed":{
+
+            const currentSettings = JSON.parse(JSON.stringify(state.settings));
+
+            for(let i = 0; i < currentSettings.length; i++){
+
+                const s = currentSettings[i];
+
+                if(action.passedIds.indexOf(s.id) !== -1){
+                    delete s.bSettingChanged;
+                }
+            }
+            return {
+                ...state,
+                "settings": currentSettings
+            }
+        }
+
+        case "change-pending-layout": {
+
+            const page = action.page.toLowerCase();
+            const item = action.name;
+            const currentIndex = action.currentIndex;
+            const bMoveUp = action.bMoveUp;
+
+            return {
+                ...state
+            }
+        }
+    }
+
+    return state;
+}
 
 async function loadData(dispatch){
 
@@ -98,88 +182,17 @@ async function saveChanges(state, dispatch){
     }
 }
 
-function reducer(state, action){
-
-    switch(action.type){
-
-        case "loaded": {
-            return {
-                ...state,
-                "settings": action.data,
-                "tabs": action.tabs,
-                "selectedTab": action.selectedTab,
-                "pageLayouts": action.pageLayouts
-            }
-        }
-        case "error": {
-            return {
-                ...state,
-                "error": action.message
-            }
-        }
-        case "change-tab": {
-            return {
-                ...state,
-                "selectedTab": action.value
-            }
-        }
-        case "change-setting-value": {
-
-            const currentSettings = JSON.parse(JSON.stringify(state.settings));
-        
-            for(let i = 0; i < currentSettings.length; i++){
-
-                const s = currentSettings[i];
-
-                if(s.category === action.category && s.setting_name === action.key){
-
-                    s.setting_value = action.value;
-
-                    if(s.bSettingChanged === undefined){
-                        s.bSettingChanged = true;
-                    }
-                    //}else{
-                    //    s.bSettingChanged = !s.bSettingChanged;
-                   // };
-                }
-            }
-
-            return {
-                ...state,
-                "settings": currentSettings        
-            }
-        }
-        case "remove-settings-changed":{
-
-            const currentSettings = JSON.parse(JSON.stringify(state.settings));
-
-            for(let i = 0; i < currentSettings.length; i++){
-
-                const s = currentSettings[i];
-
-                if(action.passedIds.indexOf(s.id) !== -1){
-                    delete s.bSettingChanged;
-                }
-            }
-            return {
-                ...state,
-                "settings": currentSettings
-            }
-        }
-    }
-
-    return state;
-}
-
 function getLayoutItems(state){
 
     const targetPage = state.selectedTab.toLowerCase();
 
     const found = [];
 
-    for(let i = 0; i < state.pageLayouts.length; i++){
+    console.log(state.pendingLayouts);
 
-        const p = state.pageLayouts[i];
+    for(let i = 0; i < state.pendingLayouts.length; i++){
+
+        const p = state.pendingLayouts[i];
 
         if(p.page === targetPage) found.push(p);
     }
@@ -198,8 +211,8 @@ function getLayoutItems(state){
     return found;
 }
 
-function renderLayoutEditor(state, dispatch){
 
+function renderLayoutEditor(state, dispatch){
 
     const elems = [];
 
@@ -214,8 +227,28 @@ function renderLayoutEditor(state, dispatch){
         elems.push(<tr key={i}><td className="text-left">
             {item.item}</td>
             <td>
-                <button type="button" className="button b-down">Down</button>
-                <button type="button" className="button b-up">UP</button>     
+                <button type="button" className="button b-down" onClick={() =>{
+                    console.log(item.item, "Down", item.page_order);
+
+                    dispatch({
+                        "type": "change-pending-layout",
+                        "page": state.selectedTab.toLowerCase(),
+                        "item": item.item,
+                        "currentIndex": item.page_order,
+                        "bMoveUp": false
+                    });
+
+                }}>Down</button>
+                <button type="button" className="button b-up" onClick={() =>{
+
+                    dispatch({
+                        "type": "change-pending-layout",
+                        "page": state.selectedTab.toLowerCase(),
+                        "item": item.item,
+                        "currentIndex": item.page_order,
+                        "bMoveUp": true
+                    });
+                }}>UP</button>     
             </td>
         </tr>);
     }
@@ -399,7 +432,8 @@ export default function SiteSettings(){
         "settings": [],
         "tabs": [],
         "selectedTab": "",
-        "pageLayouts": []
+        "pageLayouts": [],
+        "pendingLayouts": {}
     });
 
     useEffect(() =>{
