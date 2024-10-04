@@ -28,9 +28,18 @@ export default async function Home() {
 	const pageLayout = await getPageLayout("Home");
 	
 	console.log(pageLayout);
+
+	const testElems = [];
+	
+
+	/**
+	 * <WelcomeMessage settings={welcomeMessageSettings}/>
+			<SocialMedia settings={socialSettings}/>
+	 */
 	
 	return <main className={styles.main}>
 		<div>
+			{testElems}
 			<WelcomeMessage settings={welcomeMessageSettings}/>
 			<SocialMedia settings={socialSettings}/>
 			{(recentMatches !== null) ? <BasicRecentMatches data={recentMatches.data}/> : null}

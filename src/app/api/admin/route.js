@@ -20,6 +20,7 @@ import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
 import { changePlayerMatchIds as changeWeaponPlayerMatchIds } from "@/app/lib/weapons.mjs";
 import { changePlayerMatchIds as changeDominationPlayerMatchIds} from "@/app/lib/domination.mjs";
 import { clearAllDataTables } from "@/app/lib/admin";
+import { getAllPagesLayout } from "@/app/lib/pageLayout";
 
 
 
@@ -287,8 +288,9 @@ export async function GET(req){
         if(mode === "get-site-settings"){
 
             const data = await getAllSiteSettings();
+            const pageLayouts = await getAllPagesLayout();
 
-            return Response.json({"data": data});
+            return Response.json({"data": data, "pageLayouts": pageLayouts});
         }
 
         if(mode === "get-ranking-settings"){

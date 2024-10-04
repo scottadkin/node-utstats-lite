@@ -13,3 +13,11 @@ export async function getPageLayout(pageName){
 
     return result;
 }
+
+
+export async function getAllPagesLayout(){
+
+    const query = `SELECT * FROM nstats_page_layout`;
+
+    return await simpleQuery(query);
+}

@@ -17,6 +17,8 @@ async function loadData(dispatch){
 
         const res = await req.json();
 
+        console.log(res);
+
         if(res.error !== undefined) throw new Error(res.error);
 
         const tabs = [... new Set(res.data.map((d) =>{
@@ -39,7 +41,13 @@ async function loadData(dispatch){
             selectedTab = tabs[0];
         }
 
-        dispatch({"type": "loaded", "data": res.data, "tabs": tabs, "selectedTab": selectedTab});
+        dispatch({
+            "type": "loaded", 
+            "data": res.data, 
+            "tabs": tabs, 
+            "selectedTab": selectedTab,
+            "pageLayouts": res.pageLayouts
+        });
 
     }catch(err){
         console.trace(err);
@@ -99,7 +107,8 @@ function reducer(state, action){
                 ...state,
                 "settings": action.data,
                 "tabs": action.tabs,
-                "selectedTab": action.selectedTab
+                "selectedTab": action.selectedTab,
+                "pageLayouts": action.pageLayouts
             }
         }
         case "error": {
@@ -162,6 +171,69 @@ function reducer(state, action){
     return state;
 }
 
+function getLayoutItems(state){
+
+    const targetPage = state.selectedTab.toLowerCase();
+
+    const found = [];
+
+    for(let i = 0; i < state.pageLayouts.length; i++){
+
+        const p = state.pageLayouts[i];
+
+        if(p.page === targetPage) found.push(p);
+    }
+
+
+    found.sort((a, b) =>{
+
+        a = a.page_order;
+        b = b.page_order;
+
+        if(a < b) return -1;
+        if(a > b) return 1;
+        return 0;
+    });
+
+    return found;
+}
+
+function renderLayoutEditor(state, dispatch){
+
+
+    const elems = [];
+
+    const layout = getLayoutItems(state);
+
+    for(let i = 0; i < layout.length; i++){
+
+        const item = layout[i];
+
+        console.log(item);
+
+        elems.push(<tr key={i}><td className="text-left">
+            {item.item}</td>
+            <td>
+                <button type="button" className="button b-down">Down</button>
+                <button type="button" className="button b-up">UP</button>     
+            </td>
+        </tr>);
+    }
+        
+
+    return <div className="margin-top-1">
+        <Header>Page Layout Editor</Header>
+        <table className="t-width-4">
+            <tbody>
+                <tr>
+                    <th>Item</th>
+                    <th>Change Position</th>
+                </tr>
+                {elems}
+            </tbody>
+        </table>
+    </div>
+}
 
 function renderSelectedOptions(state, dispatch){
 
@@ -304,6 +376,7 @@ function renderSelectedOptions(state, dispatch){
         <div className="text-center center">
             {textAreaElems}
         </div>
+        {renderLayoutEditor(state, dispatch)}
     </>
 }
 
@@ -326,6 +399,7 @@ export default function SiteSettings(){
         "settings": [],
         "tabs": [],
         "selectedTab": "",
+        "pageLayouts": []
     });
 
     useEffect(() =>{

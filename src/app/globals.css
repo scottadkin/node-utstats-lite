@@ -210,6 +210,10 @@ form{
 	margin-bottom:var(--margin-1);
 }
 
+.margin-top-1{
+	margin-top:var(--margin-1);
+}
+
 table{
     border-collapse: collapse;
     color:var(--font-color-1);
@@ -583,4 +587,23 @@ canvas{
 .welcome-message-link{
 	text-decoration: underline;
 	color:yellow;
+}
+
+.button{
+	border:1px solid var(--border-color-1);
+	color:white;
+	padding:var(--padding-2);
+}
+
+.button:hover{
+	cursor: pointer;
+}
+
+.b-down{
+	background-color:var(--team-color-red);
+	margin-right:var(--margin-2);
+}
+
+.b-up{
+	background-color:var(--team-color-green);
 }

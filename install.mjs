@@ -562,6 +562,24 @@ async function insertPageLayout(page, itemName, pageOrder){
     await simpleQuery(query, [page, itemName, pageOrder]);
 }
 
+
+async function addPageLayouts(){
+
+    const vars = {
+        "home": ["Welcome Message", "Social Media", "Recent Maps", "Most Played Maps", "Gametypes", "Servers"],
+    };
+
+    for(const [page, data] of Object.entries(vars)){
+
+        for(let i = 0; i < data.length; i++){
+
+            const d = data[i];
+
+            await insertPageLayout(page, d, i + 1);
+        }
+    }
+}
+
 (async () =>{
  
     try{
@@ -614,6 +632,8 @@ async function insertPageLayout(page, itemName, pageOrder){
 
 
         await simpleQuery("ALTER TABLE nstats_site_settings MODIFY COLUMN setting_value text NOT NULL");
+
+        await addPageLayouts();
         
         process.exit();
 
