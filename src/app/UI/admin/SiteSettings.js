@@ -100,6 +100,14 @@ function reducer(state, action){
                 "pendingLayouts": newSettings
             }
         }
+
+        case "saved-layout-changes": {
+
+            return {
+                ...state,
+                "pageLayouts": state.pendingLayouts
+            }
+        }
     }
 
     return state;
@@ -133,24 +141,25 @@ function adjustPendingOrder(currentSettings, tab, targetItem, bMoveUp){
 
         if(bMoveUp){
 
-            if(c.page_order === targetCurrentIndex - 1){
+            if(c.item !== targetItem && c.page_order === targetCurrentIndex - 1){
                 c.page_order++;
             }else if(c.item === targetItem){
                 c.page_order--;
             }
 
-        }else{
-
-            if(c.page_order === targetCurrentIndex + 1){
-
-                c.page_order--;
-
-            }else if(c.item === targetItem){
-                //can't move last time further down
-                if(i === categorySettings.length - 1) break;
-                c.page_order++
-            }
+            continue;
         }
+
+        if(c.item !== targetItem && c.page_order === targetCurrentIndex + 1){
+
+            c.page_order--;
+
+        }else if(c.item === targetItem){
+            //can't move last time further down
+            if(i === categorySettings.length - 1) break;
+            c.page_order++
+        }
+        
     }
 
     //change this is just for testing
@@ -218,6 +227,8 @@ async function saveChanges(state, dispatch){
             }
         }
 
+        await savePageLayouts(state, dispatch);
+
         if(changes.length === 0) return;
 
         const req = await fetch("/api/admin", {
@@ -239,6 +250,32 @@ async function saveChanges(state, dispatch){
         }
 
         dispatch({"type": "remove-settings-changed", "passedIds": passedIds});
+
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
+async function savePageLayouts(state, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "save-page-layouts", "settings": state.pendingLayouts})
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+
+
+        console.log(res);
+
+        dispatch({"type": "saved-layout-changes"});
 
     }catch(err){
         console.trace(err);
@@ -471,7 +508,32 @@ function renderSelectedOptions(state, dispatch){
     </>
 }
 
+function bAnyUnsavedPageLayouts(state){
+
+    const current = state.pageLayouts;
+    const pending = state.pendingLayouts;
+
+    for(let i = 0; i < current.length; i++){
+
+        const c = current[i];
+        
+        for(let x = 0; x < pending.length; x++){
+
+            const p = pending[x];
+
+            if(p.page === c.page && p.item === c.item){
+
+                if(p.page_order !== c.page_order) return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 function bAnyUnsavedChanges(state){
+
+    if(bAnyUnsavedPageLayouts(state)) return true;
 
     for(let i = 0; i < state.settings.length; i++){
 
