@@ -79,18 +79,82 @@ function reducer(state, action){
 
         case "change-pending-layout": {
 
-            const page = action.page.toLowerCase();
-            const item = action.name;
+            const currentSettings = structuredClone(state.pendingLayouts);
+            const item = action.item;
             const currentIndex = action.currentIndex;
             const bMoveUp = action.bMoveUp;
 
+            if(bMoveUp && currentIndex === 1){
+
+                //console.log(`cant move up, already first item`);
+
+                return {...state};
+            }
+
+            const tab = state.selectedTab.toLowerCase();
+
+            const newSettings = adjustPendingOrder(currentSettings, tab, item, bMoveUp);
+
             return {
-                ...state
+                ...state,
+                "pendingLayouts": newSettings
             }
         }
     }
 
     return state;
+}
+
+function adjustPendingOrder(currentSettings, tab, targetItem, bMoveUp){
+
+    const newSettings = [];
+    const categorySettings = [];
+
+    let targetCurrentIndex = null;
+
+    for(let i = 0; i < currentSettings.length; i++){
+
+        const c = currentSettings[i];
+
+        if(c.page === tab){
+
+            categorySettings.push(c);
+
+            if(c.item === targetItem) targetCurrentIndex = c.page_order;
+
+        }else{
+            newSettings.push(c);
+        }
+    }
+
+    for(let i = 0; i < categorySettings.length; i++){
+
+        const c = categorySettings[i];
+
+        if(bMoveUp){
+
+            if(c.page_order === targetCurrentIndex - 1){
+                c.page_order++;
+            }else if(c.item === targetItem){
+                c.page_order--;
+            }
+
+        }else{
+
+            if(c.page_order === targetCurrentIndex + 1){
+
+                c.page_order--;
+
+            }else if(c.item === targetItem){
+                //can't move last time further down
+                if(i === categorySettings.length - 1) break;
+                c.page_order++
+            }
+        }
+    }
+
+    //change this is just for testing
+    return [...categorySettings, ...newSettings];
 }
 
 async function loadData(dispatch){
@@ -188,8 +252,6 @@ function getLayoutItems(state){
 
     const found = [];
 
-    console.log(state.pendingLayouts);
-
     for(let i = 0; i < state.pendingLayouts.length; i++){
 
         const p = state.pendingLayouts[i];
@@ -222,13 +284,10 @@ function renderLayoutEditor(state, dispatch){
 
         const item = layout[i];
 
-        console.log(item);
-
         elems.push(<tr key={i}><td className="text-left">
             {item.item}</td>
             <td>
                 <button type="button" className="button b-down" onClick={() =>{
-                    console.log(item.item, "Down", item.page_order);
 
                     dispatch({
                         "type": "change-pending-layout",
@@ -240,7 +299,6 @@ function renderLayoutEditor(state, dispatch){
 
                 }}>Down</button>
                 <button type="button" className="button b-up" onClick={() =>{
-
                     dispatch({
                         "type": "change-pending-layout",
                         "page": state.selectedTab.toLowerCase(),
