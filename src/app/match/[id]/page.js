@@ -14,6 +14,7 @@ import ErrorBox from "@/app/UI/ErrorBox";
 import MatchScreenshot from "@/app/UI/Match/MatchScreenshot";
 import { getAllImages as getAllWeaponImages, bWeaponImageExist } from "@/app/lib/weapons.mjs";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
+import { getPageLayout } from "@/app/lib/pageLayout";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -56,6 +57,9 @@ export default async function MatchPage({params, searchParams}) {
 
     const weaponImages = await getAllWeaponImages();
 
+    const pageSettings = await getCategorySettings("Match");
+    const pageLayout = await getPageLayout("Match");
+
     
     if(matchData.error !== undefined){
         return (
@@ -65,21 +69,26 @@ export default async function MatchPage({params, searchParams}) {
         );
     }
 
-    console.log(matchData.basic.hash);
 	const totalTeams = matchData.basic.total_teams;
+
+
+    const elems = [];
+
+
+    elems[pageLayout["Basic Info"]] = (pageSettings["Display Basic Info"]) ? <BasicInfo key="basic" matchData={matchData}/> : null;
+    elems[pageLayout["Screenshot"]] = (pageSettings["Display Screenshot"]) ? <MatchScreenshot key="sshot" data={matchData}/> : null;
+    elems[pageLayout["Frags"]] = (pageSettings["Display Frags"]) ? <FragTable key="frags" data={matchData} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["CTF"]] = (pageSettings["Display CTF"]) ? <CTFTable key="ctf" data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["DOM"]] = (pageSettings["Display DOM"]) ? <DomTable key="dom" data={matchData.dom} players={matchData.basicPlayers}/>: null;
+    elems[pageLayout["Weapons"]] = (pageSettings["Display Weapons"]) ? <WeaponStats key="weapons" data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers} weaponImages={weaponImages}/> : null;
+    elems[pageLayout["Items"]] = (pageSettings["Display Items"]) ? <ItemsTable key="items" data={matchData.playerData} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["Special Events"]] = (pageSettings["Display Special Events"]) ? <SpecialEvents key="special" data={matchData} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["Kills"]] = (pageSettings["Display Kills"]) ? <KillsMatchUp key="kills" kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/> : null;
+    elems[pageLayout["Pings"]] = (pageSettings["Display Pings"]) ? <Pings key="pings" data={matchData.playerData} totalTeams={totalTeams}/> : null;
 
     return (
 		<main>
-			<BasicInfo matchData={matchData}/>
-            <MatchScreenshot data={matchData}/>
-			<FragTable data={matchData} totalTeams={totalTeams}/>
-            <CTFTable data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/>
-            <DomTable data={matchData.dom} players={matchData.basicPlayers}/>
-            <WeaponStats data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers} weaponImages={weaponImages}/>
-            <ItemsTable data={matchData.playerData} totalTeams={totalTeams}/>
-            <SpecialEvents data={matchData} totalTeams={totalTeams}/>
-            <KillsMatchUp kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/>
-            <Pings data={matchData.playerData} totalTeams={totalTeams}/>
+            {elems}
 		</main>
     );
 }

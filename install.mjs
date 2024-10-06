@@ -418,6 +418,17 @@ async function insertSiteSettings(){
         {"category": "Welcome Message" ,"type": `longtext`, "name": "Welcome Message", "value": "Welcome to Node UTStats-lite, stats tracking website for our Unreal Tournament servers."},
         {"category": "Map" ,"type": `bool`, "name": "Display Basic Summary", "value": 1},
         {"category": "Map" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
+
+        {"category": "Match" ,"type": `bool`, "name": "Display Basic Info", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display Screenshot", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display Frags", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display CTF", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display DOM", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display Weapons", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display Items", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display Special Events", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display Kills", "value": 1},
+        {"category": "Match" ,"type": `bool`, "name": "Display Pings", "value": 1},
     ];
 
     for(let i = 0; i < settings.length; i++){
@@ -569,7 +580,8 @@ async function addPageLayouts(){
 
     const vars = {
         "home": ["Welcome Message", "Social Media", "Recent Matches", "Most Played Maps", "Gametypes", "Servers"],
-        "map": ["Basic Summary", "Recent Matches"]
+        "map": ["Basic Summary", "Recent Matches"],
+        "match": ["Basic Info", "Screenshot", "Frags", "CTF", "DOM", "Weapons", "Items", "Special Events", "Kills", "Pings"]
     };
 
     for(const [page, data] of Object.entries(vars)){
