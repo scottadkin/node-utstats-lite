@@ -27,26 +27,20 @@ export default async function Home() {
 
 	const pageLayout = await getPageLayout("Home");
 	
-	console.log(pageLayout);
+	const elems = [];
 
-	const testElems = [];
-	
+	elems[pageLayout["Welcome Message"]] = <WelcomeMessage key="welcome" settings={welcomeMessageSettings}/>;
+	elems[pageLayout["Social Media"]] = <SocialMedia key="social" settings={socialSettings}/>;
 
-	/**
-	 * <WelcomeMessage settings={welcomeMessageSettings}/>
-			<SocialMedia settings={socialSettings}/>
-	 */
+	elems[pageLayout["Recent Matches"]] = (recentMatches !== null) ? <BasicRecentMatches key="matches" data={recentMatches.data}/> : null;
+	elems[pageLayout["Most Played Maps"]] = (mapsData !== null) ? <BasicMapsList key="maps" data={mapsData.data} images={mapsData.images}/> : null;
+	elems[pageLayout["Gametypes"]] = (gametypes !== null) ? <BasicGametypeList key="gametypes" gametypes={gametypes}/> : null;
+	elems[pageLayout["Servers"]] = (servers !== null) ? <BasicServerList key="servers" servers={servers}/> : null;
+
 	
 	return <main className={styles.main}>
 		<div>
-			{testElems}
-			<WelcomeMessage settings={welcomeMessageSettings}/>
-			<SocialMedia settings={socialSettings}/>
-			{(recentMatches !== null) ? <BasicRecentMatches data={recentMatches.data}/> : null}
-			{(mapsData !== null) ? <BasicMapsList data={mapsData.data} images={mapsData.images}/> : null}
-			{(gametypes !== null) ? <BasicGametypeList gametypes={gametypes}/> : null}
-			{(servers !== null) ? <BasicServerList servers={servers}/> : null}
-			
+			{elems}		
 		</div>
 	</main>
 	

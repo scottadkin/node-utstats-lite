@@ -566,7 +566,7 @@ async function insertPageLayout(page, itemName, pageOrder){
 async function addPageLayouts(){
 
     const vars = {
-        "home": ["Welcome Message", "Social Media", "Recent Maps", "Most Played Maps", "Gametypes", "Servers"],
+        "home": ["Welcome Message", "Social Media", "Recent Matches", "Most Played Maps", "Gametypes", "Servers"],
     };
 
     for(const [page, data] of Object.entries(vars)){

@@ -5,13 +5,22 @@ export async function getPageLayout(pageName){
 
     pageName = pageName.toLowerCase();
 
-    const query = `SELECT * FROM nstats_page_layout WHERE page=? ORDER BY page_order ASC`;
+    const query = `SELECT item,page_order FROM nstats_page_layout WHERE page=? ORDER BY page_order ASC`;
 
     const result = await simpleQuery(query, [pageName]);
 
     if(result.length === 0) return null;
 
-    return result;
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.item] = r.page_order;
+    }
+
+    return data;
 }
 
 
