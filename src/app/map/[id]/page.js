@@ -3,8 +3,9 @@ import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches } from "@/a
 import Image from "next/image";
 import MatchesList from "@/app/UI/MatchList";
 import Pagination from "@/app/UI/Pagination";
-import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
+import BasicSummary from "@/app/UI/Map/BasicSummary";
+import { getPageLayout } from "@/app/lib/pageLayout";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -44,6 +45,10 @@ export default async function MapPage({params, searchParams}){
     if(perPage < 5 || perPage > 100) perPage = DEFAULT_PER_PAGE; 
 
 
+    const pageSettings = await getCategorySettings("Map");
+    const pageLayout = await getPageLayout("Map");
+
+
     const info = await getMapInfo(id);
 
     const images = await getMapImages([info.name]);
@@ -60,33 +65,24 @@ export default async function MapPage({params, searchParams}){
    // const query = `SELECT nstats_matches.id,nstats_matches.map_id, nstats_match_players.* 
     //FROM nstats_matches LEFT JOIN nstats_match_players ON nstats_matches.id=nstats_match_players.match_id ORDER BY kills DESC LIMIT 10`;
 
-    //console.log(await simpleQuery(query));
+
+    const elems = [];
+    
+    elems[pageLayout["Basic Summary"]] = (pageSettings["Display Basic Summary"] === "1") ? <BasicSummary key="basic" info={info} /> : null;
+
+    elems[pageLayout["Recent Matches"]] = (pageSettings["Display Recent Matches"] === "1") ? <div key="recent">
+        <Header>Recent Matches</Header>
+        <Pagination currentPage={page} perPage={perPage} url={`/map/${id}/?pp=${perPage}&page=`} results={totalMatches}/>
+        <MatchesList data={recentMatches} bIgnoreMap={true}/>
+        <Pagination currentPage={page} perPage={perPage} url={`/map/${id}/?pp=${perPage}&page=`} results={totalMatches}/>
+    </div> : null;
 
     return <main>
         <Header>{info.name}</Header>
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>
-        <table className="t-width-1">
-            <tbody>
-                <tr>
-                    <th>First Match</th>
-                    <th>Last Match</th>
-                    <th>Matches Played</th>
-                    <th>Playtime</th>
-                    
-                </tr>
-                <tr>
-                    <td className="date">{convertTimestamp(new Date(info.first_match) * 0.001, true)}</td>
-                    <td className="date">{convertTimestamp(new Date(info.last_match * 0.001), true)}</td>
-                    <td>{info.matches}</td>
-                    <td className="date">{toPlaytime(info.playtime)}</td>
-                </tr>
-            </tbody>
-        </table>
-        <Header>Recent Matches</Header>
-        <Pagination currentPage={page} perPage={perPage} url={`/map/${id}/?pp=${perPage}&page=`} results={totalMatches}/>
-        <MatchesList data={recentMatches} bIgnoreMap={true}/>
-        <Pagination currentPage={page} perPage={perPage} url={`/map/${id}/?pp=${perPage}&page=`} results={totalMatches}/>
+        {elems}
+        
     </main>
 }

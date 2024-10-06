@@ -416,6 +416,8 @@ async function insertSiteSettings(){
         {"category": "Social Media" ,"type": `string`, "name": "Twitch Link", "value": ""},
         {"category": "Welcome Message" ,"type": `string`, "name": "Welcome Title", "value": "Welcome to Node UTStats-lite"},
         {"category": "Welcome Message" ,"type": `longtext`, "name": "Welcome Message", "value": "Welcome to Node UTStats-lite, stats tracking website for our Unreal Tournament servers."},
+        {"category": "Map" ,"type": `bool`, "name": "Display Basic Summary", "value": 1},
+        {"category": "Map" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
     ];
 
     for(let i = 0; i < settings.length; i++){
@@ -567,6 +569,7 @@ async function addPageLayouts(){
 
     const vars = {
         "home": ["Welcome Message", "Social Media", "Recent Matches", "Most Played Maps", "Gametypes", "Servers"],
+        "map": ["Basic Summary", "Recent Matches"]
     };
 
     for(const [page, data] of Object.entries(vars)){
