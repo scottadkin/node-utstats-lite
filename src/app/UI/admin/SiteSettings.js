@@ -317,6 +317,8 @@ function renderLayoutEditor(state, dispatch){
 
     const layout = getLayoutItems(state);
 
+    if(layout.length === 0) return null;
+
     for(let i = 0; i < layout.length; i++){
 
         const item = layout[i];

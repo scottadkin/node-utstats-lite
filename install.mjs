@@ -437,6 +437,15 @@ async function insertSiteSettings(){
         {"category": "Player" ,"type": `bool`, "name": "Display Rankings", "value": 1},
         {"category": "Player" ,"type": `bool`, "name": "Display Items", "value": 1},
         {"category": "Player" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
+
+        {"category": "Nav" ,"type": `bool`, "name": "Display Home", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Matches", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Players", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Rankings", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Records", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Maps", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Admin", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Login/Logout", "value": 1},
     ];
 
     for(let i = 0; i < settings.length; i++){
@@ -590,7 +599,8 @@ async function addPageLayouts(){
         "home": ["Welcome Message", "Social Media", "Recent Matches", "Most Played Maps", "Gametypes", "Servers"],
         "map": ["Basic Summary", "Recent Matches"],
         "match": ["Basic Info", "Screenshot", "Frags", "CTF", "DOM", "Weapons", "Items", "Special Events", "Kills", "Pings"],
-        "player": ["Gametype Totals", "CTF", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"]
+        "player": ["Gametype Totals", "CTF", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"],
+        "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Logout"]
     };
 
     for(const [page, data] of Object.entries(vars)){

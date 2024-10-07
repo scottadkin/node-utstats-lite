@@ -5,65 +5,102 @@ import Link from "next/link";
 import { logout } from "../lib/authentication";
 
 
-export default function Nav({settings, sessionInfo, bAdmin}){
+export default function Nav({settings, sessionInfo, bAdmin, layout}){
 
     const router = useRouter();
     const pathname = usePathname().toLowerCase();
 
+    const options = [];
 
-    const options = [
-        {
-            "name": "Home", 
-            "url": "/", 
-            "bExactMatchesOnly": true,
-            "matches": ["/"]},
-        {
-            "name": "Matches", 
-            "url": "/matches", 
-            "matches": [
-                "/match/",
-                "/matches"
-            ]
-        }, 
-        {
-            "name": "Players",
-            "url": "/players",
-            "matches": [
-                "/players",
-                "/player/"
-            ]
-        },
-        {
-            "name": "Rankings",
-            "url": "/rankings",
-            "matches": [
-                "/rankings",
-            ]
-        },
-        {
-            "name": "Records",
-            "url": "/records",
-            "matches": [
-                "/records",
-            ]
-        },
-        {
-            "name": "Maps",
-            "url": "/maps",
-            "matches": [
-                "/map",
-            ]
-        }
-    ];
+    if(settings["Display Home"] === "1"){
 
-    if(sessionInfo !== null){
+        options.push({
+                "name": "Home", 
+                "url": "/", 
+                "bExactMatchesOnly": true,
+                "matches": ["/"],
+                "index": layout["Home"]
+            }
+        );
+    }
+
+    if(settings["Display Matches"] === "1"){
+
+        options.push({
+                "name": "Matches", 
+                "url": "/matches", 
+                "matches": [
+                    "/match/",
+                    "/matches"
+                ],
+                "index": layout["Matches"]
+            }
+        );
+    }
+
+
+    if(settings["Display Players"] === "1"){
+
+        options.push({
+                "name": "Players",
+                "url": "/players",
+                "matches": [
+                    "/players",
+                    "/player/"
+                ],
+                "index": layout["Players"]
+            }
+        );
+    }
+
+    if(settings["Display Rankings"] === "1"){
+
+        options.push({
+                "name": "Rankings",
+                "url": "/rankings",
+                "matches": [
+                    "/rankings",
+                ],
+                "index": layout["Rankings"]
+            }
+        );
+    }
+
+    if(settings["Display Records"] === "1"){
+
+        options.push({
+                "name": "Records",
+                "url": "/records",
+                "matches": [
+                    "/records",
+                ],
+                "index": layout["Records"]
+            }
+        );
+    }
+
+    if(settings["Display Maps"] === "1"){
+
+        options.push({
+                "name": "Maps",
+                "url": "/maps",
+                "matches": [
+                    "/map",
+                ],
+                "index": layout["Maps"]
+            }
+        );
+    }
+
+    if(sessionInfo !== null && settings["Display Admin"] === "1"){
 
         options.push({
             "name": "Admin",
             "url": "/admin",
             "matches": [
                 "/admin"
-            ]
+            ],
+            "index": layout["Admin"]
         });
     }
 
@@ -75,13 +112,15 @@ export default function Nav({settings, sessionInfo, bAdmin}){
             options.push({
                 "name": "Login",
                 "url": "/login",
-                "matches": ["/login"]
+                "matches": ["/login"],
+                "index": layout["Login/Logout"]
             });
 
             options.push({
                 "name": "Register",
                 "url": "/register",
-                "matches": ["/register"]
+                "matches": ["/register"],
+                "index": layout["Login/Logout"]
             });   
         }
 
@@ -93,18 +132,25 @@ export default function Nav({settings, sessionInfo, bAdmin}){
             "matches": ["#"],
             "onClick": async () =>{
                 const a = await logout();
-    
-                
-                console.log(a);
-    
                 
                 router.push("/");
                 router.refresh();
-            }
+            },
+            "index": layout["Login/Logout"]
         });
     }
 
     const elems = [];
+
+    options.sort((a, b) =>{
+
+        a = a.index;
+        b = b.index;
+
+        if(a < b) return -1;
+        if(a > b) return 1;
+        return 0;
+    });
 
     for(let i = 0; i < options.length; i++){
 

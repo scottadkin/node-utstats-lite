@@ -5,6 +5,7 @@ import UpdateSession from "./UpdateSession";
 import { getSessionInfo } from "./lib/authentication";
 import { getCategorySettings } from "./lib/siteSettings.mjs";
 import { headers } from 'next/headers';
+import { getPageLayout } from "./lib/pageLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,12 +38,13 @@ export default async function RootLayout({ children }) {
 	const sessionInfo = await getSessionInfo();
 
 	const navSettings = await getCategorySettings("Nav");
+	const navLayout = await getPageLayout("Nav");
 	
 	return (
 		<html lang="en">
 		<body className={inter.className}>
 			<UpdateSession />
-			<Nav settings={navSettings} sessionInfo={sessionInfo} bAdmin={true}/>
+			<Nav settings={navSettings} sessionInfo={sessionInfo} bAdmin={true} layout={navLayout}/>
 			<div className="padding-top"></div>
 			{children}
 			<footer>
