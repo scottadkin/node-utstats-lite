@@ -15,6 +15,7 @@ import { getPlayerRankings } from "@/app/lib/rankings.mjs";
 import Rankings from "@/app/UI/Player/Rankings";
 import PermaLink from "@/app/UI/PermaLink";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
+import { getPageLayout } from "@/app/lib/pageLayout";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -66,6 +67,9 @@ export default async function Page({params, searchParams}){
         </main>
     }
 
+    const pageSettings = await getCategorySettings("Player");
+    const pageLayout = await getPageLayout("Player");
+
     const realId = player.id;
     const hash = player.hash;
 
@@ -77,14 +81,22 @@ export default async function Page({params, searchParams}){
         totals = await getPlayerGametypeTotals(realId);
     }
 
+    let weaponTotals = [];
+    let weaponIds = [];
+    let weaponNames = {};
 
-    const weaponTotals = await weaponsGetPlayerTotals(realId);
+    if(pageSettings["Display Weapons"] === "1"){
 
-    const weaponIds = [... new Set(weaponTotals.map((w) =>{
-        return w.weapon_id;
-    }))]
+        weaponTotals = await weaponsGetPlayerTotals(realId);
 
-    const weaponNames = await getWeaponNames(weaponIds);
+        weaponIds = [... new Set(weaponTotals.map((w) =>{
+            return w.weapon_id;
+        }))]
+
+        weaponNames = await getWeaponNames(weaponIds);
+    }
+
+    
 
     const gametypeIds = [...new Set(
         totals.map((t) =>{
@@ -103,9 +115,37 @@ export default async function Page({params, searchParams}){
 
     const minDate = new Date(Date.now() - month * 1000);
 
-    const rankings = await getPlayerRankings(realId, minDate);
+    let rankings = [];
+
+    if(pageSettings["Display Rankings"] === "1"){
+        rankings = await getPlayerRankings(realId, minDate);
+    }
 
     
+
+    const elems = [];
+
+
+    const gametypeElem = (pageSettings["Display Gametype Totals"] === "1") ? <GametypeTotals key="gametypes" data={totals} names={gametypeNames}/> : null;
+    elems[pageLayout["Gametype Totals"]] = gametypeElem;
+
+    const ctfElem = (pageSettings["Display CTF"] === "1") ? <CTFTotals key="ctf" data={ctfTotals} gametypeNames={gametypeNames}/> : null; 
+    elems[pageLayout["CTF"]] = ctfElem;
+
+    const specialElem = (pageSettings["Display Special Events"] === "1") ? <SpecialEvents key="special" data={totals} gametypeNames={gametypeNames}/> : null; 
+    elems[pageLayout["Special Events"]] = specialElem;
+
+    const weaponElem = (pageSettings["Display Weapons"] === "1") ? <WeaponStats totals={weaponTotals} key="weapons" weaponNames={weaponNames} gametypeNames={gametypeNames}/> : null;
+    elems[pageLayout["Weapons"]] = weaponElem;
+
+    const rankingElem = (pageSettings["Display Rankings"] === "1") ? <Rankings key="rankings" data={rankings} gametypeNames={gametypeNames}/> : null;
+    elems[pageLayout["Rankings"]] = rankingElem;
+
+    const itemsElem = (pageSettings["Display Items"] === "1") ? <ItemStats key="items" data={totals} gametypeNames={gametypeNames}/> : null;
+    elems[pageLayout["Items"]] = itemsElem;
+
+    const matchesElem = (pageSettings["Display Recent Matches"] === "1") ? <RecentMatches key="matches" playerId={realId}/> : null;
+    elems[pageLayout["Recent Matches"]] = matchesElem;
 
     return <main>
         <Header>
@@ -114,12 +154,13 @@ export default async function Page({params, searchParams}){
         <div className="text-center">
             <PermaLink url={`/player/${hash}`} text="Copy Permanent Player Link To Clipboard"/>
         </div>
-        <GametypeTotals data={totals} names={gametypeNames}/>
-        <CTFTotals data={ctfTotals} gametypeNames={gametypeNames}/>
-        <SpecialEvents data={totals} gametypeNames={gametypeNames}/>
-        <WeaponStats totals={weaponTotals} weaponNames={weaponNames} gametypeNames={gametypeNames}/>
-        <Rankings data={rankings} gametypeNames={gametypeNames}/>
-        <ItemStats data={totals} gametypeNames={gametypeNames}/>
-        <RecentMatches playerId={realId}/>
+        {elems}
+        
+        
+        
+        
+        
+        
+        
     </main>
 }
