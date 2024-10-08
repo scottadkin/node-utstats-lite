@@ -113,14 +113,14 @@ export default function Nav({settings, sessionInfo, bAdmin, layout}){
                 "name": "Login",
                 "url": "/login",
                 "matches": ["/login"],
-                "index": layout["Login/Logout"]
+                "index": layout["Login/Register"]
             });
 
             options.push({
                 "name": "Register",
                 "url": "/register",
                 "matches": ["/register"],
-                "index": layout["Login/Logout"]
+                "index": layout["Login/Register"]
             });   
         }
 
@@ -136,7 +136,7 @@ export default function Nav({settings, sessionInfo, bAdmin, layout}){
                 router.push("/");
                 router.refresh();
             },
-            "index": layout["Login/Logout"]
+            "index": layout["Login/Register"]
         });
     }
 

@@ -29,8 +29,8 @@ export default async function Home() {
 	
 	const elems = [];
 
-	elems[pageLayout["Welcome Message"]] = <WelcomeMessage key="welcome" settings={welcomeMessageSettings}/>;
-	elems[pageLayout["Social Media"]] = <SocialMedia key="social" settings={socialSettings}/>;
+	elems[pageLayout["Welcome Message"]] = <WelcomeMessage key="welcome" settings={welcomeMessageSettings} bDisplay={pageSettings["Display Welcome Message"]}/>;
+	elems[pageLayout["Social Media"]] = <SocialMedia key="social" settings={socialSettings} bDisplay={pageSettings["Display Social Media"]}/>;
 
 	elems[pageLayout["Recent Matches"]] = (recentMatches !== null) ? <BasicRecentMatches key="matches" data={recentMatches.data}/> : null;
 	elems[pageLayout["Most Played Maps"]] = (mapsData !== null) ? <BasicMapsList key="maps" data={mapsData.data} images={mapsData.images}/> : null;

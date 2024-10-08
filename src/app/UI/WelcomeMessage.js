@@ -2,7 +2,9 @@ import Header from "./Header";
 import BBParser from "../lib/BBParser";
 
 
-export default function WelcomeMessage({settings}){
+export default function WelcomeMessage({settings, bDisplay}){
+
+    if(bDisplay === "0") return null;
 
     const title =  settings["Welcome Title"] || "";
     let message = settings["Welcome Message"] || "";

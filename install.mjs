@@ -398,10 +398,11 @@ async function bLogsSettingsExist(){
 async function insertSiteSettings(){
 
     const settings = [
-        {"category": "Nav" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
         {"category": "Matches" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
         {"category": "Players" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
         {"category": "Menu" ,"type": `string`, "name": "Discord URL", "value": ""},
+        {"category": "Home" ,"type": `bool`, "name": "Display Welcome Message", "value": 1},
+        {"category": "Home" ,"type": `bool`, "name": "Display Social Media", "value": 1},
         {"category": "Home" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
         {"category": "Home" ,"type": `bool`, "name": "Display Most Played Maps", "value": 1},
         {"category": "Home" ,"type": `bool`, "name": "Display Most Played Gametypes", "value": 1},
@@ -445,7 +446,7 @@ async function insertSiteSettings(){
         {"category": "Nav" ,"type": `bool`, "name": "Display Records", "value": 1},
         {"category": "Nav" ,"type": `bool`, "name": "Display Maps", "value": 1},
         {"category": "Nav" ,"type": `bool`, "name": "Display Admin", "value": 1},
-        {"category": "Nav" ,"type": `bool`, "name": "Display Login/Logout", "value": 1},
+        {"category": "Nav" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
     ];
 
     for(let i = 0; i < settings.length; i++){
@@ -600,7 +601,7 @@ async function addPageLayouts(){
         "map": ["Basic Summary", "Recent Matches"],
         "match": ["Basic Info", "Screenshot", "Frags", "CTF", "DOM", "Weapons", "Items", "Special Events", "Kills", "Pings"],
         "player": ["Gametype Totals", "CTF", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"],
-        "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Logout"]
+        "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Register"]
     };
 
     for(const [page, data] of Object.entries(vars)){
