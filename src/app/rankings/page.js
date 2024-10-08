@@ -137,7 +137,7 @@ export default async function Page({params, searchParams}){
         <SearchForm gametypeNames={gametypeNames} gametypeId={gametypeId} timeFrame={timeFrame} perPage={perPage} page={page}/>
         <Header>Top {gametypeName} Players</Header>
         <Pagination url={`/rankings/?gid=${gametypeId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
-        <table className="t-width-4">
+        <table className="t-width-3">
             <tbody>
                 <tr key={-2}>
                     <th>Place</th>

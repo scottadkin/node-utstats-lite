@@ -147,7 +147,6 @@ function _applyTimePenalty(playerData, settings, minutesPlayed){
         }
     }
 
-
     if(targetKey === null) return;
 
     const penalty = settings[targetKey].points;
@@ -185,6 +184,9 @@ function _setRankingPoints(settings, playerData){
     if(t.playtime > 0){
         mins = t.playtime / 60;
     }
+
+    //Punish players score heavily if they are under 30 mins by setting mins to 30
+    if(mins < 30) mins = 30;
 
     if(t.playtime > 0 && t.ranking_points !== 0){
         t.ranking_points = t.ranking_points / mins;
@@ -234,7 +236,7 @@ export async function getRankings(gametypeId, page, perPage, timeRange){
     const now = new Date();
     const minDate = (timeRange > 0) ? new Date(now - day * timeRange * 1000) : new Date(0);
 
-    const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage)
+    const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
 
     const query = `SELECT * FROM nstats_rankings WHERE gametype_id=? AND last_active>=? ORDER by score DESC LIMIT ?, ?`;
 
