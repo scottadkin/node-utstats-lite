@@ -597,7 +597,7 @@ async function insertPageLayout(page, itemName, pageOrder){
 async function addPageLayouts(){
 
     const vars = {
-        "home": ["Welcome Message", "Social Media", "Recent Matches", "Most Played Maps", "Gametypes", "Servers"],
+        "home": ["Welcome Message", "Social Media", "Recent Matches", "Most Played Maps", "Most Played Gametypes", "Servers"],
         "map": ["Basic Summary", "Recent Matches"],
         "match": ["Basic Info", "Screenshot", "Frags", "CTF", "DOM", "Weapons", "Items", "Special Events", "Kills", "Pings"],
         "player": ["Gametype Totals", "CTF", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"],

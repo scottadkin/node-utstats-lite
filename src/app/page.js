@@ -34,7 +34,7 @@ export default async function Home() {
 
 	elems[pageLayout["Recent Matches"]] = (recentMatches !== null) ? <BasicRecentMatches key="matches" data={recentMatches.data}/> : null;
 	elems[pageLayout["Most Played Maps"]] = (mapsData !== null) ? <BasicMapsList key="maps" data={mapsData.data} images={mapsData.images}/> : null;
-	elems[pageLayout["Gametypes"]] = (gametypes !== null) ? <BasicGametypeList key="gametypes" gametypes={gametypes}/> : null;
+	elems[pageLayout["Most Played Gametypes"]] = (gametypes !== null) ? <BasicGametypeList key="gametypes" gametypes={gametypes}/> : null;
 	elems[pageLayout["Servers"]] = (servers !== null) ? <BasicServerList key="servers" servers={servers}/> : null;
 
 	
