@@ -47,12 +47,15 @@ function reducer(state, action){
 
                     if(s.bSettingChanged === undefined){
                         s.bSettingChanged = true;
+                    }else{
+                        s.bSettingChanged = !s.bSettingChanged;
                     }
                     //}else{
                     //    s.bSettingChanged = !s.bSettingChanged;
                    // };
                 }
             }
+
 
             return {
                 ...state,
@@ -68,7 +71,7 @@ function reducer(state, action){
                 const s = currentSettings[i];
 
                 if(action.passedIds.indexOf(s.id) !== -1){
-                    delete s.bSettingChanged;
+                    s.bSettingChanged = false;
                 }
             }
             return {
@@ -174,7 +177,6 @@ async function loadData(dispatch){
 
         const res = await req.json();
 
-        console.log(res);
 
         if(res.error !== undefined) throw new Error(res.error);
 
@@ -222,7 +224,7 @@ async function saveChanges(state, dispatch){
 
             const s = state.settings[i];
 
-            if(s.bSettingChanged !== undefined){
+            if(s.bSettingChanged !== undefined && s.bSettingChanged){
                 changes.push(s);
             }
         }
@@ -272,9 +274,6 @@ async function savePageLayouts(state, dispatch){
         if(res.error !== undefined) throw new Error(res.error);
 
 
-
-        console.log(res);
-
         dispatch({"type": "saved-layout-changes"});
 
     }catch(err){
@@ -311,6 +310,28 @@ function getLayoutItems(state){
 }
 
 
+
+function bItemEnabled(page, item, settings){
+
+    page = page.toLowerCase();
+    item = `Display ${item}`;
+    item = item.toLowerCase();
+
+    for(let i = 0; i < settings.length; i++){
+
+        const s = settings[i];
+
+        const cat = s.category.toLowerCase();
+
+        if(cat !== page || s.setting_type !== "bool") continue;
+        
+        const value = parseInt(s.setting_value);
+        if(s.setting_name.toLowerCase() === item && value) return true;
+    }
+
+    return false;
+}
+
 function renderLayoutEditor(state, dispatch){
 
     const elems = [];
@@ -323,9 +344,13 @@ function renderLayoutEditor(state, dispatch){
 
         const item = layout[i];
 
-        elems.push(<tr key={i}><td className="text-left">
-            {item.item}</td>
-            <td>
+        const bEnabled = bItemEnabled(state.selectedTab, item.item, state.settings);
+
+        let col = null;
+
+        if(bEnabled){
+
+            col = <td key={`${i}-enabled`}>
                 <button type="button" className="button b-down" onClick={() =>{
 
                     dispatch({
@@ -346,7 +371,16 @@ function renderLayoutEditor(state, dispatch){
                         "bMoveUp": true
                     });
                 }}>UP</button>     
-            </td>
+            </td>;
+
+        }else{
+
+            col = <td className="dull" key={`${i}-disabled`}>Disabled</td>
+        }
+
+        elems.push(<tr key={i}><td className="text-left">
+            {item.item}</td>
+            {col}
         </tr>);
     }
         
