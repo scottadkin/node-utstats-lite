@@ -5,7 +5,7 @@ import MatchesList from "@/app/UI/MatchList";
 import Pagination from "@/app/UI/Pagination";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import BasicSummary from "@/app/UI/Map/BasicSummary";
-import { getPageLayout } from "@/app/lib/pageLayout";
+import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 

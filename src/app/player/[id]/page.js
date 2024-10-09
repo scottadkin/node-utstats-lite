@@ -15,7 +15,7 @@ import { getPlayerRankings } from "@/app/lib/rankings.mjs";
 import Rankings from "@/app/UI/Player/Rankings";
 import PermaLink from "@/app/UI/PermaLink";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
-import { getPageLayout } from "@/app/lib/pageLayout";
+import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {

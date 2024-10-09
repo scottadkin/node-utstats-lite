@@ -12,14 +12,31 @@ function reducer(state, action){
     switch(action.type){
 
         case "loaded": {
-            return {
-                ...state,
-                "settings": action.data,
-                "tabs": action.tabs,
-                "selectedTab": action.selectedTab,
-                "pageLayouts": action.pageLayouts,
-                "pendingLayouts": action.pageLayouts
+
+            let obj = {};
+
+            if(action.selectedTab !== null){
+
+                obj = {
+                    ...state,
+                    "settings": action.data,
+                    "tabs": action.tabs,
+                    "selectedTab": action.selectedTab,
+                    "pageLayouts": action.pageLayouts,
+                    "pendingLayouts": action.pageLayouts
+                }
+
+            }else{
+                obj = {
+                    ...state,
+                    "settings": action.data,
+                    "tabs": action.tabs,
+                    "pageLayouts": action.pageLayouts,
+                    "pendingLayouts": action.pageLayouts
+                }
             }
+
+            return obj;
         }
         case "error": {
             return {
@@ -169,7 +186,7 @@ function adjustPendingOrder(currentSettings, tab, targetItem, bMoveUp){
     return [...categorySettings, ...newSettings];
 }
 
-async function loadData(dispatch){
+async function loadData(dispatch, bIgnoreTabChange){
 
     try{
 
@@ -204,7 +221,7 @@ async function loadData(dispatch){
             "type": "loaded", 
             "data": res.data, 
             "tabs": tabs, 
-            "selectedTab": selectedTab,
+            "selectedTab": (bIgnoreTabChange) ? null : selectedTab,
             "pageLayouts": res.pageLayouts
         });
 
@@ -275,6 +292,31 @@ async function savePageLayouts(state, dispatch){
 
 
         dispatch({"type": "saved-layout-changes"});
+
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
+
+async function restoreDefaultPageLayout(page, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "restore-page-layout", "page": page})
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+
+        await loadData(dispatch, true);
+        //reload data
 
     }catch(err){
         console.trace(err);
@@ -396,6 +438,13 @@ function renderLayoutEditor(state, dispatch){
                 {elems}
             </tbody>
         </table>
+        <div className="text-center margin-bottom-1">
+            <div className="warning-button" onClick={() =>{
+                restoreDefaultPageLayout(state.selectedTab, dispatch);
+            }}>
+                Restore Default Page Layout
+            </div>
+        </div>
     </div>
 }
 

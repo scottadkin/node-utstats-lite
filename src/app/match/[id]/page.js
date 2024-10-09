@@ -14,7 +14,7 @@ import ErrorBox from "@/app/UI/ErrorBox";
 import MatchScreenshot from "@/app/UI/Match/MatchScreenshot";
 import { getAllImages as getAllWeaponImages, bWeaponImageExist } from "@/app/lib/weapons.mjs";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
-import { getPageLayout } from "@/app/lib/pageLayout";
+import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {

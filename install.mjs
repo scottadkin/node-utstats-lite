@@ -5,7 +5,8 @@ import { mysqlSettings } from "./config.mjs";
 import mysql from "mysql2/promise";
 import {createRandomString} from "./src/app/lib/generic.mjs";
 import { simpleQuery } from "./src/app/lib/database.mjs";
-import { bSettingExist, insertSetting } from "./src/app/lib/siteSettings.mjs";
+import { restoreDefaultSettings } from "./src/app/lib/siteSettings.mjs";
+import { restoreDefaultLayouts } from "./src/app/lib/pageLayout.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -397,66 +398,7 @@ async function bLogsSettingsExist(){
 
 async function insertSiteSettings(){
 
-    const settings = [
-        {"category": "Matches" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
-        {"category": "Players" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
-        {"category": "Menu" ,"type": `string`, "name": "Discord URL", "value": ""},
-        {"category": "Home" ,"type": `bool`, "name": "Display Welcome Message", "value": 1},
-        {"category": "Home" ,"type": `bool`, "name": "Display Social Media", "value": 1},
-        {"category": "Home" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
-        {"category": "Home" ,"type": `bool`, "name": "Display Most Played Maps", "value": 1},
-        {"category": "Home" ,"type": `bool`, "name": "Display Most Played Gametypes", "value": 1},
-        {"category": "Home" ,"type": `bool`, "name": "Display Servers", "value": 1},
-        {"category": "Home" ,"type": `integer`, "name": "Total Recent Matches", "value": 3},
-        {"category": "Home" ,"type": `integer`, "name": "Total Most Played Maps", "value": 3},
-        {"category": "Branding" ,"type": `string`, "name": "Site Name", "value": "Node UTStats Lite"},
-        {"category": "Branding" ,"type": `string`, "name": "Description", "value": "Stats based website made for the UTStats-lite mutator."},
-        {"category": "Social Media" ,"type": `string`, "name": "External Site", "value": ""},
-        {"category": "Social Media" ,"type": `string`, "name": "Discord Link", "value": ""},
-        {"category": "Social Media" ,"type": `string`, "name": "Youtube Link", "value": ""},
-        {"category": "Social Media" ,"type": `string`, "name": "Twitch Link", "value": ""},
-        {"category": "Welcome Message" ,"type": `string`, "name": "Welcome Title", "value": "Welcome to Node UTStats-lite"},
-        {"category": "Welcome Message" ,"type": `longtext`, "name": "Welcome Message", "value": "Welcome to Node UTStats-lite, stats tracking website for our Unreal Tournament servers."},
-        {"category": "Map" ,"type": `bool`, "name": "Display Basic Summary", "value": 1},
-        {"category": "Map" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
-
-        {"category": "Match" ,"type": `bool`, "name": "Display Basic Info", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display Screenshot", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display Frags", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display CTF", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display DOM", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display Weapons", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display Items", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display Special Events", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display Kills", "value": 1},
-        {"category": "Match" ,"type": `bool`, "name": "Display Pings", "value": 1},
-
-        {"category": "Player" ,"type": `bool`, "name": "Display Gametype Totals", "value": 1},
-        {"category": "Player" ,"type": `bool`, "name": "Display CTF", "value": 1},
-        {"category": "Player" ,"type": `bool`, "name": "Display Special Events", "value": 1},
-        {"category": "Player" ,"type": `bool`, "name": "Display Weapons", "value": 1},
-        {"category": "Player" ,"type": `bool`, "name": "Display Rankings", "value": 1},
-        {"category": "Player" ,"type": `bool`, "name": "Display Items", "value": 1},
-        {"category": "Player" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
-
-        {"category": "Nav" ,"type": `bool`, "name": "Display Home", "value": 1},
-        {"category": "Nav" ,"type": `bool`, "name": "Display Matches", "value": 1},
-        {"category": "Nav" ,"type": `bool`, "name": "Display Players", "value": 1},
-        {"category": "Nav" ,"type": `bool`, "name": "Display Rankings", "value": 1},
-        {"category": "Nav" ,"type": `bool`, "name": "Display Records", "value": 1},
-        {"category": "Nav" ,"type": `bool`, "name": "Display Maps", "value": 1},
-        {"category": "Nav" ,"type": `bool`, "name": "Display Admin", "value": 1},
-        {"category": "Nav" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
-    ];
-
-    for(let i = 0; i < settings.length; i++){
-
-        const s = settings[i];
-
-        if(!await bSettingExist(s.category, s.name)){
-            await insertSetting(s.category, s.type, s.name, s.value);
-        }
-    }
+    await restoreDefaultSettings();
 }
 
 
@@ -571,48 +513,12 @@ async function addColumn(table, name, type){
 }
 
 
-async function bPageOrderItemExists(page, itemName){
 
-    page = page.toLowerCase();
-
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_page_layout WHERE page=? AND item=?`;
-
-    const result = await simpleQuery(query, [page, itemName]);
-
-    return result[0].total_rows > 0;
-}
-
-async function insertPageLayout(page, itemName, pageOrder){
-
-    page = page.toLowerCase();
-
-    if(await bPageOrderItemExists(page, itemName)) return;
-
-    const query = `INSERT INTO nstats_page_layout VALUES(NULL,?,?,?)`;
-
-    await simpleQuery(query, [page, itemName, pageOrder]);
-}
 
 
 async function addPageLayouts(){
 
-    const vars = {
-        "home": ["Welcome Message", "Social Media", "Recent Matches", "Most Played Maps", "Most Played Gametypes", "Servers"],
-        "map": ["Basic Summary", "Recent Matches"],
-        "match": ["Basic Info", "Screenshot", "Frags", "CTF", "DOM", "Weapons", "Items", "Special Events", "Kills", "Pings"],
-        "player": ["Gametype Totals", "CTF", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"],
-        "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Register"]
-    };
-
-    for(const [page, data] of Object.entries(vars)){
-
-        for(let i = 0; i < data.length; i++){
-
-            const d = data[i];
-
-            await insertPageLayout(page, d, i + 1);
-        }
-    }
+    await restoreDefaultLayouts();
 }
 
 (async () =>{

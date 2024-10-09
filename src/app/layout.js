@@ -5,7 +5,7 @@ import UpdateSession from "./UpdateSession";
 import { getSessionInfo } from "./lib/authentication";
 import { getCategorySettings } from "./lib/siteSettings.mjs";
 import { headers } from 'next/headers';
-import { getPageLayout } from "./lib/pageLayout";
+import { getPageLayout } from "./lib/pageLayout.mjs";
 
 const inter = Inter({ subsets: ["latin"] });
 

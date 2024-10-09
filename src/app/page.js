@@ -10,7 +10,7 @@ import BasicRecentMatches from "./UI/Home/BasicRecentMatches";
 import { getCategorySettings } from "./lib/siteSettings.mjs";
 import SocialMedia from "./UI/SocialMedia";
 import WelcomeMessage from "./UI/WelcomeMessage";
-import { getPageLayout } from "./lib/pageLayout";
+import { getPageLayout } from "./lib/pageLayout.mjs";
 
 export default async function Home() {
 

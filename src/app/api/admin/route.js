@@ -20,7 +20,7 @@ import { changePlayerIds as changeCTFPlayerIds } from "@/app/lib/ctf.mjs";
 import { changePlayerMatchIds as changeWeaponPlayerMatchIds } from "@/app/lib/weapons.mjs";
 import { changePlayerMatchIds as changeDominationPlayerMatchIds} from "@/app/lib/domination.mjs";
 import { clearAllDataTables } from "@/app/lib/admin";
-import { getAllPagesLayout, saveChanges as savePageLayoutChanges } from "@/app/lib/pageLayout";
+import { getAllPagesLayout, saveChanges as savePageLayoutChanges, restoreDefaultPageLayout } from "@/app/lib/pageLayout.mjs";
 
 
 
@@ -196,6 +196,21 @@ export async function POST(req){
             await clearAllDataTables();
 
             return Response.json({"message": "passed"});
+        }
+
+        if(mode === "restore-page-layout"){
+
+            let page = res.page ?? null;
+
+            if(page === null) throw new Error("Page has not been set");
+
+            page = page.toLowerCase();
+
+            console.log(`page = ${page}`);
+
+            await restoreDefaultPageLayout(page);
+
+
         }
         
         return Response.json({"message": "hi"});
