@@ -25,14 +25,14 @@ export async function generateMetadata({ params, searchParams }, parent) {
 export default async function Page({params, searchParams}) {
 
     const pageSettings = await getCategorySettings("Matches");
-    const setting = await getCategorySettings("Branding");
+    //const setting = await getCategorySettings("Branding");
 
     const perPage = searchParams?.pp ?? pageSettings["Results Per Page"] ?? 50;
     const page = searchParams?.page ?? 1;
     const server = searchParams?.s ?? 0;
     const gametype = searchParams?.g ?? 0;
     const map = searchParams?.m ?? 0;
-
+    const display = searchParams?.display ?? 0;
 
     const {data, total} = await getRecentMatches(page, perPage, server, gametype, map);
 
@@ -41,22 +41,25 @@ export default async function Page({params, searchParams}) {
     const mapNames = await getAllMapNames();
     
 
-    const pageURL = `/matches?s=${server}&g=${gametype}&m=${map}&page=`;
+    const pageURL = `/matches?s=${server}&g=${gametype}&m=${map}&display=${display}&page=`;
+
+    const matchElems = (display === "0") ? <MatchesBoxView data={data}/> : <MatchList data={data} bIgnoreMap={false}/> ;
 
     return (
       <main className={"styles.main"}>
         <div>
             <Header>Recent Matches</Header>
             <SearchForm 
-              serverNames={serverNames} 
-              gametypeNames={gametypeNames}
-              mapNames={mapNames}
-              server={server}
-              gametype={gametype}
-              map={map}
+                serverNames={serverNames} 
+                gametypeNames={gametypeNames}
+                mapNames={mapNames}
+                server={server}
+                gametype={gametype}
+                map={map}
+                display={display}
             />
             <Pagination url={pageURL} currentPage={page} results={total} perPage={perPage}/>
-            <MatchesBoxView data={data}/>
+            {matchElems}
             <Pagination url={pageURL} currentPage={page} results={total} perPage={perPage}/>
         </div>
       </main>
