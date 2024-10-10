@@ -41,7 +41,8 @@ export default async function Page({params, searchParams}) {
     const mapNames = await getAllMapNames();
     
 
-  
+    const pageURL = `/matches?s=${server}&g=${gametype}&m=${map}&page=`;
+
     return (
       <main className={"styles.main"}>
         <div>
@@ -54,9 +55,9 @@ export default async function Page({params, searchParams}) {
               gametype={gametype}
               map={map}
             />
-            <Pagination url="/matches?page=" currentPage={page} results={total} perPage={perPage}/>
+            <Pagination url={pageURL} currentPage={page} results={total} perPage={perPage}/>
             <MatchesBoxView data={data}/>
-            <Pagination url="/matches?page=" currentPage={page} results={total} perPage={perPage}/>
+            <Pagination url={pageURL} currentPage={page} results={total} perPage={perPage}/>
         </div>
       </main>
     );
