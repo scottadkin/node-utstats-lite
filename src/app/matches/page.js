@@ -32,7 +32,7 @@ export default async function Page({params, searchParams}) {
     const server = searchParams?.s ?? 0;
     const gametype = searchParams?.g ?? 0;
     const map = searchParams?.m ?? 0;
-    const display = searchParams?.display ?? 0;
+    const display = searchParams?.display ?? "0";
 
     const {data, total} = await getRecentMatches(page, perPage, server, gametype, map);
 
