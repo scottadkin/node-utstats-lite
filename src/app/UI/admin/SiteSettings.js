@@ -64,12 +64,9 @@ function reducer(state, action){
 
                     if(s.bSettingChanged === undefined){
                         s.bSettingChanged = true;
-                    }else{
+                    }/*else{
                         s.bSettingChanged = !s.bSettingChanged;
-                    }
-                    //}else{
-                    //    s.bSettingChanged = !s.bSettingChanged;
-                   // };
+                    }*/
                 }
             }
 
@@ -586,17 +583,19 @@ function renderSelectedOptions(state, dispatch){
         }
 
         if(bTextArea){
+
             textAreaElems.push(<div className="admin-textarea-wrapper" key={i}>
                 <div className="admin-textarea-title">{s.setting_name}</div>
                 {valueElem}
             </div>);
-            continue;
-        }
+          
+        }else{
 
-        rows.push(<tr key={s.id}>
-            <td className="text-left">{s.setting_name}</td>
-            {valueElem}
-        </tr>);
+            rows.push(<tr key={s.id}>
+                <td className="text-left">{s.setting_name}</td>
+                {valueElem}
+            </tr>);
+        }
 
     }
 
