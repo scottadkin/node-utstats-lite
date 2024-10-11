@@ -371,7 +371,7 @@ const queries = [
             category varchar(255) NOT NULL,
             name varchar(255) NOT NULL,
             display_name varchar(255) NOT NULL,
-            points int NOT NULL
+            points float NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_page_layout (
@@ -573,6 +573,8 @@ async function addPageLayouts(){
 
 
         await simpleQuery("ALTER TABLE nstats_site_settings MODIFY COLUMN setting_value text NOT NULL");
+
+        await simpleQuery("ALTER TABLE nstats_ranking_settings MODIFY COLUMN points float NOT NULL");
 
         await addPageLayouts();
         
