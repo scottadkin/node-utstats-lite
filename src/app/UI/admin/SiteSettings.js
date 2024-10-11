@@ -324,6 +324,30 @@ async function restoreDefaultPageLayout(page, dispatch){
     }
 }
 
+async function restoreDefaultPageSettings(page, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "restore-page-settings", "page": page})
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+
+        await loadData(dispatch, true);
+        //reload data
+
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "error", "message": err.toString()});
+    }
+}
+
 function getLayoutItems(state){
 
     const targetPage = state.selectedTab.toLowerCase();
@@ -439,7 +463,7 @@ function renderLayoutEditor(state, dispatch){
             </tbody>
         </table>
         <div className="text-center margin-bottom-1">
-            <div className="warning-button" onClick={() =>{
+            <div className="restore-default-button" onClick={() =>{
                 restoreDefaultPageLayout(state.selectedTab, dispatch);
             }}>
                 Restore Default Page Layout
@@ -588,7 +612,13 @@ function renderSelectedOptions(state, dispatch){
         </table>
         <div className="text-center center">
             {textAreaElems}
+            <div className="restore-default-button" onClick={() =>{
+                restoreDefaultPageSettings(state.selectedTab.toLowerCase(), dispatch);
+            }}>
+                Restore Default Page Settings
+            </div>
         </div>
+
         {renderLayoutEditor(state, dispatch)}
     </>
 }

@@ -607,3 +607,18 @@ canvas{
 .b-up{
 	background-color:var(--team-color-green);
 }
+
+.restore-default-button{
+	display:inline-block;
+	background-color: var(--team-color-red);
+	padding:var(--padding-2);
+	color:var(--font-color-1);
+	border:1px solid var(--border-color-1);
+	font-size:var(--font-size-4);
+	transition:var(--transition-1);
+	user-select: none;
+}
+
+.restore-default-button:hover{
+	cursor: pointer;
+}
