@@ -20,6 +20,7 @@ function reducer(state, action){
                 obj = {
                     ...state,
                     "settings": action.data,
+                    "originalSettings": action.data,
                     "tabs": action.tabs,
                     "selectedTab": action.selectedTab,
                     "pageLayouts": action.pageLayouts,
@@ -30,6 +31,7 @@ function reducer(state, action){
                 obj = {
                     ...state,
                     "settings": action.data,
+                    "originalSettings": action.data,
                     "tabs": action.tabs,
                     "pageLayouts": action.pageLayouts,
                     "pendingLayouts": action.pageLayouts
@@ -64,9 +66,7 @@ function reducer(state, action){
 
                     if(s.bSettingChanged === undefined){
                         s.bSettingChanged = true;
-                    }/*else{
-                        s.bSettingChanged = !s.bSettingChanged;
-                    }*/
+                    }
                 }
             }
 
@@ -123,6 +123,14 @@ function reducer(state, action){
             return {
                 ...state,
                 "pageLayouts": state.pendingLayouts
+            }
+        }
+
+        case "update-original-settings": {
+           
+            return {
+                ...state,
+                "originalSettings": state.settings
             }
         }
     }
@@ -265,7 +273,9 @@ async function saveChanges(state, dispatch){
             if(m.type === "pass") passedIds.push(m.id);
         }
 
-        dispatch({"type": "remove-settings-changed", "passedIds": passedIds});
+        
+        //dispatch({"type": "remove-settings-changed", "passedIds": passedIds});
+        dispatch({"type": "update-original-settings"});
 
     }catch(err){
         console.trace(err);
@@ -649,11 +659,19 @@ function bAnyUnsavedChanges(state){
 
     if(bAnyUnsavedPageLayouts(state)) return true;
 
+    //should never happen
+    if(state.settings.length !== state.originalSettings.length) return true;
+
     for(let i = 0; i < state.settings.length; i++){
 
         const s = state.settings[i];
+        const o = state.originalSettings[i];
 
-        if(s.bSettingChanged) return true;
+        //console.log(o.category === s.category);
+
+        if(o.setting_value !== s.setting_value) return true;
+
+        //if(s.bSettingChanged) return true;
 
     }
     return false;
@@ -663,6 +681,7 @@ export default function SiteSettings(){
 
     const [state, dispatch] = useReducer(reducer, {
         "error": null,
+        "originalSettings": [],
         "settings": [],
         "tabs": [],
         "selectedTab": "",
