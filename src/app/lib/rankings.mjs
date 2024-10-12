@@ -194,7 +194,24 @@ function _setRankingPoints(settings, playerData){
         t.ranking_points = 0;
     }
 
+    //console.log(t.total_matches);
+
     _applyTimePenalty(t, settings.penalty, mins);
+    
+}
+
+
+function _removePlayersUnderMatchLimit(data, minMatches){
+
+    const players = {};
+
+    for(const player of Object.values(data)){
+
+        if(player.total_matches >= minMatches) players[player.player_id] = player;
+    }
+
+
+    return players;
 }
 
 export async function calculateRankings(gametypeId, playerIds){
@@ -204,7 +221,7 @@ export async function calculateRankings(gametypeId, playerIds){
     const fragTotals = await getPlayerFragTotals(gametypeId, playerIds);
     const ctfTotals = await getPlayerCTFTotals(gametypeId, playerIds);
     
-    const mergedData = _mergeTotalsData(fragTotals, ctfTotals);
+    let mergedData = _mergeTotalsData(fragTotals, ctfTotals);
 
 
     const settings = await getRankingSettings();
@@ -214,6 +231,16 @@ export async function calculateRankings(gametypeId, playerIds){
     }
 
     await deletePlayerRankings(gametypeId, playerIds);
+
+    //console.log(mergedData);
+    //console.log(settings);
+
+    let minMatches = settings?.penalty?.min_matches ?? null;
+    
+    if(minMatches !== null){
+        minMatches = minMatches.points;
+        mergedData = _removePlayersUnderMatchLimit(mergedData, minMatches);
+    }
 
     await bulkInsertRankings(gametypeId, Object.values(mergedData));
 
@@ -281,9 +308,20 @@ export async function updateSettings(settings){
 }
 
 
+async function deleteAllPlayerRankings(){
+
+    const query = `DELETE FROM nstats_rankings`;
+
+    await simpleQuery(query);
+
+}
+
+
 export async function recalculateAll(){
 
     const gametypeIds = await getAllGametypeIds();
+
+    await deleteAllPlayerRankings();
 
     for(let i = 0; i < gametypeIds.length; i++){
         
@@ -291,7 +329,7 @@ export async function recalculateAll(){
 
         const playerIds = await getAllPlayerGametypeIds(g);
 
-        await calculateRankings(g, playerIds)
+        await calculateRankings(g, playerIds);
     }
 }
 

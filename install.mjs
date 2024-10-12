@@ -436,6 +436,7 @@ async function insertRankingSettings(){
         {"category": "penalty", "name": "under_240", "displayName": "Under 4 Hours Playtime Penalty", "points": 0.50},
         {"category": "penalty", "name": "under_300", "displayName": "Under 5 Hours Playtime Penalty", "points": 0.66},
         {"category": "penalty", "name": "under_600", "displayName": "Under 10 Hours Playtime Penalty", "points": 0.75},
+        {"category": "penalty", "name": "min_matches", "displayName": "Minimum Matches Played", "points": 20},
 
         {"category": "general", "name": "kills", "displayName": "Kill", "points": 300},
         {"category": "general", "name": "deaths", "displayName": "Death", "points": -150},
