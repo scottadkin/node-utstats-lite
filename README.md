@@ -1,5 +1,5 @@
 ## Node UTStats Lite
-Unreal Tournament stats website for the [https://github.com/rxut/UTStatsLite](utstats-lite mutator).
+Unreal Tournament stats website for the https://github.com/rxut/UTStatsLite
 
 ## Requirements 
 - MYSQL Server
