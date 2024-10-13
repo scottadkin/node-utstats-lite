@@ -3,8 +3,8 @@ import {getMapNames} from "./maps.mjs";
 import { getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getMapImages } from "./maps.mjs";
-import { getPlayersById, getBasicPlayerInfo } from "./players.mjs";
-import { getMatchWeaponStats } from "./weapons.mjs";
+import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds } from "./players.mjs";
+import { getMatchWeaponStats, getWeaponNames } from "./weapons.mjs";
 import { getMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
@@ -287,6 +287,7 @@ export async function getMatchData(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
         }
 
         const weaponStats = (bIgnoreWeaponStats) ? null : await getMatchWeaponStats(id);
+        console.log(weaponStats);
         const kills = (bIgnoreKills) ? [] : await getMatchKills(id);
 
         const ctf = await ctfGetMatchData(id);
@@ -677,6 +678,60 @@ function _JSONSetDomData(dom){
     return totals;
 }
 
+
+function _setKillsData(kills, playerNames, weaponNames, bIgnoreTimestamp, bIgnoreWeapons){
+
+    if(bIgnoreTimestamp === undefined) bIgnoreTimestamp = false;
+    if(bIgnoreWeapons === undefined) bIgnoreWeapons = false;
+
+    const killers = {};
+
+
+    const data = kills.map((k) =>{
+        
+
+        const killerName = playerNames[k.killer_id] ?? k.killer_id;
+        const victimName = playerNames[k.victim_id] ?? k.victim_id;
+
+        if(killers[killerName] === undefined) killers[killerName] = {};
+
+        if(killers[killerName][victimName] === undefined){
+
+            killers[killerName][victimName] = {
+                "kills": 0
+            };
+
+            if(!bIgnoreTimestamp){
+                killers[killerName][victimName].timestamps = [];
+            }
+        }
+
+        killers[killerName][victimName].kills++;
+
+        if(!bIgnoreTimestamp){
+            killers[killerName][victimName].timestamps.push(k.timestamp);
+        }
+
+        const current = {
+            "k": killerName,
+            "v": victimName
+        };
+
+        if(!bIgnoreTimestamp) current.t = k.timestamp;
+
+        if(!bIgnoreWeapons){
+            current.vw = weaponNames[k.victim_weapon];
+            current.kw = weaponNames[k.killer_weapon];
+        }
+
+
+        return current;
+    });
+
+
+    return {"killers": killers};
+}
+
 /**
  * used for /api/json/match
  */
@@ -691,7 +746,12 @@ export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
         if(bIgnoreSpecial === undefined) bIgnoreSpecial = false;
         if(bIgnorePickups === undefined) bIgnorePickups = false;
 
-        const data = await getMatchData(id, bIgnoreKills, bIgnoreWeaponStats, bIgnorePlayers, bIgnoreBasic);
+        const data = await getMatchData(
+            id, 
+            bIgnoreKills, 
+            bIgnoreWeaponStats, 
+            bIgnorePlayers, 
+            bIgnoreBasic);
 
         if(data.error !== undefined) throw new Error(data.error);
 
@@ -730,6 +790,35 @@ export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
         if(!bIgnoreBasic && dom !== null) jsonObject.dom = dom;
         if(!bIgnoreBasic) jsonObject.basic = basic;
         if(!bIgnorePlayers) jsonObject.players = finalPlayers;
+        if(!bIgnoreKills){
+
+            let weapons = {};
+            let playerIds = new Set();
+
+            
+            let weaponIds = new Set();
+
+            
+
+            for(let i = 0; i < data.kills.length; i++){
+
+                const k = data.kills[i];
+                weaponIds.add(k.killer_weapon);
+                weaponIds.add(k.victim_weapon);
+
+                playerIds.add(k.killer_id);
+                playerIds.add(k.victim_id);
+            }
+
+            weaponIds = [...weaponIds]
+ 
+            weapons = await getWeaponNames(weaponIds);
+
+            const playerNames = await getPlayerNamesByIds([...playerIds]);
+
+            jsonObject.kills = _setKillsData(data.kills, playerNames, weapons, false, bIgnoreWeaponStats);
+
+        }
 
         return jsonObject;
 

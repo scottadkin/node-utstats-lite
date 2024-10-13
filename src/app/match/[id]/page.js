@@ -15,6 +15,7 @@ import MatchScreenshot from "@/app/UI/Match/MatchScreenshot";
 import { getAllImages as getAllWeaponImages, bWeaponImageExist } from "@/app/lib/weapons.mjs";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import { getPageLayout } from "@/app/lib/pageLayout.mjs";
+import JSONInfo from "@/app/UI/Match/JSONInfo";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -88,6 +89,7 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
+            <JSONInfo />
             {elems}
 		</main>
     );
