@@ -3,7 +3,7 @@ import {getMapNames} from "./maps.mjs";
 import { getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getMapImages } from "./maps.mjs";
-import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds } from "./players.mjs";
+import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, getAllNames } from "./players.mjs";
 import { getMatchWeaponStats, getWeaponNames } from "./weapons.mjs";
 import { getMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
@@ -213,7 +213,7 @@ async function getPlayerMatchData(id){
 }
 
 
-async function getMatchIdFromHash(hash){
+export async function getMatchIdFromHash(hash){
 
     const query = `SELECT id FROM nstats_matches WHERE hash=?`;
 
@@ -885,4 +885,47 @@ export async function getBasicMatchJSON(id){
 
 
     return obj;
+}
+
+
+export async function getMatchKillsJSON(id){
+
+    const kills = await getMatchKills(id);
+
+    const playerIds = new Set();
+    const weaponIds = new Set();
+
+    for(let i = 0; i < kills.length; i++){
+
+        const k = kills[i];
+
+        playerIds.add(k.killer_id);
+        playerIds.add(k.victim_id);
+        weaponIds.add(k.killer_weapon);
+        weaponIds.add(k.victim_weapon);
+    }
+
+    const players = await getPlayerNamesByIds([...playerIds]);
+    const weapons = await getWeaponNames([...weaponIds]);
+
+    for(let i = 0; i < kills.length; i++){
+
+        const k = kills[i];
+
+        k.t = k.timestamp;
+
+        k.k = players[k.killer_id];
+        k.v = players[k.victim_id];
+
+        k.kw = weapons[k.killer_weapon] ?? "Not Found";
+        k.vw = weapons[k.victim_weapon] ?? "Not Found";
+
+        delete k.killer_weapon;
+        delete k.victim_weapon;
+        delete k.killer_id;
+        delete k.victim_id;
+        delete k.timestamp;
+    }
+
+    return kills;
 }
