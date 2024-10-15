@@ -1,4 +1,4 @@
-import { getMatchJSON } from "@/app/lib/matches.mjs";
+import { getBasicMatchJSON, getMatchJSON } from "@/app/lib/matches.mjs";
 
 
 export const dynamic = "force-dynamic";
@@ -36,6 +36,14 @@ export async function GET(req){
             const data = await getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnorePlayers, bIgnoreBasic, bIgnoreSpecial, bIgnorePickups);
 
             return Response.json(data);
+        }
+
+        mode = mode.toLowerCase();
+
+        console.log(mode);
+
+        if(mode === "basic"){
+            return Response.json(await getBasicMatchJSON(id));
         }
 
 

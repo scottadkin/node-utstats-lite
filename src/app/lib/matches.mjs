@@ -9,7 +9,7 @@ import { getMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
-import { getWinner } from "./generic.mjs";
+import { getWinner, getTeamName } from "./generic.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
@@ -639,6 +639,13 @@ async function _JSONCreateMatchInfo(basic, ctf){
 
         data.winnerScore = b[`team_${winner.winners[0]}_score`] ?? -9999;
 
+        for(let i = 0; i < data.winners.length; i++){
+
+            const d = data.winners[i];
+
+            data.winners[i] = getTeamName(d);
+        }
+
     }else{
 
         data.winnerScore = b.solo_winner_score ?? -9999;
@@ -816,7 +823,7 @@ export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
 
             const playerNames = await getPlayerNamesByIds([...playerIds]);
 
-            jsonObject.kills = _setKillsData(data.kills, playerNames, weapons, false, bIgnoreWeaponStats);
+            jsonObject.kills = _setKillsData(data.kills, playerNames, weapons, true, bIgnoreWeaponStats);
 
         }
 
@@ -826,5 +833,56 @@ export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
         return {"error": err.toString()}
     }
     //return {"players":  finalPlayers, "basic": basic};
+}
 
+
+
+export async function getBasicMatchJSON(id){
+
+
+    const data = await getMatch(id);
+
+    if(data === null) throw new Error("Match doesn't exist!");
+
+    const winner = getWinner({"basic": data});
+
+    const obj = {
+        "matchId": data.id,
+        "hash": data.hash,
+        "server": data.serverName,
+        "gametype": data.gametypeName,
+        "map": data.mapName,
+        "playtime": data.playtime,
+        "players": data.players,
+        "winners": [],
+        "bInstagib": data.insta === 1
+    };
+
+    if(data.total_teams > 0){
+
+        obj.teams = data.total_teams;
+        obj.redTeamScore = data.team_0_score;
+        obj.blueTeamScore = data.team_1_score;
+        obj.greenTeamScore = data.team_2_score;
+        obj.yellowTeamScore = data.team_3_score;
+
+        for(let i = 0; i < winner.winners.length; i++){
+
+            const w = winner.winners[i];
+
+            obj.winners.push(getTeamName(w));
+
+        }
+
+    }else{
+
+        const winningPlayerInfo = await getBasicPlayerInfo([winner.winnerId]);
+
+        const winningPlayer = winningPlayerInfo[winner.winnerId]?.name ?? "Not Found";
+
+        obj.winners.push(winningPlayer);
+    }
+
+
+    return obj;
 }
