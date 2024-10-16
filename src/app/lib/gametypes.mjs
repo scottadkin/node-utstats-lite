@@ -151,3 +151,15 @@ export async function deleteAllPlayerTotals(){
 
     await simpleQuery(query);
 }
+
+
+export async function getLastPlayedGametype(){
+
+    const query = `SELECT gametype_id FROM nstats_matches ORDER BY date DESC LIMIT 1`;
+
+    const result = await simpleQuery(query);
+
+    if(result.length > 0) return result[0].gametype_id;
+
+    return null;
+}

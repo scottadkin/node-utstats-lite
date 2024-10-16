@@ -1,6 +1,6 @@
 import Header from "../UI/Header";
 import SearchForm from "../UI/Rankings/SearchForm";
-import { getAllNames } from "../lib/gametypes.mjs";
+import { getAllNames, getLastPlayedGametype } from "../lib/gametypes.mjs";
 import { getRankings } from "../lib/rankings.mjs";
 import { convertTimestamp, getPlayer, toPlaytime, getOrdinal, plural } from "../lib/generic.mjs";
 import { getBasicPlayerInfo } from "../lib/players.mjs";
@@ -50,7 +50,17 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
     const gametypeNames = await getAllNames(true);
 
-    const gametypeId = setGametypeId(searchParams, gametypeNames);
+    let gametypeId = setGametypeId(searchParams, gametypeNames);
+
+    if(searchParams.gid === undefined){
+
+        const lastPlayedId = await getLastPlayedGametype();
+
+        if(lastPlayedId !== null){
+            gametypeId = lastPlayedId;
+        }
+
+    }
 
     const gametypeName = setGametypeName(gametypeNames, gametypeId);
     const timeFrame = setTimeFrame(searchParams);
@@ -73,6 +83,16 @@ export default async function Page({params, searchParams}){
     const gametypeNames = await getAllNames(true);
 
     let gametypeId = setGametypeId(searchParams, gametypeNames);
+
+    if(searchParams.gid === undefined){
+
+        const lastPlayedId = await getLastPlayedGametype();
+
+        if(lastPlayedId !== null){
+            gametypeId = lastPlayedId;
+        }
+
+    }
 
     let page = (searchParams.p !== undefined) ? parseInt(searchParams.p) : 1;
     if(page !== page) page = 1;

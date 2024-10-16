@@ -936,26 +936,5 @@ export async function getMatchKillsDetailedJSON(id){
     const players = await getPlayerNamesByIds([...playerIds]);
     const weapons = await getWeaponNames([...weaponIds]);
 
-
-
-    /*for(let i = 0; i < kills.length; i++){
-
-        const k = kills[i];
-
-        k.t = k.timestamp;
-
-        k.k = players[k.killer_id];
-        k.v = players[k.victim_id];
-
-        k.kw = weapons[k.killer_weapon] ?? "Not Found";
-        k.vw = weapons[k.victim_weapon] ?? "Not Found";
-
-        delete k.killer_weapon;
-        delete k.victim_weapon;
-        delete k.killer_id;
-        delete k.victim_id;
-        delete k.timestamp;
-    }*/
-
     return {"players": players, "weapons": weapons, "kills": kills};
 }
