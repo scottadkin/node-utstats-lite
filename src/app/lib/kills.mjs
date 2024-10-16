@@ -31,6 +31,13 @@ export async function getMatchKills(matchId){
     return await simpleQuery(query, [matchId]);
 }
 
+export async function getMatchKillsBasic(matchId){
+
+    const query = `SELECT killer_id,victim_id FROM nstats_kills WHERE match_id=?`;
+
+    return await simpleQuery(query, [matchId]);
+}
+
 export async function changePlayerIds(oldIds, newId){
 
     if(oldIds.length === 0) return {"changedRows": 0};

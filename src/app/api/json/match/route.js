@@ -1,4 +1,4 @@
-import { getBasicMatchJSON, getMatchJSON, getMatchIdFromHash, getMatchKillsJSON } from "@/app/lib/matches.mjs";
+import { getBasicMatchJSON, getMatchJSON, getMatchIdFromHash, getMatchKillsBasicJSON, getMatchKillsDetailedJSON } from "@/app/lib/matches.mjs";
 
 
 export const dynamic = "force-dynamic";
@@ -58,9 +58,14 @@ export async function GET(req){
             return Response.json(await getBasicMatchJSON(id));
         }
 
-        if(mode === "kills"){
+        if(mode === "kills-basic"){
+  
+            return Response.json(await getMatchKillsBasicJSON(id));
+        }
 
-            return Response.json(await getMatchKillsJSON(id));
+        if(mode === "kills-detailed"){
+
+            return Response.json(await getMatchKillsDetailedJSON(id));
         }
 
         return Response.json({"message": "hi"});

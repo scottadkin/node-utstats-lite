@@ -5,7 +5,7 @@ import { getServerNames } from "./servers.mjs";
 import { getMapImages } from "./maps.mjs";
 import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, getAllNames } from "./players.mjs";
 import { getMatchWeaponStats, getWeaponNames } from "./weapons.mjs";
-import { getMatchKills } from "./kills.mjs";
+import { getMatchKills, getMatchKillsBasic } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
@@ -887,8 +887,33 @@ export async function getBasicMatchJSON(id){
     return obj;
 }
 
+export async function getMatchKillsBasicJSON(id){
 
-export async function getMatchKillsJSON(id){
+    const data = await getMatchKillsBasic(id);
+
+    const playerIds = new Set();
+
+    const kills = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        playerIds.add(d.killer_id);
+        playerIds.add(d.victim_id);
+
+        kills.push([
+            d.killer_id, d.victim_id
+        ]);    
+    }
+
+    const players = await getPlayerNamesByIds([...playerIds]);
+
+    return {"players": players, "kills": kills};
+}
+
+
+export async function getMatchKillsDetailedJSON(id){
 
     const kills = await getMatchKills(id);
 
