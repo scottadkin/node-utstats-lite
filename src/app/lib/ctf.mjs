@@ -28,13 +28,44 @@ export async function insertPlayerMatchData(playerManager, matchId){
     await bulkInsert(query, insertVars);
 }
 
-export async function getMatchData(matchId){
+export async function getMatchData(matchId, bReturnJSON){
+
+    if(bReturnJSON === undefined) bReturnJSON = false;
 
     const query = `SELECT player_id,flag_taken,flag_pickup,flag_drop,flag_assist,flag_cover,
     flag_seal,flag_cap,flag_kill,flag_return,flag_return_base,flag_return_mid,flag_return_enemy_base,flag_return_save
     FROM nstats_match_ctf WHERE match_id=?`;
 
-    return await simpleQuery(query, [matchId]);
+    const result = await simpleQuery(query, [matchId]);
+
+    if(!bReturnJSON) return result;
+
+    const obj = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        obj[r.player_id] = {
+            "taken": r.flag_taken,
+            "pickup": r.flag_pickup,
+            "drop": r.flag_drop,
+            "assist": r.flag_assist,
+            "cover": r.flag_cover,
+            "seal": r.flag_seal,
+            "cap": r.flag_cap,
+            "kill": r.flag_kill,
+            "return": r.flag_return,
+            "returnTypes": {
+                "base": r.flag_return_base,
+                "mid": r.flag_return_mid,
+                "enemyBase": r.flag_return_enemy_base,
+                "save": r.flag_return_save
+            }
+        };
+    }
+
+    return obj;
 }
 
 function _updatePlayerTotals(totals, gametypeId, matchData){

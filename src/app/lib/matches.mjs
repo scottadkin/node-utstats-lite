@@ -1005,6 +1005,8 @@ export async function getPlayerStatsJSON(matchId){
 
     const weaponStats = await _createPlayerWeaponKillsJSON(matchId);
 
+    const ctfStats = await ctfGetMatchData(matchId, true);
+
     const playerIds = [...new Set(result.map((r) =>{
         return r.player_id;
     }))]
@@ -1023,6 +1025,8 @@ export async function getPlayerStatsJSON(matchId){
 
         p.spectator = r.spectator === 1;
         p.bot = r.bot === 1;
+        p.ping = r.ping;
+        p.country = r.country;
 
         p.weaponStats = (weaponStats[r.player_id] !== undefined) ? weaponStats[r.player_id] : {};
 
@@ -1065,6 +1069,11 @@ export async function getPlayerStatsJSON(matchId){
             "invis": r.item_invis,
             "shp": r.item_shp,
         };
+
+        if(ctfStats[r.player_id] !== undefined){
+            p.ctf = ctfStats[r.player_id] 
+
+        }
 
         data.push(p);
     }
