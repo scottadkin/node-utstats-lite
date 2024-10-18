@@ -938,3 +938,76 @@ export async function getMatchKillsDetailedJSON(id){
 
     return {"players": players, "weapons": weapons, "kills": kills};
 }
+
+export async function getPlayerStatsJSON(matchId){
+
+    const query = `SELECT player_id,spectator,country,bot,ping_avg as ping,team,score,frags,kills,deaths,
+    suicides,team_kills,efficiency,time_on_server,ttl,first_blood,spree_1,spree_2,spree_3,
+    spree_4,spree_5,spree_best,multi_1,multi_2,multi_3,multi_4,multi_best,headshots,
+    item_amp,item_belt,item_boots,item_body,item_pads,item_invis,item_shp 
+    FROM nstats_match_players WHERE match_id=?`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    const playerIds = [...new Set(result.map((r) =>{
+        return r.player_id;
+    }))]
+
+    const playerNames = await getPlayerNamesByIds(playerIds);
+
+    const deleteKeys = [
+        "spree_1", "spree_2", "spree_3", "spree_4", 
+        "spree_5","spree_best", 
+        "multi_1", "multi_2", "multi_3", "multi_4", "multi_best",
+        "first_blood","item_amp","item_belt","item_boots","item_body","item_pads","item_invis",
+        "item_shp"
+    ];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        r.name = playerNames[r.player_id] ?? "Not Found";
+
+        r.spectator = r.spectator === 1;
+        r.bot = r.bot === 1;
+
+        r.special = {
+            "multis": [
+                r.multi_1,
+                r.multi_2,
+                r.multi_3,
+                r.multi_4,
+            ],
+            "multiBest": r.multi_best,
+            "sprees": [
+                r.spree_1,
+                r.spree_2,
+                r.spree_3,
+                r.spree_4,
+                r.spree_5,
+            ],
+            "spreeBest": r.spree_best,
+            "firstBlood": r.first_blood === 1
+        };
+
+        r.items = {
+            "amp": r.item_amp,
+            "belt": r.item_belt,
+            "boots": r.item_boots,
+            "body": r.item_body,
+            "pads": r.item_pads,
+            "invis": r.item_invis,
+            "shp": r.item_shp,
+        };
+
+        for(let x = 0; x < deleteKeys.length; x++){
+
+            const d = deleteKeys[x];
+            delete r[d];
+        }
+    }
+
+    return result;
+}
+
