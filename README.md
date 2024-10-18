@@ -53,6 +53,7 @@ Valid Ignore types are:
 - **pickups**(ignores armour,udamage,jump boots ect)
 - **players**(this will automatically ignore weapons,special,pickups)
 
+- **Fetch Match Basic Info** Returns team scores, winner, map, gametype, server names, total players, playtime https://example.com/api/json/match/?id=1337&mode=basic
 - **Fetch Match Players Info** https://example.com/api/json/match/?id=1337&mode=players
 - **Fetch Match Detailed Kills** This includes timestamps, weapons held by each player https://example.com/api/json/match/?id=1337&mode=kills-detailed
 - **Fetch Match Basic Kills** The returns just killer,victim pairs https://example.com/api/json/match/?id=1337&mode=kills-basic

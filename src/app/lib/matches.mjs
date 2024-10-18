@@ -939,6 +939,59 @@ export async function getMatchKillsDetailedJSON(id){
     return {"players": players, "weapons": weapons, "kills": kills};
 }
 
+async function _createPlayerWeaponKillsJSON(matchId){
+
+    const kills = await getMatchKills(matchId);
+
+    const weaponIds = new Set();
+
+    for(let i = 0; i < kills.length; i++){
+
+        const k = kills[i];
+
+        weaponIds.add(k.killer_weapon);
+        weaponIds.add(k.victim_weapon);
+    }
+
+    const weaponNames = await getWeaponNames([...weaponIds]);
+    const data = {};
+
+    for(let i = 0; i < kills.length; i++){
+
+        const k = kills[i];
+
+        const kId = k.killer_id;
+        const kW = weaponNames[k.killer_weapon] ?? "Not Found";
+        const vId = k.victim_id;
+        const vW = weaponNames[k.victim_weapon] ?? "Not Found";
+
+
+        if(data[kId] === undefined){
+            data[kId] = {};//{"kills": 0, "deaths": 0};
+        }
+
+        if(data[vId] === undefined){
+            data[vId] = {};//{"kills": 0, "deaths": 0};
+        }
+
+        if(data[kId][kW] === undefined){
+            data[kId][kW]  = {"kills": 0, "deaths": 0};
+        }
+
+        if(data[vId][vW] === undefined){
+            data[vId][vW]  = {"kills": 0, "deaths": 0};
+        }
+
+        const killerStats = data[kId][kW];
+        const victimStats = data[vId][vW];
+
+        killerStats.kills++;
+        victimStats.deaths++;
+    }
+
+    return data;
+}
+
 export async function getPlayerStatsJSON(matchId){
 
     const query = `SELECT player_id,spectator,country,bot,ping_avg as ping,team,score,frags,kills,deaths,
@@ -948,6 +1001,9 @@ export async function getPlayerStatsJSON(matchId){
     FROM nstats_match_players WHERE match_id=?`;
 
     const result = await simpleQuery(query, [matchId]);
+
+
+    const weaponStats = await _createPlayerWeaponKillsJSON(matchId);
 
     const playerIds = [...new Set(result.map((r) =>{
         return r.player_id;
@@ -967,6 +1023,8 @@ export async function getPlayerStatsJSON(matchId){
 
         p.spectator = r.spectator === 1;
         p.bot = r.bot === 1;
+
+        p.weaponStats = (weaponStats[r.player_id] !== undefined) ? weaponStats[r.player_id] : {};
 
         p.general = {
             "score": r.score,
@@ -1014,3 +1072,6 @@ export async function getPlayerStatsJSON(matchId){
     return data;
 }
 
+export async function getPlayersWeaponStatsJSON(id){
+
+}

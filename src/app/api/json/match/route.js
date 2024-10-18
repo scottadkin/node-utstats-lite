@@ -1,5 +1,5 @@
 import { getBasicMatchJSON, getMatchJSON, getMatchIdFromHash, 
-    getMatchKillsBasicJSON, getMatchKillsDetailedJSON, getPlayerStatsJSON } from "@/app/lib/matches.mjs";
+    getMatchKillsBasicJSON, getMatchKillsDetailedJSON, getPlayerStatsJSON, getPlayersWeaponStatsJSON } from "@/app/lib/matches.mjs";
 
 
 export const dynamic = "force-dynamic";
@@ -72,6 +72,11 @@ export async function GET(req){
         if(mode === "players"){
 
             return Response.json(await getPlayerStatsJSON(id));
+        }
+
+        if(mode === "weapons"){
+
+            return Response.json(await getPlayersWeaponStatsJSON(id));
         }
 
         return Response.json({"message": "hi"});
