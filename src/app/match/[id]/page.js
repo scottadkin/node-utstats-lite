@@ -76,20 +76,21 @@ export default async function MatchPage({params, searchParams}) {
     const elems = [];
 
 
-    elems[pageLayout["Basic Info"]] = (pageSettings["Display Basic Info"]) ? <BasicInfo key="basic" matchData={matchData}/> : null;
-    elems[pageLayout["Screenshot"]] = (pageSettings["Display Screenshot"]) ? <MatchScreenshot key="sshot" data={matchData}/> : null;
-    elems[pageLayout["Frags"]] = (pageSettings["Display Frags"]) ? <FragTable key="frags" data={matchData} totalTeams={totalTeams}/> : null;
-    elems[pageLayout["CTF"]] = (pageSettings["Display CTF"]) ? <CTFTable key="ctf" data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/> : null;
-    elems[pageLayout["DOM"]] = (pageSettings["Display DOM"]) ? <DomTable key="dom" data={matchData.dom} players={matchData.basicPlayers}/>: null;
-    elems[pageLayout["Weapons"]] = (pageSettings["Display Weapons"]) ? <WeaponStats key="weapons" data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers} weaponImages={weaponImages}/> : null;
-    elems[pageLayout["Items"]] = (pageSettings["Display Items"]) ? <ItemsTable key="items" data={matchData.playerData} totalTeams={totalTeams}/> : null;
-    elems[pageLayout["Special Events"]] = (pageSettings["Display Special Events"]) ? <SpecialEvents key="special" data={matchData} totalTeams={totalTeams}/> : null;
-    elems[pageLayout["Kills"]] = (pageSettings["Display Kills"]) ? <KillsMatchUp key="kills" kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/> : null;
-    elems[pageLayout["Pings"]] = (pageSettings["Display Pings"]) ? <Pings key="pings" data={matchData.playerData} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["Basic Info"]] = (pageSettings["Display Basic Info"] === "1") ? <BasicInfo key="basic" matchData={matchData}/> : null;
+    elems[pageLayout["Screenshot"]] = (pageSettings["Display Screenshot"] === "1") ? <MatchScreenshot key="sshot" data={matchData}/> : null;
+    elems[pageLayout["Frags"]] = (pageSettings["Display Frags"] === "1") ? <FragTable key="frags" data={matchData} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["CTF"]] = (pageSettings["Display CTF"] === "1") ? <CTFTable key="ctf" data={matchData.ctf} players={matchData.basicPlayers} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["DOM"]] = (pageSettings["Display DOM"] === "1") ? <DomTable key="dom" data={matchData.dom} players={matchData.basicPlayers}/>: null;
+    elems[pageLayout["Weapons"]] = (pageSettings["Display Weapons"] === "1") ? <WeaponStats key="weapons" data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers} weaponImages={weaponImages}/> : null;
+    elems[pageLayout["Items"]] = (pageSettings["Display Items"] === "1") ? <ItemsTable key="items" data={matchData.playerData} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["Special Events"]] = (pageSettings["Display Special Events"] === "1") ? <SpecialEvents key="special" data={matchData} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["Kills"]] = (pageSettings["Display Kills"] === "1") ? <KillsMatchUp key="kills" kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/> : null;
+    elems[pageLayout["Pings"]] = (pageSettings["Display Pings"] === "1") ? <Pings key="pings" data={matchData.playerData} totalTeams={totalTeams}/> : null;
+    elems[pageLayout["JSON Links"]] = (pageSettings["Display JSON Links"] === "1") ? <JSONInfo key="json" matchId={matchId}/> : null;
 
     return (
 		<main>
-            <JSONInfo />
+            
             {elems}
 		</main>
     );

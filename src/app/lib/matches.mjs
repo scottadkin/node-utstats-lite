@@ -287,7 +287,7 @@ export async function getMatchData(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
         }
 
         const weaponStats = (bIgnoreWeaponStats) ? null : await getMatchWeaponStats(id);
-        console.log(weaponStats);
+   
         const kills = (bIgnoreKills) ? [] : await getMatchKills(id);
 
         const ctf = await ctfGetMatchData(id);

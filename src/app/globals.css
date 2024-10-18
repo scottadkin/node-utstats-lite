@@ -622,3 +622,15 @@ canvas{
 .restore-default-button:hover{
 	cursor: pointer;
 }
+
+.json-link{
+	padding:var(--padding-2);
+	text-align:center;
+	display:inline-block;
+}
+
+.json-title{
+	font-size:var(--font-size-2);
+	color:var(--font-color-3);
+	display:inline-block;
+}
