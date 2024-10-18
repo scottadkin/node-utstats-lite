@@ -955,24 +955,31 @@ export async function getPlayerStatsJSON(matchId){
 
     const playerNames = await getPlayerNamesByIds(playerIds);
 
-    const deleteKeys = [
-        "spree_1", "spree_2", "spree_3", "spree_4", 
-        "spree_5","spree_best", 
-        "multi_1", "multi_2", "multi_3", "multi_4", "multi_best",
-        "first_blood","item_amp","item_belt","item_boots","item_body","item_pads","item_invis",
-        "item_shp"
-    ];
+    const data = [];
 
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
-        r.name = playerNames[r.player_id] ?? "Not Found";
+        const p = {};
 
-        r.spectator = r.spectator === 1;
-        r.bot = r.bot === 1;
+        p.name = playerNames[r.player_id] ?? "Not Found";
 
-        r.special = {
+        p.spectator = r.spectator === 1;
+        p.bot = r.bot === 1;
+
+        p.general = {
+            "score": r.score,
+            "frags": r.frags,
+            "kills": r.kills,
+            "deaths": r.deaths,
+            "suicides": r.suicides,
+            "teamKills": r.team_kills,
+            "efficiency": r.efficiency,
+            "playtime": r.playtime,
+        };
+
+        p.special = {
             "multis": [
                 r.multi_1,
                 r.multi_2,
@@ -991,7 +998,7 @@ export async function getPlayerStatsJSON(matchId){
             "firstBlood": r.first_blood === 1
         };
 
-        r.items = {
+        p.items = {
             "amp": r.item_amp,
             "belt": r.item_belt,
             "boots": r.item_boots,
@@ -1001,13 +1008,9 @@ export async function getPlayerStatsJSON(matchId){
             "shp": r.item_shp,
         };
 
-        for(let x = 0; x < deleteKeys.length; x++){
-
-            const d = deleteKeys[x];
-            delete r[d];
-        }
+        data.push(p);
     }
 
-    return result;
+    return data;
 }
 
