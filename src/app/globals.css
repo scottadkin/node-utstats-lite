@@ -634,3 +634,27 @@ canvas{
 	color:var(--font-color-3);
 	display:inline-block;
 }
+
+
+.fav{
+	display:inline-block;
+	margin-top: var(--margin-1);
+	margin-bottom: var(--margin-1);
+	color:var(--font-color-1);
+	border:1px solid var(--border-color-1);
+	padding:var(--padding-1);
+}
+
+.fav:hover{
+	cursor: pointer;
+	user-select: none;
+	color:yellow;
+}
+
+.fav-add{
+	background-color:var(--team-color-green);
+}
+
+.fav-del{
+	background-color:var(--team-color-red);
+}

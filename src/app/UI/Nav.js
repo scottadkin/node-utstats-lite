@@ -1,14 +1,16 @@
 "use client"
 import styles from "./Nav.module.css";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
 import { logout } from "../lib/authentication";
+
+import useLocalStorage from "../hooks/useLocalStorage";
 
 
 export default function Nav({settings, sessionInfo, bAdmin, layout}){
 
     const router = useRouter();
     const pathname = usePathname().toLowerCase();
+
 
     const options = [];
 
@@ -187,6 +189,29 @@ export default function Nav({settings, sessionInfo, bAdmin, layout}){
         </a>;
 
         elems.push(elem);
+    }
+
+
+
+
+    const local = useLocalStorage();
+    
+    if(typeof localStorage !== "undefined"){
+  
+        const savedMatches = local.getItem("savedMatches");
+        const savedPlayers = local.getItem("savedPlayers");
+
+        if(savedMatches !== null){
+            elems.push(<a href={"#"} key={"saved-matches"} className={"className"}>
+                Saved Matches
+            </a>);
+        }
+
+        if(savedPlayers !== null){
+            elems.push(<a href={"#"} key={"saved-players"} className={"className"}>
+                Saved Players
+            </a>);
+        }
     }
 
     return <nav className={styles.wrapper}>

@@ -12,6 +12,8 @@ import SocialMedia from "./UI/SocialMedia";
 import WelcomeMessage from "./UI/WelcomeMessage";
 import { getPageLayout } from "./lib/pageLayout.mjs";
 
+
+
 export default async function Home() {
 
 	const pageSettings = await getCategorySettings("Home");
@@ -37,7 +39,6 @@ export default async function Home() {
 	elems[pageLayout["Most Played Gametypes"]] = (gametypes !== null) ? <BasicGametypeList key="gametypes" gametypes={gametypes}/> : null;
 	elems[pageLayout["Servers"]] = (servers !== null) ? <BasicServerList key="servers" servers={servers}/> : null;
 
-	
 	return <main className={styles.main}>
 		<div>
 			{elems}		

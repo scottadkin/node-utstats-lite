@@ -17,6 +17,10 @@ import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import JSONInfo from "@/app/UI/Match/JSONInfo";
 
+import dynamic from 'next/dynamic'
+const AddToSavedMatches = dynamic( () => import('@/app/UI/Match/AddToSavedMatches'), {
+    ssr: false,});
+
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
@@ -61,7 +65,6 @@ export default async function MatchPage({params, searchParams}) {
     const pageSettings = await getCategorySettings("Match");
     const pageLayout = await getPageLayout("Match");
 
-    
     if(matchData.error !== undefined){
         return (
             <main>
@@ -90,7 +93,7 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
-            
+            <AddToSavedMatches hash={matchData.basic.hash}/>
             {elems}
 		</main>
     );
