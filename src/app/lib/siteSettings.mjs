@@ -52,6 +52,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Nav" ,"type": `bool`, "name": "Display Maps", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Admin", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
+    {"category": "Nav" ,"type": `bool`, "name": "Display Watchlist", "value": 1},
 ];
 
 

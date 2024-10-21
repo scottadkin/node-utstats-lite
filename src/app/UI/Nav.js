@@ -3,8 +3,6 @@ import styles from "./Nav.module.css";
 import { usePathname, useRouter } from "next/navigation";
 import { logout } from "../lib/authentication";
 
-import useLocalStorage from "../hooks/useLocalStorage";
-
 
 export default function Nav({settings, sessionInfo, bAdmin, layout}){
 
@@ -94,6 +92,19 @@ export default function Nav({settings, sessionInfo, bAdmin, layout}){
         );
     }
 
+    if(settings["Display Watchlist"] === "1"){
+
+        options.push({
+                "name": "Watchlist",
+                "url": "/watchlist",
+                "matches": [
+                    "/watchlist",
+                ],
+                "index": layout["Watchlist"]
+            }
+        );
+    }
+
     if(sessionInfo !== null && settings["Display Admin"] === "1"){
 
         options.push({
@@ -141,6 +152,8 @@ export default function Nav({settings, sessionInfo, bAdmin, layout}){
             "index": layout["Login/Register"]
         });
     }
+
+
 
     const elems = [];
 
@@ -192,27 +205,6 @@ export default function Nav({settings, sessionInfo, bAdmin, layout}){
     }
 
 
-
-
-    const local = useLocalStorage();
-    
-    if(typeof localStorage !== "undefined"){
-  
-        const savedMatches = local.getItem("savedMatches");
-        const savedPlayers = local.getItem("savedPlayers");
-
-        if(savedMatches !== null){
-            elems.push(<a href={"#"} key={"saved-matches"} className={"className"}>
-                Saved Matches
-            </a>);
-        }
-
-        if(savedPlayers !== null){
-            elems.push(<a href={"#"} key={"saved-players"} className={"className"}>
-                Saved Players
-            </a>);
-        }
-    }
 
     return <nav className={styles.wrapper}>
         {elems}

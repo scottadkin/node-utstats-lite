@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 export default function AddToSavedMatches({hash}){
 
-    return null;
     const local = useLocalStorage();
 
     const [saved, setSaved] = useState(false);
@@ -44,7 +43,7 @@ export default function AddToSavedMatches({hash}){
 
         setSaved(true);
     }}>
-         Add to saved matches
+         Add to watchlist
     </div>
 
 
@@ -62,12 +61,8 @@ export default function AddToSavedMatches({hash}){
 
         setSaved(false);
     }}>
-        Remove from saved matches
+        Remove from watchlist
     </div>
-
-
-
-    
 
 
     return <div className="text-center">

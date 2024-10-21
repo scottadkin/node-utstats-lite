@@ -17,14 +17,12 @@ import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import JSONInfo from "@/app/UI/Match/JSONInfo";
 
-import dynamic from 'next/dynamic'
-const AddToSavedMatches = dynamic( () => import('@/app/UI/Match/AddToSavedMatches'), {
-    ssr: false,});
+
+import AddToSavedMatches from "@/app/UI/Match/AddToSavedMatches";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
-
 
     const settings = await getCategorySettings("Branding");
 

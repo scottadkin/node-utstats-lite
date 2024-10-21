@@ -5,7 +5,7 @@ const DEFAULT_PAGE_LAYOUTS = {
     "map": ["Basic Summary", "Recent Matches"],
     "match": ["Basic Info", "Screenshot", "Frags", "CTF", "DOM", "Weapons", "Items", "Special Events", "Kills", "Pings", "JSON Links"],
     "player": ["Gametype Totals", "CTF", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"],
-    "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Register"]
+    "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Register", "Watchlist"]
 };
 
 
