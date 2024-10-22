@@ -7,19 +7,17 @@ export default function AddToSavedMatches({hash}){
     const local = useLocalStorage();
 
     const [saved, setSaved] = useState(false);
+
     let matches = local.getItem("saved-matches");
+
+    if(matches === null){
+        local.setItem("saved-matches",[]);
+        matches = [];
+    }
 
     useEffect(() =>{
 
         let bSaved = false;
-
-        //will be null on client, on server undefined
-        if(matches === null){
-            //matches = JSON.parse(matches);
-            local.setItem("saved-matches",[]);
-            matches = [];
-            return;
-        }
 
         const index = matches.indexOf(hash);
 
@@ -28,7 +26,7 @@ export default function AddToSavedMatches({hash}){
         setSaved(bSaved);
 
 
-    }, [saved]);
+    }, [saved, matches, hash]);
 
     
     const addElem = <div className="fav fav-add" onClick={() =>{
@@ -37,11 +35,12 @@ export default function AddToSavedMatches({hash}){
 
         if(index === -1){
             matches.push(hash);
+            setSaved(true);
         }
 
         local.setItem("saved-matches", matches);
 
-        setSaved(true);
+        
     }}>
          Add to watchlist
     </div>
