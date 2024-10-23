@@ -50,9 +50,11 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
     const gametypeNames = await getAllNames(true);
 
-    let gametypeId = setGametypeId(searchParams, gametypeNames);
+    const sp = await searchParams;
 
-    if(searchParams.gid === undefined){
+    let gametypeId = setGametypeId(sp, gametypeNames);
+
+    if(sp.gid === undefined){
 
         const lastPlayedId = await getLastPlayedGametype();
 
@@ -63,7 +65,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
     }
 
     const gametypeName = setGametypeName(gametypeNames, gametypeId);
-    const timeFrame = setTimeFrame(searchParams);
+    const timeFrame = setTimeFrame(sp);
 
     let timeFrameString = `, all time rankings.`;
     if(timeFrame > 0){
@@ -80,11 +82,12 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
 export default async function Page({params, searchParams}){
 
+    const sp = await searchParams;
     const gametypeNames = await getAllNames(true);
 
-    let gametypeId = setGametypeId(searchParams, gametypeNames);
+    let gametypeId = setGametypeId(sp, gametypeNames);
 
-    if(searchParams.gid === undefined){
+    if(sp.gid === undefined){
 
         const lastPlayedId = await getLastPlayedGametype();
 
@@ -94,18 +97,18 @@ export default async function Page({params, searchParams}){
 
     }
 
-    let page = (searchParams.p !== undefined) ? parseInt(searchParams.p) : 1;
+    let page = (sp.p !== undefined) ? parseInt(sp.p) : 1;
     if(page !== page) page = 1;
 
-    let perPage = (searchParams.pp !== undefined) ? parseInt(searchParams.pp) : 25;
+    let perPage = (sp.pp !== undefined) ? parseInt(sp.pp) : 25;
     if(perPage !== perPage) perPage = 25;
     if(perPage > 100) perPage = 100;
 
-    let tf = (searchParams.tf !== undefined) ? parseInt(searchParams.tf) : 28;
+    let tf = (sp.tf !== undefined) ? parseInt(sp.tf) : 28;
     if(tf !== tf) tf = 28; 
 
 
-    const timeFrame = setTimeFrame(searchParams);
+    const timeFrame = setTimeFrame(sp);
 
     const {data, totalResults} = await getRankings(gametypeId, page, perPage, timeFrame);
 

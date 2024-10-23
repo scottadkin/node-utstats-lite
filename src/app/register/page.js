@@ -1,13 +1,13 @@
 "use client"
 import Header from "../UI/Header";
-import {useFormState} from "react-dom";
+import {useActionState} from "react";
 import { register } from "../lib/authentication";
 import ErrorBox from "../UI/ErrorBox";
 import MessageBox from "../UI/MessageBox";
 
 export default function RegisterPage(){
 
-    const [state, formAction] = useFormState(register, {
+    const [state, formAction] = useActionState(register, {
         "message": null,
         "error": null
     });

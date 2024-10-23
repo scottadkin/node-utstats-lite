@@ -9,7 +9,10 @@ import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
-    let id = (params.id !== undefined) ? parseInt(params.id) : 0;
+
+    const p = await params;
+
+    let id = (p.id !== undefined) ? parseInt(p.id) : 0;
     if(id !== id) id = 0;
 
     const info = await getMapInfo(id);
@@ -31,15 +34,19 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
 export default async function MapPage({params, searchParams}){
 
-    let id = (params.id !== undefined) ? parseInt(params.id) : 0;
+    const p = await params;
+    const sp = await searchParams;
+
+
+    let id = (p.id !== undefined) ? parseInt(p.id) : 0;
     if(id !== id) id = 0;
 
-    let page = (searchParams.page !== undefined) ? parseInt(searchParams.page) : 1;
+    let page = (sp.page !== undefined) ? parseInt(sp.page) : 1;
     if(page !== page) page = 1;
 
     const DEFAULT_PER_PAGE = 25;
 
-    let perPage = (searchParams.pp !== undefined) ? parseInt(searchParams.pp) : DEFAULT_PER_PAGE;
+    let perPage = (sp.pp !== undefined) ? parseInt(sp.pp) : DEFAULT_PER_PAGE;
 
     if(perPage !== perPage) perPage = DEFAULT_PER_PAGE;
     if(perPage < 5 || perPage > 100) perPage = DEFAULT_PER_PAGE; 

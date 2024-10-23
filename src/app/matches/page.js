@@ -27,12 +27,14 @@ export default async function Page({params, searchParams}) {
     const pageSettings = await getCategorySettings("Matches");
     //const setting = await getCategorySettings("Branding");
 
-    const perPage = searchParams?.pp ?? pageSettings["Results Per Page"] ?? 50;
-    const page = searchParams?.page ?? 1;
-    const server = searchParams?.s ?? 0;
-    const gametype = searchParams?.g ?? 0;
-    const map = searchParams?.m ?? 0;
-    const display = searchParams?.display ?? "0";
+    const sp = await searchParams;
+
+    const perPage = sp?.pp ?? pageSettings["Results Per Page"] ?? 50;
+    const page = sp?.page ?? 1;
+    const server = sp?.s ?? 0;
+    const gametype = sp?.g ?? 0;
+    const map = sp?.m ?? 0;
+    const display = sp?.display ?? "0";
 
     const {data, total} = await getRecentMatches(page, perPage, server, gametype, map);
 

@@ -1,5 +1,9 @@
 "use client"
-import MatchListTable from "./MatchListTable";
+import dynamic from "next/dynamic";
+//import MatchListTable from "./MatchListTable";
+const MatchListTable = dynamic(() => import("./MatchListTable"), {
+    ssr: false
+  });
 
 
 export default function MatchesList({data, bIgnoreMap}){

@@ -172,7 +172,7 @@ export async function logout(){
     try{
 
         
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
 
         cookieStore.delete("nstats_name");
         cookieStore.delete("nstats_sid");
@@ -204,7 +204,7 @@ export async function updateSession(){
 
     try{
 
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
 
         const sId = cookieStore.get("nstats_sid");
 
@@ -249,7 +249,7 @@ export async function updateSession(){
 
 export async function getSessionInfo(){
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     const userId = cookieStore.get("nstats_userid")?.value;
     const sessionId = cookieStore.get("nstats_sid")?.value;

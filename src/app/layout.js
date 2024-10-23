@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ["latin"] });
 export async function generateMetadata({ params, searchParams }, parent) {
 
 
-	const headersList = headers();
+	const headersList = await headers();
   
     const host = headersList.get("host"); // to get domain
     //console.log(headersList.get('next-url')); // to get url

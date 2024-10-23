@@ -24,10 +24,12 @@ import AddToSavedMatches from "@/app/UI/Match/AddToSavedMatches";
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
 
+    const p = await params;
+
     const settings = await getCategorySettings("Branding");
 
     //const match = new Match();
-    const matchId = params.id ?? -1;
+    const matchId = p.id ?? -1;
 
     const matchData = await getMatchData(matchId);
 
@@ -54,7 +56,8 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
 export default async function MatchPage({params, searchParams}) {
 
-    let matchId = params.id ?? -1;
+    const p = await params;
+    let matchId = p.id ?? -1;
 
     const matchData = await getMatchData(matchId);
 

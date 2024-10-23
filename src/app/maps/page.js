@@ -21,7 +21,9 @@ export default async function MapsPage({searchParams}){
 
     //console.log(searchParams);
 
-    let search = (searchParams.search !== undefined) ? searchParams.search : "";
+    const sp = await searchParams;
+
+    let search = (sp.search !== undefined) ? sp.search : "";
 
     return <main>
         <Header>Maps</Header>

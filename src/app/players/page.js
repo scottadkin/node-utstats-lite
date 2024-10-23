@@ -44,34 +44,37 @@ export default async function Page({params, searchParams}) {
     let error = null;
     let name = "";
     let page = 1;
+
+    const sp = await searchParams;
+
     
-    if(searchParams.page !== undefined){
-        page = parseInt(searchParams.page);
+    if(sp.page !== undefined){
+        page = parseInt(sp.page);
         if(page !== page) page = 1;
         if(page < 1) page = 1;
     }
 
-    if(searchParams.sortBy !== undefined){
-        sortBy = searchParams.sortBy;
+    if(sp.sortBy !== undefined){
+        sortBy = sp.sortBy;
     }
 
-    if(searchParams.order !== undefined){
+    if(sp.order !== undefined){
 
-        order = searchParams.order.toUpperCase();
+        order = sp.order.toUpperCase();
 
         if(order !== "ASC" && order !== "DESC"){
             order = "ASC";
         }
     }
 
-    if(searchParams.name !== undefined){
-        name = searchParams.name;
+    if(sp.name !== undefined){
+        name = sp.name;
     }
 
     let perPage = NaN;
 
-    if(searchParams.perPage !== undefined){
-        perPage = searchParams.perPage;
+    if(sp.perPage !== undefined){
+        perPage = sp.perPage;
     }
 
     perPage = parseInt(perPage);

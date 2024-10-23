@@ -2,7 +2,7 @@
 "use client"
 import { login } from "../lib/authentication";
 import Header from "../UI/Header";
-import {useFormState} from "react-dom";
+import {useActionState} from "react";
 import ErrorBox from "../UI/ErrorBox";
 import MessageBox from "../UI/MessageBox";
 import { useEffect } from "react";
@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 
 export default function Login(){
 
-    const [state, formAction] = useFormState(login, {
+    const [state, formAction] = useActionState(login, {
         "message": null,
         "error": null
     });

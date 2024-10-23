@@ -19,8 +19,10 @@ import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
+
+    const p = await params;
     // read route params
-    const id = params.id;
+    const id = p.id;
 
     let player = await getPlayerByAuto(id);
 
@@ -53,8 +55,10 @@ export default async function Page({params, searchParams}){
 
     let id = 0;
 
-    if(params.id !== undefined){
-        id = params.id;
+    const p = await params;
+
+    if(p.id !== undefined){
+        id = p.id;
     }
 
 

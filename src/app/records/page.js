@@ -16,8 +16,10 @@ import { getCategorySettings } from "../lib/siteSettings.mjs";
 export async function generateMetadata({ params, searchParams }, parent) {
 
 
-    const mode = (searchParams.mode !== undefined) ? searchParams.mode.toLowerCase() : "match"; 
-    let cat = (searchParams.cat !== undefined) ? searchParams.cat.toLowerCase() : "kills";
+    const sp = await searchParams;
+
+    const mode = (sp.mode !== undefined) ? sp.mode.toLowerCase() : "match"; 
+    let cat = (sp.cat !== undefined) ? sp.cat.toLowerCase() : "kills";
 
     if(cat === "") cat = "kills";
     
@@ -128,6 +130,7 @@ function renderSingleMatchList(mode, cat, data, totalResults, page, perPage){
 }
 
 function renderSingleLifetimeList(mode, cat, data, totalResults, page, perPage){
+    
 
     if(mode !== "lifetime" || data === null || cat === "") return null;
 
@@ -139,7 +142,7 @@ function renderSingleLifetimeList(mode, cat, data, totalResults, page, perPage){
     const title = getTypeDisplayName(mode, cat);
     
     
-    elems.push(<Header key={cat}>{title}</Header>);
+    elems.push(<Header key={`header-${cat}`}>{title}</Header>);
 
     const headers = {
         "rank": {"title": "#"},
@@ -191,9 +194,10 @@ export default async function Records({params, searchParams}){
 
     try{
 
-
-        let page = (searchParams.page !== undefined) ? parseInt(searchParams.page) : 1;
-        let perPage = (searchParams.perPage !== undefined) ? parseInt(searchParams.perPage) : 25;
+        const sp = await searchParams;
+        
+        let page = (sp.page !== undefined) ? parseInt(sp.page) : 1;
+        let perPage = (sp.perPage !== undefined) ? parseInt(sp.perPage) : 25;
 
         if(page !== page) page = 1;
         if(page < 1) page = 1;
@@ -201,10 +205,8 @@ export default async function Records({params, searchParams}){
         if(perPage !== perPage) perPage = 25;
         if(perPage < 5 || perPage > 100) perPage = 25;
 
-        console.log(params, searchParams);
-
-        let mode = (searchParams.mode !== undefined) ? searchParams.mode : "match";
-        let cat = (searchParams.cat !== undefined) ? searchParams.cat : "kills";
+        let mode = (sp.mode !== undefined) ? sp.mode : "match";
+        let cat = (sp.cat !== undefined) ? sp.cat : "kills";
     
         if(cat === "") cat = "kills";
 
