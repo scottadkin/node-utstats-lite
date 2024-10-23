@@ -31,11 +31,7 @@ export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta
     return null;
 }
 
-
-/**
- * Get the names for all serverIds, gametypeIds, mapIds that are in the supplied matches
- */
-async function setMatchTypeNames(matches){
+function _getUniqueTypeIds(matches){
 
     const serverIds = new Set();
     const gametypeIds = new Set();
@@ -51,9 +47,24 @@ async function setMatchTypeNames(matches){
         mapIds.add(m.map_id);
     }
 
-    const mapNames = await getMapNames([...mapIds]);
-    const gametypeNames = await getGametypeNames([...gametypeIds]);
-    const serverNames = await getServerNames([...serverIds]);
+    return {
+        "serverIds": [...serverIds],
+        "gametypeIds": [...gametypeIds],
+        "mapIds": [...mapIds],
+    };
+}
+
+/**
+ * Get the names for all serverIds, gametypeIds, mapIds that are in the supplied matches
+ */
+async function setMatchTypeNames(matches){
+
+    
+    const {mapIds, gametypeIds, serverIds} = _getUniqueTypeIds(matches);
+
+    const mapNames = await getMapNames(mapIds);
+    const gametypeNames = await getGametypeNames(gametypeIds);
+    const serverNames = await getServerNames(serverIds);
     const mapImages = await getMapImages(mapNames);
 
     for(let i = 0; i < matches.length; i++){
@@ -427,22 +438,11 @@ export async function getBasicMatchesInfo(matchIds){
 
     const result = await simpleQuery(query, [matchIds]);
 
-    const serverIds = new Set();
-    const gametypeIds = new Set();
-    const mapIds = new Set();
+    const {mapIds, gametypeIds, serverIds} = _getUniqueTypeIds(result);
 
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        serverIds.add(r.server_id);
-        gametypeIds.add(r.gametype_id);
-        mapIds.add(r.map_id);
-    }
-
-    const serverNames = await getServerNames([...serverIds]);
-    const gametypeNames = await getGametypeNames([...gametypeIds]);
-    const mapNames = await getMapNames([...mapIds]);
+    const serverNames = await getServerNames(serverIds);
+    const gametypeNames = await getGametypeNames(gametypeIds);
+    const mapNames = await getMapNames(mapIds);
 
     const data = {};
 
@@ -450,6 +450,8 @@ export async function getBasicMatchesInfo(matchIds){
 
         const r = result[i];
         data[r.id] = r;
+
+  
 
         r.serverName = serverNames[r.server_id];
         r.gametypeName = gametypeNames[r.gametype_id];
@@ -1083,4 +1085,40 @@ export async function getPlayerStatsJSON(matchId){
 
 export async function getPlayersWeaponStatsJSON(id){
 
+}
+
+
+export async function getMatchesByHashes(hashes){
+
+    if(hashes.length === 0) return {};
+
+    const query = `SELECT * FROM nstats_matches WHERE hash IN(?)`;
+
+    const result = await simpleQuery(query, [hashes]);
+
+    const {mapIds, gametypeIds, serverIds} = _getUniqueTypeIds(result);
+
+    const mapNames = await getMapNames(mapIds);
+    const gametypeNames = await getGametypeNames(gametypeIds);
+    const serverNames = await getServerNames(serverIds);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        r.mapName = mapNames[r.map_id] ?? "Not Found";
+        r.gametypeName = gametypeNames[r.gametype_id] ?? "Not Found";
+        r.serverName = serverNames[r.server_id] ?? "Not Found";
+    }
+
+    result.sort((a, b) =>{
+        a = a.date;
+        b = b.date;
+
+        if(a < b) return 1;
+        if(a > b) return -1;
+        return 0;
+    });
+
+    return result;
 }
