@@ -1090,7 +1090,7 @@ export async function getPlayersWeaponStatsJSON(id){
 
 export async function getMatchesByHashes(hashes){
 
-    if(hashes.length === 0) return {};
+    if(hashes.length === 0) return [];
 
     const query = `SELECT * FROM nstats_matches WHERE hash IN(?)`;
 

@@ -3,6 +3,8 @@ import Header from "../Header";
 import useLocalStorage from "@/app/hooks/useLocalStorage";
 import { useEffect, useReducer } from "react";
 import MatchesList from "../MatchList";
+import InteractiveTable from "../InteractiveTable";
+import { convertTimestamp, MMSS, toPlaytime } from "@/app/lib/generic.mjs";
 
 function reducer(state, action){
 
@@ -29,8 +31,6 @@ async function loadMatches(dispatch){
 
     try{
 
-        //const local = useLocalStorage();
-
         const matches = localStorage.getItem("saved-matches");
 
         if(matches === null) throw new Error(`Saved matches is null`);
@@ -52,12 +52,27 @@ async function loadMatches(dispatch){
         dispatch({"type": "set-matches-data", "data": res});
 
 
-        console.log(res);
-
     }catch(err){
         console.trace(err);
     }
 }
+
+
+function removeFromFavourites(local, matches, removeHash){
+
+
+    const index = matches.indexOf(removeHash);
+
+    if(index === -1){
+        console.log(`Match is not in favourites`);
+        return;
+    }
+
+    matches.splice(index, 1);
+
+    local.setItem("saved-matches", matches);
+}
+
 
 
 export default function SavedMatches({}){
@@ -78,8 +93,43 @@ export default function SavedMatches({}){
 
     },[totalMatches]);
 
+
+    const headers = {
+        "map": {"title": "Map"},
+        "gametype": {"title": "Gametype"},
+        "date": {"title": "Date"},
+        "players": {"title": "Players"},
+        "playtime": {"title": "Playtime"},
+        "remove": {"title": "Remove"},
+    };
+
+
+    const rows = state.matchesData.map((m) =>{
+        return {
+            "map": {"value": m.mapName.toLowerCase(), "displayValue": m.mapName},
+            "gametype": {"value": m.gametypeName.toLowerCase(), "displayValue": m.gametypeName},
+            "date": {
+                "value": m.date, 
+                "displayValue": convertTimestamp(new Date(m.date), true, false, true),
+                "className": "date"
+            },
+            "players": {"value": m.players},
+            "playtime": {"value": m.playtime, "displayValue": MMSS(m.playtime)},
+            "remove": {
+                "value": null,
+                "displayValue": "Remove",
+                "className": "team-red hover",
+                "onClick": () =>{
+                    removeFromFavourites(local, matches, m.hash);
+                    loadMatches(dispatch);
+                }
+            }
+        };
+    });
+
+
     return <>
         <Header>Saved Matches ({state.totalMatches})</Header>
-        <MatchesList data={state.matchesData} bIgnoreMap={false}/>
+        <InteractiveTable headers={headers} rows={rows} width={1}/>
     </>
 }

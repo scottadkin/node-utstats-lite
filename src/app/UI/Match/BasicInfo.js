@@ -6,6 +6,7 @@ import styles from "./BasicInfo.module.css";
 import { convertTimestamp, plural, toPlaytime } from "@/app/lib/generic.mjs";
 import Mutators from "./Mutators";
 import PermaLink from "../PermaLink";
+import AddToSavedMatches from "./AddToSavedMatches";
 
 export default function BasicInfo({matchData}){
 
@@ -31,7 +32,8 @@ export default function BasicInfo({matchData}){
                 {timeLimit}
                 <Mutators data={basic.mutators}/>
             </div>
-            <PermaLink url={`/match/${matchData.basic.hash}`} />
+            <PermaLink url={`/match/${matchData.basic.hash}`} /><br/>
+            <AddToSavedMatches hash={matchData.basic.hash}/>
         </div>
     </>
 }

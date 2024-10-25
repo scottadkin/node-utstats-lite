@@ -64,7 +64,7 @@ export default function AddToSavedMatches({hash}){
     </div>
 
 
-    return <div className="text-center">
+    return <>
         {(saved) ? delElem : addElem}
-    </div>;
+    </>;
 }

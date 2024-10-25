@@ -20,7 +20,7 @@
 	--team-color-blue:rgb(10,51,106);
 	--team-color-green:rgb(0,56,0);
 	--team-color-yellow:rgb(85,85,0);
-	--purple:rgb(75,0,130);
+	--purple:rgb(55,0,110);
 	--margin-1:25px;
 	--margin-2:10px;
 	--font-size-small:12px;
@@ -33,6 +33,7 @@
 	--font-size-2:16px;
 	--font-size-3:18px;
 	--font-size-4:13px;
+	--font-size-5:12px;
 	--transition-1:background-color 0.5s;
 	--width-1:90%;
 	--width-2:75%;
@@ -328,6 +329,9 @@ tr:nth-child(even):hover, tr:nth-child(odd):hover{
 	display:none;
 }
 
+.hover:hover{
+	cursor: pointer;
+}
 
 .font-small{
 	font-size:var(--font-size-small);
@@ -457,15 +461,17 @@ canvas{
 }
 
 .perma-link{
-	background-color:var(--team-color-red);
-	padding:5px;
+	background-color:var(--purple);
+	padding:var(--padding-3);
 	display:inline-block;
 	margin-bottom:10px;
 	color:var(--font-color-1);
+	border: 1px solid var(--border-color-1);
 }
 
 .perma-link:hover{
 	cursor: pointer;
+	color:yellow;
 }
 
 .map-sshot{
@@ -626,11 +632,11 @@ canvas{
 .json-link{
 	padding:var(--padding-2);
 	text-align:center;
+	font-size:var(--font-size-4);
 	display:inline-block;
 }
 
 .json-title{
-	font-size:var(--font-size-2);
 	color:var(--font-color-3);
 	display:inline-block;
 }
@@ -638,11 +644,10 @@ canvas{
 
 .fav{
 	display:inline-block;
-	margin-top: var(--margin-1);
-	margin-bottom: var(--margin-1);
+	margin-bottom: var(--margin-2);
 	color:var(--font-color-1);
 	border:1px solid var(--border-color-1);
-	padding:var(--padding-1);
+	padding:var(--padding-3);
 }
 
 .fav:hover{

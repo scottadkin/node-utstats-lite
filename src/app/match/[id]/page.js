@@ -18,8 +18,6 @@ import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import JSONInfo from "@/app/UI/Match/JSONInfo";
 
 
-import AddToSavedMatches from "@/app/UI/Match/AddToSavedMatches";
-
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
@@ -94,7 +92,6 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
-            <AddToSavedMatches hash={matchData.basic.hash}/>
             {elems}
 		</main>
     );
