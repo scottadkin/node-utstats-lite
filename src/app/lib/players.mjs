@@ -877,3 +877,14 @@ export async function recalcAllPlayerTotals(){
 
     await updatePlayerGametypeTotals(playerIds);
 }
+
+
+export async function getPlayersByHashes(hashes){
+
+    if(hashes.length === 0) return [];
+
+    const query = `SELECT * FROM nstats_players WHERE hash IN (?)`;
+
+    return await simpleQuery(query, [hashes]);
+
+}

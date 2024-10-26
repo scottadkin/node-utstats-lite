@@ -107,7 +107,12 @@ export default function SavedMatches({}){
 
     const rows = state.matchesData.map((m) =>{
         return {
-            "map": {"value": m.mapName.toLowerCase(), "displayValue": m.mapName},
+            "map": {
+                "value": m.mapName.toLowerCase(), 
+                "displayValue": m.mapName,
+                "className": "text-left"
+            },
+                
             "gametype": {"value": m.gametypeName.toLowerCase(), "displayValue": m.gametypeName},
             "date": {
                 "value": m.date, 

@@ -16,6 +16,7 @@ import Rankings from "@/app/UI/Player/Rankings";
 import PermaLink from "@/app/UI/PermaLink";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import { getPageLayout } from "@/app/lib/pageLayout.mjs";
+import AddToSavedPlayers from "@/app/UI/Player/AddToSavedPlayers";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -156,7 +157,8 @@ export default async function Page({params, searchParams}){
             <CountryFlag code={player.country}/>{player.name}&apos;s Player Summary
         </Header> 
         <div className="text-center">
-            <PermaLink url={`/player/${hash}`} text="Copy Permanent Player Link To Clipboard"/>
+            <PermaLink url={`/player/${hash}`} text="Copy Permanent Player Link To Clipboard"/><br/>
+            <AddToSavedPlayers hash={hash}/>
         </div>
         {elems}
         

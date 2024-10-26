@@ -1,6 +1,7 @@
 import Header from "../UI/Header";
 import { getCategorySettings } from "../lib/siteSettings.mjs";
 import SavedMatches from "../UI/Watchlist/SavedMatches";
+import SavedPlayers from "../UI/Watchlist/SavedPlayers";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -24,5 +25,6 @@ export default function Watchlist({}){
             No account is necessary, everything is saved to your localstorage on your browser.
         </div>
         <SavedMatches />
+        <SavedPlayers />
     </div>
 }
