@@ -461,7 +461,7 @@ canvas{
 }
 
 .perma-link{
-	background-color:var(--purple);
+	background-color:var(--team-color-green);
 	padding:var(--padding-3);
 	display:inline-block;
 	margin-bottom:10px;

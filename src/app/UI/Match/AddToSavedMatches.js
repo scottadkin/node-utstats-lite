@@ -42,7 +42,7 @@ export default function AddToSavedMatches({hash}){
 
         
     }}>
-         Add to watchlist
+         Add To Match Watchlist
     </div>
 
 
@@ -60,7 +60,7 @@ export default function AddToSavedMatches({hash}){
 
         setSaved(false);
     }}>
-        Remove from watchlist
+        Remove From Watchlist
     </div>
 
 

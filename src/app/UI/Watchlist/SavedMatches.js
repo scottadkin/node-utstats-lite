@@ -2,9 +2,9 @@
 import Header from "../Header";
 import useLocalStorage from "@/app/hooks/useLocalStorage";
 import { useEffect, useReducer } from "react";
-import MatchesList from "../MatchList";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, MMSS, toPlaytime } from "@/app/lib/generic.mjs";
+import MatchScoreBox from "../MatchScoreBox";
 
 function reducer(state, action){
 
@@ -100,6 +100,7 @@ export default function SavedMatches({}){
         "date": {"title": "Date"},
         "players": {"title": "Players"},
         "playtime": {"title": "Playtime"},
+        "result": {"title": "Result"},
         "remove": {"title": "Remove"},
     };
 
@@ -115,6 +116,11 @@ export default function SavedMatches({}){
             },
             "players": {"value": m.players},
             "playtime": {"value": m.playtime, "displayValue": MMSS(m.playtime)},
+            "result": {
+                "value": null,
+                "displayValue": <MatchScoreBox data={m} small={true} bTableElem={false}/>,
+                "bIgnoreTd": true
+            },
             "remove": {
                 "value": null,
                 "displayValue": "Remove",
