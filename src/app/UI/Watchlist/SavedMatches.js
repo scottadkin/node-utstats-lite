@@ -5,6 +5,7 @@ import { useEffect, useReducer } from "react";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, MMSS, toPlaytime } from "@/app/lib/generic.mjs";
 import MatchScoreBox from "../MatchScoreBox";
+import Link from "next/link";
 
 function reducer(state, action){
 
@@ -109,7 +110,7 @@ export default function SavedMatches({}){
         return {
             "map": {
                 "value": m.mapName.toLowerCase(), 
-                "displayValue": m.mapName,
+                "displayValue": <Link href={`/match/${m.hash}`} target="_blank">{m.mapName}</Link>,
                 "className": "text-left"
             },
                 

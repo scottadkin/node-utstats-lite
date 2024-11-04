@@ -103,7 +103,7 @@ export default function SavedPlayers(){
         return {
             "name": {
                 "value": p.name.toLowerCase(), 
-                "displayValue": <PlayerLink id={p.hash} country={p.country}>{p.name}</PlayerLink>,
+                "displayValue": <PlayerLink id={p.hash} country={p.country} bNewTab={true}>{p.name}</PlayerLink>,
                 "className": "text-left"
             },
             "last": {

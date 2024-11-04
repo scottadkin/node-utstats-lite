@@ -6,8 +6,6 @@ export async function POST(req){
 
         const res = await req.json();
 
-        console.log(res);
-
         const mode = (res.mode !== undefined) ? res.mode.toLowerCase() : "";
 
         if(mode === "get-matches-by-hashes"){
@@ -18,8 +16,6 @@ export async function POST(req){
 
             return Response.json(data);
         }
-
-        console.log(`mode = ${mode}`);
 
         return Response.json({"error": "Unknown command"});
 
