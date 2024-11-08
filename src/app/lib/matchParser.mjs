@@ -203,6 +203,9 @@ export class MatchParser{
         await setMatchHash(this.matchId, hashVars.toString());
 
 
+        await this.damageManager.insertMatchData(this.players, this.matchId);
+
+
     }
 
     parseLines(){
