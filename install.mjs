@@ -379,7 +379,21 @@ const queries = [
             page varchar(255) NOT NULL,
             item varchar(255) NOT NULL,
             page_order int NOT NULL
-        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE nstats_damage_match (
+            id int NOT NULL AUTO_INCREMENT,
+            player_id int NOT NULL,
+            match_id int NOT NULL,
+            damage_delt int NOT NULL,
+            damage_taken int NOT NULL,
+            self_damage int NOT NULL,
+            team_damage_delt int NOT NULL,
+            team_damage_taken int NOT NULL,
+            fall_damage int NOT NULL,
+            drown_damage int NOT NULL,
+            cannon_damage int NOT NULL,
+            PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
 
 ];

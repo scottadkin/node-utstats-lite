@@ -1,4 +1,4 @@
-import { simpleQuery } from "../database.mjs";
+import { simpleQuery, bulkInsert } from "../database.mjs";
 import Message from "../message.mjs";
 
 
@@ -18,7 +18,6 @@ export default class DamageManager{
     
         if(result === null) return false;
     
-        console.log(result);
         const playerId = parseInt(result[1]);
         const damageDelt = parseInt(result[2]);
         const damageTaken = parseInt(result[3]);
@@ -57,6 +56,36 @@ export default class DamageManager{
 
             player.damageData = damageData;
         }
+    }
+
+    async insertMatchData(playerManager, matchId){
+
+        const insertVars = [];
+
+        const query = `INSERT INTO nstats_damage_match 
+        (player_id,match_id,damage_delt,damage_taken,self_damage,team_damage_delt,team_damage_taken,fall_damage,drown_damage,cannon_damage) VALUES ?`;
+
+        for(const p of Object.values(playerManager.mergedPlayers)){
+
+            const d = p.damageData;
+
+            if(d === undefined) continue;
+
+            insertVars.push([
+                p.masterId,
+                matchId,
+                d.damageDelt,
+                d.damageTaken,
+                d.selfDamage,
+                d.teamDamageDelt,
+                d.teamDamageTaken,
+                d.fallDamage,
+                d.drownDamage,
+                d.cannonDamage
+            ]);
+        }
+
+        await bulkInsert(query, insertVars);
     }
 
 }
