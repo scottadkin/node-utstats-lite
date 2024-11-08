@@ -255,6 +255,8 @@ export class PlayerManager{
 
        // create player if not exists, just set id set name and everything else to null
 
+        id = parseInt(id);
+
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
@@ -510,6 +512,17 @@ export class PlayerManager{
             ctfKeys = Object.keys(this.players[0].stats.ctf);
         }
 
+        const damageKeys = [
+            "damageDelt",
+            "damageTaken",
+            "selfDamage",
+            "teamDamageDelt",
+            "teamDamageTaken",
+            "fallDamage",
+            "drownDamage",
+            "cannonDamage"
+        ];
+
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
@@ -636,12 +649,14 @@ export class PlayerManager{
             master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];
 
             if(master.stats.timeOnServer > 0) master.bSpectator = 0;
-        }
 
-       // console.log(this.renameHistory);
-        //console.log(Object.keys(this.mergedPlayers));
-        //console.log(this.idsToNames);
-        //console.log(this.namesToIds);
+
+            for(let x = 0; x < damageKeys.length; x++){
+
+                const d = damageKeys[x];
+                master.damageData[d] += p.damageData[d];
+            }
+        }
     }
 
     matchEnded(matchStart, matchEnd){

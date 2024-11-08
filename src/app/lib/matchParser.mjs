@@ -12,6 +12,7 @@ import { CTF } from "./importer/ctf.mjs";
 import { Domination } from "./importer/domination.mjs";
 import Items from "./importer/items.mjs";
 import {calculateRankings} from "./rankings.mjs";
+import DamageManager from "./importer/damageManager.mjs";
 
 export class MatchParser{
 
@@ -34,6 +35,7 @@ export class MatchParser{
         this.ctf = new CTF();
         this.dom = new Domination();
         this.items = new Items();
+        this.damageManager = new DamageManager();
 
         this.matchStart = -1;
         this.matchEnd = -1;
@@ -87,6 +89,8 @@ export class MatchParser{
         
         this.kills.setPlayerSpecialEvents(this.players, this.gametype.bHardcore);
         this.items.setPlayerStats(this.players);
+
+        this.damageManager.setPlayerDamage(this.players);
 
         this.players.mergePlayers();
 
@@ -342,6 +346,11 @@ export class MatchParser{
 
             if(itemGetReg.test(subString)){
                 this.items.parseLine(timestamp, subString);
+                continue;
+            }
+
+
+            if(this.damageManager.parseString(subString)){
                 continue;
             }
         }
