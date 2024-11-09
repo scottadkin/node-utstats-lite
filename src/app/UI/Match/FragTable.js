@@ -48,7 +48,7 @@ export default function FragTable({data, totalTeams}){
             "name": {
                 "value": name.toLowerCase(), 
                 "displayValue": <PlayerLink id={d.player_id} country={d.country}>{name}</PlayerLink>, 
-                "className": `player-name-td ${getTeamColorClass((totalTeams > 1) ? d.team : 255)} text-left`
+                "className": `player-name-td ${(totalTeams >= 2) ? getTeamColorClass(d.team)  : ""} text-left`
             },
             "playtime": {"value": d.time_on_server, "displayValue": MMSS(d.time_on_server)},
             "score": {"value": d.score, "displayValue": ignore0(d.score)},

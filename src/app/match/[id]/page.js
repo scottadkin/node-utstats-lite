@@ -94,7 +94,7 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
-            <DamageStats data={matchData.playerData}/>
+            <DamageStats data={matchData.playerData} totalTeams={totalTeams}/>
             {elems}
 		</main>
     );

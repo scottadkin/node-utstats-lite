@@ -19,7 +19,7 @@ function bAnyDamageOfType(data, keyName){
     return false;
 }
 
-function renderBasicTable(data){
+function renderBasicTable(data, totalTeams){
 
     const headers = {
         "player": {"title": "Player"},
@@ -50,7 +50,7 @@ function renderBasicTable(data){
             "player": {
                 "value": d.name.toLowerCase(), 
                 "displayValue": <PlayerLink id={d.player_id} country={d.country}>{d.name}</PlayerLink>,
-                "className": `${getTeamColorClass(d.team)} text-left`
+                "className": `${(totalTeams >= 2) ? getTeamColorClass(d.team) : ""} text-left`
             },
             "self": {"value": dam.selfDamage, "displayValue": ignore0(dam.selfDamage)},
             "fall": {"value": dam.fallDamage, "displayValue": ignore0(dam.fallDamage)},
@@ -66,10 +66,10 @@ function renderBasicTable(data){
     return <InteractiveTable width={1} headers={headers} rows={rows}/>
 }
 
-export default function DamageStats({data}){
+export default function DamageStats({data, totalTeams}){
 
     return <>
         <Header>Damage Stats</Header>
-        {renderBasicTable(data)}
+        {renderBasicTable(data, totalTeams)}
     </>
 }
