@@ -25,14 +25,14 @@ function renderBasicTable(data){
         "player": {"title": "Player"},
     };
 
-    if(bAnyDamageOfType(data, "self_damage")) headers.self = {"title": "Self Damage"}
-    if(bAnyDamageOfType(data, "fall_damage")) headers.fall = {"title": "Fall Damage"}
-    if(bAnyDamageOfType(data, "cannon_damage")) headers.cannon = {"title": "Cannon Damage"}
-    if(bAnyDamageOfType(data, "drown_damage")) headers.drown = {"title": "Drown Damage"}
-    if(bAnyDamageOfType(data, "team_damage_taken")) headers.teamDamageTaken = {"title": "Team Damage Taken"}
-    if(bAnyDamageOfType(data, "team_damage_delt")) headers.teamDamageDelt = {"title": "Team Damage Delt"}
-    if(bAnyDamageOfType(data, "damage_taken")) headers.damageTaken = {"title": "Damage Taken"}
-    if(bAnyDamageOfType(data, "damage_delt")) headers.damageDelt = {"title": "Damage Delt"}
+    if(bAnyDamageOfType(data, "selfDamage")) headers.self = {"title": "Self Damage"}
+    if(bAnyDamageOfType(data, "fallDamage")) headers.fall = {"title": "Fall Damage"}
+    if(bAnyDamageOfType(data, "cannonDamage")) headers.cannon = {"title": "Cannon Damage"}
+    if(bAnyDamageOfType(data, "drownDamage")) headers.drown = {"title": "Drown Damage"}
+    if(bAnyDamageOfType(data, "teamDamageTaken")) headers.teamDamageTaken = {"title": "Team Damage Taken"}
+    if(bAnyDamageOfType(data, "teamDamageDelt")) headers.teamDamageDelt = {"title": "Team Damage Delt"}
+    if(bAnyDamageOfType(data, "damageTaken")) headers.damageTaken = {"title": "Damage Taken"}
+    if(bAnyDamageOfType(data, "damageDelt")) headers.damageDelt = {"title": "Damage Delt"}
     
 
 
@@ -49,17 +49,17 @@ function renderBasicTable(data){
         rows.push({
             "player": {
                 "value": d.name.toLowerCase(), 
-                "displayValue": <PlayerLink country={d.country}>{d.name}</PlayerLink>,
+                "displayValue": <PlayerLink id={d.player_id} country={d.country}>{d.name}</PlayerLink>,
                 "className": `${getTeamColorClass(d.team)} text-left`
             },
-            "self": {"value": dam.self_damage, "displayValue": ignore0(dam.self_damage)},
-            "fall": {"value": dam.fall_damage, "displayValue": ignore0(dam.fall_damage)},
-            "cannon": {"value": dam.cannon_damage, "displayValue": ignore0(dam.cannon_damage)},
-            "drown": {"value": dam.drown_damage, "displayValue": ignore0(dam.drown_damage)},
-            "teamDamageTaken": {"value": dam.team_damage_taken, "displayValue": ignore0(dam.team_damage_taken)},
-            "teamDamageDelt": {"value": dam.team_damage_delt, "displayValue": ignore0(dam.team_damage_delt)},
-            "damageTaken": {"value": dam.damage_taken, "displayValue": ignore0(dam.damage_taken)},
-            "damageDelt": {"value": dam.damage_delt, "displayValue": ignore0(dam.damage_delt)},
+            "self": {"value": dam.selfDamage, "displayValue": ignore0(dam.selfDamage)},
+            "fall": {"value": dam.fallDamage, "displayValue": ignore0(dam.fallDamage)},
+            "cannon": {"value": dam.cannonDamage, "displayValue": ignore0(dam.cannonDamage)},
+            "drown": {"value": dam.drownDamage, "displayValue": ignore0(dam.drownDamage)},
+            "teamDamageTaken": {"value": dam.teamDamageTaken, "displayValue": ignore0(dam.teamDamageTaken)},
+            "teamDamageDelt": {"value": dam.teamDamageDelt, "displayValue": ignore0(dam.teamDamageDelt)},
+            "damageTaken": {"value": dam.damageTaken, "displayValue": ignore0(dam.damageTaken)},
+            "damageDelt": {"value": dam.damageDelt, "displayValue": ignore0(dam.damageDelt)},
         });
     }
 

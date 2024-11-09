@@ -507,6 +507,7 @@ function _JSONAddPlayerDetails(players, data, weaponNames, weaponStats, bIgnoreS
             "returnEnemyBase": d.flag_return_enemy_base,
             "returnSave": d.flag_return_save,
         };
+
     }
 
     if(data.playerData === null) return;
@@ -535,6 +536,11 @@ function _JSONAddPlayerDetails(players, data, weaponNames, weaponStats, bIgnoreS
             "playtime": d.time_on_server,
             "ttl": d.ttl,
         };
+
+        if(d.damage !== undefined){
+
+            player.damage = d.damage;
+        }
 
         if(!bIgnorePickups){
 
@@ -712,7 +718,6 @@ function _setKillsData(kills, playerNames, weaponNames, bIgnoreTimestamp, bIgnor
 
     const data = kills.map((k) =>{
         
-
         const killerName = playerNames[k.killer_id] ?? k.killer_id;
         const victimName = playerNames[k.victim_id] ?? k.victim_id;
 
