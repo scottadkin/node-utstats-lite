@@ -10,6 +10,7 @@ import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName } from "./generic.mjs";
+import { getMatchDamage } from "./damage.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, players, totalTeams, team0Scores, team1Scores, 
@@ -220,7 +221,20 @@ async function getPlayerMatchData(id){
     item_amp,item_belt,item_boots,item_body,item_pads,item_invis,item_shp 
     FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
 
-    return await simpleQuery(query, [id]);
+    const damageData = await getMatchDamage(id);
+
+    const result = await simpleQuery(query, [id]);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(damageData[r.player_id] != undefined){
+            r.damage = damageData[r.player_id];
+        }
+    }
+
+    return result;
 }
 
 

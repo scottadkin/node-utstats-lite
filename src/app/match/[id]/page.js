@@ -16,6 +16,7 @@ import { getAllImages as getAllWeaponImages, bWeaponImageExist } from "@/app/lib
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import JSONInfo from "@/app/UI/Match/JSONInfo";
+import DamageStats from "@/app/UI/Match/DamageStats";
 
 
 
@@ -59,6 +60,7 @@ export default async function MatchPage({params, searchParams}) {
 
     const matchData = await getMatchData(matchId);
 
+
     const weaponImages = await getAllWeaponImages();
 
     const pageSettings = await getCategorySettings("Match");
@@ -92,6 +94,7 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
+            <DamageStats data={matchData.playerData}/>
             {elems}
 		</main>
     );
