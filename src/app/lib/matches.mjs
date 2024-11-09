@@ -1015,14 +1015,7 @@ async function _createPlayerWeaponKillsJSON(matchId){
 
 export async function getPlayerStatsJSON(matchId){
 
-    const query = `SELECT player_id,spectator,country,bot,ping_avg as ping,team,score,frags,kills,deaths,
-    suicides,team_kills,efficiency,time_on_server,ttl,first_blood,spree_1,spree_2,spree_3,
-    spree_4,spree_5,spree_best,multi_1,multi_2,multi_3,multi_4,multi_best,headshots,
-    item_amp,item_belt,item_boots,item_body,item_pads,item_invis,item_shp 
-    FROM nstats_match_players WHERE match_id=?`;
-
-    const result = await simpleQuery(query, [matchId]);
-
+    const result = await getPlayerMatchData(matchId);
 
     const weaponStats = await _createPlayerWeaponKillsJSON(matchId);
 
@@ -1080,6 +1073,8 @@ export async function getPlayerStatsJSON(matchId){
             "spreeBest": r.spree_best,
             "firstBlood": r.first_blood === 1
         };
+
+        if(r.damage !== undefined) p.damage = r.damage;
 
         p.items = {
             "amp": r.item_amp,
