@@ -654,6 +654,13 @@ export class PlayerManager{
             for(let x = 0; x < damageKeys.length; x++){
 
                 const d = damageKeys[x];
+
+
+                if(master.damageData === undefined){
+                    master.damageData = p.damageData;
+                    continue;
+                }
+
                 master.damageData[d] += p.damageData[d];
             }
         }
