@@ -381,7 +381,7 @@ const queries = [
             page_order int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        `CREATE TABLE nstats_damage_match (
+        `CREATE TABLE IF NOT EXISTS nstats_damage_match (
             id int NOT NULL AUTO_INCREMENT,
             player_id int NOT NULL,
             match_id int NOT NULL,

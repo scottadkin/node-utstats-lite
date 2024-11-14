@@ -102,7 +102,7 @@ export default function CTFTable({players, data}){
 
         const headers = (selectedTab === "general") ? tableHeaders.general : tableHeaders.returns;
 
-        tables.push(<InteractiveTable key={teamId} headers={headers} rows={tableRows}/>);
+        tables.push(<InteractiveTable width={1} key={teamId} headers={headers} rows={tableRows}/>);
     }
 
     const tabs = [

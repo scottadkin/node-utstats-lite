@@ -91,10 +91,11 @@ export default async function MatchPage({params, searchParams}) {
     elems[pageLayout["Kills"]] = (pageSettings["Display Kills"] === "1") ? <KillsMatchUp key="kills" kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/> : null;
     elems[pageLayout["Pings"]] = (pageSettings["Display Pings"] === "1") ? <Pings key="pings" data={matchData.playerData} totalTeams={totalTeams}/> : null;
     elems[pageLayout["JSON Links"]] = (pageSettings["Display JSON Links"] === "1") ? <JSONInfo key="json" matchId={matchId}/> : null;
+    elems[pageLayout["Damage Stats"]] = (pageSettings["Display Damage Stats"] === "1") ?  <DamageStats key="damage" data={matchData.playerData} totalTeams={totalTeams}/> : null;
 
     return (
 		<main>
-            <DamageStats data={matchData.playerData} totalTeams={totalTeams}/>
+           
             {elems}
 		</main>
     );
