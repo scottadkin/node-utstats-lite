@@ -27,3 +27,12 @@ export async function getMatchDamage(matchId){
 
     return data;
 }
+
+export async function changePlayerMatchIds(oldIds, newId){
+
+    if(oldIds.length === 0) return {"changedRows": 0};
+
+    const query = `UPDATE nstats_damage_match SET player_id=? WHERE player_id IN (?)`;
+
+    return await simpleQuery(query, [newId, oldIds]);
+}

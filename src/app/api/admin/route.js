@@ -21,6 +21,7 @@ import { changePlayerMatchIds as changeWeaponPlayerMatchIds } from "@/app/lib/we
 import { changePlayerMatchIds as changeDominationPlayerMatchIds} from "@/app/lib/domination.mjs";
 import { clearAllDataTables } from "@/app/lib/admin";
 import { getAllPagesLayout, saveChanges as savePageLayoutChanges, restoreDefaultPageLayout } from "@/app/lib/pageLayout.mjs";
+import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/damage.mjs";
 
 
 
@@ -140,9 +141,10 @@ export async function POST(req){
             const ctfResult = await changeCTFPlayerIds(affectedPlayers, playerId);
             const weaponsResult = await changeWeaponPlayerMatchIds(affectedPlayers, playerId);
             const domResult = await changeDominationPlayerMatchIds(affectedPlayers, playerId);
+            const damageResult = await changeDamagePlayerMatchIds(affectedPlayers, playerId);
 
             let changedRows = result.changedRows + killsResult.changedRows + ctfResult.changedRows + 
-            weaponsResult.changedRows + domResult.changedRows;
+            weaponsResult.changedRows + domResult.changedRows + damageResult.changedRows;
 
             const allPlayers = [... new Set([...affectedPlayers, playerId])];
             await updatePlayerGametypeTotals(allPlayers);
