@@ -45,6 +45,8 @@ function createRows(headers, rows){
 
     const elems = [];
 
+    let last = null;
+
     for(let i = 0; i < rows.length; i++){
 
         const r = rows[i];
@@ -70,11 +72,18 @@ function createRows(headers, rows){
                 }else{
                     columns.push(r[name].value);
                 }
-            }
-            
+            }     
         }
 
-        elems.push(<tr key={i}>{columns}</tr>);
+        if(r.bAlwaysLast !== undefined && r.bAlwaysLast){
+            last = <tr key={i}>{columns}</tr>;
+        }else{
+            elems.push(<tr key={i}>{columns}</tr>);
+        }
+    }
+
+    if(last !== null){
+        elems.push(last);
     }
 
     
