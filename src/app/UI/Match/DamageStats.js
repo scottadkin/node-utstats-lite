@@ -19,6 +19,36 @@ function bAnyDamageOfType(data, keyName){
     return false;
 }
 
+
+function bAnyDamageData(data){
+
+    const types = [
+        "selfDamage",
+        "fallDamage",
+        "cannonDamage",
+        "drownDamage",
+        "teamDamageTaken",
+        "teamDamageDelt",
+        "damageDelt",
+        "damageTaken",
+    ];
+
+    for(let i = 0; i < data.length; i++){
+
+        if(data[i].damage === undefined) continue;
+
+        const d = data[i].damage;
+
+        for(let x = 0; x < types.length; x++){
+
+            const t = types[x];
+            if(d[t] !== undefined && d[t] !== 0) return true;
+        }
+    }
+
+    return false;
+}
+
 function renderBasicTable(data, totalTeams){
 
     const headers = {
@@ -33,9 +63,10 @@ function renderBasicTable(data, totalTeams){
     if(bAnyDamageOfType(data, "teamDamageDelt")) headers.teamDamageDelt = {"title": "Team Damage Delt"}
     if(bAnyDamageOfType(data, "damageTaken")) headers.damageTaken = {"title": "Damage Taken"}
     if(bAnyDamageOfType(data, "damageDelt")) headers.damageDelt = {"title": "Damage Delt"}
-    
+
 
     const tables = [[]];
+
     const totals = [{
         "selfDamage": 0,
         "fallDamage": 0,
@@ -142,6 +173,7 @@ function renderBasicTable(data, totalTeams){
 
 export default function DamageStats({data, totalTeams}){
 
+    if(!bAnyDamageData(data)) return null;
     return <>
         <Header>Damage Stats</Header>
         {renderBasicTable(data, totalTeams)}
