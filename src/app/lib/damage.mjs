@@ -1,7 +1,6 @@
 import { simpleQuery } from "./database.mjs";
 
 
-
 export async function getMatchDamage(matchId){
 
     const query = `SELECT player_id,
@@ -35,4 +34,55 @@ export async function changePlayerMatchIds(oldIds, newId){
     const query = `UPDATE nstats_damage_match SET player_id=? WHERE player_id IN (?)`;
 
     return await simpleQuery(query, [newId, oldIds]);
+}
+
+
+async function createPlayerTotal(playerId, gametypeId){
+
+    const query = `INSERT INTO nstats_player_totals_damage VALUES (NULL,?,?,0,0,0,0,0,0,0,0,0,0)`;
+
+    return await simpleQuery(query, [playerId, gametypeId]);
+}
+
+async function bPlayerTotalExist(playerId, gametypeId){
+
+    const query = `SELECT COUNT(*) as total_players FROM nstats_player_totals_damage WHERE player_id=? AND gametype_id=?`;
+
+    const result = await simpleQuery(query, [playerId, gametypeId]);
+
+    return result[0].total_players;
+}
+
+
+async function updatePlayerTotal(playerId, gametypeId){
+
+    if(!await bPlayerTotalExist(playerId, gametypeId)){
+        await createPlayerTotal(playerId, gametypeId);
+    }
+}
+
+export async function updatePlayerTotals(playerManager, gametypeId){
+
+    for(const p of Object.values(playerManager.mergedPlayers)){
+
+        const d = p.damageData;
+
+        if(d === undefined) continue;
+
+        await updatePlayerTotal(p.masterId, gametypeId);
+
+       /* insertVars.push([
+            p.masterId,
+            matchId,
+            d.damageDelt,
+            d.damageTaken,
+            d.selfDamage,
+            d.teamDamageDelt,
+            d.teamDamageTaken,
+            d.fallDamage,
+            d.drownDamage,
+            d.cannonDamage
+        ]);*/
+    }
+
 }

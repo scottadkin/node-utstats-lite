@@ -1,5 +1,6 @@
 import { simpleQuery, bulkInsert } from "../database.mjs";
 import Message from "../message.mjs";
+import { updatePlayerTotals } from "../damage.mjs";
 
 
 export default class DamageManager{
@@ -86,6 +87,14 @@ export default class DamageManager{
         }
 
         await bulkInsert(query, insertVars);
+    }
+
+
+    async updatePlayerTotals(playerManager, gametypeId){
+
+
+        await updatePlayerTotals(playerManager, gametypeId);
+
     }
 
 }

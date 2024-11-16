@@ -393,7 +393,23 @@ const queries = [
             fall_damage int NOT NULL,
             drown_damage int NOT NULL,
             cannon_damage int NOT NULL,
-            PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+            PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_player_totals_damage (
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        gametype_id int NOT NULL,
+        total_matches int NOT NULL,
+        playtime FLOAT NOT NULL,
+        damage_delt int NOT NULL,
+        damage_taken int NOT NULL,
+        self_damage int NOT NULL,
+        team_damage_delt int NOT NULL,
+        team_damage_taken int NOT NULL,
+        fall_damage int NOT NULL,
+        drown_damage int NOT NULL,
+        cannon_damage int NOT NULL,
+        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
 
 
 ];

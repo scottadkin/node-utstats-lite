@@ -204,6 +204,7 @@ export class MatchParser{
 
 
         await this.damageManager.insertMatchData(this.players, this.matchId);
+        await this.damageManager.updatePlayerTotals(this.players, this.gametype.id);
 
 
     }
