@@ -95,6 +95,9 @@ export class Player{
 
         //last time player killed or died
         this.lastFragEvent = -99999;
+
+
+        this.teamChanges = [];
     }
 
     connected(timestamp, bAsPlayer){
@@ -110,6 +113,26 @@ export class Player{
     disconnect(timestamp){
 
         this.disconnects.push(timestamp);
+    }
+
+    changeTeam(newTeam, timestamp){
+
+        this.team = newTeam;
+        this.teamChanges.push({"timestamp": timestamp, "team": newTeam});
+    }
+
+    getTeamAt(timestamp){
+
+        let latestTeam = null;
+
+        for(let i = 0; i < this.teamChanges.length; i++){
+
+            const t = this.teamChanges[i];
+
+            if(t.timestamp <= timestamp) latestTeam = t.team;
+        }
+
+        return latestTeam;
     }
 
     updateMultiHistory(){

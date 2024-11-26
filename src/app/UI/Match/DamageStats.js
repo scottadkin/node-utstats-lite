@@ -109,7 +109,7 @@ function renderBasicTable(data, totalTeams){
             "player": {
                 "value": d.name.toLowerCase(), 
                 "displayValue": <PlayerLink id={d.player_id} country={d.country}>{d.name}</PlayerLink>,
-                "className": `${(totalTeams >= 2) ? getTeamColorClass(d.team) : ""} text-left`
+                "className": `${(totalTeams >= 2) ? getTeamColorClass(d.team) : ""} text-left player-name-td`
             },
             "self": {"value": dam.selfDamage, "displayValue": ignore0(dam.selfDamage)},
             "fall": {"value": dam.fallDamage, "displayValue": ignore0(dam.fallDamage)},

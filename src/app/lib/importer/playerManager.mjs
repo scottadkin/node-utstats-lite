@@ -181,7 +181,7 @@ export class PlayerManager{
             return;
         }
 
-        player.team = team;
+        player.changeTeam(team, timestamp);
     }
 
     parsePing(line){
@@ -655,7 +655,6 @@ export class PlayerManager{
 
                 const d = damageKeys[x];
 
-
                 if(master.damageData === undefined){
                     master.damageData = p.damageData;
                     continue;
@@ -663,7 +662,9 @@ export class PlayerManager{
 
                 master.damageData[d] += p.damageData[d];
             }
-        }
+
+            master.teamChanges = [...master.teamChanges, ...p.teamChanges];
+        }  
     }
 
     matchEnded(matchStart, matchEnd){
@@ -782,5 +783,17 @@ export class PlayerManager{
         }
 
         return ids;
+    }
+
+    getPlayerTeamAt(playerId, timestamp){
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(p.id === playerId) return p.getTeamAt(timestamp);
+        }
+
+        return null;
     }
 }

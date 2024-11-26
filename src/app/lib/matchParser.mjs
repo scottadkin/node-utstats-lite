@@ -83,6 +83,7 @@ export class MatchParser{
         //append (insta) if game is instagib
         this.gametype.updateName();
 
+        this.ctf.processFlagEvents(this.players);
         this.ctf.setPlayerStats(this.players, this.kills);
         await this.dom.setPointIds();
         this.dom.setPlayerCapStats(this.players);
@@ -93,6 +94,7 @@ export class MatchParser{
         this.damageManager.setPlayerDamage(this.players);
 
         this.players.mergePlayers();
+        
 
         const totalPlayers = this.players.getTotalUniquePlayers();
 
@@ -196,7 +198,8 @@ export class MatchParser{
             this.soloWinner,
             this.soloWinnerScore,
             this.gametype.targetScore,
-            this.gametype.timeLimit];
+            this.gametype.timeLimit
+        ];
 
 
 

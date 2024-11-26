@@ -1,11 +1,19 @@
 import Message from "../message.mjs";
 import { insertPlayerMatchData, updatePlayerTotals } from "../ctf.mjs";
+import ctfFlag from "./ctfFlag.mjs";
 
 export class CTF{
 
     constructor(){
 
         this.events = [];
+
+        this.flags = [];
+
+        for(let i = 0; i < 4; i++){
+
+            this.flags.push(new ctfFlag(i));
+        }
 
     }
 
@@ -118,7 +126,9 @@ export class CTF{
 
         const playerId = parseInt(result[1]);
 
-        this.events.push({"type": type, "playerId": playerId, "timestamp": timestamp}); 
+        console.log(result);
+
+        this.events.push({"type": type, "playerId": playerId, "timestamp": timestamp, "teamId": parseInt(result[2])}); 
     }
 
     parseSeal(timestamp, string){
@@ -239,6 +249,50 @@ export class CTF{
             if(e.type === "capture"){
                 player.bHasFlag = false;
             }
+        }
+    }
+
+
+    processFlagEvents(playerManager){
+
+        console.table(this.events);
+
+        for(let i = 0; i < this.events.length; i++){
+
+            //teamId is dependent on event type, taken/pickedup is the flag team id
+            const {type, playerId, timestamp, teamId } = this.events[i];
+
+            const flag = this.flags[teamId];
+
+            if(flag === undefined){
+
+                continue;
+            }
+
+            const playerTeam = playerManager.getPlayerTeamAt(playerId, timestamp);
+
+            if(playerTeam === null){
+                new Message(`ctf.processFlagEvents(): Failed to get playerTeam is null`,"error");
+            }
+
+            if(type === "taken" || type === "pickedup"){
+
+                flag.taken(timestamp, playerId, type === "taken");
+                continue;
+            }
+
+            //ignore mid/close as they are also logged as return at smae timestamp
+            if(type === "return"){
+
+                flag.returned(timestamp);
+                continue;
+            }
+
+            if(type === "dropped"){
+
+                flag.dropped(timestamp, playerId);            
+            }
+
         }
     }
 
