@@ -34,8 +34,14 @@ export class CTF{
             const result = reg.exec(subString);
        
             if(result === null) return;
+ 
+            this.events.push({
+                "type": "capture", 
+                "playerId": parseInt(result[1]), 
+                "timestamp": timestamp,
+                "teamId": parseInt(result[2])
+            });
 
-            this.events.push({"type": "capture", "playerId": parseInt(result[1]), "timestamp": timestamp});
             return;
         }
 
@@ -125,8 +131,6 @@ export class CTF{
         if(result === null) return;
 
         const playerId = parseInt(result[1]);
-
-        console.log(result);
 
         this.events.push({"type": type, "playerId": playerId, "timestamp": timestamp, "teamId": parseInt(result[2])}); 
     }
@@ -284,15 +288,31 @@ export class CTF{
             //ignore mid/close as they are also logged as return at smae timestamp
             if(type === "return"){
 
-                flag.returned(timestamp);
+                flag.returned(timestamp, playerId);
                 continue;
             }
 
             if(type === "dropped"){
 
-                flag.dropped(timestamp, playerId);            
+                flag.dropped(timestamp, playerId);
+                continue;            
             }
 
+
+            if(type === "cover"){
+                flag.cover(timestamp, playerId);
+                continue;
+            }
+
+            if(type === "capture"){
+
+                const playerTeam = playerManager.getPlayerTeamAt(playerId, timestamp);
+                flag.captured(timestamp, playerId, playerTeam);
+                continue;
+            }
+
+
+            //TODO: need to check if disconnect logs a flag_drop
         }
     }
 

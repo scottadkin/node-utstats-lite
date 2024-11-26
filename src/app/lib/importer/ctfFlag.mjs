@@ -1,3 +1,5 @@
+import { getTeamName } from "../generic.mjs";
+
 export default class ctfFlag{
 
     constructor(team){
@@ -8,6 +10,7 @@ export default class ctfFlag{
         this.returns = [];
         this.bDropped = false;
         this.takenTimestamp = null;
+        this.lastPickupTimestamp = null;
         this.droppedTimestamp = null;
 
         this.carriers = [];
@@ -17,31 +20,86 @@ export default class ctfFlag{
         this.returned();
     }
 
-    returned(timestamp){
-
-        this.returns.push({
-            "timestamp": timestamp, 
-            "carriers": [...this.carriers], 
-            "covers": [...this.covers], 
-            "drops": [...this.drops]
-        });
+    reset(){
 
         this.bDropped = false;
         this.takenTimestamp = null;
-        this.droppedTimestamp = null;
+        this.droppedTimestamp = null;    
+        this.lastPickupTimestamp = null;
 
         this.carriers = [];
         this.covers = [];
         this.drops = [];
     }
 
+    calcCarryDropTime(timestamp){
+
+        let carryTime = 0;
+        let dropTime = 0;
+
+        const totalTime = timestamp - this.takenTimestamp;
+
+        if(this.drops.length === 0){
+            return {"carryTime": totalTime, dropTime, totalTime};
+        }
+
+        for(let i = 0; i < this.drops.length; i++){
+
+            const d = this.drops[i];
+            carryTime += d.carryTime;
+        }
+
+
+        dropTime = totalTime - carryTime;
+
+        return {carryTime, dropTime, totalTime}
+    }
+
+    returned(timestamp, playerId){
+
+        const {carryTime, dropTime, totalTime} = this.calcCarryDropTime(timestamp);
+
+        this.returns.push({
+            "timestamp": timestamp, 
+            "carriers": [...this.carriers], 
+            "covers": [...this.covers], 
+            "drops": [...this.drops],
+            "playerId": playerId,
+            "carryTime": carryTime,
+            "dropTime": dropTime,
+            "totalTime": totalTime
+        });
+
+        this.reset();
+    }
+
+    captured(timestamp, playerId, cappingTeam){
+
+        const {carryTime, dropTime, totalTime} = this.calcCarryDropTime(timestamp);
+
+        this.caps.push({
+            "timestamp": timestamp, 
+            "carriers": [...this.carriers], 
+            "covers": [...this.covers], 
+            "drops": [...this.drops],
+            "playerId": playerId,
+            "cappingTeam": cappingTeam,     
+            "carryTime": carryTime,
+            "dropTime": dropTime,
+            "totalTime": totalTime
+        });
+
+        this.reset();
+    }
+
     taken(timestamp, playerId, bTakenFromBase){
 
         if(bTakenFromBase){
             this.takenTimestamp = timestamp;
+        }else{
+            this.lastPickupTimestamp = timestamp;
         }
 
-        console.log(`${this.team} flag taken by ${playerId}, ${bTakenFromBase}`);
         this.bDropped = false;
 
         this.carriers.push({"timestamp": timestamp, "playerId": playerId});
@@ -49,8 +107,15 @@ export default class ctfFlag{
 
     dropped(timestamp, playerId){
 
-        this.drops.push({"timestamp": timestamp, "playerId": playerId});
+        const carryTime = (this.lastPickupTimestamp === null) ? timestamp - this.takenTimestamp : timestamp - this.lastPickupTimestamp;
+
+        this.drops.push({"timestamp": timestamp, "playerId": playerId, "carryTime": carryTime});
 
         this.bDropped = true;
+        this.droppedTimestamp = timestamp;
+    }
+
+    cover(timestamp, playerId){
+        this.covers.push({timestamp, playerId})
     }
 }
