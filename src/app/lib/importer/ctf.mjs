@@ -1,7 +1,7 @@
 import Message from "../message.mjs";
 import { insertPlayerMatchData, updatePlayerTotals } from "../ctf.mjs";
 import ctfFlag from "./ctfFlag.mjs";
-import { bulkInsert } from "../database.mjs";
+import { bulkInsert, simpleQuery } from "../database.mjs";
 
 export class CTF{
 
@@ -316,7 +316,6 @@ export class CTF{
                 continue;            
             }
 
-
             if(type === "cover"){
                 flag.cover(timestamp, playerId);
                 continue;
@@ -334,7 +333,72 @@ export class CTF{
     }
 
 
+    async insertCovers(playerManager, capId, covers){
+
+
+        const insertVars = [];
+
+        for(let i = 0; i < covers.length; i++){
+
+            const c = covers[i];
+
+            const playerId = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
+
+            insertVars.push([capId, c.timestamp, playerId]);
+        }
+
+        const query = `INSERT INTO nstats_ctf_covers (cap_id, timestamp, player_id) VALUES ?`;
+
+        await bulkInsert(query, insertVars);
+    }
+
+    async insertCap(playerManager, matchId, mapId, gametypeId, cap){
+
+        const c = cap;
+
+        const takenPlayer = playerManager.getPlayerById(c.takenBy)?.masterId ?? -1;
+        const capPlayer = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
+
+        const query = `INSERT INTO nstats_ctf_caps VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+
+        const vars = [
+            matchId, mapId, gametypeId, 
+            Number(c.uniqueCarriers === 1), 
+            c.flagTeam, c.cappingTeam,
+            c.takenTimestamp, 
+            takenPlayer,
+            c.timestamp,
+            capPlayer,
+            c.totalTime,
+            c.carryTime,
+            c.dropTime,
+            c.drops.length,
+            c.covers.length,
+            c.uniqueCarriers
+        ];
+
+        try{
+
+            const result = await simpleQuery(query, vars);
+
+            const capId = result.insertId;
+
+            if(capId === undefined) throw new Error("cap id is null");
+
+
+            await this.insertCovers(playerManager, capId, c.covers);
+
+        }catch(err){
+
+            new Message(`Failed to insert cap! ${err.toString()}`,`error`);
+
+        
+        }
+    }
+
     async insertCaps(playerManager, matchId, mapId, gametypeId){
+
+        //TODO: scale playtime in hardcore mode
 
         const caps = [...this.flags[0].caps, ...this.flags[1].caps, ...this.flags[2].caps, ...this.flags[3].caps];
 
@@ -347,32 +411,22 @@ export class CTF{
             return 0;
         });
 
-        console.log(caps);
 
-        const query = `INSERT INTO nstats_ctf_caps (match_id,map_id,gametype_id,cap_type,flag_team,capping_team,taken_timestamp,taken_player,cap_timestamp,cap_player) 
+        /*const query = `INSERT INTO nstats_ctf_caps (match_id,map_id,gametype_id,cap_type,flag_team,
+        capping_team,taken_timestamp,taken_player,cap_timestamp,cap_player, cap_time, carry_time, drop_time,
+        total_drops, total_covers, unique_carriers) 
         VALUES ?`;
 
-        const insertVars = [];
+        const insertVars = [];*/
 
         for(let i = 0; i < caps.length; i++){
 
             const c = caps[i];
 
-            const takenPlayer = playerManager.getPlayerById(c.takenBy)?.masterId ?? -1;
-            const capPlayer = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
-
-            insertVars.push([
-                matchId, mapId, gametypeId, 
-                Number(c.uniqueCarriers === 1), 
-                c.flagTeam, c.cappingTeam,
-                c.takenTimestamp, 
-                takenPlayer,
-                c.timestamp,
-                c.playerId
-            ]);
+            await this.insertCap(playerManager, matchId, mapId, gametypeId, c);
         }
 
-        await bulkInsert(query, insertVars);
+        //await bulkInsert(query, insertVars);
     }
 
 }

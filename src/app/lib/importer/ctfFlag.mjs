@@ -87,6 +87,10 @@ export default class ctfFlag{
         const uniqueCarriers = [...new Set(this.carriers.map((c) =>{
             return c.playerId;
         }))].length;
+
+        const uniqueCovers = [...new Set(this.covers.map((c) =>{
+            return c.playerId;
+        }))].length;
         
         this.caps.push({
             "flagTeam": this.team,
@@ -94,6 +98,7 @@ export default class ctfFlag{
             "carriers": [...this.carriers], 
             "uniqueCarriers": uniqueCarriers,
             "covers": [...this.covers], 
+            "uniqueCovers": uniqueCovers,
             "drops": [...this.drops],
             "playerId": playerId,
             "cappingTeam": cappingTeam,     

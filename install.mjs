@@ -409,7 +409,28 @@ const queries = [
         fall_damage int NOT NULL,
         drown_damage int NOT NULL,
         cannon_damage int NOT NULL,
-        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+
+        `CREATE TABLE IF NOT EXISTS nstats_ctf_caps (
+        id int NOT NULL AUTO_INCREMENT,
+        match_id int NOT NULL,
+        map_id int NOT NULL,
+        gametype_id int NOT NULL,
+        cap_type tinyint NOT NULL,
+        flag_team tinyint NOT NULL,
+        capping_team tinyint NOT NULL,
+        taken_timestamp float NOT NULL,
+        taken_player int NOT NULL,
+        cap_timestamp float NOT NULL,
+        cap_player int NOT NULL,
+        cap_time float NOT NULL,
+        carry_time float NOT NULL,
+        drop_time float NOT NULL,
+        total_drops int NOT NULL,
+        total_covers int NOT NULL,
+        unique_carriers int NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
 
 
 ];
