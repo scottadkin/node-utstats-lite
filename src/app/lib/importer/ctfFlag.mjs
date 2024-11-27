@@ -12,6 +12,7 @@ export default class ctfFlag{
         this.takenTimestamp = null;
         this.lastPickupTimestamp = null;
         this.droppedTimestamp = null;
+        this.takenBy = null;
 
         this.carriers = [];
         this.covers = [];
@@ -26,6 +27,7 @@ export default class ctfFlag{
         this.takenTimestamp = null;
         this.droppedTimestamp = null;    
         this.lastPickupTimestamp = null;
+        this.takenBy = null;
 
         this.carriers = [];
         this.covers = [];
@@ -82,16 +84,24 @@ export default class ctfFlag{
 
         const {carryTime, dropTime, totalTime} = this.calcCarryDropTime(timestamp);
 
+        const uniqueCarriers = [...new Set(this.carriers.map((c) =>{
+            return c.playerId;
+        }))].length;
+        
         this.caps.push({
+            "flagTeam": this.team,
             "timestamp": timestamp, 
             "carriers": [...this.carriers], 
+            "uniqueCarriers": uniqueCarriers,
             "covers": [...this.covers], 
             "drops": [...this.drops],
             "playerId": playerId,
             "cappingTeam": cappingTeam,     
             "carryTime": carryTime,
             "dropTime": dropTime,
-            "totalTime": totalTime
+            "totalTime": totalTime,
+            "takenBy": this.takenBy,
+            "takenTimestamp": this.takenTimestamp
         });
 
         this.reset();
@@ -101,6 +111,7 @@ export default class ctfFlag{
 
         if(bTakenFromBase){
             this.takenTimestamp = timestamp;
+            this.takenBy = playerId;
         }else{
             this.lastPickupTimestamp = timestamp;
         }

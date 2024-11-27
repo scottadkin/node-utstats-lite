@@ -83,8 +83,6 @@ export class MatchParser{
         //append (insta) if game is instagib
         this.gametype.updateName();
 
-        this.ctf.processFlagEvents(this.players);
-
         //console.log(this.ctf.flags);
         this.ctf.setPlayerStats(this.players, this.kills);
         await this.dom.setPointIds();
@@ -180,6 +178,7 @@ export class MatchParser{
         await this.players.updatePlayerFullTotals();
 
         await this.ctf.updatePlayerTotals(this.players);
+        await this.ctf.processFlagEvents(this.players, this.matchId, this.map.id, this.gametype.id);
         await this.map.updateTotals();
 
         const validMergedPlayerIds = this.players.getMergedPlayerIds();

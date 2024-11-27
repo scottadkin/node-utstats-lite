@@ -1,6 +1,7 @@
 import Message from "../message.mjs";
 import { insertPlayerMatchData, updatePlayerTotals } from "../ctf.mjs";
 import ctfFlag from "./ctfFlag.mjs";
+import { bulkInsert } from "../database.mjs";
 
 export class CTF{
 
@@ -273,7 +274,7 @@ export class CTF{
     }
 
 
-    processFlagEvents(playerManager){
+    async processFlagEvents(playerManager, matchId, mapId, gametypeId){
 
         console.table(this.events);
 
@@ -327,10 +328,51 @@ export class CTF{
                 flag.captured(timestamp, playerId, playerTeam);
                 continue;
             }
-
-
-            //TODO: need to check if disconnect logs a flag_drop
         }
+
+        await this.insertCaps(playerManager, matchId, mapId, gametypeId);
+    }
+
+
+    async insertCaps(playerManager, matchId, mapId, gametypeId){
+
+        const caps = [...this.flags[0].caps, ...this.flags[1].caps, ...this.flags[2].caps, ...this.flags[3].caps];
+
+        caps.sort((a, b) =>{
+            a = a.timestamp;
+            b = b.timestamp;
+
+            if(a < b) return -1;
+            if(a > b) return 1;
+            return 0;
+        });
+
+        console.log(caps);
+
+        const query = `INSERT INTO nstats_ctf_caps (match_id,map_id,gametype_id,cap_type,flag_team,capping_team,taken_timestamp,taken_player,cap_timestamp,cap_player) 
+        VALUES ?`;
+
+        const insertVars = [];
+
+        for(let i = 0; i < caps.length; i++){
+
+            const c = caps[i];
+
+            const takenPlayer = playerManager.getPlayerById(c.takenBy)?.masterId ?? -1;
+            const capPlayer = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
+
+            insertVars.push([
+                matchId, mapId, gametypeId, 
+                Number(c.uniqueCarriers === 1), 
+                c.flagTeam, c.cappingTeam,
+                c.takenTimestamp, 
+                takenPlayer,
+                c.timestamp,
+                c.playerId
+            ]);
+        }
+
+        await bulkInsert(query, insertVars);
     }
 
 }
