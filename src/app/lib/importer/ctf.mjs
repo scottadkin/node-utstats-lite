@@ -107,6 +107,12 @@ export class CTF{
             this.parseSeal(timestamp, subString);
             return;
         }
+
+        if(type === "flag_returned_timeout"){
+
+            this.parseTimeout(timestamp, subString);
+            return;
+        }
     }
 
     parseFlagCover(timestamp, line){
@@ -122,6 +128,7 @@ export class CTF{
         this.events.push({"type": "cover", "playerId": killerId, "teamId": teamId, "timestamp": timestamp});
     }
 
+
     parseGeneric(timestamp, string, type){
 
         const reg = /^(\d+?)\t(\d+)$/i;
@@ -133,6 +140,11 @@ export class CTF{
         const playerId = parseInt(result[1]);
 
         this.events.push({"type": type, "playerId": playerId, "timestamp": timestamp, "teamId": parseInt(result[2])}); 
+    }
+
+    parseTimeout(timestamp, flagTeam){
+
+        this.events.push({"type": "timeout", "playerId": null, "timestamp": timestamp, "teamId": parseInt(flagTeam)}); 
     }
 
     parseSeal(timestamp, string){
@@ -156,8 +168,12 @@ export class CTF{
             const e = this.events[i];
 
             const player = playerManager.getPlayerById(e.playerId);
+
     
             if(player === null){
+
+                if(e.type === "timeout") continue;
+
                 new Message(`player is null ctf.setPlayerStats`,"warning");
                 continue;
             }
@@ -268,15 +284,16 @@ export class CTF{
 
             const flag = this.flags[teamId];
 
-            if(flag === undefined){
-
-                continue;
-            }
-
+            if(flag === undefined) continue;
+            
             const playerTeam = playerManager.getPlayerTeamAt(playerId, timestamp);
 
-            if(playerTeam === null){
+            if(playerTeam === null && playerId !== null){
                 new Message(`ctf.processFlagEvents(): Failed to get playerTeam is null`,"error");
+            }
+
+            if(playerId === null && type === "timeout"){
+                continue;
             }
 
             if(type === "taken" || type === "pickedup"){

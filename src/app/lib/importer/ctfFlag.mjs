@@ -73,6 +73,11 @@ export default class ctfFlag{
         this.reset();
     }
 
+    timedOutReturn(timestamp){
+
+        this.returned(timestamp, -1);
+    }
+
     captured(timestamp, playerId, cappingTeam){
 
         const {carryTime, dropTime, totalTime} = this.calcCarryDropTime(timestamp);
