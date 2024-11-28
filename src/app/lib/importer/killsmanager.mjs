@@ -1,5 +1,5 @@
 import { bulkInserKills } from "../kills.mjs";
-import { scalePlaytime, removeDoubleEnforcer } from "../generic.mjs";
+import { removeDoubleEnforcer } from "../generic.mjs";
 
 export class KillsManager{
 
@@ -160,7 +160,7 @@ export class KillsManager{
             const victim = playerManager.getPlayerById(k.victimId);
 
             let timestamp = k.timestamp;
-            if(bHardcore) timestamp = scalePlaytime(timestamp);
+            //if(bHardcore) timestamp = scalePlaytime(timestamp);
 
             killer.killed(k.timestamp);
             victim.died(k.timestamp);
@@ -175,7 +175,7 @@ export class KillsManager{
             const victim = playerManager.getPlayerById(k.victimId);
 
             let timestamp = k.timestamp;
-            if(bHardcore) timestamp = scalePlaytime(timestamp);
+            //if(bHardcore) timestamp = scalePlaytime(timestamp);
 
             //dont count team kills for sprees and multis
             //killer.killed(k.timestamp);

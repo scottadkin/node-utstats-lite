@@ -2,7 +2,7 @@ import Message from "../message.mjs";
 import { insertPlayerMatchData, updatePlayerTotals, insertCaps } from "../ctf.mjs";
 import ctfFlag from "./ctfFlag.mjs";
 import { bulkInsert, simpleQuery } from "../database.mjs";
-import { scalePlaytime } from "../generic.mjs";
+import { getTeamName, scalePlaytime } from "../generic.mjs";
 
 export class CTF{
 
@@ -11,6 +11,7 @@ export class CTF{
         this.events = [];
 
         this.flags = [];
+        
 
         for(let i = 0; i < 4; i++){
 
@@ -284,7 +285,9 @@ export class CTF{
             //teamId is dependent on event type, taken/pickedup is the flag team id
             const {type, playerId, timestamp, teamId } = this.events[i];
 
-            const correctedTimestamp = scalePlaytime(timestamp, bHardcore);
+            console.log(playerId);
+
+            const correctedTimestamp = timestamp//scalePlaytime(timestamp, bHardcore);
 
             const flag = this.flags[teamId];
 
@@ -302,7 +305,8 @@ export class CTF{
 
             if(type === "taken" || type === "pickedup"){
 
-                flag.taken(correctedTimestamp, playerId, type === "taken");
+                console.log(`${getTeamName(playerTeam)} took the ${getTeamName(flag.team)} flag`);
+                flag.taken(correctedTimestamp, playerId, type === "taken", playerTeam);
                 continue;
             }
 
@@ -318,15 +322,25 @@ export class CTF{
                 flag.dropped(correctedTimestamp, playerId);
                 continue;            
             }
-
+            
             if(type === "cover"){
-                flag.cover(correctedTimestamp, playerId);
+                //do same with seals
+                //Only capped covers are saved atm that's why the don't match SCOTT!!
+                for(let x = 0; x < this.flags.length; x++){
+
+                    const f = this.flags[x];
+
+                    if(f.enemyTeam === playerTeam){
+                        this.flags[x].cover(correctedTimestamp, playerId);
+                    }
+                }
+
                 continue;
             }
 
             if(type === "capture"){
 
-                const playerTeam = playerManager.getPlayerTeamAt(playerId, timestamp);
+                console.log(`${getTeamName(playerTeam)} capped the ${getTeamName(flag.team)} flag`);
                 flag.captured(correctedTimestamp, playerId, playerTeam);
                 continue;
             }

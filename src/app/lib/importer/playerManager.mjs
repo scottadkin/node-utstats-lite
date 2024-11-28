@@ -2,7 +2,6 @@ import { Player } from "./player.mjs";
 import Message from "../message.mjs";
 import { getPlayerMasterId, createMasterPlayer, updateMasterPlayers, updatePlayerGametypeTotals, bulkInsertPlayerMatchData } from "../players.mjs";
 import geoip from "geoip-lite";
-import { scalePlaytime } from "../generic.mjs";
 
 
 export class PlayerManager{

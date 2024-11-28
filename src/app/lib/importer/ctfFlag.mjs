@@ -5,6 +5,8 @@ export default class ctfFlag{
     constructor(team){
 
         this.team = team;
+        //the team of the enemy that is holding the flag
+        this.enemyTeam = null;
 
         this.caps = [];
         this.returns = [];
@@ -28,10 +30,13 @@ export default class ctfFlag{
         this.droppedTimestamp = null;    
         this.lastPickupTimestamp = null;
         this.takenBy = null;
+        this.enemyTeam = null;
 
         this.carriers = [];
         this.covers = [];
         this.drops = [];
+
+        console.log(`reset ${this.team}`);
     }
 
     calcCarryDropTime(timestamp){
@@ -91,6 +96,10 @@ export default class ctfFlag{
         const uniqueCovers = [...new Set(this.covers.map((c) =>{
             return c.playerId;
         }))].length;
+
+        console.log(`-----------------------------`);
+        console.log(this.covers);
+        console.log(`-----------------------------`);
         
         this.caps.push({
             "flagTeam": this.team,
@@ -112,7 +121,7 @@ export default class ctfFlag{
         this.reset();
     }
 
-    taken(timestamp, playerId, bTakenFromBase){
+    taken(timestamp, playerId, bTakenFromBase, enemyTeam){
 
         if(bTakenFromBase){
             this.takenTimestamp = timestamp;
@@ -120,6 +129,10 @@ export default class ctfFlag{
         }else{
             this.lastPickupTimestamp = timestamp;
         }
+
+        this.enemyTeam = enemyTeam;
+
+        console.log(`enemyTeam is now ${enemyTeam}`);
 
         this.bDropped = false;
 
@@ -134,6 +147,8 @@ export default class ctfFlag{
 
         this.bDropped = true;
         this.droppedTimestamp = timestamp;
+        console.log(`enemyTeram was ${this.enemyTeam}`);
+        this.enemyTeam = null;
     }
 
     cover(timestamp, playerId){

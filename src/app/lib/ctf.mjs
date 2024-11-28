@@ -38,7 +38,12 @@ export async function getMatchData(matchId, bReturnJSON){
 
     const result = await simpleQuery(query, [matchId]);
 
-    if(!bReturnJSON) return result;
+
+    const caps = await getMatchCaps(matchId);
+
+    if(!bReturnJSON){
+        return {"playerData": result, "caps": caps};
+    }
 
     const obj = {};
 
@@ -281,6 +286,8 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
         if(capId === undefined) throw new Error("cap id is null");
 
+        console.log(c.covers);
+
         await insertCovers(playerManager, matchId, capId, c.covers);
 
     }catch(err){
@@ -321,8 +328,39 @@ export async function insertCaps(playerManager, matchId, mapId, gametypeId, caps
 }
 
 
+async function getMatchCovers(matchId){
+
+    const query = `SELECT * FROM nstats_ctf_covers WHERE match_id=? ORDER by timestamp ASC`;
+
+    
+    const result = await simpleQuery(query, [matchId]);
+
+    console.log(result);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(data[r.cap_id] === undefined){
+            data[r.cap_id] = [];
+        }
+
+        data[r.cap_id].push({"playerId": r.player_id, "timestamp": r.timestamp});
+    }
+
+    return data;
+}
+
 export async function getMatchCaps(matchId){
 
-    const query = ``;
+    const query = `SELECT * FROM nstats_ctf_caps WHERE match_id=? ORDER BY cap_timestamp ASC`;
 
+    const result = await simpleQuery(query, [matchId]);
+
+    const covers = await getMatchCovers(matchId);
+    console.log(covers);
+
+    return result;
 }

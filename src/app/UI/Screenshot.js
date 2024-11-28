@@ -391,10 +391,9 @@ class ScreenshotImage{
 
     getPlayerCTFData(playerId){
 
+        for(let i = 0; i < this.data.ctf.playerData.length; i++){
 
-        for(let i = 0; i < this.data.ctf.length; i++){
-
-            const d = this.data.ctf[i];
+            const d = this.data.ctf.playerData[i];
 
             if(d.player_id === playerId) return d;
         }
@@ -805,7 +804,7 @@ class ScreenshotImage{
     }
 
     bCTF(){
-        return this.data.ctf.length > 0;
+        return this.data.ctf.playerData.length > 0;
     }
 
     setCTFMaxValues(){
@@ -828,9 +827,9 @@ class ScreenshotImage{
             "flag_kill": 0
         };
 
-        for(let i = 0; i < this.data.ctf.length; i++){
+        for(let i = 0; i < this.data.ctf.playerData.length; i++){
 
-            const d = this.data.ctf[i];
+            const d = this.data.ctf.playerData[i];
 
             for(const key of Object.keys(this.ctfMax)){
 

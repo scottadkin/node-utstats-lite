@@ -663,3 +663,24 @@ canvas{
 .fav-del{
 	background-color:var(--team-color-red);
 }
+
+.ctf-caps{
+	text-align:center;
+}
+
+.ctf-cap{
+	color:var(--font-color-1);
+	/*background-color:var(--bg-color-3);*/
+	padding-top:var(--padding-1);
+}
+
+.cap-info{
+	font-size:var(--font-size-5);
+	color:var(--font-color-2);
+	padding:var(--padding-1);
+}
+
+.cap-scores{
+	background-color: var(--bg-color-2);
+	padding:5px;
+}
