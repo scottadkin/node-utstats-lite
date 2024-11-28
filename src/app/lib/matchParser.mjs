@@ -46,8 +46,28 @@ export class MatchParser{
         this.soloWinnerScore = 0;
         
 
+        //scale timestamps at the start for hardcore instead of over and over in different methodd
+        this.setBHardcore();
+
         this.parseLines();
 
+    }
+
+    setBHardcore(){
+
+        this.bHardcore = false;
+
+        //0.00	game	HardCore	True
+
+        const reg = /^\d+?\.\d+?\tgame\thardcore\t(.+)$/igm;
+
+        const result = reg.exec(this.rawData);
+
+        if(result === null) return;
+
+        const value = result[1].toLowerCase();
+
+        if(value === "true") this.bHardcore = true;
     }
 
     async main(){
@@ -64,9 +84,9 @@ export class MatchParser{
 
         this.matchLength = this.matchEnd - this.matchStart;
 
-        if(this.gametype.bHardcore){
+        /*if(this.gametype.bHardcore){
             this.matchLength = scalePlaytime(this.matchLength, true);
-        }
+        }*/
         
 
         if(this.matchLength < this.minPlaytime){
@@ -110,7 +130,7 @@ export class MatchParser{
         this.players.setCountries();
         this.players.matchEnded(this.matchStart, this.matchEnd);
         this.players.setPlayerPlaytime(this.matchStart, this.matchEnd);
-        this.players.scalePlaytimes(this.gametype.bHardcore);
+        //this.players.scalePlaytimes(this.gametype.bHardcore);
 
 
         await this.players.setPlayerMasterIds(this.match.date);
@@ -178,7 +198,11 @@ export class MatchParser{
         await this.players.updatePlayerFullTotals();
 
         await this.ctf.updatePlayerTotals(this.players);
-        await this.ctf.processFlagEvents(this.players, this.matchId, this.map.id, this.gametype.id);
+
+
+
+
+        await this.ctf.processFlagEvents(this.players, this.matchId, this.map.id, this.gametype.id, this.gametype.bHardcore);
         await this.map.updateTotals();
 
         const validMergedPlayerIds = this.players.getMergedPlayerIds();
@@ -250,7 +274,7 @@ export class MatchParser{
 
             if(timestampResult === null) continue;
 
-            const timestamp = parseFloat(timestampResult[1]);
+            const timestamp = (this.bHardcore) ? parseFloat(scalePlaytime(timestampResult[1], this.bHardcore).toFixed(2)) : parseFloat(timestampResult[1]);
             const subString = timestampResult[2];
 
             if(playerReg.test(subString)){

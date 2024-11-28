@@ -1,7 +1,8 @@
 import Message from "../message.mjs";
-import { insertPlayerMatchData, updatePlayerTotals } from "../ctf.mjs";
+import { insertPlayerMatchData, updatePlayerTotals, insertCaps } from "../ctf.mjs";
 import ctfFlag from "./ctfFlag.mjs";
 import { bulkInsert, simpleQuery } from "../database.mjs";
+import { scalePlaytime } from "../generic.mjs";
 
 export class CTF{
 
@@ -274,7 +275,7 @@ export class CTF{
     }
 
 
-    async processFlagEvents(playerManager, matchId, mapId, gametypeId){
+    async processFlagEvents(playerManager, matchId, mapId, gametypeId, bHardcore){
 
         console.table(this.events);
 
@@ -282,6 +283,8 @@ export class CTF{
 
             //teamId is dependent on event type, taken/pickedup is the flag team id
             const {type, playerId, timestamp, teamId } = this.events[i];
+
+            const correctedTimestamp = scalePlaytime(timestamp, bHardcore);
 
             const flag = this.flags[teamId];
 
@@ -299,134 +302,40 @@ export class CTF{
 
             if(type === "taken" || type === "pickedup"){
 
-                flag.taken(timestamp, playerId, type === "taken");
+                flag.taken(correctedTimestamp, playerId, type === "taken");
                 continue;
             }
 
             //ignore mid/close as they are also logged as return at smae timestamp
             if(type === "return"){
 
-                flag.returned(timestamp, playerId);
+                flag.returned(correctedTimestamp, playerId);
                 continue;
             }
 
             if(type === "dropped"){
 
-                flag.dropped(timestamp, playerId);
+                flag.dropped(correctedTimestamp, playerId);
                 continue;            
             }
 
             if(type === "cover"){
-                flag.cover(timestamp, playerId);
+                flag.cover(correctedTimestamp, playerId);
                 continue;
             }
 
             if(type === "capture"){
 
                 const playerTeam = playerManager.getPlayerTeamAt(playerId, timestamp);
-                flag.captured(timestamp, playerId, playerTeam);
+                flag.captured(correctedTimestamp, playerId, playerTeam);
                 continue;
             }
         }
 
-        await this.insertCaps(playerManager, matchId, mapId, gametypeId);
-    }
-
-
-    async insertCovers(playerManager, capId, covers){
-
-
-        const insertVars = [];
-
-        for(let i = 0; i < covers.length; i++){
-
-            const c = covers[i];
-
-            const playerId = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
-
-            insertVars.push([capId, c.timestamp, playerId]);
-        }
-
-        const query = `INSERT INTO nstats_ctf_covers (cap_id, timestamp, player_id) VALUES ?`;
-
-        await bulkInsert(query, insertVars);
-    }
-
-    async insertCap(playerManager, matchId, mapId, gametypeId, cap){
-
-        const c = cap;
-
-        const takenPlayer = playerManager.getPlayerById(c.takenBy)?.masterId ?? -1;
-        const capPlayer = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
-
-        const query = `INSERT INTO nstats_ctf_caps VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
-
-        const vars = [
-            matchId, mapId, gametypeId, 
-            Number(c.uniqueCarriers === 1), 
-            c.flagTeam, c.cappingTeam,
-            c.takenTimestamp, 
-            takenPlayer,
-            c.timestamp,
-            capPlayer,
-            c.totalTime,
-            c.carryTime,
-            c.dropTime,
-            c.drops.length,
-            c.covers.length,
-            c.uniqueCarriers
-        ];
-
-        try{
-
-            const result = await simpleQuery(query, vars);
-
-            const capId = result.insertId;
-
-            if(capId === undefined) throw new Error("cap id is null");
-
-
-            await this.insertCovers(playerManager, capId, c.covers);
-
-        }catch(err){
-
-            new Message(`Failed to insert cap! ${err.toString()}`,`error`);
-
-        
-        }
-    }
-
-    async insertCaps(playerManager, matchId, mapId, gametypeId){
-
-        //TODO: scale playtime in hardcore mode
-
         const caps = [...this.flags[0].caps, ...this.flags[1].caps, ...this.flags[2].caps, ...this.flags[3].caps];
 
-        caps.sort((a, b) =>{
-            a = a.timestamp;
-            b = b.timestamp;
 
-            if(a < b) return -1;
-            if(a > b) return 1;
-            return 0;
-        });
-
-
-        /*const query = `INSERT INTO nstats_ctf_caps (match_id,map_id,gametype_id,cap_type,flag_team,
-        capping_team,taken_timestamp,taken_player,cap_timestamp,cap_player, cap_time, carry_time, drop_time,
-        total_drops, total_covers, unique_carriers) 
-        VALUES ?`;
-
-        const insertVars = [];*/
-
-        for(let i = 0; i < caps.length; i++){
-
-            const c = caps[i];
-
-            await this.insertCap(playerManager, matchId, mapId, gametypeId, c);
-        }
-
-        //await bulkInsert(query, insertVars);
+        await insertCaps(playerManager, matchId, mapId, gametypeId, caps);
     }
 
 }

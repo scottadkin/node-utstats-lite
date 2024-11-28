@@ -228,3 +228,101 @@ export async function changePlayerIds(oldIds, newId){
 
     return await simpleQuery(query, [oldIds, newId]);
 }
+
+async function insertCovers(playerManager, matchId, capId, covers){
+
+
+    const insertVars = [];
+
+    for(let i = 0; i < covers.length; i++){
+
+        const c = covers[i];
+
+        const playerId = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
+
+        insertVars.push([matchId, capId, c.timestamp, playerId]);
+    }
+
+    const query = `INSERT INTO nstats_ctf_covers (match_id, cap_id, timestamp, player_id) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
+}
+
+async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
+
+    const c = cap;
+
+    const takenPlayer = playerManager.getPlayerById(c.takenBy)?.masterId ?? -1;
+    const capPlayer = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
+
+    const query = `INSERT INTO nstats_ctf_caps VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+
+    const vars = [
+        matchId, mapId, gametypeId, 
+        Number(c.uniqueCarriers === 1), 
+        c.flagTeam, c.cappingTeam,
+        c.takenTimestamp, 
+        takenPlayer,
+        c.timestamp,
+        capPlayer,
+        c.totalTime,
+        c.carryTime,
+        c.dropTime,
+        c.drops.length,
+        c.covers.length,
+        c.uniqueCarriers
+    ];
+
+    try{
+
+        const result = await simpleQuery(query, vars);
+
+        const capId = result.insertId;
+
+        if(capId === undefined) throw new Error("cap id is null");
+
+        await insertCovers(playerManager, matchId, capId, c.covers);
+
+    }catch(err){
+
+        new Message(`Failed to insert cap! ${err.toString()}`,`error`);
+
+    
+    }
+}
+
+export async function insertCaps(playerManager, matchId, mapId, gametypeId, caps){
+
+    caps.sort((a, b) =>{
+        a = a.timestamp;
+        b = b.timestamp;
+
+        if(a < b) return -1;
+        if(a > b) return 1;
+        return 0;
+    });
+
+
+    /*const query = `INSERT INTO nstats_ctf_caps (match_id,map_id,gametype_id,cap_type,flag_team,
+    capping_team,taken_timestamp,taken_player,cap_timestamp,cap_player, cap_time, carry_time, drop_time,
+    total_drops, total_covers, unique_carriers) 
+    VALUES ?`;
+
+    const insertVars = [];*/
+
+    for(let i = 0; i < caps.length; i++){
+
+        const c = caps[i];
+
+        await insertCap(playerManager, matchId, mapId, gametypeId, c);
+    }
+
+    //await bulkInsert(query, insertVars);
+}
+
+
+export async function getMatchCaps(matchId){
+
+    const query = ``;
+
+}

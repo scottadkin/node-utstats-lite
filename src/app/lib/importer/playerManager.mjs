@@ -697,7 +697,7 @@ export class PlayerManager{
         }
     }
 
-    scalePlaytimes(bHardcore){
+    /*scalePlaytimes(bHardcore){
 
         if(bHardcore === 0) return;
 
@@ -705,7 +705,7 @@ export class PlayerManager{
 
             player.playtime = scalePlaytime(player.playtime, bHardcore);
         }
-    }
+    }*/
 
     async updatePlayerTotals(date){
 
