@@ -331,11 +331,8 @@ export async function insertCaps(playerManager, matchId, mapId, gametypeId, caps
 async function getMatchCovers(matchId){
 
     const query = `SELECT * FROM nstats_ctf_covers WHERE match_id=? ORDER by timestamp ASC`;
-
     
     const result = await simpleQuery(query, [matchId]);
-
-    console.log(result);
 
     const data = {};
 
@@ -344,10 +341,14 @@ async function getMatchCovers(matchId){
         const r = result[i];
 
         if(data[r.cap_id] === undefined){
-            data[r.cap_id] = [];
+            data[r.cap_id] = {};
         }
 
-        data[r.cap_id].push({"playerId": r.player_id, "timestamp": r.timestamp});
+        if(data[r.cap_id][r.player_id] === undefined){
+            data[r.cap_id][r.player_id] = [];
+        }
+
+        data[r.cap_id][r.player_id].push(r.timestamp);
     }
 
     return data;
@@ -360,7 +361,14 @@ export async function getMatchCaps(matchId){
     const result = await simpleQuery(query, [matchId]);
 
     const covers = await getMatchCovers(matchId);
-    console.log(covers);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        r.covers = covers?.[r.id] ?? [];
+
+    }
 
     return result;
 }

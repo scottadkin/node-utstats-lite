@@ -278,14 +278,10 @@ export class CTF{
 
     async processFlagEvents(playerManager, matchId, mapId, gametypeId, bHardcore){
 
-        console.table(this.events);
-
         for(let i = 0; i < this.events.length; i++){
 
             //teamId is dependent on event type, taken/pickedup is the flag team id
             const {type, playerId, timestamp, teamId } = this.events[i];
-
-            console.log(playerId);
 
             const correctedTimestamp = timestamp//scalePlaytime(timestamp, bHardcore);
 
@@ -305,7 +301,6 @@ export class CTF{
 
             if(type === "taken" || type === "pickedup"){
 
-                console.log(`${getTeamName(playerTeam)} took the ${getTeamName(flag.team)} flag`);
                 flag.taken(correctedTimestamp, playerId, type === "taken", playerTeam);
                 continue;
             }
@@ -340,7 +335,6 @@ export class CTF{
 
             if(type === "capture"){
 
-                console.log(`${getTeamName(playerTeam)} capped the ${getTeamName(flag.team)} flag`);
                 flag.captured(correctedTimestamp, playerId, playerTeam);
                 continue;
             }
