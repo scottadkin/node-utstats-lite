@@ -696,6 +696,7 @@ canvas{
 	padding:var(--padding-2);
 	font-size:12px;
 	color:white;
+	max-width:300px;
 }
 
 .basic-mouse-over-title{

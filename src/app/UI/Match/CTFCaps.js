@@ -21,16 +21,48 @@ function createCoverElems(c, players){
 
     const covers = c.covers;
 
-    console.log(covers);
+    const playerTotalCovers = [];
 
-    for(const [playerId, timestamps] of Object.entries(c.covers)){
+    for(const [playerId, timestamps] of Object.entries(covers)){
 
-        const player = getPlayer(players, parseInt(playerId));
+        playerTotalCovers.push({"playerId": playerId, "timestamps": timestamps.length});
+    }
 
-        elems.push(<span key={playerId}>
+    playerTotalCovers.sort((a, b) =>{
+
+        a = a.timestamps;
+        b = b.timestamps;
+        if(a > b) return -1;
+        if(a < b) return 1;
+        return 0;
+    });
+
+    for(let i = 0; i < playerTotalCovers.length; i++){
+
+        const p = playerTotalCovers[i];
+
+
+        const timestamps = covers[p.playerId];
+
+        const player = getPlayer(players, parseInt(p.playerId));
+
+        let timestampString = ``;
+
+        for(let i = 0; i < timestamps.length; i++){
+
+            timestampString += `${(i === 0) ? "" : ", " }${MMSS(timestamps[i])}`
+        }
+
+
+        elems.push(<span key={p.playerId}>
             {(elems.length === 0) ? "" : ", "}
-            <BasicMouseOver content="test" title="Cover Timestamps"><b>{player.name}</b> ({timestamps.length})</BasicMouseOver>
+            <BasicMouseOver 
+                content={<span className="date">{timestampString}</span>} 
+                title="Cover Timestamps">
+                    <b>{player.name}</b> ({timestamps.length})
+            </BasicMouseOver>
         </span>);
+
     }
 
 
@@ -48,8 +80,6 @@ export default function CTFCaps({caps, totalTeams, players}){
     for(let i = 0; i < caps.length; i++){
 
         const c = caps[i];
-
-        console.log(c);
 
         scores[c.capping_team]++;
 
@@ -72,9 +102,7 @@ export default function CTFCaps({caps, totalTeams, players}){
         );
 
     }
-    //{getTeamName(c.capping_team)} Team Scores!
 
-    console.log(scores);
     return <>
         <Header>CTF Caps</Header>
         <div className="ctf-caps">

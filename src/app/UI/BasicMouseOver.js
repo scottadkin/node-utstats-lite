@@ -10,19 +10,15 @@ export default function BasicMouseOver({children, title, content}){
     const mouseRef = useRef(null);
     const screenInfo = useScreenInfo();
 
-    console.log(screenInfo);
-
     useEffect(() =>{
 
         
         if(mouseRef.current !== null && bDisplay){
-            console.log(mouseRef.current);
 
             const bounds = mouseRef.current.getBoundingClientRect();
 
             setWidth(bounds.width);
             setHeight(bounds.height);
-            console.log(bounds);
         }
 
     },[screenInfo.screenWidth, screenInfo.screenHeight, bDisplay]);
