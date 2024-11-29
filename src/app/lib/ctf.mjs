@@ -375,6 +375,26 @@ async function getMatchCovers(matchId){
     return data;
 }
 
+async function getMatchCarryTimes(matchId){
+
+    const query = `SELECT cap_id,player_id,start_timestamp,end_timestamp,carry_time FROM nstats_ctf_carry_times WHERE match_id=? ORDER BY start_timestamp ASC`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(data[r.cap_id] === undefined) data[r.cap_id] = [];
+
+        data[r.cap_id].push(r);
+    }
+
+    return data;
+}
+
 export async function getMatchCaps(matchId){
 
     const query = `SELECT * FROM nstats_ctf_caps WHERE match_id=? ORDER BY cap_timestamp ASC`;
@@ -383,11 +403,14 @@ export async function getMatchCaps(matchId){
 
     const covers = await getMatchCovers(matchId);
 
+    const carryTimes = await getMatchCarryTimes(matchId);
+
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
         r.covers = covers?.[r.id] ?? [];
+        r.carryTimes = carryTimes?.[r.id] ?? [];
 
     }
 

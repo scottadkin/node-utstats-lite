@@ -1,5 +1,5 @@
 import Header from "../Header";
-import { getTeamName, MMSS, getTeamColorClass, getPlayer } from "@/app/lib/generic.mjs";
+import { getTeamName, MMSS, getTeamColorClass, getPlayer, toPlaytime } from "@/app/lib/generic.mjs";
 import PlayerLink from "../PlayerLink";
 import BasicMouseOver from "../BasicMouseOver";
 
@@ -71,9 +71,34 @@ function createCoverElems(c, players){
     return elems;
 }
 
+
+function getCarryTimesElem(c, players){
+
+    if(c.carryTimes.length === 1) return null;
+
+    const elems = [
+        <>Assisted By: </>
+    ];
+
+    for(let i = 0; i < c.carryTimes.length; i++){
+
+        const current = c.carryTimes[i];
+        console.log(current);
+
+        //TODO: add mouse over elem to display timestamps of pickedup and dropped
+
+        const player = getPlayer(players, current.player_id);
+        elems.push(<span key={i}>{(i === 0) ? "" : ", "}<b>{player.name}</b> {toPlaytime(current.carry_time, true)}</span>);
+    }
+
+    return <>{elems}<br/></>;
+}
+
 export default function CTFCaps({caps, totalTeams, players}){
 
     const scores = Array(totalTeams).fill(0);
+
+    console.log(caps);
 
     const elems = [];
 
@@ -92,7 +117,7 @@ export default function CTFCaps({caps, totalTeams, players}){
                 Captured The {getTeamName(c.flag_team)} Flag&nbsp;
                 <div className="cap-info">
                     Taken by <b>{takenPlayer.name}</b> @ {MMSS(c.taken_timestamp)}, Capped by <b>{capPlayer.name}</b> @ {MMSS(c.cap_timestamp)}<br/>
-                    {getAssistString(c, players)}<br/>
+                    {getCarryTimesElem(c, players)}
                     {createCoverElems(c, players)}
                 </div>
                 <div className="cap-scores">

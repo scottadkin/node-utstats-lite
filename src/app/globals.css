@@ -30,6 +30,7 @@
 	--font-size-1:14px;
 	--line-height-1:24px;
 	--line-height-2:32px;
+	--line-height-3:20px;
 	--font-size-2:16px;
 	--font-size-3:18px;
 	--font-size-4:13px;
@@ -678,6 +679,7 @@ canvas{
 	font-size:var(--font-size-5);
 	color:var(--font-color-2);
 	padding:var(--padding-1);
+	line-height:var(--line-height-3);
 }
 
 .cap-scores{
