@@ -1,4 +1,5 @@
 import { getTeamName } from "../generic.mjs";
+import Message from "../message.mjs";
 
 export default class ctfFlag{
 
@@ -35,8 +36,6 @@ export default class ctfFlag{
         this.carriers = [];
         this.covers = [];
         this.drops = [];
-
-        console.log(`reset ${this.team}`);
     }
 
     calcCarryDropTime(timestamp){
@@ -89,6 +88,8 @@ export default class ctfFlag{
 
         const {carryTime, dropTime, totalTime} = this.calcCarryDropTime(timestamp);
 
+        this.updateLastCarrier(timestamp);
+
         const uniqueCarriers = [...new Set(this.carriers.map((c) =>{
             return c.playerId;
         }))].length;
@@ -97,10 +98,6 @@ export default class ctfFlag{
             return c.playerId;
         }))].length;
 
-        console.log(`-----------------------------`);
-        console.log(this.covers);
-        console.log(`-----------------------------`);
-        
         this.caps.push({
             "flagTeam": this.team,
             "timestamp": timestamp, 
@@ -132,22 +129,34 @@ export default class ctfFlag{
 
         this.enemyTeam = enemyTeam;
 
-        console.log(`enemyTeam is now ${enemyTeam}`);
-
         this.bDropped = false;
 
         this.carriers.push({"timestamp": timestamp, "playerId": playerId});
     }
 
+
+    updateLastCarrier(timestamp){
+
+        const lastCarrier = this.carriers[this.carriers.length - 1];
+
+        if(lastCarrier === undefined){
+            new Message(`FLAG.updateLastCarrier() lastCarrier is undefined`,"warning");
+        }else{
+            lastCarrier.carryTime = timestamp - lastCarrier.timestamp;
+            lastCarrier.endTimestamp = timestamp;
+        }
+    }
+
     dropped(timestamp, playerId){
 
-        const carryTime = (this.lastPickupTimestamp === null) ? timestamp - this.takenTimestamp : timestamp - this.lastPickupTimestamp;
+        this.updateLastCarrier(timestamp);
 
-        this.drops.push({"timestamp": timestamp, "playerId": playerId, "carryTime": carryTime});
+        const lastCarrier = this.carriers[this.carriers.length - 1];
+
+        this.drops.push({"timestamp": timestamp, "playerId": playerId, "carryTime": lastCarrier.carryTime});
 
         this.bDropped = true;
         this.droppedTimestamp = timestamp;
-        console.log(`enemyTeram was ${this.enemyTeam}`);
         this.enemyTeam = null;
     }
 

@@ -1,5 +1,6 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { getMatchesGametype } from "./matches.mjs";
+import Message from "./message.mjs";
 
 
 export async function insertPlayerMatchData(playerManager, matchId){
@@ -253,6 +254,27 @@ async function insertCovers(playerManager, matchId, capId, covers){
     await bulkInsert(query, insertVars);
 }
 
+async function insertCarryTimes(playerManager, matchId, mapId, gametypeId, capId, carriers){
+
+    const insertVars = [];
+
+    for(let i = 0; i < carriers.length; i++){
+
+        const c = carriers[i];
+
+        const player = playerManager.getPlayerById(c.playerId);
+      
+        insertVars.push([
+            matchId, mapId, gametypeId, capId, player?.masterId ?? -1, c.timestamp, c.endTimestamp, c.carryTime
+        ]);
+    }
+
+    const query = `INSERT INTO nstats_ctf_carry_times (match_id, map_id, gametype_id, cap_id, player_id, start_timestamp, end_timestamp, carry_time) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
+
+}
+
 async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
     const c = cap;
@@ -286,9 +308,8 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
         if(capId === undefined) throw new Error("cap id is null");
 
-        console.log(c.covers);
-
         await insertCovers(playerManager, matchId, capId, c.covers);
+        await insertCarryTimes(playerManager, matchId, mapId, gametypeId, capId, cap.carriers)
 
     }catch(err){
 

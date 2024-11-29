@@ -429,8 +429,30 @@ const queries = [
         drop_time float NOT NULL,
         total_drops int NOT NULL,
         total_covers int NOT NULL,
-        unique_carriers int NOT NULL
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+        unique_carriers int NOT NULL,
+        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+    `CREATE TABLE IF NOT EXISTS nstats_ctf_covers (
+    id int NOT NULL AUTO_INCREMENT,
+    match_id int NOT NULL,
+    cap_id int NOT NULL,
+    timestamp float NOT NULL,
+    player_id int NOT NULL,
+    PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    
+    `CREATE TABLE IF NOT EXISTS nstats_ctf_carry_times (
+        id int NOT NULL AUTO_INCREMENT,
+        match_id int NOT NULL,
+        map_id int NOT NULL,
+        gametype_id int NOT NULL,
+        cap_id int NOT NULL,
+        player_id int NOT NULL,
+        start_timestamp float NOT NULL,
+        end_timestamp float NOT NULL,
+        carry_time float NOT NULL,
+        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
 
 
 ];
