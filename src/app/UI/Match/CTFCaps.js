@@ -1,9 +1,10 @@
 "use client"
 import Header from "../Header";
-import { getTeamName, MMSS, getTeamColorClass, getPlayer, toPlaytime } from "@/app/lib/generic.mjs";
+import { getTeamName, MMSS, getTeamColorClass, getPlayer, toPlaytime, plural } from "@/app/lib/generic.mjs";
 import PlayerLink from "../PlayerLink";
 import BasicMouseOver from "../BasicMouseOver";
 import { useState } from "react";
+import BasicTeamScoreBox from "../BasicTeamScoreBox";
 
 function createCoverElems(c, players){
 
@@ -58,22 +59,22 @@ function createCoverElems(c, players){
 
     if(elems.length === 0) return null;
 
-    return <>Covered By: {elems}</>;
+    return <>Covered By: {elems}<br/></>;
 }
 
 
 function getCarryTimesElem(c, players){
 
+    //return null;
     //if(c.carryTimes.length === 1) return null;
 
     const elems = [
-        <>Carried By: </>
+        <span key="start">Carried By: </span>
     ];
 
     for(let i = 0; i < c.carryTimes.length; i++){
 
         const current = c.carryTimes[i];
-        console.log(current);
 
         //TODO: add mouse over elem to display timestamps of pickedup and dropped
 
@@ -88,10 +89,9 @@ function getCarryTimesElem(c, players){
                 </span>
             } 
             title="Carry Info">
-                <span key={i}>{(i === 0) ? "" : ", "}<b>{player.name}</b> {toPlaytime(current.carry_time, true)}</span>
+                <span>{(i === 0) ? "" : ", "}<b>{player.name}</b> {toPlaytime(current.carry_time, true)}</span>
         </BasicMouseOver>);
 
-        //elems.push(<span key={i}>{(i === 0) ? "" : ", "}<b>{player.name}</b> {toPlaytime(current.carry_time, true)}</span>);
     }
 
     return <>{elems}<br/></>;
@@ -101,10 +101,12 @@ function getCarryTimesElem(c, players){
 function renderButtons(caps, capIndex, setCapIndex){
 
     const totalCaps = caps.length;
-    console.log(caps);
 
-
-    return <>
+    return <div className="small-buttons">
+        <div className="small-info">
+            Displaying Cap {capIndex + 1} Of {totalCaps}
+        </div>
+    
         <div className="small-button"  onClick={() =>{
             setCapIndex((capIndex) => {
                 if(capIndex - 1 < 0) return capIndex;
@@ -118,11 +120,17 @@ function renderButtons(caps, capIndex, setCapIndex){
                 return capIndex + 1;
             });
         }}>Next</div>
-        <div className="small-info">
-            Displaying Cap {capIndex + 1} Of {totalCaps}
-        </div>
        
-    </>
+    </div>
+}
+
+function createDropElems(c){
+
+    console.log(c);
+
+    if(c.total_drops === 0) return null;
+
+    return <>Dropped: {c.total_drops}{plural(c.total_drops, " Time")} for a total of {toPlaytime(c.drop_time, true)}</>
 }
 
 export default function CTFCaps({caps, totalTeams, players}){
@@ -142,21 +150,22 @@ export default function CTFCaps({caps, totalTeams, players}){
 
         scores[c.capping_team]++;
 
+        if(i !== capIndex) continue;
+
         const takenPlayer = getPlayer(players, c.taken_player);
         const capPlayer = getPlayer(players, c.cap_player);
 
         elems.push(
             <div className={`ctf-cap ${getTeamColorClass(c.capping_team)}`} key={i}>
                 <PlayerLink id={c.cap_player} country={capPlayer.country}>{capPlayer.name}</PlayerLink>&nbsp;
-                Captured The {getTeamName(c.flag_team)} Flag&nbsp;
+                Captured The {getTeamName(c.flag_team)} Flag&nbsp; <span className="yellow-font">{toPlaytime(c.cap_time, true)}</span>
                 <div className="cap-info">
                     Taken By: <b>{takenPlayer.name}</b> @ {MMSS(c.taken_timestamp)}, Capped by <b>{capPlayer.name}</b> @ {MMSS(c.cap_timestamp)}<br/>
                     {getCarryTimesElem(c, players)}
                     {createCoverElems(c, players)}
+                    {createDropElems(c)}
                 </div>
-                <div className="cap-scores">
-                    {scores.join(" - ")}
-                </div>
+                <BasicTeamScoreBox totalTeams={totalTeams} red={scores[0]} blue={scores[1]} green={scores[2]} yellow={scores[3]}/>
             </div>
         );
 
