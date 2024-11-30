@@ -1,19 +1,9 @@
+"use client"
 import Header from "../Header";
 import { getTeamName, MMSS, getTeamColorClass, getPlayer, toPlaytime } from "@/app/lib/generic.mjs";
 import PlayerLink from "../PlayerLink";
 import BasicMouseOver from "../BasicMouseOver";
-
-
-function getAssistString(c, players){
-
-    let message = "";
-
-    if(c.unique_carriers === 1){
-        return "Solo Cap";
-    }
-
-    return "Assisted Cap";
-}
+import { useState } from "react";
 
 function createCoverElems(c, players){
 
@@ -68,16 +58,16 @@ function createCoverElems(c, players){
 
     if(elems.length === 0) return null;
 
-    return elems;
+    return <>Covered By: {elems}</>;
 }
 
 
 function getCarryTimesElem(c, players){
 
-    if(c.carryTimes.length === 1) return null;
+    //if(c.carryTimes.length === 1) return null;
 
     const elems = [
-        <>Assisted By: </>
+        <>Carried By: </>
     ];
 
     for(let i = 0; i < c.carryTimes.length; i++){
@@ -88,13 +78,57 @@ function getCarryTimesElem(c, players){
         //TODO: add mouse over elem to display timestamps of pickedup and dropped
 
         const player = getPlayer(players, current.player_id);
-        elems.push(<span key={i}>{(i === 0) ? "" : ", "}<b>{player.name}</b> {toPlaytime(current.carry_time, true)}</span>);
+
+
+       elems.push(<BasicMouseOver key={i}
+            content={
+                <span className="date">
+                    Picked Up: <span className="white">{MMSS(current.start_timestamp)}</span>,
+                    {(i === c.carryTimes.length - 1) ? ` Capped` : ` Dropped`} <span className="white">{MMSS(current.end_timestamp)}</span>
+                </span>
+            } 
+            title="Carry Info">
+                <span key={i}>{(i === 0) ? "" : ", "}<b>{player.name}</b> {toPlaytime(current.carry_time, true)}</span>
+        </BasicMouseOver>);
+
+        //elems.push(<span key={i}>{(i === 0) ? "" : ", "}<b>{player.name}</b> {toPlaytime(current.carry_time, true)}</span>);
     }
 
     return <>{elems}<br/></>;
 }
 
+
+function renderButtons(caps, capIndex, setCapIndex){
+
+    const totalCaps = caps.length;
+    console.log(caps);
+
+
+    return <>
+        <div className="small-button"  onClick={() =>{
+            setCapIndex((capIndex) => {
+                if(capIndex - 1 < 0) return capIndex;
+                return capIndex - 1;
+            });
+        }}>Previous</div>
+        <div className="small-button" onClick={() =>{
+            setCapIndex((capIndex) => {
+                if(capIndex + 1 >= totalCaps) return capIndex;
+
+                return capIndex + 1;
+            });
+        }}>Next</div>
+        <div className="small-info">
+            Displaying Cap {capIndex + 1} Of {totalCaps}
+        </div>
+       
+    </>
+}
+
 export default function CTFCaps({caps, totalTeams, players}){
+
+
+    const [capIndex, setCapIndex] = useState(0);
 
     const scores = Array(totalTeams).fill(0);
 
@@ -116,7 +150,7 @@ export default function CTFCaps({caps, totalTeams, players}){
                 <PlayerLink id={c.cap_player} country={capPlayer.country}>{capPlayer.name}</PlayerLink>&nbsp;
                 Captured The {getTeamName(c.flag_team)} Flag&nbsp;
                 <div className="cap-info">
-                    Taken by <b>{takenPlayer.name}</b> @ {MMSS(c.taken_timestamp)}, Capped by <b>{capPlayer.name}</b> @ {MMSS(c.cap_timestamp)}<br/>
+                    Taken By: <b>{takenPlayer.name}</b> @ {MMSS(c.taken_timestamp)}, Capped by <b>{capPlayer.name}</b> @ {MMSS(c.cap_timestamp)}<br/>
                     {getCarryTimesElem(c, players)}
                     {createCoverElems(c, players)}
                 </div>
@@ -131,6 +165,7 @@ export default function CTFCaps({caps, totalTeams, players}){
     return <>
         <Header>CTF Caps</Header>
         <div className="ctf-caps">
+            {renderButtons(caps, capIndex, setCapIndex)}
             {elems}
         </div>
     </>

@@ -379,6 +379,22 @@ option{
 	cursor: pointer;
 }
 
+.small-button{
+	display:inline-block;
+	background-color:var(--bg-color-3);
+	color:var(--font-color-1);
+	font-size:var(--font-size-small);
+	padding:var(--padding-2);
+	border:1px solid var(--border-color-2);
+	user-select: none;
+	margin-right:5px;
+}
+
+.small-button:hover{
+	cursor: pointer;
+	color:yellow;
+}
+
 .true{
 	background-color:var(--team-color-green);
 	
