@@ -159,7 +159,7 @@ export class KillsManager{
             const killer = playerManager.getPlayerById(k.killerId);
             const victim = playerManager.getPlayerById(k.victimId);
 
-            let timestamp = k.timestamp;
+            //let timestamp = k.timestamp;
             //if(bHardcore) timestamp = scalePlaytime(timestamp);
 
             killer.killed(k.timestamp);
@@ -255,5 +255,34 @@ export class KillsManager{
         }
 
         return null;
+    }
+
+
+    getKillsBetween(start, end){
+
+        const data = [];
+
+        for(let i = 0; i < this.kills.length; i++){
+
+            const k = this.kills[i];
+
+            if(k.timestamp < start) continue;
+            if(k.timestamp > end) break;
+
+
+            const killerTeam = this.playerManager.getPlayerTeamAt(k.killerId, k.timestamp);
+            const victimTeam = this.playerManager.getPlayerTeamAt(k.victimId, k.timestamp);
+
+            data.push({
+                "timestamp": k.timestamp, 
+                "killer": k.killerMasterId, 
+                "victim": k.victimMasterId, 
+                "killerTeam": killerTeam, 
+                "victimTeam": victimTeam
+            });
+        }
+
+
+        return data;
     }
 }

@@ -430,6 +430,10 @@ const queries = [
         total_drops int NOT NULL,
         total_covers int NOT NULL,
         unique_carriers int NOT NULL,
+        red_kills int NOT NULL,
+        blue_kills int NOT NULL,
+        green_kills int NOT NULL,
+        yellow_kills int NOT NULL,
         PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 

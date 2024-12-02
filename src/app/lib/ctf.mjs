@@ -275,6 +275,29 @@ async function insertCarryTimes(playerManager, matchId, mapId, gametypeId, capId
 
 }
 
+
+function setCapTeamTotalKills(cap){
+
+    const kills = {"red": 0, "blue": 0, "green": 0, "yellow": 0};
+
+    console.log(cap.kills);
+
+    for(let i = 0; i < cap.kills.length; i++){
+
+        const k = cap.kills[i];
+
+        switch(k.killerTeam){
+            case 0: {   kills.red++; } break;
+            case 1: {   kills.blue++; } break;
+            case 2: {   kills.green++; } break;
+            case 3: {   kills.yellow++; } break;
+            default: { new Message(`setCapTeamKills Unknown team`,"warning")} break;
+        }
+    }
+
+    return kills;
+}
+
 async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
     const c = cap;
@@ -282,7 +305,9 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
     const takenPlayer = playerManager.getPlayerById(c.takenBy)?.masterId ?? -1;
     const capPlayer = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
 
-    const query = `INSERT INTO nstats_ctf_caps VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const query = `INSERT INTO nstats_ctf_caps VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+
+    const kills = setCapTeamTotalKills(cap);
 
     const vars = [
         matchId, mapId, gametypeId, 
@@ -297,7 +322,11 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
         c.dropTime,
         c.drops.length,
         c.covers.length,
-        c.uniqueCarriers
+        c.uniqueCarriers,
+        kills.red,
+        kills.blue,
+        kills.green,
+        kills.yellow
     ];
 
     try{

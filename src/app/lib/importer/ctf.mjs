@@ -276,7 +276,7 @@ export class CTF{
     }
 
 
-    async processFlagEvents(playerManager, matchId, mapId, gametypeId, bHardcore){
+    async processFlagEvents(playerManager, killsManager, matchId, mapId, gametypeId, bHardcore){
 
         for(let i = 0; i < this.events.length; i++){
 
@@ -335,7 +335,7 @@ export class CTF{
 
             if(type === "capture"){
 
-                flag.captured(correctedTimestamp, playerId, playerTeam);
+                flag.captured(playerManager, killsManager, correctedTimestamp, playerId, playerTeam);
                 continue;
             }
         }

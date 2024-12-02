@@ -17,6 +17,9 @@ export default class ctfFlag{
         this.droppedTimestamp = null;
         this.takenBy = null;
 
+        //keep track of kills while a flag is taken
+        this.kills = {};
+
         this.carriers = [];
         this.covers = [];
         this.drops = [];
@@ -36,6 +39,7 @@ export default class ctfFlag{
         this.carriers = [];
         this.covers = [];
         this.drops = [];
+        this.kills = {};
     }
 
     calcCarryDropTime(timestamp){
@@ -84,7 +88,7 @@ export default class ctfFlag{
         this.returned(timestamp, -1);
     }
 
-    captured(timestamp, playerId, cappingTeam){
+    captured(playerManager, killsManager, timestamp, playerId, cappingTeam){
 
         const {carryTime, dropTime, totalTime} = this.calcCarryDropTime(timestamp);
 
@@ -97,6 +101,9 @@ export default class ctfFlag{
         const uniqueCovers = [...new Set(this.covers.map((c) =>{
             return c.playerId;
         }))].length;
+
+
+        const kills = killsManager.getKillsBetween(this.takenTimestamp, timestamp);
 
         this.caps.push({
             "flagTeam": this.team,
@@ -112,7 +119,8 @@ export default class ctfFlag{
             "dropTime": dropTime,
             "totalTime": totalTime,
             "takenBy": this.takenBy,
-            "takenTimestamp": this.takenTimestamp
+            "takenTimestamp": this.takenTimestamp,
+            "kills": kills
         });
 
         this.reset();

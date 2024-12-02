@@ -32,6 +32,8 @@ export class MatchParser{
         this.map = new Map();
         this.weapons = new WeaponsManager();
         this.kills = new KillsManager();
+
+        this.kills.playerManager = this.players;
         this.ctf = new CTF();
         this.dom = new Domination();
         this.items = new Items();
@@ -201,8 +203,8 @@ export class MatchParser{
 
 
 
-
-        await this.ctf.processFlagEvents(this.players, this.matchId, this.map.id, this.gametype.id, this.gametype.bHardcore);
+        console.log(this.kills.kills);
+        await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id, this.gametype.bHardcore);
         await this.map.updateTotals();
 
         const validMergedPlayerIds = this.players.getMergedPlayerIds();
