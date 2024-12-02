@@ -298,6 +298,23 @@ function setCapTeamTotalKills(cap){
     return kills;
 }
 
+async function insertCapKills(matchId, capId, cap){
+
+    const insertVars = [];
+
+    const query = `INSERT INTO nstats_ctf_cap_kills (match_id, cap_id, timestamp, killer_id, killer_team) VALUES ?`;
+
+    for(let i = 0; i < cap.kills.length; i++){
+
+        const c = cap.kills[i];
+
+        insertVars.push([matchId, capId, c.timestamp, c.killer, c.killerTeam]);
+    }
+
+    await bulkInsert(query, insertVars);
+
+}
+
 async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
     const c = cap;
@@ -338,7 +355,8 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
         if(capId === undefined) throw new Error("cap id is null");
 
         await insertCovers(playerManager, matchId, capId, c.covers);
-        await insertCarryTimes(playerManager, matchId, mapId, gametypeId, capId, cap.carriers)
+        await insertCarryTimes(playerManager, matchId, mapId, gametypeId, capId, cap.carriers);
+        await insertCapKills(matchId, capId, cap);
 
     }catch(err){
 
