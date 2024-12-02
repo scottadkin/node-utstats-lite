@@ -126,8 +126,6 @@ function renderButtons(caps, capIndex, setCapIndex){
 
 function createDropElems(c){
 
-    console.log(c);
-
     if(c.total_drops === 0) return null;
 
     return <>Dropped: {c.total_drops}{plural(c.total_drops, " Time")} for a total of {toPlaytime(c.drop_time, true)}</>
@@ -164,6 +162,7 @@ export default function CTFCaps({caps, totalTeams, players}){
                     {getCarryTimesElem(c, players)}
                     {createCoverElems(c, players)}
                     {createDropElems(c)}
+                    <br/>Red Kills {c.red_kills}, Blue Kills {c.blue_kills}
                 </div>
                 <BasicTeamScoreBox totalTeams={totalTeams} red={scores[0]} blue={scores[1]} green={scores[2]} yellow={scores[3]}/>
             </div>

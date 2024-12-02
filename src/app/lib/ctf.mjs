@@ -442,6 +442,30 @@ async function getMatchCarryTimes(matchId){
     return data;
 }
 
+async function getMatchCapKills(matchId){
+
+    const query = `SELECT cap_id,timestamp,killer_id,killer_team FROM nstats_ctf_cap_kills WHERE match_id=?`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(data[r.cap_id] === undefined) data[r.cap_id] = [];
+
+        data[r.cap_id].push({
+            "timestamp": r.timestamp,
+            "killerId": r.killer_id,
+            "killerTeam": r.killer_team
+        });
+    }
+
+    return data;
+}
+
 export async function getMatchCaps(matchId){
 
     const query = `SELECT * FROM nstats_ctf_caps WHERE match_id=? ORDER BY cap_timestamp ASC`;
@@ -449,8 +473,8 @@ export async function getMatchCaps(matchId){
     const result = await simpleQuery(query, [matchId]);
 
     const covers = await getMatchCovers(matchId);
-
     const carryTimes = await getMatchCarryTimes(matchId);
+    const kills = await getMatchCapKills(matchId);
 
     for(let i = 0; i < result.length; i++){
 
@@ -458,6 +482,7 @@ export async function getMatchCaps(matchId){
 
         r.covers = covers?.[r.id] ?? [];
         r.carryTimes = carryTimes?.[r.id] ?? [];
+        r.kills = kills?.[r.id] ?? [];
 
     }
 
