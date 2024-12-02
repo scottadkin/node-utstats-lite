@@ -102,8 +102,8 @@ function renderButtons(caps, capIndex, setCapIndex){
 
     const totalCaps = caps.length;
 
-    return <div className="small-buttons">
-        <div className="small-info">
+    return <div className="ctf-cap-buttons">
+        <div className="font-small padding-1">
             Displaying Cap {capIndex + 1} Of {totalCaps}
         </div>
     
