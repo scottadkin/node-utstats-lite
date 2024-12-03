@@ -470,6 +470,15 @@ const queries = [
         timestamp float NOT NULL,
         killer_id int NOT NULL,
         killer_team int NOT NULL,
+        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_ctf_cap_suicides (
+        id int NOT NULL AUTO_INCREMENT,
+        match_id int NOT NULL,
+        cap_id int NOT NULL,
+        timestamp float NOT NULL,
+        player_id int NOT NULL,
+        player_team int NOT NULL,
         PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
 
 

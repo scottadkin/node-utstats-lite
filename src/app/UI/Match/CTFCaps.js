@@ -131,19 +131,33 @@ function createDropElems(c){
     return <>Dropped: {c.total_drops}{plural(c.total_drops, " Time")} for a total of {toPlaytime(c.drop_time, true)}<br/></>
 }
 
-function createTeamFragsInfo(c, totalTeams){
+function createTeamFragsInfo(c, totalTeams, type){
 
     const elems = [];
 
-    console.log(totalTeams);
+    let red,blue,green,yellow,string;
 
-    elems.push(<span key="red" className="team-red ctf-cap-frags">{c.red_kills} Kills</span>);
-    elems.push(<span key="blue" className="team-blue ctf-cap-frags">{c.blue_kills} Kills</span>);
+    if(type === "kills"){
 
-    if(totalTeams > 2) elems.push(<span key="green" className="team-green ctf-cap-frags">{c.green_kills} Kills</span>);
-    if(totalTeams > 3) elems.push(<span key="yellow" className="team-yellow ctf-cap-frags">{c.yellow_kills} Kills</span>);
+        red = c.red_kills;
+        blue = c.blue_kills;
+        green = c.green_kills;
+        yellow = c.yellow_kills;
+        string = "Kill";
 
-    
+    }else if(type === "suicides"){
+        red = c.red_suicides;
+        blue = c.blue_suicides;
+        green = c.green_suicides;
+        yellow = c.yellow_suicides;
+        string = "Suicide";
+    }
+
+    elems.push(<span key="red" className="team-red ctf-cap-frags">{red} {plural(red, string)}</span>);
+    elems.push(<span key="blue" className="team-blue ctf-cap-frags">{blue} {plural(blue, string)}</span>);
+
+    if(totalTeams > 2) elems.push(<span key="green" className="team-green ctf-cap-frags">{green} {plural(green, string)}</span>);
+    if(totalTeams > 3) elems.push(<span key="yellow" className="team-yellow ctf-cap-frags">{yellow} {plural(yellow, string)}</span>);
 
     return <>{elems}<br/></>
 }
@@ -180,7 +194,8 @@ export default function CTFCaps({caps, totalTeams, players}){
                     {createCoverElems(c, players)}
                     {createDropElems(c)}
                 </div>
-                {createTeamFragsInfo(c, totalTeams)}<br/>
+                {createTeamFragsInfo(c, totalTeams, "kills")}<br/>
+                {createTeamFragsInfo(c, totalTeams, "suicides")}<br/>
                 <BasicTeamScoreBox totalTeams={totalTeams} red={scores[0]} blue={scores[1]} green={scores[2]} yellow={scores[3]}/>
             </div>
         );

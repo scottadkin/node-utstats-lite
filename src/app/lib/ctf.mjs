@@ -334,6 +334,23 @@ async function insertCapKills(matchId, capId, cap){
 
 }
 
+async function insertCapSuicides(matchId, capId, cap){
+
+    const insertVars = [];
+
+    const query = `INSERT INTO nstats_ctf_cap_suicides (match_id, cap_id, timestamp, player_id, player_team) VALUES ?`;
+
+    for(let i = 0; i < cap.suicides.length; i++){
+
+        const c = cap.suicides[i];
+
+        insertVars.push([matchId, capId, c.timestamp, c.player, c.playerTeam]);
+    }
+
+    await bulkInsert(query, insertVars);
+
+}
+
 async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
     const c = cap;
@@ -383,6 +400,7 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
         await insertCovers(playerManager, matchId, capId, c.covers);
         await insertCarryTimes(playerManager, matchId, mapId, gametypeId, capId, cap.carriers);
         await insertCapKills(matchId, capId, cap);
+        await insertCapSuicides(matchId, capId, cap);
 
     }catch(err){
 
