@@ -202,8 +202,6 @@ export class MatchParser{
         await this.ctf.updatePlayerTotals(this.players);
 
 
-
-        console.log(this.kills.kills);
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id, this.gametype.bHardcore);
         await this.map.updateTotals();
 

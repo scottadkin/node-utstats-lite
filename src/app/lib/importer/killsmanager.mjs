@@ -122,6 +122,15 @@ export class KillsManager{
                 k.victimMasterId = victim.masterId;
             }
         }
+
+        for(let i = 0; i < this.suicides.length; i++){
+
+            const s = this.suicides[i];
+
+            const player = playerManager.getPlayerById(s.playerId);
+
+            s.playerMasterId = player.masterId;
+        }
     }
 
 
@@ -258,31 +267,67 @@ export class KillsManager{
     }
 
 
-    getKillsBetween(start, end){
+    getTypeBetween(type, start, end){
 
         const data = [];
 
-        for(let i = 0; i < this.kills.length; i++){
+        let events = [];
 
-            const k = this.kills[i];
+        if(type === "kills"){
+            events = this.kills;
+        }else if(type === "suicides"){
+            events = this.suicides;
+        }
+
+        for(let i = 0; i < events.length; i++){
+
+            const k = events[i];
 
             if(k.timestamp < start) continue;
             if(k.timestamp > end) break;
 
 
-            const killerTeam = this.playerManager.getPlayerTeamAt(k.killerId, k.timestamp);
-            const victimTeam = this.playerManager.getPlayerTeamAt(k.victimId, k.timestamp);
+            
+            
 
-            data.push({
-                "timestamp": k.timestamp, 
-                "killer": k.killerMasterId, 
-                "victim": k.victimMasterId, 
-                "killerTeam": killerTeam, 
-                "victimTeam": victimTeam
-            });
+            if(type === "kills"){
+
+                const killerTeam = this.playerManager.getPlayerTeamAt(k.killerId, k.timestamp);
+                const victimTeam = this.playerManager.getPlayerTeamAt(k.victimId, k.timestamp);
+
+                data.push({
+                    "timestamp": k.timestamp, 
+                    "killer": k.killerMasterId, 
+                    "victim": k.victimMasterId, 
+                    "killerTeam": killerTeam, 
+                    "victimTeam": victimTeam
+                });
+
+            }else if(type === "suicides"){
+
+                const playerTeam = this.playerManager.getPlayerTeamAt(k.playerId, k.timestamp);
+
+                data.push({
+                    "timestamp": k.timestamp, 
+                    "player": k.playerMasterId,
+                    "playerTeam": playerTeam, 
+                });
+            }
+
+            
         }
 
 
         return data;
+    }
+
+
+    getKillsBetween(start, end){
+
+        return this.getTypeBetween("kills", start, end);    
+    }
+
+    getSuicidesBetween(start, end){
+        return this.getTypeBetween("suicides", start, end);
     }
 }

@@ -104,6 +104,7 @@ export default class ctfFlag{
 
 
         const kills = killsManager.getKillsBetween(this.takenTimestamp, timestamp);
+        const suicides = killsManager.getSuicidesBetween(this.takenTimestamp, timestamp);
 
         this.caps.push({
             "flagTeam": this.team,
@@ -120,7 +121,8 @@ export default class ctfFlag{
             "totalTime": totalTime,
             "takenBy": this.takenBy,
             "takenTimestamp": this.takenTimestamp,
-            "kills": kills
+            "kills": kills,
+            "suicides": suicides
         });
 
         this.reset();

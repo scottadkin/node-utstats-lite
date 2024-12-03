@@ -747,3 +747,8 @@ canvas{
 .basic-team-score{
 	padding:var(--padding-1);
 }
+
+.ctf-cap-frags{
+	padding:var(--padding-1);
+	font-size:var(--font-size-small);
+}

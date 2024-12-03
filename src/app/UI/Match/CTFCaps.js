@@ -128,7 +128,24 @@ function createDropElems(c){
 
     if(c.total_drops === 0) return null;
 
-    return <>Dropped: {c.total_drops}{plural(c.total_drops, " Time")} for a total of {toPlaytime(c.drop_time, true)}</>
+    return <>Dropped: {c.total_drops}{plural(c.total_drops, " Time")} for a total of {toPlaytime(c.drop_time, true)}<br/></>
+}
+
+function createTeamFragsInfo(c, totalTeams){
+
+    const elems = [];
+
+    console.log(totalTeams);
+
+    elems.push(<span key="red" className="team-red ctf-cap-frags">{c.red_kills} Kills</span>);
+    elems.push(<span key="blue" className="team-blue ctf-cap-frags">{c.blue_kills} Kills</span>);
+
+    if(totalTeams > 2) elems.push(<span key="green" className="team-green ctf-cap-frags">{c.green_kills} Kills</span>);
+    if(totalTeams > 3) elems.push(<span key="yellow" className="team-yellow ctf-cap-frags">{c.yellow_kills} Kills</span>);
+
+    
+
+    return <>{elems}<br/></>
 }
 
 export default function CTFCaps({caps, totalTeams, players}){
@@ -162,8 +179,8 @@ export default function CTFCaps({caps, totalTeams, players}){
                     {getCarryTimesElem(c, players)}
                     {createCoverElems(c, players)}
                     {createDropElems(c)}
-                    <br/>Red Kills {c.red_kills}, Blue Kills {c.blue_kills}
                 </div>
+                {createTeamFragsInfo(c, totalTeams)}<br/>
                 <BasicTeamScoreBox totalTeams={totalTeams} red={scores[0]} blue={scores[1]} green={scores[2]} yellow={scores[3]}/>
             </div>
         );

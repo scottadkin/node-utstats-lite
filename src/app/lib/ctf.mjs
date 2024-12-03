@@ -280,8 +280,6 @@ function setCapTeamTotalKills(cap){
 
     const kills = {"red": 0, "blue": 0, "green": 0, "yellow": 0};
 
-    console.log(cap.kills);
-
     for(let i = 0; i < cap.kills.length; i++){
 
         const k = cap.kills[i];
@@ -296,6 +294,27 @@ function setCapTeamTotalKills(cap){
     }
 
     return kills;
+}
+
+
+function setCapTeamTotalSuicides(cap){
+
+    const suicides = {"red": 0, "blue": 0, "green": 0, "yellow": 0};
+
+    for(let i = 0; i < cap.suicides.length; i++){
+
+        const k = cap.suicides[i];
+
+        switch(k.playerTeam){
+            case 0: {   suicides.red++; } break;
+            case 1: {   suicides.blue++; } break;
+            case 2: {   suicides.green++; } break;
+            case 3: {   suicides.yellow++; } break;
+            default: { new Message(`setCapTeamSuicides Unknown team`,"warning")} break;
+        }
+    }
+
+    return suicides;
 }
 
 async function insertCapKills(matchId, capId, cap){
@@ -322,9 +341,12 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
     const takenPlayer = playerManager.getPlayerById(c.takenBy)?.masterId ?? -1;
     const capPlayer = playerManager.getPlayerById(c.playerId)?.masterId ?? -1;
 
-    const query = `INSERT INTO nstats_ctf_caps VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+    const query = `INSERT INTO nstats_ctf_caps VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
     const kills = setCapTeamTotalKills(cap);
+    const suicides = setCapTeamTotalSuicides(cap);
+
+   // const suicides = {"red": 0, "blue": 0, "green": 0, "yellow": 0};
 
     const vars = [
         matchId, mapId, gametypeId, 
@@ -343,7 +365,11 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
         kills.red,
         kills.blue,
         kills.green,
-        kills.yellow
+        kills.yellow,
+        suicides.red,
+        suicides.blue,
+        suicides.green,
+        suicides.yellow
     ];
 
     try{

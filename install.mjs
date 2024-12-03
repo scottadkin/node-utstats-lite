@@ -434,6 +434,10 @@ const queries = [
         blue_kills int NOT NULL,
         green_kills int NOT NULL,
         yellow_kills int NOT NULL,
+        red_suicides int NOT NULL,
+        blue_suicides int NOT NULL,
+        green_suicides int NOT NULL,
+        yellow_suicides int NOT NULL,
         PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 
