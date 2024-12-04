@@ -741,6 +741,8 @@ canvas{
 
 .basic-mouse-over-title{
 	font-weight:bold;
+	font-size:14px;
+	padding-bottom: 5px;
 }
 
 
@@ -753,4 +755,19 @@ canvas{
 	font-size:var(--font-size-small);
 	border:1px solid var(--border-color-1);
 	margin-top:-1px;
+}
+
+
+.big-button{
+	font-size:var(--font-size-1);
+	background-color:var(--bg-color-3);
+	padding:var(--padding-1);
+	user-select: none;
+	border:1px solid var(--border-color-1);
+}
+
+.big-button:hover{
+	cursor: pointer;
+	background-color:var(--bg-color-1);
+	color:yellow;
 }

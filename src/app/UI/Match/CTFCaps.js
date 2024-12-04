@@ -107,19 +107,21 @@ function renderButtons(caps, capIndex, setCapIndex){
             Displaying Cap {capIndex + 1} Of {totalCaps}
         </div>
     
-        <div className="small-button"  onClick={() =>{
-            setCapIndex((capIndex) => {
-                if(capIndex - 1 < 0) return capIndex;
-                return capIndex - 1;
-            });
-        }}>Previous</div>
-        <div className="small-button" onClick={() =>{
-            setCapIndex((capIndex) => {
-                if(capIndex + 1 >= totalCaps) return capIndex;
+        <div className="duo">
+            <div className="big-button"  onClick={() =>{
+                setCapIndex((capIndex) => {
+                    if(capIndex - 1 < 0) return capIndex;
+                    return capIndex - 1;
+                });
+            }}>Previous Cap</div>
+            <div className="big-button" onClick={() =>{
+                setCapIndex((capIndex) => {
+                    if(capIndex + 1 >= totalCaps) return capIndex;
 
-                return capIndex + 1;
-            });
-        }}>Next</div>
+                    return capIndex + 1;
+                });
+            }}>Next Cap</div>
+        </div>
        
     </div>
 }
@@ -163,12 +165,10 @@ function getCapEventList(type, c, teamId, players){
         a = a[1];
         b = b[1];
 
-        if(a < b) return -1;
-        if(a > b) return 1;
+        if(a < b) return 1;
+        if(a > b) return -1;
         return 0;
     });
-
-    console.log(data);
 
     const elems = [];
 
@@ -180,7 +180,7 @@ function getCapEventList(type, c, teamId, players){
     }
 
 
-    if(elems.length === 0) return <>No Kills Found</>;
+    if(elems.length === 0) return <>No {type} found</>;
 
     return <>{elems}</>
 }
@@ -209,9 +209,7 @@ function createTeamFragsInfo(players, c, totalTeams, type){
         string = "Suicide";
     }
 
-    console.log(c);
-
-    const mouseOverTitle = "Team Kill List";
+    const mouseOverTitle = `Team ${type} list`;
 
     elems.push(<BasicMouseOver key="red" title={mouseOverTitle} content={getCapEventList(type, c, 0, players)}>
         <div className="team-red ctf-cap-frags">
@@ -285,8 +283,9 @@ export default function CTFCaps({caps, totalTeams, players}){
                 
             </div>
         );
-
     }
+
+    if(elems.length === 0) return null;
 
     return <>
         <Header>CTF Caps</Header>
