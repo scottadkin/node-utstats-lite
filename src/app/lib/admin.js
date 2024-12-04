@@ -22,6 +22,11 @@ export async function clearAllDataTables(){
         "rankings",
         "servers",
         "weapons",
+        "ctf_caps",
+        "ctf_cap_kills",
+        "ctf_cap_suicides",
+        "ctf_carry_times",
+        "ctf_covers",
     ];
 
 

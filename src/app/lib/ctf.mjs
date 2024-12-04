@@ -224,10 +224,50 @@ export async function getPlayerCTFTotals(playerId){
     return await simpleQuery(query, [playerId]);
 }
 
+async function changeCapPlayerIds(oldIds, newId){
+
+    const queries = [
+        `UPDATE nstats_ctf_caps SET 
+        taken_player = IF(taken_player IN (?), ?, taken_player),
+        cap_player = IF(cap_player IN (?), ?, cap_player)`,
+
+        `UPDATE nstats_ctf_cap_kills SET
+        killer_id = IF(killer_id IN (?), ?, killer_id)`,
+
+        `UPDATE nstats_ctf_cap_suicides SET
+        player_id = IF(player_id IN (?), ?, player_id)`,
+
+        `UPDATE nstats_ctf_carry_times SET
+        player_id = IF(player_id IN (?), ?, player_id)`,
+
+        `UPDATE nstats_ctf_covers SET
+        player_id = IF(player_id IN (?), ?, player_id)`
+    ];
+
+    const vars = [
+        [oldIds, newId, oldIds, newId],
+        [oldIds, newId],
+        [oldIds, newId],
+        [oldIds, newId],
+        [oldIds, newId]
+    ];
+
+ 
+    for(let i = 0; i < queries.length; i++){
+
+        const q = queries[i];
+
+        const v = vars[i];
+
+        await simpleQuery(q, v);
+    }
+}
 
 export async function changePlayerIds(oldIds, newId){
 
     if(oldIds.length === 0) return {"changedRows": 0};
+
+    await changeCapPlayerIds(oldIds, newId);
 
     const query = `UPDATE nstats_match_ctf SET
     player_id = IF(player_id IN (?), ?, player_id)`;
