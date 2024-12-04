@@ -131,7 +131,61 @@ function createDropElems(c){
     return <>Dropped: {c.total_drops}{plural(c.total_drops, " Time")} for a total of {toPlaytime(c.drop_time, true)}<br/></>
 }
 
-function createTeamFragsInfo(c, totalTeams, type){
+function getCapEventList(type, c, teamId, players){
+
+    const totals = {};
+
+    const targetType = (type === "kills") ? "kills" : "suicides";
+
+    const targetPlayerid = (type === "kills") ? "killerId" : "playerId"; 
+    const targetTeamId = (type === "kills") ? "killerTeam" : "playerTeam";
+
+    for(let i = 0; i < c[targetType].length; i++){
+
+        const k = c[targetType][i];
+
+        if(k[targetTeamId] !== teamId) continue;
+
+        if(totals[k[targetPlayerid]] === undefined){
+            totals[k[targetPlayerid]] = 0;
+        }
+
+        totals[k[targetPlayerid]]++;
+    }
+
+    const data = [];
+
+    for(const [playerId, kills] of Object.entries(totals)){
+        data.push([playerId, kills]);
+    }
+
+    data.sort((a, b) =>{
+        a = a[1];
+        b = b[1];
+
+        if(a < b) return -1;
+        if(a > b) return 1;
+        return 0;
+    });
+
+    console.log(data);
+
+    const elems = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+        const player = getPlayer(players, d[0]);
+        elems.push(<span key={i}>{(i > 0) ? ", " : ""}<b>{player.name}</b>({d[1]})</span>);
+    }
+
+
+    if(elems.length === 0) return <>No Kills Found</>;
+
+    return <>{elems}</>
+}
+
+function createTeamFragsInfo(players, c, totalTeams, type){
 
 
     //TODO: Hover displays mouse over with player names with total kills/suicides
@@ -155,11 +209,32 @@ function createTeamFragsInfo(c, totalTeams, type){
         string = "Suicide";
     }
 
-    elems.push(<span key="red" className="team-red ctf-cap-frags">{red} {plural(red, string)}</span>);
-    elems.push(<span key="blue" className="team-blue ctf-cap-frags">{blue} {plural(blue, string)}</span>);
+    console.log(c);
 
-    if(totalTeams > 2) elems.push(<span key="green" className="team-green ctf-cap-frags">{green} {plural(green, string)}</span>);
-    if(totalTeams > 3) elems.push(<span key="yellow" className="team-yellow ctf-cap-frags">{yellow} {plural(yellow, string)}</span>);
+    const mouseOverTitle = "Team Kill List";
+
+    elems.push(<BasicMouseOver key="red" title={mouseOverTitle} content={getCapEventList(type, c, 0, players)}>
+        <div className="team-red ctf-cap-frags">
+            {red} {plural(red, string)}
+        </div>
+    </BasicMouseOver>);
+
+    elems.push(<BasicMouseOver key="blue" title={mouseOverTitle} content={getCapEventList(type, c, 1, players)}>
+        <div className="team-blue ctf-cap-frags">{blue} {plural(blue, string)}</div>
+    </BasicMouseOver>);
+
+    if(totalTeams > 2){
+
+        elems.push(<BasicMouseOver key="green" title={mouseOverTitle} content={getCapEventList(type, c, 2, players)}>
+            <div className="team-green ctf-cap-frags">{green} {plural(green, string)}</div>
+        </BasicMouseOver>);
+    }
+
+    if(totalTeams > 3){
+        elems.push(<BasicMouseOver key="yellow" title={mouseOverTitle} content={getCapEventList(type, c, 3, players)}>
+            <div className="team-yellow ctf-cap-frags">{yellow} {plural(yellow, string)}</div>
+        </BasicMouseOver>);
+    }
 
 
     let className = "duo";
@@ -205,8 +280,8 @@ export default function CTFCaps({caps, totalTeams, players}){
                     {createCoverElems(c, players)}
                     {createDropElems(c)}
                 </div>
-                {createTeamFragsInfo(c, totalTeams, "kills")}
-                {createTeamFragsInfo(c, totalTeams, "suicides")}
+                {createTeamFragsInfo(players, c, totalTeams, "kills")}
+                {createTeamFragsInfo(players, c, totalTeams, "suicides")}
                 
             </div>
         );
