@@ -751,4 +751,6 @@ canvas{
 .ctf-cap-frags{
 	padding:var(--padding-1);
 	font-size:var(--font-size-small);
+	border:1px solid var(--border-color-1);
+	margin-top:-1px;
 }

@@ -133,6 +133,8 @@ function createDropElems(c){
 
 function createTeamFragsInfo(c, totalTeams, type){
 
+
+    //TODO: Hover displays mouse over with player names with total kills/suicides
     const elems = [];
 
     let red,blue,green,yellow,string;
@@ -159,7 +161,15 @@ function createTeamFragsInfo(c, totalTeams, type){
     if(totalTeams > 2) elems.push(<span key="green" className="team-green ctf-cap-frags">{green} {plural(green, string)}</span>);
     if(totalTeams > 3) elems.push(<span key="yellow" className="team-yellow ctf-cap-frags">{yellow} {plural(yellow, string)}</span>);
 
-    return <>{elems}<br/></>
+
+    let className = "duo";
+    if(totalTeams === 3){
+        className = "trio";
+    }else if(totalTeams === 4){
+        className = "quad";
+    }
+
+    return <div className={className}>{elems}</div>
 }
 
 export default function CTFCaps({caps, totalTeams, players}){
@@ -186,6 +196,7 @@ export default function CTFCaps({caps, totalTeams, players}){
 
         elems.push(
             <div className={`ctf-cap ${getTeamColorClass(c.capping_team)}`} key={i}>
+                <BasicTeamScoreBox totalTeams={totalTeams} red={scores[0]} blue={scores[1]} green={scores[2]} yellow={scores[3]}/><br/>
                 <PlayerLink id={c.cap_player} country={capPlayer.country}>{capPlayer.name}</PlayerLink>&nbsp;
                 Captured The {getTeamName(c.flag_team)} Flag&nbsp; <span className="yellow-font">{toPlaytime(c.cap_time, true)}</span>
                 <div className="cap-info">
@@ -194,9 +205,9 @@ export default function CTFCaps({caps, totalTeams, players}){
                     {createCoverElems(c, players)}
                     {createDropElems(c)}
                 </div>
-                {createTeamFragsInfo(c, totalTeams, "kills")}<br/>
-                {createTeamFragsInfo(c, totalTeams, "suicides")}<br/>
-                <BasicTeamScoreBox totalTeams={totalTeams} red={scores[0]} blue={scores[1]} green={scores[2]} yellow={scores[3]}/>
+                {createTeamFragsInfo(c, totalTeams, "kills")}
+                {createTeamFragsInfo(c, totalTeams, "suicides")}
+                
             </div>
         );
 
