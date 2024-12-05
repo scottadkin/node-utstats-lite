@@ -3,7 +3,7 @@ import { simpleQuery } from "./database.mjs";
 const DEFAULT_PAGE_LAYOUTS = {
     "home": ["Welcome Message", "Social Media", "Recent Matches", "Most Played Maps", "Most Played Gametypes", "Servers"],
     "map": ["Basic Summary", "Recent Matches"],
-    "match": ["Basic Info", "Screenshot", "Frags", "CTF", "DOM","Damage Stats", "Weapons", "Items", "Special Events", "Kills", "Pings", "JSON Links"],
+    "match": ["Basic Info", "Screenshot", "Frags", "CTF", "CTF Caps", "DOM","Damage Stats", "Weapons", "Items", "Special Events", "Kills", "Pings", "JSON Links"],
     "player": ["Gametype Totals", "CTF", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"],
     "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Register", "Watchlist"]
 };

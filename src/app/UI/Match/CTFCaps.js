@@ -268,8 +268,9 @@ export default function CTFCaps({caps, totalTeams, players, matchStart}){
         elems.push(
             <div className={`ctf-cap ${getTeamColorClass(c.capping_team)}`} key={i}>
                 <BasicTeamScoreBox totalTeams={totalTeams} red={scores[0]} blue={scores[1]} green={scores[2]} yellow={scores[3]}/><br/>
-                <PlayerLink id={c.cap_player} country={capPlayer.country}>{capPlayer.name}</PlayerLink>&nbsp;
-                Captured The {getTeamName(c.flag_team)} Flag&nbsp; <span className="yellow-font">{toPlaytime(c.cap_time, true)}</span>
+                <div className={`${getTeamColorClass(c.capping_team)} padding-1`}><PlayerLink id={c.cap_player} country={capPlayer.country}>{capPlayer.name}</PlayerLink>&nbsp;
+                    Captured The {getTeamName(c.flag_team)} Flag&nbsp; <span className="yellow-font">{toPlaytime(c.cap_time, true)}</span>
+                </div>
                 <div className="cap-info">
                     Taken By: <b>{takenPlayer.name}</b> @ {MMSS(c.taken_timestamp - matchStart)}, Capped by <b>{capPlayer.name}</b> @ {MMSS(c.cap_timestamp - matchStart)}<br/>
                     {getCarryTimesElem(c, players, matchStart)}

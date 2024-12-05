@@ -28,6 +28,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Match" ,"type": `bool`, "name": "Display Screenshot", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Frags", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display CTF", "value": 1},
+    {"category": "Match" ,"type": `bool`, "name": "Display CTF Caps", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display DOM", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Weapons", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Items", "value": 1},
