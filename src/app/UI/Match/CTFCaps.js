@@ -6,7 +6,7 @@ import BasicMouseOver from "../BasicMouseOver";
 import { useState } from "react";
 import BasicTeamScoreBox from "../BasicTeamScoreBox";
 
-function createCoverElems(c, players){
+function createCoverElems(c, players, matchStart){
 
     const elems = [];
 
@@ -41,7 +41,7 @@ function createCoverElems(c, players){
 
         for(let i = 0; i < timestamps.length; i++){
 
-            timestampString += `${(i === 0) ? "" : ", " }${MMSS(timestamps[i])}`
+            timestampString += `${(i === 0) ? "" : ", " }${MMSS(timestamps[i] - matchStart)}`
         }
 
 
@@ -63,7 +63,7 @@ function createCoverElems(c, players){
 }
 
 
-function getCarryTimesElem(c, players){
+function getCarryTimesElem(c, players, matchStart){
 
     //return null;
     //if(c.carryTimes.length === 1) return null;
@@ -84,8 +84,8 @@ function getCarryTimesElem(c, players){
        elems.push(<BasicMouseOver key={i}
             content={
                 <span className="date">
-                    Picked Up: <span className="white">{MMSS(current.start_timestamp)}</span>,
-                    {(i === c.carryTimes.length - 1) ? ` Capped` : ` Dropped`} <span className="white">{MMSS(current.end_timestamp)}</span>
+                    Picked Up: <span className="white">{MMSS(current.start_timestamp - matchStart)}</span>,
+                    {(i === c.carryTimes.length - 1) ? ` Capped` : ` Dropped`} <span className="white">{MMSS(current.end_timestamp - matchStart)}</span>
                 </span>
             } 
             title="Carry Info">
@@ -176,7 +176,7 @@ function getCapEventList(type, c, teamId, players){
 
         const d = data[i];
         const player = getPlayer(players, d[0]);
-        elems.push(<span key={i}>{(i > 0) ? ", " : ""}<b>{player.name}</b>({d[1]})</span>);
+        elems.push(<span key={i}>{(i > 0) ? ", " : ""}{player.name} <b>({d[1]})</b></span>);
     }
 
 
@@ -209,7 +209,7 @@ function createTeamFragsInfo(players, c, totalTeams, type){
         string = "Suicide";
     }
 
-    const mouseOverTitle = `Team ${type} list`;
+    const mouseOverTitle = `${type.toUpperCase()} list`;
 
     elems.push(<BasicMouseOver key="red" title={mouseOverTitle} content={getCapEventList(type, c, 0, players)}>
         <div className="team-red ctf-cap-frags">
@@ -245,14 +245,12 @@ function createTeamFragsInfo(players, c, totalTeams, type){
     return <div className={className}>{elems}</div>
 }
 
-export default function CTFCaps({caps, totalTeams, players}){
+export default function CTFCaps({caps, totalTeams, players, matchStart}){
 
 
     const [capIndex, setCapIndex] = useState(0);
 
     const scores = Array(totalTeams).fill(0);
-
-    console.log(caps);
 
     const elems = [];
 
@@ -273,10 +271,10 @@ export default function CTFCaps({caps, totalTeams, players}){
                 <PlayerLink id={c.cap_player} country={capPlayer.country}>{capPlayer.name}</PlayerLink>&nbsp;
                 Captured The {getTeamName(c.flag_team)} Flag&nbsp; <span className="yellow-font">{toPlaytime(c.cap_time, true)}</span>
                 <div className="cap-info">
-                    Taken By: <b>{takenPlayer.name}</b> @ {MMSS(c.taken_timestamp)}, Capped by <b>{capPlayer.name}</b> @ {MMSS(c.cap_timestamp)}<br/>
-                    {getCarryTimesElem(c, players)}
-                    {createCoverElems(c, players)}
-                    {createDropElems(c)}
+                    Taken By: <b>{takenPlayer.name}</b> @ {MMSS(c.taken_timestamp - matchStart)}, Capped by <b>{capPlayer.name}</b> @ {MMSS(c.cap_timestamp - matchStart)}<br/>
+                    {getCarryTimesElem(c, players, matchStart)}
+                    {createCoverElems(c, players, matchStart)}
+                    {createDropElems(c,)}
                 </div>
                 {createTeamFragsInfo(players, c, totalTeams, "kills")}
                 {createTeamFragsInfo(players, c, totalTeams, "suicides")}

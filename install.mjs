@@ -77,6 +77,8 @@ const queries = [
             insta int(1) NOT NULL,
             date datetime NOT NULL,
             playtime float NOT NULL,
+            match_start float NOT NULL,
+            match_end float NOT NULL,
             players int(11) NOT NULL,
             total_teams int(1) NOT NULL,
             team_0_score int(11) NOT NULL,   
@@ -676,6 +678,9 @@ async function addPageLayouts(){
         await simpleQuery("ALTER TABLE nstats_site_settings MODIFY COLUMN setting_value text NOT NULL");
 
         await simpleQuery("ALTER TABLE nstats_ranking_settings MODIFY COLUMN points float NOT NULL");
+
+        await addColumn("nstats_matches", "match_start", "FLOAT NOT NULL AFTER playtime");
+        await addColumn("nstats_matches", "match_end", "FLOAT NOT NULL AFTER match_start");
 
         await addPageLayouts();
         

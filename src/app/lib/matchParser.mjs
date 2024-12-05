@@ -160,6 +160,8 @@ export class MatchParser{
             this.gametype.bInsta,
             this.match.date, 
             this.matchLength,
+            this.matchStart, 
+            this.matchEnd,
             this.players.getTotalUniquePlayers(),
             this.totalTeams,
             this.teamScores[0],

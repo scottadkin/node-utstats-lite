@@ -96,7 +96,7 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
-            <CTFCaps caps={matchData.ctf.caps} totalTeams={totalTeams} players={matchData.basicPlayers}/>
+            <CTFCaps caps={matchData.ctf.caps} totalTeams={totalTeams} players={matchData.basicPlayers} matchStart={matchData.basic.match_start}/>
             {elems}
 		</main>
     );

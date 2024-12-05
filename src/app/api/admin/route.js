@@ -127,6 +127,18 @@ export async function POST(req){
 
         if(mode === "merge-hwid-usage-to-player"){
 
+
+            /**
+             * 04/12/24
+             * This probably doesn't work as intended? ATM it changes all match data for a matching player_id when we just want it to change
+             * effected player_ids in the matches a match was used
+             * 
+             * Example:
+             * Ooper could have had a HWID 0001 in 5 matches, but Ooper also played with HWID 0002 in 10 other matches,
+             * when we merge HWID 0001 into a player profile we only want to change the player_id in the first 5 matches and not all 15 matches,
+             * ATM all 15 change which is not correct
+             */
+
             const playerId = (res.playerId !== undefined) ? parseInt(res.playerId) : NaN;
             const hwid = (res.hwid !== undefined) ? res.hwid : null;
 
