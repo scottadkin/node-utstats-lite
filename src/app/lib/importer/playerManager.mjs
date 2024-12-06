@@ -375,10 +375,10 @@ export class PlayerManager{
 
 
     //change to bulkinsert
-    async insertPlayerMatchData(matchId, matchDate){
+    async insertPlayerMatchData(matchId, matchDate, gametypeId, mapId){
 
 
-        await bulkInsertPlayerMatchData(this.mergedPlayers, matchId, matchDate);
+        await bulkInsertPlayerMatchData(this.mergedPlayers, matchId, matchDate, gametypeId, mapId);
 
         /*for(const p of Object.values(this.mergedPlayers)){
 
@@ -727,6 +727,7 @@ export class PlayerManager{
      * Update totals that are used for player profiles
      */
     async updatePlayerFullTotals(){
+        
     }
 
 

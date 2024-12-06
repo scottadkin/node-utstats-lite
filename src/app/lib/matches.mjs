@@ -1137,3 +1137,24 @@ export async function getMatchesByHashes(hashes){
 
     return result;
 }
+
+
+export async function getMapAndGametypeIds(matchIds){
+
+    if(matchIds.length === 0) return [];
+
+    const query = `SELECT id,gametype_id,map_id FROM nstats_matches WHERE id IN (?)`;
+
+    const result = await simpleQuery(query, [matchIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = {"gametype": r.gametype_id, "map": r.map_id};
+    }
+
+    return data;
+}

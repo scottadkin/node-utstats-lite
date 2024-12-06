@@ -2,6 +2,7 @@ import {simpleQuery, bulkInsert} from "./database.mjs";
 import {getMultipleMatchDetails} from "./matches.mjs";
 import { getWinner, getPlayer } from "./generic.mjs";
 import { deleteAllPlayerTotals as deleteAllPlayerGametypeTotals } from "./gametypes.mjs";
+import { getMapAndGametypeIds } from "./matches.mjs";
 import md5 from "md5";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
@@ -114,7 +115,7 @@ export async function updateMasterPlayers(playerIds, idsToCountries, date){
 }
 
 
-export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
+export async function bulkInsertPlayerMatchData(players, matchId, matchDate, gametypeId, mapId){
 
     if(Object.keys(players).length === 0) return;
 
@@ -131,6 +132,8 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
             p.mac1,
             p.mac2,
             matchId,
+            mapId,
+            gametypeId,
             matchDate,
             p.bBot,
             (p.ping.min !== null) ? p.ping.min : -1,
@@ -171,7 +174,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate){
 
     const query = `INSERT INTO nstats_match_players (
         player_id, spectator, ip, country, hwid,
-        mac1, mac2, match_id, match_date, bot, ping_min, ping_avg, ping_max,
+        mac1, mac2, match_id, map_id, gametype_id, match_date, bot, ping_min, ping_avg, ping_max,
         team, score, frags, kills, deaths,
         suicides, team_kills, efficiency, time_on_server, ttl,
         first_blood, spree_1, spree_2, spree_3, spree_4,
@@ -886,5 +889,23 @@ export async function getPlayersByHashes(hashes){
     const query = `SELECT * FROM nstats_players WHERE hash IN (?)`;
 
     return await simpleQuery(query, [hashes]);
+}
 
+
+export async function setMatchMapGametypeIds(){
+
+    const query = `SELECT DISTINCT match_id FROM nstats_match_players WHERE map_id=0 AND gametype_id=0`;
+
+    const result = await simpleQuery(query);
+
+    const uniqueMatchIds = [...new Set([...result.map((r) => r.match_id)])];
+
+    console.log(result);
+    console.log(uniqueMatchIds);
+
+    const ids = await getMapAndGametypeIds(uniqueMatchIds);
+
+
+    //need to add map and gametype ids to match_players, match_dom, match_ctf, match_weapons
+    console.log(ids);
 }

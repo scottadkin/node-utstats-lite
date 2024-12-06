@@ -204,10 +204,10 @@ export class CTF{
         return false;
     }
 
-    async insertPlayerMatchData(playerManager, matchId){
+    async insertPlayerMatchData(playerManager, matchId, gametypeId, mapId){
 
         if(this.bAnyCTFEvents(playerManager.mergedPlayers)){
-            await insertPlayerMatchData(playerManager, matchId);
+            await insertPlayerMatchData(playerManager, matchId, gametypeId, mapId);
         }
     }
 

@@ -79,8 +79,8 @@ export class Domination{
         }
     }
 
-    async insertPlayerMatchData(players, matchId){
+    async insertPlayerMatchData(players, matchId, gametypeId, mapId){
 
-        await insertPlayerMatchData(players, matchId);
+        await insertPlayerMatchData(players, matchId, gametypeId, mapId);
     }
 }

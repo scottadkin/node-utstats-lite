@@ -183,9 +183,11 @@ export class MatchParser{
         await this.server.updateTotals();
         await this.gametype.updateTotals();
 
-        await this.players.insertPlayerMatchData(this.matchId, this.match.date);
-        await this.ctf.insertPlayerMatchData(this.players, this.matchId);
-        await this.dom.insertPlayerMatchData(this.players.players, this.matchId);
+        await this.players.insertPlayerMatchData(this.matchId, this.match.date, this.gametype.id, this.map.id);
+
+        //TODO add gametype & map ids to weapons, CTF AND DOM TABLES
+        await this.ctf.insertPlayerMatchData(this.players, this.matchId, this.gametype.id, this.map.id);
+        await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
         await this.weapons.setWeaponIds();
         this.kills.setWeaponIds(this.weapons.weapons);
         this.kills.setPlayerIds(this.players);
@@ -199,7 +201,7 @@ export class MatchParser{
 
 
         await this.players.updatePlayerTotals(this.match.date);
-        await this.players.updatePlayerFullTotals();
+        //await this.players.updatePlayerFullTotals();
 
         await this.ctf.updatePlayerTotals(this.players);
 

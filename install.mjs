@@ -7,6 +7,7 @@ import {createRandomString} from "./src/app/lib/generic.mjs";
 import { simpleQuery } from "./src/app/lib/database.mjs";
 import { restoreDefaultSettings } from "./src/app/lib/siteSettings.mjs";
 import { restoreDefaultLayouts } from "./src/app/lib/pageLayout.mjs";
+import { setMatchMapGametypeIds } from "./src/app/lib/players.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -132,6 +133,8 @@ const queries = [
             mac1 varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
             mac2 varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
             match_id int NOT NULL,
+            map_id int NOT NULL,
+            gametype_id int NOT NULL,
             match_date datetime NOT NULL,
             bot int(1) NOT NULL,
             ping_min int(11) NOT NULL,
@@ -197,7 +200,9 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_match_ctf (
             id int NOT NULL AUTO_INCREMENT,
-            match_id int NOT NULL,
+            match_id int NOT NULL,     
+            map_id int NOT NULL,
+            gametype_id int NOT NULL,
             player_id int NOT NULL,
             flag_taken int NOT NULL,
             flag_pickup int NOT NULL,
@@ -221,7 +226,9 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_match_dom (
             id int NOT NULL AUTO_INCREMENT,
-            match_id int NOT NULL,
+            match_id int NOT NULL,  
+            map_id int NOT NULL,
+            gametype_id int NOT NULL,
             player_id int NOT NULL,
             point_id int NOT NULL,
             total_caps int NOT NULL
@@ -681,8 +688,21 @@ async function addPageLayouts(){
 
         await addColumn("nstats_matches", "match_start", "FLOAT NOT NULL AFTER playtime");
         await addColumn("nstats_matches", "match_end", "FLOAT NOT NULL AFTER match_start");
+        
+    
+        await addColumn("nstats_match_players", "map_id", "INT NOT NULL AFTER match_id");
+        await addColumn("nstats_match_players", "gametype_id", "INT NOT NULL AFTER map_id");
+
+        await addColumn("nstats_match_ctf", "map_id", "INT NOT NULL AFTER match_id");
+        await addColumn("nstats_match_ctf", "gametype_id", "INT NOT NULL AFTER map_id");
+
+        await addColumn("nstats_match_dom", "map_id", "INT NOT NULL AFTER match_id");
+        await addColumn("nstats_match_dom", "gametype_id", "INT NOT NULL AFTER map_id");
 
         await addPageLayouts();
+
+
+        await setMatchMapGametypeIds();
         
         process.exit();
 
