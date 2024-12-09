@@ -82,9 +82,9 @@ export class WeaponsManager{
     }
 
 
-    async insertPlayerMatchStats(matchId){
+    async insertPlayerMatchStats(matchId, gametypeId, mapId){
 
-        await bulkInsertMatchWeaponStats(this.playerStats, matchId);
+        await bulkInsertMatchWeaponStats(this.playerStats, matchId, gametypeId, mapId);
     }
 
     async updatePlayerTotals(players){

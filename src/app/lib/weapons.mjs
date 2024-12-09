@@ -24,7 +24,7 @@ export async function createWeapon(name){
 }
 
 
-export async function bulkInsertMatchWeaponStats(data, matchId){
+export async function bulkInsertMatchWeaponStats(data, matchId, gametypeId, mapId){
 
     const insertVars = [];
 
@@ -37,13 +37,13 @@ export async function bulkInsertMatchWeaponStats(data, matchId){
             const weaponId = parseInt(wId);
 
             insertVars.push([
-                matchId, playerId, weaponId, weaponStats.kills,
+                matchId, mapId, gametypeId, playerId, weaponId, weaponStats.kills,
                 weaponStats.deaths, weaponStats.teamKills
             ]);
         }
     }
 
-    const query = `INSERT INTO nstats_match_weapon_stats (match_id,player_id,weapon_id,kills,deaths,team_kills) VALUES ?`;
+    const query = `INSERT INTO nstats_match_weapon_stats (match_id,map_id,gametype_id,player_id,weapon_id,kills,deaths,team_kills) VALUES ?`;
 
     await bulkInsert(query, insertVars);
 

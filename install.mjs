@@ -175,6 +175,8 @@ const queries = [
         `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
             id int(11) NOT NULL AUTO_INCREMENT,
             match_id int(11) NOT NULL,
+            map_id int(11) NOT NULL,
+            gametype_id int(11) NOT NULL,
             player_id int(11) NOT NULL,
             weapon_id int(11) NOT NULL,
             kills int(11) NOT NULL,
@@ -698,6 +700,9 @@ async function addPageLayouts(){
 
         await addColumn("nstats_match_dom", "map_id", "INT NOT NULL AFTER match_id");
         await addColumn("nstats_match_dom", "gametype_id", "INT NOT NULL AFTER map_id");
+
+        await addColumn("nstats_match_weapon_stats", "map_id", "INT NOT NULL AFTER match_id");
+        await addColumn("nstats_match_weapon_stats", "gametype_id", "INT NOT NULL AFTER map_id");
 
         await addPageLayouts();
 
