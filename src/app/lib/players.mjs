@@ -6,6 +6,7 @@ import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
 import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./weapons.mjs";
+import { getPlayerMapTotals, deleteCurrentPlayerMapAverages, updateCurrentPlayerMapAverages } from "./maps.mjs";
 import md5 from "md5";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
@@ -926,5 +927,45 @@ export async function setMatchMapGametypeIds(){
     await setCTFMatchMapGametypeIds(ids);
     await setDOMMatchMapGametypeIds(ids);
     await setWeaponStatsMatchMapGametypeIds(ids);
+
+}
+
+
+
+
+export async function updateMapAverages(playerIds, gametypeId, mapId){
+
+    const totals = await getPlayerMapTotals(playerIds);
+
+    const keys = ["score", "frags", "kills", "deaths", "suicides", "team_kills"];
+
+    for(let i = 0; i < totals.length; i++){
+
+        const t = totals[i];
+
+        if(t.playtime <= 0){
+
+            t.bIgnore = true;
+            continue;
+        }
+
+        const minutes = t.playtime / 60;
+
+        for(let x = 0; x < keys.length; x++){
+
+            const k = keys[x];
+    
+
+            if(t[k] <= 0){
+                t[k] = 0;
+                continue;
+            }
+
+            t[k] = t[k] / minutes;
+        }
+
+        await deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapId);
+        await updateCurrentPlayerMapAverages(totals, gametypeId, mapId);
+    }
 
 }

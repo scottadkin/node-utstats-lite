@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { bulkInsert, simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName } from "./generic.mjs";
 import { getAll, getGametypeNames } from "./gametypes.mjs";
@@ -387,4 +387,58 @@ export async function getAllMatchIds(id){
     return result.map((r) =>{
         return r.id;
     });
+}
+
+
+export async function getPlayerMapTotals(playerIds){
+
+    if(playerIds.length === 0) return {};
+
+    const query = `SELECT player_id, COUNT(*) as total_matches, SUM(time_on_server) as playtime, SUM(score) as score,SUM(frags) as frags,
+    SUM(kills) as kills, SUM(deaths) as deaths, SUM(suicides) as suicides, SUM(team_kills) as team_kills FROM nstats_match_players WHERE player_id IN (?) GROUP BY player_id`;
+
+    return await simpleQuery(query, [playerIds]);
+
+}
+
+
+export async function deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapId){
+
+    if(playerIds.length === 0) return;
+
+    const query = `DELETE FROM nstats_player_map_minute_averages WHERE player_id=? AND gametype_id=? AND map_id=?`;
+
+    const promises = [];
+
+    for(let i = 0; i < playerIds.length; i++){
+
+        const pId = playerIds[i];
+
+        promises.push(simpleQuery(query, [pId, gametypeId, mapId]));
+    }
+
+
+    await Promise.all(promises);
+}
+
+
+export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId){
+
+    if(players.length === 0) return;
+
+    const insertVars = [];
+
+    for(let i = 0; i < players.length; i++){
+
+        const p = players[i];
+
+        insertVars.push([p.player_id, mapId, gametypeId, p.playtime, p.total_matches, p.score, p.frags, p.kills, p.deaths, p.suicides, p.team_kills]);
+    }
+
+
+    const query = `INSERT INTO nstats_player_map_minute_averages 
+    (player_id, map_id, gametype_id, total_playtime, total_matches, score, frags, kills, deaths, suicides, team_kills) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
+
 }

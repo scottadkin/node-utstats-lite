@@ -1,6 +1,7 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId, createMasterPlayer, updateMasterPlayers, updatePlayerGametypeTotals, bulkInsertPlayerMatchData } from "../players.mjs";
+import { getPlayerMasterId, createMasterPlayer, updateMasterPlayers, 
+    updatePlayerGametypeTotals, bulkInsertPlayerMatchData, updateMapAverages } from "../players.mjs";
 import geoip from "geoip-lite";
 
 
@@ -795,5 +796,18 @@ export class PlayerManager{
         }
 
         return null;
+    }
+
+
+    async updateMapAverages(gametypeId, mapId){
+
+        const playerIds = new Set();
+
+        for(const player of Object.values(this.mergedPlayers)){
+
+            playerIds.add(player.masterId);
+        }
+
+        await updateMapAverages([...playerIds], gametypeId, mapId);
     }
 }

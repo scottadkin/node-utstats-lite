@@ -239,6 +239,9 @@ export class MatchParser{
         await this.damageManager.updatePlayerTotals(this.players, this.gametype.id);
 
 
+        await this.players.updateMapAverages(this.gametype.id, this.map.id);
+
+
     }
 
     parseLines(){

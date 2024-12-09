@@ -490,7 +490,23 @@ const queries = [
         timestamp float NOT NULL,
         player_id int NOT NULL,
         player_team int NOT NULL,
-        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+        `CREATE TABLE IF NOT EXISTS nstats_player_map_minute_averages (
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        map_id int NOT NULL,
+        gametype_id int NOT NULL,
+        total_playtime float NOT NULL,
+        total_matches float NOT NULL,
+        score float NOT NULL,
+        frags float NOT NULL,
+        kills float NOT NULL,
+        deaths float NOT NULL,
+        suicides float NOT NULL,
+        team_kills float NOT NULL,
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
 
 
 ];
