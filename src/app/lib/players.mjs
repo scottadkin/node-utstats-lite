@@ -3,6 +3,9 @@ import {getMultipleMatchDetails} from "./matches.mjs";
 import { getWinner, getPlayer } from "./generic.mjs";
 import { deleteAllPlayerTotals as deleteAllPlayerGametypeTotals } from "./gametypes.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
+import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
+import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
+import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./weapons.mjs";
 import md5 from "md5";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
@@ -892,20 +895,36 @@ export async function getPlayersByHashes(hashes){
 }
 
 
+async function _setMatchMapGametypeIds(data){
+
+    const query = `UPDATE nstats_match_players SET gametype_id=?, map_id=? WHERE match_id=?`;
+
+    const queries = [];
+
+    for(const [matchId, m] of Object.entries(data)){
+
+        queries.push(simpleQuery(query, [m.gametype, m.map, matchId]));
+    }
+
+    await Promise.all(queries);
+}
+
+
 export async function setMatchMapGametypeIds(){
 
     const query = `SELECT DISTINCT match_id FROM nstats_match_players WHERE map_id=0 AND gametype_id=0`;
 
     const result = await simpleQuery(query);
 
-    const uniqueMatchIds = [...new Set([...result.map((r) => r.match_id)])];
+    if(result.length === 0) return;
 
-    console.log(result);
-    console.log(uniqueMatchIds);
+    const uniqueMatchIds = [...new Set([...result.map((r) => r.match_id)])];
 
     const ids = await getMapAndGametypeIds(uniqueMatchIds);
 
+    await _setMatchMapGametypeIds(ids);
+    await setCTFMatchMapGametypeIds(ids);
+    await setDOMMatchMapGametypeIds(ids);
+    await setWeaponStatsMatchMapGametypeIds(ids);
 
-    //need to add map and gametype ids to match_players, match_dom, match_ctf, match_weapons
-    console.log(ids);
 }

@@ -599,3 +599,18 @@ export async function getMatchCaps(matchId){
 
     return result;
 }
+
+
+export async function setMatchMapGametypeIds(data){
+
+    const query = `UPDATE nstats_match_ctf SET gametype_id=?, map_id=? WHERE match_id=?`;
+
+    const queries = [];
+
+    for(const [matchId, m] of Object.entries(data)){
+
+        queries.push(simpleQuery(query, [m.gametype, m.map, matchId]));
+    }
+
+    await Promise.all(queries);
+}
