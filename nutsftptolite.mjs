@@ -17,7 +17,7 @@ import {readFile} from "fs/promises";
     target_folder, delete_after_import, first,
     last, total_imports, total_logs_imported, ignore_bots,
     ignore_duplicates, min_players, min_playtime,
-    sftp, enabled) VALUES ?`;
+    sftp, enabled, delete_tmp_files) VALUES ?`;
     const settings = json.data;
     const rows = [];
     
@@ -29,11 +29,11 @@ import {readFile} from "fs/promises";
         const first = new Date(s[8]);
         const last = new Date(s[9]);
         rows.push([
-            `${s[1]}_test`, s[2], s[3], s[4], s[5],
+            s[1], s[2], s[3], s[4], s[5],
             s[6], s[7], first, 
             last, 0, 0, s[13], 
             s[14], s[15], s[16], 
-            s[17],s[24],// s[24]
+            s[17],s[24],s[25]// s[24]
         ]);
     }
 
