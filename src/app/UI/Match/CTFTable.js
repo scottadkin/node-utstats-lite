@@ -7,6 +7,28 @@ import { useState } from "react";
 import PlayerLink from "../PlayerLink";
 
 
+const initialGeneralTotals = {
+    "taken": 0,
+    "pickup": 0,
+    "drop": 0,
+    "assist": 0,
+    "cover": 0,
+    "seal": 0,
+    "cap": 0,
+    "kill": 0,
+    "return": 0, 
+    "players": 0
+};
+
+const initialReturnTotals = {
+    "return": 0,
+    "returnBase": 0,
+    "returnMid": 0,
+    "returnEnemyBase": 0,
+    "returnSave": 0,
+    "players": 0
+};
+
 function createGeneralRow(player, d){
 
     return {
@@ -40,7 +62,7 @@ function createReturnRow(player, d){
         "returnBase": {"value": d.flag_return_base, "displayValue": ignore0(d.flag_return_base)},
         "returnMid": {"value": d.flag_return_mid, "displayValue": ignore0(d.flag_return_mid)},
         "returnEnemyBase": {"value": d.flag_return_enemybase, "displayValue": ignore0(d.flag_return_enemybase)},
-        "returnSave": {"value": d.flag_save, "displayValue": ignore0(d.flag_save)},
+        "returnSave": {"value": d.flag_return_save, "displayValue": ignore0(d.flag_return_save)},
     };
 }
 
@@ -76,6 +98,9 @@ export default function CTFTable({players, data}){
     };
 
 
+    let totals = [];
+
+
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
@@ -85,14 +110,42 @@ export default function CTFTable({players, data}){
         if(player.bSpectator !== 0) continue;
 
 
+        if(totals[player.team] === undefined){
+
+            totals[player.team] = (selectedTab === "general") ? {...initialGeneralTotals} : { ...initialReturnTotals};
+        }
+
+
         if(rows[player.team] === undefined){
             rows[player.team] = [];
         }
 
+        const t = totals[player.team];
+
+        t.players++;
+
         if(selectedTab === "general"){
+
             rows[player.team].push(createGeneralRow(player, d));
+
+            t.taken += d.flag_taken;
+            t.pickup +=  d.flag_pickup;
+            t.drop +=  d.flag_drop;
+            t.assist +=  d.flag_assist;
+            t.cover +=  d.flag_cover;
+            t.seal +=  d.flag_seal;
+            t.cap += d.flag_cap;
+            t.kill += d.flag_kill;
+            t.return += d.flag_return;
+
         }else{
             rows[player.team].push(createReturnRow(player, d));
+
+            t.return += d.flag_return;
+            t.returnBase += d.flag_return_base;
+            t.returnMid += d.flag_return_mid;
+            t.returnEnemyBase += d.flag_return_enemy_base;
+            t.returnSave += d.flag_return_save;
         }
     }
 
@@ -101,6 +154,49 @@ export default function CTFTable({players, data}){
     for(const [teamId, tableRows] of Object.entries(rows)){
 
         const headers = (selectedTab === "general") ? tableHeaders.general : tableHeaders.returns;
+
+        const t = totals[teamId];
+
+        if(selectedTab === "general"){
+            tableRows.push(
+                 {
+                    "bAlwaysLast": true,
+                    "player": {
+                        "value": "", 
+                        "displayValue": "Total",
+                        "className": `player-name-td text-left team-none`
+                    },
+                    "taken": {"value": t.taken, "displayValue": ignore0(t.taken)},
+                    "pickup": {"value": t.pickup, "displayValue": ignore0(t.pickup)},
+                    "drop": {"value": t.drop, "displayValue": ignore0(t.drop)},
+                    "assist": {"value": t.assist, "displayValue": ignore0(t.assist)},
+                    "cover": {"value": t.cover, "displayValue": ignore0(t.cover)},
+                    "seal": {"value": t.seal, "displayValue": ignore0(t.seal)},
+                    "cap": {"value": t.cap, "displayValue": ignore0(t.cap)},
+                    "kill": {"value": t.kill, "displayValue": ignore0(t.kill)},
+                    "return": {"value": t.return, "displayValue": ignore0(t.return)},
+                }
+            );
+        }else{
+
+            tableRows.push(
+                {
+                   "bAlwaysLast": true,
+                   "player": {
+                       "value": "", 
+                       "displayValue": "Total",
+                       "className": `player-name-td text-left team-none`
+                   },
+                   "return": {"value": t.return, "displayValue": ignore0(t.return)},
+                    "returnBase": {"value": t.returnBase, "displayValue": ignore0(t.returnBase)},
+                    "returnMid": {"value": t.returnMid, "displayValue": ignore0(t.returnMid)},
+                    "returnEnemyBase": {"value": t.returnEnemyBase, "displayValue": ignore0(t.returnEnemyBase)},
+                    "returnSave": {"value": t.returnSave, "displayValue": ignore0(t.returnSave)},
+        
+               }
+           );
+
+        }
 
         tables.push(<InteractiveTable width={1} key={teamId} headers={headers} rows={tableRows}/>);
     }
