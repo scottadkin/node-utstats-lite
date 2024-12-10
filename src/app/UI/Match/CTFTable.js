@@ -166,15 +166,15 @@ export default function CTFTable({players, data}){
                         "displayValue": "Total",
                         "className": `player-name-td text-left team-none`
                     },
-                    "taken": {"value": t.taken, "displayValue": ignore0(t.taken)},
-                    "pickup": {"value": t.pickup, "displayValue": ignore0(t.pickup)},
-                    "drop": {"value": t.drop, "displayValue": ignore0(t.drop)},
-                    "assist": {"value": t.assist, "displayValue": ignore0(t.assist)},
-                    "cover": {"value": t.cover, "displayValue": ignore0(t.cover)},
-                    "seal": {"value": t.seal, "displayValue": ignore0(t.seal)},
-                    "cap": {"value": t.cap, "displayValue": ignore0(t.cap)},
-                    "kill": {"value": t.kill, "displayValue": ignore0(t.kill)},
-                    "return": {"value": t.return, "displayValue": ignore0(t.return)},
+                    "taken": {"value": t.taken, "displayValue": ignore0(t.taken), "className": "team-none"},
+                    "pickup": {"value": t.pickup, "displayValue": ignore0(t.pickup), "className": "team-none"},
+                    "drop": {"value": t.drop, "displayValue": ignore0(t.drop), "className": "team-none"},
+                    "assist": {"value": t.assist, "displayValue": ignore0(t.assist), "className": "team-none"},
+                    "cover": {"value": t.cover, "displayValue": ignore0(t.cover), "className": "team-none"},
+                    "seal": {"value": t.seal, "displayValue": ignore0(t.seal), "className": "team-none"},
+                    "cap": {"value": t.cap, "displayValue": ignore0(t.cap), "className": "team-none"},
+                    "kill": {"value": t.kill, "displayValue": ignore0(t.kill), "className": "team-none"},
+                    "return": {"value": t.return, "displayValue": ignore0(t.return), "className": "team-none"},
                 }
             );
         }else{
@@ -187,11 +187,11 @@ export default function CTFTable({players, data}){
                        "displayValue": "Total",
                        "className": `player-name-td text-left team-none`
                    },
-                   "return": {"value": t.return, "displayValue": ignore0(t.return)},
-                    "returnBase": {"value": t.returnBase, "displayValue": ignore0(t.returnBase)},
-                    "returnMid": {"value": t.returnMid, "displayValue": ignore0(t.returnMid)},
-                    "returnEnemyBase": {"value": t.returnEnemyBase, "displayValue": ignore0(t.returnEnemyBase)},
-                    "returnSave": {"value": t.returnSave, "displayValue": ignore0(t.returnSave)},
+                   "return": {"value": t.return, "displayValue": ignore0(t.return), "className": "team-none"},
+                    "returnBase": {"value": t.returnBase, "displayValue": ignore0(t.returnBase), "className": "team-none"},
+                    "returnMid": {"value": t.returnMid, "displayValue": ignore0(t.returnMid), "className": "team-none"},
+                    "returnEnemyBase": {"value": t.returnEnemyBase, "displayValue": ignore0(t.returnEnemyBase), "className": "team-none"},
+                    "returnSave": {"value": t.returnSave, "displayValue": ignore0(t.returnSave), "className": "team-none"},
         
                }
            );

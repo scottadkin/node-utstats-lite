@@ -39,9 +39,12 @@ export default function FragTable({data, totalTeams}){
 
     const test = {};
 
-    const totals = [];
+    const totals = [{...initialTotals}];
 
-    for(let i = 0; i < totalTeams; i++){
+    console.log(`totalTeams = ${totalTeams}`);
+
+
+    for(let i = 1; i < totalTeams; i++){
         totals.push({...initialTotals});
     }
 
@@ -106,7 +109,7 @@ export default function FragTable({data, totalTeams}){
 
     if(totalTeams < 2){
 
-        elems = <InteractiveTable width={3} headers={headers} rows={test[0]} sortBy="score" order="DESC"/>;
+        elems = <InteractiveTable key="one-team" width={3} headers={headers} rows={test[0]} sortBy="score" order="DESC"/>;
 
     }else{
 
