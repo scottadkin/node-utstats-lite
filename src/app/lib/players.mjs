@@ -935,6 +935,9 @@ export async function setMatchMapGametypeIds(){
 
 export async function updateMapAverages(playerIds, gametypeId, mapId){
 
+    //REMOVE THIS IF PEOPLE WANT MAP + GAMETYPE RANKINGS ADDED AS WELL
+    gametypeId = 0;
+
     const totals = await getPlayerMapTotals(playerIds);
 
     const keys = ["score", "frags", "kills", "deaths", "suicides", "team_kills"];
