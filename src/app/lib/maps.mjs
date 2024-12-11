@@ -5,6 +5,7 @@ import { getAll, getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
 import { getPlayerMapTotals as getPlayerCTFMapTotals } from "./ctf.mjs";
+import { getPlayerMapTotals as getPlayerDOMMapTotals } from "./domination.mjs";
 
 async function getMapId(name){
 
@@ -411,29 +412,44 @@ export async function getPlayerMapTotals(playerIds, mapId){
     const data = await simpleQuery(query, [playerIds, mapId]);
 
     const ctfData = await getPlayerCTFMapTotals(playerIds, mapId);
+    const domData = await getPlayerDOMMapTotals(playerIds, mapId);
 
     let bFoundCTF = false;
+    let bFoundDOM = false;
 
     if(Object.keys(ctfData).length > 0){
 
         bFoundCTF = true;
+    }
+
+    if(Object.keys(domData).length > 0){
+
+        bFoundDOM = true;
+    }
         
-        for(let i = 0; i < data.length; i++){
+    for(let i = 0; i < data.length; i++){
 
-            const d = data[i];
+        const d = data[i];
 
-            const ctf = ctfData[d.player_id];
+        const ctf = ctfData[d.player_id];
+        const dom = domData[d.player_id];
 
-            if(ctf === undefined) continue;
 
-            data[i] = {...d, ...ctf};
+        if(ctf !== undefined){
+
+            data[i] = {...data[i], ...ctf};
+        }
+
+        if(dom !== undefined){
+            data[i] = {...data[i], ...dom};
         }
     }
+    
     
     //get dom totals
 
 
-    return {data, bFoundCTF};
+    return {data, bFoundCTF, bFoundDOM};
 
 }
 
@@ -473,7 +489,7 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
             p.headshots, p.item_amp,p.item_belt,p.item_boots,p.item_body,p.item_pads,p.item_invis,p.item_shp,
             p?.flag_taken ?? 0, p?.flag_pickup ?? 0, p?.flag_drop ?? 0, p?.flag_assist ?? 0, p?.flag_cover ?? 0,
             p?.flag_seal ?? 0, p?.flag_cap ?? 0, p?.flag_kills ?? 0, p?.flag_return ?? 0, p?.flag_return_base ?? 0,
-            p?.flag_return_mid ?? 0, p?.flag_return_enemy_base ?? 0, p?.flag_return_save ?? 0, /**dom caps */ 0
+            p?.flag_return_mid ?? 0, p?.flag_return_enemy_base ?? 0, p?.flag_return_save ?? 0, p?.dom_caps ?? 0
         ]);
     }
 

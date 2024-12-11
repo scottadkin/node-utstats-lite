@@ -938,7 +938,7 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
     //REMOVE THIS IF PEOPLE WANT MAP + GAMETYPE RANKINGS ADDED AS WELL
     gametypeId = 0;
 
-    const {data, bFoundCTF} = await getPlayerMapTotals(playerIds, mapId);
+    const {data, bFoundCTF, bFoundDOM} = await getPlayerMapTotals(playerIds, mapId);
 
 
     let keys = ["score", "frags", "kills", "deaths", "suicides", "team_kills",
@@ -961,8 +961,13 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
         "flag_return_save",
     ];
 
+
     if(bFoundCTF){
         keys = [...keys, ...ctfKeys];
+    }
+
+    if(bFoundDOM){
+        keys.push("dom_caps");
     }
 
     for(let i = 0; i < data.length; i++){

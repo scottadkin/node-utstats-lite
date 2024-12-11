@@ -618,7 +618,7 @@ export async function setMatchMapGametypeIds(data){
 
 export async function getPlayerMapTotals(playerIds, mapId){
 
-    if(playerIds.length === 0) return [];
+    if(playerIds.length === 0) return {};
 
     const query = `SELECT player_id, SUM(flag_taken) as flag_taken, SUM(flag_pickup) as flag_pickup, 
     SUM(flag_drop) as flag_drop, SUM(flag_assist) as flag_assist, SUM(flag_cover) as flag_cover,

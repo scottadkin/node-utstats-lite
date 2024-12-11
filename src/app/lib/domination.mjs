@@ -103,3 +103,25 @@ export async function setMatchMapGametypeIds(data){
 
     await Promise.all(queries);
 }
+
+export async function getPlayerMapTotals(playerIds, mapId){
+
+    if(playerIds.length === 0) return {};
+
+    const query = `SELECT player_id, SUM(total_caps) as dom_caps
+    FROM nstats_match_dom WHERE player_id IN (?) AND map_id=? GROUP BY player_id`;
+
+    const result = await simpleQuery(query, [playerIds, mapId]);
+
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.player_id] = r;
+    }
+
+    return data;
+}
