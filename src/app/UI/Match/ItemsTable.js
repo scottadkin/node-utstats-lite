@@ -104,13 +104,13 @@ export default function ItemsTable({data, totalTeams}){
                 "displayValue": "Total",
                 "className": `player-name-td team-none text-left`
             },
-            "body": {"value": t.body, "displayValue": ignore0(t.body)},
-            "pads": {"value": t.pads, "displayValue": ignore0(t.pads)},
-            "shp": {"value": t.shp, "displayValue": ignore0(t.shp)},
-            "invis": {"value": t.invis, "displayValue": ignore0(t.invis)},
-            "belt": {"value": t.belt, "displayValue": ignore0(t.belt)},
-            "amp": {"value": t.amp, "displayValue": ignore0(t.amp)},
-            "boots": {"value": t.boots, "displayValue": ignore0(t.boots)},
+            "body": {"value": t.body, "displayValue": ignore0(t.body), "className": "team-none"},
+            "pads": {"value": t.pads, "displayValue": ignore0(t.pads), "className": "team-none"},
+            "shp": {"value": t.shp, "displayValue": ignore0(t.shp), "className": "team-none"},
+            "invis": {"value": t.invis, "displayValue": ignore0(t.invis), "className": "team-none"},
+            "belt": {"value": t.belt, "displayValue": ignore0(t.belt), "className": "team-none"},
+            "amp": {"value": t.amp, "displayValue": ignore0(t.amp), "className": "team-none"},
+            "boots": {"value": t.boots, "displayValue": ignore0(t.boots), "className": "team-none"},
         });
 
         tables.push(<InteractiveTable width="1" key={i} headers={headers} rows={rows[i]}/>);

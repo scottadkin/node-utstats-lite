@@ -4,6 +4,7 @@ import { getMapImageName as genericGetMapImageName } from "./generic.mjs";
 import { getAll, getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
+import { getPlayerMapTotals as getPlayerCTFMapTotals } from "./ctf.mjs";
 
 async function getMapId(name){
 
@@ -390,14 +391,49 @@ export async function getAllMatchIds(id){
 }
 
 
-export async function getPlayerMapTotals(playerIds){
+export async function getPlayerMapTotals(playerIds, mapId){
 
     if(playerIds.length === 0) return {};
 
-    const query = `SELECT player_id, COUNT(*) as total_matches, SUM(time_on_server) as playtime, SUM(score) as score,SUM(frags) as frags,
-    SUM(kills) as kills, SUM(deaths) as deaths, SUM(suicides) as suicides, SUM(team_kills) as team_kills FROM nstats_match_players WHERE player_id IN (?) GROUP BY player_id`;
 
-    return await simpleQuery(query, [playerIds]);
+    const query = `SELECT player_id, COUNT(*) as total_matches, SUM(time_on_server) as playtime, SUM(score) as score,SUM(frags) as frags,
+    SUM(kills) as kills, SUM(deaths) as deaths, SUM(suicides) as suicides, SUM(team_kills) as team_kills,
+    SUM(headshots) as headshots,
+    SUM(item_amp) as item_amp,
+    SUM(item_belt) as item_belt,
+    SUM(item_boots) as item_boots,
+    SUM(item_body) as item_body,
+    SUM(item_pads) as item_pads,
+    SUM(item_invis) as item_invis,
+    SUM(item_shp) as item_shp
+    FROM nstats_match_players WHERE player_id IN (?) AND map_id=? GROUP BY player_id`;
+
+    const data = await simpleQuery(query, [playerIds, mapId]);
+
+    const ctfData = await getPlayerCTFMapTotals(playerIds, mapId);
+
+    let bFoundCTF = false;
+
+    if(Object.keys(ctfData).length > 0){
+
+        bFoundCTF = true;
+        
+        for(let i = 0; i < data.length; i++){
+
+            const d = data[i];
+
+            const ctf = ctfData[d.player_id];
+
+            if(ctf === undefined) continue;
+
+            data[i] = {...d, ...ctf};
+        }
+    }
+    
+    //get dom totals
+
+
+    return {data, bFoundCTF};
 
 }
 
@@ -432,12 +468,23 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
 
         const p = players[i];
 
-        insertVars.push([p.player_id, mapId, gametypeId, p.playtime, p.total_matches, p.score, p.frags, p.kills, p.deaths, p.suicides, p.team_kills]);
+        insertVars.push([
+            p.player_id, mapId, gametypeId, p.playtime, p.total_matches, p.score, p.frags, p.kills, p.deaths, p.suicides, p.team_kills,
+            p.headshots, p.item_amp,p.item_belt,p.item_boots,p.item_body,p.item_pads,p.item_invis,p.item_shp,
+            p?.flag_taken ?? 0, p?.flag_pickup ?? 0, p?.flag_drop ?? 0, p?.flag_assist ?? 0, p?.flag_cover ?? 0,
+            p?.flag_seal ?? 0, p?.flag_cap ?? 0, p?.flag_kills ?? 0, p?.flag_return ?? 0, p?.flag_return_base ?? 0,
+            p?.flag_return_mid ?? 0, p?.flag_return_enemy_base ?? 0, p?.flag_return_save ?? 0, /**dom caps */ 0
+        ]);
     }
 
 
     const query = `INSERT INTO nstats_player_map_minute_averages 
-    (player_id, map_id, gametype_id, total_playtime, total_matches, score, frags, kills, deaths, suicides, team_kills) VALUES ?`;
+    (player_id, map_id, gametype_id, total_playtime, total_matches, score, frags, kills, deaths, suicides, team_kills,
+    headshots, item_amp, item_belt, item_boots, item_body, item_pads, item_invis, item_shp,
+    flag_taken, flag_pickup, flag_drop, flag_assist, flag_cover, flag_seal, flag_cap, flag_kills, flag_return, flag_return_base, 
+    flag_return_mid, flag_return_enemy_base, flag_return_save, dom_caps
+
+    ) VALUES ?`;
 
     await bulkInsert(query, insertVars);
 

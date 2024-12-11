@@ -938,13 +938,36 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
     //REMOVE THIS IF PEOPLE WANT MAP + GAMETYPE RANKINGS ADDED AS WELL
     gametypeId = 0;
 
-    const totals = await getPlayerMapTotals(playerIds);
+    const {data, bFoundCTF} = await getPlayerMapTotals(playerIds, mapId);
 
-    const keys = ["score", "frags", "kills", "deaths", "suicides", "team_kills"];
 
-    for(let i = 0; i < totals.length; i++){
+    let keys = ["score", "frags", "kills", "deaths", "suicides", "team_kills",
+        "headshots", "item_amp", "item_belt", "item_boots", "item_body", "item_pads", "item_invis", "item_shp"
+    ];
 
-        const t = totals[i];
+    const ctfKeys = [
+        "flag_taken",
+        "flag_pickup",
+        "flag_drop",
+        "flag_assist",
+        "flag_cover",
+        "flag_seal",
+        "flag_cap",
+        "flag_kill",
+        "flag_return",
+        "flag_return_base",
+        "flag_return_mid",
+        "flag_return_enemy_base",
+        "flag_return_save",
+    ];
+
+    if(bFoundCTF){
+        keys = [...keys, ...ctfKeys];
+    }
+
+    for(let i = 0; i < data.length; i++){
+
+        const t = data[i];
 
         if(t.playtime <= 0){
 
@@ -958,7 +981,6 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
 
             const k = keys[x];
     
-
             if(t[k] <= 0){
                 t[k] = 0;
                 continue;
@@ -967,8 +989,9 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
             t[k] = t[k] / minutes;
         }
 
+
         await deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapId);
-        await updateCurrentPlayerMapAverages(totals, gametypeId, mapId);
+        await updateCurrentPlayerMapAverages(data, gametypeId, mapId, bFoundCTF);
     }
 
 }

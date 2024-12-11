@@ -614,3 +614,33 @@ export async function setMatchMapGametypeIds(data){
 
     await Promise.all(queries);
 }
+
+
+export async function getPlayerMapTotals(playerIds, mapId){
+
+    if(playerIds.length === 0) return [];
+
+    const query = `SELECT player_id, SUM(flag_taken) as flag_taken, SUM(flag_pickup) as flag_pickup, 
+    SUM(flag_drop) as flag_drop, SUM(flag_assist) as flag_assist, SUM(flag_cover) as flag_cover,
+    SUM(flag_seal) as flag_seal, SUM(flag_cap) as flag_cap, SUM(flag_kill) as flag_kill, 
+    SUM(flag_return) as flag_return, SUM(flag_return_base) as flag_return_base, 
+    SUM(flag_return_mid) as flag_return_mid, SUM(flag_return_enemy_base) as flag_return_enemy_base, 
+    SUM(flag_return_save) as flag_return_save 
+    FROM nstats_match_ctf WHERE player_id IN (?) AND map_id=? GROUP BY player_id`;
+
+    const result = await simpleQuery(query, [playerIds, mapId]);
+
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.player_id] = r;
+    }
+
+    return data;
+
+
+}
