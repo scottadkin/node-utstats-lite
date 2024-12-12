@@ -1,11 +1,43 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
-import { getMapImageName as genericGetMapImageName } from "./generic.mjs";
+import { getMapImageName as genericGetMapImageName, sanitizePagePerPage } from "./generic.mjs";
 import { getAll, getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
 import { getPlayerMapTotals as getPlayerCTFMapTotals } from "./ctf.mjs";
 import { getPlayerMapTotals as getPlayerDOMMapTotals } from "./domination.mjs";
+
+
+const VALID_PLAYER_MAP_MINUTE_AVERAGES = {
+    "score": "Score", 
+    "frags": "Frags", 
+    "kills": "Kills", 
+    "deaths": "Deaths", 
+    "suicides": "Suicides", 
+    "team_kills": "",
+    "headshots": "", 
+    "item_amp": "", 
+    "item_belt": "", 
+    "item_boots": "", 
+    "item_body": "", 
+    "item_pads": "", 
+    "item_invis": "", 
+    "item_shp": "",
+    "flag_taken": "", 
+    "flag_pickup": "", 
+    "flag_drop": "", 
+    "flag_assist": "", 
+    "flag_cover": "", 
+    "flag_seal": "", 
+    "flag_cap": "", 
+    "flag_kills": "", 
+    "flag_return": "", 
+    "flag_return_base": "", 
+    "flag_return_mid": "", 
+    "flag_return_enemy_base": "", 
+    "flag_return_save": "", 
+    "dom_caps": ""
+};
 
 async function getMapId(name){
 
@@ -503,5 +535,41 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
     ) VALUES ?`;
 
     await bulkInsert(query, insertVars);
+}
 
+
+export function bValidMinuteCategory(type){
+
+    const keys = Object.keys(VALID_PLAYER_MAP_MINUTE_AVERAGES);
+
+    return keys.indexOf(type) === -1;
+}
+
+export async function getMapPlayerAverages(mapId, category, initialPage, initialPerPage){
+
+    const [page, perPage, start] = sanitizePagePerPage(initialPage, initialPerPage);
+
+    let title = "Kills";
+
+    category = category.toLowerCase();
+
+    if(bValidMinuteCategory(category)){
+        
+        title = VALID_PLAYER_MAP_MINUTE_AVERAGES[category];
+        
+    }else{
+        category = "kills";
+    }
+
+    const query = `SELECT player_id,total_playtime,kills as target_value FROM nstats_player_map_minute_averages WHERE map_id=? ORDER BY target_value DESC LIMIT ?, ?`;
+
+    const result = await simpleQuery(query, [mapId, start, perPage]);
+
+    const uniquePlayerIds = [...new Set(result.map((r) =>{
+        return r.player_id;
+    }))];
+
+    const players = await getBasicPlayerInfo(uniquePlayerIds);
+
+   return {"data": result, "players": players, "title": title};
 }

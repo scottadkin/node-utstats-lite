@@ -1,11 +1,12 @@
 import Header from "@/app/UI/Header";
-import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches } from "@/app/lib/maps.mjs";
+import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches, getMapPlayerAverages } from "@/app/lib/maps.mjs";
 import Image from "next/image";
 import MatchesList from "@/app/UI/MatchList";
 import Pagination from "@/app/UI/Pagination";
 import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import BasicSummary from "@/app/UI/Map/BasicSummary";
 import { getPageLayout } from "@/app/lib/pageLayout.mjs";
+import TopXPlayers from "@/app/UI/Map/TopXPlayers";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -73,6 +74,8 @@ export default async function MapPage({params, searchParams}){
     //FROM nstats_matches LEFT JOIN nstats_match_players ON nstats_matches.id=nstats_match_players.match_id ORDER BY kills DESC LIMIT 10`;
 
 
+    const testData = await getMapPlayerAverages(id, "kills", 1, 10);
+
     const elems = [];
     
     elems[pageLayout["Basic Summary"]] = (pageSettings["Display Basic Summary"] === "1") ? <BasicSummary key="basic" info={info} /> : null;
@@ -86,6 +89,7 @@ export default async function MapPage({params, searchParams}){
 
     return <main>
         <Header>{info.name}</Header>
+        <TopXPlayers data={testData} mapId={id} category={"kills"} perPage={10}/>
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>
