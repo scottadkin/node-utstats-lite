@@ -11,6 +11,10 @@ export async function GET(req){
         let id = searchParams.get("id") ?? NaN;
         id = parseInt(id);
         
+        let page = searchParams.get("page") ?? 1;
+        page = parseInt(page);
+        if(page !== page) page = 1;
+        if(page < 1) page = 1;
 
         let perPage = searchParams.get("pp") ?? DEFAULT_PER_PAGE;
         perPage = parseInt(perPage);
@@ -29,9 +33,10 @@ export async function GET(req){
 
             if(id !== id) throw new Error(`MapId must be a integer`);
 
-            const result = await getMapPlayerAverages(id, "kills", 1, 10);
+            const result = await getMapPlayerAverages(id, "kills", page, 10);
 
-            console.table(result);
+            return Response.json(result);
+            //console.table(result);
         }
 
         return Response.json({"error": "Unknown Command"});

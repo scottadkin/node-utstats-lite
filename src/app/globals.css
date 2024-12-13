@@ -765,10 +765,25 @@ canvas{
 	padding:var(--padding-1);
 	user-select: none;
 	border:1px solid var(--border-color-1);
+	color:white;
+	text-align: center;
 }
 
 .big-button:hover{
 	cursor: pointer;
 	background-color:var(--bg-color-1);
 	color:yellow;
+}
+
+.top-players{
+	margin-left:auto;
+	margin-right:auto;
+	display:inline-block;
+	min-width:var(--width-2);
+}
+
+.top-players table{
+	width:100%;
+	margin-top:-1px;
+	
 }

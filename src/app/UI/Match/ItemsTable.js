@@ -92,6 +92,7 @@ export default function ItemsTable({data, totalTeams}){
 
     for(let i = 0; i < rows.length; i++){
 
+        if(rows[i] === undefined) continue;
 
         if(rows[i].length === 0) continue;
 

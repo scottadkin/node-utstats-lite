@@ -1,7 +1,7 @@
 "use client"
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
-import { getPlayer, toPlaytime } from "@/app/lib/generic.mjs";
+import { getOrdinal, getPlayer, toPlaytime } from "@/app/lib/generic.mjs";
 import PlayerLink from "../PlayerLink";
 import { useReducer, useEffect } from "react";
 
@@ -10,9 +10,16 @@ function reducer(state, action){
     switch(action.type){
         case "load-data": {
             return {
+                ...state,
                 "data": action.data,
                 "players": action.players,
-                ...state
+                "title": action.title,      
+            }
+        }
+        case "change-page": {
+            return {
+                ...state,
+                "page": action.page
             }
         }
     }
@@ -21,18 +28,22 @@ function reducer(state, action){
 }
 
 
-async function loadData(mapId, category, page, perPage){
+async function loadData(mapId, category, page, perPage, dispatch){
 
     console.log("load data");
 
     try{
 
-        const url = `/api/maps?mode=avg&id=${mapId}&category=${category}`;
+        const url = `/api/maps?mode=avg&id=${mapId}&category=${category}&page=${page}`;
 
         console.log(url);
 
         const req = await fetch(url);
         const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+        
+        dispatch({"type": "load-data", "data": res.data, "players": res.players, "title": res.title});
 
         console.log(res);
     }catch(err){
@@ -50,13 +61,13 @@ export default function TopXPlayers({mapId, data, category, perPage}){
         "category": "deaths",
         "perPage": perPage,
         "page": 1,
-        "title": "Title"
+        "title": "Kills"
     });
 
 
     useEffect(() =>{
 
-        loadData(mapId, state.category, state.page, state.perPage);
+        loadData(mapId, state.category, state.page, state.perPage, dispatch);
 
         return () =>{
 
@@ -65,9 +76,10 @@ export default function TopXPlayers({mapId, data, category, perPage}){
     },[mapId, state.category, state.page, state.perPage]);
 
     const headers = {
+        "place": {"title": " "},
         "player": {"title": "Player"},
         "playtime": {"title": "Playtime"},
-        "value": {"title": "VALUE"}
+        "value": {"title": state.title}
     };
 
     const rows = [];
@@ -78,7 +90,14 @@ export default function TopXPlayers({mapId, data, category, perPage}){
 
         const player = getPlayer(state.players, d.player_id);
 
+        const place = (state.page - 1) * state.perPage + i + 1;
+
         rows.push({
+            "place": {
+                "value": "",
+                "displayValue": <>{place}{getOrdinal(place)}</>,
+                "className": "ordinal"
+            },
             "player": {
                 "value": player.name.toLowerCase(), 
                 "displayValue": <PlayerLink country={player.country} id={player.id}>{player.name}</PlayerLink>, 
@@ -86,7 +105,7 @@ export default function TopXPlayers({mapId, data, category, perPage}){
             },
             "playtime": {
                 "value": d.total_playtime,
-                "displayValue": toPlaytime(d.total_playtime)  ,
+                "displayValue": toPlaytime(d.total_playtime),
                 "className": "date"
             },
             "value": {
@@ -99,6 +118,22 @@ export default function TopXPlayers({mapId, data, category, perPage}){
         <div className="info">
             Averages based on per minute played.
         </div>
-        <InteractiveTable width={4} headers={headers} rows={rows} sortBy={"value"} order="desc"/>
+        <div className="text-center">
+            <div className="top-players">
+                <div className="duo">
+                    <div className="big-button" onClick={() =>{
+                        let page = state.page-1;
+                        if(page < 1) page = 1;
+                        dispatch({"type": "change-page", "page": page});
+                    }}>Previous</div>
+                    <div className="big-button" onClick={() =>{
+                        let page = state.page+1;
+                       // if(page < 1) page = 1;
+                        dispatch({"type": "change-page", "page": page});
+                    }}>Next</div>
+                </div>
+                <InteractiveTable headers={headers} rows={rows} sortBy={"value"} order="desc"/>
+            </div>
+        </div>
     </>
 }
