@@ -85,7 +85,7 @@ export default async function MatchPage({params, searchParams}) {
     elems[pageLayout["Screenshot"]] = (pageSettings["Display Screenshot"] === "1") ? <MatchScreenshot key="sshot" data={matchData}/> : null;
     elems[pageLayout["Frags"]] = (pageSettings["Display Frags"] === "1") ? <FragTable key="frags" data={matchData} totalTeams={totalTeams}/> : null;
     elems[pageLayout["CTF"]] = (pageSettings["Display CTF"] === "1") ? <CTFTable key="ctf" data={matchData.ctf.playerData} players={matchData.basicPlayers} totalTeams={totalTeams}/> : null;
-    elems[pageLayout["CTF Caps"]] = (pageSettings["Display CTF Caps"] === "1") ? <CTFCaps caps={matchData.ctf.caps} totalTeams={totalTeams} players={matchData.basicPlayers} matchStart={matchData.basic.match_start}/> : null;
+    elems[pageLayout["CTF Caps"]] = (pageSettings["Display CTF Caps"] === "1") ? <CTFCaps key="ctf-caps" caps={matchData.ctf.caps} totalTeams={totalTeams} players={matchData.basicPlayers} matchStart={matchData.basic.match_start}/> : null;
    
     elems[pageLayout["DOM"]] = (pageSettings["Display DOM"] === "1") ? <DomTable key="dom" data={matchData.dom} players={matchData.basicPlayers}/>: null;
     elems[pageLayout["Weapons"]] = (pageSettings["Display Weapons"] === "1") ? <WeaponStats key="weapons" data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers} weaponImages={weaponImages}/> : null;

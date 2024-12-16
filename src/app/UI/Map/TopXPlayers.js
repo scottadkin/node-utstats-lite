@@ -5,6 +5,8 @@ import { getOrdinal, getPlayer, toPlaytime } from "@/app/lib/generic.mjs";
 import PlayerLink from "../PlayerLink";
 import { useReducer, useEffect } from "react";
 
+const PER_PAGE = 10;
+
 function reducer(state, action){
 
     switch(action.type){
@@ -13,7 +15,9 @@ function reducer(state, action){
                 ...state,
                 "data": action.data,
                 "players": action.players,
-                "title": action.title,      
+                "title": action.title,  
+                "totalEntries": action.totalEntries,
+                "totalPages": action.totalPages    
             }
         }
         case "change-page": {
@@ -34,16 +38,31 @@ async function loadData(mapId, category, page, perPage, dispatch){
 
     try{
 
-        const url = `/api/maps?mode=avg&id=${mapId}&category=${category}&page=${page}`;
-
-        console.log(url);
+        const url = `/api/maps?mode=avg&id=${mapId}&category=${category}&pp=${PER_PAGE}&page=${page}`;
 
         const req = await fetch(url);
         const res = await req.json();
 
         if(res.error !== undefined) throw new Error(res.error);
+
+        console.log(res);
+
+        let totalPages = res.totalEntries / PER_PAGE;
+
+        if(totalPages !== totalPages) totalPages = 1;
+
+        totalPages = Math.ceil(totalPages);
+
+        if(totalPages < 1) totalPages = 1;
         
-        dispatch({"type": "load-data", "data": res.data, "players": res.players, "title": res.title});
+        dispatch({
+            "type": "load-data", 
+            "data": res.data, 
+            "players": res.players, 
+            "title": res.title, 
+            "totalEntries": res.totalEntries,
+            "totalPages": totalPages
+        });
 
         console.log(res);
     }catch(err){
@@ -61,7 +80,9 @@ export default function TopXPlayers({mapId, data, category, perPage}){
         "category": "deaths",
         "perPage": perPage,
         "page": 1,
-        "title": "Kills"
+        "title": "Kills",
+        "totalEntries": 0,
+        "totalPages": 1
     });
 
 
@@ -120,6 +141,7 @@ export default function TopXPlayers({mapId, data, category, perPage}){
         </div>
         <div className="text-center">
             <div className="top-players">
+                <div className="top-players-info">Displaying Page {state.page} of {state.totalPages}</div>
                 <div className="duo">
                     <div className="big-button" onClick={() =>{
                         let page = state.page-1;
@@ -128,7 +150,7 @@ export default function TopXPlayers({mapId, data, category, perPage}){
                     }}>Previous</div>
                     <div className="big-button" onClick={() =>{
                         let page = state.page+1;
-                       // if(page < 1) page = 1;
+                        if(page > state.totalPages) page = state.totalPages;
                         dispatch({"type": "change-page", "page": page});
                     }}>Next</div>
                 </div>

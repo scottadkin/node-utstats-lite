@@ -543,6 +543,15 @@ export function bValidMinuteCategory(type){
     const keys = Object.keys(VALID_PLAYER_MAP_MINUTE_AVERAGES);
 
     return keys.indexOf(type) === -1;
+} 
+
+export async function getMapPlayerAveragesTotalCount(mapId){
+
+    const query = `SELECT COUNT(*) as total_values FROM nstats_player_map_minute_averages WHERE map_id=?`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    return result[0].total_values;
 }
 
 export async function getMapPlayerAverages(mapId, category, initialPage, initialPerPage){
@@ -571,5 +580,7 @@ export async function getMapPlayerAverages(mapId, category, initialPage, initial
 
     const players = await getBasicPlayerInfo(uniquePlayerIds);
 
-   return {"data": result, "players": players, "title": title};
+    const totalEntries = await getMapPlayerAveragesTotalCount(mapId);
+
+    return {"data": result, "players": players, "title": title, "totalEntries": totalEntries};
 }

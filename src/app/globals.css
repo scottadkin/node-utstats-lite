@@ -787,3 +787,12 @@ canvas{
 	margin-top:-1px;
 	
 }
+
+.top-players-info{
+	background-color:var(--bg-color-3);
+	text-align: center;
+	color:var(--font-color-1);
+	padding:var(--padding-2);
+	font-size:var(--font-size-small);
+	line-height: var(--line-height-1);
+}
