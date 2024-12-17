@@ -1,5 +1,5 @@
 import Header from "@/app/UI/Header";
-import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches, getMapPlayerAverages } from "@/app/lib/maps.mjs";
+import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches, getMapPlayerAverages, VALID_PLAYER_MAP_MINUTE_AVERAGES } from "@/app/lib/maps.mjs";
 import Image from "next/image";
 import MatchesList from "@/app/UI/MatchList";
 import Pagination from "@/app/UI/Pagination";
@@ -89,7 +89,7 @@ export default async function MapPage({params, searchParams}){
 
     return <main>
         <Header>{info.name}</Header>
-        <TopXPlayers data={testData} mapId={id} category={"kills"} perPage={10}/>
+        <TopXPlayers data={testData} mapId={id} category={"kills"} perPage={10} validOptions={VALID_PLAYER_MAP_MINUTE_AVERAGES}/>
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>

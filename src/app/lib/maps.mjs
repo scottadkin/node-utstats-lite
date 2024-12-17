@@ -8,35 +8,35 @@ import { getPlayerMapTotals as getPlayerCTFMapTotals } from "./ctf.mjs";
 import { getPlayerMapTotals as getPlayerDOMMapTotals } from "./domination.mjs";
 
 
-const VALID_PLAYER_MAP_MINUTE_AVERAGES = {
+export const VALID_PLAYER_MAP_MINUTE_AVERAGES = {
     "score": "Score", 
     "frags": "Frags", 
     "kills": "Kills", 
     "deaths": "Deaths", 
     "suicides": "Suicides", 
-    "team_kills": "",
-    "headshots": "", 
-    "item_amp": "", 
-    "item_belt": "", 
-    "item_boots": "", 
-    "item_body": "", 
-    "item_pads": "", 
-    "item_invis": "", 
-    "item_shp": "",
-    "flag_taken": "", 
-    "flag_pickup": "", 
-    "flag_drop": "", 
-    "flag_assist": "", 
-    "flag_cover": "", 
-    "flag_seal": "", 
-    "flag_cap": "", 
-    "flag_kills": "", 
-    "flag_return": "", 
-    "flag_return_base": "", 
-    "flag_return_mid": "", 
-    "flag_return_enemy_base": "", 
-    "flag_return_save": "", 
-    "dom_caps": ""
+    "team_kills": "Team Kills",
+    "headshots": "Headshots", 
+    "item_amp": "UDamage", 
+    "item_belt": "Shield Belts", 
+    "item_boots": "Jump Boots", 
+    "item_body": "Body Armour", 
+    "item_pads": "Thigh Pads", 
+    "item_invis": "Invisibility", 
+    "item_shp": "Super Health Pack",
+    "flag_taken": "Flag Taken", 
+    "flag_pickup": "Flag Pickups", 
+    "flag_drop": "Flag Drops", 
+    "flag_assist": "Flag Assists", 
+    "flag_cover": "Flag Covers", 
+    "flag_seal": "Flag Seals", 
+    "flag_cap": "Flag Caps", 
+    "flag_kills": "Flag Kills", 
+    "flag_return": "Flag Returns", 
+    "flag_return_base": "Flag Returns Base", 
+    "flag_return_mid": "Flag Returns Mid", 
+    "flag_return_enemy_base": "Flag Returns Enemy Base", 
+    "flag_return_save": "Flag Returns Close Save", 
+    "dom_caps": "Domination Caps"
 };
 
 async function getMapId(name){
@@ -520,7 +520,7 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
             p.player_id, mapId, gametypeId, p.playtime, p.total_matches, p.score, p.frags, p.kills, p.deaths, p.suicides, p.team_kills,
             p.headshots, p.item_amp,p.item_belt,p.item_boots,p.item_body,p.item_pads,p.item_invis,p.item_shp,
             p?.flag_taken ?? 0, p?.flag_pickup ?? 0, p?.flag_drop ?? 0, p?.flag_assist ?? 0, p?.flag_cover ?? 0,
-            p?.flag_seal ?? 0, p?.flag_cap ?? 0, p?.flag_kills ?? 0, p?.flag_return ?? 0, p?.flag_return_base ?? 0,
+            p?.flag_seal ?? 0, p?.flag_cap ?? 0, p?.flag_kill ?? 0, p?.flag_return ?? 0, p?.flag_return_base ?? 0,
             p?.flag_return_mid ?? 0, p?.flag_return_enemy_base ?? 0, p?.flag_return_save ?? 0, p?.dom_caps ?? 0
         ]);
     }
@@ -542,7 +542,8 @@ export function bValidMinuteCategory(type){
 
     const keys = Object.keys(VALID_PLAYER_MAP_MINUTE_AVERAGES);
 
-    return keys.indexOf(type) === -1;
+
+    return keys.indexOf(type) !== -1;
 } 
 
 export async function getMapPlayerAveragesTotalCount(mapId){
@@ -570,7 +571,7 @@ export async function getMapPlayerAverages(mapId, category, initialPage, initial
         category = "kills";
     }
 
-    const query = `SELECT player_id,total_playtime,kills as target_value FROM nstats_player_map_minute_averages WHERE map_id=? ORDER BY target_value DESC LIMIT ?, ?`;
+    const query = `SELECT player_id,total_playtime,${category} as target_value FROM nstats_player_map_minute_averages WHERE map_id=? ORDER BY target_value DESC LIMIT ?, ?`;
 
     const result = await simpleQuery(query, [mapId, start, perPage]);
 

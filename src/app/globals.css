@@ -779,7 +779,8 @@ canvas{
 	margin-left:auto;
 	margin-right:auto;
 	display:inline-block;
-	min-width:var(--width-2);
+	min-width:50%;
+	max-width:var(--max-table-width-4);
 }
 
 .top-players table{

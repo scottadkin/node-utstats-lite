@@ -25,20 +25,24 @@ export async function GET(req){
           if(perPage > MAX_PER_PAGE) perPage = MAX_PER_PAGE;
           if(perPage <= 0) perPage = DEFAULT_PER_PAGE;
 
-          console.log(id, mode);
-          
+          let category = searchParams.get("cat") ?? null;
 
-          console.log(`id = ${id}`);
+          if(category != null){
+               category = category.toLowerCase();
+          }else{
+               category = "kills";
+          }
 
-          
-          
-          console.log(mode);
+
+
+          console.log(`id = ${id} cat = `, category);
+
 
           if(mode === "avg"){
 
                if(id !== id) throw new Error(`MapId must be a integer`);
 
-               const result = await getMapPlayerAverages(id, "kills", page, perPage);
+               const result = await getMapPlayerAverages(id, category, page, perPage);
 
                return Response.json(result);
                //console.table(result);

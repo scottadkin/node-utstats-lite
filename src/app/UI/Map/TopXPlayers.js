@@ -26,6 +26,12 @@ function reducer(state, action){
                 "page": action.page
             }
         }
+        case "set-category": {
+            return {
+                ...state,
+                "category": action.value
+            }
+        }
     }
 
     return state;
@@ -38,7 +44,7 @@ async function loadData(mapId, category, page, perPage, dispatch){
 
     try{
 
-        const url = `/api/maps?mode=avg&id=${mapId}&category=${category}&pp=${PER_PAGE}&page=${page}`;
+        const url = `/api/maps?mode=avg&id=${mapId}&cat=${category}&pp=${PER_PAGE}&page=${page}`;
 
         const req = await fetch(url);
         const res = await req.json();
@@ -70,9 +76,29 @@ async function loadData(mapId, category, page, perPage, dispatch){
     }
 }
 
-export default function TopXPlayers({mapId, data, category, perPage}){
+function renderOptions(types, state, dispatch){
+
+
+    const options = [];
+
+    for(const [key, value] of Object.entries(types)){
+
+        options.push(<option key={key} value={key}>{value}</option>);
+    }
+
+    return <>
+        <select value={state.category} onChange={(e) =>{
+            dispatch({"type": "set-category", "value": e.target.value});
+        }}>
+            {options}
+        </select>
+    </>
+}
+
+export default function TopXPlayers({mapId, data, category, perPage, validOptions}){
 
     console.log(data);
+    console.log(validOptions);
 
     const [state, dispatch] = useReducer(reducer, {
         "data": data.data,
@@ -131,11 +157,16 @@ export default function TopXPlayers({mapId, data, category, perPage}){
             },
             "value": {
                 "value": d.target_value,  
+                "displayValue": d.target_value.toFixed(2),  
             }
         });
     }
     return <>
-        <Header>Top {state.title} Players</Header>
+        <Header>Top Player Averages</Header>
+        <div className="form-row">
+            <label>Data Type</label>
+            {renderOptions(validOptions, state, dispatch)}
+        </div>
         <div className="info">
             Averages based on per minute played.
         </div>
@@ -154,7 +185,7 @@ export default function TopXPlayers({mapId, data, category, perPage}){
                         dispatch({"type": "change-page", "page": page});
                     }}>Next</div>
                 </div>
-                <InteractiveTable headers={headers} rows={rows} sortBy={"value"} order="desc"/>
+                <InteractiveTable headers={headers} rows={rows} sortBy={"value"} order="desc" bNoHeaderSorting={true}/>
             </div>
         </div>
     </>
