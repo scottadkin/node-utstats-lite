@@ -1,6 +1,6 @@
 "use client"
 import InteractiveTable from "../InteractiveTable";
-import { getTeamColorClass, getPlayer, ignore0 } from "@/app/lib/generic.mjs";
+import { getTeamColorClass, getPlayer, ignore0, toPlaytime } from "@/app/lib/generic.mjs";
 import Header from "../Header";
 import Tabs from "../Tabs";
 import { useState } from "react";
@@ -17,7 +17,8 @@ const initialGeneralTotals = {
     "cap": 0,
     "kill": 0,
     "return": 0, 
-    "players": 0
+    "players": 0,
+    "carryTime": 0
 };
 
 const initialReturnTotals = {
@@ -46,6 +47,7 @@ function createGeneralRow(player, d){
         "cap": {"value": d.flag_assist, "displayValue": ignore0(d.flag_cap)},
         "kill": {"value": d.flag_kill, "displayValue": ignore0(d.flag_kill)},
         "return": {"value": d.flag_return, "displayValue": ignore0(d.flag_return)},
+        "carryTime": {"value": d.flag_carry_time, "displayValue": toPlaytime(d.flag_carry_time, true), "className": "date"},
     };
 }
 
@@ -86,6 +88,7 @@ export default function CTFTable({players, data}){
             "cap": {"title": "Capture", "mouseOverBox": {"title": "Flag Capture", "content": "Player captured the enemy flag."}},
             "kill": {"title": "Kill", "mouseOverBox": {"title": "Flag Kill", "content": "Player killed an enemy carrying their flag."}},
             "return": {"title": "Return", "mouseOverBox": {"title": "Flag Return", "content": "Player returned their flag."}},
+            "carryTime": {"title": "Carry Time", "mouseOverBox": {"title": "Flag Carry Time", "content": "How long the player held the enemy flag."}},
 
         }, "returns": {
             "player": {"title": "Player"},
@@ -137,6 +140,7 @@ export default function CTFTable({players, data}){
             t.cap += d.flag_cap;
             t.kill += d.flag_kill;
             t.return += d.flag_return;
+            t.carryTime += d.flag_carry_time;
 
         }else{
             rows[player.team].push(createReturnRow(player, d));
@@ -175,6 +179,7 @@ export default function CTFTable({players, data}){
                     "cap": {"value": t.cap, "displayValue": ignore0(t.cap), "className": "team-none"},
                     "kill": {"value": t.kill, "displayValue": ignore0(t.kill), "className": "team-none"},
                     "return": {"value": t.return, "displayValue": ignore0(t.return), "className": "team-none"},
+                    "carryTime": {"value": t.carryTime, "displayValue": toPlaytime(t.carryTime, true), "className": "team-none"},
                 }
             );
         }else{
