@@ -21,8 +21,10 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Social Media" ,"type": `string`, "name": "Twitch Link", "value": ""},
     {"category": "Welcome Message" ,"type": `string`, "name": "Welcome Title", "value": "Welcome to Node UTStats-lite"},
     {"category": "Welcome Message" ,"type": `longtext`, "name": "Welcome Message", "value": "Welcome to Node UTStats-lite, stats tracking website for our Unreal Tournament servers."},
+    
     {"category": "Map" ,"type": `bool`, "name": "Display Basic Summary", "value": 1},
     {"category": "Map" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
+    {"category": "Map" ,"type": `bool`, "name": "Display Player Top Averages", "value": 1},
 
     {"category": "Match" ,"type": `bool`, "name": "Display Basic Info", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Screenshot", "value": 1},

@@ -34,10 +34,6 @@ export async function GET(req){
           }
 
 
-
-          console.log(`id = ${id} cat = `, category);
-
-
           if(mode === "avg"){
 
                if(id !== id) throw new Error(`MapId must be a integer`);

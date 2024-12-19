@@ -87,9 +87,13 @@ export default async function MapPage({params, searchParams}){
         <Pagination currentPage={page} perPage={perPage} url={`/map/${id}/?pp=${perPage}&page=`} results={totalMatches}/>
     </div> : null;
 
+
+    elems[pageLayout["Player Top Averages"]] = (pageSettings["Display Player Top Averages"] === "1") ? <TopXPlayers data={testData} mapId={id} category={"kills"} 
+        perPage={25} validOptions={VALID_PLAYER_MAP_MINUTE_AVERAGES}/> : null;
+
     return <main>
         <Header>{info.name}</Header>
-        <TopXPlayers data={testData} mapId={id} category={"kills"} perPage={10} validOptions={VALID_PLAYER_MAP_MINUTE_AVERAGES}/>
+        
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>

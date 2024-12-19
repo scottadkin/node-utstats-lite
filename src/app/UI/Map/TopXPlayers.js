@@ -5,7 +5,7 @@ import { getOrdinal, getPlayer, toPlaytime } from "@/app/lib/generic.mjs";
 import PlayerLink from "../PlayerLink";
 import { useReducer, useEffect } from "react";
 
-const PER_PAGE = 10;
+const PER_PAGE = 25;
 
 function reducer(state, action){
 
@@ -29,7 +29,8 @@ function reducer(state, action){
         case "set-category": {
             return {
                 ...state,
-                "category": action.value
+                "category": action.value,
+                "page": 1
             }
         }
     }
@@ -95,6 +96,28 @@ function renderOptions(types, state, dispatch){
     </>
 }
 
+
+function renderPagination(state){
+
+    if(state.totalPages < 2) return null;
+
+    return <>
+        <div className="top-players-info">Displaying Page {state.page} of {state.totalPages}</div>
+        <div className="duo">
+            <div className="big-button" onClick={() =>{
+                let page = state.page-1;
+                if(page < 1) page = 1;
+                dispatch({"type": "change-page", "page": page});
+            }}>Previous</div>
+            <div className="big-button" onClick={() =>{
+                let page = state.page+1;
+                if(page > state.totalPages) page = state.totalPages;
+                dispatch({"type": "change-page", "page": page});
+            }}>Next</div>
+        </div>
+    </>
+}
+
 export default function TopXPlayers({mapId, data, category, perPage, validOptions}){
 
     console.log(data);
@@ -103,7 +126,7 @@ export default function TopXPlayers({mapId, data, category, perPage, validOption
     const [state, dispatch] = useReducer(reducer, {
         "data": data.data,
         "players": data.players,
-        "category": "deaths",
+        "category": "kills",
         "perPage": perPage,
         "page": 1,
         "title": "Kills",
@@ -172,19 +195,7 @@ export default function TopXPlayers({mapId, data, category, perPage, validOption
         </div>
         <div className="text-center">
             <div className="top-players">
-                <div className="top-players-info">Displaying Page {state.page} of {state.totalPages}</div>
-                <div className="duo">
-                    <div className="big-button" onClick={() =>{
-                        let page = state.page-1;
-                        if(page < 1) page = 1;
-                        dispatch({"type": "change-page", "page": page});
-                    }}>Previous</div>
-                    <div className="big-button" onClick={() =>{
-                        let page = state.page+1;
-                        if(page > state.totalPages) page = state.totalPages;
-                        dispatch({"type": "change-page", "page": page});
-                    }}>Next</div>
-                </div>
+                {renderPagination(state)}
                 <InteractiveTable headers={headers} rows={rows} sortBy={"value"} order="desc" bNoHeaderSorting={true}/>
             </div>
         </div>
