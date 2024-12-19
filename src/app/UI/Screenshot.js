@@ -403,13 +403,13 @@ class ScreenshotImage{
 
     renderSmartCTFBar(name, typeName, value, x, y, index){
 
-        const maxWidth = 11;
+        const maxWidth = 13;
 
         const barHeight = 0.4;
-        const barOffsetX = 4.2;
+        const barOffsetX = 4.6;
         const rowOffset = 1.6;
 
-        const offsetX = (index % 2 === 0) ? 0 : 15.6;
+        const offsetX = (index % 2 === 0) ? 0 : 18;
         const offsetY = Math.floor(index * 0.5) * rowOffset;
         const fontSize = this.scale(1.1,"y");
 
@@ -420,14 +420,14 @@ class ScreenshotImage{
             "color":"white",
             "x": x + offsetX,
             "y": y + offsetY,
-            "maxWidth": 2.5
+            "maxWidth": 2.2
         };
 
         const valueOptions = {
             "text": value,
             "textAlign": "right",
             "color":"white",
-            "x": x + offsetX + 3.8,
+            "x": x + offsetX + 4.3,
             "y": y + offsetY,
             "maxWidth": 2
         };
@@ -508,15 +508,15 @@ class ScreenshotImage{
 
 
         const barNames = [
-            "Caps", "Covers", "Grabs", "Returns", "Assists", "FlagKills"
+            "Caps", "Covers", "Grabs", "Returns", "Assists", "FlagKills", "Seals", "CarryTime"
         ];
 
         const typeNames = [
-            "flag_cap", "flag_cover", "flag_taken", "flag_return", "flag_assist", "flag_kill"
+            "flag_cap", "flag_cover", "flag_taken", "flag_return", "flag_assist", "flag_kill", "flag_seal", "flag_carry_time"
         ];
 
 
-        const startX = (teamId === 0) ? 10 : 60;
+        const startX = (teamId === 0) ? 5 : 55;
         const startY = 15;
 
         const bgShade = "rgba(0,0,0,0.25)";
@@ -529,9 +529,9 @@ class ScreenshotImage{
 
         const pingFontSize = 0.9;
 
-        const width = 35;
+        const width = 40;
         const headerHeight = 5;
-        const playerHeight = 9;
+        const playerHeight = 9.5;
 
         let totalPlayers = 0;
 
@@ -815,7 +815,9 @@ class ScreenshotImage{
             "flag_taken": 0, 
             "flag_return": 0, 
             "flag_assist": 0, 
-            "flag_kill": 0
+            "flag_kill": 0,
+            "flag_carry_time": 0,
+            "flag_seal": 0
         };
 
         this.ctfTotals = {
@@ -824,7 +826,9 @@ class ScreenshotImage{
             "flag_taken": 0, 
             "flag_return": 0, 
             "flag_assist": 0, 
-            "flag_kill": 0
+            "flag_kill": 0,
+            "flag_carry_time": 0,
+            "flag_seal": 0
         };
 
         for(let i = 0; i < this.data.ctf.playerData.length; i++){
