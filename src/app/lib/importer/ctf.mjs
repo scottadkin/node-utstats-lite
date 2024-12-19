@@ -181,6 +181,25 @@ export class CTF{
                 continue;
             }
 
+            if(e.type === "taken" || e.type === "pickedup"){
+                player.lastFlagPickupTime = e.timestamp;
+            }
+
+            if(e.type === "dropped" || e.type === "capture"){
+
+                const diff = e.timestamp - player.lastFlagPickupTime;
+
+                if(diff > player.stats.ctf.flagCarryTime.max){
+                    player.stats.ctf.flagCarryTime.max = diff;
+                }
+
+                if(player.stats.ctf.flagCarryTime.min === -1 || diff < player.stats.ctf.flagCarryTime.min){
+                    player.stats.ctf.flagCarryTime.min = diff;
+                }
+
+                player.stats.ctf.flagCarryTime.total += diff;
+            }
+
             player.stats.ctf[e.type]++;
         }
 

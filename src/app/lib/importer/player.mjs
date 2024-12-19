@@ -73,7 +73,12 @@ export class Player{
                 "cover": 0,
                 "taken": 0,
                 "pickedup": 0,
-                "seal": 0
+                "seal": 0,
+                "flagCarryTime": {
+                    "min": -1,
+                    "total": 0,
+                    "max": 0
+                }
             },
             "dom": {
                 "controlPoints": {}
@@ -96,7 +101,8 @@ export class Player{
         //last time player killed or died
         this.lastFragEvent = -99999;
 
-
+        this.lastFlagPickupTime = -9999;
+        
         this.teamChanges = [];
     }
 

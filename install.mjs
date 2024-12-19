@@ -218,7 +218,10 @@ const queries = [
             flag_return_base int NOT NULL,
             flag_return_mid int NOT NULL,
             flag_return_enemy_base int NOT NULL,
-            flag_return_save int NOT NULL
+            flag_return_save int NOT NULL,
+            flag_carry_time FLOAT NOT NULL,
+            flag_carry_time_min FLOAT NOT NULL,
+            flag_carry_time_max FLOAT NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_dom_control_points (
@@ -735,6 +738,10 @@ async function addPageLayouts(){
 
         await addColumn("nstats_match_ctf", "map_id", "INT NOT NULL AFTER match_id");
         await addColumn("nstats_match_ctf", "gametype_id", "INT NOT NULL AFTER map_id");
+
+        await addColumn("nstats_match_ctf", "flag_carry_time", "FLOAT NOT NULL AFTER flag_return_save");
+        await addColumn("nstats_match_ctf", "flag_carry_time_min", "FLOAT NOT NULL AFTER flag_carry_time");
+        await addColumn("nstats_match_ctf", "flag_carry_time_max", "FLOAT NOT NULL AFTER flag_carry_time_min");
 
         await addColumn("nstats_match_dom", "map_id", "INT NOT NULL AFTER match_id");
         await addColumn("nstats_match_dom", "gametype_id", "INT NOT NULL AFTER map_id");

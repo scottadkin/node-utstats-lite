@@ -510,7 +510,14 @@ export class PlayerManager{
         if(this.players.length > 0){
 
             ctfKeys = Object.keys(this.players[0].stats.ctf);
+
+            const carryIndex = ctfKeys.indexOf("flagCarryTime");
+
+            if(carryIndex !== -1){
+                ctfKeys.splice(carryIndex, 1);
+            }
         }
+
 
         const damageKeys = [
             "damageDelt",
@@ -610,6 +617,21 @@ export class PlayerManager{
 
                 master.stats.ctf[type] += p.stats.ctf[type];
             }
+            
+
+            //
+            if(master.stats.ctf.flagCarryTime.min > p.stats.ctf.flagCarryTime.min){
+
+                master.stats.ctf.flagCarryTime.min = p.stats.ctf.flagCarryTime.min;
+            }
+
+            if(master.stats.ctf.flagCarryTime.max < p.stats.ctf.flagCarryTime.max){
+
+                master.stats.ctf.flagCarryTime.max = p.stats.ctf.flagCarryTime.max;
+            }
+
+            master.stats.ctf.flagCarryTime.total += p.stats.ctf.flagCarryTime.total;
+
 
             for(const [pointId, pointCaps] of Object.entries(p.stats.dom.controlPoints)){
                 
