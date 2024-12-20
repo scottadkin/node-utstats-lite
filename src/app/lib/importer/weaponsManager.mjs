@@ -1,4 +1,4 @@
-import { getWeaponId, createWeapon, bulkInsertMatchWeaponStats, updatePlayerTotals } from "../weapons.mjs";
+import { getWeaponId, createWeapon, bulkInsertMatchWeaponStats, updatePlayerTotals, calcMapWeaponsTotals } from "../weapons.mjs";
 import { removeDoubleEnforcer } from "../generic.mjs";
 
 export class WeaponsManager{
@@ -97,5 +97,10 @@ export class WeaponsManager{
         }
 
         await updatePlayerTotals(playerIds);
+    }
+
+    async updateMapTotals(mapId){
+
+        await calcMapWeaponsTotals(mapId);
     }
 }

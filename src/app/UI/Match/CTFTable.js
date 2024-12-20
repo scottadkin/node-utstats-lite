@@ -289,21 +289,22 @@ export default function CTFTable({players, data}){
                    "total": {
                         "value": t.total,
                         "displayValue": toPlaytime(t.total),
-                        "className": "date"
+                        "className": "date team-none"
                    },
                    "max": {
                         "value": t.max,
                         "displayValue": toPlaytime(t.max),
-                        "className": "date"
+                        "className": "date team-none"
                    },
                    "timesHeld": {
                         "value": t.timesHeld,
-                        "displayValue": ignore0(t.timesHeld)
+                        "displayValue": ignore0(t.timesHeld),
+                        "className": "team-none"
                    },
                    "avg": {
                         "value": avg,
                         "displayValue": toPlaytime(avg, true),
-                        "className": "date"
+                        "className": "date team-none"
                    }
                 }
             );

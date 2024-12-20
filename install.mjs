@@ -531,7 +531,22 @@ const queries = [
         flag_return_enemy_base float NOT NULL,
         flag_return_save float NOT NULL,
         dom_caps float NOT NULL,
-        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+        `CREATE TABLE IF NOT EXISTS nstats_map_weapon_totals (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            map_id int(11) NOT NULL,
+            total_matches int(11) NOT NULL,
+            total_playtime FLOAT NOT NULL,
+            weapon_id int(11) NOT NULL,
+            kills int(11) NOT NULL,
+            deaths int(11) NOT NULL,
+            team_kills int(11) NOT NULL,
+            kills_per_min FLOAT NOT NULL,
+            deaths_per_min FLOAT NOT NULL,
+            team_kills_per_min FLOAT NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
 
 ];

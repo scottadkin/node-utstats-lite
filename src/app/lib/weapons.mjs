@@ -1,5 +1,6 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
 import { getMatchesGametype } from "./matches.mjs";
+import { getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
 
 
@@ -339,4 +340,81 @@ export async function setMatchMapGametypeIds(data){
     }
 
     await Promise.all(queries);
+}
+
+async function deleteMapWeaponTotals(mapId){
+
+    const query = `DELETE FROM nstats_match_weapon_stats WHERE map_id=?`;
+
+    return await simpleQuery(query, [mapId]);
+}
+
+async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
+
+    const query = `INSERT INTO nstats_map_weapon_totals
+    (map_id, total_matches, total_playtime, weapon_id, kills, deaths, team_kills, kills_per_min, deaths_per_min, team_kills_per_min) 
+    VALUES ?`;
+
+    const insertVars = [];
+
+    for(const [weaponId, d] of Object.entries(totals)){
+
+        insertVars.push([
+            mapId,
+            totalMatches,
+            playtime,
+            weaponId,
+            d.kills,
+            d.deaths,
+            d.teamKills,
+            d.killsPMin,
+            d.deathsPMin,
+            d.teamKillsPMin
+        ]);
+    }
+
+    await bulkInsert(query, insertVars);
+}
+
+export async function calcMapWeaponsTotals(mapId){
+
+    const query = `SELECT weapon_id, SUM(kills) as kills, SUM(deaths) as deaths, SUM(team_kills) as team_kills 
+    FROM nstats_match_weapon_stats WHERE map_id=? GROUP BY weapon_id`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    const totals = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        totals[r.weapon_id] = {
+            "kills": parseInt(r.kills),
+            "deaths": parseInt(r.deaths),
+            "teamKills": parseInt(r.team_kills),
+            "killsPMin": 0,
+            "deathsPMin": 0,
+            "teamKillsPMin": 0
+        };
+    }
+
+    const {playtime, matches} = await getTotalPlaytimeAndMatches(mapId);
+
+    let minutes = 0;
+
+    if(playtime > 0) minutes = playtime / 60;
+
+    if(minutes > 0){
+
+        for(const data of Object.values(totals)){
+
+            if(data.kills > 0) data.killsPMin = data.kills / minutes;
+            if(data.deaths > 0) data.deathsPMin = data.deaths / minutes;
+            if(data.teamKills > 0) data.teamKillsPMin = data.teamKills / minutes;
+        }
+    }
+
+    await deleteMapWeaponTotals(mapId);
+    await bulkInsertMapWeaponTotals(mapId, playtime, matches, totals);
 }

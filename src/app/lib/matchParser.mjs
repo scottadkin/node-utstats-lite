@@ -240,6 +240,7 @@ export class MatchParser{
 
 
         await this.players.updateMapAverages(this.gametype.id, this.map.id);
+        await this.weapons.updateMapTotals(this.map.id);
 
 
     }

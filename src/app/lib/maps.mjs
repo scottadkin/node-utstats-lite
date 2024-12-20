@@ -411,6 +411,15 @@ export async function getTotalMatches(id){
     return result[0].total_matches;
 }
 
+export async function getTotalPlaytimeAndMatches(id){
+
+    const query = `SELECT COUNT(*) as total_matches, SUM(playtime) as total_playtime FROM nstats_matches WHERE map_id=?`;
+
+    const result = await simpleQuery(query, [id]);
+
+    return {"playtime": result[0].total_playtime, "matches": result[0].total_matches};
+}
+
 
 export async function getAllMatchIds(id){
 
