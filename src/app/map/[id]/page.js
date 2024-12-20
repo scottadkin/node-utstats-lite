@@ -7,6 +7,8 @@ import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import BasicSummary from "@/app/UI/Map/BasicSummary";
 import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import TopXPlayers from "@/app/UI/Map/TopXPlayers";
+import { getMapWeaponStats } from "@/app/lib/weapons.mjs";
+import WeaponStats from "@/app/UI/Map/WeaponStats";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -76,6 +78,8 @@ export default async function MapPage({params, searchParams}){
 
     const testData = await getMapPlayerAverages(id, "kills", 1, 10);
 
+    const weaponStats = await getMapWeaponStats(id);
+
     const elems = [];
     
     elems[pageLayout["Basic Summary"]] = (pageSettings["Display Basic Summary"] === "1") ? <BasicSummary key="basic" info={info} /> : null;
@@ -93,7 +97,7 @@ export default async function MapPage({params, searchParams}){
 
     return <main>
         <Header>{info.name}</Header>
-        
+        <WeaponStats data={weaponStats}/>
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>

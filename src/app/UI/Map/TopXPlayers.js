@@ -41,7 +41,6 @@ function reducer(state, action){
 
 async function loadData(mapId, category, page, perPage, dispatch){
 
-    console.log("load data");
 
     try{
 
@@ -51,8 +50,6 @@ async function loadData(mapId, category, page, perPage, dispatch){
         const res = await req.json();
 
         if(res.error !== undefined) throw new Error(res.error);
-
-        console.log(res);
 
         let totalPages = res.totalEntries / PER_PAGE;
 
@@ -119,9 +116,6 @@ function renderPagination(state){
 }
 
 export default function TopXPlayers({mapId, data, category, perPage, validOptions}){
-
-    console.log(data);
-    console.log(validOptions);
 
     const [state, dispatch] = useReducer(reducer, {
         "data": data.data,

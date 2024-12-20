@@ -344,7 +344,7 @@ export async function setMatchMapGametypeIds(data){
 
 async function deleteMapWeaponTotals(mapId){
 
-    const query = `DELETE FROM nstats_match_weapon_stats WHERE map_id=?`;
+    const query = `DELETE FROM nstats_map_weapon_totals WHERE map_id=?`;
 
     return await simpleQuery(query, [mapId]);
 }
@@ -417,4 +417,27 @@ export async function calcMapWeaponsTotals(mapId){
 
     await deleteMapWeaponTotals(mapId);
     await bulkInsertMapWeaponTotals(mapId, playtime, matches, totals);
+}
+
+
+export async function getMapWeaponStats(mapId){
+
+    const query = `SELECT total_matches,total_playtime,weapon_id,kills,deaths,team_kills,kills_per_min,
+    deaths_per_min,team_kills_per_min FROM nstats_map_weapon_totals WHERE map_id=?`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    const weaponIds = [...result.map((r) =>{
+        return r.weapon_id;
+    })]
+
+    const weaponNames = await getWeaponNames(weaponIds);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i]; 
+        r.name = weaponNames[r.weapon_id] ?? "Not Found";
+    }
+
+    return result;
 }
