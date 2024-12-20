@@ -30,6 +30,13 @@ const initialReturnTotals = {
     "players": 0
 };
 
+const initialCarryTotals = {
+    "total": 0,
+    "max": 0,
+    "timesHeld": 0,
+    "average": 0
+};
+
 function createGeneralRow(player, d){
 
     return {
@@ -68,6 +75,45 @@ function createReturnRow(player, d){
     };
 }
 
+function createCarryRow(player, d){
+
+    let avg = 0;
+
+    const held = d.flag_taken + d.flag_pickup;
+
+    if(held > 0 && d.flag_carry_time > 0){
+
+        avg = d.flag_carry_time / held;
+    }
+
+    return {
+        "player": {
+            "value": player.name.toLowerCase(), 
+            "displayValue": <PlayerLink id={d.player_id} country={player.country}>{player.name}</PlayerLink>,
+            "className": `player-name-td text-left ${getTeamColorClass(player.team)}`
+        },
+        "total": {
+            "value": d.flag_carry_time,
+            "displayValue": toPlaytime(d.flag_carry_time, true),
+            "className": "date"
+        },
+        "max": {
+            "value": d.flag_carry_time_max,
+            "displayValue": toPlaytime(d.flag_carry_time_max, true),
+            "className": "date"
+        },
+        "timesHeld": {
+            "value": held,
+            "displayValue": ignore0(held)
+        },
+        "avg": {
+            "value": avg,
+            "displayValue": toPlaytime(avg, true),
+            "className": "date"
+        }
+    };
+}
+
 export default function CTFTable({players, data}){
 
     const [selectedTab, setSelectedTab] = useState("general");
@@ -97,6 +143,12 @@ export default function CTFTable({players, data}){
             "returnMid": {"title": "Return Mid", "mouseOverBox": {"title": "Flag Return Mid", "content": "Player returned their flag from the middle of the map."}},
             "returnEnemyBase": {"title": "Return Enemy Base", "mouseOverBox": {"title": "Flag Return Enemy Base", "content": "Player returned their flag from the enemy base."}},
             "returnSave": {"title": "Return Close Save", "mouseOverBox": {"title": "Flag Return Close Save", "content": "Player returned their flag from near the enemy flag."}},
+        }, "carry": {
+            "player": {"title": "Player"},
+            "timesHeld": {"title": "Times Held", "mouseOverBox": {"title": "Times Held", "content": "How many times did the player have the flag during the match."}},
+            "max": {"title": "Max Carry Time", "mouseOverBox": {"title": "Max Flag Carry Time", "content": "How long the player held the enemy flag for a single time."}},
+            "avg": {"title": "Avg Carry Time", "mouseOverBox": {"title": "Average Flag Carry Time", "content": "Average time the player held the enemy flag for."}},
+            "total": {"title": "Total Carry Time", "mouseOverBox": {"title": "Total Flag Carry Time", "content": "How long the player held the enemy flag for."}},
         }
     };
 
@@ -115,7 +167,10 @@ export default function CTFTable({players, data}){
 
         if(totals[player.team] === undefined){
 
-            totals[player.team] = (selectedTab === "general") ? {...initialGeneralTotals} : { ...initialReturnTotals};
+
+            if(selectedTab === "general") totals[player.team] = {...initialGeneralTotals};
+            if(selectedTab === "returns") totals[player.team] = {...initialReturnTotals};
+            if(selectedTab === "carry") totals[player.team] = {...initialCarryTotals};
         }
 
 
@@ -142,7 +197,7 @@ export default function CTFTable({players, data}){
             t.return += d.flag_return;
             t.carryTime += d.flag_carry_time;
 
-        }else{
+        }else if(selectedTab === "returns"){
             rows[player.team].push(createReturnRow(player, d));
 
             t.return += d.flag_return;
@@ -150,6 +205,12 @@ export default function CTFTable({players, data}){
             t.returnMid += d.flag_return_mid;
             t.returnEnemyBase += d.flag_return_enemy_base;
             t.returnSave += d.flag_return_save;
+
+        }else if(selectedTab === "carry"){
+            rows[player.team].push(createCarryRow(player, d));
+            t.total += d.flag_carry_time;
+            if(d.flag_carry_time_max > t.max) t.max = d.flag_carry_time_max;
+            t.timesHeld += d.flag_taken + d.flag_pickup; 
         }
     }
 
@@ -157,11 +218,17 @@ export default function CTFTable({players, data}){
 
     for(const [teamId, tableRows] of Object.entries(rows)){
 
-        const headers = (selectedTab === "general") ? tableHeaders.general : tableHeaders.returns;
+        let headers = {};
+
+        if(selectedTab === "general") headers = tableHeaders.general;
+        if(selectedTab === "returns") headers = tableHeaders.returns;
+        if(selectedTab === "carry") headers = tableHeaders.carry;
+
 
         const t = totals[teamId];
 
         if(selectedTab === "general"){
+
             tableRows.push(
                  {
                     "bAlwaysLast": true,
@@ -182,7 +249,8 @@ export default function CTFTable({players, data}){
                     "carryTime": {"value": t.carryTime, "displayValue": toPlaytime(t.carryTime, true), "className": "team-none"},
                 }
             );
-        }else{
+
+        }else if(selectedTab === "returns"){
 
             tableRows.push(
                 {
@@ -201,6 +269,44 @@ export default function CTFTable({players, data}){
                }
            );
 
+        }else if(selectedTab === "carry"){
+
+            let avg = 0;
+
+            if(t.timesHeld > 0 && t.total > 0){
+
+                avg = t.total / t.timesHeld;
+            }
+
+            tableRows.push(
+                {
+                   "bAlwaysLast": true,
+                   "player": {
+                       "value": "", 
+                       "displayValue": "Total",
+                       "className": `player-name-td text-left team-none`
+                   },
+                   "total": {
+                        "value": t.total,
+                        "displayValue": toPlaytime(t.total),
+                        "className": "date"
+                   },
+                   "max": {
+                        "value": t.max,
+                        "displayValue": toPlaytime(t.max),
+                        "className": "date"
+                   },
+                   "timesHeld": {
+                        "value": t.timesHeld,
+                        "displayValue": ignore0(t.timesHeld)
+                   },
+                   "avg": {
+                        "value": avg,
+                        "displayValue": toPlaytime(avg, true),
+                        "className": "date"
+                   }
+                }
+            );
         }
 
         tables.push(<InteractiveTable width={1} key={teamId} headers={headers} rows={tableRows}/>);
@@ -209,6 +315,7 @@ export default function CTFTable({players, data}){
     const tabs = [
         {"name": "General", "value": "general"},
         {"name": "Returns", "value": "returns"},
+        {"name": "Carry Time", "value": "carry"},
     ];
 
     return <>
