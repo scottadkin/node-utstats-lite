@@ -189,13 +189,13 @@ export class MatchParser{
         await this.ctf.insertPlayerMatchData(this.players, this.matchId, this.gametype.id, this.map.id);
         await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
         await this.weapons.setWeaponIds();
-        this.kills.setWeaponIds(this.weapons.weapons);
+        this.kills.setWeaponIds(this.weapons);
         this.kills.setPlayerIds(this.players);
         await this.kills.insertKills(this.matchId);
         
         // this.players.debugListAllPlayers();
 
-        this.weapons.setPlayerStats(this.kills.kills);
+        this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides);
         await this.weapons.insertPlayerMatchStats(this.matchId, this.gametype.id, this.map.id);
         await this.weapons.updatePlayerTotals(this.players.mergedPlayers);
 
@@ -353,6 +353,7 @@ export class MatchParser{
 
             if(suicideReg.test(subString)){
                 this.kills.parseSuicide(timestamp, subString);
+                this.weapons.parseLine(subString);
                 continue;
             }
 

@@ -181,7 +181,8 @@ const queries = [
             weapon_id int(11) NOT NULL,
             kills int(11) NOT NULL,
             deaths int(11) NOT NULL,
-            team_kills int(11) NOT NULL
+            team_kills int(11) NOT NULL,
+            suicides int(11) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_weapons (
@@ -288,6 +289,7 @@ const queries = [
             total_matches int(11) NOT NULL,
             kills int(11) NOT NULL,
             deaths int(11) NOT NULL,
+            suicides int(11) NOT NULL,
             team_kills int(11) NOT NULL,
             eff float NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
@@ -542,10 +544,12 @@ const queries = [
             weapon_id int(11) NOT NULL,
             kills int(11) NOT NULL,
             deaths int(11) NOT NULL,
+            suicides int(11) NOT NULL,
             team_kills int(11) NOT NULL,
             kills_per_min FLOAT NOT NULL,
             deaths_per_min FLOAT NOT NULL,
-            team_kills_per_min FLOAT NOT NULL
+            team_kills_per_min FLOAT NOT NULL,
+            suicides_per_min FLOAT NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
 
@@ -764,8 +768,9 @@ async function addPageLayouts(){
         await addColumn("nstats_match_weapon_stats", "map_id", "INT NOT NULL AFTER match_id");
         await addColumn("nstats_match_weapon_stats", "gametype_id", "INT NOT NULL AFTER map_id");
 
+        await addColumn("nstats_match_weapon_stats", "suicides", "INT NOT NULL AFTER team_kills");
+        await addColumn("nstats_player_totals_weapons", "suicides", "INT NOT NULL AFTER deaths");
         await addPageLayouts();
-
 
         await setMatchMapGametypeIds();
         

@@ -32,19 +32,20 @@ export async function bulkInsertMatchWeaponStats(data, matchId, gametypeId, mapI
     for(const [pId, playerStats] of Object.entries(data)){
 
         const playerId = parseInt(pId);
-   
+
         for(const [wId, weaponStats] of Object.entries(playerStats)){
 
             const weaponId = parseInt(wId);
 
+
             insertVars.push([
                 matchId, mapId, gametypeId, playerId, weaponId, weaponStats.kills,
-                weaponStats.deaths, weaponStats.teamKills
+                weaponStats.deaths, weaponStats.teamKills, weaponStats.suicides
             ]);
         }
     }
 
-    const query = `INSERT INTO nstats_match_weapon_stats (match_id,map_id,gametype_id,player_id,weapon_id,kills,deaths,team_kills) VALUES ?`;
+    const query = `INSERT INTO nstats_match_weapon_stats (match_id,map_id,gametype_id,player_id,weapon_id,kills,deaths,team_kills,suicides) VALUES ?`;
 
     await bulkInsert(query, insertVars);
 
@@ -89,7 +90,7 @@ export async function getMatchWeaponStats(matchId){
 
 async function _getAllPlayerMatchData(playerIds){
 
-    const query = `SELECT match_id,player_id,weapon_id,kills,deaths,team_kills FROM nstats_match_weapon_stats WHERE player_id IN (?)`;
+    const query = `SELECT match_id,player_id,weapon_id,kills,deaths,team_kills,suicides FROM nstats_match_weapon_stats WHERE player_id IN (?)`;
 
     const result = await simpleQuery(query, [playerIds]);
 
@@ -149,7 +150,8 @@ function _updatePlayerTotals(totals, data, gametypeId){
             "kills": data.kills,
             "deaths": data.deaths,
             "team_kills": data.team_kills,
-            "eff": eff       
+            "eff": eff,
+            "suicides": data.suicides       
         };
 
         return;
@@ -160,6 +162,7 @@ function _updatePlayerTotals(totals, data, gametypeId){
     t.kills += data.kills;
     t.deaths += data.deaths;
     t.team_kills += data.team_kills;
+    t.suicides += data.suicides;
 
     let eff = 0;
 
@@ -215,7 +218,7 @@ async function bulkInsertPlayerTotals(totals){
                 insertVars.push([
                     playerId, gametypeId, weaponId,
                     weaponData.matches, weaponData.kills, weaponData.deaths,
-                    weaponData.team_kills, weaponData.eff
+                    weaponData.suicides, weaponData.team_kills, weaponData.eff
                 ]);
             }
         }
@@ -225,7 +228,7 @@ async function bulkInsertPlayerTotals(totals){
 
     const query = `INSERT INTO nstats_player_totals_weapons (
         player_id, gametype_id, weapon_id,
-        total_matches, kills, deaths, team_kills, eff
+        total_matches, kills, deaths, suicides, team_kills, eff
     ) VALUES ?`;
 
     await bulkInsert(query, insertVars);
@@ -352,7 +355,7 @@ async function deleteMapWeaponTotals(mapId){
 async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
 
     const query = `INSERT INTO nstats_map_weapon_totals
-    (map_id, total_matches, total_playtime, weapon_id, kills, deaths, team_kills, kills_per_min, deaths_per_min, team_kills_per_min) 
+    (map_id, total_matches, total_playtime, weapon_id, kills, deaths, suicides, team_kills, kills_per_min, deaths_per_min, team_kills_per_min, suicides_per_min) 
     VALUES ?`;
 
     const insertVars = [];
@@ -366,10 +369,12 @@ async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
             weaponId,
             d.kills,
             d.deaths,
+            d.suicides,
             d.teamKills,
             d.killsPMin,
             d.deathsPMin,
-            d.teamKillsPMin
+            d.teamKillsPMin,
+            d.suicidesPMin
         ]);
     }
 
@@ -378,7 +383,7 @@ async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
 
 export async function calcMapWeaponsTotals(mapId){
 
-    const query = `SELECT weapon_id, SUM(kills) as kills, SUM(deaths) as deaths, SUM(team_kills) as team_kills 
+    const query = `SELECT weapon_id, SUM(kills) as kills, SUM(deaths) as deaths, SUM(team_kills) as team_kills, SUM(suicides) as suicides 
     FROM nstats_match_weapon_stats WHERE map_id=? GROUP BY weapon_id`;
 
     const result = await simpleQuery(query, [mapId]);
@@ -393,9 +398,11 @@ export async function calcMapWeaponsTotals(mapId){
             "kills": parseInt(r.kills),
             "deaths": parseInt(r.deaths),
             "teamKills": parseInt(r.team_kills),
+            "suicides": parseInt(r.suicides),
             "killsPMin": 0,
             "deathsPMin": 0,
-            "teamKillsPMin": 0
+            "teamKillsPMin": 0,
+            "suicidesPMin": 0
         };
     }
 
@@ -412,6 +419,7 @@ export async function calcMapWeaponsTotals(mapId){
             if(data.kills > 0) data.killsPMin = data.kills / minutes;
             if(data.deaths > 0) data.deathsPMin = data.deaths / minutes;
             if(data.teamKills > 0) data.teamKillsPMin = data.teamKills / minutes;
+            if(data.suicides > 0) data.suicidesPMin = data.suicides / minutes;
         }
     }
 

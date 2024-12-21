@@ -49,7 +49,7 @@ export default async function RootLayout({ children }) {
 			{children}
 			<footer>
 				<a href="https://github.com/scottadkin/node-utstats-lite">Node UTStats Lite Website</a> for the <a href="https://github.com/rxut/UTStatsLite">UTStats Lite Mutator</a><br/>
-				Website Version 1.3.0 &copy; 2024 Scott Adkin<br/>
+				Website Version 1.4.0 &copy; 2024 Scott Adkin<br/>
 				UTStats mod was originally created by azazel, AnthraX, and toa, with additions by Skillz, killereye, Enakin, Loki and rork.<br/>
 				UTStats-lite changes by rX
 			</footer>

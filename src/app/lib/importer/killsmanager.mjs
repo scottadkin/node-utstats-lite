@@ -68,7 +68,7 @@ export class KillsManager{
 
     parseSuicide(timestamp, line){
 
-        const suicideReg = /^suicide\t(\d+)\t.+$/i;
+        const suicideReg = /^suicide\t(\d+)\t(.+?)\t.+$/i;
 
         const result = suicideReg.exec(line);
 
@@ -76,22 +76,15 @@ export class KillsManager{
 
         const playerId = parseInt(result[1]);
 
-        this.suicides.push({"timestamp": parseFloat(timestamp), "playerId": playerId});
+        const weapon =  removeDoubleEnforcer(result[2]);
+
+        this.suicides.push({"timestamp": parseFloat(timestamp), "playerId": playerId, "weapon": weapon});
     }
 
-
-    getId(weapons, name){
-        
-        for(const [weaponId, weaponName] of Object.entries(weapons)){
-            if(weaponName === name) return parseInt(weaponId);
-        }
-
-        return null;
-    }
 
     setWeaponIds(weapons){
 
-        const types = ["kills", "teamKills"];
+        const types = ["kills", "teamKills", "suicides"];
 
         for(let x = 0; x < types.length; x++){
 
@@ -99,8 +92,12 @@ export class KillsManager{
 
                 const k = this[types[x]][i];
                 
-                k.killerWeaponId = this.getId(weapons, k.killerWeapon);
-                k.victimWeaponId =  this.getId(weapons, k.victimWeapon);
+                if(x !== 2){
+                    k.killerWeaponId = weapons.getId(k.killerWeapon);
+                    k.victimWeaponId =  weapons.getId(k.victimWeapon);
+                }else{
+                    k.weaponId = weapons.getId(k.weapon);
+                }
             }
         }
     }
@@ -123,6 +120,7 @@ export class KillsManager{
             }
         }
 
+
         for(let i = 0; i < this.suicides.length; i++){
 
             const s = this.suicides[i];
@@ -130,6 +128,7 @@ export class KillsManager{
             const player = playerManager.getPlayerById(s.playerId);
 
             s.playerMasterId = player.masterId;
+            
         }
     }
 
