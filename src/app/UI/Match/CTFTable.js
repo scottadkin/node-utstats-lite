@@ -70,7 +70,7 @@ function createReturnRow(player, d){
         "return": {"value": d.flag_return, "displayValue": ignore0(d.flag_return)},
         "returnBase": {"value": d.flag_return_base, "displayValue": ignore0(d.flag_return_base)},
         "returnMid": {"value": d.flag_return_mid, "displayValue": ignore0(d.flag_return_mid)},
-        "returnEnemyBase": {"value": d.flag_return_enemybase, "displayValue": ignore0(d.flag_return_enemybase)},
+        "returnEnemyBase": {"value": d.flag_return_enemy_base, "displayValue": ignore0(d.flag_return_enemy_base)},
         "returnSave": {"value": d.flag_return_save, "displayValue": ignore0(d.flag_return_save)},
     };
 }
