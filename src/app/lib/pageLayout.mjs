@@ -8,6 +8,28 @@ const DEFAULT_PAGE_LAYOUTS = {
     "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Register", "Watchlist"]
 };
 
+function getNextAvailableIndex(usedIndexes, targetIndex){
+
+    const index = usedIndexes.indexOf(targetIndex);
+
+    if(index === -1){
+        usedIndexes.push(targetIndex);
+        return targetIndex;
+    }
+
+    let lastIndex = 0;
+
+    for(let i = 0; i < usedIndexes.length; i++){
+
+        const u = usedIndexes[i];
+
+        if(i === 0 || u > lastIndex) lastIndex = u;
+    }
+
+    usedIndexes.push(lastIndex + 1);
+    return lastIndex + 1;
+
+}
 
 export async function getPageLayout(pageName){
 
@@ -21,11 +43,15 @@ export async function getPageLayout(pageName){
 
     const data = {};
 
+    const indexesUsed = [];
+
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
-        data[r.item] = r.page_order;
+        const index = getNextAvailableIndex(indexesUsed, r.page_order);
+
+        data[r.item] = index;
     }
 
     return data;
