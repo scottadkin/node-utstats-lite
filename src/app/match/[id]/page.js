@@ -61,6 +61,8 @@ export default async function MatchPage({params, searchParams}) {
 
     const matchData = await getMatchData(matchId);
 
+    console.log(matchData.weaponStats);
+
 
     const weaponImages = await getAllWeaponImages();
 

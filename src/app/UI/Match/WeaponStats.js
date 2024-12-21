@@ -74,7 +74,7 @@ function getPlayerWeaponStats(data, playerId, weaponId){
         if(d.player_id !== playerId) continue;
         if(d.weapon_id !== weaponId) continue;
 
-        return {"kills": d.kills, "deaths": d.deaths};
+        return {"kills": d.kills, "deaths": d.deaths, "suicides": d.suicides};
     }
 
     return null;
@@ -187,6 +187,7 @@ export default function WeaponStats({data, totalTeams, players, weaponImages}){
             options={[
                 {"name": "Kills", "value": "kills"},
                 {"name": "Deaths", "value": "deaths"},
+                {"name": "Suicides", "value": "suicides"},
             ]}/>
         {tables}
     </>

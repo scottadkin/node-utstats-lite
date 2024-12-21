@@ -74,7 +74,7 @@ export async function getWeaponNames(ids){
 
 export async function getMatchWeaponStats(matchId){
 
-    const query = `SELECT player_id,weapon_id,kills,deaths,team_kills FROM nstats_match_weapon_stats WHERE match_id=?`;
+    const query = `SELECT player_id,weapon_id,kills,deaths,team_kills,suicides FROM nstats_match_weapon_stats WHERE match_id=?`;
     const result = await simpleQuery(query, [matchId]);
 
     const uniqueWeapons = [...new Set(result.map((r) =>{
@@ -431,7 +431,7 @@ export async function calcMapWeaponsTotals(mapId){
 export async function getMapWeaponStats(mapId){
 
     const query = `SELECT total_matches,total_playtime,weapon_id,kills,deaths,team_kills,kills_per_min,
-    deaths_per_min,team_kills_per_min FROM nstats_map_weapon_totals WHERE map_id=?`;
+    deaths_per_min,team_kills_per_min,suicides,suicides_per_min FROM nstats_map_weapon_totals WHERE map_id=?`;
 
     const result = await simpleQuery(query, [mapId]);
 
