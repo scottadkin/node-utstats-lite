@@ -6,7 +6,7 @@ import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
 import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./weapons.mjs";
-import { getPlayerMapTotals, deleteCurrentPlayerMapAverages, updateCurrentPlayerMapAverages } from "./maps.mjs";
+import { getPlayerMapTotals, deleteCurrentPlayerMapAverages, updateCurrentPlayerMapAverages, getUniquePlayerIdsOnMap, getAllMapIds} from "./maps.mjs";
 import md5 from "md5";
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
@@ -998,5 +998,63 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
         await deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapId);
         await updateCurrentPlayerMapAverages(data, gametypeId, mapId, bFoundCTF);
     }
+}
 
+
+async function bulkInsertPlayerMapAverages(data, mapId){
+
+    const insertVars = [];
+
+    for(let i = 0; i < data.data.length; i++){
+
+        const d = data.data[i];
+
+        insertVars.push([
+            d.player_id, mapId, 0, d.playtime, d.total_matches,
+            d.score, d.frags, d.kills, d.deaths, d.suicides, d.team_kills, d.headshots,
+            d.item_amp , d.item_belt , d.item_boots , d.item_body , d.item_pads , d.item_invis , d.item_shp ,
+            d.flag_taken ?? 0,  d.flag_pickup ?? 0,  d.flag_drop ?? 0,  d.flag_assist ?? 0,  d.flag_cover ?? 0,  d.flag_seal ?? 0, 
+            d.flag_cap ?? 0,  d.flag_kills ?? 0,  d.flag_return ?? 0,  d.flag_return_base ?? 0,  d.flag_return_mid ?? 0,  d.flag_return_enemy_base ?? 0, 
+            d.flag_return_save ?? 0, d.dom_caps ?? 0
+
+        ]);
+    }
+
+    const query = `INSERT INTO nstats_player_map_minute_averages (
+    player_id, map_id, gametype_id, total_playtime, total_matches,
+    score, frags, kills, deaths, suicides, team_kills, headshots,
+    item_amp , item_belt , item_boots , item_body , item_pads , item_invis , item_shp,
+    flag_taken,flag_pickup,flag_drop,flag_assist,flag_cover,flag_seal,
+    flag_cap,flag_kills,flag_return,flag_return_base,flag_return_mid,flag_return_enemy_base,
+    flag_return_save,dom_caps
+    ) VALUES ?`;
+
+
+    await bulkInsert(query, insertVars);
+}
+
+
+async function deleteMapMinuteAverages(mapId){
+
+    const query = `DELETE FROM nstats_player_map_minute_averages WHERE map_id=?`;
+
+    await simpleQuery(query, [mapId]);
+}
+
+//used for upgrade for earlier version
+export async function setAllPlayerMapAverages(){
+
+    const mapIds = await getAllMapIds();
+
+    for(let i = 0; i < mapIds.length; i++){
+
+        const mId = mapIds[i];
+
+        const playerIds = await getUniquePlayerIdsOnMap(mId);
+
+        const totals = await getPlayerMapTotals(playerIds, mId);
+
+        await deleteMapMinuteAverages(mId);
+        await bulkInsertPlayerMapAverages(totals, mId);
+    }
 }

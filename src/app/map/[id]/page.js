@@ -92,12 +92,15 @@ export default async function MapPage({params, searchParams}){
     </div> : null;
 
 
-    elems[pageLayout["Player Top Averages"]] = (pageSettings["Display Player Top Averages"] === "1") ? <TopXPlayers data={testData} mapId={id} category={"kills"} 
+    elems[pageLayout["Player Top Averages"]] = (pageSettings["Display Player Top Averages"] === "1") ? <TopXPlayers key="top-x" data={testData} mapId={id} category={"kills"} 
         perPage={25} validOptions={VALID_PLAYER_MAP_MINUTE_AVERAGES}/> : null;
+
+
+    elems[pageLayout["Weapon Statistics"]] = (pageSettings["Display Weapon Statistics"]) ? <WeaponStats key="weapons" data={weaponStats}/> : null ;
 
     return <main>
         <Header>{info.name}</Header>
-        <WeaponStats data={weaponStats}/>
+        
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>

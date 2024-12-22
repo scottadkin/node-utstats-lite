@@ -25,6 +25,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Map" ,"type": `bool`, "name": "Display Basic Summary", "value": 1},
     {"category": "Map" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
     {"category": "Map" ,"type": `bool`, "name": "Display Player Top Averages", "value": 1},
+    {"category": "Map" ,"type": `bool`, "name": "Display Weapon Statistics", "value": 1},
 
     {"category": "Match" ,"type": `bool`, "name": "Display Basic Info", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Screenshot", "value": 1},

@@ -594,3 +594,22 @@ export async function getMapPlayerAverages(mapId, category, initialPage, initial
 
     return {"data": result, "players": players, "title": title, "totalEntries": totalEntries};
 }
+
+
+export async function getUniquePlayerIdsOnMap(mapId){
+
+    const query = `SELECT DISTINCT player_id FROM nstats_match_players WHERE map_id=?`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    return result.map((r) => r.player_id);
+}
+
+export async function getAllMapIds(){
+
+    const query = `SELECT DISTINCT id FROM nstats_maps`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) => r.id);
+}
