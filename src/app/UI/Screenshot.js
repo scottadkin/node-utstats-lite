@@ -645,7 +645,7 @@ class ScreenshotImage{
 
             if(p.kills > 0){
                 if(p.deaths > 0){
-                    eff = parseInt(p.kills / (p.kills + p.deaths + p.team_kills) * 100);   
+                    eff = parseInt(p.kills / (p.kills + p.deaths + p.team_kills + p.suicides) * 100);   
                 }
             }
 
