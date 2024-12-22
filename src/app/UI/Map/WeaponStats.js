@@ -46,8 +46,8 @@ function renderBasicTable(data, totalKills){
             "suicides": {"value": d.suicides, "displayValue": ignore0(d.suicides)},
             "tk": {"value": d.team_kills, "displayValue": ignore0(d.team_kills)},
             "kills": {"value": d.kills, "displayValue": ignore0(d.kills)},
-            "kp": {"value": kp, "displayValue":  <>{kp.toFixed(2)}%</>},
-            "kpm": {"value": d.kills_per_min, "displayValue":  d.kills_per_min.toFixed(2)},
+            "kp": {"value": kp, "displayValue":  <>{kp.toFixed(3)}%</>},
+            "kpm": {"value": d.kills_per_min, "displayValue":  d.kills_per_min.toFixed(3)},
         });
     }
 

@@ -459,7 +459,7 @@ function _updateTotals(totals, gametypeId, playerData, date, bWinner, bDraw){
         if(p.deaths === 0){
             eff = 100;
         }else{
-            eff = (p.kills / (p.kills + p.deaths + p.deaths)) * 100;
+            eff = (p.kills / (p.kills + p.deaths)) * 100;
         }
 
         totals[playerData.player_id][gametypeId] = {
@@ -545,7 +545,7 @@ function _updateTotals(totals, gametypeId, playerData, date, bWinner, bDraw){
         if(t.deaths === 0){
             t.eff = 100;
         }else{
-            t.eff = (t.kills / (t.kills + t.deaths + t.deaths)) * 100;
+            t.eff = (t.kills / (t.kills + t.deaths)) * 100;
         }
     }
 
