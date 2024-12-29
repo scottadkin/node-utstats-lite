@@ -1,6 +1,6 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
-import { getMatchesGametype } from "./matches.mjs";
-import { getTotalPlaytimeAndMatches } from "./maps.mjs";
+import { getMatchesGametype, getMatchesPlaytime } from "./matches.mjs";
+import { getAllMapIds, getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
 
 
@@ -448,4 +448,94 @@ export async function getMapWeaponStats(mapId){
     }
 
     return result;
+}
+
+
+
+async function getAllMapData(mapId){
+
+    const query = `SELECT match_id,map_id,weapon_id,SUM(kills) as kills,SUM(deaths) as deaths, SUM(team_kills) as team_kills,SUM(suicides) as suicides
+    FROM nstats_match_weapon_stats WHERE map_id=? GROUP BY match_id,weapon_id,map_id`;
+
+    return await simpleQuery(query, [mapId]);
+}
+
+
+
+export async function setAllMapTotals(){
+
+    const mapIds = await getAllMapIds();
+
+    console.log(mapIds);
+
+    const matchData = {};
+    
+    const matchIds = new Set();
+
+    for(let i = 0; i < mapIds.length; i++){
+
+        const m = mapIds[i];
+
+        const current = await getAllMapData(m);
+
+
+        console.log(current);
+
+        matchData[m] = current;
+        //get total playtime and matches
+
+        for(let x = 0; x < current.length; x++){
+            matchIds.add(current[x].match_id);
+        }
+        
+    }
+
+    const matchPlaytimes = await getMatchesPlaytime([...matchIds]);
+
+    const mapTotals = {};
+    // mapId => weaponId => weaponStats
+
+    for(const [mapId, data] of Object.entries(matchData)){
+
+        for(let i = 0; i < data.length; i++){
+
+            const m = data[i];
+
+            if(mapTotals[mapId] === undefined){
+                mapTotals[mapId] = {};
+            }
+
+            if(mapTotals[mapId][m.weapon_id] === undefined){
+
+                mapTotals[mapId][m.weapon_id] = {
+                    "kills": 0,
+                    "deaths": 0,
+                    "teamKills": 0,
+                    "suicides": 0,
+                    "playtime": 0,
+                    "matchIds": new Set()
+                };
+            }
+
+            const playtime = matchPlaytimes[m.match_id] ?? 0;
+
+            const t = mapTotals[mapId][m.weapon_id];
+
+            t.kills += parseInt(m.kills);
+            t.deaths += parseInt(m.deaths);
+            t.teamKills += parseInt(m.team_kills);
+            t.suicides += parseInt(m.suicides);
+            t.playtime += playtime;
+            t.matchIds.add(m.match_id);
+
+        }
+        //console.log(data);
+        //console.log(playtime);
+    }
+
+    console.log(mapTotals);
+
+    //console.log(matchData);
+    //get all match weapon data for each map
+    //insert new totals for maps
 }

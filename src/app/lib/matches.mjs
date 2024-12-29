@@ -1158,3 +1158,25 @@ export async function getMapAndGametypeIds(matchIds){
 
     return data;
 }
+
+
+export async function getMatchesPlaytime(matchIds){
+
+    if(matchIds.length === 0) return {};
+
+    const query = `SELECT id,playtime FROM nstats_matches WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [matchIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = r.playtime;
+    }
+
+
+    return data;
+}
