@@ -461,12 +461,66 @@ async function getAllMapData(mapId){
 }
 
 
+async function deleteAllMapTotals(){
+
+    const query = `DELETE FROM nstats_map_weapon_totals`;
+
+    await simpleQuery(query);
+}
+
+
+async function bulkInsertMapTotals(totals){
+
+
+    const insertVars = [];
+
+    for(const [mapId, mapData] of Object.entries(totals)){
+
+        for(const [weaponId, wData] of Object.entries(mapData)){
+
+            let kpm = 0;
+            let dpm = 0;
+            let tkpm = 0;
+            let spm = 0;
+
+            if(wData.playtime > 0){
+
+                if(wData.kills > 0){
+                    kpm = wData.kills / (wData.playtime / 60);
+                }
+
+                if(wData.deaths > 0){
+                    dpm = wData.deaths / (wData.playtime / 60);
+                }
+
+                if(wData.teamKills > 0){
+                    tkpm = wData.teamKills / (wData.playtime / 60);
+                }
+
+                if(wData.suicides > 0){
+                    spm = wData.suicides / (wData.playtime / 60);
+                }
+            }
+
+
+            insertVars.push([
+                mapId, wData.matchIds.size,wData.playtime,weaponId,wData.kills,wData.deaths,wData.suicides,
+                wData.teamKills, kpm, dpm, tkpm, spm
+            ]);
+        }   
+    }
+
+    const query = `INSERT INTO nstats_map_weapon_totals (
+    map_id,total_matches,total_playtime,weapon_id,kills,deaths,suicides,
+    team_kills,kills_per_min,deaths_per_min,team_kills_per_min,suicides_per_min
+    ) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
+}
 
 export async function setAllMapTotals(){
 
     const mapIds = await getAllMapIds();
-
-    console.log(mapIds);
 
     const matchData = {};
     
@@ -477,9 +531,6 @@ export async function setAllMapTotals(){
         const m = mapIds[i];
 
         const current = await getAllMapData(m);
-
-
-        console.log(current);
 
         matchData[m] = current;
         //get total playtime and matches
@@ -533,9 +584,11 @@ export async function setAllMapTotals(){
         //console.log(playtime);
     }
 
-    console.log(mapTotals);
-
     //console.log(matchData);
     //get all match weapon data for each map
     //insert new totals for maps
+
+
+    await deleteAllMapTotals();
+    await bulkInsertMapTotals(mapTotals);
 }
