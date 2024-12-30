@@ -319,6 +319,28 @@ export default function CTFTable({players, data}){
         {"name": "Carry Time", "value": "carry"},
     ];
 
+
+    let bFoundData = false;
+
+    for(let i = 0; i < totals.length; i++){
+
+        const keys = Object.keys(totals[i]);
+
+        for(let x = 0; x < keys.length; x++){
+
+            if(keys[x] === "players") continue;
+            
+            if(totals[i][keys[x]] > 0){
+                bFoundData = true;
+                break;
+            }
+        }
+
+        if(bFoundData) break;
+    }
+
+    if(!bFoundData) return null;
+
     return <>
         <Header>CTF Summary</Header>
         <Tabs options={tabs} selectedValue={selectedTab} changeSelected={setSelectedTab}/>
