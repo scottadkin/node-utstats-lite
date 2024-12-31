@@ -82,6 +82,8 @@ function getPlayerWeaponStats(data, playerId, weaponId){
 
 function renderKDTable(orderedNames, data, players, totalTeams, selectedType, weaponImages){
 
+    if(selectedType === "totals") return null;
+
     const rows = [];
 
     const title = (selectedType === "kills") ? "Kills" : "Deaths";
@@ -149,8 +151,66 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType, we
 
     }
 
-    return <InteractiveTable headers={headers} rows={rows}/>
+    return <InteractiveTable width={1} headers={headers} rows={rows}/>
     
+}
+
+
+function renderTotals(weaponNames, data, selectedType){
+
+    if(selectedType !== "totals") return null;
+
+    const weaponTotals = {};
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const w = d.weapon_id;
+
+        if(weaponTotals[w] === undefined){
+
+            weaponTotals[w] = {
+                "kills": 0,
+                "deaths": 0,
+                "suicides": 0,
+                "teamKills": 0
+            };
+        }
+
+        const wt = weaponTotals[w];
+
+        wt.kills += d.kills;
+        wt.deaths += d.deaths;
+        wt.suicides += d.suicides;
+        wt.teamKills += d.team_kills;
+    }
+
+    const headers = {
+        "name": {"title": "Weapon"},
+        "teamKills": {"title": "Team Kills"},
+        "suicides": {"title": "Suicides"},
+        "deaths": {"title": "Deaths"},
+        "kills": {"title": "Kills"},
+        
+    };
+
+    const rows = [];
+
+    for(const [weaponId, d] of Object.entries(weaponTotals)){
+
+        const name = weaponNames?.[weaponId] ?? "Not Found";
+
+        rows.push({
+            "name": {"value": name.toLowerCase(), "displayValue": name, "className": "text-left"},
+            "teamKills": {"value": d.teamKills, "displayValue": ignore0(d.teamKills)},
+            "deaths": {"value": d.deaths, "displayValue": ignore0(d.deaths)},
+            "suicides": {"value": d.suicides, "displayValue": ignore0(d.suicides)},
+            "kills": {"value": d.kills, "displayValue": ignore0(d.kills)},
+        });
+    }
+
+    return <InteractiveTable width={1} headers={headers} rows={rows}/>
 }
 
 export default function WeaponStats({data, totalTeams, players, weaponImages}){
@@ -188,7 +248,9 @@ export default function WeaponStats({data, totalTeams, players, weaponImages}){
                 {"name": "Kills", "value": "kills"},
                 {"name": "Deaths", "value": "deaths"},
                 {"name": "Suicides", "value": "suicides"},
+                {"name": "Totals", "value": "totals"}
             ]}/>
         {tables}
+        {renderTotals(data.names, data.data, selectedType)}
     </>
 }

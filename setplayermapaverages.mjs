@@ -4,7 +4,7 @@ import { setAllMapTotals } from "./src/app/lib/weapons.mjs";
 (async () =>{
 
     //UNCOMMENT AFTER TESTING
-    //await setAllPlayerMapAverages();
+    await setAllPlayerMapAverages();
 
     await setAllMapTotals();
 

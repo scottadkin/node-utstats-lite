@@ -41,7 +41,6 @@ function renderBasicTable(data, totalKills){
 
         rows.push({
             "name": {"value": d.name.toLowerCase(), "displayValue": d.name, "className": "text-left"},
-            "playtime": {"value": d.total_playtime, "displayValue": toPlaytime(d.total_playtime), "className": "date"},
             "deaths": {"value": d.deaths, "displayValue": ignore0(d.deaths)},
             "suicides": {"value": d.suicides, "displayValue": ignore0(d.suicides)},
             "tk": {"value": d.team_kills, "displayValue": ignore0(d.team_kills)},
