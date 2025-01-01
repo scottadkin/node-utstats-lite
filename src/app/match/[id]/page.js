@@ -61,9 +61,6 @@ export default async function MatchPage({params, searchParams}) {
 
     const matchData = await getMatchData(matchId);
 
-    console.log(matchData.weaponStats);
-
-
     const weaponImages = await getAllWeaponImages();
 
     const pageSettings = await getCategorySettings("Match");
@@ -90,7 +87,7 @@ export default async function MatchPage({params, searchParams}) {
     elems[pageLayout["CTF Caps"]] = (pageSettings["Display CTF Caps"] === "1") ? <CTFCaps key="ctf-caps" caps={matchData.ctf.caps} totalTeams={totalTeams} players={matchData.basicPlayers} matchStart={matchData.basic.match_start}/> : null;
    
     elems[pageLayout["DOM"]] = (pageSettings["Display DOM"] === "1") ? <DomTable key="dom" data={matchData.dom} players={matchData.basicPlayers}/>: null;
-    elems[pageLayout["Weapons"]] = (pageSettings["Display Weapons"] === "1") ? <WeaponStats key="weapons" data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers} weaponImages={weaponImages}/> : null;
+    elems[pageLayout["Weapons"]] = (pageSettings["Display Weapons"] === "1") ? <WeaponStats key="weapons" data={matchData.weaponStats} totalTeams={totalTeams} players={matchData.basicPlayers} weaponImages={weaponImages} matchLength={matchData.basic.playtime}/> : null;
     elems[pageLayout["Items"]] = (pageSettings["Display Items"] === "1") ? <ItemsTable key="items" data={matchData.playerData} totalTeams={totalTeams}/> : null;
     elems[pageLayout["Special Events"]] = (pageSettings["Display Special Events"] === "1") ? <SpecialEvents key="special" data={matchData} totalTeams={totalTeams}/> : null;
     elems[pageLayout["Kills"]] = (pageSettings["Display Kills"] === "1") ? <KillsMatchUp key="kills" kills={matchData.kills} totalTeams={totalTeams} players={matchData.basicPlayers}/> : null;

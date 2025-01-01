@@ -151,14 +151,22 @@ function renderKDTable(orderedNames, data, players, totalTeams, selectedType, we
 
     }
 
-    return <InteractiveTable width={1} headers={headers} rows={rows}/>
+    return <InteractiveTable headers={headers} rows={rows}/>
     
 }
 
 
-function renderTotals(weaponNames, data, selectedType){
+function renderTotals(weaponNames, data, selectedType, matchLength){
 
     if(selectedType !== "totals") return null;
+
+
+    const totals = {
+        "kills": 0,
+        "deaths": 0,
+        "suicides": 0,
+        "teamKills": 0
+    };
 
     const weaponTotals = {};
 
@@ -184,6 +192,11 @@ function renderTotals(weaponNames, data, selectedType){
         wt.deaths += d.deaths;
         wt.suicides += d.suicides;
         wt.teamKills += d.team_kills;
+
+        totals.kills += d.kills;
+        totals.deaths += d.deaths;
+        totals.suicides += d.suicides;
+        totals.teamKills += d.team_kills;
     }
 
     const headers = {
@@ -192,6 +205,7 @@ function renderTotals(weaponNames, data, selectedType){
         "suicides": {"title": "Suicides"},
         "deaths": {"title": "Deaths"},
         "kills": {"title": "Kills"},
+        "kpm": {"title": "KPM", "mouseOverBox": {"title": "Kills Per Minute", "content": "Average Kills Per Minute"}}
         
     };
 
@@ -201,19 +215,48 @@ function renderTotals(weaponNames, data, selectedType){
 
         const name = weaponNames?.[weaponId] ?? "Not Found";
 
+        let kpm = 0;
+
+        if(matchLength > 0 && d.kills > 0){
+
+            kpm = d.kills / (matchLength / 60)
+        }
+
+
         rows.push({
             "name": {"value": name.toLowerCase(), "displayValue": name, "className": "text-left"},
             "teamKills": {"value": d.teamKills, "displayValue": ignore0(d.teamKills)},
             "deaths": {"value": d.deaths, "displayValue": ignore0(d.deaths)},
             "suicides": {"value": d.suicides, "displayValue": ignore0(d.suicides)},
             "kills": {"value": d.kills, "displayValue": ignore0(d.kills)},
+            "kpm": {"value": kpm, "displayValue": kpm.toFixed(3)},
+        });
+    }
+
+    if(rows.length > 0){
+
+        let kpm = 0;
+
+        if(matchLength > 0 && totals.kills > 0){
+
+            kpm = totals.kills / (matchLength / 60)
+        }
+
+        rows.push({
+            "bAlwaysLast": true,
+            "name": {"value": "Totals", "displayValue": "Totals", "className": "text-left team-none"},
+            "teamKills": {"value": totals.teamKills, "displayValue": ignore0(totals.teamKills), "className": "team-none"},
+            "deaths": {"value": totals.deaths, "displayValue": ignore0(totals.deaths), "className": "team-none"},
+            "suicides": {"value": totals.suicides, "displayValue": ignore0(totals.suicides), "className": "team-none"},
+            "kills": {"value": totals.kills, "displayValue": ignore0(totals.kills), "className": "team-none"},
+            "kpm": {"value": kpm, "displayValue": kpm.toFixed(3), "className": "team-none"},
         });
     }
 
     return <InteractiveTable width={1} headers={headers} rows={rows}/>
 }
 
-export default function WeaponStats({data, totalTeams, players, weaponImages}){
+export default function WeaponStats({data, totalTeams, players, weaponImages, matchLength}){
 
     const [selectedType, setSelectedType] = useState("kills");
     const orderedNames = [];
@@ -251,6 +294,6 @@ export default function WeaponStats({data, totalTeams, players, weaponImages}){
                 {"name": "Totals", "value": "totals"}
             ]}/>
         {tables}
-        {renderTotals(data.names, data.data, selectedType)}
+        {renderTotals(data.names, data.data, selectedType, matchLength)}
     </>
 }
