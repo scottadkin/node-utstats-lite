@@ -50,11 +50,13 @@ export async function getTotalMatchRecords(gametype){
 
 export async function getTotalLifetimeRecords(gametype){
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals WHERE playtime>0 ${(gametype !== -1) ? "AND gametype_id=?" : ""}`;
+    if(gametype === -1) gametype  = 0;
 
-    const vars = [];
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals WHERE playtime>0 AND gametype_id=?`;
 
-    if(gametype !== -1) vars.push(gametype);
+    const vars = [gametype];
+
+   
 
     const result = await simpleQuery(query, vars);
 
