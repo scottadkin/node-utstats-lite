@@ -8,9 +8,10 @@ import { convertTimestamp, getOrdinal, getPlayer, toPlaytime } from "../lib/gene
 import Link from "next/link";
 import TabsLinks from "../UI/TabsLinks";
 import DropDown from "../UI/Records/DropDown";
-import {VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, getTypeDisplayName} from "@/app/lib/validRecordTypes";
+import { getTypeDisplayName} from "@/app/lib/validRecordTypes";
 import Pagination from "../UI/Pagination";
 import { getCategorySettings } from "../lib/siteSettings.mjs";
+import { getAllNames } from "../lib/gametypes.mjs";
 
 
 export async function generateMetadata({ params, searchParams }, parent) {
@@ -51,13 +52,16 @@ function getMatchInfo(matches, matchId){
 }
 
 
-function renderSelect(mode, cat){
+function renderSelect(mode, cat, gametypeNames, selectedGametype){
+
     
-    return <DropDown mode={mode} cat={cat}/>
+    return <>
+        <DropDown mode={mode} cat={cat} gametypeNames={gametypeNames} selectedGametype={selectedGametype}/>    
+    </>
 }
 
 
-function renderSingleMatchList(mode, cat, data, totalResults, page, perPage){
+function renderSingleMatchList(mode, cat, gametype, data, totalResults, page, perPage){
 
     if(mode !== "match" || data === null || cat === "") return null;
 
@@ -125,14 +129,14 @@ function renderSingleMatchList(mode, cat, data, totalResults, page, perPage){
 
     return <>
         {elems}
-        <Pagination url={`/records?mode=${mode}&cat=${cat}&perPage=${perPage}&page=`} currentPage={page} perPage={perPage} results={totalResults}/>
+        <Pagination url={`/records?mode=${mode}&cat=${cat}&g=${gametype}&perPage=${perPage}&page=`} currentPage={page} perPage={perPage} results={totalResults}/>
     </>
 }
 
-function renderSingleLifetimeList(mode, cat, data, totalResults, page, perPage){
+function renderSingleLifetimeList(mode, cat, gametype, data, totalResults, page, perPage){
     
 
-    if(mode !== "lifetime" || data === null || cat === "") return null;
+    if(mode !== "lifetime") return null;
 
     const players = data.playerData;
     const records = data.records;
@@ -186,7 +190,7 @@ function renderSingleLifetimeList(mode, cat, data, totalResults, page, perPage){
 
     return <>
         {elems}
-        <Pagination url={`/records?mode=${mode}&cat=${cat}&perPage=${perPage}&page=`} currentPage={page} perPage={perPage} results={totalResults}/>
+        <Pagination url={`/records?mode=${mode}&cat=${cat}&g=${gametype}&perPage=${perPage}&page=`} currentPage={page} perPage={perPage} results={totalResults}/>
     </>
 }
 
@@ -207,28 +211,34 @@ export default async function Records({params, searchParams}){
 
         let mode = (sp.mode !== undefined) ? sp.mode : "match";
         let cat = (sp.cat !== undefined) ? sp.cat : "kills";
+        let gametype = sp?.g ?? "-1";
+
+        gametype = parseInt(gametype);
+        if(gametype !== gametype) gametype = -1;
     
         if(cat === "") cat = "kills";
+
+        const gametypeNames = await getAllNames(true);
 
         let data = null;
 
         let totalResults = 0;
 
+
         if(mode === "match"){
-            totalResults = await getTotalMatchRecords();
+            totalResults = await getTotalMatchRecords(gametype);
         }else{
-            totalResults = await getTotalLifetimeRecords();
+            totalResults = await getTotalLifetimeRecords(gametype);
         }
 
-        console.log(`totalRecords = ${totalResults}`);
-
         if(mode === "match"){
 
-            data = await getPlayersMatchRecords(cat, page, perPage, false);
+            data = await getPlayersMatchRecords(cat, gametype, page, perPage, false);
 
         }else if(mode === "lifetime"){
             
-            data = await getPlayersLifetimeRecords(cat, 0, page, perPage, false);
+            
+            data = await getPlayersLifetimeRecords(cat, gametype, page, perPage, false);
         }
 
         const tabs = [
@@ -238,13 +248,15 @@ export default async function Records({params, searchParams}){
 
         return <main>
             <Header>Records</Header>
-            {renderSelect(mode, cat)}
+            {renderSelect(mode, cat, gametypeNames, gametype)}
             <TabsLinks options={tabs} selectedValue={mode} url={`/records/?mode=`}/>
-            {renderSingleMatchList(mode, cat, data, totalResults, page, perPage)}
-            {renderSingleLifetimeList(mode, cat, data, totalResults, page, perPage)}
+            {renderSingleMatchList(mode, cat, gametype, data, totalResults, page, perPage)}
+            {renderSingleLifetimeList(mode, cat, gametype, data, totalResults, page, perPage)}
         </main>
 
     }catch(err){
+
+        console.trace(err);
 
         return <main>
             <ErrorBox title="Failed to load records">{err.message}</ErrorBox>
