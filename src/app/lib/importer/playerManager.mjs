@@ -677,6 +677,8 @@ export class PlayerManager{
 
                 const d = damageKeys[x];
 
+                if(p.damageData === undefined) break;
+
                 if(master.damageData === undefined){
                     master.damageData = p.damageData;
                     continue;
