@@ -34,7 +34,7 @@ export default function BasicGametypeList({gametypes}){
                 "displayValue": convertTimestamp(last, true),  
                 "className": "date"
             },
-            "playtime": {"value": g.playtime, "displayValue": toPlaytime(g.playtime)},
+            "playtime": {"value": g.playtime, "displayValue": toPlaytime(g.playtime), "className": "date"},
             "matches": {"value": g.matches},
         }
     });

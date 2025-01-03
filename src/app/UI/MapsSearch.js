@@ -76,7 +76,7 @@ function renderBasicTable(maps){
         totals.playtime += m.playtime;
 
         return {
-            "name": {"value": m.name.toLowerCase(), "displayValue": <Link href={url}>{m.name}</Link>},
+            "name": {"value": m.name.toLowerCase(), "displayValue": <Link href={url}>{m.name}</Link>, "className": "text-left"},
             "first": {"value": m.first_match, "displayValue": <Link href={url}>{convertTimestamp(new Date(m.first_match), true, false, true)}</Link>, "className": "date"},
             "last": {"value": m.last_match, "displayValue": <Link href={url}>{convertTimestamp(new Date(m.last_match), true, false, true)}</Link>, "className": "date"},
             "matches": {"value": m.matches, "displayValue": <Link href={url}>{m.matches}</Link>},
@@ -131,7 +131,7 @@ export default function MapsSearch({maps, images, search}){
             }}/>
         </div>
         <div className="form-row">
-            <label>Display Type</label>
+            <label>Display Mode</label>
             <select onChange={(e) =>{
                 dispatch({"type": "change-display", "value": e.target.value});
             }}>

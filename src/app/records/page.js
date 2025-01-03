@@ -23,16 +23,30 @@ export async function generateMetadata({ params, searchParams }, parent) {
     let cat = (sp.cat !== undefined) ? sp.cat.toLowerCase() : "kills";
 
     if(cat === "") cat = "kills";
+
+    let gametype = sp?.g ?? "-1";
+
+    gametype = parseInt(gametype);
+    if(gametype !== gametype) gametype = -1;
     
     const catDisplayName = getTypeDisplayName(mode, cat);
 
-    const singleMatchTotals = await getTotalMatchRecords();
-    const lifetimeTotals = await getTotalLifetimeRecords();
-    
+    const singleMatchTotals = await getTotalMatchRecords(gametype);
+    const lifetimeTotals = await getTotalLifetimeRecords(gametype);
 
+    const gametypeNames = await getAllNames(false);
+    gametypeNames[-1] = "";
+    gametypeNames[0] = "";
+
+    let gametypeName = gametypeNames[gametype] ?? "Not Found";
+
+    if(gametypeName !== ""){
+        gametypeName = `(${gametypeName})`;
+    }
+    
     const settings = await getCategorySettings("Branding");
 
-    const title = (catDisplayName !== null) ? `${catDisplayName} Records - ${(mode === "match") ? "Single Match" : "Lifetime"}` : "Invalid Record Type";
+    const title = (catDisplayName !== null) ? `${catDisplayName} Records ${gametypeName} - ${(mode === "match") ? "Single Match" : "Lifetime"}` : "Invalid Record Type";
 
     
     return {
@@ -105,7 +119,8 @@ function renderSingleMatchList(mode, cat, gametype, data, totalResults, page, pe
             "name": {
                 "displayValue": <>
                     <Link href={`/match/${r.match_id}`}><CountryFlag code={player.country}/>{player.name}</Link>
-                </>
+                </>,
+                "className": "player-name-td"
             },
             "date": {
                 "displayValue": convertTimestamp(new Date(r.match_date) * 0.001, true),
@@ -171,7 +186,8 @@ function renderSingleLifetimeList(mode, cat, gametype, data, totalResults, page,
             "name": {
                 "displayValue": <>
                     <Link href={`/player/${r.player_id}`}><CountryFlag code={player.country}/>{player.name}</Link>
-                </>
+                </>,      
+                "className": "player-name-td"
             },
             "date": {
                 "displayValue": convertTimestamp(new Date(r.last_active) * 0.001, true),

@@ -120,7 +120,7 @@ export default async function Page({params, searchParams}) {
                     </Link>
                 </>
             </td>
-            <td className="font-small">
+            <td className="date">
                 {convertTimestamp(active, true)}
             </td>
             <td>{ignore0(p.score)}</td>
@@ -130,7 +130,7 @@ export default async function Page({params, searchParams}) {
             <td>{ignore0(p.suicides)}</td>
             <td>{p.eff.toFixed(2)}&#37;</td>
             <td>{p.matches}</td>
-            <td className="font-small">{toPlaytime(p.playtime)}</td>
+            <td className="date">{toPlaytime(p.playtime)}</td>
         </tr>);
     }
 
@@ -150,7 +150,7 @@ export default async function Page({params, searchParams}) {
         <table className="t-width-1">
             <tbody>
                 <tr>
-                    <th><Link href={createHeaderURL("name", sortBy, order)}>Name</Link></th>
+                    <th className="player-name-td"><Link href={createHeaderURL("name", sortBy, order)}>Name</Link></th>
                     <th><Link href={createHeaderURL("last_active", sortBy, order)}>Last Active</Link></th>
                     <th><Link href={createHeaderURL("score", sortBy, order)}>Score</Link></th>
                     <th><Link href={createHeaderURL("frags", sortBy, order)}>Frags</Link></th>

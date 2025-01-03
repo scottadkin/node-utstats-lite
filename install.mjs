@@ -9,6 +9,9 @@ import { restoreDefaultSettings } from "./src/app/lib/siteSettings.mjs";
 import { restoreDefaultLayouts } from "./src/app/lib/pageLayout.mjs";
 import { setMatchMapGametypeIds } from "./src/app/lib/players.mjs";
 
+import { setAllPlayerMapAverages } from "./src/app/lib/players.mjs";
+import { setAllMapTotals } from "./src/app/lib/weapons.mjs";
+
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
     "user": mysqlSettings.user,
@@ -773,6 +776,10 @@ async function addPageLayouts(){
         await addPageLayouts();
 
         await setMatchMapGametypeIds();
+
+        await setAllPlayerMapAverages();
+
+        await setAllMapTotals();
         
         process.exit();
 

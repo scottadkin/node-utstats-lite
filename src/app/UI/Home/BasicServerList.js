@@ -34,7 +34,7 @@ export default function BasicServerList({servers}){
                 "displayValue": convertTimestamp(last, true),  
                 "className": "date"
             },
-            "playtime": {"value": s.playtime, "displayValue": toPlaytime(s.playtime)},
+            "playtime": {"value": s.playtime, "displayValue": toPlaytime(s.playtime), "className": "date"},
             "matches": {"value": s.matches},
         }
     });
