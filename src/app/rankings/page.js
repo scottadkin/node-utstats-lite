@@ -1,6 +1,6 @@
 import Header from "../UI/Header";
 import SearchForm from "../UI/Rankings/SearchForm";
-import { getAllNames, getLastPlayedGametype } from "../lib/gametypes.mjs";
+import { getAllNames, getGametypeNames, getLastPlayedGametype } from "../lib/gametypes.mjs";
 import { getRankings } from "../lib/rankings.mjs";
 import { convertTimestamp, getPlayer, toPlaytime, getOrdinal, plural } from "../lib/generic.mjs";
 import { getBasicPlayerInfo } from "../lib/players.mjs";
@@ -12,6 +12,7 @@ import { getCategorySettings } from "../lib/siteSettings.mjs";
 function setGametypeId(searchParams, gametypeNames){
 
     let firstGametypeId = 0;
+
 
     if(gametypeNames.length > 0) firstGametypeId = gametypeNames[0].id;
 
@@ -31,6 +32,8 @@ function setGametypeName(gametypeNames, targetId){
         const g = gametypeNames[i];
         if(g.id === targetId) return g.name;
     }
+
+    if(gametypeNames.length === 0) return "";
 
     return "Not Found";
 }
@@ -158,7 +161,7 @@ export default async function Page({params, searchParams}){
     return <main>
         <Header>Rankings</Header>
         <SearchForm gametypeNames={gametypeNames} gametypeId={gametypeId} timeFrame={timeFrame} perPage={perPage} page={page}/>
-        <Header>Top {gametypeName} Players</Header>
+        <Header>Top {setGametypeName(gametypeNames, gametypeId)} Players</Header>
         <Pagination url={`/rankings/?gid=${gametypeId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
         <table className="t-width-3">
             <tbody>

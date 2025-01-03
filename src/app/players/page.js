@@ -135,7 +135,7 @@ export default async function Page({params, searchParams}) {
     }
 
     if(rows.length === 0){
-        rows.push(<tr>
+        rows.push(<tr key="none">
             <td colSpan={10}>No matches found</td>
         </tr>);
     }

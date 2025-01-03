@@ -14,10 +14,13 @@ import { getCategorySettings } from "../lib/siteSettings.mjs";
 import { getAllNames } from "../lib/gametypes.mjs";
 
 
-export async function generateMetadata({ params, searchParams }, parent) {
+export async function generateMetadata(props) {
 
 
-    const sp = await searchParams;
+    const searchParams = await props.searchParams;
+
+    const sp = searchParams;
+
 
     const mode = (sp.mode !== undefined) ? sp.mode.toLowerCase() : "match"; 
     let cat = (sp.cat !== undefined) ? sp.cat.toLowerCase() : "kills";
@@ -66,7 +69,7 @@ function getMatchInfo(matches, matchId){
 }
 
 
-function renderSelect(mode, cat, gametypeNames, selectedGametype){
+function RenderSelect(mode, cat, gametypeNames, selectedGametype){
 
     
     return <>
@@ -210,12 +213,23 @@ function renderSingleLifetimeList(mode, cat, gametype, data, totalResults, page,
     </>
 }
 
-export default async function Records({params, searchParams}){
+async function testFart(props){
+
+    //const searchParams = await props.searchParams;
+
+    return {}//searchParams;
+}
+
+export default async function Page(props){
+
+    const searchParams = await props.searchParams;
 
     try{
 
-        const sp = await searchParams;
-        
+        //const searchParams = await testFart(props)// await props.searchParams;
+
+        const sp = searchParams;
+
         let page = (sp.page !== undefined) ? parseInt(sp.page) : 1;
         let perPage = (sp.perPage !== undefined) ? parseInt(sp.perPage) : 25;
 
@@ -264,7 +278,7 @@ export default async function Records({params, searchParams}){
 
         return <main>
             <Header>Records</Header>
-            {renderSelect(mode, cat, gametypeNames, gametype)}
+            <DropDown mode={mode} cat={cat} gametypeNames={gametypeNames} selectedGametype={gametype}/>   
             <TabsLinks options={tabs} selectedValue={mode} url={`/records/?mode=`}/>
             {renderSingleMatchList(mode, cat, gametype, data, totalResults, page, perPage)}
             {renderSingleLifetimeList(mode, cat, gametype, data, totalResults, page, perPage)}
