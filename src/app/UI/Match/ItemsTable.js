@@ -47,12 +47,16 @@ export default function ItemsTable({data, totalTeams}){
 
     const totals = [];
 
+    let dataEntries = 0;
+
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
         //if(d.bSpectator === 1) continue;
 
         if(!bAnyData(d)) continue;
+
+        dataEntries++;
 
         let team = 0;
 
@@ -116,6 +120,8 @@ export default function ItemsTable({data, totalTeams}){
 
         tables.push(<InteractiveTable width="1" key={i} headers={headers} rows={rows[i]}/>);
     }
+
+    if(dataEntries === 0) return null;
 
     return <>
         <Header>Items Summary</Header>

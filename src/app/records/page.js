@@ -143,7 +143,7 @@ function renderSingleMatchList(mode, cat, gametype, data, totalResults, page, pe
         });
     }
 
-    elems.push(<InteractiveTable key={`table_${cat}`} headers={headers} rows={rows} bNoHeaderSorting={true} width={3}/>)
+    elems.push(<InteractiveTable key={`table_${cat}`} headers={headers} rows={rows} bNoHeaderSorting={true} width={1}/>)
 
     return <>
         {elems}
@@ -204,7 +204,7 @@ function renderSingleLifetimeList(mode, cat, gametype, data, totalResults, page,
         });
     }
 
-    elems.push(<InteractiveTable key={cat} headers={headers} rows={rows} bNoHeaderSorting={true} width={3}/>);
+    elems.push(<InteractiveTable key={cat} headers={headers} rows={rows} bNoHeaderSorting={true} width={1}/>);
 
 
     return <>
