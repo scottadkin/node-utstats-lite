@@ -57,3 +57,7 @@ Valid Ignore types are:
 - **Fetch Match Players Info** https://example.com/api/json/match/?id=1337&mode=players
 - **Fetch Match Detailed Kills** This includes timestamps, weapons held by each player https://example.com/api/json/match/?id=1337&mode=kills-detailed
 - **Fetch Match Basic Kills** The returns just killer,victim pairs https://example.com/api/json/match/?id=1337&mode=kills-basic
+
+## Optional Damage Mutator
+You can enable basic damage tracking for players by adding [this mutator](https://github.com/scottadkin/UTStats-Lite-Damage)
+So far there is only match player data displayed for damage.
