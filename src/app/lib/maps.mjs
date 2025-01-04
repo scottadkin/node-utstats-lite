@@ -613,3 +613,17 @@ export async function getAllMapIds(){
 
     return result.map((r) => r.id);
 }
+
+
+
+export async function getAllPlayedMatchIds(mapId){
+
+    const query = `SELECT DISTINCT id FROM nstats_matches WHERE map_id=?`;
+
+    const result = await simpleQuery(query,[mapId]);
+    console.log(result);
+
+    return result.map((r) =>{   
+        return r.id;
+    });
+}

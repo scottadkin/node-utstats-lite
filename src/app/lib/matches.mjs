@@ -5,12 +5,12 @@ import { getServerNames } from "./servers.mjs";
 import { getMapImages } from "./maps.mjs";
 import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, getAllNames } from "./players.mjs";
 import { getMatchWeaponStats, getWeaponNames } from "./weapons.mjs";
-import { getMatchKills, getMatchKillsBasic } from "./kills.mjs";
+import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName } from "./generic.mjs";
-import { getMatchDamage } from "./damage.mjs";
+import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, matchStart, matchEnd,
@@ -1177,6 +1177,71 @@ export async function getMatchesPlaytime(matchIds){
         data[r.id] = r.playtime;
     }
 
+    return data;
+}
+//lazy copy past of above
+export async function getMatchesGametypes(matchIds){
+
+    if(matchIds.length === 0) return {};
+
+    const query = `SELECT id,gametype_id FROM nstats_matches WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [matchIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = r.gametype_id;
+    }
 
     return data;
+}
+
+export async function deleteMatch(id){
+
+    /*await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
+    await simpleQuery(`DELETE FROM nstats_match_ctf WHERE match_id=?`, [id]);
+    await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
+    await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
+    await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
+
+
+    await deleteMatchKills(id);*/
+
+    await deleteMatchDamage(id);
+    //delete from these tables
+    /**
+     * nstats_ctf_caps, match_id
+     * nstats_ctf_cap_kills, match_id
+     * nstats_ctf_cap_suicides, match_id
+     * nstats_ctf_carry_times, match_id
+     * nstats_ctf_covers, match_id
+     * 
+     * ----------nstats_damage_match, match_id
+     * ----------nstats_kills, match_id
+     * ----------nstats_matches, id
+     * ----------nstats_match_ctf, match_id
+     * ----------nstats_match_dom, match_id
+     * ----------nstats_match_players, match_id
+     * ----------nstats_match_weapon_stats, match_id
+     * 
+     * 
+     */ 
+
+
+    //recalculate totals for these tables
+    /**
+     * nstats_gametypes
+     * nstats_maps
+     * nstats_map_weapon_totals
+     * nstats_player_map_minute_averages
+     * 	nstats_player_totals	
+     * nstats_player_totals_ctf
+     * nstats_player_totals_damage
+     * nstats_player_totals_weapons
+     * 	nstats_rankings
+     */
 }

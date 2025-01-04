@@ -48,3 +48,10 @@ export async function changePlayerIds(oldIds, newId){
 
     return await simpleQuery(query, [oldIds, newId, oldIds, newId]);
 }
+
+export async function deleteMatchKills(id){
+
+    const query = `DELETE FROM nstats_kills WHERE match_id=?`;
+
+    return await simpleQuery(query, [id]);
+}
