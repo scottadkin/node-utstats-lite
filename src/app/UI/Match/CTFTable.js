@@ -163,6 +163,7 @@ export default function CTFTable({players, data}){
         const player = getPlayer(players, d.player_id); 
 
         if(player.bSpectator !== 0) continue;
+        if(player.team === 255) continue;
 
 
         if(totals[player.team] === undefined){
@@ -177,6 +178,8 @@ export default function CTFTable({players, data}){
         if(rows[player.team] === undefined){
             rows[player.team] = [];
         }
+
+        
 
         const t = totals[player.team];
 

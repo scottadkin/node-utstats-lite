@@ -44,30 +44,33 @@ export default function FragTable({data, totalTeams}){
     console.log(`totalTeams = ${totalTeams}`);
 
 
-    for(let i = 1; i < totalTeams; i++){
+    /*for(let i = 1; i < totalTeams; i++){
         totals.push({...initialTotals});
-    }
+    }*/
 
     for(let i = 0; i < data.playerData.length; i++){
 
         const d = data.playerData[i];
         if(d.spectator === 1) continue;
 
-       
+        
 
         const name = data.playerNames[d.player_id] ?? "Not Found";
 
         let team = 0;
 
         if(totalTeams > 1){
-            team = d.team;
-            
+            team = d.team;  
         }
+
+        if(totalTeams > 1 && team === 255) continue;
+
         if(test[team] === undefined){
             test[team] = [];
         }
 
         let net = d.kills - d.deaths;
+
 
 
         test[team].push({
@@ -89,8 +92,12 @@ export default function FragTable({data, totalTeams}){
             "ttl": {"value": d.ttl, "displayValue": MMSS(d.ttl)},  
         });
 
+        if(totals[team] === undefined){
+            
+            totals[team] = {...initialTotals};
+        }
+
         const t = totals[team];
-     
         t.playtime += d.time_on_server;
         t.score += d.score;
         t.frags += d.frags;
