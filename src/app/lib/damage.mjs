@@ -125,64 +125,75 @@ export async function insertMatchData(playerManager, matchId, mapId, gametypeId)
 
 
 
-export async function getPlayerDataByMatchIds(matchIds){
+export async function getAllPlayerMatchData(){
 
-    if(matchIds.length === 0) return [];
+    //if(matchIds.length === 0) return [];
 
-    const query = `SELECT match_id,player_id,damage_delt,damage_taken,self_damage,
+    const query = `SELECT match_id,gametype_id,player_id,damage_delt,damage_taken,self_damage,
     team_damage_delt,team_damage_taken,fall_damage,drown_damage,cannon_damage 
-    FROM nstats_damage_match WHERE match_id IN(?)`;
+    FROM nstats_damage_match`;
   
 
-    return await simpleQuery(query, [matchIds]);
+    return await simpleQuery(query);
 }
 
-async function deleteMapTotals(id){
-    const query = `DELETE FROM nstats_d`;
+async function deleteAllTotals(){
+
+    const query = `DELETE FROM nstats_player_totals_damage`;
+
+    return await simpleQuery(query);
 }
 
-function _getTotalPlaytime(data, targetIndexes){
+export async function bulkInsertPlayerTotals(data){
 
-    let total = 0;
+    const insertVars = [];
 
-    for(const [key, value] of Object.entries(data)){
+    for(const [gametypeId, gametypeData] of Object.entries(data)){
 
-        if(targetIndexes.indexOf(parseInt(key)) !== -1) total += value;
+        for(const [playerId, d] of Object.entries(gametypeData)){
+
+            insertVars.push([
+                playerId, gametypeId, d.matches, d.playtime, d.damageDelt,
+                d.damageTaken, d.selfDamage, d.teamDamageDelt, d.teamDamageTaken, d.fallDamage,
+                d.drownDamage, d.cannonDamage
+            ]);
+        }
     }
 
-    return total;
+    const query = `INSERT INTO nstats_player_totals_damage (
+    player_id,gametype_id,total_matches,playtime,damage_delt,
+    damage_taken,self_damage,team_damage_delt,team_damage_taken,fall_damage,
+    drown_damage,cannon_damage) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
 }
 
-async function recalculateMapPlayerTotals(id){
+async function recalculatePlayerTotals(){
 
-    const mapMatchIds = await getAllPlayedMatchIds(id);
-    //const matchData = await getAllMapPlayerData(id);
-    const gametypeIds = await getMatchesGametypes(mapMatchIds);
+    const matchesData = await getAllPlayerMatchData();
 
-    const matchData = await getPlayerDataByMatchIds(mapMatchIds);
+    const matchIds = [...new Set(matchesData.map((m) =>{
+        return m.match_id;
+    }))];
 
+    const matchPlaytimes = await getMatchesPlaytime(matchIds);
 
-    //delete all in nstats_player_map_minute_averages before isnerting new data
-
-    // playerId => gametypeId => damageData
+    //gametypeId => playerId => damageData
     const totals = {};
 
-    for(let i = 0; i < matchData.length; i++){
+    for(let i = 0; i < matchesData.length; i++){
 
-        const m = matchData[i];
+        const m = matchesData[i];
 
-        const p = m.player_id;
-        const gametypeId = gametypeIds[m.match_id];
+        if(totals[m.gametype_id] === undefined){
+            totals[m.gametype_id] = {};
+        }
 
-        if(gametypeId === undefined) throw new Error("Gametype Id is null");
+        if(totals[m.gametype_id][m.player_id] === undefined){
 
-        if(totals[p] === undefined) totals[p] = {};
-
-        if(totals[p][gametypeId] === undefined){
-
-            totals[p][gametypeId] = {
-                //we will calculate playtime by fetching all match ids(matchLength) then add them together later
-                "matchIds": new Set(),
+            totals[m.gametype_id][m.player_id] = {
+                "matches": 0,
+                //"matchIds": new Set(),
                 "playtime": 0,
                 "damageDelt": 0,
                 "damageTaken": 0,
@@ -191,14 +202,17 @@ async function recalculateMapPlayerTotals(id){
                 "teamDamageTaken": 0,
                 "fallDamage": 0,
                 "drownDamage": 0,
-                "cannonDamage": 0,
-                
+                "cannonDamage": 0
             };
         }
 
-        const t = totals[p][gametypeId];
+        const t = totals[m.gametype_id][m.player_id];
 
-        t.matchIds.add(m.match_id);
+        const playtime = matchPlaytimes[m.match_id] ?? 0;
+
+        t.matches++;
+        t.playtime += playtime;
+        //t.matchIds.add(m.match_id);
         t.damageDelt += m.damage_delt;
         t.damageTaken += m.damage_taken;
         t.selfDamage += m.self_damage;
@@ -207,39 +221,19 @@ async function recalculateMapPlayerTotals(id){
         t.fallDamage += m.fall_damage;
         t.drownDamage += m.drown_damage;
         t.cannonDamage += m.cannon_damage;
-
-    }
-
-    console.log(totals);
-
-    const matchPlaytimes = await getMatchesPlaytime(mapMatchIds);
-    console.log(matchPlaytimes);
-
-
-    for(const gametypeData of Object.values(totals)){
-
-        for(const damageData of Object.values(gametypeData)){
-            damageData.playtime = _getTotalPlaytime(matchPlaytimes, [...damageData.matchIds]);
-        }
-       // data.playtime = _getTotalPlaytime(matchPlaytimes, [...data.matchIds]);
-      
     }
 
 
-    console.log(totals);
-    console.log(gametypeIds);
+    await deleteAllTotals();
 
-    //need to get matches gametypeIds for the damage totals table
-
+    await bulkInsertPlayerTotals(totals);
+    
 }
 
 export async function deleteMatch(id){
   
-   // await simpleQuery(`DELETE FROM nstats_damage_match WHERE match_id=?`, [id]);
-
-    //nstats_player_totals_damage
-
-    await recalculateMapPlayerTotals(id);
+    await simpleQuery(`DELETE FROM nstats_damage_match WHERE match_id=?`, [id]);
+    await recalculatePlayerTotals();
 }
 
 /**

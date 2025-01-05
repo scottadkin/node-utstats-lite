@@ -1202,14 +1202,14 @@ export async function getMatchesGametypes(matchIds){
 
 export async function deleteMatch(id){
 
-    /*await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
+    await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_ctf WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
 
 
-    await deleteMatchKills(id);*/
+    await deleteMatchKills(id);
 
     await deleteMatchDamage(id);
     //delete from these tables
@@ -1240,7 +1240,7 @@ export async function deleteMatch(id){
      * nstats_player_map_minute_averages
      * 	nstats_player_totals	
      * nstats_player_totals_ctf
-     * nstats_player_totals_damage
+     * ------------nstats_player_totals_damage
      * nstats_player_totals_weapons
      * 	nstats_rankings
      */
