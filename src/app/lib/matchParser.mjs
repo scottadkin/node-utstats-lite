@@ -235,7 +235,7 @@ export class MatchParser{
         await setMatchHash(this.matchId, hashVars.toString());
 
 
-        await this.damageManager.insertMatchData(this.players, this.matchId);
+        await this.damageManager.insertMatchData(this.players, this.matchId, this.map.id, this.gametype.id);
         await this.damageManager.updatePlayerTotals(this.players, this.gametype.id);
 
 

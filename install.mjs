@@ -11,6 +11,7 @@ import { setMatchMapGametypeIds } from "./src/app/lib/players.mjs";
 
 import { setAllPlayerMapAverages } from "./src/app/lib/players.mjs";
 import { setAllMapTotals } from "./src/app/lib/weapons.mjs";
+import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./src/app/lib/damage.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -404,6 +405,8 @@ const queries = [
             id int NOT NULL AUTO_INCREMENT,
             player_id int NOT NULL,
             match_id int NOT NULL,
+            map_id int NOT NULL,
+            gametype_id int NOT NULL,
             damage_delt int NOT NULL,
             damage_taken int NOT NULL,
             self_damage int NOT NULL,
@@ -780,7 +783,11 @@ async function addPageLayouts(){
         await setAllPlayerMapAverages();
 
         await setAllMapTotals();
+
+        await addColumn("nstats_damage_match", "map_id", "INT NOT NULL after match_id");
+        await addColumn("nstats_damage_match", "gametype_id", "INT NOT NULL after map_id");
         
+        await damageSetMatchMapGametypeIds();
         process.exit();
 
     }catch(err){

@@ -1,6 +1,7 @@
-import { simpleQuery } from "./database.mjs";
+import { simpleQuery, bulkInsert } from "./database.mjs";
 import { getAllPlayedMatchIds } from "./maps.mjs";
-import { getMatchesGametypes, getMatchesPlaytime } from "./matches.mjs";
+import { getMatchesGametypes, getMatchesPlaytime, getMapAndGametypeIds } from "./matches.mjs";
+import Message from "./message.mjs";
 
 
 export async function getMatchDamage(matchId){
@@ -89,6 +90,38 @@ export async function updatePlayerTotals(playerManager, gametypeId){
 
 }
 
+
+export async function insertMatchData(playerManager, matchId, mapId, gametypeId){
+
+    const insertVars = [];
+
+    const query = `INSERT INTO nstats_damage_match 
+    (player_id,match_id,map_id,gametype_id,damage_delt,damage_taken,self_damage,team_damage_delt,team_damage_taken,fall_damage,drown_damage,cannon_damage) VALUES ?`;
+
+    for(const p of Object.values(playerManager.mergedPlayers)){
+
+        const d = p.damageData;
+
+        if(d === undefined) continue;
+
+        insertVars.push([
+            p.masterId,
+            matchId,
+            mapId,
+            gametypeId,
+            d.damageDelt,
+            d.damageTaken,
+            d.selfDamage,
+            d.teamDamageDelt,
+            d.teamDamageTaken,
+            d.fallDamage,
+            d.drownDamage,
+            d.cannonDamage
+        ]);
+    }
+
+    await bulkInsert(query, insertVars);
+}
 
 
 
@@ -207,4 +240,37 @@ export async function deleteMatch(id){
     //nstats_player_totals_damage
 
     await recalculateMapPlayerTotals(id);
+}
+
+/**
+ * used for v1.4.0 to v1.4.1 upgrade
+ */
+export async function setMatchMapGametypeIds(){
+
+    const query = `SELECT DISTINCT match_id FROM nstats_damage_match WHERE map_id=0 OR gametype_id=0`;
+
+    const result = await simpleQuery(query);
+
+    const matchIds = result.map((r) =>{ 
+        return r.match_id;
+    });
+
+    const matchesInfo = await getMapAndGametypeIds(matchIds);
+
+    const updateQuery = `UPDATE nstats_damage_match SET map_id=?,gametype_id=? WHERE match_id=?`;
+
+    for(let i = 0; i < matchIds.length; i++){
+
+        const id = matchIds[i];
+
+        const info = matchesInfo[id];
+
+        if(info === undefined){
+            new Message(`Couldn't find match info for matchId ${id}`,"warning");
+            continue;
+        }
+
+        await simpleQuery(updateQuery, [info.map, info.gametype, id]);
+    }
+    
 }
