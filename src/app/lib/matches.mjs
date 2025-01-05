@@ -4,13 +4,14 @@ import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from
 import { getServerNames } from "./servers.mjs";
 import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
 import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, setPlayerMapAverages, getPlayerIdsInMatch, updatePlayerGametypeTotals } from "./players.mjs";
-import { getMatchWeaponStats, getWeaponNames, calcMapWeaponsTotals as weaponCalcMapWeaponsTotals } from "./weapons.mjs";
+import { getMatchWeaponStats, getWeaponNames, calcMapWeaponsTotals as weaponCalcMapWeaponsTotals, updatePlayerTotals as weaponUpdatePlayerTotals } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
+import { recalculateGametype as rankingRecalculateGametype} from "./rankings.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, matchStart, matchEnd,
@@ -1207,8 +1208,7 @@ export async function deleteMatch(id){
     const basicInfo = await getBasicMatchesInfo([id]);
 
     const playerIds = await getPlayerIdsInMatch(id);
-    console.log(basicInfo);
-    console.log(playerIds);
+
 
     await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
@@ -1229,12 +1229,20 @@ export async function deleteMatch(id){
         await mapUpdateTotals(basic.map_id);
         await weaponCalcMapWeaponsTotals(basic.map_id);
         await setPlayerMapAverages(basic.map_id);
+        await rankingRecalculateGametype(basic.gametype_id);
+
+        if(playerIds.length > 0){
+            await weaponUpdatePlayerTotals(playerIds);
+        }
     }
 
 
     if(playerIds.length > 0){
         await updatePlayerGametypeTotals(playerIds);
     }
+
+
+    
 
     //delete from these tables
     /**
@@ -1263,9 +1271,9 @@ export async function deleteMatch(id){
      * ------- nstats_map_weapon_totals
      * ------- nstats_player_map_minute_averages
      * ------- nstats_player_totals	
-     * ------------nstats_player_totals_ctf
-     * ------------nstats_player_totals_damage
-     * nstats_player_totals_weapons
-     * 	nstats_rankings
+     * ------- nstats_player_totals_ctf
+     * ------- nstats_player_totals_damage
+     * -------- nstats_player_totals_weapons
+     * --------	nstats_rankings
      */
 }

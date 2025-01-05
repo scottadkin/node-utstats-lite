@@ -6,6 +6,7 @@ import { getServerNames } from "./servers.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
 import { getPlayerMapTotals as getPlayerCTFMapTotals } from "./ctf.mjs";
 import { getPlayerMapTotals as getPlayerDOMMapTotals } from "./domination.mjs";
+import Message from "./message.mjs";
 
 
 export const VALID_PLAYER_MAP_MINUTE_AVERAGES = {

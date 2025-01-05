@@ -207,7 +207,9 @@ function _removePlayersUnderMatchLimit(data, minMatches){
 
     for(const player of Object.values(data)){
 
-        if(player.total_matches >= minMatches) players[player.player_id] = player;
+        if(player.total_matches >= minMatches){
+            players[player.player_id] = player;
+        }
     }
 
 
@@ -316,6 +318,13 @@ async function deleteAllPlayerRankings(){
 
 }
 
+async function deleteGametypeRankings(id){
+
+    const query = `DELETE FROM nstats_rankings WHERE gametype_id=?`;
+
+    await simpleQuery(query, [id]);
+
+}
 
 export async function recalculateAll(){
 
@@ -331,6 +340,16 @@ export async function recalculateAll(){
 
         await calculateRankings(g, playerIds);
     }
+}
+
+export async function recalculateGametype(id){
+
+    await deleteGametypeRankings(id);
+
+    const playerIds = await getAllPlayerGametypeIds(id);
+
+    await calculateRankings(id, playerIds);
+  
 }
 
 export async function recalculatePlayersByIds(playerIds){

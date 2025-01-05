@@ -86,6 +86,11 @@ async function updateTotals(id, totals){
 
     const query = `UPDATE nstats_gametypes SET matches=?,playtime=?,first_match=?,last_match=? WHERE id=?`;
 
+    if(totals.first_match === null || totals.last_match === null || totals.playtime === null){
+        new Message(`Can't update gametype totals, frist_match,last_match, or playtime are null`,"warning");
+        return;
+    }
+
     return await simpleQuery(query, [totals.total_matches, totals.playtime, totals.first_match, totals.last_match, id]);
 }
 
