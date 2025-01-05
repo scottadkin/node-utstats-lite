@@ -1058,3 +1058,29 @@ export async function setAllPlayerMapAverages(){
         await bulkInsertPlayerMapAverages(totals, mId);
     }
 }
+
+export async function setPlayerMapAverages(mapId){
+
+
+    const playerIds = await getUniquePlayerIdsOnMap(mapId);
+
+    const totals = await getPlayerMapTotals(playerIds, mapId);
+
+    await deleteMapMinuteAverages(mapId);
+    await bulkInsertPlayerMapAverages(totals, mapId);
+    
+}
+
+
+export async function getPlayerIdsInMatch(matchId){
+
+    const query = `SELECT player_id FROM nstats_match_players WHERE match_id=?`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    if(result.length === 0) return [];
+
+    return result.map((r) =>{
+        return r.player_id;
+    });
+}

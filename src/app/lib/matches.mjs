@@ -3,8 +3,8 @@ import {getMapNames} from "./maps.mjs";
 import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
-import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, getAllNames } from "./players.mjs";
-import { getMatchWeaponStats, getWeaponNames } from "./weapons.mjs";
+import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, setPlayerMapAverages, getPlayerIdsInMatch, updatePlayerGametypeTotals } from "./players.mjs";
+import { getMatchWeaponStats, getWeaponNames, calcMapWeaponsTotals as weaponCalcMapWeaponsTotals } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
@@ -1200,13 +1200,15 @@ export async function getMatchesGametypes(matchIds){
     return data;
 }
 
+
+
 export async function deleteMatch(id){
     
     const basicInfo = await getBasicMatchesInfo([id]);
 
+    const playerIds = await getPlayerIdsInMatch(id);
     console.log(basicInfo);
-
-    
+    console.log(playerIds);
 
     await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
@@ -1215,21 +1217,25 @@ export async function deleteMatch(id){
 
 
     await deleteMatchKills(id);
-
     await deleteMatchDamage(id);
-
-
     await ctfDeleteMatch(id);
+
 
     if(basicInfo[id] !== undefined){
 
         const basic = basicInfo[id];
 
-        console.log(basic);
-
         await gametypeUpdateBasicTotals(basic.gametype_id);
         await mapUpdateTotals(basic.map_id);
+        await weaponCalcMapWeaponsTotals(basic.map_id);
+        await setPlayerMapAverages(basic.map_id);
     }
+
+
+    if(playerIds.length > 0){
+        await updatePlayerGametypeTotals(playerIds);
+    }
+
     //delete from these tables
     /**
      * --------nstats_ctf_caps, match_id
@@ -1254,9 +1260,9 @@ export async function deleteMatch(id){
     /**
      * ------- nstats_gametypes
      * ------- nstats_maps
-     * nstats_map_weapon_totals
-     * nstats_player_map_minute_averages
-     * 	nstats_player_totals	
+     * ------- nstats_map_weapon_totals
+     * ------- nstats_player_map_minute_averages
+     * ------- nstats_player_totals	
      * ------------nstats_player_totals_ctf
      * ------------nstats_player_totals_damage
      * nstats_player_totals_weapons
