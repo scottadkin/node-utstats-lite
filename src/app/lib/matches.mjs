@@ -6,7 +6,7 @@ import { getMapImages } from "./maps.mjs";
 import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, getAllNames } from "./players.mjs";
 import { getMatchWeaponStats, getWeaponNames } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
-import { getMatchData as ctfGetMatchData } from "./ctf.mjs";
+import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName } from "./generic.mjs";
@@ -1203,7 +1203,6 @@ export async function getMatchesGametypes(matchIds){
 export async function deleteMatch(id){
 
     await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
-    await simpleQuery(`DELETE FROM nstats_match_ctf WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
@@ -1212,13 +1211,16 @@ export async function deleteMatch(id){
     await deleteMatchKills(id);
 
     await deleteMatchDamage(id);
+
+
+    await ctfDeleteMatch(id);
     //delete from these tables
     /**
-     * nstats_ctf_caps, match_id
-     * nstats_ctf_cap_kills, match_id
-     * nstats_ctf_cap_suicides, match_id
-     * nstats_ctf_carry_times, match_id
-     * nstats_ctf_covers, match_id
+     * --------nstats_ctf_caps, match_id
+     * --------nstats_ctf_cap_kills, match_id
+     * --------nstats_ctf_cap_suicides, match_id
+     * --------nstats_ctf_carry_times, match_id
+     * --------nstats_ctf_covers, match_id
      * 
      * ----------nstats_damage_match, match_id
      * ----------nstats_kills, match_id
@@ -1239,7 +1241,7 @@ export async function deleteMatch(id){
      * nstats_map_weapon_totals
      * nstats_player_map_minute_averages
      * 	nstats_player_totals	
-     * nstats_player_totals_ctf
+     * ------------nstats_player_totals_ctf
      * ------------nstats_player_totals_damage
      * nstats_player_totals_weapons
      * 	nstats_rankings

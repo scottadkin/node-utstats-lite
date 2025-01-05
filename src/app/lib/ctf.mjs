@@ -641,6 +641,129 @@ export async function getPlayerMapTotals(playerIds, mapId){
     }
 
     return data;
+}
+
+async function deleteAllTotals(){
 
 
+    const query = `DELETE FROM nstats_player_totals_ctf`;
+
+    return await simpleQuery(query);
+}
+
+async function getTotalsFromMatchData(){
+
+    const query = `SELECT
+    player_id,gametype_id,
+    COUNT(*) as total_matches,
+    SUM(flag_taken) as flag_taken,
+    SUM(flag_pickup) as flag_pickup,
+    SUM(flag_drop) as flag_drop,
+    SUM(flag_assist) as flag_assist,
+    SUM(flag_cover) as flag_cover,
+    SUM(flag_seal) as flag_seal,
+    SUM(flag_cap) as flag_cap,
+    SUM(flag_kill) as flag_kill,
+    SUM(flag_return) as flag_return,
+    SUM(flag_return_base) as flag_return_base,
+    SUM(flag_return_mid) as flag_return_mid,
+    SUM(flag_return_enemy_base) as flag_return_enemy_base,
+    SUM(flag_return_save) as flag_return_save
+    FROM nstats_match_ctf
+    GROUP BY player_id,gametype_id`;
+
+    const result = await simpleQuery(query);
+
+    await deleteAllTotals();
+
+    const allTimeTotals = {};
+
+    const insertVars = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(allTimeTotals[r.player_id] === undefined){
+            allTimeTotals[r.player_id] = r;
+        }else{
+
+            const a = allTimeTotals[r.player_id];
+            a.total_matches += r.total_matches;
+            a.flag_taken += r.flag_taken;
+            a.flag_pickup += r.flag_pickup;
+            a.flag_drop += r.flag_drop;
+            a.flag_assist += r.flag_assist;
+            a.flag_cover += r.flag_cover;
+            a.flag_seal += r.flag_seal;
+            a.flag_cap += r.flag_cap;
+            a.flag_kill += r.flag_kill;
+            a.flag_return += r.flag_return;
+            a.flag_return_base += r.flag_return_base;
+            a.flag_return_mid += r.flag_return_mid;
+            a.flag_return_enemy_base += r.flag_return_enemy_base;
+            a.flag_return_save += r.flag_return_save
+        }
+
+
+        insertVars.push([
+            r.player_id, r.gametype_id, r.total_matches, r.flag_taken, r.flag_pickup,
+            r.flag_drop, r.flag_assist, r.flag_cover, r.flag_seal, r.flag_cap, r.flag_kill,
+            r.flag_return, r.flag_return_base, r.flag_return_mid, r.flag_return_enemy_base,
+            r.flag_return_save
+        ]);
+    }
+
+
+    for(const [playerId, d] of Object.entries(allTimeTotals)){
+
+        insertVars.push([
+            playerId, 0, d.total_matches, d.flag_taken, d.flag_pickup,
+            d.flag_drop, d.flag_assist, d.flag_cover, d.flag_seal, d.flag_cap, d.flag_kill,
+            d.flag_return, d.flag_return_base, d.flag_return_mid, d.flag_return_enemy_base,
+            d.flag_return_save
+        ]);
+    }
+
+    const insertQuery = `INSERT INTO nstats_player_totals_ctf (
+    player_id, gametype_id, total_matches, flag_taken, flag_pickup,
+    flag_drop, flag_assist, flag_cover, flag_seal, flag_cap, flag_kill,
+    flag_return, flag_return_base, flag_return_mid, flag_return_enemy_base,
+    flag_return_save
+    ) VALUES ?`;
+
+    await bulkInsert(insertQuery, insertVars);
+
+}
+
+async function recalculateTotals(){
+
+
+    const gametypeTotals = await getTotalsFromMatchData();
+}
+
+export async function deleteMatch(matchId){
+
+    /*nstats_ctf_caps, match_id
+     * nstats_ctf_cap_kills, match_id
+     * nstats_ctf_cap_suicides, match_id
+     * nstats_ctf_carry_times, match_id
+     * nstats_ctf_covers, match_id*/
+
+    //nstats_player_totals_ctf
+
+    const deleteFromTables = [
+        "nstats_ctf_caps","nstats_ctf_cap_kills","nstats_ctf_cap_suicides",
+        "nstats_ctf_carry_times","nstats_ctf_covers", "nstats_match_ctf"
+    ];
+
+    for(let i = 0; i < deleteFromTables.length; i++){
+
+        const t = deleteFromTables[i];
+
+        await simpleQuery(`DELETE FROM ${t} WHERE match_id=?`, [matchId]);
+    }
+
+
+    await recalculateTotals();
 }
