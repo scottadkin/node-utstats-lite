@@ -163,3 +163,4 @@ export async function getLastPlayedGametype(){
 
     return null;
 }
+

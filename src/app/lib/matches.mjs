@@ -1,8 +1,8 @@
 import {simpleQuery} from "./database.mjs";
 import {getMapNames} from "./maps.mjs";
-import { getGametypeNames } from "./gametypes.mjs";
+import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
-import { getMapImages } from "./maps.mjs";
+import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
 import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, getAllNames } from "./players.mjs";
 import { getMatchWeaponStats, getWeaponNames } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
@@ -1201,6 +1201,12 @@ export async function getMatchesGametypes(matchIds){
 }
 
 export async function deleteMatch(id){
+    
+    const basicInfo = await getBasicMatchesInfo([id]);
+
+    console.log(basicInfo);
+
+    
 
     await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
@@ -1214,6 +1220,16 @@ export async function deleteMatch(id){
 
 
     await ctfDeleteMatch(id);
+
+    if(basicInfo[id] !== undefined){
+
+        const basic = basicInfo[id];
+
+        console.log(basic);
+
+        await gametypeUpdateBasicTotals(basic.gametype_id);
+        await mapUpdateTotals(basic.map_id);
+    }
     //delete from these tables
     /**
      * --------nstats_ctf_caps, match_id
@@ -1236,8 +1252,8 @@ export async function deleteMatch(id){
 
     //recalculate totals for these tables
     /**
-     * nstats_gametypes
-     * nstats_maps
+     * ------- nstats_gametypes
+     * ------- nstats_maps
      * nstats_map_weapon_totals
      * nstats_player_map_minute_averages
      * 	nstats_player_totals	

@@ -2,6 +2,6 @@ import { deleteMatch } from "./src/app/lib/matches.mjs";
 
 (async () =>{
 
-    await deleteMatch(3);
+    await deleteMatch(4);
     process.exit();
 })();
