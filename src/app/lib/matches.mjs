@@ -9,7 +9,7 @@ import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
-import { getWinner, getTeamName } from "./generic.mjs";
+import { getWinner, getTeamName, sanitizePagePerPage } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype} from "./rankings.mjs";
 
@@ -1276,4 +1276,49 @@ export async function deleteMatch(id){
      * -------- nstats_player_totals_weapons
      * --------	nstats_rankings
      */
+}
+
+export async function adminGetMatches(page, perPage){
+
+    const query = `SELECT id,gametype_id,map_id,date,playtime,players,total_teams,team_0_score,team_1_score,
+    team_2_score,team_3_score,solo_winner,solo_winner_score FROM nstats_matches ORDER BY date DESC LIMIT ?, ?`;
+
+    const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
+
+    const result = await simpleQuery(query, [start, cleanPerPage]);
+
+    const gametypeIds = new Set();
+    const mapIds = new Set();
+    const playerIds = new Set();
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        gametypeIds.add(r.gametype_id);
+        mapIds.add(r.map_id);
+
+        if(r.solo_winner !== 0){
+            playerIds.add(r.solo_winner);
+        }
+    }
+
+    const gametypeNames = await getGametypeNames([...gametypeIds]);
+    const mapNames = await getMapNames([...mapIds]);
+    const playerNames = await getPlayerNamesByIds([...playerIds]);
+    
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        r.gametypeName = gametypeNames[r.gametype_id] ?? "Not Found";
+        r.mapName = mapNames[r.map_id] ?? "Not Found";
+
+        if(r.solo_winner !== 0){
+            r.soloWinnerName = playerNames[r.solo_winner] ?? "Not Found";
+        }
+    }
+
+    return result;
 }

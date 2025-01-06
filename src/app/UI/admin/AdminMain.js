@@ -13,10 +13,11 @@ import MapImageUploader from "./MapImageUploader";
 import PlayerMerger from "./PlayerMerger";
 import PlayerManager from "./PlayerManager";
 import ClearDatabase from "./ClearDatabase";
+import MatchesManager from "./MatchesManager";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("settings");
+    const [mode, setMode] = useState("matches");
 
     return <>
         <Tabs 
@@ -26,6 +27,7 @@ export default function AdminMain(){
                 {"name": "Importer Settings", "value": "importer"},
                 {"name": "Importer History", "value": "importer-history"},
                 {"name": "User Accounts", "value": "users"},
+                {"name": "Matches Manager", "value": "matches"},
                 {"name": "Ranking Settings", "value": "rankings"},
                 {"name": "Recalculate All Rankings", "value": "rankings-all"},
                 {"name": "Map Image Uploader", "value": "map-img"},
@@ -51,6 +53,7 @@ export default function AdminMain(){
         {(mode === "player-merge") ? <PlayerMerger /> : null}
         {(mode === "player-manager") ? <PlayerManager /> : null}
         {(mode === "clear-database") ? <ClearDatabase /> : null}
+        {(mode === "matches") ? <MatchesManager /> : null}
 
     </>
 }

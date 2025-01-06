@@ -22,6 +22,7 @@ import { changePlayerMatchIds as changeDominationPlayerMatchIds} from "@/app/lib
 import { clearAllDataTables } from "@/app/lib/admin";
 import { getAllPagesLayout, saveChanges as savePageLayoutChanges, restoreDefaultPageLayout } from "@/app/lib/pageLayout.mjs";
 import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/damage.mjs";
+import { adminGetMatches } from "@/app/lib/matches.mjs";
 
 
 
@@ -378,6 +379,14 @@ export async function GET(req){
 
             await recalcAllPlayerTotals();
             return Response.json({"message": "done"});
+        }
+
+
+        if(mode === "get-match-list"){
+
+            const data = await adminGetMatches(page, perPage);
+
+            return Response.json({"matches": data});
         }
 
 
