@@ -9,21 +9,38 @@ function reducer(state, action){
 
     switch(action.type){
 
+        case "set-names": {
+            return {
+                ...state,
+                "typeNames": action.data
+            }
+        }
         case "set-matches": {
             return {
                 ...state,
-                "matches": action.matches
+                "matches": action.matches,
+                "totalMatches": action.totalMatches
+            }
+        }
+        case "set-selected-name": {
+
+            const test = {...state};
+
+            test[action.key] = action.value;
+
+            return {
+                ...test
             }
         }
     }
     return state;
 }
 
-async function loadData(dispatch, page){
+async function loadMatches(dispatch, page, map, gametype, server){
 
     try{
 
-        const req = await fetch(`./api/admin?mode=get-match-list&page=${page}&perPage=25`);
+        const req = await fetch(`./api/admin?mode=get-match-list&s=${server}&g=${gametype}&m=${map}&page=${page}&perPage=25`);
 
         const res = await req.json();
 
@@ -31,7 +48,7 @@ async function loadData(dispatch, page){
             throw new Error(res.error);
         }
 
-        dispatch({"type": "set-matches", "matches": res.matches});
+        dispatch({"type": "set-matches", "matches": res.matches, "totalMatches": res.totalMatches});
 
         console.log(res);
     }catch(err){
@@ -39,6 +56,28 @@ async function loadData(dispatch, page){
     }
 }
 
+
+async function loadNames(dispatch){
+
+    try{
+
+        const req = await fetch(`./api/admin?mode=get-all-type-names`);
+
+        const res = await req.json();
+
+        if(res.error !== undefined){
+            throw new Error(res.error);
+        }
+
+
+        dispatch({"type": "set-names", "data": res});
+
+        console.log(res);
+
+    }catch(err){
+        console.trace(err);
+    }
+}
 
 function renderBasicTable(state){
 
@@ -68,42 +107,105 @@ function renderBasicTable(state){
     return <InteractiveTable width={1} headers={headers} rows={rows} bNoHeaderSorting={true} sortBy={"date"} order="DESC"/>
 }
 
+function sortByName(a, b){
+
+    a = a.name.toLowerCase();
+    b = b.name.toLowerCase();
+
+    if(a < b) return -1;
+    if(a > b) return 1;
+    return 0;
+}
+
+function renderFilterForm(state, dispatch){
+
+    const maps = [];
+    const gametypes = [];
+    const servers = [];
+
+    for(const [id, name] of Object.entries(state.typeNames.maps)){
+        maps.push({id, name});
+    }
+
+    for(const [id, name] of Object.entries(state.typeNames.gametypes)){
+        gametypes.push({id, name});
+    }
+
+    for(const [id, name] of Object.entries(state.typeNames.servers)){
+        servers.push({id, name});
+    }
+
+    maps.sort(sortByName);
+    gametypes.sort(sortByName);
+    servers.sort(sortByName);
+
+    console.log(state.selectedServer);
+
+    return <div className="form">
+        <div className="form-row">
+            <label>Map</label>
+            <select value={state.selectedMap} onChange={(e) =>{
+                dispatch({"type": "set-selected-name", "key": "selectedMap", "value": e.target.value});
+            }}>
+                {maps.map((m) =>{
+                    return <option key={m.id} value={m.id}>{m.name}</option>
+                })}
+            </select>
+        </div>
+        <div className="form-row">
+            <label>Gametype</label>
+            <select value={state.selectedGametype} onChange={(e) =>{
+                dispatch({"type": "set-selected-name", "key": "selectedGametype", "value": e.target.value});
+            }}>
+                {gametypes.map((g) =>{
+                    return <option key={g.id} value={g.id}>{g.name}</option>
+                })}
+            </select>
+        </div>
+        <div className="form-row">
+            <label>Server</label>
+            <select value={state.selectedServer} onChange={(e) =>{
+                dispatch({"type": "set-selected-name", "key": "selectedServer", "value": e.target.value});
+            }}>
+                {servers.map((s) =>{
+                    return <option key={s.id} value={s.id}>{s.name}</option>
+                })}
+            </select>
+        </div>
+        <div className="form-info">Matches Found {state.totalMatches}</div>
+    </div>
+}
+
 export default function MatchesManager({}){
 
     const [state, dispatch] = useReducer(reducer, {
         "page": 1, 
-        "selectedMap": -1,
-        "selectedGametype": -1,
-        "selectedServer": -1,
-        "matches": []
+        "selectedMap": 0,
+        "selectedGametype": 0,
+        "selectedServer": 0,
+        "matches": [],
+        "totalMatches": 0,
+        "typeNames": {
+            "gametypes": {},
+            "servers": {},
+            "maps": {}
+        }
     });
 
     useEffect(() =>{
-        loadData(dispatch, state.page);
-    },[state.page]);
+        loadNames(dispatch);
+    },[]);
+
+    useEffect(() =>{
+
+        loadMatches(dispatch, state.page, state.selectedMap, state.selectedGametype, state.selectedServer);
+
+
+    },[state.page, state.selectedMap, state.selectedGametype, state.selectedServer]);
 
     return <>
         <Header>Matches Manager</Header>
-        <div className="form">
-            <div className="form-row">
-                <label>Map</label>
-                <select>
-                    <option value="-1">Any</option>
-                </select>
-            </div>
-            <div className="form-row">
-                <label>Gametype</label>
-                <select>
-                    <option value="-1">Any</option>
-                </select>
-            </div>
-            <div className="form-row">
-                <label>Server</label>
-                <select>
-                    <option value="-1">Any</option>
-                </select>
-            </div>
-        </div>
+        {renderFilterForm(state, dispatch)}
         {renderBasicTable(state)}
     </>
 }

@@ -1278,14 +1278,64 @@ export async function deleteMatch(id){
      */
 }
 
-export async function adminGetMatches(page, perPage){
+function _generateAdminGetMatchesWhere(map, gametype, server){
+
+    let string = ``;
+    const vars = [];
+
+    if(map !== 0){
+        string += `map_id=?`;
+        vars.push(map);
+    }
+
+    if(gametype !== 0){
+
+        if(string === ""){
+            string = `gametype_id=?`;
+        }else{
+            string += ` AND gametype_id=?`;
+        }
+        vars.push(gametype);
+    }
+
+    if(server !== 0){
+        
+        if(string === ""){
+            string = `server_id=?`;
+        }else{
+            string += ` AND server_id=?`;
+        }
+        vars.push(server);
+    }
+
+    if(string !== "") string = ` WHERE ${string}`;
+
+
+    return [string, vars];
+}
+
+async function adminGetMatchesTotalMatches(whereString, whereVars){
+    
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_matches ${whereString}`;
+
+    const result = await simpleQuery(query, whereVars);
+
+    return result[0].total_matches;
+}
+
+export async function adminGetMatches(page, perPage, map, gametype, server){
+
+    
+    const [whereString, whereVars] =  _generateAdminGetMatchesWhere(map, gametype, server);
 
     const query = `SELECT id,gametype_id,map_id,date,playtime,players,total_teams,team_0_score,team_1_score,
-    team_2_score,team_3_score,solo_winner,solo_winner_score FROM nstats_matches ORDER BY date DESC LIMIT ?, ?`;
+    team_2_score,team_3_score,solo_winner,solo_winner_score FROM nstats_matches ${whereString} ORDER BY date DESC LIMIT ?, ?`;
 
     const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
 
-    const result = await simpleQuery(query, [start, cleanPerPage]);
+    const result = await simpleQuery(query, [...whereVars,start, cleanPerPage]);
+
+    const totalMatches = await adminGetMatchesTotalMatches(whereString, whereVars)
 
     const gametypeIds = new Set();
     const mapIds = new Set();
@@ -1320,5 +1370,5 @@ export async function adminGetMatches(page, perPage){
         }
     }
 
-    return result;
+    return {"matches": result, "totalMatches": totalMatches};
 }

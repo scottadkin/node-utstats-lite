@@ -23,6 +23,8 @@ import { clearAllDataTables } from "@/app/lib/admin";
 import { getAllPagesLayout, saveChanges as savePageLayoutChanges, restoreDefaultPageLayout } from "@/app/lib/pageLayout.mjs";
 import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/damage.mjs";
 import { adminGetMatches } from "@/app/lib/matches.mjs";
+import { getAllNames as getAllGametypeNames } from "@/app/lib/gametypes.mjs";
+import { getAllNames as getAllServerNames } from "@/app/lib/servers.mjs";
 
 
 
@@ -384,9 +386,31 @@ export async function GET(req){
 
         if(mode === "get-match-list"){
 
-            const data = await adminGetMatches(page, perPage);
+            let gametype = searchParams.get("g") ?? 0;
+            let server = searchParams.get("s") ?? 0;
+            let map = searchParams.get("m") ?? 0;
 
-            return Response.json({"matches": data});
+            gametype = parseInt(gametype);
+            server = parseInt(server);
+            map = parseInt(map);
+
+            if(gametype !== gametype) gametype = 0;
+            if(server !== server) server = 0;
+            if(map !== map) map = 0;
+
+            const data = await adminGetMatches(page, perPage, map, gametype, server);
+
+            return Response.json(data);
+        }
+
+        //gametypes, maps, servers,....
+        if(mode === "get-all-type-names"){
+            
+            const maps = await getAllMapNames();
+            const gametypes = await getAllGametypeNames(false);
+            const servers = await getAllServerNames();
+
+            return Response.json({maps, gametypes, servers});
         }
 
 
