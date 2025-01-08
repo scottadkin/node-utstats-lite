@@ -3,14 +3,16 @@
     color:var(--font-color-2);
     position:fixed;
     top:0;
-    width:100%;
+    width:100%;  
+    text-align:center;
 }
 
 .wrapper a{
     display:inline-block;
-    padding:10px;
+    padding:15px 15px;
 }
 
 .active{
     color:var(--active-link-color);
+    border-bottom:2px solid yellow;
 }
