@@ -22,7 +22,7 @@ import { changePlayerMatchIds as changeDominationPlayerMatchIds} from "@/app/lib
 import { clearAllDataTables } from "@/app/lib/admin";
 import { getAllPagesLayout, saveChanges as savePageLayoutChanges, restoreDefaultPageLayout } from "@/app/lib/pageLayout.mjs";
 import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/damage.mjs";
-import { adminGetMatches } from "@/app/lib/matches.mjs";
+import { adminGetMatches, deleteMatch } from "@/app/lib/matches.mjs";
 import { getAllNames as getAllGametypeNames } from "@/app/lib/gametypes.mjs";
 import { getAllNames as getAllServerNames } from "@/app/lib/servers.mjs";
 
@@ -235,6 +235,17 @@ export async function POST(req){
 
             await restorePageSettings(page);
 
+        }
+
+        if(mode === "delete-match"){
+
+            if(res.id === undefined) throw new Error(`Match Id not set`);
+
+            if(await deleteMatch(res.id)){
+                return Response.json({"message": "passed"});
+            }else{
+                throw new Error(`Failed to delete match`);
+            }
         }
         
         return Response.json({"message": "hi"});

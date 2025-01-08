@@ -538,6 +538,7 @@ canvas{
 
 .tab-selected{
 	background-color:rgb(164,0,0);
+	border-bottom:2px solid rgb(120,0,0);
 }
 
 .no-image{

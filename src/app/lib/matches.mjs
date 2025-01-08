@@ -1,7 +1,7 @@
 import {simpleQuery} from "./database.mjs";
 import {getMapNames} from "./maps.mjs";
 import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
-import { getServerNames } from "./servers.mjs";
+import { getAllNames, getServerNames } from "./servers.mjs";
 import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
 import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, setPlayerMapAverages, getPlayerIdsInMatch, updatePlayerGametypeTotals } from "./players.mjs";
 import { getMatchWeaponStats, getWeaponNames, calcMapWeaponsTotals as weaponCalcMapWeaponsTotals, updatePlayerTotals as weaponUpdatePlayerTotals } from "./weapons.mjs";
@@ -1205,42 +1205,50 @@ export async function getMatchesGametypes(matchIds){
 
 export async function deleteMatch(id){
     
-    const basicInfo = await getBasicMatchesInfo([id]);
+    try{
 
-    const playerIds = await getPlayerIdsInMatch(id);
+        const basicInfo = await getBasicMatchesInfo([id]);
 
-
-    await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
-    await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
-    await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
-    await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
+        const playerIds = await getPlayerIdsInMatch(id);
 
 
-    await deleteMatchKills(id);
-    await deleteMatchDamage(id);
-    await ctfDeleteMatch(id);
+        await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
+        await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
+        await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
+        await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
 
 
-    if(basicInfo[id] !== undefined){
+        await deleteMatchKills(id);
+        await deleteMatchDamage(id);
+        await ctfDeleteMatch(id);
 
-        const basic = basicInfo[id];
 
-        await gametypeUpdateBasicTotals(basic.gametype_id);
-        await mapUpdateTotals(basic.map_id);
-        await weaponCalcMapWeaponsTotals(basic.map_id);
-        await setPlayerMapAverages(basic.map_id);
-        await rankingRecalculateGametype(basic.gametype_id);
+        if(basicInfo[id] !== undefined){
+
+            const basic = basicInfo[id];
+
+            await gametypeUpdateBasicTotals(basic.gametype_id);
+            await mapUpdateTotals(basic.map_id);
+            await weaponCalcMapWeaponsTotals(basic.map_id);
+            await setPlayerMapAverages(basic.map_id);
+            await rankingRecalculateGametype(basic.gametype_id);
+
+            if(playerIds.length > 0){
+                await weaponUpdatePlayerTotals(playerIds);
+            }
+        }
+
 
         if(playerIds.length > 0){
-            await weaponUpdatePlayerTotals(playerIds);
+            await updatePlayerGametypeTotals(playerIds);
         }
+
+        return true;
+
+    }catch(err){
+        console.trace(err);
+        return false;
     }
-
-
-    if(playerIds.length > 0){
-        await updatePlayerGametypeTotals(playerIds);
-    }
-
 
     
 
@@ -1328,10 +1336,11 @@ export async function adminGetMatches(page, perPage, map, gametype, server){
     
     const [whereString, whereVars] =  _generateAdminGetMatchesWhere(map, gametype, server);
 
-    const query = `SELECT id,gametype_id,map_id,date,playtime,players,total_teams,team_0_score,team_1_score,
-    team_2_score,team_3_score,solo_winner,solo_winner_score FROM nstats_matches ${whereString} ORDER BY date DESC LIMIT ?, ?`;
+    const query = `SELECT id,gametype_id,map_id,server_id,date,playtime,players,total_teams,team_0_score,team_1_score,
+    team_2_score,team_3_score,solo_winner,solo_winner_score FROM nstats_matches ${whereString} ORDER BY date DESC, id DESC LIMIT ?, ?`;
 
     const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
+
 
     const result = await simpleQuery(query, [...whereVars,start, cleanPerPage]);
 
@@ -1356,7 +1365,8 @@ export async function adminGetMatches(page, perPage, map, gametype, server){
     const gametypeNames = await getGametypeNames([...gametypeIds]);
     const mapNames = await getMapNames([...mapIds]);
     const playerNames = await getPlayerNamesByIds([...playerIds]);
-    
+    const serverNames = await getAllNames();
+
 
     for(let i = 0; i < result.length; i++){
 
@@ -1364,6 +1374,7 @@ export async function adminGetMatches(page, perPage, map, gametype, server){
 
         r.gametypeName = gametypeNames[r.gametype_id] ?? "Not Found";
         r.mapName = mapNames[r.map_id] ?? "Not Found";
+        r.serverName = serverNames[r.server_id] ?? "Not Found";
 
         if(r.solo_winner !== 0){
             r.soloWinnerName = playerNames[r.solo_winner] ?? "Not Found";

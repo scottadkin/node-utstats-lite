@@ -4,6 +4,7 @@ import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, toPlaytime, MMSS } from "@/app/lib/generic.mjs";
 import MatchScoreBox from "../MatchScoreBox";
 import Link from "next/link";
+import BasicPagination from "../BasicPagination";
 
 function reducer(state, action){
 
@@ -29,7 +30,42 @@ function reducer(state, action){
             test[action.key] = action.value;
 
             return {
-                ...test
+                ...test,
+                "page": 1
+            }
+        }
+        case "add-pending": {
+
+            const pending = {...state.pending};
+
+            pending[action.id] = 1;
+            
+            return {
+                ...state,
+                "pending": pending
+            }
+        }
+        case "delete-match": {
+
+            const matches = [];
+
+            for(let i = 0; i < state.matches.length; i++){
+
+                const m = state.matches[i];
+
+                if(m.id !== action.id) matches.push(m);
+            }
+
+            return {
+                ...state,
+                "matches": matches,
+                "totalMatches": matches.length 
+            }
+        }
+        case "set-page": {
+            return {
+                ...state,
+                "page": action.page
             }
         }
     }
@@ -79,28 +115,68 @@ async function loadNames(dispatch){
     }
 }
 
-function renderBasicTable(state){
+async function deleteMatch(dispatch, id){
+
+    
+    try{
+
+        //add match to pending delete list
+
+        dispatch({"type": "add-pending", "id": id});
+
+        const req = await fetch("./api/admin/", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({"mode": "delete-match", "id": id})
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined){
+
+            throw new Error(res.error.toString());
+        }
+
+        dispatch({"type": "delete-match", "id": id});
+        console.log(res);
+
+    }catch(err){
+        console.trace(err);
+    }
+}
+
+function renderBasicTable(state, dispatch){
 
     const headers = {
-        "map": {"title": "Map"},
         "date": {"title": "Date"},
-        "players": {"title": "Players"},
-        "playtime": {"title": "Playtime"},
+        "map": {"title": "Map"},   
+        "server": {"title": "Server"},
+        "players": {"title": "Players"},    
         "result": {"title": "Result"},
-        "action": {"title": "Action"},
+        "select": {"title": "Action"},
     };
 
     const rows = state.matches.map((m) =>{
 
         const url = `/match/${m.id}`;
 
+        let deleteButton = <span className="hover team-red font-small padding-2" key={`${m.id}_delete`} onClick={() =>{
+            deleteMatch(dispatch, m.id);
+        }}>Delete Match</span>;
+
+        if(state.pending[m.id] !== undefined){
+
+            deleteButton = <span>In progress...</span>
+        }
+
         return {
-            "date": {"value": m.date, "displayValue": convertTimestamp(new Date(m.date), true, false, true), "className": "date"},
+            "date": {"value": m.date, "displayValue": <Link href={url} target="_blank">{convertTimestamp(new Date(m.date), true, false, true)}</Link>, "className": "date"},
             "map": {"value": m.mapName.toLowerCase(), "displayValue": <Link href={url} target="_blank">{m.mapName}</Link>, "className": "font-small"},
             "players": {"value": m.players, "className": "font-small"},
-            "playtime": {"value": m.playtime, "displayValue": MMSS(m.playtime), "className": "date"},
+            "server": {"value": m.serverName, "displayValue": <Link href={url} target="_blank">{m.serverName}</Link>, "className": "font-small" },
             "result": {"bIgnoreTD": true, "value": "", "displayValue": <MatchScoreBox  key={m.id} data={m} small={true} bTableElem={true}/>},
-            "action": {"value": null, "displayValue": <td className="hover team-red font-small" key={`${m.id}_delete`}>Delete Match</td>, "bIgnoreTD":  true},
+            "select": {"value": null, 
+                "displayValue": deleteButton},
         };
     });
 
@@ -117,6 +193,7 @@ function sortByName(a, b){
     return 0;
 }
 
+
 function renderFilterForm(state, dispatch){
 
     const maps = [];
@@ -124,14 +201,17 @@ function renderFilterForm(state, dispatch){
     const servers = [];
 
     for(const [id, name] of Object.entries(state.typeNames.maps)){
+        if(id === "0") continue;
         maps.push({id, name});
     }
 
     for(const [id, name] of Object.entries(state.typeNames.gametypes)){
+        if(id === "0") continue;
         gametypes.push({id, name});
     }
 
     for(const [id, name] of Object.entries(state.typeNames.servers)){
+        if(id === "0") continue;
         servers.push({id, name});
     }
 
@@ -139,7 +219,9 @@ function renderFilterForm(state, dispatch){
     gametypes.sort(sortByName);
     servers.sort(sortByName);
 
-    console.log(state.selectedServer);
+    maps.unshift({"id": "0", "name": "Any"});
+    gametypes.unshift({"id": "0", "name": "Any"});
+    servers.unshift({"id": "0", "name": "Any"});
 
     return <div className="form">
         <div className="form-row">
@@ -172,7 +254,7 @@ function renderFilterForm(state, dispatch){
                 })}
             </select>
         </div>
-        <div className="form-info">Matches Found {state.totalMatches}</div>
+        <div className="small-info">Total Matches Found {state.totalMatches}</div>
     </div>
 }
 
@@ -189,7 +271,8 @@ export default function MatchesManager({}){
             "gametypes": {},
             "servers": {},
             "maps": {}
-        }
+        },
+        "pending": {}
     });
 
     useEffect(() =>{
@@ -206,6 +289,10 @@ export default function MatchesManager({}){
     return <>
         <Header>Matches Manager</Header>
         {renderFilterForm(state, dispatch)}
-        {renderBasicTable(state)}
+        <BasicPagination results={state.totalMatches} page={state.page} perPage={25} setPage={(a) =>{
+       
+            dispatch({"type": "set-page", "page": a});
+        }}/>
+        {renderBasicTable(state, dispatch)}
     </>
 }
