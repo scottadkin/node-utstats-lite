@@ -251,6 +251,22 @@ export async function getMatchIdFromHash(hash){
     return null;
 }
 
+
+export async function bMatchExists(id){
+
+    if(id.length === 32){
+
+        id = await getMatchIdFromHash(id);
+        if(id !== null) return true;
+    }
+
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_matches WHERE id=?`;
+    const result = await simpleQuery(query, [id]);
+
+    if(result[0].total_matches > 0) return true;
+    return false;
+}
+
 export async function getMatchData(id, bIgnoreKills, bIgnoreWeaponStats, bIgnorePlayers, bIgnoreBasic){
 
     try{

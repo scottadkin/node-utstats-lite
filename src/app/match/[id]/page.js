@@ -1,5 +1,5 @@
 "use server"
-import {getMatchData} from "@/app/lib/matches.mjs";
+import {getMatchData, bMatchExists} from "@/app/lib/matches.mjs";
 import FragTable from "@/app/UI/Match/FragTable";
 import SpecialEvents from "@/app/UI/Match/SpecialEvents";
 import WeaponStats from "@/app/UI/Match/WeaponStats";
@@ -18,6 +18,8 @@ import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import JSONInfo from "@/app/UI/Match/JSONInfo";
 import DamageStats from "@/app/UI/Match/DamageStats";
 import CTFCaps from "@/app/UI/Match/CTFCaps";
+import { getSessionInfo } from "@/app/lib/authentication";
+import AdminTools from "@/app/UI/Match/AdminTools";
 
 
 
@@ -59,6 +61,16 @@ export default async function MatchPage({params, searchParams}) {
     const p = await params;
     let matchId = p.id ?? -1;
 
+    if(!await bMatchExists(matchId)){
+        return (
+            <main>
+                <ErrorBox title="Failed to load match">Match doesn&apos;t exist</ErrorBox>
+            </main>
+        );
+    }
+
+    const session = await getSessionInfo();
+
     const matchData = await getMatchData(matchId);
 
     const weaponImages = await getAllWeaponImages();
@@ -97,7 +109,7 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
-            
+            {(session !== null) ? <AdminTools matchId={matchId}/> : null}
             {elems}
 		</main>
     );

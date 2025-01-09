@@ -107,6 +107,7 @@ footer{
 	color:var(--font-color-2);
 	text-align:center;
 	font-size:var(--font-size-small);
+	line-height:var(--line-height-1);
 }
 
 a{
@@ -250,6 +251,7 @@ th, .admin-textarea-title{
 	font-weight:400;
 	font-size:14px;
 }
+
 
 th a{
 	color:yellow;
@@ -525,7 +527,7 @@ canvas{
 
 .tab{
     display:inline-block;
-    padding:var(--padding-2) var(--padding-1);
+    padding:var(--padding-1) var(--padding-1);
     user-select: none;
 }
 
@@ -537,8 +539,8 @@ canvas{
 
 
 .tab-selected{
-	background-color:rgb(164,0,0);
-	border-bottom:2px solid rgb(120,0,0);
+	color:yellow;
+	border-bottom:2px solid yellow;
 }
 
 .no-image{
