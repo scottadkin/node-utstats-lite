@@ -800,3 +800,28 @@ canvas{
 	font-size:var(--font-size-small);
 	line-height: var(--line-height-1);
 }
+
+
+.box{
+	text-align:center;
+	color:white;
+	padding:var(--padding-1);
+	margin-bottom: var(--margin-1);
+	font-size:var(--font-size-1);
+	line-height:var(--line-height-1);
+	background-color:var(--bg-color-3);
+}
+
+.delete-button{
+	background-color:var(--team-color-red);
+	color:white;
+	padding:var(--padding-1);
+	display:inline-block;
+	margin-top:var(--margin-1);
+	margin-bottom:var(--margin-1);
+}
+
+.delete-button:hover{
+	color:yellow;
+	background-color:var(--team-color-none);
+}

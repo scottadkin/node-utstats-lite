@@ -1399,3 +1399,13 @@ export async function adminGetMatches(page, perPage, map, gametype, server){
 
     return {"matches": result, "totalMatches": totalMatches};
 }
+
+export async function adminGetMatchLogDetails(id){
+
+    const logQuery = `SELECT file_name,date FROM nstats_logs WHERE match_id=?`;
+    const logInfo = await simpleQuery(logQuery, [id]);
+
+    if(logInfo.length > 0) return {"fileName": logInfo[0].file_name, "date": logInfo[0].date};
+
+    return null;
+}

@@ -22,7 +22,7 @@ import { changePlayerMatchIds as changeDominationPlayerMatchIds} from "@/app/lib
 import { clearAllDataTables } from "@/app/lib/admin";
 import { getAllPagesLayout, saveChanges as savePageLayoutChanges, restoreDefaultPageLayout } from "@/app/lib/pageLayout.mjs";
 import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/damage.mjs";
-import { adminGetMatches, deleteMatch } from "@/app/lib/matches.mjs";
+import { adminGetMatchLogDetails, adminGetMatches, deleteMatch } from "@/app/lib/matches.mjs";
 import { getAllNames as getAllGametypeNames } from "@/app/lib/gametypes.mjs";
 import { getAllNames as getAllServerNames } from "@/app/lib/servers.mjs";
 
@@ -239,6 +239,8 @@ export async function POST(req){
 
         if(mode === "delete-match"){
 
+
+            console.log("#############################################################");
             if(res.id === undefined) throw new Error(`Match Id not set`);
 
             if(await deleteMatch(res.id)){
@@ -422,6 +424,16 @@ export async function GET(req){
             const servers = await getAllServerNames();
 
             return Response.json({maps, gametypes, servers});
+        }
+
+
+        if(mode === "admin-get-match-details"){
+
+            let id = searchParams.get("id") ?? -1;
+
+            id = parseInt(id);
+
+            return Response.json(await adminGetMatchLogDetails(id));
         }
 
 
