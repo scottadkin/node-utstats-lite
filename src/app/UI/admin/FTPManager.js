@@ -693,7 +693,8 @@ export default function FTPManager(){
             "minPlaytime": 0,
             "bEnabled": 1,
             "bDeleteFromFTP": 1,
-            "sftp": 0
+            "sftp": 0,
+            "bDeleteTmpFiles": 0
         },
         "editForm": {
             "name": "",
