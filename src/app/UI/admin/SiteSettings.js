@@ -337,6 +337,11 @@ async function restoreDefaultPageSettings(page, dispatch){
 
     try{
 
+        if(!window.confirm("Are you sure you want to restore default page settings?")){
+            return;
+        }
+ 
+
         const req = await fetch("/api/admin", {
             "headers": {"Content-type": "application/json"},
             "method": "POST",
@@ -622,7 +627,7 @@ function renderSelectedOptions(state, dispatch){
             </tbody>
         </table>
         <div className="text-center center">
-            {textAreaElems}
+            {textAreaElems}<br/>
             <div className="restore-default-button" onClick={() =>{
                 restoreDefaultPageSettings(state.selectedTab.toLowerCase(), dispatch);
             }}>
