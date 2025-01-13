@@ -15,7 +15,8 @@ export class SFTPImporter{
         this.user = user;
         this.password = password;
         this.secure = secure;
-        this.targetFolder = targetFolder;
+        this.targetFolder = path.join("./", targetFolder);
+        this.logsFolder = path.join(targetFolder, "Logs");
         this.bIgnoreDuplicates = bIgnoreDuplicates;
         this.bDeleteAfterImport = bDeleteAfterImport;
         this.bDeleteTmpFiles = bDeleteTmpFiles;
@@ -37,8 +38,8 @@ export class SFTPImporter{
 
         let sftp = new Client();
 
-        return this.client.connect(config)
-        .then( () => {
+        return this.client.connect(config).then( () => {
+
             new Message(`Connected to ${this.host}:${this.port}(SFTP)`,"pass");
             return this.downloadMatchLogs()
         })
@@ -69,13 +70,15 @@ export class SFTPImporter{
         }
 
         if(!bValid) return;
+
+        const dest = path.join(this.logsFolder, file.name);
         
-        await this.client.delete(`${this.targetFolder}/Logs/${file.name}`);
+        await this.client.delete(dest);
         new Message(`Deleting tmp file ${file.name}`, "note");
     }
 
 
-    async downloadMatchLogs(sftp){
+    async downloadMatchLogs(){
 
         const test = path.join(this.targetFolder, "Logs");
 
@@ -115,7 +118,8 @@ export class SFTPImporter{
 
                     let dst = createWriteStream(`${importedLogsFolder}/${f.name}`);
 
-                    await this.client.get(`${this.targetFolder}/Logs/${f.name}`, dst);
+                    const targetFile = path.join(this.logsFolder, f.name);
+                    await this.client.get(targetFile, dst);
                     new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass"); 
                 }
 
