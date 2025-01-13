@@ -27,7 +27,7 @@
 	--padding-1:10px;
 	--padding-2:5px;
 	--padding-3:3px;
-	--font-size-1:14px;
+	--font-size-1:13px;
 	--line-height-1:24px;
 	--line-height-2:32px;
 	--line-height-3:20px;
@@ -824,4 +824,19 @@ canvas{
 .delete-button:hover{
 	color:yellow;
 	background-color:var(--team-color-none);
+}
+
+.header-wrapper{
+    text-align:center;
+    padding:20px;
+    color:var(--font-color-1);
+    background-color:var(--bg-color-2);
+    font-weight:400;
+    margin-bottom:25px;
+    font-size:18px;
+}
+
+.country-flag-wrapper{
+    display:inline-block;
+    padding-right:2px;
 }

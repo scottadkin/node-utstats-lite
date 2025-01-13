@@ -231,6 +231,7 @@ async function main(){
 
         await ftp.connect();
 
+
         await parseLogs(
             r.id,
             r.ignore_bots,

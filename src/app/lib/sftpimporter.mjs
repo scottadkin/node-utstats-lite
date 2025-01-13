@@ -4,6 +4,7 @@ import { logFilePrefix, importedLogsFolder, minTmpFileLifetime } from "../../../
 import { bLogAlreadyImported } from "./importer.mjs";
 import { createWriteStream } from "fs";
 import { bTMPFileOldEnough } from "./generic.mjs";
+import path from "path";
 
 export class SFTPImporter{
 
@@ -24,30 +25,33 @@ export class SFTPImporter{
 
     async connect(){
 
-        this.client = new Client();
+       this.client = new Client("sftp-importer");
 
-        //this.client.ftp.verbose = true
+        
+        const config = {
+            "host": this.host,
+            "port": this.port,
+            "user": this.user,
+            "password": this.password
+        };
 
-        try {
+        let sftp = new Client();
 
-            await this.client.connect({
-                "host": this.host,
-                "port": this.port,
-                "user": this.user,
-                "password": this.password,
-                "secure": false
-            });
-
+        return this.client.connect(config)
+        .then( () => {
             new Message(`Connected to ${this.host}:${this.port}(SFTP)`,"pass");
+            return this.downloadMatchLogs()
+        })
+        .then(() => {
+            sftp.end();
+        })
+        .catch(err => {
+            console.error(err.message);
+        }).finally(() =>{
+            new Message(`Disconnected from ${this.host}(SFTP)`,"note");
+        });
 
-            await this.downloadMatchLogs();
-
-        }catch(err) {
-            new Message(err.toString(),"error");
-        }
-
-        this.client.end();
-        new Message(`Disconnected from ${this.host}(SFTP)`,"note");
+        
     }
 
     async deleteTmpFile(file){
@@ -71,9 +75,11 @@ export class SFTPImporter{
     }
 
 
-    async downloadMatchLogs(){
+    async downloadMatchLogs(sftp){
 
-        const files = await this.client.list(`${this.targetFolder}/Logs`);
+        const test = path.join(this.targetFolder, "Logs");
+
+        const files = await this.client.list(test);
 
         const lowerPrefix = logFilePrefix.toLowerCase();
 
@@ -123,5 +129,6 @@ export class SFTPImporter{
                 new Message(err.toString(),"error");
             }
         }
+
     }
 }
