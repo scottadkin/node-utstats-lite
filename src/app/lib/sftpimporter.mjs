@@ -16,7 +16,7 @@ export class SFTPImporter{
         this.password = password;
         this.secure = secure;
         this.targetFolder = path.join("./", targetFolder);
-        this.logsFolder = path.join(targetFolder, "Logs");
+        this.logsFolder = path.join(this.targetFolder, "Logs");
         this.bIgnoreDuplicates = bIgnoreDuplicates;
         this.bDeleteAfterImport = bDeleteAfterImport;
         this.bDeleteTmpFiles = bDeleteTmpFiles;
