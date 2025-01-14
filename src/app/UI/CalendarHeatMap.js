@@ -1,5 +1,4 @@
 "use client"
-import { useState } from "react";
 import { getMonthName, getOrdinal } from "../lib/generic.mjs";
 
 
@@ -77,41 +76,21 @@ function renderMonth(year, month){
     </>
 }
 
-export default function CalendarHeatMap({}){
+export default function CalendarHeatMap({year, month}){
     
+    //convert from 1-12 to 0-11
+    month = month - 1;
 
-    const now = new Date(Date.now());
+    const currentDate = new Date(year, month);
 
-    const year = now.getFullYear();
-    const month = now.getMonth(); //0-11
-    const date = now.getDate(); //1-31
-    const day = now.getDay(); //0-6 sunday-saturday
-
-    const [selectedYear, setSelectedYear] = useState(year);
-    const [selectedMonth, setSelectedMonth] = useState(month);
-    //const [currentDate, setCurrentMonth] = useState(date);
-   // const [currentYear, setCurrentYear] = useState(year);
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth(); //0-11
+    //const date = currentDate.getDate(); //1-31
+    //const day = currentDate.getDay(); //0-6 sunday-saturday
 
 
     return <div className="calendar-heat-map-wrapper">
-        <button onClick={() =>{
-            if(selectedMonth - 1 < 0){
-                setSelectedMonth(11);
-                setSelectedYear(selectedYear - 1);
-            }else{
-                setSelectedMonth(selectedMonth - 1);
-            }
-        }}>previous</button>
-        <button onClick={() =>{
-
-            if(selectedMonth + 1 > 11){
-                setSelectedMonth(0);
-                setSelectedYear(selectedYear + 1);
-            }else{
-                setSelectedMonth(selectedMonth + 1);
-            }
-        }}>next</button>
-        {getMonthName(selectedMonth, true)} {selectedYear} <br/>
-        {renderMonth(selectedYear, selectedMonth)}
+        <div className="calendar-title">{getMonthName(currentMonth, true)} {currentYear}</div>
+        {renderMonth(currentYear, currentMonth)}
     </div>
 }

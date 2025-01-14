@@ -845,22 +845,49 @@ canvas{
 
 .calendar-block{
 	display:inline-block;
-	padding:3px;
+	padding:var(--padding-2);
 	color:white;
 	background-color: var(--bg-color-3);
 	text-align:center;
 	border:1px solid black;
 	margin-top:-1px;
 	margin-left:-1px;
+	font-size:14px;
+}
+
+.calendar-heat-map-wrapper{
+	width:350px;
+	background-color: var(--bg-color-3);
+	display:inline-block;
 }
 
 .calendar-row{
-	max-width:300px;
 	background-color: var(--bg-color-2);
 	display:grid;
 	grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
+.calendar-title{
+	text-align: center;
+	color:var(--font-color-1);
+	padding:var(--padding-2);
+	border:1px solid black;
+	margin-top:-1px;
+}
+
 .tiny-font{
 	font-size: var(--tiny-font-size);
+}
+
+.a-h-m-button{
+	width:175px;
+	background-color:var(--bg-color-2);
+	border:1px solid black;
+	color:var(--font-color-1);
+	padding:var(--padding-2);
+}
+
+.a-h-m-button:hover{
+	color:yellow;
+	cursor: pointer;
 }
