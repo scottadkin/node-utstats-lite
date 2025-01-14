@@ -11,6 +11,7 @@ import { getCategorySettings } from "./lib/siteSettings.mjs";
 import SocialMedia from "./UI/SocialMedia";
 import WelcomeMessage from "./UI/WelcomeMessage";
 import { getPageLayout } from "./lib/pageLayout.mjs";
+import CalendarHeatMap from "./UI/CalendarHeatMap";
 
 
 
@@ -41,6 +42,7 @@ export default async function Home() {
 
 	return <main className={styles.main}>
 		<div>
+			<CalendarHeatMap />
 			{elems}		
 		</div>
 	</main>
