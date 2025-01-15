@@ -40,9 +40,15 @@ export default async function Home() {
 	elems[pageLayout["Most Played Gametypes"]] = (gametypes !== null) ? <BasicGametypeList key="gametypes" gametypes={gametypes}/> : null;
 	elems[pageLayout["Servers"]] = (servers !== null) ? <BasicServerList key="servers" servers={servers}/> : null;
 
+	if(pageSettings["Display Activity Heatmap"] === "1"){
+		elems[pageLayout["Activity Heatmap"]] = <ActivityHeatMap />;
+	}
+
+	
+
 	return <main className={styles.main}>
 		<div>
-			<ActivityHeatMap />
+			
 			{elems}		
 		</div>
 	</main>
