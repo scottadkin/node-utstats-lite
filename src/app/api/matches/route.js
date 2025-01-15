@@ -1,4 +1,4 @@
-import { getMatchesByHashes } from "@/app/lib/matches.mjs";
+import { getMatchesByHashes, getMatchesPlayedCountBetween } from "@/app/lib/matches.mjs";
 
 export async function POST(req){
 
@@ -13,6 +13,16 @@ export async function POST(req){
             const hashes = res.hashes;
 
             const data = await getMatchesByHashes(hashes);
+
+            return Response.json(data);
+        }
+
+        if(mode === "get-matches-played-between"){
+
+            const start = res.start ?? new Date(Date.now());
+            const end = res.end ?? new Date(Date.now());
+
+            const data = await getMatchesPlayedCountBetween(start, end);
 
             return Response.json(data);
         }

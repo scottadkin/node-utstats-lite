@@ -1409,3 +1409,38 @@ export async function adminGetMatchLogDetails(id){
 
     return null;
 }
+
+
+
+export async function getMatchesPlayedCountBetween(startDate, endDate){
+
+    const query = `SELECT id,date,playtime FROM nstats_matches WHERE date>=? AND date<=? ORDER BY date DESC`;
+
+    const result = await simpleQuery(query, [startDate, endDate]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        const date = new Date(r.date);
+  
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDate();
+
+
+        const key = `${year}-${month}-${day}`;
+
+        if(data[key] === undefined){
+
+            data[key] = {"total": 0, "playtime": 0};
+        }
+
+        data[key].total++;
+        data[key].playtime += r.playtime;
+    }
+
+    return data;
+
+}

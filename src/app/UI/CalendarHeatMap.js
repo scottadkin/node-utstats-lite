@@ -2,20 +2,69 @@
 import { getMonthName, getOrdinal } from "../lib/generic.mjs";
 
 
-function CalendarBlock({children, value}){
+function CalendarBlock({children, date, value, maxValue}){
 
-    if(value !== null){
-        value = getOrdinal(value);
+    if(date !== null){
+        date = getOrdinal(date);
     }else{
-        value = <>&nbsp;</>;
+        date = <>&nbsp;</>;
     }
 
-    return <div className="calendar-block">
-        {children}<span className="tiny-font">{value}</span>
+    if(value === undefined) value = 0;
+    if(maxValue === undefined) maxValue = 0;
+
+    let a = 0;
+
+    if(maxValue !== 0 && value !== 0){
+
+        const percent = 100 / maxValue;
+        a = percent * value * 0.01;
+    }
+
+    return <div className="calendar-block" style={{"backgroundColor": `rgba(255,0,0,${a})`}}>
+        {children}<span className="tiny-font">{date}</span>
     </div>
 }
 
-function renderMonth(year, month){
+function calcMaxValues(targetKeys, data){
+
+    const maxValues = {};
+
+    if(data === undefined){
+
+        const dummy = {};
+
+        for(let i = 0; i < targetKeys.length; i++){
+
+            const k = targetKeys[i];
+            dummy[k] = 0;
+        }
+
+        return dummy;
+    }
+
+    for(const value of Object.values(data)){
+
+
+        for(let i = 0; i < targetKeys.length; i++){
+
+            const k = targetKeys[i];
+
+            if(maxValues[k] === undefined){
+                maxValues[k] = value[k];
+                continue;
+            }      
+
+            if(maxValues[k] < value[k]) maxValues[k] = value[k];
+        }   
+    }
+
+    return maxValues;
+}
+
+function renderMonth(year, month, data){
+
+    const originalMonth = month;
 
     if(month < 10){
         month = `0${month}`;
@@ -24,33 +73,50 @@ function renderMonth(year, month){
     const date = new Date(year, month);
     const lastDay = new Date(year, month + 1, 0);
 
+    //don't need to 0 now if single digit
+    month = originalMonth;
+
     const firstDay = date.getDay();
     const lastDate = lastDay.getDate();
 
     const rows = [<div key={"day-names"} className="calendar-row">
-            <CalendarBlock key={`01`} value={null}>S</CalendarBlock>
-            <CalendarBlock key={`02`} value={null}>M</CalendarBlock>
-            <CalendarBlock key={`03`} value={null}>T</CalendarBlock>
-            <CalendarBlock key={`04`} value={null}>W</CalendarBlock>
-            <CalendarBlock key={`05`} value={null}>T</CalendarBlock>
-            <CalendarBlock key={`06`} value={null}>F</CalendarBlock>
-            <CalendarBlock key={`07`} value={null}>S</CalendarBlock>
+            <CalendarBlock key={`01`} date={null}>S</CalendarBlock>
+            <CalendarBlock key={`02`} date={null}>M</CalendarBlock>
+            <CalendarBlock key={`03`} date={null}>T</CalendarBlock>
+            <CalendarBlock key={`04`} date={null}>W</CalendarBlock>
+            <CalendarBlock key={`05`} date={null}>T</CalendarBlock>
+            <CalendarBlock key={`06`} date={null}>F</CalendarBlock>
+            <CalendarBlock key={`07`} date={null}>S</CalendarBlock>
         </div>
     ];
 
     let currentRow = [];
 
     for(let i = 0; i < firstDay; i++){
-        currentRow.push(<CalendarBlock key={`i-${i}`} value={null}>&nbsp;</CalendarBlock>);
+        currentRow.push(<CalendarBlock key={`i-${i}`} date={null}>&nbsp;</CalendarBlock>);
     }
+
+
+    const maxValues = calcMaxValues(["total", "playtime"], data);
 
     let currentDay = firstDay;
     let currentDate = 1;
 
     for(let i = 1; i <= lastDate; i++){
 
-        currentRow.push(<CalendarBlock key={i} value={currentDate}>{currentDate}</CalendarBlock>);
 
+        let currentValue = {"total": 0, "playtime": 0};
+
+        if(data !== undefined && data[`${year}-${originalMonth}-${currentDate}`] !== undefined){
+            //console.log(data[`${year}-${originalMonth}-${currentDate}`],`${year}-${originalMonth}-${currentDate}`);
+
+            currentValue = data[`${year}-${originalMonth}-${currentDate}`];
+        }
+
+
+        currentRow.push(<CalendarBlock key={i} value={currentValue.total} maxValue={maxValues.total} date={currentDate}>{currentDate}</CalendarBlock>);
+
+        //console.log(currentValue,`${year}-${originalMonth}-${currentDate}`);
         currentDay++;
 
         if(currentDay > 6){
@@ -65,7 +131,7 @@ function renderMonth(year, month){
     if(currentRow.length > 0){
 
         for(let i = currentRow.length; i <= 6; i++){
-            currentRow.push(<CalendarBlock key={`last-${i}`} value={null}>&nbsp;</CalendarBlock>);
+            currentRow.push(<CalendarBlock key={`last-${i}`} date={null}>&nbsp;</CalendarBlock>);
         }
         
         rows.push(<div key={"end"} className="calendar-row">{currentRow}</div>);
@@ -76,7 +142,7 @@ function renderMonth(year, month){
     </>
 }
 
-export default function CalendarHeatMap({year, month}){
+export default function CalendarHeatMap({year, month, data}){
     
     //convert from 1-12 to 0-11
     month = month - 1;
@@ -91,6 +157,6 @@ export default function CalendarHeatMap({year, month}){
 
     return <div className="calendar-heat-map-wrapper">
         <div className="calendar-title">{getMonthName(currentMonth, true)} {currentYear}</div>
-        {renderMonth(currentYear, currentMonth)}
+        {renderMonth(currentYear, currentMonth, data)}
     </div>
 }

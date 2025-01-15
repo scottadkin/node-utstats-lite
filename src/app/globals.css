@@ -885,6 +885,7 @@ canvas{
 	border:1px solid black;
 	color:var(--font-color-1);
 	padding:var(--padding-2);
+	user-select: none;
 }
 
 .a-h-m-button:hover{
