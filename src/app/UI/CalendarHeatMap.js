@@ -1,8 +1,11 @@
 "use client"
-import { getMonthName, getOrdinal } from "../lib/generic.mjs";
+import { getMonthName, getOrdinal, toPlaytime } from "../lib/generic.mjs";
+import BasicMouseOver from "./BasicMouseOver";
 
 
-function CalendarBlock({children, date, value, maxValue}){
+function CalendarBlock({children, date, value, maxValue, playtime}){
+
+    const initialDate = date;
 
     if(date !== null){
         date = getOrdinal(date);
@@ -21,8 +24,24 @@ function CalendarBlock({children, date, value, maxValue}){
         a = percent * value * 0.01;
     }
 
+
+    let inner = null;
+
+
+    if(initialDate === null){
+        inner = <>{children}<span className="tiny-font">{date}</span></>
+    }else{
+        inner = <BasicMouseOver title="Date Stats" content={<>
+            <b>Matches Played</b>: {value}<br/>
+            <b>Playtime</b>: {toPlaytime(playtime)}
+
+        </>}>
+            {children}<span className="tiny-font">{date}</span>
+        </BasicMouseOver>;
+    }
+
     return <div className="calendar-block" style={{"backgroundColor": `rgba(255,0,0,${a})`}}>
-        {children}<span className="tiny-font">{date}</span>
+        {inner}
     </div>
 }
 
@@ -80,13 +99,13 @@ function renderMonth(year, month, data){
     const lastDate = lastDay.getDate();
 
     const rows = [<div key={"day-names"} className="calendar-row">
-            <CalendarBlock key={`01`} date={null}>S</CalendarBlock>
-            <CalendarBlock key={`02`} date={null}>M</CalendarBlock>
-            <CalendarBlock key={`03`} date={null}>T</CalendarBlock>
-            <CalendarBlock key={`04`} date={null}>W</CalendarBlock>
-            <CalendarBlock key={`05`} date={null}>T</CalendarBlock>
-            <CalendarBlock key={`06`} date={null}>F</CalendarBlock>
-            <CalendarBlock key={`07`} date={null}>S</CalendarBlock>
+            <CalendarBlock key={`01`} date={null}><BasicMouseOver title="Sunday">S</BasicMouseOver></CalendarBlock>
+            <CalendarBlock key={`02`} date={null}><BasicMouseOver title="Monday">M</BasicMouseOver></CalendarBlock>
+            <CalendarBlock key={`03`} date={null}><BasicMouseOver title="Tuesday">T</BasicMouseOver></CalendarBlock>
+            <CalendarBlock key={`04`} date={null}><BasicMouseOver title="Wednesday">W</BasicMouseOver></CalendarBlock>
+            <CalendarBlock key={`05`} date={null}><BasicMouseOver title="Thursday">T</BasicMouseOver></CalendarBlock>
+            <CalendarBlock key={`06`} date={null}><BasicMouseOver title="Friday">F</BasicMouseOver></CalendarBlock>
+            <CalendarBlock key={`07`} date={null}><BasicMouseOver title="Saturday">S</BasicMouseOver></CalendarBlock>
         </div>
     ];
 
@@ -114,7 +133,9 @@ function renderMonth(year, month, data){
         }
 
 
-        currentRow.push(<CalendarBlock key={i} value={currentValue.total} maxValue={maxValues.total} date={currentDate}>{currentDate}</CalendarBlock>);
+        currentRow.push(<CalendarBlock key={i} playtime={currentValue.playtime} value={currentValue.total} maxValue={maxValues.total} date={currentDate}>
+            {currentDate}
+        </CalendarBlock>);
 
         //console.log(currentValue,`${year}-${originalMonth}-${currentDate}`);
         currentDay++;

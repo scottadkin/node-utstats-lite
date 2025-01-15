@@ -44,7 +44,7 @@ async function loadData(dispatch, month, year){
 
         dispatch({"type": "save-data", "data": res, "month": month, "year": year});
 
-        console.log(res);
+        //console.log(res);
 
     }catch(err){
         console.trace(err);
