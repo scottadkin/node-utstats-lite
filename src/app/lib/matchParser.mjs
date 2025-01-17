@@ -118,7 +118,7 @@ export class MatchParser{
         this.players.mergePlayers();
         
 
-        const totalPlayers = this.players.getTotalUniquePlayers();
+        const totalPlayers = this.players.getTotalUniquePlayers(this.totalTeams);
 
         if(totalPlayers < this.minPlayers){
             new Message(`Match has less then the minimum players limit (found ${totalPlayers} out of a target of ${this.minPlayers}).`,"error");
@@ -162,7 +162,7 @@ export class MatchParser{
             this.matchLength,
             this.matchStart, 
             this.matchEnd,
-            this.players.getTotalUniquePlayers(),
+            this.players.getTotalUniquePlayers(this.totalTeams),
             this.totalTeams,
             this.teamScores[0],
             this.teamScores[1],

@@ -413,11 +413,14 @@ export class PlayerManager{
 
 
     //ignore spectators
-    getTotalUniquePlayers(){
+    getTotalUniquePlayers(totalTeams){
 
         const uniqueNames = [];
 
         for(const p of Object.values(this.mergedPlayers)){
+
+            //players set to spectators by a mutator?
+            if(totalTeams > 1 && p.team === 255) continue;
 
             if(p.bSpectator === 1 && p.stats.timeOnServer === 0) continue;
 
