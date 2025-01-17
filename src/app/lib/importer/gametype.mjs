@@ -73,7 +73,34 @@ export class Gametype{
         }
     }
 
-    async setId(){
+    async setId(totalTeams, totalPlayers, bIncludeTeamSize){
+
+
+
+        if(bIncludeTeamSize && totalTeams > 1){
+
+            
+
+            if(totalPlayers > 0){
+
+
+                let perTeam = 0; 
+                perTeam = Math.floor(totalPlayers / totalTeams);
+
+                let teamString = "";
+
+                for(let i = 0; i < totalTeams; i++){
+
+                    teamString += `${perTeam}`;
+                    if(i < totalTeams - 1) teamString +=` v `;
+                }
+
+                this.name = `${this.name} (${teamString})`
+
+            }
+
+            
+        }
         
         this.id = await updateGametype(this.name);
     }

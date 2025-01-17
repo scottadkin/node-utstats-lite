@@ -146,7 +146,7 @@ export class MatchParser{
         }
 
         await this.server.setId();
-        await this.gametype.setId();
+        await this.gametype.setId(this.totalTeams, totalPlayers, true);
         await this.map.setId();
 
         
