@@ -622,9 +622,23 @@ export async function getAllPlayedMatchIds(mapId){
     const query = `SELECT DISTINCT id FROM nstats_matches WHERE map_id=?`;
 
     const result = await simpleQuery(query,[mapId]);
-    console.log(result);
+
 
     return result.map((r) =>{   
         return r.id;
     });
+}
+
+
+
+export async function getNameById(mapId){
+
+    const query = `SELECT name FROM nstats_maps WHERE id=?`;
+    const result = await simpleQuery(query, [mapId]);
+
+    if(result.length === 0){
+        return null
+    }
+
+    return result[0].name;
 }

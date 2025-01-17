@@ -1,5 +1,5 @@
 import {simpleQuery} from "./database.mjs";
-import {getMapNames} from "./maps.mjs";
+import {getMapNames, getNameById} from "./maps.mjs";
 import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
 import { getAllNames, getServerNames } from "./servers.mjs";
 import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
@@ -1443,4 +1443,16 @@ export async function getMatchesPlayedCountBetween(startDate, endDate){
 
     return data;
 
+}
+
+
+export async function getMatchMapName(matchId){
+
+    const query = `SELECT map_id FROM nstats_matches WHERE id=?`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    if(result.length === 0) return null;
+
+    return await getNameById(result[0].map_id);
 }

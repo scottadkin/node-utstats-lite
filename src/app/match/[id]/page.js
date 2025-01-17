@@ -21,8 +21,6 @@ import CTFCaps from "@/app/UI/Match/CTFCaps";
 import { getSessionInfo } from "@/app/lib/authentication";
 import AdminTools from "@/app/UI/Match/AdminTools";
 
-
-
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
 
