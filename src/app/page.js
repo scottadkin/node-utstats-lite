@@ -48,7 +48,6 @@ export default async function Home() {
 
 	return <main className={styles.main}>
 		<div>
-			
 			{elems}		
 		</div>
 	</main>

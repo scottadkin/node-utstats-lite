@@ -1,5 +1,6 @@
 "use server"
 import {getMatchData, bMatchExists} from "@/app/lib/matches.mjs";
+import { getMapImageName, getMapImages } from "@/app/lib/maps.mjs";
 import FragTable from "@/app/UI/Match/FragTable";
 import SpecialEvents from "@/app/UI/Match/SpecialEvents";
 import WeaponStats from "@/app/UI/Match/WeaponStats";
@@ -44,10 +45,28 @@ export async function generateMetadata({ params, searchParams }, parent) {
 
     const date = Math.floor(new Date(matchData.basic.date) * 0.001);
 
+
+    
+    let mapImage = "default.jpg";
+
+    if(b.mapName !== null){
+        const imageResult = await getMapImages([b.mapName]);
+
+        const lowerName = b.mapName.toLowerCase();
+
+        if(imageResult[lowerName] !== undefined){
+
+            mapImage = imageResult[lowerName];
+        }
+    }
+
    
     return {
         "title": `${b.mapName} - ${convertTimestamp(date, true)} - ${settings["Site Name"] || "Node UTStats Lite"}`,
         "description": `Match report for ${b.mapName} (${b.gametypeName}), ${convertTimestamp(date, true)}, ${b.players} ${plural(b.players, "player")}, match length ${toPlaytime(b.playtime)}, server ${b.serverName}.`
+        ,"openGraph": {
+			"images": [`./images/maps/${mapImage}`]
+		}
     }
 }
 

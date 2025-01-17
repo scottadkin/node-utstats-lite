@@ -239,6 +239,14 @@ async function getPlayerMatchData(id){
     return result;
 }
 
+async function getPlayerMatchScores(id){
+
+    const query = `SELECT player_id,team,score,frags,kills,deaths FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
+
+    return await simpleQuery(query, [id]);
+
+}
+
 
 export async function getMatchIdFromHash(hash){
 
@@ -1455,4 +1463,47 @@ export async function getMatchMapName(matchId){
     if(result.length === 0) return null;
 
     return await getNameById(result[0].map_id);
+}
+
+
+
+export async function getMatchOGImageData(matchId){
+
+    const query = `SELECT total_teams,team_0_score,team_1_score,team_2_score,team_3_score FROM nstats_matches WHERE id=?`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    if(result.length === 0) return null;
+
+    const playerScores = await getPlayerMatchScores(matchId);
+
+    const playerIds = [...new Set(playerScores.map((p) =>{
+        return p.player_id;
+    }))];
+
+    const players = await getPlayersById(playerIds);
+
+    for(let i = 0; i < playerScores.length; i++){
+
+        const p = playerScores[i];
+        
+        if(players[p.player_id] === undefined){
+            p.name = "Not Found";
+            continue;
+        }
+        
+        p.name = players[p.player_id];
+    }
+
+    playerScores.sort((a, b) =>{
+        
+        a = a.frags;
+        b = b.frags;
+
+        if(a < b) return 1;
+        if(a < b) return -1;
+        return 0;
+    });
+
+    return {"players": playerScores};
 }
