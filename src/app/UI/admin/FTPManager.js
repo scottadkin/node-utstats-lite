@@ -176,7 +176,8 @@ const reducer = function (state, action){
                     "bEnabled": d.enabled,
                     "bDeleteFromFTP": d.delete_after_import,
                     "sftp": d.sftp,
-                    "bDeleteTmpFiles": d.delete_tmp_files
+                    "bDeleteTmpFiles": d.delete_tmp_files,
+                    "appendTeamSizes": d.append_team_sizes
                 }
             }
         }
@@ -201,7 +202,8 @@ const reducer = function (state, action){
                     "bEnabled": 1,
                     "bDeleteFromFTP": 1,
                     "sftp": 0,
-                    "bDeleteTmpFiles": 0
+                    "bDeleteTmpFiles": 0,
+                    "appendTeamSizes": 0
                 }
             }
         }
@@ -240,7 +242,8 @@ const reducer = function (state, action){
                     "bEnabled": 1,
                     "bDeleteFromFTP": 1,
                     "sftp": 0,
-                    "bDeleteTmpFiles": 0
+                    "bDeleteTmpFiles": 0,
+                    "appendTeamSizes": 0
                 }
             }
         }
@@ -266,7 +269,8 @@ const reducer = function (state, action){
                     "bEnabled": 1,
                     "bDeleteFromFTP": 1,
                     "sftp": 0,
-                    "bDeleteTmpFiles": 0
+                    "bDeleteTmpFiles": 0,
+                    "appendTeamSizes": 0
                 }
             }
         }
@@ -498,6 +502,19 @@ function renderEditServers(state, dispatch){
                 }}/>
             </div>
             <div className="form-row">
+                <label>Append Team Sizes To Gametypes Name</label>
+                <TrueFalseButton value={state.editForm.appendTeamSizes} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.editForm.appendTeamSizes){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-edit-form", "key": "appendTeamSizes", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
                 <label>Enabled</label>
                 <TrueFalseButton value={state.editForm.bEnabled} setValue={() =>{
                     
@@ -646,6 +663,19 @@ function renderAddServer(state, dispatch){
                 }}/>
             </div>
             <div className="form-row">
+                <label>Append Team Sizes To Gametypes Name</label>
+                <TrueFalseButton value={state.createForm.appendTeamSizes} setValue={() =>{
+                    
+                    let newValue = 1;
+
+                    if(state.createForm.appendTeamSizes){
+                        newValue = 0;
+                    }
+
+                    dispatch({"type": "update-create-form", "key": "appendTeamSizes", "value": newValue});
+                }}/>
+            </div>
+            <div className="form-row">
                 <label>Enabled</label>
                 <TrueFalseButton value={state.createForm.bEnabled} setValue={() =>{
                     
@@ -694,7 +724,8 @@ export default function FTPManager(){
             "bEnabled": 1,
             "bDeleteFromFTP": 1,
             "sftp": 0,
-            "bDeleteTmpFiles": 0
+            "bDeleteTmpFiles": 0,
+            "appendTeamSizes": 0
         },
         "editForm": {
             "name": "",
@@ -708,7 +739,8 @@ export default function FTPManager(){
             "minPlayers": 0,
             "minPlaytime": 0,
             "bEnabled": 1,
-            "bDeleteFromFTP": 1
+            "bDeleteFromFTP": 1,
+            "appendTeamSizes": 0
         }
     });
 

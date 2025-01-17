@@ -41,7 +41,8 @@ const queries = [
         min_playtime int(11) NOT NULL,
         sftp int(1) NOT NULL,
         enabled INT(1) NOT NULL,
-        delete_tmp_files INT(1) NOT NULL
+        delete_tmp_files INT(1) NOT NULL,
+        append_team_sizes INT(1) NOT NULL
       ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
         `CREATE TABLE IF NOT EXISTS nstats_logs_folder (
@@ -53,7 +54,8 @@ const queries = [
         ignore_bots int(1) NOT NULL,
         ignore_duplicates int(1) NOT NULL,
         min_players int(2) NOT NULL,
-        min_playtime int(11) NOT NULL
+        min_playtime int(11) NOT NULL,
+        append_team_sizes INT(1) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,  
 
         `CREATE TABLE IF NOT EXISTS nstats_players (
@@ -726,7 +728,7 @@ async function addPageLayouts(){
         connection.end();
 
         if(!await bLogsSettingsExist()){
-            await simpleQuery(`INSERT INTO nstats_logs_folder VALUES(NULL, "1999-11-30 00:00:00","1999-11-30 00:00:00",0,0,0,0,0,0)`);
+            await simpleQuery(`INSERT INTO nstats_logs_folder VALUES(NULL, "1999-11-30 00:00:00","1999-11-30 00:00:00",0,0,0,0,0,0,0)`);
         }
 
         await insertSiteSettings();
@@ -786,6 +788,10 @@ async function addPageLayouts(){
 
         await addColumn("nstats_damage_match", "map_id", "INT NOT NULL after match_id");
         await addColumn("nstats_damage_match", "gametype_id", "INT NOT NULL after map_id");
+
+
+        await addColumn("nstats_ftp", "append_team_sizes", "INT(1) NOT NULL AFTER delete_tmp_files");
+        await addColumn("nstats_logs_folder", "append_team_sizes", "INT(1) NOT NULL AFTER min_playtime");
         
         await damageSetMatchMapGametypeIds();
         process.exit();

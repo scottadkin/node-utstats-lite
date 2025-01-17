@@ -18,7 +18,8 @@ async function saveChanges(state, dispatch){
                 "ignoreBots": state.ignoreBots,
                 "ignoreDuplicates": state.ignoreDuplicates,
                 "minPlayers": state.minPlayers,
-                "minPlaytime": state.minPlaytime
+                "minPlaytime": state.minPlaytime,
+                "appendTeamSizes": state.appendTeamSizes
             })
         });
 
@@ -70,6 +71,7 @@ function reducer(state, action){
                 "ignoreDuplicates": action.settings.ignore_duplicates,
                 "minPlaytime": action.settings.min_playtime,
                 "minPlayers": action.settings.min_players,
+                "appendTeamSizes": action.settings.append_team_sizes
             }
         }
         case "setError": {
@@ -108,6 +110,12 @@ function reducer(state, action){
                 "minPlaytime": action.value
             }
         }
+        case "setAppendTeamSizes": {
+            return {
+                ...state,
+                "appendTeamSizes": action.value
+            }
+        }
     }
 
     return state;
@@ -123,6 +131,7 @@ export default function ImporterSettings({}){
         "ignoreDuplicates": 0,
         "minPlaytime": 0,
         "minPlayers": 0,
+        "appendTeamSizes": 0
     });
 
     useEffect(() =>{
@@ -159,6 +168,12 @@ export default function ImporterSettings({}){
                 <label>Minimum Playtime(seconds)</label>
                 <input type="number" className="textbox" value={state.minPlaytime} min={0} onChange={(e) =>{
                     dispatch({"type": "setMinPlaytime", "value": e.target.value});
+                }}/>
+            </div>
+            <div className="form-row">
+                <label>Append Team Sizes To Gametype Name</label>
+                <TrueFalseButton value={state.appendTeamSizes} setValue={() =>{
+                    dispatch({"type": "setAppendTeamSizes", "value": (state.appendTeamSizes === 0) ? 1 : 0});
                 }}/>
             </div>
             <div className="text-center">

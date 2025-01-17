@@ -69,8 +69,9 @@ export async function POST(req){
             const ignoreDuplicates = (res.ignoreDuplicates !== undefined) ? res.ignoreDuplicates : 0;
             const minPlayers = (res.minPlayers !== undefined) ? res.minPlayers : 0;
             const minPlaytime = (res.minPlaytime !== undefined) ? res.minPlaytime : 0;
+            const appendTeamSizes = (res.appendTeamSizes !== undefined) ? res.appendTeamSizes : 0;
 
-            await updateLogsFolderSettings(ignoreBots, ignoreDuplicates, minPlayers, minPlaytime);
+            await updateLogsFolderSettings(ignoreBots, ignoreDuplicates, minPlayers, minPlaytime, appendTeamSizes);
 
             return Response.json({"message": "passed"});
         }

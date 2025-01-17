@@ -1,15 +1,16 @@
 import { simpleQuery } from "./database.mjs";
 
-export async function updateSettings(ignoreBots, ignoreDuplicates, minPlayers, minPlaytime){
+export async function updateSettings(ignoreBots, ignoreDuplicates, minPlayers, minPlaytime, appendTeamSizes){
 
     ignoreBots = parseInt(ignoreBots);
     ignoreDuplicates = parseInt(ignoreDuplicates);
     minPlayers = parseInt(minPlayers);
     minPlaytime = parseInt(minPlaytime);
+    appendTeamSizes = parseInt(appendTeamSizes);
 
-    const query = `UPDATE nstats_logs_folder SET ignore_bots=?,ignore_duplicates=?,min_players=?,min_playtime=?`;
+    const query = `UPDATE nstats_logs_folder SET ignore_bots=?,ignore_duplicates=?,min_players=?,min_playtime=?,append_team_sizes=?`;
 
-    await simpleQuery(query, [ignoreBots, ignoreDuplicates, minPlayers, minPlaytime]);
+    await simpleQuery(query, [ignoreBots, ignoreDuplicates, minPlayers, minPlaytime, appendTeamSizes]);
 }
 
 
