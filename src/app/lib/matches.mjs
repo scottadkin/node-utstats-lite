@@ -1499,5 +1499,5 @@ export async function getOGImagePlayerMatchData(matchId){
         return 0;
     });
 
-    return {"players": playerScores};
+    return playerScores;
 }

@@ -65,7 +65,7 @@ export async function generateMetadata({ params, searchParams }, parent) {
         "title": `${b.mapName} - ${convertTimestamp(date, true)} - ${settings["Site Name"] || "Node UTStats Lite"}`,
         "description": `Match report for ${b.mapName} (${b.gametypeName}), ${convertTimestamp(date, true)}, ${b.players} ${plural(b.players, "player")}, match length ${toPlaytime(b.playtime)}, server ${b.serverName}.`
         ,"openGraph": {
-			"images": [`./images/maps/${mapImage}`]
+			"images": [`./api/matchshot/?id=${matchId}`]
 		}
     }
 }

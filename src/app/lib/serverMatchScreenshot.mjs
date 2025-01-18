@@ -4,6 +4,10 @@ import { createCanvas, loadImage, createImageData } from "canvas";
 import { getMatch, getOGImagePlayerMatchData } from './matches.mjs';
 import { getTeamName } from './generic.mjs';
 
+const redTeamColor = "rgb(255,0,0)";
+const blueTeamColor = "rgb(0,193,255)";
+const greenTeamColor = "rgb(0,255,0)";
+const yellowTeamColor = "rgb(255,255,0)";
 
 export default class serverMatchScreenshot{
 
@@ -79,28 +83,51 @@ export default class serverMatchScreenshot{
 
     renderTeamScoreboard(teamId){
 
-        console.log(`render ${teamId}`);
+        const headerFontSize = 7;
 
-        const headerFontSize = 5;
-
-        let fontColor = "red";
+        let fontColor = redTeamColor;
         let startX = 5;
-        let startY = 5;
+        let startY = 8;
+
+        const scoreOffset = 40;
 
         if(teamId === 1){
-            fontColor = "blue";
+            fontColor = blueTeamColor;
             startX = 55;
         }else if(teamId === 2){
-            fontColor = "green";
-            startY = 55;
+            fontColor = greenTeamColor;
+            startY = 58;
         }else if(teamId === 3){
-            fontColor = "yellow";
-            startY = 55;
+            fontColor = yellowTeamColor;
+            startY = 58;
             startX = 55;
         }
 
 
-        this.fillText(getTeamName(teamId), startX, startY, 50, headerFontSize, fontColor, "left");
+        this.fillText(`${getTeamName(teamId)} Team`, startX, startY, 50, headerFontSize, fontColor, "left");
+        this.fillText(this.data[`team_${teamId}_score`], startX + scoreOffset, startY, 50, headerFontSize, fontColor, "right");
+
+
+
+        const rowHeight = 7;
+        const playerFontSize = 6;
+        let playerIndex = 0;
+
+
+        for(let i = 0; i < this.playerData.length; i++){
+
+            const p = this.playerData[i];
+
+            if(p.team !== teamId) continue;
+
+            let x = startX;
+            let y = startY + rowHeight + rowHeight * playerIndex; 
+
+            this.fillText(p.name, x, y, 50, playerFontSize, fontColor, "left");
+            this.fillText(p.frags, x + scoreOffset, y, 50, playerFontSize, fontColor, "right");
+
+            playerIndex++;
+        }
     }
 
     renderScoreboard(){
@@ -139,6 +166,9 @@ export default class serverMatchScreenshot{
         c.fillStyle = "white";
         c.textAlign = "center";
         c.drawImage(bgImage, 0, 0, this.width, this.height)
+
+        c.fillStyle = "rgba(0,0,0,0.65)";
+        c.fillRect(0,0, this.width, this.height);
 
         this.fillText(this.data.gametypeName, 50, 0.5, 100, 5, "white", "center");
 
