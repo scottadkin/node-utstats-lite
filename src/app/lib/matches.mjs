@@ -191,7 +191,7 @@ export async function getRecentMatches(page, perPage, server, gametype, map){
 }
 
 
-async function getMatch(id){
+export async function getMatch(id){
 
     const query = `SELECT * FROM nstats_matches WHERE id=?`;
 
@@ -1467,13 +1467,7 @@ export async function getMatchMapName(matchId){
 
 
 
-export async function getMatchOGImageData(matchId){
-
-    const query = `SELECT total_teams,team_0_score,team_1_score,team_2_score,team_3_score FROM nstats_matches WHERE id=?`;
-
-    const result = await simpleQuery(query, [matchId]);
-
-    if(result.length === 0) return null;
+export async function getOGImagePlayerMatchData(matchId){
 
     const playerScores = await getPlayerMatchScores(matchId);
 
