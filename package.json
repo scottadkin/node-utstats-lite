@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "basic-ftp": "^5.0.5",
+    "canvas": "^3.0.1",
     "encoding-japanese": "^2.1.0",
     "geoip-lite": "^1.4.10",
     "jimp": "^0.22.12",
