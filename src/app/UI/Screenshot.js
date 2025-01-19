@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useRef } from "react";
-import { MMSS, convertTimestamp, getWinner, getTeamName, getPlayer } from "../lib/generic.mjs";
+import { MMSS, convertTimestamp, getWinner, getTeamName, getPlayer, bLSMGame } from "../lib/generic.mjs";
 
 const redTeamColor = "rgb(255,0,0)";
 const blueTeamColor = "rgb(0,193,255)";
@@ -713,6 +713,9 @@ class ScreenshotImage{
 
     renderSolo(){
 
+
+        const bLMS = bLSMGame(this.data.basic.gametypeName);
+
         const nameColor = `rgb(0,194,255)`;
         const scoreColor = `rgb(194,255,255)`;
 
@@ -743,16 +746,27 @@ class ScreenshotImage{
             "text": "Deaths",
             "x": col3Offset,
             "y": startY + rowHeight,
+            "textAlign": "right"
         };
 
         this.fillText(nameTitleOptions);
-        this.fillText(col2Options);
+
+        if(!bLMS){
+            this.fillText(col2Options);
+        }else{
+
+            col3Options.text = "Lives";
+        }
+
         this.fillText(col3Options);
 
         this.data.playerData.sort((a, b) =>{
 
-            if(a.frags > b.frags) return -1;
-            if(b.frags > a.frags) return 1;
+
+            const first = (bLMS) ? "score" : "frags";
+
+            if(a[first] > b[first]) return -1;
+            if(b[first]> a[first]) return 1;
 
             if(a.deaths < b.deaths) return -1;
             if(a.deaths > b.deaths) return 1;
@@ -780,21 +794,32 @@ class ScreenshotImage{
 
             this.fillText(nameOptions);
 
-            const col2Options = {
-                "text": p.frags,
-                "x": col2Offset,
-                "y": y,
-                "color": scoreColor,
-                "textAlign": "right"
-            };
+            if(!bLMS){
+
+                const col2Options = {
+                    "text": p.frags,
+                    "x": col2Offset,
+                    "y": y,
+                    "color": scoreColor,
+                    "textAlign": "right"
+                };
+
+                this.fillText(col2Options);
+
+            }
     
             const col3Options = {
                 "text": p.deaths,
                 "x": col3Offset,
                 "y": y,
+                "color": scoreColor,
+                    "textAlign": "right"
             };
 
-            this.fillText(col2Options);
+            if(bLMS){
+                col3Options.text = p.score;
+            }
+            
             this.fillText(col3Options);
 
             this.renderTimePing(p, nameOffset, startY, rowHeight, index, true);

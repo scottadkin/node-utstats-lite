@@ -126,7 +126,6 @@ export default async function MatchPage({params, searchParams}) {
 
     return (
 		<main>
-            <img src={`/api/matchshot/?id=${matchId}`} alt="image"/>
             {(session !== null) ? <AdminTools matchId={matchId}/> : null}
             {elems}
 		</main>

@@ -1,8 +1,8 @@
-//server side canvas match screenshot
+//server side canvas match screenshots
 
 import { createCanvas, loadImage, createImageData } from "canvas";
 import { getMatch, getOGImagePlayerMatchData } from './matches.mjs';
-import { getTeamName } from './generic.mjs';
+import { getTeamName, bLSMGame } from './generic.mjs';
 
 const redTeamColor = "rgb(255,0,0)";
 const blueTeamColor = "rgb(0,193,255)";
@@ -39,6 +39,7 @@ export default class serverMatchScreenshot{
 
         this.data = await getMatch(this.id);
         this.playerData = await getOGImagePlayerMatchData(this.id);
+
 
     }
 
@@ -125,6 +126,8 @@ export default class serverMatchScreenshot{
         }
     }
 
+
+
     renderSoloScoreBoard(){
 
         //TODO:
@@ -139,9 +142,16 @@ export default class serverMatchScreenshot{
 
         const startY = 10;
 
+
+        const bLMS = bLSMGame(this.data.gametypeName);
+
         this.fillText("Player", nameOffsetX, startY - 1, 75, headerFontSize, "white", "left");
-        this.fillText("Frags", fragsOffsetX, startY - 1, 12, headerFontSize, "white", "right");
-        this.fillText("Deaths", deathsOffsetX, startY - 2, 12, headerFontSize, "white", "right");
+
+        if(!bLMS){
+            this.fillText("Frags", fragsOffsetX, startY - 1, 12, headerFontSize, "white", "right");
+        }
+
+        this.fillText((bLMS) ? "Lives" : "Deaths", deathsOffsetX, startY - 2, 12, headerFontSize, "white", "right");
 
         for(let i = 0; i < this.playerData.length; i++){
 
@@ -150,8 +160,11 @@ export default class serverMatchScreenshot{
             let y = startY + rowHeight + rowHeight * i;
 
             this.fillText(p.name, nameOffsetX, y, 75, fontSize, dmNameColor, "left");
-            this.fillText(p.frags, fragsOffsetX, y, 12, fontSize, dmScoreColor, "right");
-            this.fillText(p.deaths, deathsOffsetX, y, 12, fontSize, dmScoreColor, "right");
+
+            if(!bLMS){
+                this.fillText(p.frags, fragsOffsetX, y, 12, fontSize, dmScoreColor, "right");
+            }
+            this.fillText((bLMS) ? p.score: p.deaths, deathsOffsetX, y, 12, fontSize, dmScoreColor, "right");
 
             if(i === 13) return;
         }

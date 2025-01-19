@@ -450,3 +450,9 @@ export function bTMPFileOldEnough(fileName, minLifetime){
     return diff > realMinLifeTime;
 }
 
+export function bLSMGame(gametypeName){
+
+    const reg = /last man standing/i;
+
+    return reg.test(gametypeName);
+}
