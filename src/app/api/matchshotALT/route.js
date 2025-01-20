@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import serverMatchScreenshot from "@/app/lib/serverMatchScreenshot.mjs";
+import MatchScreenshot from "@/app/MatchScreenshot";
+import { getMatchData } from "@/app/lib/matches.mjs";
+
 
 export async function GET(req){
 
@@ -12,16 +14,17 @@ export async function GET(req){
         return NextResponse.json({ "error": "Id is null" }, { "status": 500 })
     }
 
-    /*id = parseInt(id);
+   /* id = parseInt(id);
 
     if(id !== id){
         return NextResponse.json({ "error": "Id must be a valid integer" }, { "status": 500 })
     }*/
 
+    const matchData = await getMatchData(id);
     
-    const sshot = new serverMatchScreenshot(id, 1200, 630);
+    const sshot = new MatchScreenshot(null, matchData, true);
 
-    const sshotData = await sshot.create();
+    const sshotData = await sshot.toImage();
 
     const response = new NextResponse(sshotData);
     response.headers.set('content-type', 'image/jpeg');
