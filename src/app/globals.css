@@ -45,7 +45,7 @@
 	--max-table-width-2:1200px;
 	--max-table-width-3:1000px;
 	--max-table-width-4:700px;
-	--rich-box-width:350px;
+	--rich-box-width:325px;
 }
 
 .team-none{
@@ -146,7 +146,7 @@ label{
 	padding-right:var(--padding-1);
 	color:var(--font-color-1);
 	line-height:var(--line-height-2);
-	font-size:var(--font-size-2);
+	font-size:var(--font-size-4);
 }
 
 form{
@@ -250,7 +250,7 @@ th, .admin-textarea-title{
 	background-color:var(--bg-color-5);
 	border:1px solid var(--border-color-3);
 	font-weight:400;
-	font-size:14px;
+	font-size:var(--font-size-4);
 }
 
 
@@ -265,7 +265,7 @@ th:hover{
 td{
 	border:1px solid var(--border-color-3);
 	padding:var(--padding-3);
-	font-size:var(--font-size-1);
+	font-size:var(--font-size-4);
 	line-height:var(--line-height-1);
 }
 
@@ -362,14 +362,10 @@ select{
 	background-color:var(--bg-color-3);
 	color:var(--font-color-1);
 	font-size:var(--font-size-1);
-    line-height:var(--line-height-1);
 	border:1px solid var(--border-color-1);
 }
 
-option{
-	font-size:var(--font-size-1);
-    line-height:var(--line-height-1);
-}
+
 
 .small-info{
 	padding:var(--padding-1);
@@ -497,6 +493,7 @@ canvas{
 	margin-bottom:10px;
 	color:var(--font-color-1);
 	border: 1px solid var(--border-color-1);
+	font-size:var(--font-size-1);
 }
 
 .perma-link:hover{
@@ -530,6 +527,9 @@ canvas{
     display:inline-block;
     padding:var(--padding-1) var(--padding-1);
     user-select: none;
+	border:1px solid rgba(0,0,0,0.125);
+	background-color: rgba(0,0,0,0.125);
+	margin-top:-1px;
 }
 
 .tab:hover{
@@ -578,21 +578,23 @@ canvas{
     border:1px solid var(--border-color-1);
     overflow: hidden;
     white-space: nowrap;
+	font-size:var(--font-size-4);
 }
 
 .rich-title{
 	color:var(--font-color-1);
 	padding:var(--padding-1);
     text-overflow: ellipsis;
+	
     
 }
 
 .rich-info{
     color:var(--font-color-2);
-    font-size:var(--font-size-4);
-    line-height: var(--line-height-1);
-    margin-bottom:var(--margin-2);
+    font-size:var(--font-size-5);
+    line-height: var(--line-height-3);
     text-overflow: ellipsis;
+	padding:5px;
 }
 
 .admin-textarea-wrapper{
@@ -679,6 +681,7 @@ canvas{
 	color:var(--font-color-1);
 	border:1px solid var(--border-color-1);
 	padding:var(--padding-3);
+	font-size:var(--font-size-1);
 }
 
 .fav:hover{
@@ -829,12 +832,12 @@ canvas{
 
 .header-wrapper{
     text-align:center;
-    padding:20px;
+    padding:15px;
     color:var(--font-color-1);
     background-color:var(--bg-color-2);
     font-weight:400;
     margin-bottom:25px;
-    font-size:18px;
+    font-size:16px;
 }
 
 .country-flag-wrapper{
