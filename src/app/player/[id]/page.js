@@ -18,6 +18,7 @@ import { getCategorySettings } from "@/app/lib/siteSettings.mjs";
 import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import AddToSavedPlayers from "@/app/UI/Player/AddToSavedPlayers";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
+import ActivityHeatMap from "@/app/UI/ActivityHeatMap";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -151,6 +152,9 @@ export default async function Page({params, searchParams}){
 
     const matchesElem = (pageSettings["Display Recent Matches"] === "1") ? <RecentMatches key="matches" playerId={realId}/> : null;
     elems[pageLayout["Recent Matches"]] = matchesElem;
+
+    elems[pageLayout["Activity Heatmap"]] = (pageSettings["Display Activity Heatmap"] === "1") ? <ActivityHeatMap key="act" targetId={player.id} queryMode="get-matches-played-between" apiURL="/api/players"/> : null;
+    
 
     return <main>
         <Header>

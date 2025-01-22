@@ -1,6 +1,6 @@
 import {simpleQuery, bulkInsert} from "./database.mjs";
 import {getMultipleMatchDetails} from "./matches.mjs";
-import { getWinner, getPlayer } from "./generic.mjs";
+import { getWinner, getPlayer, mysqlSetTotalsByDate } from "./generic.mjs";
 import { deleteAllPlayerTotals as deleteAllPlayerGametypeTotals } from "./gametypes.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
@@ -1083,4 +1083,15 @@ export async function getPlayerIdsInMatch(matchId){
     return result.map((r) =>{
         return r.player_id;
     });
+}
+
+
+export async function getMatchesPlayedCountBetween(id, start, end){
+
+    const query = `SELECT match_date,time_on_server FROM nstats_match_players WHERE player_id=? AND match_date>=? AND match_date<=? ORDER BY match_date DESC`;
+
+    const result = await simpleQuery(query, [id, start, end]);
+
+    return mysqlSetTotalsByDate(result, "match_date", ["time_on_server"]);
+    
 }

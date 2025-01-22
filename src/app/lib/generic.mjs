@@ -458,14 +458,14 @@ export function bLSMGame(gametypeName){
 }
 
 
-export function mysqlSetTotalsByDate(result, targetKeys){
+export function mysqlSetTotalsByDate(result, dateKey, targetKeys){
 
     const data = {};
 
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
-        const date = new Date(r.date);
+        const date = new Date(r[dateKey]);
   
         const year = date.getFullYear();
         const month = date.getMonth();

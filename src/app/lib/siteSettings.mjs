@@ -50,6 +50,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Player" ,"type": `bool`, "name": "Display Rankings", "value": 1},
     {"category": "Player" ,"type": `bool`, "name": "Display Items", "value": 1},
     {"category": "Player" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},
+    {"category": "Player" ,"type": `bool`, "name": "Display Activity Heatmap", "value": 1},
 
     {"category": "Nav" ,"type": `bool`, "name": "Display Home", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Matches", "value": 1},

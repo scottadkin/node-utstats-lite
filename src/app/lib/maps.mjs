@@ -650,6 +650,6 @@ export async function getMatchesPlayedCountBetween(mapId, start, end){
 
     const result = await simpleQuery(query, [mapId, start, end]);
 
-    return mysqlSetTotalsByDate(result, ["playtime"]);
+    return mysqlSetTotalsByDate(result, "date", ["playtime"]);
 
 }

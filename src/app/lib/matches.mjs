@@ -1426,7 +1426,7 @@ export async function getMatchesPlayedCountBetween(startDate, endDate){
 
     const result = await simpleQuery(query, [startDate, endDate]);
 
-    return mysqlSetTotalsByDate(result, ["playtime"]);
+    return mysqlSetTotalsByDate(result, "date", ["playtime"]);
 
 }
 

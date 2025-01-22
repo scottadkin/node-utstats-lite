@@ -1,4 +1,4 @@
-import { getPlayersByHashes } from "@/app/lib/players.mjs";
+import { getPlayersByHashes, getMatchesPlayedCountBetween } from "@/app/lib/players.mjs";
 
 export async function POST(req){
 
@@ -17,6 +17,17 @@ export async function POST(req){
             const players = await getPlayersByHashes(hashes);
 
             return Response.json({"players": players});
+        }
+
+        if(mode === "get-matches-played-between"){
+
+            const start = res.start ?? new Date(Date.now());
+            const end = res.end ?? new Date(Date.now());
+            const id = res.id ?? -1;
+
+            const data = await getMatchesPlayedCountBetween(id, start, end);
+
+            return Response.json(data);
         }
 
         return Response.json({"error": "Unknown Command"});
