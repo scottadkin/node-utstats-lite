@@ -68,7 +68,6 @@ async function loadData(mapId, category, page, perPage, dispatch){
             "totalPages": totalPages
         });
 
-        console.log(res);
     }catch(err){
         console.trace(err);
     }

@@ -456,3 +456,39 @@ export function bLSMGame(gametypeName){
 
     return reg.test(gametypeName);
 }
+
+
+export function mysqlSetTotalsByDate(result, targetKeys){
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        const date = new Date(r.date);
+  
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const day = date.getDate();
+
+
+        const key = `${year}-${month}-${day}`;
+
+        if(data[key] === undefined){
+
+            data[key] = {"total": 0, "playtime": 0};
+
+            for(let x = 0; x < targetKeys.length; x++){
+                data[key][targetKeys[x]] += r[targetKeys[x]];
+            }
+        }
+
+        data[key].total++;
+
+        for(let x = 0; x < targetKeys.length; x++){
+            data[key][targetKeys[x]] += r[targetKeys[x]];
+        }
+    }
+
+    return data;
+}

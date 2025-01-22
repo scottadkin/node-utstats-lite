@@ -71,8 +71,6 @@ function renderBasicTable(data, totalKills){
 
 export default function WeaponStats({data}){
 
-    console.log(data);
-
     let totalKills = 0;
 
     for(let i = 0; i < data.length; i++){

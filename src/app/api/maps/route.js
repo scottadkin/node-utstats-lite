@@ -1,4 +1,4 @@
-import { getMapPlayerAverages } from "@/app/lib/maps.mjs";
+import { getMapPlayerAverages, getMatchesPlayedCountBetween } from "@/app/lib/maps.mjs";
 
 export async function GET(req){
 
@@ -48,5 +48,24 @@ export async function GET(req){
 
      }catch(err){
           return Response.json({"error": err.toString()});
+     }
+}
+
+export async function POST(req){
+
+     const res = await req.json();
+
+     const mode = (res.mode !== undefined) ? res.mode.toLowerCase() : "";
+     const id = (res.id !== undefined) ? res.id : -1;
+
+     if(mode === "get-matches-played-between"){
+
+          const start = res.start ?? new Date(Date.now());
+          const end = res.end ?? new Date(Date.now());
+
+          const data = await getMatchesPlayedCountBetween(id, start, end);
+
+          return Response.json(data);
+
      }
 }

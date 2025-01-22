@@ -11,7 +11,7 @@ import { getCategorySettings } from "./lib/siteSettings.mjs";
 import SocialMedia from "./UI/SocialMedia";
 import WelcomeMessage from "./UI/WelcomeMessage";
 import { getPageLayout } from "./lib/pageLayout.mjs";
-import ActivityHeatMap from "./UI/Home/ActivityHeatMap";
+import ActivityHeatMap from "./UI/ActivityHeatMap";
 
 
 
@@ -41,7 +41,7 @@ export default async function Home() {
 	elems[pageLayout["Servers"]] = (servers !== null) ? <BasicServerList key="servers" servers={servers}/> : null;
 
 	if(pageSettings["Display Activity Heatmap"] === "1"){
-		elems[pageLayout["Activity Heatmap"]] = <ActivityHeatMap />;
+		elems[pageLayout["Activity Heatmap"]] = <ActivityHeatMap queryMode="get-matches-played-between" apiURL="/api/matches"/>;
 	}
 
 	

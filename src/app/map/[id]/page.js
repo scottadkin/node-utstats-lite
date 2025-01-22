@@ -9,6 +9,7 @@ import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import TopXPlayers from "@/app/UI/Map/TopXPlayers";
 import { getMapWeaponStats } from "@/app/lib/weapons.mjs";
 import WeaponStats from "@/app/UI/Map/WeaponStats";
+import ActivityHeatMap from "@/app/UI/ActivityHeatMap";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -68,14 +69,6 @@ export default async function MapPage({params, searchParams}){
     const recentMatches = await getRecentMatches(id,page,perPage);
     const totalMatches = await getTotalMatches(id);
 
-    //const matchIds = await getAllMatchIds(id);
-
-    //console.log(matchIds);
-
-   // const query = `SELECT nstats_matches.id,nstats_matches.map_id, nstats_match_players.* 
-    //FROM nstats_matches LEFT JOIN nstats_match_players ON nstats_matches.id=nstats_match_players.match_id ORDER BY kills DESC LIMIT 10`;
-
-
     const testData = await getMapPlayerAverages(id, "kills", 1, 10);
 
     const weaponStats = await getMapWeaponStats(id);
@@ -83,6 +76,8 @@ export default async function MapPage({params, searchParams}){
     const elems = [];
     
     elems[pageLayout["Basic Summary"]] = (pageSettings["Display Basic Summary"] === "1") ? <BasicSummary key="basic" info={info} /> : null;
+
+    elems[pageLayout["Activity Heatmap"]] = (pageSettings["Display Activity Heatmap"] === "1") ? <ActivityHeatMap key="act" targetId={id} queryMode="get-matches-played-between" apiURL="/api/maps"/> : null;
 
     elems[pageLayout["Recent Matches"]] = (pageSettings["Display Recent Matches"] === "1") ? <div key="recent">
         <Header>Recent Matches</Header>

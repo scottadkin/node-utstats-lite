@@ -1,6 +1,6 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
-import { getMapImageName as genericGetMapImageName, sanitizePagePerPage } from "./generic.mjs";
+import { getMapImageName as genericGetMapImageName, mysqlSetTotalsByDate, sanitizePagePerPage } from "./generic.mjs";
 import { getAll, getGametypeNames } from "./gametypes.mjs";
 import { getServerNames } from "./servers.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
@@ -641,4 +641,15 @@ export async function getNameById(mapId){
     }
 
     return result[0].name;
+}
+
+
+export async function getMatchesPlayedCountBetween(mapId, start, end){
+
+    const query = `SELECT id,date,playtime FROM nstats_matches WHERE map_id=? AND date>=? AND date<=? ORDER BY date DESC`;
+
+    const result = await simpleQuery(query, [mapId, start, end]);
+
+    return mysqlSetTotalsByDate(result, ["playtime"]);
+
 }

@@ -3,7 +3,7 @@
 :root {
 	--bg-color-1:rgb(64,64,64);
 	--bg-color-2:rgb(32,32,32);
-	--bg-color-3:rgb(46,46,46);
+	--bg-color-3:rgb(42,42,42);
 	--bg-color-4:rgb(56,56,56);
 	--bg-color-5:rgb(18,18,18);
 	--font-color-1:rgb(255,255,255);
@@ -98,7 +98,7 @@ body{
 	min-height: 100vh; 
 	display: grid;
 	grid-template-rows: auto 1fr auto;
-	background-color:var(--bg-color-1);
+	background-color:rgb(50,50,50);
   }
 
 

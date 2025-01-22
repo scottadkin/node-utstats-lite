@@ -30,7 +30,7 @@
 
 .info{
     font-size:var(--font-size-small);
-    color:var(--font-color-1);
+    color:var(--font-color-2);
     padding:var(--padding-2);
     line-height:20px;
 }

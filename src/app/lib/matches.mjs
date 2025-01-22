@@ -9,7 +9,7 @@ import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
-import { getWinner, getTeamName, sanitizePagePerPage } from "./generic.mjs";
+import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype} from "./rankings.mjs";
 
@@ -1426,30 +1426,7 @@ export async function getMatchesPlayedCountBetween(startDate, endDate){
 
     const result = await simpleQuery(query, [startDate, endDate]);
 
-    const data = {};
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-        const date = new Date(r.date);
-  
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const day = date.getDate();
-
-
-        const key = `${year}-${month}-${day}`;
-
-        if(data[key] === undefined){
-
-            data[key] = {"total": 0, "playtime": 0};
-        }
-
-        data[key].total++;
-        data[key].playtime += r.playtime;
-    }
-
-    return data;
+    return mysqlSetTotalsByDate(result, ["playtime"]);
 
 }
 
