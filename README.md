@@ -10,7 +10,9 @@ Unreal Tournament stats website for the https://github.com/rxut/UTStatsLite
 - Open a terminal in the folder you extracted to.
 - Run the command **npm install** to install all dependencies.
 - Open **config.mjs** and change the settings to connect to your mysql server.
+- If you are using an **ARM OS** you will have to follow this(https://github.com/Automattic/node-canvas?tab=readme-ov-file#compiling) additional step to get the canvas package to install otherwise you will get an error message
 - Run the command **node install.mjs** to create the database and other settings.
+
 
 ## How to change website port
 - Open package.json in the main directory.
