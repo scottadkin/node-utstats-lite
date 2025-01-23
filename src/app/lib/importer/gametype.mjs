@@ -81,7 +81,8 @@ export class Gametype{
 
             
 
-            if(totalPlayers > 0){
+            //don't want 1.5 v 1.5 ect, only append name if all teams are equal in size
+            if(totalPlayers > 0 && totalPlayers % 2 === 0){
 
 
                 let perTeam = 0; 
