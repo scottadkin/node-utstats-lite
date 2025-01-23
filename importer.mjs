@@ -80,7 +80,7 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
     await simpleQuery(query, [serverId, date, logsFound, passed, failed, totalTime]);
 }
 
-async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId){
+async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes){
 
     try{
 
@@ -111,7 +111,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         data = data.toString().replace(/\u0000/ig, '');
 
-        const m = new MatchParser(data, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime);
+        const m = new MatchParser(data, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes);
 
         await m.main();
 
@@ -135,7 +135,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 }
 
 //serverId is -1 if logs are from the websites /Logs folder
-async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime){
+async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes){
 
     const start = performance.now();
 
@@ -150,7 +150,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
         
         if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
 
-        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId)){
+        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes)){
             imported++;
         }else{
             failed++;
@@ -185,7 +185,7 @@ async function main(){
 
     new Message(`Checking for leftover logs...`,"progress");
     const ls = logsFolderSettings;
-    await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime);
+    await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime, ls.append_team_sizes);
     new Message(`Completed parsing Leftover logs completed`,"pass");
 
     const query = "SELECT * FROM nstats_ftp ORDER BY id ASC";
@@ -237,7 +237,8 @@ async function main(){
             r.ignore_bots,
             r.ignore_duplicates,
             r.min_players,
-            r.min_playtime
+            r.min_playtime,
+            r.append_team_sizes
         );
     }  
 

@@ -16,13 +16,14 @@ import DamageManager from "./importer/damageManager.mjs";
 
 export class MatchParser{
 
-    constructor(rawData, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime){
+    constructor(rawData, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes){
 
         this.rawData = rawData;
         this.bIgnoreBots = bIgnoreBots;
         this.bIgnoreDuplicates = bIgnoreDuplicates;
         this.minPlayers = minPlayers;
         this.minPlaytime = minPlaytime;
+        this.bAppendTeamSizes = bAppendTeamSizes;
 
         this.players = new PlayerManager();
         //console.log(`${this.rawData}`);
@@ -144,7 +145,7 @@ export class MatchParser{
         }
 
         await this.server.setId();
-        await this.gametype.setId(this.totalTeams, totalPlayers, true);
+        await this.gametype.setId(this.totalTeams, totalPlayers, this.bAppendTeamSizes);
         await this.map.setId();
 
 
