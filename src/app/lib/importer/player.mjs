@@ -20,6 +20,7 @@ export class Player{
         this.masterId = null;
         this.bFirstBlood = 0;
         this.playtime = 0;
+        this.bConnectedToServer = false;
 
         this.ping = {
             "min": null,
@@ -108,6 +109,7 @@ export class Player{
 
     connected(timestamp, bAsPlayer){
 
+        this.bConnectedToServer = true;
         if(this.connects.indexOf(timestamp) === -1) this.connects.push(timestamp);
 
         if(bAsPlayer){
@@ -118,6 +120,7 @@ export class Player{
 
     disconnect(timestamp){
 
+        this.bConnectedToServer = false;
         this.disconnects.push(timestamp);
     }
 
@@ -219,7 +222,7 @@ export class Player{
     }
 
 
-    setPlaytime(matchStart, matchEnd){
+    setPlaytime(matchStart, matchEnd, totalTeams){
 
         let playtime = 0;
 
@@ -233,10 +236,19 @@ export class Player{
 
             let con = this.connects[i];
             let disc = this.disconnects[i];
-
-            if(disc === undefined) disc = matchEnd;
+   
 
             if(con < matchStart) con = matchStart;
+            if(disc === undefined) disc = matchEnd;
+
+            if(disc < matchStart) continue;
+
+            //
+           // if(disc <= con) continue;
+
+            if(disc < matchStart) continue;
+
+            
 
             let diff = disc - con;
 
@@ -246,6 +258,13 @@ export class Player{
             playtime += diff;
 
         }
+
         this.playtime = playtime;
+
+        //lazy i know...
+        if(this.playtime > matchEnd - matchStart){
+            this.playtime = matchEnd - matchStart;
+        }
+
     }
 }

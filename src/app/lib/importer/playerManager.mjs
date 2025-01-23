@@ -228,6 +228,8 @@ export class PlayerManager{
                 break;
             }
             case "time_on_server": {
+
+                return;
                 type = "timeOnServer";
                 break;
             }
@@ -419,10 +421,13 @@ export class PlayerManager{
 
         for(const p of Object.values(this.mergedPlayers)){
 
+            if(p.playtime === 0) continue;
+
             //players set to spectators by a mutator?
             if(totalTeams > 1 && p.team === 255) continue;
+            
 
-            if(p.bSpectator === 1 && p.stats.timeOnServer === 0) continue;
+            if(p.bSpectator === 1 && p.playtime === 0) continue;
 
             if(p.bBot === 0){
                 uniqueNames.push(p.name);
@@ -432,6 +437,7 @@ export class PlayerManager{
                 uniqueNames.push(p.name);
             }
         }
+        
         
 
         return uniqueNames.length;
@@ -487,12 +493,11 @@ export class PlayerManager{
         return oldName;
     }
 
-
-    mergePlayers(){
+    mergePlayers(matchStart){
 
         const mergeKeys = [
             "score", "frags", "kills", "deaths",
-            "suicides", "teamKills", "timeOnServer", "headshots"
+            "suicides", "teamKills", /*"timeOnServer"*/, "headshots"
         ];
 
         const intTypes = [
@@ -546,7 +551,8 @@ export class PlayerManager{
                 this.mergedPlayers[finalName].totalEff = parseFloat(p.stats.efficiency);
                 this.mergedPlayers[finalName].totalTTL = parseFloat(p.stats.ttl);
 
-                if(p.stats.timeOnServer > 0) this.mergedPlayers[finalName].bSpectator = 0;
+                if(p.playtime === 0) this.mergedPlayers[finalName].bSpectator = 0;
+               // if(p.stats.timeOnServer > 0) this.mergedPlayers[finalName].bSpectator = 0;
                 continue;
             }
 
@@ -672,8 +678,10 @@ export class PlayerManager{
             master.connects = [... new Set([...master.connects, ...p.connects])];
 
             master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];
+            
+            //console.log(this.bDisconnectBeforeMatchStart(master, matchStart));
 
-            if(master.stats.timeOnServer > 0) master.bSpectator = 0;
+            //if(master.stats.timeOnServer > 0) master.bSpectator = 0;
 
 
             for(let x = 0; x < damageKeys.length; x++){
@@ -716,11 +724,11 @@ export class PlayerManager{
         }
     }
 
-    setPlayerPlaytime(matchStart, matchEnd){
+    setPlayerPlaytime(matchStart, matchEnd, totalTeams){
 
         for(const p of Object.values(this.mergedPlayers)){
 
-            p.setPlaytime(matchStart, matchEnd);
+            p.setPlaytime(matchStart, matchEnd, totalTeams);
         }
     }
 

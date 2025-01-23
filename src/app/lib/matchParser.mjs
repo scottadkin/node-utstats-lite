@@ -115,23 +115,21 @@ export class MatchParser{
 
         this.damageManager.setPlayerDamage(this.players);
 
-        this.players.mergePlayers();
+        this.players.mergePlayers( this.matchStart);
         
+        this.players.setPlayerPingStats();
+
+        this.players.setCountries();
+        this.players.matchEnded(this.matchStart, this.matchEnd);
+        this.players.setPlayerPlaytime(this.matchStart, this.matchEnd, this.totalTeams);
 
         const totalPlayers = this.players.getTotalUniquePlayers(this.totalTeams);
 
         if(totalPlayers < this.minPlayers){
             new Message(`Match has less then the minimum players limit (found ${totalPlayers} out of a target of ${this.minPlayers}).`,"error");
             throw new Error("MIN PLAYERS");
-        }
-
-
-        
-        this.players.setPlayerPingStats();
-
-        this.players.setCountries();
-        this.players.matchEnded(this.matchStart, this.matchEnd);
-        this.players.setPlayerPlaytime(this.matchStart, this.matchEnd);
+        }        
+       
         //this.players.scalePlaytimes(this.gametype.bHardcore);
 
 
@@ -149,7 +147,6 @@ export class MatchParser{
         await this.gametype.setId(this.totalTeams, totalPlayers, true);
         await this.map.setId();
 
-        
 
         //serverId, gametypeId, mapId, date, players
         this.matchId = await createMatch(
