@@ -190,8 +190,10 @@ export async function getRecentMatches(page, perPage, server, gametype, map){
     return {"data": result, "total": totalMatches};
 }
 
-
+//
 export async function getMatch(id){
+
+    if(id === null) return null;
 
     const query = `SELECT * FROM nstats_matches WHERE id=?`;
 

@@ -1,7 +1,7 @@
 //server side canvas match screenshots
 
 import { createCanvas, loadImage, createImageData } from "canvas";
-import { getMatch, getOGImagePlayerMatchData } from './matches.mjs';
+import { getMatch, getOGImagePlayerMatchData, getMatchIdFromHash } from './matches.mjs';
 import { getTeamName, bLSMGame } from './generic.mjs';
 
 const redTeamColor = "rgb(255,0,0)";
@@ -36,6 +36,10 @@ export default class serverMatchScreenshot{
     }
 
     async loadData(){
+
+        if(this.id.length === 32){
+            this.id =  await getMatchIdFromHash(this.id);
+        }
 
         this.data = await getMatch(this.id);
         this.playerData = await getOGImagePlayerMatchData(this.id);
