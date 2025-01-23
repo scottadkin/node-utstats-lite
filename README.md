@@ -28,6 +28,7 @@ Unreal Tournament stats website for the https://github.com/rxut/UTStatsLite
 - To Login go to [http://localhost:3000/login](http://localhost:3000/login)
 - To go to the admin area go to [http://localhost:3000/admin](http://localhost:3000/admin)
 - In the admin you can then add S/FTP servers to the importer list. ![ftp admin image](https://i.imgur.com/gA2WpT4.png "FTP Admin Image")
+- If you want to separate gametypes by team sizes, for example CTF 1v1, CTF 2v2 there is now a setting for each ftp server and logs folder called **append team sizes**, if the all teams have the same amount of players the importer will now append the team sizes to the end of the gametype to keep rankings/records separate. 
 
 ## Running The Log Importer
 - Open a terminal in the folder you installed to.
