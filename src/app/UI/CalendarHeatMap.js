@@ -83,7 +83,7 @@ function calcMaxValues(targetKeys, data){
 
 function renderMonth(year, month, data){
 
-    month++;
+    //month++;
     const originalMonth = month;
 
 
@@ -92,7 +92,7 @@ function renderMonth(year, month, data){
     }
 
     const date = new Date(year, month);
-    const lastDay = new Date(year, originalMonth, 0);
+    const lastDay = new Date(year, originalMonth + 1, 0);
 
     //don't need to 0 now if single digit
     month = originalMonth;
