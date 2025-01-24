@@ -83,14 +83,16 @@ function calcMaxValues(targetKeys, data){
 
 function renderMonth(year, month, data){
 
+    month++;
     const originalMonth = month;
+
 
     if(month < 10){
         month = `0${month}`;
     }
 
     const date = new Date(year, month);
-    const lastDay = new Date(year, month + 1, 0);
+    const lastDay = new Date(year, originalMonth, 0);
 
     //don't need to 0 now if single digit
     month = originalMonth;
@@ -174,7 +176,6 @@ export default function CalendarHeatMap({year, month, data}){
     const currentMonth = currentDate.getMonth(); //0-11
     //const date = currentDate.getDate(); //1-31
     //const day = currentDate.getDay(); //0-6 sunday-saturday
-
 
     return <div className="calendar-heat-map-wrapper">
         <div className="calendar-title">{getMonthName(currentMonth, true)} {currentYear}</div>
