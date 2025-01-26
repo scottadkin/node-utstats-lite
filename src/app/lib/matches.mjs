@@ -1480,3 +1480,12 @@ export async function getOGImagePlayerMatchData(matchId){
 
     return playerScores;
 }
+
+
+export async function getAllMatchesGametypesPlayersTotalTeams(){
+
+    const query = `SELECT id,gametype_id,players,total_teams FROM nstats_matches`;
+    
+
+    return await simpleQuery(query);
+}

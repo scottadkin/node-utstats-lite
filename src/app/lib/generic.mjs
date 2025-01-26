@@ -492,3 +492,14 @@ export function mysqlSetTotalsByDate(result, dateKey, targetKeys){
 
     return data;
 }
+
+
+export function getKey(object, targetValue){
+
+    for(const [key, value] of Object.entries(object)){
+
+        if(value === targetValue) return key;
+    }
+
+    return null;
+}

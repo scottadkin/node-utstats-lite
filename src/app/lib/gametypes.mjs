@@ -1,4 +1,6 @@
 import { simpleQuery } from "./database.mjs";
+import { getKey } from "./generic.mjs";
+import { getAllMatchesGametypesPlayersTotalTeams } from "./matches.mjs";
 import Message from "./message.mjs";
 
 
@@ -169,3 +171,70 @@ export async function getLastPlayedGametype(){
     return null;
 }
 
+//only append team sizes if teams have equal amount of players
+export async function appendTeamsToAllGametypes(){
+
+    const matchData = await getAllMatchesGametypesPlayersTotalTeams();
+
+    const uniqueGametypeIds = [...new Set(matchData.map((m) =>{
+        return m.gametype_id;
+    }))];
+
+    const gametypeNames = await getGametypeNames(uniqueGametypeIds);
+
+    //check if gametype already has team size appended
+    const teamSizeReg = /^.+\((\d+?) v (\d+?)\)$/;
+
+    for(let i = 0; i < matchData.length; i++){
+
+        const m = matchData[i];
+
+        if(gametypeNames[m.gametype_id] !== undefined){
+
+            let gName = gametypeNames[m.gametype_id];
+            const totalPlayers = m.players;
+            const totalTeams = m.total_teams;
+
+            //if doesn't exist create the gametypeId and add it to gametypeNames object
+            if(totalTeams > 1 && totalPlayers > 0 && totalPlayers % 2 === 0 && !teamSizeReg.test(gName)){
+
+                const perTeam = totalPlayers / totalTeams;
+
+                let name = `${gName} (`;
+
+                for(let x = 0; x < totalTeams; x++){
+
+                    name += `${perTeam}`;
+                    if(x < totalTeams - 1) name += ` v `;
+
+                }
+
+                name += ")";
+
+                if(Object.values(gametypeNames).indexOf(name) === -1){
+
+                    const id = await createGametype(name);
+                    gametypeNames[id] = name;
+
+                }else{
+
+                    const key = getKey(gametypeNames, name);
+
+                    if(key === null){
+
+                        new Message(`Failed to find gametypeId (appendTeamsToAllGametypes)`,"error");
+                        continue;
+                    }
+
+                    m.newGametypeName = gametypeNames[key];
+                    m.newGametypeId = key;
+                }
+            }   
+        }
+    }
+
+    console.log(matchData);
+
+
+    //recalcualte all gametype,map,player totals
+}
