@@ -1,7 +1,8 @@
 import { simpleQuery } from "./database.mjs";
 import { getKey } from "./generic.mjs";
-import { getAllMatchesGametypesPlayersTotalTeams } from "./matches.mjs";
+import { changeMatchGametype, getAllMatchesGametypesPlayersTotalTeams } from "./matches.mjs";
 import Message from "./message.mjs";
+import { recalcAllPlayerTotals } from "./players.mjs";
 
 
 
@@ -171,6 +172,48 @@ export async function getLastPlayedGametype(){
     return null;
 }
 
+async function deleteAllGametypes(){
+
+    const query = `DELETE FROM nstats_gametypes`;
+
+    await simpleQuery(query);
+}
+
+async function calcAllTotalsFromMatchesData(){
+
+    const query = `SELECT gametype_id,COUNT(*) as total_matches,SUM(playtime) as playtime,
+    MIN(date) as first_match, MAX(date) as last_match FROM nstats_matches GROUP BY gametype_id`;
+
+    const result = await simpleQuery(query);
+
+    const updatedIds = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        await simpleQuery(`UPDATE nstats_gametypes SET matches=?, playtime=?,first_match=?,last_match=? WHERE id=?`, [
+            r.total_matches,
+            r.playtime,
+            r.first_match,
+            r.last_match,
+            r.gametype_id
+        ]);
+
+        updatedIds.push(r.gametype_id);
+    }
+
+
+
+
+    //delete gametypes with 0 matches
+
+    const dQuery = `DELETE FROM nstats_gametypes WHERE id NOT IN(?)`;
+
+    await simpleQuery(dQuery, [updatedIds]);
+   
+}
+
 //only append team sizes if teams have equal amount of players
 export async function appendTeamsToAllGametypes(){
 
@@ -182,8 +225,11 @@ export async function appendTeamsToAllGametypes(){
 
     const gametypeNames = await getGametypeNames(uniqueGametypeIds);
 
+
     //check if gametype already has team size appended
     const teamSizeReg = /^.+\((\d+?) v (\d+?)\)$/;
+
+    const affectedMatchIds = [];
 
     for(let i = 0; i < matchData.length; i++){
 
@@ -216,6 +262,9 @@ export async function appendTeamsToAllGametypes(){
                     const id = await createGametype(name);
                     gametypeNames[id] = name;
 
+                    m.newGametypeName = name;
+                    m.newGametypeId = id;
+
                 }else{
 
                     const key = getKey(gametypeNames, name);
@@ -229,12 +278,21 @@ export async function appendTeamsToAllGametypes(){
                     m.newGametypeName = gametypeNames[key];
                     m.newGametypeId = key;
                 }
+
+                await changeMatchGametype(m.id, m.newGametypeId);
+                affectedMatchIds.push(m.id);
             }   
         }
     }
 
-    console.log(matchData);
+   // console.log(matchData);
+   // console.log(affectedMatchIds);
+   // console.log(affectedMatchIds.length);
 
 
-    //recalcualte all gametype,map,player totals
+    //recalcualte all gametype,player totals
+
+    await recalcAllPlayerTotals();
+    await calcAllTotalsFromMatchesData();
+    //recalc gametype totals delete ones with 0 matches played
 }

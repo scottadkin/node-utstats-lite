@@ -1486,6 +1486,31 @@ export async function getAllMatchesGametypesPlayersTotalTeams(){
 
     const query = `SELECT id,gametype_id,players,total_teams FROM nstats_matches`;
     
-
     return await simpleQuery(query);
+}
+
+
+export async function changeMatchGametype(matchId, gametypeId){
+
+    const query = `UPDATE nstats_matches SET gametype_id=? WHERE id=?`;
+
+    await simpleQuery(query, [gametypeId, matchId]);
+
+    const tables = [
+        "ctf_caps",
+        "ctf_carry_times",
+        "damage_match",
+        "match_ctf",
+        "match_dom",
+        "match_players",
+        "match_weapon_stats"
+    ];
+
+    for(let x = 0; x < tables.length; x++){
+
+        const t = tables[x];
+
+        await simpleQuery(`UPDATE nstats_${t} SET gametype_id=? WHERE match_id=?`, [gametypeId, matchId]);
+
+    }
 }
