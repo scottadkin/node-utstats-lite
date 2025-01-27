@@ -3,6 +3,7 @@ import { getKey } from "./generic.mjs";
 import { changeMatchGametype, getAllMatchesGametypesPlayersTotalTeams } from "./matches.mjs";
 import Message from "./message.mjs";
 import { recalcAllPlayerTotals } from "./players.mjs";
+import { recalculateAll as recalculateAllGametypes } from "./rankings.mjs";
 
 
 
@@ -227,7 +228,11 @@ export async function appendTeamsToAllGametypes(){
 
 
     //check if gametype already has team size appended
-    const teamSizeReg = /^.+\((\d+?) v (\d+?)\)$/;
+    //const teamSizeReg = /^.+\((\d+?) v (\d+?)\)$/i;
+
+    const teamSizeReg = /^.+\(\d+( v \d+){1,3}\)$/i
+
+   
 
     const affectedMatchIds = [];
 
@@ -235,14 +240,17 @@ export async function appendTeamsToAllGametypes(){
 
         const m = matchData[i];
 
+        
+
         if(gametypeNames[m.gametype_id] !== undefined){
 
             let gName = gametypeNames[m.gametype_id];
+
             const totalPlayers = m.players;
             const totalTeams = m.total_teams;
 
             //if doesn't exist create the gametypeId and add it to gametypeNames object
-            if(totalTeams > 1 && totalPlayers > 0 && totalPlayers % 2 === 0 && !teamSizeReg.test(gName)){
+            if(totalTeams > 1 && totalPlayers > 0 && totalPlayers % totalTeams === 0 && !teamSizeReg.test(gName)){
 
                 const perTeam = totalPlayers / totalTeams;
 
@@ -295,4 +303,7 @@ export async function appendTeamsToAllGametypes(){
     await recalcAllPlayerTotals();
     await calcAllTotalsFromMatchesData();
     //recalc gametype totals delete ones with 0 matches played
+
+    ///recalc all rankings
+    await recalculateAllGametypes();
 }
