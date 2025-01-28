@@ -307,3 +307,77 @@ export async function appendTeamsToAllGametypes(){
     ///recalc all rankings
     await recalculateAllGametypes();
 }
+
+
+//used for admin tool to display how many games will be effected
+export async function getSplitByTeamSizeInfo(){
+
+    const matchData = await getAllMatchesGametypesPlayersTotalTeams();
+
+    const uniqueGametypeIds = [...new Set(matchData.map((m) =>{
+        return m.gametype_id;
+    }))];
+
+    const gametypeNames = await getGametypeNames(uniqueGametypeIds);
+
+    const justNames = Object.values(gametypeNames);
+
+    let alreadySet = 0;
+    let willBeChanged = 0;
+    let keepOriginalName = 0;
+
+    const newGametypes = [];
+    
+   // const reg = /^.+\(\d+( v \d+){1,3}\)$/i
+    const reg = /^.+\(\d+?( v \d+){1,3}\)$/i;
+
+    for(let i = 0; i < matchData.length; i++){
+
+        const m = matchData[i];
+
+        const teams = m.total_teams;
+        const players = m.players;
+        const perTeam = (teams  > 0 && players > 0) ? players / teams : 1;
+
+        if(teams < 2 || players % teams !== 0){
+            keepOriginalName++;
+            continue;
+        }
+
+        
+        if(reg.test(gametypeNames[m.gametype_id])){
+            //console.log(gametypeNames[m.gametype_id]);
+            alreadySet++;
+            continue;
+
+        }else{
+
+            let name = `${gametypeNames[m.gametype_id]} (${perTeam}`;
+    
+            for(let x = 0; x < teams; x++){
+    
+                if(x < teams - 1) name+= ` v ${perTeam}`;
+    
+                if(x === teams - 1) name += `)`;
+            }
+
+            if(newGametypes.indexOf(name) === -1 && justNames.indexOf(name) === -1){
+                newGametypes.push(name);
+            }
+    
+
+            willBeChanged++;
+
+        }   
+    }
+    //console.log(`Found: ${matchData.length}, will change ${willBeChanged}, ${alreadySet} already set, and ${keepOriginalName} keep original name.`);
+
+
+    return {
+        "totalMatches": matchData.length,
+        "change": willBeChanged,
+        "alreadySet": alreadySet,
+        "keepName": keepOriginalName,
+        "gametypesCreated": newGametypes.length
+    };
+}

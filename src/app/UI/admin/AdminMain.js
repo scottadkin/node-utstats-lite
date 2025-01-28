@@ -14,10 +14,11 @@ import PlayerMerger from "./PlayerMerger";
 import PlayerManager from "./PlayerManager";
 import ClearDatabase from "./ClearDatabase";
 import MatchesManager from "./MatchesManager";
+import GametypesManager from "./GametypesManager";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("matches");
+    const [mode, setMode] = useState("gametypes");
 
     return <>
         <Tabs 
@@ -28,6 +29,7 @@ export default function AdminMain(){
                 {"name": "Importer History", "value": "importer-history"},
                 {"name": "User Accounts", "value": "users"},
                 {"name": "Matches Manager", "value": "matches"},
+                {"name": "Gametypes Manager", "value": "gametypes"},
                 {"name": "Ranking Settings", "value": "rankings"},
                 {"name": "Recalculate All Rankings", "value": "rankings-all"},
                 {"name": "Map Image Uploader", "value": "map-img"},
@@ -54,6 +56,7 @@ export default function AdminMain(){
         {(mode === "player-manager") ? <PlayerManager /> : null}
         {(mode === "clear-database") ? <ClearDatabase /> : null}
         {(mode === "matches") ? <MatchesManager /> : null}
+        {(mode === "gametypes") ? <GametypesManager /> : null}
 
     </>
 }

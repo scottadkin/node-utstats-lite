@@ -23,7 +23,7 @@ import { clearAllDataTables } from "@/app/lib/admin";
 import { getAllPagesLayout, saveChanges as savePageLayoutChanges, restoreDefaultPageLayout } from "@/app/lib/pageLayout.mjs";
 import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/damage.mjs";
 import { adminGetMatchLogDetails, adminGetMatches, deleteMatch } from "@/app/lib/matches.mjs";
-import { getAllNames as getAllGametypeNames } from "@/app/lib/gametypes.mjs";
+import { getAllNames as getAllGametypeNames, getSplitByTeamSizeInfo } from "@/app/lib/gametypes.mjs";
 import { getAllNames as getAllServerNames } from "@/app/lib/servers.mjs";
 
 
@@ -250,6 +250,8 @@ export async function POST(req){
                 throw new Error(`Failed to delete match`);
             }
         }
+
+        
         
         return Response.json({"message": "hi"});
 
@@ -437,6 +439,10 @@ export async function GET(req){
             return Response.json(await adminGetMatchLogDetails(id));
         }
 
+
+        if(mode === "get-split-gametypes-by-teams-info"){
+            return Response.json(await getSplitByTeamSizeInfo());
+        }
 
         return Response.json({"message": "hi"});
 
