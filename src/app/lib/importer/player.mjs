@@ -221,7 +221,6 @@ export class Player{
     }
 
     teamKill(){
-
         this.stats.teamKills++;
     }
 

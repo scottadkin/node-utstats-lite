@@ -233,6 +233,8 @@ export class PlayerManager{
             }
         }
 
+        if(type === "teamKills") return;
+
         this.setPlayerStatProperty(playerId, type, value)
     }
 
@@ -340,6 +342,8 @@ export class PlayerManager{
             new Message(`Failed to get player by id ${playerId}, setPlayerStatProperty()`,"error");
             return;
         } 
+;
+
         player.stats[key] = value;
     }
 

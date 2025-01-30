@@ -167,12 +167,6 @@ export class KillsManager{
             const killer = playerManager.getPlayerById(k.killerId);
             const victim = playerManager.getPlayerById(k.victimId);
 
-            if(killer.testKills === undefined){
-                killer.testKills = 1;
-            }else{
-                killer.testKills++;
-            }
-
             //let timestamp = k.timestamp;
             //if(bHardcore) timestamp = scalePlaytime(timestamp);
 
