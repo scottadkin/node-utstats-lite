@@ -47,8 +47,8 @@ export class PlayerManager{
             if(result === null) return;
 
             this.namesToIds[result[1]] = parseInt(result[2]);
-
-            this.addPlayer(timestamp, result[1], parseInt(result[2]));
+            //set bSPectator to true and on the connect event set to true(rename always happens before connect, but no connect for spectators)
+            this.addPlayer(timestamp, result[1], parseInt(result[2]), true);
             return;
         }
 
@@ -269,8 +269,9 @@ export class PlayerManager{
         return null;
     }
 
-    addPlayer(timestamp, name, playerId){
+    addPlayer(timestamp, name, playerId, bSpectator){
 
+        if(bSpectator === undefined) bSpectator = false;
         const testPlayer = this.getPlayerById(playerId);
 
         this.idsToNames[playerId] = name;
@@ -579,6 +580,11 @@ export class PlayerManager{
                 this.mergedPlayers[finalName].totalTTL = parseFloat(p.stats.ttl);
 
                 if(p.playtime === 0) this.mergedPlayers[finalName].bSpectator = 0;
+
+                //forgot to set this... :/
+                if(!p.bHadConnectEvent){
+                    this.mergedPlayers[finalName].bSpectator = 1;
+                }
                // if(p.stats.timeOnServer > 0) this.mergedPlayers[finalName].bSpectator = 0;
                 continue;
             }
@@ -590,7 +596,12 @@ export class PlayerManager{
             if(master.mac1 === "") master.mac1 = p.mac1;
             if(master.mac2 === "") master.mac2 = p.mac2;
 
-            if(master.bHadConnectEvent || p.bHadConnectEvent) master.bHadConnectEvent = true;
+            if(master.bHadConnectEvent || p.bHadConnectEvent){
+                //master.bHadConnectEvent = 1;
+                master.bSpectator = 0;
+            }else if(!master.bHadConnectEvent && !p.bHadConnectEvent){
+                master.bSpectator = 1;
+            }
             //if player played at any point don't mark them as a spectator even after reconnects
             if(master.bSpectator === 0 || p.bSpectator === 0) master.bSpectator = 0;
 

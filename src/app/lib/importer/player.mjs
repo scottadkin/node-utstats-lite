@@ -226,7 +226,7 @@ export class Player{
 
         let playtime = 0;
 
-        //spectators won't have connect events if there were never a player
+        //spectators won't have connect events if they were never a player
         if(this.connects.length === 0){
             this.playtime = 0;
             return;
