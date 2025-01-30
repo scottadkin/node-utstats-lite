@@ -120,7 +120,8 @@ export class MatchParser{
 
         this.damageManager.setPlayerDamage(this.players);
 
-        this.players.mergePlayers(this.matchStart, this.bUTStatsLiteLog);
+
+        this.players.mergePlayers(this.matchStart, this.bUTStatsLiteLog, this.totalTeams);
         
         this.players.setPlayerPingStats();
 

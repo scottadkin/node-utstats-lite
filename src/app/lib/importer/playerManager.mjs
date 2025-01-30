@@ -58,9 +58,7 @@ export class PlayerManager{
 
             if(result === null) return;
 
-            const playerName = result[1];
-
-            this.setConnectionEvent(playerName, timestamp);
+            this.setConnectionEvent(parseInt(result[2]), timestamp);
             return;
         }
 
@@ -177,7 +175,7 @@ export class PlayerManager{
         if(player === null){
 
             this.addPlayer(timestamp, "", playerId);
-            new Message(`Failed to get player by id ${playerId}, parseTeamChange()`,"warning");
+            //new Message(`Failed to get player by id ${playerId}, parseTeamChange()`,"warning");
             return;
         }
 
@@ -274,10 +272,13 @@ export class PlayerManager{
         if(bSpectator === undefined) bSpectator = false;
         const testPlayer = this.getPlayerById(playerId);
 
+        
+
         this.idsToNames[playerId] = name;
 
         if(testPlayer !== null){
             //process.exit();
+
             this.renameHistory.push({"playerId": playerId, "newName": name});
             testPlayer.name = name;
            // testPlayer.connected(timestamp);
@@ -287,13 +288,13 @@ export class PlayerManager{
         this.players.push(new Player(timestamp, name, playerId));
     }
 
-    setConnectionEvent(playerName, timestamp){
+    setConnectionEvent(playerId, timestamp){
 
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
 
-            if(p.name === playerName) p.connected(timestamp, true);
+            if(p.id === playerId) p.connected(timestamp, true);
         }
     }
 
@@ -305,6 +306,7 @@ export class PlayerManager{
             new Message(`Failed to get player by id setDisconnectEvent`,"warning");
             return;
         }
+
 
         player.disconnect(timestamp);
     }
@@ -511,7 +513,40 @@ export class PlayerManager{
         return max;
     }
 
-    mergePlayers(matchStart, bUTStatsLiteLog){
+
+    //if a player joins the match as player and leaves before start the improter doesn't correct them as a spectator if they rejoin
+    fixBSpectator(player, matchStart, totalTeams){
+
+       /* if(player.connectEvents.length > 0){
+
+            const last = player.connectEvents[player.connectEvents.length - 1];
+
+            //if there is no connect event after the last disconnect event player was never active during matchtime
+            if(last.type === "disconnect" && last.timestamp < matchStart){
+                player.bSpectator = 1;
+            }
+        }
+
+        console.log(player.disconnects[player.disconnects.length - 1], player.connects[player.connects.length - 1], player.name);*/
+
+        player.bSpectator = 1;
+
+        for(let i = 0; i < player.connectEvents.length; i++){
+
+            const c = player.connectEvents[i];
+
+            if(c.type === "connect"){
+                player.bSpectator = 0;
+            }else{
+                if(c.timestamp < matchStart) player.bSpectator = 1;
+            }
+
+           // if(c.type === "connect")
+        }
+
+    }
+
+    mergePlayers(matchStart, bUTStatsLiteLog, totalTeams){
 
         //so old utstats logs still can import
         const legacyMergeKeys = ["frags", "kills", "deaths",
@@ -571,7 +606,9 @@ export class PlayerManager{
 
             const p = this.players[i];
 
+
             const finalName = this.idsToNames[p.id];    
+
 
             if(this.mergedPlayers[finalName] === undefined){
                 this.mergedPlayers[finalName] = p;
@@ -579,12 +616,17 @@ export class PlayerManager{
                 this.mergedPlayers[finalName].totalEff = parseFloat(p.stats.efficiency);
                 this.mergedPlayers[finalName].totalTTL = parseFloat(p.stats.ttl);
 
-                if(p.playtime === 0) this.mergedPlayers[finalName].bSpectator = 0;
+                //if(p.playtime === 0) this.mergedPlayers[finalName].bSpectator = 0;
 
                 //forgot to set this... :/
                 if(!p.bHadConnectEvent){
                     this.mergedPlayers[finalName].bSpectator = 1;
                 }
+
+
+                this.fixBSpectator(this.mergedPlayers[finalName], matchStart);
+
+                //if(p.playtime === 0) this.mergedPlayers[finalName].bSpectator = 1;
                // if(p.stats.timeOnServer > 0) this.mergedPlayers[finalName].bSpectator = 0;
                 continue;
             }
@@ -703,6 +745,8 @@ export class PlayerManager{
             master.connects = [... new Set([...master.connects, ...p.connects])];
 
             master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];
+
+            master.connectEvents = [...master.connectEvents, ...p.connectEvents];
             
             //console.log(this.bDisconnectBeforeMatchStart(master, matchStart));
 
@@ -724,6 +768,8 @@ export class PlayerManager{
             }
 
             master.teamChanges = [...master.teamChanges, ...p.teamChanges];
+
+            this.fixBSpectator(master, matchStart, totalTeams);
         }  
 
 

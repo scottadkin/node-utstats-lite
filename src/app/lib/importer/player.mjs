@@ -105,12 +105,21 @@ export class Player{
         this.lastFlagPickupTime = -9999;
         
         this.teamChanges = [];
+
+
+        this.connectEvents = [];
     }
 
     connected(timestamp, bAsPlayer){
 
         this.bConnectedToServer = true;
         if(this.connects.indexOf(timestamp) === -1) this.connects.push(timestamp);
+
+        this.connectEvents.push({
+            "type": "connect",
+            "timestamp": timestamp,
+            "bPlayer": bAsPlayer
+        });
 
         if(bAsPlayer){
             this.bHadConnectEvent = true;
@@ -122,6 +131,12 @@ export class Player{
 
         this.bConnectedToServer = false;
         this.disconnects.push(timestamp);
+
+        this.connectEvents.push({
+            "type": "disconnect",
+            "timestamp": timestamp,
+            "bPlayer": null
+        });
     }
 
     changeTeam(newTeam, timestamp){
