@@ -418,7 +418,7 @@ export default class MatchScreenshot{
             this.fillText(nameOptions);
 
             const scoreOptions = {
-                "text": p.frags,
+                "text": p.score,
                 "textAlign": "right",
                 "font": `300 ${this.scale(nameScoreFontSize, "y")}px Arial`,
                 "x": startX + scoreOffset,
@@ -841,7 +841,7 @@ export default class MatchScreenshot{
             if(!bLMS){
 
                 const col2Options = {
-                    "text": p.frags,
+                    "text": p.score,
                     "x": col2Offset,
                     "y": y,
                     "color": scoreColor,
