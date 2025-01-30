@@ -47,6 +47,10 @@ export class MatchParser{
         this.teamScores = [0,0,0,0];
         this.soloWinner = 0;
         this.soloWinnerScore = 0;
+
+
+        //check if utstats-lite log because stat_player behaves differently(merges player stats into one for multiple reconnects) 
+        this.bUTStatsLiteLog = false;
         
 
         //scale timestamps at the start for hardcore instead of over and over in different methodd
@@ -116,7 +120,7 @@ export class MatchParser{
 
         this.damageManager.setPlayerDamage(this.players);
 
-        this.players.mergePlayers( this.matchStart);
+        this.players.mergePlayers(this.matchStart, this.bUTStatsLiteLog);
         
         this.players.setPlayerPingStats();
 
@@ -250,6 +254,11 @@ export class MatchParser{
         const lineReg = /^(.+?)$/img;
         const lines = test.match(lineReg);
 
+        const logStandardReg = /^.+info\tLog_Standard\t(.+)$/i;
+
+                  //check if utstats-lite log because stat_player behaves differently(merges player stats into one for multiple reconnects) 
+
+
         const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
         const playerReg =  /^player\t(.+)$/i;
         const statPlayerReg = /^stat_player\t(.+)$/i;
@@ -272,9 +281,23 @@ export class MatchParser{
 
         const itemGetReg = /^item_get\t(.+)$/i;
 
+        const liteReg = /lite/i;
+
         for(let i = 0; i < lines.length; i++){
             
             const line = lines[i];
+
+            //lazy way to get around fileEncoding info at start of file
+            if(logStandardReg.test(lines[i])){
+  
+                const result = logStandardReg.exec(lines[i]);
+           
+                if(liteReg.test(result[1])){
+                    this.bUTStatsLiteLog = true;
+                }
+                if(result === null) throw new Error(`Failed to get log standard`);
+    
+            }
 
             const timestampResult = timestampReg.exec(line);
 
@@ -294,10 +317,12 @@ export class MatchParser{
 
             if(infoReg.test(subString)){
 
+           
                 const result = infoReg.exec(subString);
                 
                 this.parseMatchInfo(result[1]);
                 continue;
+                
             }
 
 
@@ -416,6 +441,9 @@ export class MatchParser{
         if(type === "server_servername"){
             this.server.name = value;
         }
+
+        
+
     }
 
 

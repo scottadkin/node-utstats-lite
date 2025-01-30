@@ -336,8 +336,7 @@ export class PlayerManager{
         if(player === null){
             new Message(`Failed to get player by id ${playerId}, setPlayerStatProperty()`,"error");
             return;
-        }
-
+        } 
         player.stats[key] = value;
     }
 
@@ -493,12 +492,40 @@ export class PlayerManager{
         return oldName;
     }
 
-    mergePlayers(matchStart){
+    getLastUsedIndexByName(name){
 
-        const mergeKeys = [
-            "score", "frags", "kills", "deaths",
-            "suicides", "teamKills", /*"timeOnServer"*/, "headshots"
+        let max = -1;
+
+        for(let [key, value] of Object.entries(this.idsToNames)){
+
+            if(value !== name) continue;
+
+            key = parseInt(key);
+
+            if(key > max){
+                max = key;
+            }
+        }
+
+        return max;
+    }
+
+    mergePlayers(matchStart, bUTStatsLiteLog){
+
+        //so old utstats logs still can import
+        const legacyMergeKeys = ["frags", "kills", "deaths",
+            "suicides", "teamKills", "headshots"];
+
+        //utstats lite merges everything but score mutator side
+        let mergeKeys = [
+            "score"
         ];
+
+        //we want all stat_player stuff to merge for old utstats
+        if(!bUTStatsLiteLog){
+            mergeKeys = [...mergeKeys, ...legacyMergeKeys];
+        }
+
 
         const intTypes = [
             "score", "frags", "kills", "deaths",
@@ -538,12 +565,12 @@ export class PlayerManager{
             "cannonDamage"
         ];
 
+
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
 
-            const finalName = this.idsToNames[p.id];
-            
+            const finalName = this.idsToNames[p.id];    
 
             if(this.mergedPlayers[finalName] === undefined){
                 this.mergedPlayers[finalName] = p;
@@ -570,19 +597,7 @@ export class PlayerManager{
 
             master.team = p.team;
             
-       
-
-            //master.stats.totalEff += parseFloat(p.stats.efficiency);
-            //master.stats.totalTTL += parseFloat(p.stats.ttl);
-
-            /*if(master.stats.totalEff > 0){
-                master.stats.efficiency = master.stats.totalEff / master.stats.merges;
-            }
-
-            if(master.stats.totalTTL > 0){
-                master.stats.ttl = master.stats.totalTTL / master.stats.merges;
-            }*/
-
+            
             //merge basic stats events
             for(let x = 0; x < mergeKeys.length; x++){
 
@@ -596,7 +611,6 @@ export class PlayerManager{
                     master.stats[type] += p.stats[type];   
                 }   
             }
-
 
             for(let x = 0; x < multiMergeKeys.length; x++){
 
@@ -700,6 +714,46 @@ export class PlayerManager{
 
             master.teamChanges = [...master.teamChanges, ...p.teamChanges];
         }  
+
+
+
+            for(const [name, playerData] of Object.entries(this.mergedPlayers)){
+
+                //get around utstatslite behav
+                if(playerData.merges > 1 && bUTStatsLiteLog){
+
+
+                    const lastUsedId = this.getLastUsedIndexByName(name);
+
+
+                    if(lastUsedId === playerData.id) continue;
+
+   
+                    const latestData = this.getPlayerById(lastUsedId);
+
+                    playerData.stats.frags = parseInt(latestData.stats.frags);
+                    playerData.stats.kills = parseInt(latestData.stats.kills);
+                    playerData.stats.deaths = parseInt(latestData.stats.deaths);
+                    playerData.stats.suicides = parseInt(latestData.stats.suicides);
+                    playerData.stats.teamKills = parseInt(latestData.stats.teamKills);
+                 //playerData.stats.kills = latestData.stats.efficiency;
+
+
+                if(playerData.stats.kills > 0){
+
+                        if(playerData.stats.deaths > 0){
+                            playerData.stats.efficiency = playerData.stats.kills / (playerData.stats.kills + playerData.stats.deaths) * 100;
+
+                        }else{
+                            playerData.stats.efficiency = 100;
+                        }
+                    }else{
+                        playerData.stats.efficiency = 0;
+                    }
+                
+                }
+            }
+       
     }
 
     matchEnded(matchStart, matchEnd){

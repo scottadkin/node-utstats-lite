@@ -57,11 +57,11 @@ export default function GametypesManager(){
             By default gametypes are imported by just their name, but you can also set up importers to include the team sizes in brackets to keep records, rankings, and other stuff separate.<br/><br/>
             For example say you have a match that is a <b>Capture The Flag</b> gametype with 10 players, by default it will be imported as just <b>Capture The Flag</b>, but if you use split gametypes by team size it will be imported as <b>Capture The Flag (5 v 5)</b>.<br/>
             Note: Team sizes will not be appended if teams are of uneven size(5 players vs 4 players ect).<br/><br/><br/><br/>
-            A total of {state.data.totalMatches} matches found.<br/> 
-            {state.data.change} matches can have teams appended to gametype name.<br/>
-            {state.data.alreadySet} already have team sizes appended.<br/> 
-            {state.data.keepName} matches will keep their current name.<br/>
-            {state.data.gametypesCreated} new gametypes will be created.
+            A total of <b>{state.data.totalMatches} matches</b> found.<br/> 
+            <b>{state.data.change} matches</b> can have teams appended to gametype name.<br/>
+            <b>{state.data.alreadySet} matches</b> already have team sizes appended.<br/> 
+            <b>{state.data.keepName} matches</b> will keep their current name.<br/>
+            <b>{state.data.gametypesCreated} new gametypes</b> will be created.
         </div>
     </>
 }
