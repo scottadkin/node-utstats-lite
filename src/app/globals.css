@@ -621,6 +621,7 @@ canvas{
 	text-align:center;
 	color:var(--font-color-1);
 	margin-bottom:var(--margin-1);
+	font-size:var(--font-size-1);
 }
 
 .welcome-message-link{

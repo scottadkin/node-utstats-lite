@@ -11,6 +11,13 @@ function reducer(state, action){
                 "data": action.data
             }
         }
+        case "change-progress": {
+
+            return {
+                ...state,
+                "bInProgress": action.value
+            };
+        }
     }
 
     return state;
@@ -34,6 +41,42 @@ async function loadData(dispatch){
     }
 }
 
+async function appendTeamSizes(state, dispatch){
+
+    try{
+
+        const req = await fetch("/api/admin?mode=append-team-sizes-to-gametypes");
+
+        const res = await req.json();
+
+        if(res.error !== undefined){
+
+            throw new Error(res.error);
+        }
+
+        console.log(res);
+
+        await loadData(dispatch);
+
+        dispatch({"type": "change-progress", "value": false});
+        
+
+    }catch(err){
+        console.trace(err);
+    }
+}
+
+
+function renderButton(state, dispatch){
+
+    if(state.bInProgress) return <><br/>In progress...</>
+
+    return <><br/><div className="submit-button" onClick={() =>{
+        dispatch({"type": "change-progress", "value": true});
+        appendTeamSizes(state, dispatch);
+    }}>Append Team Sizes To Gametype Names</div></>
+}
+
 export default function GametypesManager(){
 
     const [state, dispatch] = useReducer(reducer, {
@@ -43,8 +86,9 @@ export default function GametypesManager(){
             "alreadySet": 0,
             "keepName": 0,
             "gametypesCreated": 0
-            }
-        });
+        },
+        "bInProgress": false
+    });
 
     useEffect(() =>{
         loadData(dispatch);
@@ -62,6 +106,7 @@ export default function GametypesManager(){
             <b>{state.data.alreadySet} matches</b> already have team sizes appended.<br/> 
             <b>{state.data.keepName} matches</b> will keep their current name.<br/>
             <b>{state.data.gametypesCreated} new gametypes</b> will be created.
+            {renderButton(state, dispatch)}
         </div>
     </>
 }

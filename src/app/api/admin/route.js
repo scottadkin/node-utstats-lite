@@ -23,7 +23,7 @@ import { clearAllDataTables } from "@/app/lib/admin";
 import { getAllPagesLayout, saveChanges as savePageLayoutChanges, restoreDefaultPageLayout } from "@/app/lib/pageLayout.mjs";
 import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/damage.mjs";
 import { adminGetMatchLogDetails, adminGetMatches, deleteMatch } from "@/app/lib/matches.mjs";
-import { getAllNames as getAllGametypeNames, getSplitByTeamSizeInfo } from "@/app/lib/gametypes.mjs";
+import { getAllNames as getAllGametypeNames, getSplitByTeamSizeInfo, appendTeamsToAllGametypes } from "@/app/lib/gametypes.mjs";
 import { getAllNames as getAllServerNames } from "@/app/lib/servers.mjs";
 
 
@@ -442,6 +442,12 @@ export async function GET(req){
 
         if(mode === "get-split-gametypes-by-teams-info"){
             return Response.json(await getSplitByTeamSizeInfo());
+        }
+
+
+        if(mode === "append-team-sizes-to-gametypes"){
+
+            return Response.json(await appendTeamsToAllGametypes());
         }
 
         return Response.json({"message": "hi"});

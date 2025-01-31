@@ -1088,10 +1088,10 @@ export async function getPlayerIdsInMatch(matchId){
 
 export async function getMatchesPlayedCountBetween(id, start, end){
 
-    const query = `SELECT match_date,time_on_server FROM nstats_match_players WHERE player_id=? AND match_date>=? AND match_date<=? ORDER BY match_date DESC`;
+    const query = `SELECT match_date,time_on_server as playtime FROM nstats_match_players WHERE player_id=? AND match_date>=? AND match_date<=? ORDER BY match_date DESC`;
 
     const result = await simpleQuery(query, [id, start, end]);
 
-    return mysqlSetTotalsByDate(result, "match_date", ["time_on_server"]);
+    return mysqlSetTotalsByDate(result, "match_date", ["playtime"]);
     
 }

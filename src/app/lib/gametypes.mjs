@@ -306,6 +306,7 @@ export async function appendTeamsToAllGametypes(){
 
     ///recalc all rankings
     await recalculateAllGametypes();
+    return true;
 }
 
 
