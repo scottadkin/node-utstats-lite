@@ -1,7 +1,7 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
 import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
-import { getAllGametypeIds as getAllPlayerGametypeIds } from "./players.mjs";
+import { getAllGametypeIds as getAllPlayerGametypeIds, getAllPlayerMapIds } from "./players.mjs";
 
 
 async function getPlayerFragTotals(gametypeId, playerIds){
@@ -390,6 +390,14 @@ async function deleteGametypeRankings(id){
 
 }
 
+
+async function deleteMapRankings(id){
+
+    const query = `DELETE FROM nstats_map_rankings WHERE map_id=?`;
+
+    await simpleQuery(query, [id]);
+}
+
 export async function recalculateAll(){
 
     const gametypeIds = await getAllGametypeIds();
@@ -458,4 +466,16 @@ export async function getPlayerRankings(playerId, minDate){
     }
 
     return result;
+}
+
+
+
+export async function recalculateMap(id){
+
+    await deleteMapRankings(id);
+
+    const playerIds = await getAllPlayerMapIds(id);
+
+    await calculateRankings(id, playerIds, "map");
+  
 }

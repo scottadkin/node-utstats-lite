@@ -744,6 +744,21 @@ export async function getAllGametypeIds(gametypeId){
         return r.player_id;
     });
 }
+/**
+ * get all player_ids that have played said map
+ * @param {*} mapId 
+ * @returns 
+ */
+export async function getAllPlayerMapIds(mapId){
+
+    const query = `SELECT DISTINCT player_id FROM nstats_match_players WHERE map_id=?`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    return result.map((r) =>{
+        return r.player_id;
+    });
+}
 
 
 export async function adminGetAllHistory(){

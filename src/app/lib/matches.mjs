@@ -11,7 +11,7 @@ import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
-import { recalculateGametype as rankingRecalculateGametype} from "./rankings.mjs";
+import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, matchStart, matchEnd,
@@ -1258,6 +1258,7 @@ export async function deleteMatch(id){
             await weaponCalcMapWeaponsTotals(basic.map_id);
             await setPlayerMapAverages(basic.map_id);
             await rankingRecalculateGametype(basic.gametype_id);
+            await rankingRecalculateMap(basic.map_id);
 
             if(playerIds.length > 0){
                 await weaponUpdatePlayerTotals(playerIds);
