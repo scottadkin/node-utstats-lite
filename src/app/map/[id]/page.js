@@ -94,9 +94,12 @@ export default async function MapPage({params, searchParams}){
 
     elems[pageLayout["Weapon Statistics"]] = (pageSettings["Display Weapon Statistics"]) ? <WeaponStats key="weapons" data={weaponStats}/> : null ;
 
+
+    elems[pageLayout["Rankings"]] = (pageSettings["Display Rankings"]) ? <PlayerRankings key="rankings" id={id}/> : null ;
+
     return <main>
         <Header>{info.name}</Header>
-        <PlayerRankings id={id}/>
+        
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>

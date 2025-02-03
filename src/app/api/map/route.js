@@ -15,6 +15,10 @@ export async function GET(req){
         perPage = parseInt(perPage);
         if(perPage !== perPage) perPage = DEFAULT_PER_PAGE;
 
+        let page = searchParams.get("p") ?? 1;
+        page = parseInt(page);
+        if(page !== page) page = 1;
+
         if(mode === "get-rankings"){
 
             let id = searchParams.get("id") ?? NaN;
@@ -28,7 +32,7 @@ export async function GET(req){
             tf = parseInt(tf);
             if(tf !== tf) td = 28;
 
-            return Response.json(await getRankingsWithPlayerNames(id, 1, perPage, tf, "map"));
+            return Response.json(await getRankingsWithPlayerNames(id, page, perPage, tf, "map"));
 
         }
 

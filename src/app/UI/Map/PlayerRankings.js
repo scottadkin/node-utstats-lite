@@ -4,6 +4,8 @@ import { useEffect, useReducer } from "react";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, getOrdinal, toPlaytime } from "@/app/lib/generic.mjs";
 import PlayerLink from "../PlayerLink";
+import BasicPagination from "../BasicPagination";
+import Link from "next/link";
 
 function reducer(state, action){
 
@@ -33,7 +35,7 @@ async function loadData(state, dispatch, id){
 
     try{
 
-        const req = await fetch(`/api/map?mode=get-rankings&id=${id}&pp=${state.perPage}&tf=28`);
+        const req = await fetch(`/api/map?mode=get-rankings&id=${id}&p=${state.page}&pp=${state.perPage}&tf=28`);
 
         const res = await req.json();
 
@@ -51,7 +53,7 @@ export default function PlayerRankings({id}){
 
     const [state, dispatch] = useReducer(reducer, {
         "page": 1,
-        "perPage": 5,
+        "perPage": 10,
         "totalResults": 0,
         "data": []
     });
@@ -60,7 +62,7 @@ export default function PlayerRankings({id}){
 
         loadData(state, dispatch, id);
 
-    }, []);
+    }, [state.page]);
 
     const headers = {
         "place": {"title": "Place"},
@@ -76,10 +78,15 @@ export default function PlayerRankings({id}){
         <Header>Player Rankings</Header>
 
         <div className="info">Ranking based on players who have been active in the last 28 days.</div>
+        <BasicPagination results={state.totalResults} perPage={state.perPage} page={state.page} setPage={(page) =>{
+            dispatch({"type": "change-page", "value": page});
+        }}/>
         <InteractiveTable width={3} bNoHeaderSorting={true} headers={headers} rows={
             state.data.map((d, i) =>{
+
+                const place = (state.page - 1) * state.perPage + i + 1;
                 return {
-                    "place": {"displayValue": `${i + 1}${getOrdinal(i + 1)}`, "className": "ordinal"},
+                    "place": {"displayValue": `${place}${getOrdinal(place)}`, "className": "ordinal"},
                     "player": {"displayValue": <><PlayerLink id={d.player_id} country={d.country} bNewTab={true}>{d.name}</PlayerLink></>},
                     "last": {"displayValue": convertTimestamp(new Date(d.last_active), true, false, true), "className": "date"},
                     "playtime": {"displayValue": toPlaytime(d.playtime), "className": "date"},
@@ -88,6 +95,10 @@ export default function PlayerRankings({id}){
                 };
             })
         }/>
+        <div className="text-center">
+            <Link href={`/rankings?mode=maps&m=${id}`} className="small-button">Go to Full Map Rankings</Link><br/><br/>
+        </div>
+        
     </>
 
 }
