@@ -560,6 +560,16 @@ const queries = [
             suicides_per_min FLOAT NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
+            id int NOT NULL AUTO_INCREMENT,
+            player_id int NOT NULL,
+            map_id int NOT NULL,
+            matches int NOT NULL,
+            playtime float NOT NULL,
+            score float NOT NULL,
+            last_active datetime NOT NULL
+            ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
 
 ];
 
@@ -616,6 +626,7 @@ async function insertRankingSettings(){
         {"category": "penalty", "name": "under_300", "displayName": "Under 5 Hours Playtime Penalty", "points": 0.66},
         {"category": "penalty", "name": "under_600", "displayName": "Under 10 Hours Playtime Penalty", "points": 0.75},
         {"category": "penalty", "name": "min_matches", "displayName": "Minimum Matches Played", "points": 20},
+        {"category": "penalty", "name": "map_min_matches", "displayName": "Minimum Matches Played(Map Rankings)", "points": 5},
 
         {"category": "general", "name": "kills", "displayName": "Kill", "points": 300},
         {"category": "general", "name": "deaths", "displayName": "Death", "points": -150},

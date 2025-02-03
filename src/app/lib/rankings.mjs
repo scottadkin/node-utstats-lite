@@ -54,13 +54,28 @@ async function deletePlayerRankings(gametypeId, playerIds){
     return await simpleQuery(query, [gametypeId, playerIds]);
 }
 
+async function deletePlayerMapRankings(mapId, playerIds){
 
-async function bulkInsertRankings(gametypeId, data){
+    const query = `DELETE FROM nstats_map_rankings WHERE map_id=? AND player_id IN(?)`;
 
-    const query = `INSERT INTO nstats_rankings (
+    return await simpleQuery(query, [mapId, playerIds]);
+}
+
+
+async function bulkInsertRankings(targetId, data, type){
+
+
+    let query = `INSERT INTO nstats_rankings (
         player_id, gametype_id, matches, playtime,
         score, last_active
     ) VALUES ?`;
+
+    if(type === "map"){
+        query = `INSERT INTO nstats_map_rankings (
+            player_id, map_id, matches, playtime,
+            score, last_active
+        ) VALUES ?`;
+    }
 
     const insertVars = [];
 
@@ -68,7 +83,7 @@ async function bulkInsertRankings(gametypeId, data){
 
         insertVars.push([
             p.player_id,
-            gametypeId,
+            targetId,
             p.total_matches,
             p.playtime,
             p.ranking_points,
@@ -168,8 +183,7 @@ function _setRankingPoints(settings, playerData){
 
             //don't apply penalty until get full total
             if(type === "penalty") continue;
-            
-            
+                
             if(playerData[type] !== undefined){
                 currentPoints += playerData[type] * typeData.points;
                 //console.log(category, type, typeData);
@@ -216,15 +230,58 @@ function _removePlayersUnderMatchLimit(data, minMatches){
     return players;
 }
 
-export async function calculateRankings(gametypeId, playerIds){
+async function getPlayerMapFragTotals(mapId, playerIds){
+
+    if(playerIds.length === 0) return [];
+
+    const query = `SELECT player_id,MAX(match_date) as last_active,SUM(time_on_server) as playtime,COUNT(*) as total_matches,SUM(kills) as kills, SUM(deaths) as deaths,
+    SUM(suicides) as suicides, SUM(team_kills) as team_kills, SUM(spree_1) as spree_1, SUM(spree_2) as spree_2, SUM(spree_3) as spree_3,
+    SUM(spree_4) as spree_4, SUM(spree_5) as spree_5, SUM(multi_1) as multi_1, SUM(multi_2) as multi_2, SUM(multi_3) as multi_3, SUM(multi_4) as multi_4
+    FROM nstats_match_players WHERE map_id=? AND player_id IN(?) GROUP BY player_id`;
+
+    return await simpleQuery(query, [mapId, playerIds]);
+}
+
+
+async function getPlayerMapCTFTotals(mapId, playerIds){
+
+    if(playerIds.length === 0) return [];
+
+    const query = `SELECT player_id,SUM(flag_taken) as flag_taken,SUM(flag_pickup) as flag_pickup ,SUM(flag_drop) as flag_drop ,SUM(flag_assist) as flag_assist,
+    SUM(flag_cover) as flag_cover ,SUM(flag_seal) as flag_seal, SUM(flag_cap) as flag_cap, SUM(flag_kill) as flag_kill, SUM(flag_return) as flag_return, 
+    SUM(flag_return_base) as flag_return_base, SUM(flag_return_mid) as flag_return_mid,
+    SUM(flag_return_enemy_base) as flag_return_enemy_base, SUM(flag_return_save) as flag_return_save 
+    FROM nstats_match_ctf WHERE map_id=? AND player_id IN (?) GROUP BY player_id`;
+
+    return await simpleQuery(query, [mapId,playerIds]);
+}
+
+export async function calculateRankings(targetId, playerIds, type){
 
     if(playerIds.length === 0) return;
 
-    const fragTotals = await getPlayerFragTotals(gametypeId, playerIds);
-    const ctfTotals = await getPlayerCTFTotals(gametypeId, playerIds);
+    if(type === undefined) type = "gametype";
+
+    type = type.toLowerCase();
+
+    const validTypes = ["gametype", "map"];
+
+    if(!validTypes.indexOf(type) === -1) throw new Error(`Not a valid type for calculateRankings`);
+
+    let fragTotals = [];
+    let ctfTotals = [];
+
+    if(type === "gametype"){
+        fragTotals = await getPlayerFragTotals(targetId, playerIds);
+        ctfTotals = await getPlayerCTFTotals(targetId, playerIds);
+    }else{
+
+        fragTotals = await getPlayerMapFragTotals(targetId, playerIds);
+        ctfTotals = await getPlayerMapCTFTotals(targetId, playerIds);
+
+    }
     
     let mergedData = _mergeTotalsData(fragTotals, ctfTotals);
-
 
     const settings = await getRankingSettings();
 
@@ -232,19 +289,26 @@ export async function calculateRankings(gametypeId, playerIds){
         _setRankingPoints(settings, playerData);
     }
 
-    await deletePlayerRankings(gametypeId, playerIds);
+    if(type === "gametype"){
+        await deletePlayerRankings(targetId, playerIds);
+    }else{
 
-    //console.log(mergedData);
-    //console.log(settings);
+        await deletePlayerMapRankings(targetId, playerIds);
+    }
 
     let minMatches = settings?.penalty?.min_matches ?? null;
+
+    if(type === "map"){
+
+        minMatches = settings?.penalty?.map_min_matches ?? null;
+    }
     
     if(minMatches !== null){
         minMatches = minMatches.points;
         mergedData = _removePlayersUnderMatchLimit(mergedData, minMatches);
     }
 
-    await bulkInsertRankings(gametypeId, Object.values(mergedData));
+    await bulkInsertRankings(targetId, Object.values(mergedData), type);
 
 }
 

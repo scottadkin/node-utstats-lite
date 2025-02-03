@@ -215,6 +215,7 @@ export class MatchParser{
         const validMergedPlayerIds = this.players.getMergedPlayerIds();
 
         await calculateRankings(this.gametype.id, validMergedPlayerIds);
+        await calculateRankings(this.map.id, validMergedPlayerIds, "map");
         
 
         const hashVars = [this.map.name, 
