@@ -93,7 +93,7 @@ function renderOptions(types, state, dispatch){
 }
 
 
-function renderPagination(state){
+function renderPagination(state, dispatch){
 
     if(state.totalPages < 2) return null;
 
@@ -188,7 +188,7 @@ export default function TopXPlayers({mapId, data, category, perPage, validOption
         </div>
         <div className="text-center">
             <div className="top-players">
-                {renderPagination(state)}
+                {renderPagination(state, dispatch)}
                 <InteractiveTable headers={headers} rows={rows} sortBy={"value"} order="desc" bNoHeaderSorting={true}/>
             </div>
         </div>
