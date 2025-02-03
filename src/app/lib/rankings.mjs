@@ -4,6 +4,16 @@ import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
 import { getAllGametypeIds as getAllPlayerGametypeIds, getAllPlayerMapIds } from "./players.mjs";
 
 
+const VALID_RANKING_TYPES = ["gametype", "map"];
+
+
+function bValidRankingType(type){
+
+    type = type.toLowerCase();
+
+    return VALID_RANKING_TYPES.indexOf(type) !== -1;
+}
+
 async function getPlayerFragTotals(gametypeId, playerIds){
 
     const query = `SELECT player_id,last_active,playtime,total_matches,kills,deaths,suicides,
@@ -264,9 +274,8 @@ export async function calculateRankings(targetId, playerIds, type){
 
     type = type.toLowerCase();
 
-    const validTypes = ["gametype", "map"];
 
-    if(!validTypes.indexOf(type) === -1) throw new Error(`Not a valid type for calculateRankings`);
+    if(!bValidRankingType(type)) throw new Error(`Not a valid type for calculateRankings`);
 
     let fragTotals = [];
     let ctfTotals = [];
@@ -313,16 +322,35 @@ export async function calculateRankings(targetId, playerIds, type){
 }
 
 
-async function getRankingPlayerCount(gametypeId, minDate){
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=? AND last_active>=?`;
+async function getRankingPlayerCount(targetId, minDate, type){
 
-    const result = await simpleQuery(query, [gametypeId, minDate]);
+
+    let query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=? AND last_active>=?`;
+
+    if(type === "map"){
+        query = `SELECT COUNT(*) as total_rows FROM nstats_map_rankings WHERE map_id=? AND last_active>=?`;
+    }
+
+    const result = await simpleQuery(query, [targetId, minDate]);
 
     return result[0].total_rows;
 }
 
-export async function getRankings(gametypeId, page, perPage, timeRange){
+/**
+ * 
+ * @param {*} targetId 
+ * @param {*} page 
+ * @param {*} perPage 
+ * @param {*} timeRange 
+ * @param {*} type if undefined will fetch gametype rankings
+ * @returns 
+ */
+export async function getRankings(targetId, page, perPage, timeRange, type){
+
+    if(type === undefined) type = "gametype";
+
+    if(!bValidRankingType(type)) type = "gametype";
 
     const day = 60 * 60 * 24;
 
@@ -331,10 +359,13 @@ export async function getRankings(gametypeId, page, perPage, timeRange){
 
     const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
 
-    const query = `SELECT * FROM nstats_rankings WHERE gametype_id=? AND last_active>=? ORDER by score DESC LIMIT ?, ?`;
+    let query = `SELECT * FROM nstats_rankings WHERE gametype_id=? AND last_active>=? ORDER by score DESC LIMIT ?, ?`;
+    if(type === "map"){
+        query = `SELECT * FROM nstats_map_rankings WHERE map_id=? AND last_active>=? ORDER by score DESC LIMIT ?, ?`;
+    }
 
-    const data = await simpleQuery(query, [gametypeId, minDate, start, cleanPerPage]);
-    const totalResults = await getRankingPlayerCount(gametypeId, minDate);
+    const data = await simpleQuery(query, [targetId, minDate, start, cleanPerPage]);
+    const totalResults = await getRankingPlayerCount(targetId, minDate, type);
 
     return {data, totalResults};
 }
