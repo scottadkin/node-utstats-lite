@@ -1,4 +1,6 @@
-import { getRankings } from "@/app/lib/rankings.mjs";
+import { getRankingsWithPlayerNames } from "@/app/lib/rankings.mjs";
+
+const DEFAULT_PER_PAGE = 25;
 
 export async function GET(req){
 
@@ -7,6 +9,11 @@ export async function GET(req){
         const mode = searchParams.get("mode") ?? "";
 
         if(mode === "") throw new Error("No mode specified");
+
+        let perPage = searchParams.get("pp") ?? DEFAULT_PER_PAGE;
+
+        perPage = parseInt(perPage);
+        if(perPage !== perPage) perPage = DEFAULT_PER_PAGE;
 
         if(mode === "get-rankings"){
 
@@ -21,7 +28,7 @@ export async function GET(req){
             tf = parseInt(tf);
             if(tf !== tf) td = 28;
 
-            return Response.json(await getRankings(id, 1, 25, tf, "map"));
+            return Response.json(await getRankingsWithPlayerNames(id, 1, perPage, tf, "map"));
 
         }
 

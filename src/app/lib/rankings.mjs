@@ -1,7 +1,7 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
 import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
-import { getAllGametypeIds as getAllPlayerGametypeIds, getAllPlayerMapIds } from "./players.mjs";
+import { getAllGametypeIds as getAllPlayerGametypeIds, getAllPlayerMapIds, getBasicPlayerInfo } from "./players.mjs";
 
 
 const VALID_RANKING_TYPES = ["gametype", "map"];
@@ -509,4 +509,27 @@ export async function recalculateMap(id){
 
     await calculateRankings(id, playerIds, "map");
   
+}
+
+
+export async function getRankingsWithPlayerNames(targetId, page, perPage, timeRange, type){
+
+    const {totalResults, data} = await getRankings(targetId, page, perPage, timeRange, type);
+
+
+    const playerIds = new Set([...data.map((d) =>{
+        return d.player_id;
+    })]);
+
+    const playerInfo = await getBasicPlayerInfo([...playerIds]);
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        d.name = playerInfo[d.player_id]?.name || "Not Found";
+        d.country = playerInfo[d.player_id]?.country || "xx";
+    }
+
+    return {totalResults, data}
 }
