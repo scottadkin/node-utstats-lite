@@ -27,17 +27,17 @@ function setTargetId(searchParams, typeNames, paramKey){
     return id;
 }
 
-function setGametypeName(gametypeNames, targetId){
+function setTargetName(names, targetId){
 
     targetId = parseInt(targetId);
 
-    for(let i = 0; i < gametypeNames.length; i++){
+    for(let i = 0; i < names.length; i++){
 
-        const g = gametypeNames[i];
+        const g = names[i];
         if(g.id === targetId) return g.name;
     }
 
-    if(gametypeNames.length === 0) return "";
+    if(names.length === 0) return "";
 
     return "Not Found";
 }
@@ -53,60 +53,15 @@ function setTimeFrame(searchParams){
     return timeFrame;
 }
 
-export async function generateMetadata({ params, searchParams }, parent) {
-
-    const gametypeNames = await getAllGametypeNames(true);
-
-    const sp = await searchParams;
-
-    let gametypeId = setTargetId(sp, gametypeNames, "gid");
-
-    if(sp.gid === undefined){
-
-        const lastPlayedId = await getLastPlayedGametype();
-
-        if(lastPlayedId !== null){
-            gametypeId = lastPlayedId;
-        }
-
-    }
-
-    const gametypeName = setGametypeName(gametypeNames, gametypeId);
-    const timeFrame = setTimeFrame(sp);
-
-    let timeFrameString = `, all time rankings.`;
-    if(timeFrame > 0){
-        timeFrameString = `, active players in the last ${timeFrame} ${plural(timeFrame, "day")}`;
-    }
-
-    const settings = await getCategorySettings("Branding");
-
-    return {
-        "title": `${gametypeName} Rankings - ${settings["Site Name"] || "Node UTStats Lite"}`,
-        "description": `View the top ranking players for the gametype ${gametypeName}${timeFrameString}`
-    }
-}
-
-export default async function Page({params, searchParams}){
-
-    const sp = await searchParams;
-    
-
-    let mode = sp.mode ?? "gametype";
-    let targetKey = "gid";
-
-    if(mode !== "gametype" && mode !== "map") mode = "gametype";
-
-    if(mode === "map") targetKey = "mid";
-
-    let names = [];
-
-    if(mode === "gametype"){
-        names = await getAllGametypeNames(true);
-    }else{
-        targetKey = "mid";
-        names = await getAllMapNames(true);
-    }
+/**
+ * get last played id if no id chosen by user
+ * @param {*} sp 
+ * @param {*} names 
+ * @param {*} mode 
+ * @param {*} targetKey 
+ * @returns 
+ */
+async function getTargetId(sp, names, mode, targetKey){
 
     let targetId = setTargetId(sp, names, targetKey);
 
@@ -131,6 +86,69 @@ export default async function Page({params, searchParams}){
             }
         }
     }
+
+    return targetId;
+}
+
+export async function generateMetadata({ params, searchParams }, parent) {
+
+    const sp = await searchParams;
+
+    let mode = sp.mode ?? "gametype";
+    let targetKey = "gid";
+
+    if(mode !== "gametype" && mode !== "map") mode = "gametype";
+
+    if(mode === "map") targetKey = "mid";
+
+    let names = [];
+
+    if(mode === "gametype"){
+        names = await getAllGametypeNames(true);
+    }else{
+        targetKey = "mid";
+        names = await getAllMapNames(true);
+    }
+
+    const targetId = await getTargetId(sp, names, mode, targetKey);
+
+    const targetName = setTargetName(names, targetId);
+    const timeFrame = setTimeFrame(sp);
+
+    let timeFrameString = `, all time rankings.`;
+    if(timeFrame > 0){
+        timeFrameString = `, active players in the last ${timeFrame} ${plural(timeFrame, "day")}`;
+    }
+
+    const settings = await getCategorySettings("Branding");
+
+    return {
+        "title": `${targetName} Rankings - ${settings["Site Name"] || "Node UTStats Lite"}`,
+        "description": `View the top ranking players for the ${(mode === "gametype") ? "gametype" : "map"} ${targetName}${timeFrameString}`
+    }
+}
+
+export default async function Page({params, searchParams}){
+
+    const sp = await searchParams;
+    
+    let mode = sp.mode ?? "gametype";
+    let targetKey = "gid";
+
+    if(mode !== "gametype" && mode !== "map") mode = "gametype";
+
+    if(mode === "map") targetKey = "mid";
+
+    let names = [];
+
+    if(mode === "gametype"){
+        names = await getAllGametypeNames(true);
+    }else{
+        targetKey = "mid";
+        names = await getAllMapNames(true);
+    }
+
+    const targetId = await getTargetId(sp, names, mode, targetKey);
 
     let page = (sp.p !== undefined) ? parseInt(sp.p) : 1;
     if(page !== page) page = 1;
@@ -177,9 +195,9 @@ export default async function Page({params, searchParams}){
     }
 
     return <main>
-        <Header>Rankings</Header>
+        <Header>{(mode === "gametype") ? "Gametype" : "Map"} Rankings</Header>
         <SearchForm targetNames={names} targetId={targetId} timeFrame={timeFrame} perPage={perPage} page={page} mode={mode} targetKey={targetKey}/>
-        <Header>Top {setGametypeName(names, targetId)} Players</Header>
+        <Header>Top {setTargetName(names, targetId)} Players</Header>
         <Pagination url={`/rankings/?mode=${mode}&${targetKey}=${targetId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
         <table className="t-width-3">
             <tbody>
