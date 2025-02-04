@@ -317,10 +317,11 @@ export default class MatchScreenshot{
 
     async renderTimePing(p, startX, startY, rowHeight, index, bSolo){
 
-        const pingFontSize = rowHeight * 0.33;
-        const pingFontRowHeight = rowHeight * 0.35;
+        const pingFontSize = rowHeight * 0.24;
+        const pingFontRowHeight = rowHeight * 0.32;
         const pingColor = "white";
-        const flagOffset = 4.8;
+        const flagOffset = 5.2;
+        const maxWidth = 2.3;
 
         const y = startY + rowHeight * index
 
@@ -331,6 +332,7 @@ export default class MatchScreenshot{
             "textAlign": "right",
             "x": startX - 0.5,
             "y": y,
+            "maxWidth": maxWidth
         };
 
         this.fillText(timeOptions);
@@ -342,6 +344,7 @@ export default class MatchScreenshot{
             "textAlign": "right",
             "x": startX - 0.5,
             "y": y + pingFontRowHeight,
+            "maxWidth": maxWidth
         };
 
         //if(p.country === "") p.country = "xx";
@@ -352,6 +355,18 @@ export default class MatchScreenshot{
 
         await this.drawImage(`/images/flags/${country}.svg`, startX - flagOffset, y, rowHeight * 0.5, rowHeight * 0.5);
         this.fillText(pingOptions);
+
+        const effOptions = {
+            "text": `Eff: ${parseInt(p.efficiency)}%`,
+            "fontSize": pingFontSize,
+            "color": pingColor,
+            "textAlign": "right",
+            "x": startX - 0.5,
+            "y": y + pingFontRowHeight + pingFontRowHeight,      
+            "maxWidth": maxWidth
+        };
+
+        this.fillText(effOptions);
     }
 
     async renderTeam(teamId){
@@ -366,8 +381,8 @@ export default class MatchScreenshot{
         if(teamId === 2) teamColor = greenTeamColor;
         if(teamId === 3) teamColor = yellowTeamColor;
 
-        const nameScoreFontSize = 2.3;
-        const rowHeight = 3.2;
+        const nameScoreFontSize = 2.6;
+        const rowHeight = 4.2;
         const scoreOffset = 35;
 
         const teamTitle = `${getTeamName(teamId)} Team`;
@@ -375,7 +390,7 @@ export default class MatchScreenshot{
         const titleOptions = {
             "text": teamTitle,
             "textAlign": "left",
-            "fontSize": nameScoreFontSize,
+            "fontSize": nameScoreFontSize * 1.25,
             "x": startX,
             "y": startY,
             "color": teamColor
@@ -386,7 +401,7 @@ export default class MatchScreenshot{
         const scoreOptions = {
             "text": this.data.basic[`team_${teamId}_score`] ?? "N/A",
             "textAlign": "right",
-            "fontSize": nameScoreFontSize,
+            "fontSize": nameScoreFontSize * 1.25,
             "x": startX + scoreOffset,
             "y": startY,
             "color": teamColor
@@ -766,8 +781,8 @@ export default class MatchScreenshot{
         const nameOffset = 25;
         const col2Offset = 70;
         const col3Offset = 85;
-        const fontSize = 2;
-        const rowHeight = 2.6;
+        const fontSize = 2.4;
+        const rowHeight = 3.1;
         const startY = 12;
 
         const nameTitleOptions = {
