@@ -653,3 +653,15 @@ export async function getMatchesPlayedCountBetween(mapId, start, end){
     return mysqlSetTotalsByDate(result, "date", ["playtime"]);
 
 }
+
+
+export async function getLastPlayedMapId(){
+
+    const query = `SELECT map_id FROM nstats_matches ORDER BY date DESC LIMIT 1`;
+
+    const result = await simpleQuery(query);
+
+    if(result.length > 0) return result[0].map_id;
+
+    return null;
+}

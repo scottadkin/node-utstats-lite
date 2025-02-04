@@ -3,9 +3,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import PerPageDropDown from "../PerPageDropDown";
 
-export default function SearchForm({gametypeNames, gametypeId, timeFrame, perPage, page}){
+export default function SearchForm({targetNames, targetId, timeFrame, perPage, page, targetKey, mode}){
 
-    const [gametype, setGametype] = useState(gametypeId);
+    const [target, setTarget] = useState(targetId);
     const [tf, setTf] = useState(timeFrame);
     const [pp, setPp] = useState(perPage);
     const [p, setP] = useState(page);
@@ -22,7 +22,7 @@ export default function SearchForm({gametypeNames, gametypeId, timeFrame, perPag
         {"display": "No Limit", "value": 0},
     ];
 
-    gametypeNames.sort((a, b) =>{
+    targetNames.sort((a, b) =>{
         
         a = a.name.toLowerCase();
         b = b.name.toLowerCase();
@@ -35,11 +35,11 @@ export default function SearchForm({gametypeNames, gametypeId, timeFrame, perPag
     return <div className="form">
         <div className="form-row">
             <label>Gametype</label>
-            <select value={gametype} onChange={(e) =>{
-                setGametype(e.target.value);
-                router.push(`/rankings?gid=${e.target.value}&tf=${tf}&pp=${pp}&p=1`);
+            <select value={target} onChange={(e) =>{
+                setTarget(e.target.value);
+                router.push(`/rankings?mode=${mode}&${targetKey}=${e.target.value}&tf=${tf}&pp=${pp}&p=1`);
             }}>
-                {gametypeNames.map((g, i) =>{
+                {targetNames.map((g, i) =>{
                     return <option key={i} value={g.id}>{g.name}</option>
                 })}
             </select>
@@ -48,7 +48,7 @@ export default function SearchForm({gametypeNames, gametypeId, timeFrame, perPag
             <label>Active In Previous</label>
             <select value={timeFrame} onChange={(e) =>{
                 setTf(e.target.value);
-                router.push(`/rankings?gid=${gametype}&tf=${e.target.value}&pp=${pp}&p=1`);
+                router.push(`/rankings?mode=${mode}&${targetKey}=${target}&tf=${e.target.value}&pp=${pp}&p=1`);
             }}>
                 {activeOptions.map((o, i) =>{
                     return <option key={i} value={o.value}>{o.display}</option>
@@ -59,7 +59,7 @@ export default function SearchForm({gametypeNames, gametypeId, timeFrame, perPag
             <label>Results Per Page</label>
             <PerPageDropDown selectedValue={pp} setValue={(value) =>{
                 setPp(value);
-                router.push(`/rankings?gid=${gametype}&tf=${tf}&pp=${value}&p=1`);
+                router.push(`/rankings?mode=${mode}&${targetKey}=${target}&tf=${tf}&pp=${value}&p=1`);
             }}/>
         </div>
             

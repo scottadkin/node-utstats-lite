@@ -1,6 +1,7 @@
 import Header from "../UI/Header";
 import SearchForm from "../UI/Rankings/SearchForm";
-import { getAllNames, getGametypeNames, getLastPlayedGametype } from "../lib/gametypes.mjs";
+import { getAllNames as getAllGametypeNames, getGametypeNames, getLastPlayedGametype } from "../lib/gametypes.mjs";
+import { getAllNames as getAllMapNames, getLastPlayedMapId } from "../lib/maps.mjs";
 import { getRankings } from "../lib/rankings.mjs";
 import { convertTimestamp, getPlayer, toPlaytime, getOrdinal, plural } from "../lib/generic.mjs";
 import { getBasicPlayerInfo } from "../lib/players.mjs";
@@ -9,18 +10,21 @@ import Pagination from "../UI/Pagination";
 import { getCategorySettings } from "../lib/siteSettings.mjs";
 
 
-function setGametypeId(searchParams, gametypeNames){
+const DEFAULT_PER_PAGE = 25;
 
-    let firstGametypeId = 0;
+function setTargetId(searchParams, typeNames, paramKey){
 
+    if(typeNames.length === 0) return 0;
 
-    if(gametypeNames.length > 0) firstGametypeId = gametypeNames[0].id;
+    let firstId = 0;
 
-    let gametypeId = (searchParams.gid !== undefined) ? parseInt(searchParams.gid) : firstGametypeId;
+    if(typeNames.length > 0) firstId = typeNames[0].id;
 
-    if(gametypeId !== gametypeId) gametypeId = firstGametypeId;
+    let id = (searchParams[paramKey] !== undefined) ? parseInt(searchParams[paramKey]) : firstId;
 
-    return gametypeId;
+    if(id !== id) id = firstId;
+
+    return id;
 }
 
 function setGametypeName(gametypeNames, targetId){
@@ -51,11 +55,11 @@ function setTimeFrame(searchParams){
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
-    const gametypeNames = await getAllNames(true);
+    const gametypeNames = await getAllGametypeNames(true);
 
     const sp = await searchParams;
 
-    let gametypeId = setGametypeId(sp, gametypeNames);
+    let gametypeId = setTargetId(sp, gametypeNames, "gid");
 
     if(sp.gid === undefined){
 
@@ -86,25 +90,53 @@ export async function generateMetadata({ params, searchParams }, parent) {
 export default async function Page({params, searchParams}){
 
     const sp = await searchParams;
-    const gametypeNames = await getAllNames(true);
+    
 
-    let gametypeId = setGametypeId(sp, gametypeNames);
+    let mode = sp.mode ?? "gametype";
+    let targetKey = "gid";
 
-    if(sp.gid === undefined){
+    if(mode !== "gametype" && mode !== "map") mode = "gametype";
 
-        const lastPlayedId = await getLastPlayedGametype();
+    if(mode === "map") targetKey = "mid";
 
-        if(lastPlayedId !== null){
-            gametypeId = lastPlayedId;
+    let names = [];
+
+    if(mode === "gametype"){
+        names = await getAllGametypeNames(true);
+    }else{
+        targetKey = "mid";
+        names = await getAllMapNames(true);
+    }
+
+    let targetId = setTargetId(sp, names, targetKey);
+
+    if(mode === "gametype"){
+
+        if(sp.gid === undefined){
+
+            const lastPlayedId = await getLastPlayedGametype();
+
+            if(lastPlayedId !== null){
+                targetId = lastPlayedId;
+            }
         }
+    }else{
 
+        if(sp.mid === undefined){
+
+            const lastPlayedId = await getLastPlayedMapId();
+
+            if(lastPlayedId !== null){
+                targetId = lastPlayedId;
+            }
+        }
     }
 
     let page = (sp.p !== undefined) ? parseInt(sp.p) : 1;
     if(page !== page) page = 1;
 
-    let perPage = (sp.pp !== undefined) ? parseInt(sp.pp) : 25;
-    if(perPage !== perPage) perPage = 25;
+    let perPage = (sp.pp !== undefined) ? parseInt(sp.pp) : DEFAULT_PER_PAGE;
+    if(perPage !== perPage) perPage = DEFAULT_PER_PAGE;
     if(perPage > 100) perPage = 100;
 
     let tf = (sp.tf !== undefined) ? parseInt(sp.tf) : 28;
@@ -113,27 +145,13 @@ export default async function Page({params, searchParams}){
 
     const timeFrame = setTimeFrame(sp);
 
-    const {data, totalResults} = await getRankings(gametypeId, page, perPage, timeFrame);
+    const {data, totalResults} = await getRankings(targetId, page, perPage, timeFrame, mode);
 
     const playerIds = data.map((d) =>{
         return d.player_id;
     });
 
     const players = await getBasicPlayerInfo(playerIds);
-
-    //console.log(data, gametypeId);
-
-    let gametypeName = "Not Found";
-
-    for(let i = 0; i < gametypeNames.length; i++){
-
-        const g = gametypeNames[i];
-
-        if(g.id === gametypeId){
-            gametypeName = g.name;
-            break;
-        }
-    }
 
     const rows = data.map((d, i) =>{
 
@@ -160,9 +178,9 @@ export default async function Page({params, searchParams}){
 
     return <main>
         <Header>Rankings</Header>
-        <SearchForm gametypeNames={gametypeNames} gametypeId={gametypeId} timeFrame={timeFrame} perPage={perPage} page={page}/>
-        <Header>Top {setGametypeName(gametypeNames, gametypeId)} Players</Header>
-        <Pagination url={`/rankings/?gid=${gametypeId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
+        <SearchForm targetNames={names} targetId={targetId} timeFrame={timeFrame} perPage={perPage} page={page} mode={mode} targetKey={targetKey}/>
+        <Header>Top {setGametypeName(names, targetId)} Players</Header>
+        <Pagination url={`/rankings/?mode=${mode}&${targetKey}=${targetId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
         <table className="t-width-3">
             <tbody>
                 <tr key={-2}>
@@ -176,6 +194,6 @@ export default async function Page({params, searchParams}){
                 {rows}
             </tbody>
         </table>
-        <Pagination url={`/rankings/?gid=${gametypeId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
+        <Pagination url={`/rankings/?mode=${mode}&${targetKey}=${targetId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
     </main>
 }

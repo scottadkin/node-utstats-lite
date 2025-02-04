@@ -96,7 +96,7 @@ export default function PlayerRankings({id}){
             })
         }/>
         <div className="text-center">
-            <Link href={`/rankings?mode=maps&m=${id}`} className="small-button">Go to Full Map Rankings</Link><br/><br/>
+            <Link href={`/rankings?mode=map&mid=${id}`} className="small-button">Go to Full Map Rankings</Link><br/><br/>
         </div>
         
     </>
