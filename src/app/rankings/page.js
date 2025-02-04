@@ -8,6 +8,7 @@ import { getBasicPlayerInfo } from "../lib/players.mjs";
 import PlayerLink from "../UI/PlayerLink";
 import Pagination from "../UI/Pagination";
 import { getCategorySettings } from "../lib/siteSettings.mjs";
+import TabsLinks from "../UI/TabsLinks";
 
 
 const DEFAULT_PER_PAGE = 25;
@@ -194,8 +195,14 @@ export default async function Page({params, searchParams}){
         </tr>);
     }
 
+    const tabOptions = [
+        {"value": "gametype", "display": "Gametypes"},
+        {"value": "map", "display": "Maps"},
+    ];
+
     return <main>
         <Header>{(mode === "gametype") ? "Gametype" : "Map"} Rankings</Header>
+        <TabsLinks selectedValue={mode} url={"/rankings?mode="} options={tabOptions}/>
         <SearchForm targetNames={names} targetId={targetId} timeFrame={timeFrame} perPage={perPage} page={page} mode={mode} targetKey={targetKey}/>
         <Header>Top {setTargetName(names, targetId)} Players</Header>
         <Pagination url={`/rankings/?mode=${mode}&${targetKey}=${targetId}&tf=${tf}&pp=${perPage}&p=`} results={totalResults} perPage={perPage} currentPage={page}/>
