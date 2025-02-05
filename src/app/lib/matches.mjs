@@ -243,7 +243,7 @@ async function getPlayerMatchData(id){
 
 async function getPlayerMatchScores(id){
 
-    const query = `SELECT player_id,team,score,frags,kills,deaths FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
+    const query = `SELECT player_id,team,score,frags,kills,deaths,spectator FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
 
     return await simpleQuery(query, [id]);
 

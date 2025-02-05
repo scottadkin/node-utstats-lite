@@ -53,7 +53,7 @@ export default class serverMatchScreenshot{
 
         if(maxWidth == null) maxWidth = 100;
         
-        maxWidth = this.scale("x", 100);
+        maxWidth = this.scale("x", maxWidth);
 
         if(color != null){
             c.fillStyle = color;
@@ -122,8 +122,8 @@ export default class serverMatchScreenshot{
             let x = startX;
             let y = startY + rowHeight + rowHeight * playerIndex; 
 
-            this.fillText(p.name, x, y, 50, playerFontSize, fontColor, "left");
-            this.fillText(p.frags, x + scoreOffset, y, 50, playerFontSize, fontColor, "right");
+            this.fillText(p.name, x, y, 30, playerFontSize, fontColor, "left");
+            this.fillText(p.frags, x + scoreOffset, y, 9, playerFontSize, fontColor, "right");
 
             playerIndex++;
             if(playerIndex >= maxPlayersPerTeam) return;
