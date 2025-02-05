@@ -240,8 +240,6 @@ export async function POST(req){
 
         if(mode === "delete-match"){
 
-
-            console.log("#############################################################");
             if(res.id === undefined) throw new Error(`Match Id not set`);
 
             if(await deleteMatch(res.id)){

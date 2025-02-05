@@ -117,7 +117,7 @@ export default class serverMatchScreenshot{
 
             const p = this.playerData[i];
 
-            if(p.team !== teamId) continue;
+            if(p.team !== teamId || p.spectator) continue;
 
             let x = startX;
             let y = startY + rowHeight + rowHeight * playerIndex; 
@@ -160,6 +160,8 @@ export default class serverMatchScreenshot{
         for(let i = 0; i < this.playerData.length; i++){
 
             const p = this.playerData[i];
+
+            if(p.spectator) continue;
 
             let y = startY + rowHeight + rowHeight * i;
 
