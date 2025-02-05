@@ -2,6 +2,7 @@ import { simpleQuery, bulkInsert } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
 import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
 import { getAllGametypeIds as getAllPlayerGametypeIds, getAllPlayerMapIds, getBasicPlayerInfo } from "./players.mjs";
+import { getAllMapIds } from "./maps.mjs";
 
 
 const VALID_RANKING_TYPES = ["gametype", "map"];
@@ -429,6 +430,13 @@ async function deleteMapRankings(id){
     await simpleQuery(query, [id]);
 }
 
+async function deleteAllMapRankings(){
+
+    const query = `DELETE FROM nstats_map_rankings`;
+
+    await simpleQuery(query);
+}
+
 export async function recalculateAll(){
 
     const gametypeIds = await getAllGametypeIds();
@@ -443,6 +451,19 @@ export async function recalculateAll(){
 
         await calculateRankings(g, playerIds);
     }
+
+
+    await deleteAllMapRankings();
+
+    const mapIds = await getAllMapIds();
+
+    for(let i = 0; i < mapIds.length; i++){
+
+        const m = mapIds[i];
+
+        await recalculateMap(m);
+    }
+
 }
 
 export async function recalculateGametype(id){
