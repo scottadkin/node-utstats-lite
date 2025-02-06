@@ -494,13 +494,35 @@ export async function recalculatePlayersByIds(playerIds){
 }
 
 
-async function getRankingPosition(score, gametypeId, minDate){
+async function getRankingPosition(score, gametypeId, minDate, type){
 
-    const query = `SELECT COUNT(*) as position FROM nstats_rankings WHERE score>? AND gametype_id=? AND last_active>? ORDER BY score DESC`;
+    let query = null;
+
+    if(type === "map"){
+        query = `SELECT COUNT(*) as position FROM nstats_map_rankings WHERE score>? AND map_id=? AND last_active>? ORDER BY score DESC`;
+    }else{
+        query = `SELECT COUNT(*) as position FROM nstats_rankings WHERE score>? AND gametype_id=? AND last_active>? ORDER BY score DESC`;
+    }
 
     const result = await simpleQuery(query, [score, gametypeId, minDate]);
     
-    return result[0].position;
+    return result[0].position + 1;
+}
+
+
+async function getPlayerMapRankings(playerId, minDate){
+
+    const query = `SELECT map_id,matches,playtime,score,last_active FROM nstats_map_rankings WHERE player_id=? AND last_active>?`;
+
+    const result = await simpleQuery(query, [playerId, minDate]);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        r.position = await getRankingPosition(r.score, r.map_id, minDate, "map") ?? -1;
+    }
+
+    return result;
 }
 
 export async function getPlayerRankings(playerId, minDate){
@@ -512,12 +534,14 @@ export async function getPlayerRankings(playerId, minDate){
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
-        const pos = await getRankingPosition(r.score, r.gametype_id, minDate);
-        r.position = (pos !== null) ? pos + 1 : -1;
+        const pos = await getRankingPosition(r.score, r.gametype_id, minDate, "gametype");
+        r.position = (pos !== null) ? pos : -1;
         
     }
 
-    return result;
+    const maps = await getPlayerMapRankings(playerId, minDate);
+
+    return {"gametypes": result, "maps": maps};
 }
 
 

@@ -19,6 +19,7 @@ import { getPageLayout } from "@/app/lib/pageLayout.mjs";
 import AddToSavedPlayers from "@/app/UI/Player/AddToSavedPlayers";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 import ActivityHeatMap from "@/app/UI/ActivityHeatMap";
+import { getMapNames } from "@/app/lib/maps.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -121,11 +122,22 @@ export default async function Page({params, searchParams}){
 
     const minDate = new Date(Date.now() - month * 1000);
 
-    let rankings = [];
+    let gametypeRankings = [];
+    let mapRankings = [];
 
     if(pageSettings["Display Rankings"] === "1"){
-        rankings = await getPlayerRankings(realId, minDate);
+
+        const rankings = await getPlayerRankings(realId, minDate);
+
+        gametypeRankings = rankings.gametypes;
+        mapRankings = rankings.maps;
     }
+
+    const mapIds = [...new Set(mapRankings.map((m) =>{
+        return m.map_id;
+    }))];
+
+    const mapNames = await getMapNames(mapIds);
 
     
 
@@ -144,7 +156,7 @@ export default async function Page({params, searchParams}){
     const weaponElem = (pageSettings["Display Weapons"] === "1") ? <WeaponStats totals={weaponTotals} key="weapons" weaponNames={weaponNames} gametypeNames={gametypeNames}/> : null;
     elems[pageLayout["Weapons"]] = weaponElem;
 
-    const rankingElem = (pageSettings["Display Rankings"] === "1") ? <Rankings key="rankings" data={rankings} gametypeNames={gametypeNames}/> : null;
+    const rankingElem = (pageSettings["Display Rankings"] === "1") ? <Rankings key="rankings" mapNames={mapNames} mapsData={mapRankings} gametypesData={gametypeRankings} gametypeNames={gametypeNames}/> : null;
     elems[pageLayout["Rankings"]] = rankingElem;
 
     const itemsElem = (pageSettings["Display Items"] === "1") ? <ItemStats key="items" data={totals} gametypeNames={gametypeNames}/> : null;
