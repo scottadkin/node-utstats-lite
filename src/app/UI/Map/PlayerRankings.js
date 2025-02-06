@@ -31,11 +31,11 @@ function reducer(state, action){
 }
 
 
-async function loadData(state, dispatch, id){
+async function loadData(page, perPage, dispatch, id){
 
     try{
 
-        const req = await fetch(`/api/map?mode=get-rankings&id=${id}&p=${state.page}&pp=${state.perPage}&tf=28`);
+        const req = await fetch(`/api/map?mode=get-rankings&id=${id}&p=${page}&pp=${perPage}&tf=28`);
 
         const res = await req.json();
 
@@ -60,9 +60,9 @@ export default function PlayerRankings({id}){
 
     useEffect(() =>{
 
-        loadData(state, dispatch, id);
+        loadData(state.page, state.perPage, dispatch, id);
 
-    }, [state.page]);
+    }, [state.page, id, state.perPage]);
 
     const headers = {
         "place": {"title": "Place"},

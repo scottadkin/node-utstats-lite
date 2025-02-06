@@ -81,7 +81,7 @@ export default function ActivityHeatMap({apiURL, queryMode, targetId}){
         if(state.data[`${selectedYear}-${selectedMonth}`] !== undefined) return;
         loadData(dispatch, selectedMonth, selectedYear, apiURL, queryMode, targetId);
 
-    },[selectedYear, selectedMonth, state.data, apiURL, queryMode]);
+    },[selectedYear, selectedMonth, state.data, apiURL, queryMode, targetId]);
 
 
 
