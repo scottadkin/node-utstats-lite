@@ -9,7 +9,7 @@ import Link from "next/link";
 import BasicPagination from "../BasicPagination";
 
 
-async function loadData(playerId, page, perPage, dispatch){
+async function loadData(playerId, page, perPage, selectedGametype, selectedMap, dispatch){
 
     try{
 
@@ -70,12 +70,102 @@ function reducer(state, action){
                 "page": action.page
             }
         }
+
+        case "set-gametype": {
+            return {
+                ...state,
+                "selectedGametype": action.value
+            }
+        }
+
+        case "set-map": {
+            return {
+                ...state,
+                "selectedMap": action.value
+            }
+        }
     }
 
     return state;
 }
 
-export default function RecentMatches({playerId}){
+
+function byName(a, b){
+
+    a = a.name.toLowerCase();
+    b = b.name.toLowerCase();
+
+    if(a < b) return -1;
+    if(a > b) return 1;
+    return 0;
+}
+
+
+function getPlayedMatches(data, targetKey, targetId){
+
+    targetId = parseInt(targetId);
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+        if(d[targetKey] === targetId) return d.total_matches;
+    }
+
+    return 0;
+}
+
+function renderOptions(state, dispatch, playedMaps, playedGametypes, mapNames, gametypeNames){
+
+    const gametypeOptions = [];
+    const mapOptions = [];
+
+    for(let [id, name] of Object.entries(gametypeNames)){
+
+
+        if(id !== "0"){
+            name = `${name} (${getPlayedMatches(playedGametypes, "gametype_id", id)})`
+        }
+
+        gametypeOptions.push({"id": parseInt(id), "name": name});
+    }
+
+    for(let [id, name] of Object.entries(mapNames)){
+
+        if(id !== "0"){
+            name = `${name} (${getPlayedMatches(playedMaps, "map_id", id)})`
+        }
+
+        mapOptions.push({"id": parseInt(id), "name": name});
+    }
+
+    gametypeOptions.sort(byName)
+
+    return <>
+        <div className="form-row">
+            <label>Gametype</label>
+            <select value={state.selectedGametype} onChange={(e) =>{
+                dispatch({"type": "set-gametype", "value": e.target.value});
+            }}>
+                {gametypeOptions.map((g, i) =>{
+                    return <option key={i} value={g.value}>{g.name}</option>
+                })}
+            </select>
+        </div>
+        <div className="form-row">
+            <label>Map</label>
+            <select value={state.selectedMap} onChange={(e) =>{
+                dispatch({"type": "set-map", "value": e.target.value});
+            }}>
+                <option value="0">All</option>
+            {mapOptions.map((m, i) =>{
+                    return <option key={i} value={m.value}>{m.name}</option>
+                })}
+            </select>
+        </div>
+    </>
+}
+
+export default function RecentMatches({playerId, mapNames, gametypeNames, playedGametypes, playedMaps}){
 
     const [state, dispatch] = useReducer(reducer, {
         "error": null,
@@ -83,6 +173,8 @@ export default function RecentMatches({playerId}){
         "page": 1,
         "perPage": 50,
         "totalMatches": 0,
+        "selectedGametype": 0,
+        "selectedMap": 0,
         "data": {"matches":[], "serverNames": {}, "gametypeNames": {}, "mapNames": {}}
     });
 
@@ -90,13 +182,13 @@ export default function RecentMatches({playerId}){
 
         const controller = new AbortController();
 
-        loadData(playerId, state.page, state.perPage, dispatch);
+        loadData(playerId, state.page, state.perPage, state.selectedGametype, state.selectedMap, dispatch);
 
         return () =>{
             controller.abort();
         }
 
-    },[playerId, state.page, state.perPage]);
+    },[playerId, state.page, state.perPage, state.selectedGametype, state.selectedMap]);
 
     const headers = {
         "date": {"title": "Date"},
@@ -148,6 +240,7 @@ export default function RecentMatches({playerId}){
     return <>
         <Header>Recent Matches</Header>
         <ErrorBox title="Failed to load recent matches">{state.error}</ErrorBox>
+        {renderOptions(state, dispatch, playedMaps, playedGametypes, mapNames, gametypeNames)}
         <BasicPagination results={state.totalMatches} page={state.page} perPage={state.perPage} setPage={(page) =>{
 
             dispatch({"type": "set-page", "page": page});

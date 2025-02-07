@@ -1110,3 +1110,18 @@ export async function getMatchesPlayedCountBetween(id, start, end){
     return mysqlSetTotalsByDate(result, "match_date", ["playtime"]);
     
 }
+
+
+export async function getPlayedGametypes(playerId){
+
+    const query = `SELECT gametype_id,COUNT(*) as total_matches FROM nstats_match_players WHERE player_id=? GROUP BY gametype_id`;
+
+    return await simpleQuery(query, [playerId]);
+
+}
+
+export async function getPlayedMaps(playerId){
+    const query = `SELECT map_id,COUNT(*) as total_matches FROM nstats_match_players WHERE player_id=? GROUP BY map_id`;
+
+    return await simpleQuery(query, [playerId]);
+}

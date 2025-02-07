@@ -1,6 +1,6 @@
 import CountryFlag from "@/app/UI/CountryFlag";
 import Header from "@/app/UI/Header";
-import { getPlayerByAuto, getPlayerGametypeTotals, getPlayerRecentMatches } from "@/app/lib/players.mjs";
+import { getPlayerByAuto, getPlayerGametypeTotals, getPlayedGametypes, getPlayedMaps } from "@/app/lib/players.mjs";
 import GametypeTotals from "@/app/UI/Player/GametypeTotals";
 import { getGametypeNames } from "@/app/lib/gametypes.mjs";
 import SpecialEvents from "@/app/UI/Player/SpecialEvents";
@@ -80,6 +80,10 @@ export default async function Page({params, searchParams}){
     const realId = player.id;
     const hash = player.hash;
 
+
+    const playedGametypes = await getPlayedGametypes(realId);
+    const playedMaps = await getPlayedMaps(realId);
+
     let totals = [];
 
     if(player === null){
@@ -106,12 +110,10 @@ export default async function Page({params, searchParams}){
     
 
     const gametypeIds = [...new Set(
-        totals.map((t) =>{
-            return t.gametype_id;
-         }), 
-        ...weaponTotals.map((wt) =>{
-        return wt.gametype_id;
-    }))];
+        playedGametypes.map((p) =>{
+            return p.gametype_id
+        })
+    )];
 
 
     const gametypeNames = await getGametypeNames(gametypeIds);
@@ -133,8 +135,8 @@ export default async function Page({params, searchParams}){
         mapRankings = rankings.maps;
     }
 
-    const mapIds = [...new Set(mapRankings.map((m) =>{
-        return m.map_id;
+    const mapIds = [...new Set(playedMaps.map((p) =>{
+        return p.map_id;
     }))];
 
     const mapNames = await getMapNames(mapIds);
@@ -162,7 +164,9 @@ export default async function Page({params, searchParams}){
     const itemsElem = (pageSettings["Display Items"] === "1") ? <ItemStats key="items" data={totals} gametypeNames={gametypeNames}/> : null;
     elems[pageLayout["Items"]] = itemsElem;
 
-    const matchesElem = (pageSettings["Display Recent Matches"] === "1") ? <RecentMatches key="matches" playerId={realId}/> : null;
+    const matchesElem = (pageSettings["Display Recent Matches"] === "1") ? <RecentMatches key="matches" playerId={realId} 
+        mapNames={mapNames} gametypeNames={gametypeNames} playedGametypes={playedGametypes} playedMaps={playedMaps}/> : null;
+
     elems[pageLayout["Recent Matches"]] = matchesElem;
 
     elems[pageLayout["Activity Heatmap"]] = (pageSettings["Display Activity Heatmap"] === "1") ? <ActivityHeatMap key="act" targetId={player.id} queryMode="get-matches-played-between" apiURL="/api/players"/> : null;
