@@ -28,11 +28,20 @@ export async function GET(req){
         if(page !== page) page = 1;
   
         if(id === null){
-
             throw new Error(`PlayerId is undefined`);
         }
 
-        const basicInfo = await getPlayerRecentMatches(id, page, perPage);
+        let gametype = searchParams.get("g") ?? 0;
+        gametype = parseInt(gametype);
+        if(gametype !== gametype) gametype = 0;
+
+        let map = searchParams.get("m") ?? 0;
+        map = parseInt(map);
+        if(map !== map) map = 0;
+
+
+
+        const basicInfo = await getPlayerRecentMatches(id, gametype, map, page, perPage);
 
         const matchIds = [... new Set(basicInfo.matches.map((b) =>{
             return b.match_id;

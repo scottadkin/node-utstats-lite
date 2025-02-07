@@ -699,11 +699,12 @@ export async function getPlayerGametypeTotals(playerId){
 }
 
 
-async function getPlayerTotalMatches(playerId){
+async function getPlayerTotalMatches(playerId, where, vars){
 
-    const query = `SELECT total_matches FROM nstats_player_totals WHERE player_id=? and gametype_id=0`;
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_match_players WHERE player_id=? ${where} AND spectator=0`;
 
-    const result = await simpleQuery(query, [playerId]);
+    const result = await simpleQuery(query, [...vars]);
+
 
     if(result.length === 0) return 0;
 
@@ -711,7 +712,7 @@ async function getPlayerTotalMatches(playerId){
 }
 
 // add page and perpage filtering
-export async function getPlayerRecentMatches(playerId, page, perPage){
+export async function getPlayerRecentMatches(playerId, gametype, map, page, perPage){
 
     page = parseInt(page);
     perPage = parseInt(perPage);
@@ -722,13 +723,33 @@ export async function getPlayerRecentMatches(playerId, page, perPage){
 
     if(page < 0) page = 0;
     if(perPage < 1 || perPage > 100) perPage = 50;
-    const query = `SELECT match_id,match_date,team,time_on_server FROM nstats_match_players WHERE player_id=? AND spectator=0 ORDER BY match_date DESC LIMIT ?, ?`;
+    
+    let vars = [playerId];
+
+    let where = "";
+
+    if(gametype !== 0){
+        vars.push(gametype);
+        where = ` AND gametype_id=?`;
+    }
+
+    if(map !== 0){
+        vars.push(map);
+        where += ` AND map_id=?`;
+    }
+
+    const query = `SELECT match_id,match_date,team,time_on_server FROM nstats_match_players WHERE player_id=? AND spectator=0${where} ORDER BY match_date DESC LIMIT ?, ?`;
+
+
+    const totalMatches = await getPlayerTotalMatches(playerId, where, vars);
 
     let start = page * perPage;
+    vars.push(start);
+    vars.push(perPage);
 
-    const totalMatches = await getPlayerTotalMatches(playerId);
+   
+    const matches = await simpleQuery(query, vars);
 
-    const matches = await simpleQuery(query, [playerId, start, perPage]);
 
     return {totalMatches, matches};
 }

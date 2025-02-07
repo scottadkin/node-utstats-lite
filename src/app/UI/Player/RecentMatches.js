@@ -13,7 +13,7 @@ async function loadData(playerId, page, perPage, selectedGametype, selectedMap, 
 
     try{
 
-        const req = await fetch(`/api/player/recentMatches?id=${playerId}&page=${page}&perPage=${perPage}`);
+        const req = await fetch(`/api/player/recentMatches?id=${playerId}&g=${selectedGametype}&m=${selectedMap}&page=${page}&perPage=${perPage}`);
 
         const res = await req.json();
 
@@ -74,14 +74,16 @@ function reducer(state, action){
         case "set-gametype": {
             return {
                 ...state,
-                "selectedGametype": action.value
+                "selectedGametype": action.value,
+                "page": 1
             }
         }
 
         case "set-map": {
             return {
                 ...state,
-                "selectedMap": action.value
+                "selectedMap": action.value,
+                "page": 1
             }
         }
     }
@@ -121,19 +123,10 @@ function renderOptions(state, dispatch, playedMaps, playedGametypes, mapNames, g
 
     for(let [id, name] of Object.entries(gametypeNames)){
 
-
-        if(id !== "0"){
-            name = `${name} (${getPlayedMatches(playedGametypes, "gametype_id", id)})`
-        }
-
         gametypeOptions.push({"id": parseInt(id), "name": name});
     }
 
     for(let [id, name] of Object.entries(mapNames)){
-
-        if(id !== "0"){
-            name = `${name} (${getPlayedMatches(playedMaps, "map_id", id)})`
-        }
 
         mapOptions.push({"id": parseInt(id), "name": name});
     }
@@ -147,7 +140,8 @@ function renderOptions(state, dispatch, playedMaps, playedGametypes, mapNames, g
                 dispatch({"type": "set-gametype", "value": e.target.value});
             }}>
                 {gametypeOptions.map((g, i) =>{
-                    return <option key={i} value={g.value}>{g.name}</option>
+           
+                    return <option key={i} value={g.id}>{g.name}</option>
                 })}
             </select>
         </div>
@@ -158,7 +152,7 @@ function renderOptions(state, dispatch, playedMaps, playedGametypes, mapNames, g
             }}>
                 <option value="0">All</option>
             {mapOptions.map((m, i) =>{
-                    return <option key={i} value={m.value}>{m.name}</option>
+                    return <option key={i} value={m.id}>{m.name}</option>
                 })}
             </select>
         </div>
