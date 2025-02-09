@@ -578,6 +578,8 @@ const queries = [
             map_id int NOT NULL,
             player_id int NOT NULL,
             weapon_id int NOT NULL,
+            kills int NOT NULL,
+            deaths int NOT NULL,
             shots int NOT NULL,
             hits int NOT NULL,
             accuracy float NOT NULL,

@@ -1,6 +1,6 @@
 import { bulkInsert } from "./database.mjs";
 
-export async function bulkInsertMatchStats(matchId, mapId, gametypeId, playerManager){
+export async function bulkInsertMatchStats(matchId, mapId, gametypeId, playerManager, weaponsManager){
 
     const insertVars = [];
 
@@ -8,13 +8,26 @@ export async function bulkInsertMatchStats(matchId, mapId, gametypeId, playerMan
 
         for(const [weaponId, s] of Object.entries(player.classicWeaponStats)){
 
+            const altStats = weaponsManager.getPlayerWeaponStats(player.masterId, weaponId);
+
+            let kills = 0;
+            let deaths = 0;
+
+            if(altStats.kills !== undefined){
+                kills = altStats.kills;
+            }
+
+            if(altStats.deaths !== undefined){
+                deaths = altStats.deaths;
+            }
+
             insertVars.push([
-                matchId, gametypeId, mapId, player.masterId, weaponId, s.shots, s.hits, s.accuracy, s.damage
+                matchId, gametypeId, mapId, player.masterId, weaponId, kills, deaths, s.shots, s.hits, s.accuracy, s.damage
             ]);
         }
     }
 
-    const query = `INSERT INTO nstats_classic_weapon_match_stats (match_id,gametype_id,map_id,player_id,weapon_id,shots,hits,accuracy,damage) VALUES ?`;
+    const query = `INSERT INTO nstats_classic_weapon_match_stats (match_id,gametype_id,map_id,player_id,weapon_id,kills,deaths,shots,hits,accuracy,damage) VALUES ?`;
 
     await bulkInsert(query, insertVars);
 }

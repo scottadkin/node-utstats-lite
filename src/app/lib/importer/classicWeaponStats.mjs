@@ -56,6 +56,7 @@ export default class ClassicWeaponStats{
 
             const pStats = player.classicWeaponStats;
 
+
             if(pStats[weaponId] === undefined){
 
                 pStats[weaponId] = {
@@ -81,10 +82,11 @@ export default class ClassicWeaponStats{
     }
 
 
-    async insertMatchStats(matchId, mapId, gametypeId, playerManager){
+    async insertMatchStats(matchId, mapId, gametypeId, playerManager, weaponsManager){
 
 
-        await bulkInsertMatchStats(matchId, mapId, gametypeId, playerManager);
+
+        await bulkInsertMatchStats(matchId, mapId, gametypeId, playerManager, weaponsManager);
         
     }
 }

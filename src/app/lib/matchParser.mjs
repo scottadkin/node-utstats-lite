@@ -252,7 +252,7 @@ export class MatchParser{
         await this.players.updateMapAverages(this.gametype.id, this.map.id);
         await this.weapons.updateMapTotals(this.map.id);
 
-        await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players)
+        await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players, this.weapons);
 
 
 
