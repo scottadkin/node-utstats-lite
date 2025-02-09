@@ -37,6 +37,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Match" ,"type": `bool`, "name": "Display CTF Caps", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display DOM", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Weapons", "value": 1},
+    {"category": "Match" ,"type": `bool`, "name": "Display Classic Weapon Stats", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Items", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Special Events", "value": 1},
     {"category": "Match" ,"type": `bool`, "name": "Display Kills", "value": 1},

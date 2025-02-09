@@ -31,7 +31,8 @@ export async function clearAllDataTables(){
         "ctf_covers",
         "player_map_minute_averages",
         "map_weapon_totals",
-        "map_rankings"
+        "map_rankings",
+        "classic_weapon_match_stats"
     ];
 
 

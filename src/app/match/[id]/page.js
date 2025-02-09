@@ -21,6 +21,8 @@ import DamageStats from "@/app/UI/Match/DamageStats";
 import CTFCaps from "@/app/UI/Match/CTFCaps";
 import { getSessionInfo } from "@/app/lib/authentication";
 import AdminTools from "@/app/UI/Match/AdminTools";
+import ClassicWeaponStats from "@/app/UI/Match/ClassicWeaponStats";
+import { getMatchData as classicGetMatchData } from "@/app/lib/classicWeaponStats.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
     // read route params
@@ -92,6 +94,8 @@ export default async function MatchPage({params, searchParams}) {
 
     const weaponImages = await getAllWeaponImages();
 
+    const classicStats = await classicGetMatchData(matchId);
+
     const pageSettings = await getCategorySettings("Match");
     const pageLayout = await getPageLayout("Match");
 
@@ -105,9 +109,7 @@ export default async function MatchPage({params, searchParams}) {
 
 	const totalTeams = matchData.basic.total_teams;
 
-
     const elems = [];
-
 
     elems[pageLayout["Basic Info"]] = (pageSettings["Display Basic Info"] === "1") ? <BasicInfo key="basic" matchData={matchData}/> : null;
     elems[pageLayout["Screenshot"]] = (pageSettings["Display Screenshot"] === "1") ? <MatchScreenshot key="sshot" data={matchData}/> : null;
@@ -124,8 +126,14 @@ export default async function MatchPage({params, searchParams}) {
     elems[pageLayout["JSON Links"]] = (pageSettings["Display JSON Links"] === "1") ? <JSONInfo key="json" matchId={matchId}/> : null;
     elems[pageLayout["Damage Stats"]] = (pageSettings["Display Damage Stats"] === "1") ?  <DamageStats key="damage" data={matchData.playerData} totalTeams={totalTeams}/> : null;
 
+
+    elems[pageLayout["Classic Weapon Stats"]] = (pageSettings["Display Classic Weapon Stats"] === "1") ?  <ClassicWeaponStats key="classic-weapons" weaponNames={matchData.weaponStats.names} weaponImages={weaponImages} data={classicStats} players={matchData.basicPlayers} totalTeams={totalTeams}/> : null;
+
+
+
     return (
 		<main>
+            
             {(session !== null) ? <AdminTools matchId={matchId}/> : null}
             {elems}
 		</main>

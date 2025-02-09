@@ -1,4 +1,4 @@
-import { bulkInsert } from "./database.mjs";
+import { bulkInsert, simpleQuery } from "./database.mjs";
 
 export async function bulkInsertMatchStats(matchId, mapId, gametypeId, playerManager, weaponsManager){
 
@@ -30,4 +30,12 @@ export async function bulkInsertMatchStats(matchId, mapId, gametypeId, playerMan
     const query = `INSERT INTO nstats_classic_weapon_match_stats (match_id,gametype_id,map_id,player_id,weapon_id,kills,deaths,shots,hits,accuracy,damage) VALUES ?`;
 
     await bulkInsert(query, insertVars);
+}
+
+
+export async function getMatchData(matchId){
+
+    const query = `SELECT player_id,weapon_id,kills,deaths,shots,hits,accuracy,damage FROM nstats_classic_weapon_match_stats WHERE match_id=?`;
+
+    return await simpleQuery(query, [matchId]);
 }
