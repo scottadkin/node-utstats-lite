@@ -1,4 +1,7 @@
 import { removeDoubleEnforcer } from "../generic.mjs";
+import { bulkInsertMatchStats } from "../classicWeaponStats.mjs";
+
+//TODO: fix double enforcer stats overriding single
 
 export default class ClassicWeaponStats{
 
@@ -75,5 +78,13 @@ export default class ClassicWeaponStats{
 
         
         //this.data.push({"timestamp": timestamp, "data": subString});
+    }
+
+
+    async insertMatchStats(matchId, mapId, gametypeId, playerManager){
+
+
+        await bulkInsertMatchStats(matchId, mapId, gametypeId, playerManager);
+        
     }
 }

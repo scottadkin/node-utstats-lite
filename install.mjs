@@ -571,6 +571,20 @@ const queries = [
             ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
 
+        `CREATE TABLE IF NOT EXISTS nstats_classic_weapon_match_stats (
+            id int NOT NULL AUTO_INCREMENT,
+            match_id int NOT NULL,
+            gametype_id int NOT NULL,
+            map_id int NOT NULL,
+            player_id int NOT NULL,
+            weapon_id int NOT NULL,
+            shots int NOT NULL,
+            hits int NOT NULL,
+            accuracy float NOT NULL,
+            damage int NOT NULL
+            ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+
+
 ];
 
 

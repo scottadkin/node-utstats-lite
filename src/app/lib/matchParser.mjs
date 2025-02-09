@@ -252,7 +252,7 @@ export class MatchParser{
         await this.players.updateMapAverages(this.gametype.id, this.map.id);
         await this.weapons.updateMapTotals(this.map.id);
 
-
+        await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players)
 
 
 
@@ -267,7 +267,7 @@ export class MatchParser{
 
         const logStandardReg = /^.+info\tLog_Standard\t(.+)$/i;
 
-                  //check if utstats-lite log because stat_player behaves differently(merges player stats into one for multiple reconnects) 
+        //check if utstats-lite log because stat_player behaves differently(merges player stats into one for multiple reconnects) 
 
 
         const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
