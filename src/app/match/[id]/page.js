@@ -127,7 +127,14 @@ export default async function MatchPage({params, searchParams}) {
     elems[pageLayout["Damage Stats"]] = (pageSettings["Display Damage Stats"] === "1") ?  <DamageStats key="damage" data={matchData.playerData} totalTeams={totalTeams}/> : null;
 
 
-    elems[pageLayout["Classic Weapon Stats"]] = (pageSettings["Display Classic Weapon Stats"] === "1") ?  <ClassicWeaponStats key="classic-weapons" weaponNames={matchData.weaponStats.names} weaponImages={weaponImages} data={classicStats} players={matchData.basicPlayers} totalTeams={totalTeams}/> : null;
+    let testWeapon = "-1";
+
+    const testKeys = Object.keys(matchData.weaponStats.names);
+    
+    //all is 0 always first
+    if(testKeys.length > 1) testWeapon = testKeys[1];
+
+    elems[pageLayout["Classic Weapon Stats"]] = (pageSettings["Display Classic Weapon Stats"] === "1") ?  <ClassicWeaponStats key="classic-weapons" weaponNames={matchData.weaponStats.names} weaponImages={weaponImages} data={classicStats} players={matchData.basicPlayers} totalTeams={totalTeams} firstWeapon={testWeapon}/> : null;
 
 
 

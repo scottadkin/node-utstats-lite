@@ -44,11 +44,12 @@ function renderTable(selectedWeapon, data, players, totalTeams){
     return <InteractiveTable width={3} headers={headers} rows={rows}/>
 }
 
-export default function ClassicWeaponStats({weaponNames, weaponImages, data, players, totalTeams}){
+export default function ClassicWeaponStats({weaponNames, weaponImages, data, players, totalTeams, firstWeapon}){
+
+    
+    const [selectedWeapon, setSelectedWeapon] = useState(firstWeapon);
 
     if(data.length === 0) return null;
-
-    const [selectedWeapon, setSelectedWeapon] = useState("0");
   
     const tabOptions = [];
 
@@ -69,16 +70,6 @@ export default function ClassicWeaponStats({weaponNames, weaponImages, data, pla
         return 0;
 
     });
-
-    const firstTab = (tabOptions.length > 0) ? tabOptions[0].value : "";
-
-    
-    useEffect(() =>{
-  
-            setSelectedWeapon(firstTab);
-     
-    }, [firstTab]);
-
    
 
     return <>
@@ -86,6 +77,6 @@ export default function ClassicWeaponStats({weaponNames, weaponImages, data, pla
         <Tabs options={tabOptions} selectedValue={selectedWeapon} changeSelected={(value) =>{
             setSelectedWeapon(value);
         }}/>
-        {renderTable(selectedWeapon, data, players, totalTeams)}
+        {renderTable(selectedWeapon, data, players, totalTeams, setSelectedWeapon)}
     </>
 }
