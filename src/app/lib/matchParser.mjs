@@ -13,6 +13,7 @@ import { Domination } from "./importer/domination.mjs";
 import Items from "./importer/items.mjs";
 import {calculateRankings} from "./rankings.mjs";
 import DamageManager from "./importer/damageManager.mjs";
+import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
 
 export class MatchParser{
 
@@ -39,6 +40,7 @@ export class MatchParser{
         this.dom = new Domination();
         this.items = new Items();
         this.damageManager = new DamageManager();
+        this.classicWeaponStats = new ClassicWeaponStats();
 
         this.matchStart = -1;
         this.matchEnd = -1;
@@ -120,6 +122,10 @@ export class MatchParser{
 
         this.damageManager.setPlayerDamage(this.players);
 
+        await this.weapons.setWeaponIds();
+
+        this.classicWeaponStats.setPlayerStats(this.weapons, this.players);
+
 
         this.players.mergePlayers(this.matchStart, this.bUTStatsLiteLog, this.totalTeams);
         
@@ -191,7 +197,7 @@ export class MatchParser{
         //TODO add gametype & map ids to weapons, CTF AND DOM TABLES
         await this.ctf.insertPlayerMatchData(this.players, this.matchId, this.gametype.id, this.map.id);
         await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
-        await this.weapons.setWeaponIds();
+       // await this.weapons.setWeaponIds();
         this.kills.setWeaponIds(this.weapons);
         this.kills.setPlayerIds(this.players);
         await this.kills.insertKills(this.matchId);
@@ -247,6 +253,9 @@ export class MatchParser{
         await this.weapons.updateMapTotals(this.map.id);
 
 
+
+
+
     }
 
     parseLines(){
@@ -285,6 +294,8 @@ export class MatchParser{
 
         const liteReg = /lite/i;
 
+        const classWeaponStatReg = /^weap_.+?\t(.+?)\t(\d+?)\t(.+?)$/i;
+
         for(let i = 0; i < lines.length; i++){
             
             const line = lines[i];
@@ -306,6 +317,12 @@ export class MatchParser{
             if(timestampResult === null) continue;
 
             const timestamp = (this.bHardcore) ? parseFloat(scalePlaytime(timestampResult[1], this.bHardcore).toFixed(2)) : parseFloat(timestampResult[1]);
+            
+            if(classWeaponStatReg.test(timestampResult[2])){
+                this.classicWeaponStats.addLine(timestamp, timestampResult[2]);
+                continue;
+            }
+
             const subString = timestampResult[2];
 
             if(playerReg.test(subString)){
@@ -419,7 +436,10 @@ export class MatchParser{
             if(this.damageManager.parseString(subString)){
                 continue;
             }
+
+            
         }
+
     }
 
 

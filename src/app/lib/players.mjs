@@ -750,7 +750,6 @@ export async function getPlayerRecentMatches(playerId, gametype, map, page, perP
    
     const matches = await simpleQuery(query, vars);
 
-
     return {totalMatches, matches};
 }
 

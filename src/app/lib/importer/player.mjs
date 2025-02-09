@@ -95,6 +95,9 @@ export class Player{
             }
         };
 
+        //used for original utstats
+        this.classicWeaponStats = {};
+
 
         //work around flag_kill event not always logging in smartCTF
         this.bHasFlag = false;
