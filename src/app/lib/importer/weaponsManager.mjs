@@ -42,7 +42,6 @@ export class WeaponsManager{
 
     async setWeaponIds(){
 
-       
         for(let i = 0; i < this.tempNames.length; i++){
 
             let name = this.tempNames[i];

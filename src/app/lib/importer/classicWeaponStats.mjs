@@ -1,3 +1,5 @@
+import { removeDoubleEnforcer } from "../generic.mjs";
+
 export default class ClassicWeaponStats{
 
     constructor(){
@@ -26,21 +28,21 @@ export default class ClassicWeaponStats{
 
         for(let i = 0; i < this.lines.length; i++){
 
-            const {timestamp, data} = this.lines[i];
+            const {data} = this.lines[i];
 
             const result = classicWeaponStatReg.exec(data);
 
             if(result === null) continue;
 
             const type = result[1];
-            const name = result[2];
+            const name = removeDoubleEnforcer(result[2]);
             const playerId = parseInt(result[3]);
             const value = result[4];
 
             const weaponId = weaponsManager.getId(name);     
 
             if(weaponId === null){
-                throw new Error(`weaponId is null! classicWeaponStats`);
+                throw new Error(`weaponId is null! classicWeaponStats, ${name}`);
             }     
 
             const player = playerManager.getPlayerById(playerId);

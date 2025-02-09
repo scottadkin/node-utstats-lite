@@ -550,7 +550,7 @@ export class PlayerManager{
 
     }
 
-    mergePlayers(matchStart, bUTStatsLiteLog, totalTeams){
+    mergePlayers(matchStart, bUTStatsLiteLog, totalTeams, bFoundClassicWeaponData){
 
         //so old utstats logs still can import
         const legacyMergeKeys = ["frags", "kills", "deaths",
@@ -773,48 +773,88 @@ export class PlayerManager{
 
             master.teamChanges = [...master.teamChanges, ...p.teamChanges];
 
+
+
+            //classic utstats weapon stats
+            if(bFoundClassicWeaponData){
+
+                const mWS = master.classicWeaponStats;
+                const masterWeaponKeys = Object.keys(master.classicWeaponStats);
+
+                for(const [weaponId, weaponStats] of Object.entries(p.classicWeaponStats)){
+
+                    const wIndex = masterWeaponKeys.indexOf(weaponId);
+
+                    if(wIndex === -1){
+
+                        mWS[weaponId] = weaponStats;
+                        continue;
+
+                    }else{
+
+
+                        mWS[weaponId].shots += parseInt(weaponStats.shots);
+                        mWS[weaponId].hits += parseInt(weaponStats.hits);
+                        mWS[weaponId].damage += parseInt(weaponStats.damage);
+
+                        let acc = 0;
+
+                        if(mWS[weaponId].hits > 0){
+
+                            if(mWS[weaponId].shots > 0){
+                                acc = mWS[weaponId].hits / mWS[weaponId].shots * 100;
+                            }else{
+                                acc = 100;
+                            }
+                        }
+                        mWS[weaponId].accuracy = acc;
+                    }
+                }
+            }
+
+
             this.fixBSpectator(master, matchStart, totalTeams);
         }  
 
 
 
-            for(const [name, playerData] of Object.entries(this.mergedPlayers)){
+        for(const [name, playerData] of Object.entries(this.mergedPlayers)){
 
-                //get around utstatslite behav
-                if(playerData.merges > 1 && bUTStatsLiteLog){
-
-
-                    const lastUsedId = this.getLastUsedIndexByName(name);
+            //get around utstatslite behav
+            if(playerData.merges > 1 && bUTStatsLiteLog){
 
 
-                    if(lastUsedId === playerData.id) continue;
-
-   
-                    const latestData = this.getPlayerById(lastUsedId);
-
-                    playerData.stats.frags = parseInt(latestData.stats.frags);
-                    playerData.stats.kills = parseInt(latestData.stats.kills);
-                    playerData.stats.deaths = parseInt(latestData.stats.deaths);
-                    playerData.stats.suicides = parseInt(latestData.stats.suicides);
-                    playerData.stats.teamKills = parseInt(latestData.stats.teamKills);
-                 //playerData.stats.kills = latestData.stats.efficiency;
+                const lastUsedId = this.getLastUsedIndexByName(name);
 
 
-                if(playerData.stats.kills > 0){
+                if(lastUsedId === playerData.id) continue;
 
-                        if(playerData.stats.deaths > 0){
-                            playerData.stats.efficiency = playerData.stats.kills / (playerData.stats.kills + playerData.stats.deaths) * 100;
 
-                        }else{
-                            playerData.stats.efficiency = 100;
-                        }
+                const latestData = this.getPlayerById(lastUsedId);
+
+                playerData.stats.frags = parseInt(latestData.stats.frags);
+                playerData.stats.kills = parseInt(latestData.stats.kills);
+                playerData.stats.deaths = parseInt(latestData.stats.deaths);
+                playerData.stats.suicides = parseInt(latestData.stats.suicides);
+                playerData.stats.teamKills = parseInt(latestData.stats.teamKills);
+                //playerData.stats.kills = latestData.stats.efficiency;
+
+
+            if(playerData.stats.kills > 0){
+
+                    if(playerData.stats.deaths > 0){
+                        playerData.stats.efficiency = playerData.stats.kills / (playerData.stats.kills + playerData.stats.deaths) * 100;
+
                     }else{
-                        playerData.stats.efficiency = 0;
+                        playerData.stats.efficiency = 100;
                     }
-                
+                }else{
+                    playerData.stats.efficiency = 0;
                 }
+            
             }
-       
+        }
+
     }
 
     matchEnded(matchStart, matchEnd){

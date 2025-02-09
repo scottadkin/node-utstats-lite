@@ -127,7 +127,7 @@ export class MatchParser{
         this.classicWeaponStats.setPlayerStats(this.weapons, this.players);
 
 
-        this.players.mergePlayers(this.matchStart, this.bUTStatsLiteLog, this.totalTeams);
+        this.players.mergePlayers(this.matchStart, this.bUTStatsLiteLog, this.totalTeams, this.classicWeaponStats.bFoundData);
         
         this.players.setPlayerPingStats();
 
