@@ -114,36 +114,7 @@ function renderPagination(state, dispatch){
     </>
 }
 
-export default function TopXPlayers({mapId, data, category, perPage, validOptions}){
-
-    const [state, dispatch] = useReducer(reducer, {
-        "data": data.data,
-        "players": data.players,
-        "category": "kills",
-        "perPage": perPage,
-        "page": 1,
-        "title": "Kills",
-        "totalEntries": 0,
-        "totalPages": 1
-    });
-
-
-    useEffect(() =>{
-
-        loadData(mapId, state.category, state.page, state.perPage, dispatch);
-
-        return () =>{
-
-        }
-
-    },[mapId, state.category, state.page, state.perPage]);
-
-    const headers = {
-        "place": {"title": " "},
-        "player": {"title": "Player"},
-        "playtime": {"title": "Playtime"},
-        "value": {"title": state.title}
-    };
+function createRows(state){
 
     const rows = [];
 
@@ -177,6 +148,39 @@ export default function TopXPlayers({mapId, data, category, perPage, validOption
             }
         });
     }
+
+    return rows;
+}
+
+export default function TopXPlayers({mapId, data, category, perPage, validOptions}){
+
+    const [state, dispatch] = useReducer(reducer, {
+        "data": data.data,
+        "players": data.players,
+        "category": "kills",
+        "perPage": perPage,
+        "page": 1,
+        "title": "Kills",
+        "totalEntries": 0,
+        "totalPages": 1
+    });
+
+
+    useEffect(() =>{
+
+        loadData(mapId, state.category, state.page, state.perPage, dispatch);
+
+
+    },[mapId, state.category, state.page, state.perPage]);
+
+    const headers = {
+        "place": {"title": " "},
+        "player": {"title": "Player"},
+        "playtime": {"title": "Playtime"},
+        "value": {"title": state.title}
+    };
+
+    const rows = createRows(state);
     return <>
         <Header>Top Player Averages</Header>
         <div className="form-row">

@@ -2,11 +2,8 @@
 import { ignore0 } from "@/app/lib/generic.mjs";
 import Header from "../Header";
 import InteractiveTable from "../InteractiveTable";
-import { useState } from "react";
 
 export default function ItemStats({data, gametypeNames}){
-
-    const [mode, setMode] = useState("0");
 
     const headers = {
         "gametype": {"title": "Gametype"},

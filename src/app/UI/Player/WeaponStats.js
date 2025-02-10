@@ -5,18 +5,8 @@ import InteractiveTable from "../InteractiveTable";
 import Tabs from "../Tabs";
 import { useState } from "react";
 
-export default function WeaponStats({totals, weaponNames, gametypeNames}){
 
-    const [mode, setMode] = useState("0");
-
-    const headers = {
-        "weapon": {"title": "Weapon"},
-        "matches": {"title": "Matches"},
-        "teamKills": {"title": "Team Kills"},
-        "deaths": {"title": "Deaths"},
-        "kills": {"title": "Kills"},
-        "eff": {"title": "Efficiency"},
-    };
+function creareRows(totals, weaponNames, mode){
 
     const rows = [];
 
@@ -57,6 +47,24 @@ export default function WeaponStats({totals, weaponNames, gametypeNames}){
             
         });
     }
+
+    return rows;
+}
+
+export default function WeaponStats({totals, weaponNames, gametypeNames}){
+
+    const [mode, setMode] = useState("0");
+
+    const headers = {
+        "weapon": {"title": "Weapon"},
+        "matches": {"title": "Matches"},
+        "teamKills": {"title": "Team Kills"},
+        "deaths": {"title": "Deaths"},
+        "kills": {"title": "Kills"},
+        "eff": {"title": "Efficiency"},
+    };
+
+    const rows = creareRows(totals, weaponNames, mode);
 
     const tabOptions = [];
 

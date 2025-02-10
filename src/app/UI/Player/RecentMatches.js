@@ -159,38 +159,7 @@ function renderOptions(state, dispatch, playedMaps, playedGametypes, mapNames, g
     </>
 }
 
-export default function RecentMatches({playerId, mapNames, gametypeNames, playedGametypes, playedMaps}){
-
-    const [state, dispatch] = useReducer(reducer, {
-        "error": null,
-        "bLoading": true,
-        "page": 1,
-        "perPage": 50,
-        "totalMatches": 0,
-        "selectedGametype": 0,
-        "selectedMap": 0,
-        "data": {"matches":[], "serverNames": {}, "gametypeNames": {}, "mapNames": {}}
-    });
-
-    useEffect(() =>{
-
-        const controller = new AbortController();
-
-        loadData(playerId, state.page, state.perPage, state.selectedGametype, state.selectedMap, dispatch);
-
-        return () =>{
-            controller.abort();
-        }
-
-    },[playerId, state.page, state.perPage, state.selectedGametype, state.selectedMap]);
-
-    const headers = {
-        "date": {"title": "Date"},
-        "gametype": {"title": "Gametype"},
-        "map": {"title": "Map"},
-        "playtime": {"title": "Playtime"},
-        "result": {"title": "Match Result"}
-    };
+function createRows(state, playerId){
 
     const rows = [];
 
@@ -229,6 +198,44 @@ export default function RecentMatches({playerId, mapNames, gametypeNames, played
             }
         });
     }
+
+    return rows;
+}
+
+export default function RecentMatches({playerId, mapNames, gametypeNames, playedGametypes, playedMaps}){
+
+    const [state, dispatch] = useReducer(reducer, {
+        "error": null,
+        "bLoading": true,
+        "page": 1,
+        "perPage": 50,
+        "totalMatches": 0,
+        "selectedGametype": 0,
+        "selectedMap": 0,
+        "data": {"matches":[], "serverNames": {}, "gametypeNames": {}, "mapNames": {}}
+    });
+
+    useEffect(() =>{
+
+        const controller = new AbortController();
+
+        loadData(playerId, state.page, state.perPage, state.selectedGametype, state.selectedMap, dispatch);
+
+        return () =>{
+            controller.abort();
+        }
+
+    },[playerId, state.page, state.perPage, state.selectedGametype, state.selectedMap]);
+
+    const headers = {
+        "date": {"title": "Date"},
+        "gametype": {"title": "Gametype"},
+        "map": {"title": "Map"},
+        "playtime": {"title": "Playtime"},
+        "result": {"title": "Match Result"}
+    };
+
+    const rows = createRows(state, playerId);
 
 
     return <>

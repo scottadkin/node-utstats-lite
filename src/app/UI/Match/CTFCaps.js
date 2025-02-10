@@ -245,13 +245,10 @@ function createTeamFragsInfo(players, c, totalTeams, type){
     return <div className={className}>{elems}</div>
 }
 
-export default function CTFCaps({caps, totalTeams, players, matchStart}){
 
-
-    const [capIndex, setCapIndex] = useState(0);
+function createElems(caps, totalTeams){
 
     const scores = Array(totalTeams).fill(0);
-
     const elems = [];
 
     for(let i = 0; i < caps.length; i++){
@@ -283,6 +280,16 @@ export default function CTFCaps({caps, totalTeams, players, matchStart}){
             </div>
         );
     }
+
+    return elems;
+}
+
+export default function CTFCaps({caps, totalTeams, players, matchStart}){
+
+
+    const [capIndex, setCapIndex] = useState(0);
+
+    const elems = createElems(caps);
 
     if(elems.length === 0) return null;
 
