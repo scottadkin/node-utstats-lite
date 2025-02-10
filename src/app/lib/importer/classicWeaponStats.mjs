@@ -23,11 +23,23 @@ export default class ClassicWeaponStats{
       
     }
 
+
+    updateAccuracy(stats){
+
+        if(stats.shots === 0 || stats.hits === 0){
+            stats.accuracy = 0;
+            return;
+        }
+
+        if(stats.shots > 0 && stats.hits > 0){
+            stats.accuracy = stats.hits / stats.shots * 100;
+            return;
+        }
+    }
+
     setPlayerStats(weaponsManager, playerManager){
 
-
         const classicWeaponStatReg = /^weap_(.+?)\t(.+?)\t(\d+?)\t(.+?)$/i;
-
 
         for(let i = 0; i < this.lines.length; i++){
 
@@ -66,15 +78,23 @@ export default class ClassicWeaponStats{
                     "damage": 0
                 };
             }
-
             const stats = pStats[weaponId];
 
             if(type === "accuracy") stats.accuracy = parseFloat(value);
-            if(type === "damagegiven") stats.damage = parseInt(value);
-            if(type === "shotcount") stats.shots = parseInt(value);
-            if(type === "hitcount") stats.hits = parseInt(value);
 
+            if(type === "damagegiven"){
+                stats.damage += parseInt(value);
+            }
 
+            if(type === "shotcount"){
+                stats.shots += parseInt(value);
+                this.updateAccuracy(stats);
+            }
+
+            if(type === "hitcount"){
+                stats.hits += parseInt(value);
+                this.updateAccuracy(stats);
+            }
         }
 
         
