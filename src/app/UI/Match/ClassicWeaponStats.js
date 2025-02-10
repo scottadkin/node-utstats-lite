@@ -65,6 +65,14 @@ function renderTable(selectedWeapon, data, players, targetTeam){
     if(rows.length === 0) return null;
 
     if(rows.length > 1){
+
+        let acc = 0;
+
+        if(totals.hits > 0 && totals.shots > 0){
+
+            acc = totals.hits / totals.shots * 100;
+        }
+
         rows.push({
             "bAlwaysLast": true,
             "player": {"value": "",
@@ -74,7 +82,7 @@ function renderTable(selectedWeapon, data, players, targetTeam){
             "deaths": {"value": totals.deaths, "displayValue": ignore0(totals.deaths)},
             "shots": {"value": totals.shots, "displayValue": ignore0(totals.shots)},
             "hits": {"value": totals.hits, "displayValue": ignore0(totals.hits)},
-            "acc": {"value": totals.accuracy, "displayValue": `${totals.accuracy.toFixed(2)}%`},
+            "acc": {"value": acc, "displayValue": `${acc.toFixed(2)}%`},
             "damage": {"value": totals.damage, "displayValue": ignore0(totals.damage)},
         });
     }
