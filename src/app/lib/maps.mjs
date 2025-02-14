@@ -483,8 +483,9 @@ export async function getPlayerMapTotals(playerIds, mapId){
         }
 
         if(dom !== undefined){
-            data[i] = {...data[i], ...dom};
+            data[i] = {...data[i], ...dom};    
         }
+
     }
     
     

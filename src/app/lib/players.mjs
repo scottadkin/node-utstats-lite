@@ -1026,6 +1026,9 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
                 continue;
             }
 
+            //fix dom_caps issue if a player doesn't have any events
+            if(t[k] === undefined) continue;
+
             t[k] = t[k] / minutes;
         }
 

@@ -113,7 +113,6 @@ export async function getPlayerMapTotals(playerIds, mapId){
 
     const result = await simpleQuery(query, [playerIds, mapId]);
 
-
     const data = {};
 
     for(let i = 0; i < result.length; i++){
