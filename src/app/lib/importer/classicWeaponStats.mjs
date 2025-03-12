@@ -1,5 +1,6 @@
 import { removeDoubleEnforcer } from "../generic.mjs";
 import { bulkInsertMatchStats } from "../classicWeaponStats.mjs";
+import Message from "../message.mjs";
 
 //TODO: fix double enforcer stats overriding single
 
@@ -57,7 +58,10 @@ export default class ClassicWeaponStats{
             const weaponId = weaponsManager.getId(name);     
 
             if(weaponId === null){
-                throw new Error(`weaponId is null! classicWeaponStats, ${name}`);
+                //console.log(this.lines[i]);
+                //throw new Error(`weaponId is null! classicWeaponStats, ${name}`);
+                //new Message(`weaponID is null! classicWeaponStats ${name}, no kills/deaths by weapon may cause this. Need to add fix!`,"warning");
+                continue;
             }     
 
             const player = playerManager.getPlayerById(playerId);

@@ -12,7 +12,11 @@ export class WeaponsManager{
     }
 
 
+    addWeaponToTempNames(weaponName){
 
+        const weapon = removeDoubleEnforcer(weaponName);
+        if(this.tempNames.indexOf(weapon) === -1) this.tempNames.push(weapon);
+    }
 
     parseLine(line){
 
@@ -27,8 +31,9 @@ export class WeaponsManager{
 
             if(sResult === null) return;
 
-            const weapon = removeDoubleEnforcer(sResult[2]);
-            if(this.tempNames.indexOf(weapon) === -1) this.tempNames.push(weapon);
+            //const weapon = removeDoubleEnforcer(sResult[2]);
+           // if(this.tempNames.indexOf(weapon) === -1) this.tempNames.push(weapon);
+            this.addWeaponToTempNames(sResult[2]);
             return;
         }
 
