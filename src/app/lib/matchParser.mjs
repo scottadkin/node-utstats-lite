@@ -283,7 +283,7 @@ export class MatchParser{
         const teamScoreReg = /^teamscore\t(\d+)\t(.+)$/i;
         const headshotReg = /^headshot\t.+$/i;
 
-        const endReg = /^game_end\t.+$/i;
+        const endReg = /^game_end\t(.+)$/i;
 
         const firstBloodReg = /^first_blood\t(\d+)$/i;
 
@@ -295,6 +295,8 @@ export class MatchParser{
         const liteReg = /lite/i;
 
         const classWeaponStatReg = /^weap_.+?\t(.+?)\t(\d+?)\t(.+?)$/i;
+
+        //16521.67	game_end	mapchange
 
         for(let i = 0; i < lines.length; i++){
             
@@ -375,6 +377,17 @@ export class MatchParser{
             }
 
             if(endReg.test(subString)){
+
+                const gameEndResult = endReg.exec(subString);
+                //Ignore logs where the match ended because of map change
+                if(gameEndResult !== null && gameEndResult[1].toLowerCase() === "mapchange"){
+    
+                    new Message(`Match end type was map change, skipping log parsing.`,"error");
+                    this.matchStart = -1;
+                    this.matchEnd = -1;
+                    return;
+                }
+
                 this.matchEnd = timestamp;
                 continue;
             }
