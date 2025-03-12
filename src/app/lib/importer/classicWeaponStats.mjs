@@ -60,7 +60,9 @@ export default class ClassicWeaponStats{
             if(weaponId === null){
                 //console.log(this.lines[i]);
                 //throw new Error(`weaponId is null! classicWeaponStats, ${name}`);
-                //new Message(`weaponID is null! classicWeaponStats ${name}, no kills/deaths by weapon may cause this. Need to add fix!`,"warning");
+                new Message(`weaponID is null! classicWeaponStats ${name}.`,"warning");
+                
+                //TODO: if weapon id is null, change this to async function, create weaponId, add to list, and then continue normally 
                 continue;
             }     
 

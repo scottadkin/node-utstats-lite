@@ -322,6 +322,7 @@ export class MatchParser{
             
             if(classWeaponStatReg.test(timestampResult[2])){
                 this.classicWeaponStats.addLine(timestamp, timestampResult[2]);
+                this.weapons.parseLine(timestampResult[2]);
                 continue;
             }
 

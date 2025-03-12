@@ -18,6 +18,18 @@ export class WeaponsManager{
         if(this.tempNames.indexOf(weapon) === -1) this.tempNames.push(weapon);
     }
 
+    //do this just in case there is no kill/death events
+    classicAddWeaponNameFromLine(line){
+ 
+        const reg = /^weap_.+?\t(.+?)\t\d+?\t.+?$/i;
+
+        const result = reg.exec(line);
+
+        if(result === null) return;
+
+        this.addWeaponToTempNames(result[1]);
+    }
+
     parseLine(line){
 
         const reg = /^(kill|teamkill)\t\d+?\t(.+?)\t\d+?\t(.+?)\t.+$/i;
@@ -29,7 +41,10 @@ export class WeaponsManager{
             const suicideReg = /^suicide\t(\d+?)\t(.+?)\t.+$/i;
             const sResult = suicideReg.exec(line);
 
-            if(sResult === null) return;
+            if(sResult === null){
+                this.classicAddWeaponNameFromLine(line);
+                return;
+            }
 
             //const weapon = removeDoubleEnforcer(sResult[2]);
            // if(this.tempNames.indexOf(weapon) === -1) this.tempNames.push(weapon);
@@ -60,7 +75,6 @@ export class WeaponsManager{
             this.weapons[id] = name;
         }
     }
-
 
     getPlayerWeaponStats(playerId, weaponId){
 
