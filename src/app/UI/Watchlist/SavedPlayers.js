@@ -4,7 +4,6 @@ import { useReducer, useEffect } from "react";
 import InteractiveTable from "../InteractiveTable";
 import PlayerLink from "../PlayerLink";
 import { convertTimestamp, toPlaytime } from "@/app/lib/generic.mjs";
-import useLocalStorage from "@/app/hooks/useLocalStorage";
 
 function reducer(state, action){
 
@@ -13,7 +12,8 @@ function reducer(state, action){
             return {
                 ...state,
                 "players": action.players,
-                "totalPlayers": action.totalPlayers
+                "totalPlayers": action.totalPlayers,
+                "savedPlayers": action.savedPlayers
             }
         }
         case "remove-player": {
@@ -48,18 +48,25 @@ async function loadPlayers(dispatch){
         if(res.error !== undefined) throw new Error(res.error);
 
 
-        dispatch({"type": "loaded-players", "players": res.players, "totalPlayers": hashes.length});
+        dispatch({
+            "type": "loaded-players", 
+            "players": res.players, 
+            "totalPlayers": hashes.length,
+            "savedPlayers": hashes
+        });
 
     }catch(err){
         console.trace(err);
     }
 }
 
-function removeFromWatchlist(hash, local, dispatch){
+function removeFromWatchlist(hash, dispatch){
 
-    let currentPlayers = local.getItem("saved-players");
+    let currentPlayers = localStorage.getItem("saved-players");
 
     if(currentPlayers === null) return;
+
+    currentPlayers = JSON.parse(currentPlayers);
     
     const newPlayers = [...currentPlayers];
 
@@ -68,39 +75,61 @@ function removeFromWatchlist(hash, local, dispatch){
     if(index === -1) return;
     newPlayers.splice(index, 1);
 
-    local.setItem("saved-players", newPlayers);
+    localStorage.setItem("saved-players", JSON.stringify(newPlayers));
 
     dispatch({"type": "remove-player", "totalPlayers": newPlayers.length});
     
 }
 
-export default function SavedPlayers(){
+function getPlayerByHash(targetHash, state){
 
-    const local = useLocalStorage();
+    for(let i = 0; i < state.players.length; i++){
 
-    const [state, dispatch] = useReducer(reducer, {
-        "players": [],
-        "totalPlayers": 0
-    });
+        const p = state.players[i];
+        if(targetHash === p.hash) return p;
+    }
 
-    useEffect(() =>{
+    return null;
+}
 
-        loadPlayers(dispatch);
+function createRows(state, dispatch){
 
-    }, [state.totalPlayers]);
+    const rows = [];
 
+    for(let i = 0; i < state.savedPlayers.length; i++){
 
-    const headers = {
-        "name": {"title": "Name"},
-        "last": {"title": "Last Active"},
-        "matches": {"title": "Matches Played"},
-        "playtime": {"title": "Playtime"},
-        "remove": {"title": "Remove"}
-    };
+        const hash = state.savedPlayers[i];
+        const p = getPlayerByHash(hash, state);
+ 
+        if(p === null){
 
-    const rows = state.players.map((p) =>{
+            rows.push({
+                "name": {
+                    "value": "", 
+                    "displayValue": "Deleted Player",
+                    "className": "text-left"
+                },
+                "last": {
+                    "value": 0, 
+                    "displayValue": convertTimestamp(0),
+                    "className": "date"
+                },
+                "matches": {"value": 0},
+                "playtime": {"value": 0},
+                "remove": {
+                    "value": null,
+                    "displayValue": "Remove",
+                    "className": "team-red hover",
+                    "onClick": () =>{
+                        removeFromWatchlist(hash, dispatch);
+                        loadPlayers(dispatch);
+                    }
+                }
+            });
+            continue;
+        }
 
-        return {
+        rows.push({
             "name": {
                 "value": p.name.toLowerCase(), 
                 "displayValue": <PlayerLink id={p.hash} country={p.country} bNewTab={true}>{p.name}</PlayerLink>,
@@ -118,11 +147,41 @@ export default function SavedPlayers(){
                 "displayValue": "Remove",
                 "className": "team-red hover",
                 "onClick": () =>{
-                    removeFromWatchlist(p.hash, local, dispatch);
+                    removeFromWatchlist(hash, dispatch);
+                    loadPlayers(dispatch);
                 }
             }
-        };
+        });
+    }
+
+    return rows;
+}
+
+export default function SavedPlayers(){
+
+    const [state, dispatch] = useReducer(reducer, {
+        "players": [],
+        "totalPlayers": 0,
+        "savedPlayers": []
     });
+
+    useEffect(() =>{
+
+        loadPlayers(dispatch);
+
+    }, [state.totalPlayers]);
+
+
+    const headers = {
+        "name": {"title": "Name"},
+        "last": {"title": "Last Active"},
+        "matches": {"title": "Matches Played"},
+        "playtime": {"title": "Playtime"},
+        "remove": {"title": "Remove"}
+    };
+
+        const rows = createRows(state, dispatch);
+    
 
     return <>
         <Header>Saved Players ({state.totalPlayers})</Header>

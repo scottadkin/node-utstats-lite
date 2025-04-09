@@ -1,7 +1,7 @@
 "use client"
 import Header from "../Header";
 import useLocalStorage from "@/app/hooks/useLocalStorage";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, MMSS, toPlaytime } from "@/app/lib/generic.mjs";
 import MatchScoreBox from "../MatchScoreBox";
@@ -18,6 +18,7 @@ function reducer(state, action){
             }
         }
         case "set-matches-data": {
+
             return {
                 ...state,
                 "matchesData": action.data
@@ -37,6 +38,9 @@ async function loadMatches(dispatch){
         if(matches === null) throw new Error(`Saved matches is null`);
 
         const hashes = JSON.parse(matches);
+
+        console.log("hashes");
+        console.log(hashes);
 
         const req = await fetch("/api/matches/", {
             "headers": {"Content-type": "application/json"},
@@ -58,8 +62,19 @@ async function loadMatches(dispatch){
     }
 }
 
+function getMatchDataByHash(state, hash){
 
-function removeFromFavourites(local, matches, removeHash){
+    for(let i = 0; i < state.matchesData.length; i++){
+
+        const m = state.matchesData[i];
+        if(m.hash === hash) return m;
+    }
+
+    return null;
+}
+
+
+function removeFromFavourites(matches, removeHash){
 
 
     const index = matches.indexOf(removeHash);
@@ -70,8 +85,10 @@ function removeFromFavourites(local, matches, removeHash){
     }
 
     matches.splice(index, 1);
+    if(matches.length === 0) matches = "[]";
 
-    local.setItem("saved-matches", matches);
+    localStorage.setItem("saved-matches", matches);
+
 }
 
 
@@ -79,7 +96,7 @@ function removeFromFavourites(local, matches, removeHash){
 export default function SavedMatches({}){
 
     const local = useLocalStorage();
-    const matches = local.getItem("saved-matches");
+    const [matches, setMatches] = useState([]);
     const totalMatches = (matches != null) ? matches.length : 0;
 
     const [state, dispatch] = useReducer(reducer, {
@@ -90,10 +107,21 @@ export default function SavedMatches({}){
     useEffect(() =>{
 
         dispatch({"type": "set-total-matches", "value": totalMatches});
+        const data = localStorage.getItem("saved-matches");
+
+        if(data !== null){
+            try{
+                setMatches(JSON.parse(data));
+            }catch(err){
+
+            }
+        }
         loadMatches(dispatch);
 
     },[totalMatches]);
 
+
+    if(matches == null) return null;
 
     const headers = {
         "map": {"title": "Map"},
@@ -105,9 +133,51 @@ export default function SavedMatches({}){
         "remove": {"title": "Remove"},
     };
 
+    const rows = [];
 
-    const rows = state.matchesData.map((m) =>{
-        return {
+    for(let i = 0; i < matches.length; i++){
+
+        const hash = matches[i];
+
+        const matchData = getMatchDataByHash(state, hash);
+
+        if(matchData === null){
+
+            rows.push({
+                "map": {
+                    "value": "N/A", 
+                    "displayValue": "N/A",
+                    "className": "text-left"
+                },
+                    
+                "gametype": {"value": "", "displayValue": "N/A"},
+                "date": {
+                    "value": 0, 
+                    "displayValue": convertTimestamp(0),
+                    "className": "date"
+                },
+                "players": {"value": 0},
+                "playtime": {"value": "N/A"},
+                "result": {
+                    "value": null,
+                    "displayValue": <>Match Deleted</>,
+                },
+                "remove": {
+                    "value": null,
+                    "displayValue": "Remove",
+                    "className": "team-red hover",
+                    "onClick": () =>{
+                        removeFromFavourites(matches, hash);
+                        loadMatches(dispatch);
+                    }
+                }
+            });
+            continue;
+        }
+
+        const m = matchData;
+
+        rows.push({
             "map": {
                 "value": m.mapName.toLowerCase(), 
                 "displayValue": <Link href={`/match/${m.hash}`} target="_blank">{m.mapName}</Link>,
@@ -132,12 +202,12 @@ export default function SavedMatches({}){
                 "displayValue": "Remove",
                 "className": "team-red hover",
                 "onClick": () =>{
-                    removeFromFavourites(local, matches, m.hash);
+                    removeFromFavourites(matches, m.hash);
                     loadMatches(dispatch);
                 }
             }
-        };
-    });
+        });
+    }
 
 
     return <>
