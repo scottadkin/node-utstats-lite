@@ -17,7 +17,6 @@ export default function AddToSavedMatches({hash}){
     useEffect(() =>{
 
         const data = getSavedMatches();
-
         localStorage.setItem("saved-matches", JSON.stringify(data));
     }, []);
 

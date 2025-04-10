@@ -13,7 +13,8 @@ function reducer(state, action){
                 ...state,
                 "players": action.players,
                 "totalPlayers": action.totalPlayers,
-                "savedPlayers": action.savedPlayers
+                "savedPlayers": action.savedPlayers,
+                "missingPlayers": action.missingPlayers
             }
         }
         case "remove-player": {
@@ -27,6 +28,13 @@ function reducer(state, action){
     return state;
 }
 
+function bPlayerExists(targetHash, players){
+
+    for(let i = 0; i < players.length; i++){
+        if(players[i].hash === targetHash) return true;
+    }
+    return false;
+}
 
 async function loadPlayers(dispatch){
 
@@ -47,12 +55,20 @@ async function loadPlayers(dispatch){
 
         if(res.error !== undefined) throw new Error(res.error);
 
+        let missingPlayers = 0;
+
+        for(let i = 0; i < hashes.length; i++){
+
+            if(!bPlayerExists(hashes[i], res.players)) missingPlayers++;     
+        }
+
 
         dispatch({
             "type": "loaded-players", 
             "players": res.players, 
             "totalPlayers": hashes.length,
-            "savedPlayers": hashes
+            "savedPlayers": hashes,
+            "missingPlayers": missingPlayers
         });
 
     }catch(err){
@@ -110,8 +126,8 @@ function createRows(state, dispatch){
                     "className": "text-left"
                 },
                 "last": {
-                    "value": 0, 
-                    "displayValue": convertTimestamp(0),
+                    "value": -1, 
+                    "displayValue": "N/A",
                     "className": "date"
                 },
                 "matches": {"value": 0},
@@ -180,12 +196,52 @@ function renderTable(state, dispatch){
     return <InteractiveTable headers={headers} rows={rows} width={1} sortBy={"name"}/>;
 }
 
+function deleteMissingPlayers(state, dispatch){
+
+    let data = localStorage.getItem("saved-players");
+    if(data === null) return;
+
+    data = JSON.parse(data);
+
+    const validPlayers = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+        const player = getPlayerByHash(d, state);
+        if(player === null) continue;
+        validPlayers.push(d);
+    }
+
+    localStorage.setItem("saved-players", JSON.stringify(validPlayers));
+    loadPlayers(dispatch);
+}
+
+function renderDeleteMissingPlayers(state, dispatch){
+
+
+    if(state.missingPlayers === 0) return null;
+
+    return <div className="form">
+        <div className="form-info">
+            Would you like to remove all the players that no longer exist from your watchlist?<br/><br/>
+            <button onClick={() =>{
+                deleteMissingPlayers(state, dispatch);
+            }} className="small-button" style={{"backgroundColor": "var(--team-color-red)"}}>
+                Delete
+            </button>
+        </div>
+        
+    </div>
+}
+
 export default function SavedPlayers(){
 
     const [state, dispatch] = useReducer(reducer, {
         "players": [],
         "totalPlayers": 0,
-        "savedPlayers": []
+        "savedPlayers": [],
+        "missingPlayers": 0
     });
 
     useEffect(() =>{
@@ -195,12 +251,9 @@ export default function SavedPlayers(){
     }, [state.totalPlayers]);
 
 
-    
-    
-
     return <>
         <Header>Saved Players ({state.totalPlayers})</Header>
+        {renderDeleteMissingPlayers(state, dispatch)}
         {renderTable(state, dispatch)}
-        
     </>
 }

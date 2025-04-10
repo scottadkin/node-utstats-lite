@@ -1,6 +1,5 @@
 "use client"
 import Header from "../Header";
-import useLocalStorage from "@/app/hooks/useLocalStorage";
 import { useEffect, useReducer, useState } from "react";
 import InteractiveTable from "../InteractiveTable";
 import { convertTimestamp, MMSS, toPlaytime } from "@/app/lib/generic.mjs";
@@ -21,12 +20,21 @@ function reducer(state, action){
 
             return {
                 ...state,
-                "matchesData": action.data
+                "matchesData": action.data,
+                "missingMatches": action.missingMatches
             }
         }
     }
 
     return state;
+}
+
+function bMatchExists(targetHash, matches){
+
+    for(let i = 0; i < matches.length; i++){
+        if(matches[i].hash === targetHash) return true;
+    }
+    return false;
 }
 
 async function loadMatches(dispatch){
@@ -38,9 +46,6 @@ async function loadMatches(dispatch){
         if(matches === null) throw new Error(`Saved matches is null`);
 
         const hashes = JSON.parse(matches);
-
-        console.log("hashes");
-        console.log(hashes);
 
         const req = await fetch("/api/matches/", {
             "headers": {"Content-type": "application/json"},
@@ -54,7 +59,15 @@ async function loadMatches(dispatch){
             throw new Error(res.error);
         }
 
-        dispatch({"type": "set-matches-data", "data": res});
+
+        let missingMatches = 0;
+        
+        for(let i = 0; i < hashes.length; i++){
+            if(!bMatchExists(hashes[i], res)) missingMatches++;
+        }
+
+
+        dispatch({"type": "set-matches-data", "data": res, "missingMatches": missingMatches});
 
 
     }catch(err){
@@ -192,32 +205,72 @@ function renderTable(state, dispatch, matches){
     return <InteractiveTable headers={headers} rows={rows} width={1}/>;
 }
 
+function deleteMissingMatches(state, dispatch){
+
+    let data = localStorage.getItem("saved-matches");
+    if(data === null) return;
+
+    data = JSON.parse(data);
+
+    const validMatches = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+        const player = getMatchDataByHash(state, d);
+        if(player === null) continue;
+        validMatches.push(d);
+    }
+
+    localStorage.setItem("saved-matches", JSON.stringify(validMatches));
+    dispatch({"type": "set-total-matches", "value": validMatches.length});
+    loadMatches(dispatch);
+}
+
+
+function renderDeleteMissingMatches(state, dispatch){
+
+
+    if(state.missingMatches === 0) return null;
+
+    return <div className="form">
+        <div className="form-info">
+            Would you like to remove all the matches that no longer exist from your watchlist?<br/><br/>
+            <button onClick={() =>{
+                deleteMissingMatches(state, dispatch);
+            }} className="small-button" style={{"backgroundColor": "var(--team-color-red)"}}>
+                Delete
+            </button>
+        </div>
+        
+    </div>
+}
+
 
 export default function SavedMatches({}){
 
     const [matches, setMatches] = useState([]);
-    const totalMatches = (matches != null) ? matches.length : 0;
 
     const [state, dispatch] = useReducer(reducer, {
         "totalMatches": 0,
-        "matchesData": []
+        "matchesData": [],
+        "missingMatches": 0
     });
 
     useEffect(() =>{
 
-        dispatch({"type": "set-total-matches", "value": totalMatches});
+        
         const data = localStorage.getItem("saved-matches");
 
         if(data !== null){
             try{
                 setMatches(JSON.parse(data));
-            }catch(err){
-
-            }
+                dispatch({"type": "set-total-matches", "value": JSON.parse(data).length});
+            }catch(err){}
         }
         loadMatches(dispatch);
 
-    },[totalMatches]);
+    },[state.totalMatches]);
 
 
     if(matches == null) return null;
@@ -227,6 +280,7 @@ export default function SavedMatches({}){
 
     return <>
         <Header>Saved Matches ({state.totalMatches})</Header>
+        {renderDeleteMissingMatches(state, dispatch)}
         {renderTable(state, dispatch, matches)}
     </>
 }
