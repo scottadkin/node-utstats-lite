@@ -1,44 +1,53 @@
 "use client"
-import useLocalStorage from "@/app/hooks/useLocalStorage";
 import { useEffect, useState } from "react";
+
+
+function getSavedMatches(){
+    let data = localStorage.getItem("saved-matches");
+    if(data === null || data === "") data = "[]";
+    data = JSON.parse(data);
+    return data;
+}
 
 export default function AddToSavedMatches({hash}){
 
-    const local = useLocalStorage();
 
     const [saved, setSaved] = useState(false);
 
-    let matches = local.getItem("saved-matches");
+    useEffect(() =>{
 
-    if(matches === null){
-        local.setItem("saved-matches",[]);
-        matches = [];
-    }
+        const data = getSavedMatches();
+
+        localStorage.setItem("saved-matches", JSON.stringify(data));
+    }, []);
 
     useEffect(() =>{
 
+        const data = getSavedMatches();
         let bSaved = false;
 
-        const index = matches.indexOf(hash);
+        const index = data.indexOf(hash);
 
         if(index !== -1) bSaved = true;
- 
+        localStorage.setItem("saved-matches", JSON.stringify(data));
         setSaved(bSaved);
 
 
-    }, [saved, matches, hash]);
+    }, [saved, hash]);
 
     
     const addElem = <div className="fav fav-add" onClick={() =>{
 
-        const index = matches.indexOf(hash);
+
+        const data = getSavedMatches();
+
+        const index = data.indexOf(hash);
 
         if(index === -1){
-            matches.push(hash);
+            data.push(hash);
             setSaved(true);
         }
-
-        local.setItem("saved-matches", matches);
+        localStorage.setItem("saved-matches", JSON.stringify(data));
 
         
     }}>
@@ -48,16 +57,15 @@ export default function AddToSavedMatches({hash}){
 
     const delElem = <div className="fav fav-del" onClick={() =>{
 
-        const index = matches.indexOf(hash);
+        const data = getSavedMatches();
+        const index = data.indexOf(hash);
 
-        let newMatches = matches;
 
         if(index !== -1){
-            newMatches.splice(index, 1);
+            data.splice(index, 1);
         }
 
-        local.setItem("saved-matches", newMatches);
-
+        localStorage.setItem("saved-matches", JSON.stringify(data));
         setSaved(false);
     }}>
         Remove From Watchlist

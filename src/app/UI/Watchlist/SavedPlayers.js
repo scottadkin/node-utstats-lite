@@ -157,6 +157,29 @@ function createRows(state, dispatch){
     return rows;
 }
 
+function renderTable(state, dispatch){
+
+    const headers = {
+        "name": {"title": "Name"},
+        "last": {"title": "Last Active"},
+        "matches": {"title": "Matches Played"},
+        "playtime": {"title": "Playtime"},
+        "remove": {"title": "Remove"}
+    };
+
+    const rows = createRows(state, dispatch);
+
+    if(rows.length === 0){
+        return <div className="form">
+            <div className="form-info">
+                You have no players added to your watchlist.
+            </div>
+        </div>
+    }
+
+    return <InteractiveTable headers={headers} rows={rows} width={1} sortBy={"name"}/>;
+}
+
 export default function SavedPlayers(){
 
     const [state, dispatch] = useReducer(reducer, {
@@ -172,20 +195,12 @@ export default function SavedPlayers(){
     }, [state.totalPlayers]);
 
 
-    const headers = {
-        "name": {"title": "Name"},
-        "last": {"title": "Last Active"},
-        "matches": {"title": "Matches Played"},
-        "playtime": {"title": "Playtime"},
-        "remove": {"title": "Remove"}
-    };
-
-        const rows = createRows(state, dispatch);
+    
     
 
     return <>
         <Header>Saved Players ({state.totalPlayers})</Header>
-
-        <InteractiveTable headers={headers} rows={rows} width={1} sortBy={"name"}/>
+        {renderTable(state, dispatch)}
+        
     </>
 }

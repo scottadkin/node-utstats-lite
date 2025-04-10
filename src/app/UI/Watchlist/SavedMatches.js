@@ -85,43 +85,15 @@ function removeFromFavourites(matches, removeHash){
     }
 
     matches.splice(index, 1);
-    if(matches.length === 0) matches = "[]";
+    if(matches.length === 0) matches = [];
 
-    localStorage.setItem("saved-matches", matches);
+    localStorage.setItem("saved-matches", JSON.stringify(matches));
 
 }
 
 
 
-export default function SavedMatches({}){
-
-    const local = useLocalStorage();
-    const [matches, setMatches] = useState([]);
-    const totalMatches = (matches != null) ? matches.length : 0;
-
-    const [state, dispatch] = useReducer(reducer, {
-        "totalMatches": 0,
-        "matchesData": []
-    });
-
-    useEffect(() =>{
-
-        dispatch({"type": "set-total-matches", "value": totalMatches});
-        const data = localStorage.getItem("saved-matches");
-
-        if(data !== null){
-            try{
-                setMatches(JSON.parse(data));
-            }catch(err){
-
-            }
-        }
-        loadMatches(dispatch);
-
-    },[totalMatches]);
-
-
-    if(matches == null) return null;
+function renderTable(state, dispatch, matches){
 
     const headers = {
         "map": {"title": "Map"},
@@ -209,9 +181,52 @@ export default function SavedMatches({}){
         });
     }
 
+    if(rows.length === 0){
+        return <div className="form">
+            <div className="form-info">
+                You have no matches added to your watchlist.
+            </div>
+        </div>
+    }
+
+    return <InteractiveTable headers={headers} rows={rows} width={1}/>;
+}
+
+
+export default function SavedMatches({}){
+
+    const [matches, setMatches] = useState([]);
+    const totalMatches = (matches != null) ? matches.length : 0;
+
+    const [state, dispatch] = useReducer(reducer, {
+        "totalMatches": 0,
+        "matchesData": []
+    });
+
+    useEffect(() =>{
+
+        dispatch({"type": "set-total-matches", "value": totalMatches});
+        const data = localStorage.getItem("saved-matches");
+
+        if(data !== null){
+            try{
+                setMatches(JSON.parse(data));
+            }catch(err){
+
+            }
+        }
+        loadMatches(dispatch);
+
+    },[totalMatches]);
+
+
+    if(matches == null) return null;
+
+    
+
 
     return <>
         <Header>Saved Matches ({state.totalMatches})</Header>
-        <InteractiveTable headers={headers} rows={rows} width={1}/>
+        {renderTable(state, dispatch, matches)}
     </>
 }
