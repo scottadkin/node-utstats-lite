@@ -72,7 +72,29 @@ export async function generateMetadata({ params, searchParams }, parent) {
     }
 }
 
+//we don't want None to be selected as we don't display that in child component
+function getFirstValidWeaponId(names){
 
+    let weapon = "-1";
+
+    const testKeys = Object.keys(names);
+    
+    //all is 0 always first
+
+    if(testKeys.length === 1) return "0";
+
+    if(testKeys.length > 1){
+        
+        for(const [key, name] of Object.entries(names)){
+
+            const ln = name.toLowerCase();
+            if(ln === "none" || ln === "all") continue;
+            return key;
+        }
+    }
+
+    return weapon;
+}
    
 
 export default async function MatchPage({params, searchParams}) {
@@ -127,12 +149,7 @@ export default async function MatchPage({params, searchParams}) {
     elems[pageLayout["Damage Stats"]] = (pageSettings["Display Damage Stats"] === "1") ?  <DamageStats key="damage" data={matchData.playerData} totalTeams={totalTeams}/> : null;
 
 
-    let testWeapon = "-1";
-
-    const testKeys = Object.keys(matchData.weaponStats.names);
-    
-    //all is 0 always first
-    if(testKeys.length > 1) testWeapon = testKeys[1];
+    const testWeapon = getFirstValidWeaponId(matchData.weaponStats.names);
 
     elems[pageLayout["Classic Weapon Stats"]] = (pageSettings["Display Classic Weapon Stats"] === "1") ?  <ClassicWeaponStats key="classic-weapons" weaponNames={matchData.weaponStats.names} weaponImages={weaponImages} data={classicStats} players={matchData.basicPlayers} totalTeams={totalTeams} firstWeapon={testWeapon}/> : null;
 

@@ -108,7 +108,6 @@ function renderTables(selectedWeapon, data, players, totalTeams){
 
 export default function ClassicWeaponStats({weaponNames, weaponImages, data, players, totalTeams, firstWeapon}){
 
-    
     const [selectedWeapon, setSelectedWeapon] = useState(firstWeapon);
 
     if(data.length === 0) return null;
