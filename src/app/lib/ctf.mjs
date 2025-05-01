@@ -767,3 +767,38 @@ export async function deleteMatch(matchId){
 
     await recalculateTotals();
 }
+
+
+
+export async function getMatchesTeamResults(matchIds){
+
+    if(matchIds.length === 0) return {};
+
+    const query = `SELECT id,team_0_score,team_1_score FROM nstats_matches WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [matchIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const redScore = r.team_0_score;
+        const blueScore = r.team_1_score
+
+        //draw
+        let winner = -1;
+
+        if(redScore > blueScore) winner = 0;
+        if(redScore < blueScore) winner = 1;
+
+        data[r.id] = {
+            "red": redScore,
+            "blue": blueScore,
+            "winner": winner
+        };
+
+    }
+    return data;
+}

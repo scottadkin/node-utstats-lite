@@ -41,7 +41,7 @@ export default async function Home() {
 	elems[pageLayout["Servers"]] = (servers !== null) ? <BasicServerList key="servers" servers={servers}/> : null;
 
 	if(pageSettings["Display Activity Heatmap"] === "1"){
-		elems[pageLayout["Activity Heatmap"]] = <ActivityHeatMap queryMode="get-matches-played-between" apiURL="/api/matches"/>;
+		elems[pageLayout["Activity Heatmap"]] = <ActivityHeatMap key="act-heatmap" queryMode="get-matches-played-between" apiURL="/api/matches"/>;
 	}
 
 	

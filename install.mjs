@@ -584,7 +584,26 @@ const queries = [
             hits int NOT NULL,
             accuracy float NOT NULL,
             damage int NOT NULL
-            ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+            ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_player_map_ctf_league (
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        gametype_id int NOT NULL,
+        map_id int NOT NULL,
+        first_match datetime NOT NULL,
+        last_match datetime NOT NULL,
+        playtime float NOT NULL,
+        total_matches int NOT NULL,
+        wins int NOT NULL,
+        draws int NOT NULL,
+        losses int NOT NULL,
+        winrate float NOT NULL,
+        cap_for int NOT NULL,
+        cap_against int NOT NULL,
+        cap_offset int NOT NULL,
+        points int NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
 
 
 ];

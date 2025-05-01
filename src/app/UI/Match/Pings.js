@@ -18,8 +18,7 @@ export default function Pings({data, totalTeams}){
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
-
-        if(d.spectator === 1) continue;
+        if(d.spectator === 1 || d.bot === 1) continue;
 
         rows.push({
             "name": {
