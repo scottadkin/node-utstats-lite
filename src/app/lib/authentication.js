@@ -157,9 +157,12 @@ export async function login(currentState, formData){
 
         await createSession(userId, sid, expires);
 
-        cookies().set("nstats_name", username,{expires, "httpOnly": true, "path": "/"});
-        cookies().set("nstats_userid", userId,{expires, "httpOnly": true, "path": "/"});
-        cookies().set("nstats_sid", sid,{expires, "httpOnly": true, "path": "/"});
+        const cookieStore = await cookies();
+        //await cookies();
+
+        cookieStore.set("nstats_name", username,{expires, "httpOnly": true, "path": "/"});
+        cookieStore.set("nstats_userid", userId,{expires, "httpOnly": true, "path": "/"});
+        cookieStore.set("nstats_sid", sid,{expires, "httpOnly": true, "path": "/"});
         return {"message": "ok", "error": null};
     }catch(err){
         //console.trace(err);
