@@ -344,6 +344,27 @@ export async function getBasicPlayerInfo(ids){
     return data;
 }
 
+/**
+ * 
+ * @param {*} playerInfos 
+ * @param {*} targetData must have key named "player_id"
+ */
+export function applyBasicPlayerInfoToObjects(playerInfos, targetData){
+
+    for(let i = 0; i < targetData.length; i++){
+
+        if(targetData[i].player_id === undefined) throw new Error("applyBasicInfoToObjects() requires target data have a key called player_id");
+
+        const pId = targetData[i].player_id;
+
+        if(playerInfos[pId] !== undefined){
+            const p = playerInfos[pId];
+            targetData[i].playerName = p.name;
+            targetData[i].playerCountry = p.country;
+        }
+    }
+}
+
 export async function getTotalPlayers(name){
 
     const query = `SELECT COUNT(*) as total_players FROM nstats_players WHERE name LIKE ?`;

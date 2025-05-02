@@ -1,6 +1,7 @@
 
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { getMatchesTeamResults } from "./ctf.mjs";
+import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
 
 
 async function getMapPlayerHistory(mapId, gametypeId){
@@ -149,4 +150,24 @@ export async function calcPlayersMapResults(mapId, gametypeId){
     await bulkInsertMapEntries(mapId, gametypeId, table);
 
 
+}
+
+
+export async function getMapTable(mapId, gametypeId){
+
+    const query = `SELECT player_id,first_match,last_match,total_matches,wins,draws,losses,
+    cap_for,cap_against,cap_offset,points FROM nstats_player_map_ctf_league WHERE map_id=? 
+    AND gametype_id=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset ASC`;
+    
+    const result = await simpleQuery(query, [mapId, gametypeId]);
+
+    const playerIds = new Set(result.map((r) =>{
+        return r.player_id;
+    }));
+
+    const playerInfo = await getBasicPlayerInfo([...playerIds]);
+
+    applyBasicPlayerInfoToObjects(playerInfo, result);
+    
+    return result;
 }

@@ -11,6 +11,7 @@ import { getMapWeaponStats } from "@/app/lib/weapons.mjs";
 import WeaponStats from "@/app/UI/Map/WeaponStats";
 import ActivityHeatMap from "@/app/UI/ActivityHeatMap";
 import PlayerRankings from "@/app/UI/Map/PlayerRankings";
+import PlayerLeague from "@/app/UI/Map/PlayerLeague";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -99,7 +100,7 @@ export default async function MapPage({params, searchParams}){
 
     return <main>
         <Header>{info.name}</Header>
-        
+        <PlayerLeague mapId={id}/>
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>
