@@ -826,10 +826,13 @@ async function addPageLayouts(){
         await addColumn("nstats_player_totals_weapons", "suicides", "INT NOT NULL AFTER deaths");
         await addPageLayouts();
 
+        new Message("Setting match map & gametype ids.", "note");
         await setMatchMapGametypeIds();
 
+        new Message("Calculating Player Map Averages", "note");
         await setAllPlayerMapAverages();
 
+        new Message("Calculating Map Totals", "note");
         await setAllMapTotals();
 
         await addColumn("nstats_damage_match", "map_id", "INT NOT NULL after match_id");

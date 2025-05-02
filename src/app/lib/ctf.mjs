@@ -774,7 +774,7 @@ export async function getMatchesTeamResults(matchIds){
 
     if(matchIds.length === 0) return {};
 
-    const query = `SELECT id,team_0_score,team_1_score FROM nstats_matches WHERE id IN(?)`;
+    const query = `SELECT id,date,playtime,team_0_score,team_1_score FROM nstats_matches WHERE id IN(?)`;
 
     const result = await simpleQuery(query, [matchIds]);
 
@@ -796,7 +796,9 @@ export async function getMatchesTeamResults(matchIds){
         data[r.id] = {
             "red": redScore,
             "blue": blueScore,
-            "winner": winner
+            "winner": winner,
+            "date": r.date,
+            "playtime": r.playtime
         };
 
     }
