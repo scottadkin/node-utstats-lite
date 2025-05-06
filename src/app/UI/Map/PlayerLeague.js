@@ -84,6 +84,9 @@ export default function PlayerLeague({mapId}){
 
     return <>
         <Header>Player League</Header>
+        GAMETYPE DROPDOWN HERE<br/>
+        Active last X Here<br/>
+        Per Page dropdown here<br/>
         {renderTable(state)}
     </>
 }

@@ -122,6 +122,8 @@ function renderBasicTable(data, totalTeams){
         };
 
         const team = (totalTeams > 1) ? d.team : 0;
+        //skip 255 because they shouldn't be displayed in team games
+        if(totalTeams > 1 && team === 255) continue;
     
         tables[team].push(row);
 
