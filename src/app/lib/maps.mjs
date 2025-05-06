@@ -666,3 +666,22 @@ export async function getLastPlayedMapId(){
 
     return null;
 }
+
+
+async function getPlayersBasicMapTotals(gametypeId, mapId, playerIds){
+
+    if(playerIds.length === 0) return [];
+
+    const query = `SELECT player_id,COUNT(*) as total_matches,MIN(match_date) as first_match, 
+    MAX(match_date) as last_match, SUM(time_on_server) as total_playtime FROM nstats_match_players 
+    WHERE spectator=0 AND gametype_id=? AND map_id=? AND player_id IN (?) GROUP BY player_id`;
+
+    const result = await simpleQuery(query, [gametypeId, mapId, playerIds]);
+
+    console.log(result);
+}
+
+export async function updatePlayerMapTotals(gametypeId, mapId, playerIds){
+
+    await getPlayersBasicMapTotals(gametypeId, mapId, playerIds);
+}

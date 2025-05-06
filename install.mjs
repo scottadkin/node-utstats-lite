@@ -603,7 +603,26 @@ const queries = [
         cap_against int NOT NULL,
         cap_offset int NOT NULL,
         points int NOT NULL
-        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+        `CREATE TABLE IF NOT EXISTS nstats_player_map_totals (
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        map_id int NOT NULL,
+        gametype_id int NOT NULL,
+        first_match datetime NOT NULL,
+        last_match datetime NOT NULL,
+        total_matches int NOT NULL,
+        total_playtime float NOT NULL,
+        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
+        id INT NOT NULL AUTO_INCREMENT,
+        name varchar(255) NOT NULL,
+        type varchar(255) NOT NULL,
+        value varchar(255) NOT NULL,
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
 
 
 ];
@@ -738,13 +757,37 @@ async function addColumn(table, name, type){
     }
 }
 
-
-
-
-
 async function addPageLayouts(){
 
     await restoreDefaultLayouts();
+}
+
+async function bCTFSettingExist(name){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_ctf_league_settings WHERE name=?`;
+
+    const result = await simpleQuery(query, [name]);
+
+    return result[0].total_rows > 0;
+}
+
+async function insertCTFLeagueSettings(){
+
+    const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?)`;
+
+    const settings = [
+        {"name": "Maximum Matches Per Player", "type": "integer", "value": 20}
+    ];
+
+    for(let i = 0; i < settings.length; i++){
+
+        const s = settings[i];
+
+        if(!await bCTFSettingExist(s.name)){
+            await simpleQuery(query, [s.name, s.type, s.value]);
+        }
+    }
+
 }
 
 (async () =>{
@@ -780,6 +823,8 @@ async function addPageLayouts(){
         await insertSiteSettings();
 
         await insertRankingSettings();
+
+        await insertCTFLeagueSettings();
 
         if(!fs.existsSync("./salt.mjs")){
 

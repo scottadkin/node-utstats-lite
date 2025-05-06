@@ -15,10 +15,11 @@ import PlayerManager from "./PlayerManager";
 import ClearDatabase from "./ClearDatabase";
 import MatchesManager from "./MatchesManager";
 import GametypesManager from "./GametypesManager";
+import CTFLeague from "./CTFLeague";
 
 export default function AdminMain(){
 
-    const [mode, setMode] = useState("gametypes");
+    const [mode, setMode] = useState("ctf-league");
 
     return <>
         <Tabs 
@@ -32,6 +33,7 @@ export default function AdminMain(){
                 {"name": "Gametypes Manager", "value": "gametypes"},
                 {"name": "Ranking Settings", "value": "rankings"},
                 {"name": "Recalculate All Rankings", "value": "rankings-all"},
+                {"name": "CTF League", "value": "ctf-league"},
                 {"name": "Map Image Uploader", "value": "map-img"},
                 {"name": "Player Merger", "value": "player-merge"},
                 {"name": "Player Manager", "value": "player-manager"},
@@ -57,6 +59,7 @@ export default function AdminMain(){
         {(mode === "clear-database") ? <ClearDatabase /> : null}
         {(mode === "matches") ? <MatchesManager /> : null}
         {(mode === "gametypes") ? <GametypesManager /> : null}
+        {(mode === "ctf-league") ? <CTFLeague /> : null}
 
     </>
 }

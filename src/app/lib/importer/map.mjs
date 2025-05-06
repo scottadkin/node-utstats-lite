@@ -1,5 +1,5 @@
 import { removeUNR } from "../generic.mjs";
-import { updateMap, updateTotals } from "../maps.mjs";
+import { updateMap, updateTotals, updatePlayerMapTotals } from "../maps.mjs";
 
 export class Map{
 
@@ -31,5 +31,12 @@ export class Map{
 
     async updateTotals(){
         await updateTotals(this.id);
+    }
+
+    async updatePlayerTotals(gametypeId, mapId, playerIds){
+
+        console.log("update player map totals");
+
+        await updatePlayerMapTotals(gametypeId, mapId, playerIds);
     }
 }

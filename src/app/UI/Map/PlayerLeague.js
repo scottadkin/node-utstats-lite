@@ -78,7 +78,8 @@ export default function PlayerLeague({mapId}){
 
     useEffect(()=>{
 
-        loadData(mapId, state.gametypeId, dispatch);
+        loadData(18, 1, dispatch);
+        //loadData(mapId, state.gametypeId, dispatch);
 
     }, [mapId, state.gametypeId]);
 

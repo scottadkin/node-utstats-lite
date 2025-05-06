@@ -29,6 +29,7 @@ export async function clearAllDataTables(){
         "ctf_cap_suicides",
         "ctf_carry_times",
         "ctf_covers",
+        "player_map_ctf_league",
         "player_map_minute_averages",
         "map_weapon_totals",
         "map_rankings",

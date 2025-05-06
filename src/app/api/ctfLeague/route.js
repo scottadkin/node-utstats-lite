@@ -15,7 +15,7 @@ export async function GET(req){
 
             console.log(`target map}`);
 
-            const data = await getMapTable(1,1);
+            const data = await getMapTable(18,1);
 
             return Response.json(data);
         }

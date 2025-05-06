@@ -56,7 +56,7 @@ export default class MatchScreenshot{
             image.src = url;
 
             image.onload = () =>{
-                console.log(`Loaded image ${url}`);
+                //console.log(`Loaded image ${url}`);
                 resolve();
             }
 

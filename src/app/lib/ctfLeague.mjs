@@ -6,7 +6,8 @@ import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs
 
 async function getMapPlayerHistory(mapId, gametypeId){
 
-    const query = `SELECT match_id,player_id,team FROM nstats_match_players WHERE time_on_server>0 AND spectator=0 AND map_id=? AND gametype_id=?`;
+    const query = `SELECT match_id,player_id,team FROM nstats_match_players 
+    WHERE time_on_server>0 AND spectator=0 AND map_id=? AND gametype_id=? ORDER BY match_date DESC`;
 
     const result = await simpleQuery(query, [mapId, gametypeId]);
 
@@ -116,8 +117,9 @@ async function bulkInsertMapEntries(mapId, gametypeId, tableData){
     await bulkInsert(query, insertVars);
 }
 
-export async function calcPlayersMapResults(mapId, gametypeId){
+export async function calcPlayersMapResults(mapId, gametypeId, maxMatches){
 
+    if(maxMatches === undefined) maxMatches = 5;
 
     const history = await getMapPlayerHistory(mapId, gametypeId);
     const matchResults = await getMatchesTeamResults(history.matchIds);
@@ -141,15 +143,14 @@ export async function calcPlayersMapResults(mapId, gametypeId){
                 throw new Error(`matchResult is undefined`);
             }
  
-
-            table[id].update(team, matchResult.red, matchResult.blue, matchResult.winner, matchResult.date, matchResult.playtime);
+            if(table[id].matches < maxMatches){
+                table[id].update(team, matchResult.red, matchResult.blue, matchResult.winner, matchResult.date, matchResult.playtime);
+            }
         }  
     }
 
     await deleteAllMapEntries(mapId, gametypeId);
     await bulkInsertMapEntries(mapId, gametypeId, table);
-
-
 }
 
 

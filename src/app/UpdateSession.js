@@ -15,7 +15,7 @@ async function fart(){
 
         const res = await req.json();
 
-        console.log(res);
+       // console.log(res);
     }catch(err){
 
         console.trace(err);

@@ -41,7 +41,7 @@ export default function FragTable({data, totalTeams}){
 
     const totals = [{...initialTotals}];
 
-    console.log(`totalTeams = ${totalTeams}`);
+    //console.log(`totalTeams = ${totalTeams}`);
 
 
     /*for(let i = 1; i < totalTeams; i++){
