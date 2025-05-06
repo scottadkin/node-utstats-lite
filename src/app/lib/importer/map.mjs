@@ -35,8 +35,6 @@ export class Map{
 
     async updatePlayerTotals(gametypeId, mapId, playerIds){
 
-        console.log("update player map totals");
-
         await updatePlayerMapTotals(gametypeId, mapId, playerIds);
     }
 }

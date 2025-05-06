@@ -172,3 +172,20 @@ export async function getMapTable(mapId, gametypeId){
     
     return result;
 }
+
+export async function getLeagueSiteSettings(){
+
+    const query = `SELECT name,type,value FROM nstats_ctf_league_settings`;
+
+    const result = await simpleQuery(query);
+
+    const settings = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        settings[r.name] = {"type": r.type, "value": r.value}
+    }
+
+    return settings;
+}

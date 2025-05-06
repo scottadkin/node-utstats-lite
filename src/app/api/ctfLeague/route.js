@@ -1,4 +1,4 @@
-import { getMapTable } from "@/app/lib/ctfLeague.mjs";
+import { getMapTable, getLeagueSiteSettings } from "@/app/lib/ctfLeague.mjs";
 
 export async function GET(req){
 
@@ -18,6 +18,13 @@ export async function GET(req){
             const data = await getMapTable(18,1);
 
             return Response.json(data);
+        }
+
+        if(mode === "get-settings"){
+
+            const settings = await getLeagueSiteSettings();
+
+            return Response.json(settings);
         }
 
     }catch(err){
