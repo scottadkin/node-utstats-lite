@@ -175,7 +175,7 @@ export async function getMapTable(mapId, gametypeId){
 
 export async function getLeagueSiteSettings(){
 
-    const query = `SELECT name,type,value FROM nstats_ctf_league_settings`;
+    const query = `SELECT category,name,type,value FROM nstats_ctf_league_settings`;
 
     const result = await simpleQuery(query);
 
@@ -184,7 +184,18 @@ export async function getLeagueSiteSettings(){
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
-        settings[r.name] = {"type": r.type, "value": r.value}
+        let value = r.value;
+
+        if(r.type === "bool"){
+
+            if(value === "false"){
+                value = 0;
+            }else{
+                value = 1;
+            }
+        }
+
+        settings[r.name] = {"category": r.category, "type": r.type, "value": value}
     }
 
     return settings;
@@ -193,11 +204,22 @@ export async function getLeagueSiteSettings(){
 
 export async function updateSettings(data){
 
+    const query = `UPDATE nstats_ctf_league_settings SET value=? WHERE category=? AND name=?`;
 
-    const query = `UPDATE nstats_ctf_league_settings SET value=? WHERE name=?`;
+    for(const [categoryName, category] of Object.entries(data)){
 
-    for(const [key, setting] of Object.entries(data)){
+        if(categoryName === "totalChanges") continue;
 
-        await simpleQuery(query, [setting.value, key]);
+        for(const [key, setting] of Object.entries(category)){
+
+            let v = setting.value.toString();
+    
+            const vars = [v, setting.category, key];
+    
+            await simpleQuery(query, vars);
+        }
+
     }
+
+    
 }

@@ -3,6 +3,7 @@ import Header from "../Header";
 import Tabs from "../Tabs";
 import {useEffect, useReducer } from "react";
 import WarningBox from "../WarningBox";
+import TrueFalseButton from "../TrueFalseButton";
 
 function reducer(state, action){
 
@@ -44,11 +45,21 @@ function getChangesSettings(state){
     const saved = state.savedSettings;
     const current = state.settings;
 
-    const changed = {};
+    const changed = {
+        "totalChanges": 0
+    };
 
     for(const [key, setting] of Object.entries(saved)){
-        if(parseInt(setting.value) !== parseInt(current[key].value)) changed[key] = current[key];
 
+        if(setting.value !== current[key].value){
+            
+            if(changed[setting.category] === undefined){
+                changed[setting.category] = {};
+            }
+
+            changed[setting.category][key] = current[key];
+            changed.totalChanges++;
+        }
     }
 
     return changed;
@@ -90,11 +101,26 @@ function renderMapOptions(state, dispatch){
 
     for(const [key, value] of Object.entries(state.settings)){
 
+        if(value.category !== "maps") continue;
+        let elem = null;
+
+        if(value.type === "integer"){
+
+            elem = <td><input className="textbox" type="number" defaultValue={value.value} onChange={(e) =>{
+                dispatch({"type": "update-settings","dataType": "integer", "category": value.category, "key": key, "value": e.target.value});
+            }}/></td>;
+
+        }else if(value.type === "bool"){
+
+            elem = <TrueFalseButton bTableElem={true} value={value.value} setValue={() =>{  
+
+                dispatch({"type": "update-settings", "dataType": "bool", "category": value.category, "key": key, "value":!value.value});
+            }}/>;
+        }
+
         rows.push(<tr key={rows.length}>
             <td className="text-left">{key}</td>
-            <td><input className="textbox" type="number" defaultValue={value.value} onChange={(e) =>{
-                dispatch({"type": "update-settings", "key": key, "value": e.target.value});
-            }}/></td>
+            {elem}
         </tr>);
     }
 
@@ -104,7 +130,7 @@ function renderMapOptions(state, dispatch){
 
     const changes = getChangesSettings(state)
 
-    if(Object.keys(changes).length > 0){
+    if(changes.totalChanges > 0){
         warn = <WarningBox>
             You have unsaved changes!<br/>
             <button className="submit-button" onClick={() =>{

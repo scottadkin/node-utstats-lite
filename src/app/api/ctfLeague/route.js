@@ -13,7 +13,6 @@ export async function GET(req){
 
         if(mode === "map"){
 
-            console.log(`target map}`);
 
             const data = await getMapTable(18,1);
 
@@ -40,7 +39,6 @@ export async function POST(req){
 
         const res = await req.json();
 
-        console.log(res);
 
         const mode = res?.mode ?? null;
    

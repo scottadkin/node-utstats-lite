@@ -619,6 +619,7 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
         id INT NOT NULL AUTO_INCREMENT,
+        category varchar(255) NOT NULL,
         name varchar(255) NOT NULL,
         type varchar(255) NOT NULL,
         value varchar(255) NOT NULL,
@@ -773,11 +774,12 @@ async function bCTFSettingExist(name){
 
 async function insertCTFLeagueSettings(){
 
-    const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?)`;
+    const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?,?)`;
 
     const settings = [
-        {"name": "Maximum Matches Per Player", "type": "integer", "value": 20},
-        {"name": "Maximum Match Age In Days", "type": "integer", "value": 90},
+        {"category": "maps", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
+        {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 90},
+        {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
     ];
 
     for(let i = 0; i < settings.length; i++){
@@ -785,7 +787,8 @@ async function insertCTFLeagueSettings(){
         const s = settings[i];
 
         if(!await bCTFSettingExist(s.name)){
-            await simpleQuery(query, [s.name, s.type, s.value]);
+            
+            await simpleQuery(query, [s.category, s.name, s.type, s.value]);
         }
     }
 
