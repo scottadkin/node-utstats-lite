@@ -189,3 +189,15 @@ export async function getLeagueSiteSettings(){
 
     return settings;
 }
+
+
+export async function updateSettings(data){
+
+
+    const query = `UPDATE nstats_ctf_league_settings SET value=? WHERE name=?`;
+
+    for(const [key, setting] of Object.entries(data)){
+
+        await simpleQuery(query, [setting.value, key]);
+    }
+}

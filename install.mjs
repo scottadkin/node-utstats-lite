@@ -776,7 +776,8 @@ async function insertCTFLeagueSettings(){
     const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?)`;
 
     const settings = [
-        {"name": "Maximum Matches Per Player", "type": "integer", "value": 20}
+        {"name": "Maximum Matches Per Player", "type": "integer", "value": 20},
+        {"name": "Maximum Match Age In Days", "type": "integer", "value": 90},
     ];
 
     for(let i = 0; i < settings.length; i++){

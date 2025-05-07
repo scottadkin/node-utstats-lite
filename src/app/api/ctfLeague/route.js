@@ -1,4 +1,4 @@
-import { getMapTable, getLeagueSiteSettings } from "@/app/lib/ctfLeague.mjs";
+import { getMapTable, getLeagueSiteSettings, updateSettings } from "@/app/lib/ctfLeague.mjs";
 
 export async function GET(req){
 
@@ -29,5 +29,36 @@ export async function GET(req){
 
     }catch(err){
         return Response.json({"error": err});
+    }
+}
+
+
+export async function POST(req){
+
+    try{
+
+
+        const res = await req.json();
+
+        console.log(res);
+
+        const mode = res?.mode ?? null;
+   
+        if(mode === null) throw new Error("Unknown Command");
+
+
+        if(mode === "save-settings"){
+
+            if(res.changes === undefined) throw new Error("Object must have key called changes!");
+
+            await updateSettings(res.changes);
+
+            return Response.json({"message": "passed"});
+        }
+
+        throw new Error("test");
+
+    }catch(err){
+        return Response.json({"error": err.toString()});
     }
 }

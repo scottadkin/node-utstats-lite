@@ -896,3 +896,11 @@ canvas{
 	color:yellow;
 	cursor: pointer;
 }
+
+ul{
+	list-style: inside;
+	max-width:1000px;
+	text-align:left;
+	margin-left:auto;
+	margin-right: auto;
+}

@@ -2,6 +2,7 @@
 import Header from "../Header";
 import Tabs from "../Tabs";
 import {useEffect, useReducer } from "react";
+import WarningBox from "../WarningBox";
 
 function reducer(state, action){
 
@@ -15,7 +16,21 @@ function reducer(state, action){
         case "load-settings": {
             return {
                 ...state,
-                "settings": action.settings
+                "settings": action.settings,
+                "savedSettings": action.settings
+            }
+        }
+        case "update-settings": {
+
+            const s = JSON.parse(JSON.stringify(state.settings));
+
+            if(s[action.key] === undefined) throw new Error("Setting does not exist!");
+
+            s[action.key].value = action.value;
+            
+            return {
+                ...state,
+                "settings": {...s}
             }
         }
     }
@@ -23,7 +38,51 @@ function reducer(state, action){
     return state;
 }
 
-function renderMapOptions(state){
+
+function getChangesSettings(state){
+
+    const saved = state.savedSettings;
+    const current = state.settings;
+
+    const changed = {};
+
+    for(const [key, setting] of Object.entries(saved)){
+        if(parseInt(setting.value) !== parseInt(current[key].value)) changed[key] = current[key];
+
+    }
+
+    return changed;
+}
+
+
+async function saveChanges(changes, dispatch){
+
+    try{
+
+
+        const req = await fetch("./api/ctfLeague", {
+            "headers": {"Content-type": "application/json"},
+            "method": "POST",
+            "body": JSON.stringify({
+                "mode": "save-settings",
+                "changes": changes
+            })
+        });
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        await loadSettings(dispatch);
+
+
+    }catch(err){
+        console.trace(err);
+    }
+
+}
+
+function renderMapOptions(state, dispatch){
 
     if(state.mode !== "map") return null;
 
@@ -33,16 +92,35 @@ function renderMapOptions(state){
 
         rows.push(<tr key={rows.length}>
             <td className="text-left">{key}</td>
-            <td>{value.value}</td>
+            <td><input className="textbox" type="number" defaultValue={value.value} onChange={(e) =>{
+                dispatch({"type": "update-settings", "key": key, "value": e.target.value});
+            }}/></td>
         </tr>);
     }
 
     if(rows.length === 0) return null;
 
+    let warn = null;
+
+    const changes = getChangesSettings(state)
+
+    if(Object.keys(changes).length > 0){
+        warn = <WarningBox>
+            You have unsaved changes!<br/>
+            <button className="submit-button" onClick={() =>{
+                saveChanges(changes, dispatch);
+            }}>Save Changes</button>
+        </WarningBox>
+    }
     return <>
+        {warn}
         <div className="info">
-            - Maximum matches per player refers to the maximum number of matches that can be counted in a league table.<br/> 
-            - If a player is over the maximum number of matches only their latest games are counted towards the league table.
+            <ul>
+                <li>Maximum matches per player refers to the maximum number of matches that can be counted towards a league table.
+                If a player is over the maximum number of matches only their latest games are counted towards the league table.</li>
+                <li>Maximum match age is the limit of how old a match is compared to the current date, if you set it to 90 only matches 
+                    that where in the previous 90 days will count towards the league table.</li>
+            </ul>
         </div>
         <table className="t-width-3">
             <tbody>
@@ -78,7 +156,8 @@ export default function CTFLeague({}){
 
     const [state, dispatch] = useReducer(reducer, {
         "mode": "map",
-        "settings": {}
+        "settings": {},
+        "savedSettings": {}
     });
 
     useEffect(() =>{
@@ -86,7 +165,7 @@ export default function CTFLeague({}){
     },[]);
 
     const tabOptions = [
-        {"name": "Map", "value": "map"}
+        {"name": "Maps", "value": "map"}
     ];
 
     return <>
@@ -94,6 +173,6 @@ export default function CTFLeague({}){
         <Tabs options={tabOptions} selectedValue={state.mode} changeSelected={(value) =>{
             dispatch({"type": "change-mode", "mode": value});
         }}/>
-        {renderMapOptions(state)}
+        {renderMapOptions(state, dispatch)}
     </>
 }
