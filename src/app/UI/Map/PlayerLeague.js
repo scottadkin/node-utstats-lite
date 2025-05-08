@@ -14,6 +14,12 @@ function reducer(state, action){
                 "data": action.data
             }
         }
+        case "set-gametype": {
+            return {
+                ...state,
+                "gametypeId": action.value
+            }
+        }
     }
 
     return state;
@@ -23,12 +29,11 @@ async function loadData(mapId, gametypeId, dispatch){
 
     try{
 
+
         const req = await fetch(`/api/ctfLeague?mode=map&mId=${parseInt(mapId)}&gId=${parseInt(gametypeId)}`);
         const res = await req.json();
 
         if(res.error !== undefined) throw new Error(res.error.message);
-
-        console.log(res);
 
         dispatch({"type": "set-data", "data": res});
 
@@ -63,7 +68,7 @@ function renderTable(state){
             "losses": {"value": d.losses, "displayValue": ignore0(d.losses)},
             "capFor": {"value": d.cap_for, "displayValue": ignore0(d.cap_for)},
             "capAgainst": {"value": d.cap_against, "displayValue": ignore0(d.cap_against)},
-            "capDiff": {"value": d.cap_offset, "displayValue": (d.cap_offset > 0) ? `+${d.cap_offset}` : d.cap_offset},
+            "capDiff": {"value": d.cap_offset, "displayValue": (d.cap_offset > 0) ? `+${d.cap_offset}` : ignore0(d.cap_offset)},
             "points": {"value": d.points, "displayValue": ignore0(d.points)},
         };
     });
@@ -71,22 +76,50 @@ function renderTable(state){
     return <InteractiveTable width={2} headers={headers} rows={rows}/>
 }
 
-//get last played match gametype id then get league data for that gametype
-export default function PlayerLeague({mapId}){
 
-    const [state, dispatch] = useReducer(reducer, {"data": [], "gametypeId": -1});
+function renderGametypeDropDown(state, dispatch, gametypes){
+
+    const options = [];
+
+    for(const [id, name] of Object.entries(gametypes)){
+        options.push(<option key={id} value={id}>{name}</option>);
+    }
+
+    return <div className="form-row">
+        <label>Gametype</label>
+        <select className="default-select"  onChange={(e) =>{
+            dispatch({"type": "set-gametype", "value": e.target.value});
+        }}>
+            {options}
+        </select>
+    </div>
+}
+
+//get last played match gametype id then get league data for that gametype
+export default function PlayerLeague({mapId, gametypes, leagueSettings}){
+
+    const gametypeKeys = Object.keys(gametypes);
+
+    const [state, dispatch] = useReducer(reducer, {
+        "data": [], 
+        "gametypeId": (gametypeKeys.length > 0) ? gametypeKeys[0] : -1
+    });
 
     useEffect(()=>{
 
-        loadData(18, 1, dispatch);
-        //loadData(mapId, state.gametypeId, dispatch);
+        loadData(mapId, state.gametypeId, dispatch);
 
     }, [mapId, state.gametypeId]);
 
+
     return <>
-        <Header>Player League</Header>
-        GAMETYPE DROPDOWN HERE<br/>
-        Active last X Here<br/>
+        <Header>CTF Player League</Header>
+        <div className="info">
+            Matches played in the last <b>{leagueSettings["Maximum Match Age In Days"].value}</b> days are only counted.<br/>
+            Only the last <b>{leagueSettings["Maximum Matches Per Player"].value}</b> matches played by the player are counted towards the league.
+
+        </div>
+        {renderGametypeDropDown(state, dispatch, gametypes)}
         Per Page dropdown here<br/>
         {renderTable(state)}
     </>

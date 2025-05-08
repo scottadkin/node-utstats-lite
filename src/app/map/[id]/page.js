@@ -1,5 +1,5 @@
 import Header from "@/app/UI/Header";
-import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches, getMapPlayerAverages, VALID_PLAYER_MAP_MINUTE_AVERAGES } from "@/app/lib/maps.mjs";
+import { getMapImages, getMapInfo, getRecentMatches, getTotalMatches, getMapPlayerAverages, VALID_PLAYER_MAP_MINUTE_AVERAGES, getPlayedGametypes } from "@/app/lib/maps.mjs";
 import Image from "next/image";
 import MatchesList from "@/app/UI/MatchList";
 import Pagination from "@/app/UI/Pagination";
@@ -12,6 +12,8 @@ import WeaponStats from "@/app/UI/Map/WeaponStats";
 import ActivityHeatMap from "@/app/UI/ActivityHeatMap";
 import PlayerRankings from "@/app/UI/Map/PlayerRankings";
 import PlayerLeague from "@/app/UI/Map/PlayerLeague";
+import { getGametypeNames } from "@/app/lib/gametypes.mjs";
+import { getLeagueCategorySettings } from "@/app/lib/ctfLeague.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -75,6 +77,10 @@ export default async function MapPage({params, searchParams}){
 
     const weaponStats = await getMapWeaponStats(id);
 
+    const playedGametypes = await getPlayedGametypes(id);
+    const gametypeNames = await getGametypeNames(playedGametypes, true);
+
+    const ctfLeagueSettings = await getLeagueCategorySettings("maps");
     const elems = [];
     
     elems[pageLayout["Basic Summary"]] = (pageSettings["Display Basic Summary"] === "1") ? <BasicSummary key="basic" info={info} /> : null;
@@ -100,7 +106,7 @@ export default async function MapPage({params, searchParams}){
 
     return <main>
         <Header>{info.name}</Header>
-        <PlayerLeague mapId={id}/>
+        <PlayerLeague mapId={id} gametypes={gametypeNames} leagueSettings={ctfLeagueSettings}/>
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>

@@ -1,10 +1,13 @@
 import { getMapTable, getLeagueSiteSettings, updateSettings } from "@/app/lib/ctfLeague.mjs";
+import { setInt } from "@/app/lib/generic.mjs";
 
 export async function GET(req){
 
     const { searchParams } = new URL(req.url);
 
     const mode = searchParams.get("mode") ?? "";
+    const mapId = setInt(searchParams.get("mId"), -1);
+    const gametypeId = setInt(searchParams.get("gId"), -1);
 
     try{
 
@@ -13,8 +16,7 @@ export async function GET(req){
 
         if(mode === "map"){
 
-
-            const data = await getMapTable(18,1);
+            const data = await getMapTable(mapId, gametypeId);
 
             return Response.json(data);
         }

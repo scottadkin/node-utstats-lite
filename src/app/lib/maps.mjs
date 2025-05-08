@@ -685,3 +685,15 @@ export async function updatePlayerMapTotals(gametypeId, mapId, playerIds){
 
     //await getPlayersBasicMapTotals(gametypeId, mapId, playerIds);
 }
+
+
+export async function getPlayedGametypes(mapId){
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_matches WHERE map_id=?`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    return result.map((r) =>{
+        return r.gametype_id;
+    });
+}

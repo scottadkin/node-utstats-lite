@@ -91,8 +91,7 @@ async function updateCTFLeague(m, mapCTFLeagueSettings){
 
         const bEnabledMapCTF = mapCTFLeagueSettings["Enable League"]?.value ?? "false";
         const maxMatches = setInt(mapCTFLeagueSettings["Maximum Matches Per Player"]?.value, 5);
-        const maxDays = setInt(mapCTFLeagueSettings["Maximum  Match Age In Days"]?.value, 180);
-
+        const maxDays = setInt(mapCTFLeagueSettings["Maximum Match Age In Days"]?.value, 180);
 
         if(bEnabledMapCTF === "true"){
             await leagueCalcPlayerMapResults(m.map.id, m.gametype.id, maxMatches, maxDays);

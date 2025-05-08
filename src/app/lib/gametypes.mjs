@@ -51,18 +51,24 @@ export async function updateGametype(name){
     
 }
 
-
-export async function getGametypeNames(ids){
+/**
+ * 
+ * @param {*} ids 
+ * @param {*} bSkipAllGametype returned object will skip "0": "All"
+ * @returns 
+ */
+export async function getGametypeNames(ids, bSkipAllGametype){
 
     if(ids.length === 0) return [];
+    if(bSkipAllGametype === undefined) bSkipAllGametype = false;
 
     const query = `SELECT id,name FROM nstats_gametypes WHERE id IN(?)`;
 
     const result = await simpleQuery(query, [ids]);
 
-    const data = {
-        "0": "All"
-    };
+    const data = {};
+
+    if(!bSkipAllGametype) data["0"] = "All";
 
     for(let i = 0; i < result.length; i++){
 
