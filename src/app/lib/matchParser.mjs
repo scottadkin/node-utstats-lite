@@ -14,7 +14,6 @@ import Items from "./importer/items.mjs";
 import {calculateRankings} from "./rankings.mjs";
 import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
-import { calcPlayersMapResults } from "./ctfLeague.mjs";
 
 export class MatchParser{
 
@@ -253,7 +252,7 @@ export class MatchParser{
         await this.players.updateMapAverages(this.gametype.id, this.map.id);
         await this.map.updatePlayerTotals(this.gametype.id, this.map.id, validMergedPlayerIds);
 
-        await calcPlayersMapResults(this.map.id, this.gametype.id);
+        //await calcPlayersMapResults(this.map.id, this.gametype.id);
 
         await this.weapons.updateMapTotals(this.map.id);
 

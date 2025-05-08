@@ -2,14 +2,18 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
+import { DAY } from "./generic.mjs";
 
 
-async function getMapPlayerHistory(mapId, gametypeId){
+async function getMapPlayerHistory(mapId, gametypeId, maxAgeDays){
 
     const query = `SELECT match_id,player_id,team FROM nstats_match_players 
-    WHERE time_on_server>0 AND spectator=0 AND map_id=? AND gametype_id=? ORDER BY match_date DESC`;
+    WHERE time_on_server>0 AND spectator=0 AND map_id=? AND gametype_id=? AND match_date>=? ORDER BY match_date DESC`;
 
-    const result = await simpleQuery(query, [mapId, gametypeId]);
+    const now = Date.now();
+    const minDate = new Date(now - maxAgeDays * DAY);
+
+    const result = await simpleQuery(query, [mapId, gametypeId, minDate]);
 
     const matchIds = new Set();
     const matchesToPlayers = {};
@@ -117,11 +121,12 @@ async function bulkInsertMapEntries(mapId, gametypeId, tableData){
     await bulkInsert(query, insertVars);
 }
 
-export async function calcPlayersMapResults(mapId, gametypeId, maxMatches){
+export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDays){
 
     if(maxMatches === undefined) maxMatches = 5;
+    if(maxDays === undefined) maxDays = 180;
 
-    const history = await getMapPlayerHistory(mapId, gametypeId);
+    const history = await getMapPlayerHistory(mapId, gametypeId, maxDays);
     const matchResults = await getMatchesTeamResults(history.matchIds);
     const table = {};
 
@@ -173,6 +178,10 @@ export async function getMapTable(mapId, gametypeId){
     return result;
 }
 
+/**
+ * Used for admin tools, use getLeagueCategorySettings for importer
+ * @returns 
+ */
 export async function getLeagueSiteSettings(){
 
     const query = `SELECT category,name,type,value FROM nstats_ctf_league_settings`;
@@ -202,6 +211,23 @@ export async function getLeagueSiteSettings(){
 }
 
 
+export async function getLeagueCategorySettings(cat){
+
+    const query = `SELECT category,name,type,value FROM nstats_ctf_league_settings WHERE category=?`;
+    const result = await simpleQuery(query, [cat]);
+
+    const settings = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        settings[r.name] = {"type": r.type, "name": r.name, "value": r.value};
+    }
+
+    return settings;
+}
+
+
 export async function updateSettings(data){
 
     const query = `UPDATE nstats_ctf_league_settings SET value=? WHERE category=? AND name=?`;
@@ -218,8 +244,5 @@ export async function updateSettings(data){
     
             await simpleQuery(query, vars);
         }
-
-    }
-
-    
+    }  
 }

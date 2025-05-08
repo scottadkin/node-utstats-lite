@@ -778,7 +778,7 @@ async function insertCTFLeagueSettings(){
 
     const settings = [
         {"category": "maps", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
-        {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 90},
+        {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
         {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
     ];
 
@@ -791,7 +791,6 @@ async function insertCTFLeagueSettings(){
             await simpleQuery(query, [s.category, s.name, s.type, s.value]);
         }
     }
-
 }
 
 (async () =>{

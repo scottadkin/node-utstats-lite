@@ -677,11 +677,11 @@ async function getPlayersBasicMapTotals(gametypeId, mapId, playerIds){
     WHERE spectator=0 AND gametype_id=? AND map_id=? AND player_id IN (?) GROUP BY player_id`;
 
     const result = await simpleQuery(query, [gametypeId, mapId, playerIds]);
-
-    console.log(result);
+    console.log(`maps.getPlayersBasicMapTotals`);
+    //console.log(result);
 }
 
 export async function updatePlayerMapTotals(gametypeId, mapId, playerIds){
 
-    await getPlayersBasicMapTotals(gametypeId, mapId, playerIds);
+    //await getPlayersBasicMapTotals(gametypeId, mapId, playerIds);
 }

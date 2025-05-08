@@ -1,3 +1,5 @@
+export const DAY = 60 * 60 * 24 * 1000;
+
 export function getTeamColorClass(value){
 
     value = parseInt(value);
@@ -502,4 +504,13 @@ export function getKey(object, targetValue){
     }
 
     return null;
+}
+
+
+export function setInt(value, backupValue){
+
+    value = parseInt(value);
+    if(value !== value) value = backupValue;
+
+    return value;
 }

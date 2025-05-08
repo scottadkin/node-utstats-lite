@@ -8,6 +8,8 @@ import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/app/lib/logsfoldersettings.mjs";
 import { bLogAlreadyImported } from "./src/app/lib/importer.mjs";
+import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings } from "./src/app/lib/ctfLeague.mjs";
+import { setInt } from "./src/app/lib/generic.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
 
@@ -80,7 +82,27 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
     await simpleQuery(query, [serverId, date, logsFound, passed, failed, totalTime]);
 }
 
-async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes){
+
+async function updateCTFLeague(m, mapCTFLeagueSettings){
+
+    if(mapCTFLeagueSettings["Enable League"] === undefined){
+        new Message(`Map CTFLeague settings missing, please install using install.mjs.`,"error");
+    }else{
+
+        const bEnabledMapCTF = mapCTFLeagueSettings["Enable League"]?.value ?? "false";
+        const maxMatches = setInt(mapCTFLeagueSettings["Maximum Matches Per Player"]?.value, 5);
+        const maxDays = setInt(mapCTFLeagueSettings["Maximum  Match Age In Days"]?.value, 180);
+
+
+        if(bEnabledMapCTF === "true"){
+            await leagueCalcPlayerMapResults(m.map.id, m.gametype.id, maxMatches, maxDays);
+        }else{
+            new Message(`CTF map league is disabled, skipping.`,"note");
+        }
+    }
+}
+
+async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, mapCTFLeagueSettings){
 
     try{
 
@@ -115,6 +137,8 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await m.main();
 
+        await updateCTFLeague(m, mapCTFLeagueSettings);
+
         await InsertLogHistory(file, serverId, m.matchId);
 
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
@@ -144,13 +168,15 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
     let imported = 0;
     let failed = 0;
 
+    const mapCTFLeagueSettings = await getLeagueCategorySettings("maps");
+
     for(let i = 0; i < files.length; i++){
 
         const f = files[i];
         
         if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
 
-        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes)){
+        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, mapCTFLeagueSettings)){
             imported++;
         }else{
             failed++;
