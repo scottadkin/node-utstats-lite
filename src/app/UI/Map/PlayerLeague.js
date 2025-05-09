@@ -74,7 +74,11 @@ function renderTable(state, dispatch){
 
         return {
             "place": {"value": i, "displayValue": `${pos}${getOrdinal(pos)}`, "className": "ordinal"},
-            "player": {"value":d.playerName.toLowerCase(), "displayValue": <PlayerLink country={d.playerCountry} id={d.player_id}>{d.playerName}</PlayerLink>},
+            "player": {
+                "value":d.playerName.toLowerCase(), 
+                "displayValue": <PlayerLink country={d.playerCountry} id={d.player_id}>{d.playerName}</PlayerLink>,
+                "className": "text-left"
+            },
             "played": {"value": d.total_matches},
             "wins": {"value": d.wins, "displayValue": ignore0(d.wins)},
             "draws": {"value": d.draws, "displayValue": ignore0(d.draws)},
@@ -102,15 +106,30 @@ function renderTable(state, dispatch){
 
 function renderGametypeDropDown(state, dispatch, gametypes){
 
+    const optionArray = [];
     const options = [];
 
     for(const [id, name] of Object.entries(gametypes)){
+       optionArray.push({id, name});
+    }
+
+    optionArray.sort((a, b) =>{
+        a = a.name.toLowerCase();
+        b = b.name.toLowerCase();
+
+        if(a < b) return -1;
+        if(a > b) return 1;
+        return 0;
+    });
+
+    for(let i = 0; i < optionArray.length; i++){
+        const {id,name} = optionArray[i];
         options.push(<option key={id} value={id}>{name}</option>);
     }
 
     return <div className="form-row">
         <label>Gametype</label>
-        <select className="default-select"  onChange={(e) =>{
+        <select className="default-select" defaultValue={state.gametypeId} onChange={(e) =>{
             dispatch({"type": "set-gametype", "value": e.target.value});
         }}>
             {options}
@@ -138,14 +157,11 @@ function renderInfo(leagueSettings){
         </div>
 }
 
-//get last played match gametype id then get league data for that gametype
-export default function PlayerLeague({mapId, gametypes, leagueSettings}){
-
-    const gametypeKeys = Object.keys(gametypes);
+export default function PlayerLeague({mapId, gametypes, leagueSettings, lastPlayedGametypeId}){
 
     const [state, dispatch] = useReducer(reducer, {
         "data": [], 
-        "gametypeId": (gametypeKeys.length > 0) ? gametypeKeys[0] : -1,
+        "gametypeId": (lastPlayedGametypeId !== null) ? lastPlayedGametypeId : -1,
         "page": 1,
         "perPage": 25,
         "results": 0

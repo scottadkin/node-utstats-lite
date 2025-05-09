@@ -667,6 +667,16 @@ export async function getLastPlayedMapId(){
     return null;
 }
 
+export async function getLastPlayedGametypeId(mapId){
+
+    const query = `SELECT gametype_id FROM nstats_matches WHERE map_id=? ORDER BY date DESC LIMIT 1`;
+
+    const result = await simpleQuery(query, [mapId]);
+
+    if(result.length === 0) return null;
+
+    return result[0].gametype_id;
+}
 
 async function getPlayersBasicMapTotals(gametypeId, mapId, playerIds){
 
