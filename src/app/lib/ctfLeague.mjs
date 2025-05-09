@@ -159,13 +159,30 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
 }
 
 
-export async function getMapTable(mapId, gametypeId){
+async function getMapTotalPossibleResults(mapId, gametypeId){
+
+    const query = `SELECT COUNT(*) as total_players FROM nstats_player_map_ctf_league WHERE map_id=? 
+    AND gametype_id=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset ASC`;
+
+    const result = await simpleQuery(query, [mapId, gametypeId]);
+
+    return result[0].total_players;
+}
+
+export async function getMapTable(mapId, gametypeId, page, perPage){
+
+    const totalMatches = await getMapTotalPossibleResults(mapId, gametypeId);
+
+    if(totalMatches === 0) return {};
 
     const query = `SELECT player_id,first_match,last_match,total_matches,wins,draws,losses,
     cap_for,cap_against,cap_offset,points FROM nstats_player_map_ctf_league WHERE map_id=? 
-    AND gametype_id=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset ASC`;
+    AND gametype_id=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset ASC LIMIT ?, ?`;
     
-    const result = await simpleQuery(query, [mapId, gametypeId]);
+
+    const start = page * perPage;
+    const result = await simpleQuery(query, [mapId, gametypeId, start, perPage]);
+
 
     const playerIds = new Set(result.map((r) =>{
         return r.player_id;
@@ -175,7 +192,7 @@ export async function getMapTable(mapId, gametypeId){
 
     applyBasicPlayerInfoToObjects(playerInfo, result);
     
-    return result;
+    return {"data": result, "totalResults": totalMatches};
 }
 
 /**

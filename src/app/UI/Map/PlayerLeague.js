@@ -3,7 +3,8 @@ import Header from "../Header";
 import { useEffect, useReducer } from "react";
 import InteractiveTable from "../InteractiveTable";
 import PlayerLink from "../PlayerLink";
-import { ignore0, getOrdinal } from "@/app/lib/generic.mjs";
+import { ignore0, getOrdinal, setInt } from "@/app/lib/generic.mjs";
+import BasicPagination from "../BasicPagination";
 
 function reducer(state, action){
 
@@ -11,7 +12,8 @@ function reducer(state, action){
         case "set-data": {
             return {
                 ...state,
-                "data": action.data
+                "data": action.data.data,
+                "results": action.data.totalResults
             }
         }
         case "set-gametype": {
@@ -20,17 +22,25 @@ function reducer(state, action){
                 "gametypeId": action.value
             }
         }
+        case "set-page": {
+            return {
+                ...state,
+                "page": action.value
+            }
+        }
     }
 
     return state;
 }
 
-async function loadData(mapId, gametypeId, dispatch){
+async function loadData(mapId, gametypeId, dispatch, page, perPage){
 
     try{
 
+        page = setInt(page, 1);
+        perPage = setInt(perPage, 25);
 
-        const req = await fetch(`/api/ctfLeague?mode=map&mId=${parseInt(mapId)}&gId=${parseInt(gametypeId)}`);
+        const req = await fetch(`/api/ctfLeague?mode=map&mId=${parseInt(mapId)}&gId=${parseInt(gametypeId)}&perPage=${perPage}&page=${page}`);
         const res = await req.json();
 
         if(res.error !== undefined) throw new Error(res.error.message);
@@ -43,7 +53,7 @@ async function loadData(mapId, gametypeId, dispatch){
 }
 
 
-function renderTable(state){
+function renderTable(state, dispatch){
 
     const headers = {
         "place": {"title": "Place"},
@@ -59,8 +69,11 @@ function renderTable(state){
     };
 
     const rows = state.data.map((d, i) =>{
+
+        const pos = state.perPage * (state.page - 1) + i + 1
+
         return {
-            "place": {"value": i, "displayValue": `${i+1}${getOrdinal(i+1)}`, "className": "ordinal"},
+            "place": {"value": i, "displayValue": `${pos}${getOrdinal(pos)}`, "className": "ordinal"},
             "player": {"value":d.playerName.toLowerCase(), "displayValue": <PlayerLink country={d.playerCountry} id={d.player_id}>{d.playerName}</PlayerLink>},
             "played": {"value": d.total_matches},
             "wins": {"value": d.wins, "displayValue": ignore0(d.wins)},
@@ -73,7 +86,17 @@ function renderTable(state){
         };
     });
 
-    return <InteractiveTable width={2} headers={headers} rows={rows}/>
+    let pagination = null;
+
+    if(state.results > state.perPage){
+        pagination = <BasicPagination results={state.results} perPage={state.perPage} page={state.page} setPage={(newPage) =>{
+            dispatch({"type": "set-page", "value": newPage});
+        }}/>
+    }
+    return <>
+        {pagination}
+        <InteractiveTable width={2} headers={headers} rows={rows} bNoHeaderSorting={true}/>
+    </>
 }
 
 
@@ -95,6 +118,26 @@ function renderGametypeDropDown(state, dispatch, gametypes){
     </div>
 }
 
+function renderInfo(leagueSettings){
+
+    let matchAgeElem = null;
+    let maxMatchesElem = null;
+
+    if(leagueSettings["Maximum Match Age In Days"].value > 0){
+        matchAgeElem = <p>Only Matches played in the last <b>{leagueSettings["Maximum Match Age In Days"].value}</b> days are counted.</p>;
+    }
+
+    if(leagueSettings["Maximum Matches Per Player"].value > 0){
+        maxMatchesElem = <p>Only the last <b>{leagueSettings["Maximum Matches Per Player"].value}</b> matches played by the player are counted towards the league</p>;
+    }
+
+    return <div className="info">
+            {matchAgeElem}
+            {maxMatchesElem}
+            <b>3 points</b> per win, <b>1 point</b> per draw, <b>0 points</b> per loss.
+        </div>
+}
+
 //get last played match gametype id then get league data for that gametype
 export default function PlayerLeague({mapId, gametypes, leagueSettings}){
 
@@ -102,25 +145,25 @@ export default function PlayerLeague({mapId, gametypes, leagueSettings}){
 
     const [state, dispatch] = useReducer(reducer, {
         "data": [], 
-        "gametypeId": (gametypeKeys.length > 0) ? gametypeKeys[0] : -1
+        "gametypeId": (gametypeKeys.length > 0) ? gametypeKeys[0] : -1,
+        "page": 1,
+        "perPage": 25,
+        "results": 0
     });
 
     useEffect(()=>{
 
-        loadData(mapId, state.gametypeId, dispatch);
+        loadData(mapId, state.gametypeId, dispatch, state.page, state.perPage);
 
-    }, [mapId, state.gametypeId]);
+    }, [mapId, state.gametypeId, state.page, state.perPage]);
+
+
 
 
     return <>
         <Header>CTF Player League</Header>
-        <div className="info">
-            Matches played in the last <b>{leagueSettings["Maximum Match Age In Days"].value}</b> days are only counted.<br/>
-            Only the last <b>{leagueSettings["Maximum Matches Per Player"].value}</b> matches played by the player are counted towards the league.
-
-        </div>
+        {renderInfo(leagueSettings)}
         {renderGametypeDropDown(state, dispatch, gametypes)}
-        Per Page dropdown here<br/>
-        {renderTable(state)}
+        {renderTable(state, dispatch)}
     </>
 }

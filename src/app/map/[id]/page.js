@@ -14,6 +14,7 @@ import PlayerRankings from "@/app/UI/Map/PlayerRankings";
 import PlayerLeague from "@/app/UI/Map/PlayerLeague";
 import { getGametypeNames } from "@/app/lib/gametypes.mjs";
 import { getLeagueCategorySettings } from "@/app/lib/ctfLeague.mjs";
+import CTFLeagueTable from "@/app/UI/CTFLeagueTable";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
