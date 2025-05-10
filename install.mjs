@@ -12,6 +12,7 @@ import { setMatchMapGametypeIds } from "./src/app/lib/players.mjs";
 import { setAllPlayerMapAverages } from "./src/app/lib/players.mjs";
 import { setAllMapTotals } from "./src/app/lib/weapons.mjs";
 import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./src/app/lib/damage.mjs";
+import { refreshAllMapTables } from "./src/app/lib/ctfLeague.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -895,6 +896,10 @@ async function insertCTFLeagueSettings(){
         await addColumn("nstats_logs_folder", "append_team_sizes", "INT(1) NOT NULL AFTER min_playtime");
         
         await damageSetMatchMapGametypeIds();
+
+
+        new Message(`Refreshing player ctf league tables.`,"note");
+        await refreshAllMapTables();
         process.exit();
 
     }catch(err){

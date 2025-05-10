@@ -272,6 +272,14 @@ export async function refreshAllMapTables(){
 
     const settings = await getLeagueCategorySettings("maps");
 
+    if(settings["Enable League"] === undefined) throw new Error(`CTF Map League Missing Setting, Enable League`);
+
+    if(settings["Enable League"].value === "false"){
+        new Message(`Player CTF Map League is disabled, skipping.`,"note");
+        return;
+    }
+
+
     const lastImport = Math.floor(new Date(settings["Last Whole League Refresh"].value));
     const now = new Date(Date.now());
 
