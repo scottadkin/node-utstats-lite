@@ -776,10 +776,14 @@ async function insertCTFLeagueSettings(){
 
     const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?,?)`;
 
+    const dummyDate = new Date(0);
+
     const settings = [
         {"category": "maps", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
         {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
         {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
+        {"category": "maps", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
+        {"category": "maps", "name": "Last Whole League Refresh", "type": "datetime", "value": dummyDate.toISOString()},
     ];
 
     for(let i = 0; i < settings.length; i++){

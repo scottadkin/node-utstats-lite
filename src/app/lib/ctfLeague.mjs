@@ -2,7 +2,9 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
-import { DAY } from "./generic.mjs";
+import { DAY, setInt } from "./generic.mjs";
+import { getUniqueMapGametypeCombosInPastDays } from "./matches.mjs";
+import Message from "./message.mjs";
 
 
 async function getMapPlayerHistory(mapId, gametypeId, maxAgeDays){
@@ -262,4 +264,39 @@ export async function updateSettings(data){
             await simpleQuery(query, vars);
         }
     }  
+}
+
+
+
+export async function refreshAllMapTables(){
+
+    const settings = await getLeagueCategorySettings("maps");
+
+    const lastImport = Math.floor(new Date(settings["Last Whole League Refresh"].value));
+    const now = new Date(Date.now());
+
+    const timeSinceLastRefresh = now - lastImport;
+
+    if(timeSinceLastRefresh < DAY){
+        new Message(`Less than 24 hours have passed since last CTF map league refresh, skipping.`,"note");
+        return;
+    }
+
+    if(settings["Maximum Match Age In Days"] === undefined) throw new Error(`CTF Map League Missing Setting, Maximum Match Age In Days`);
+
+    const maxDays = settings["Maximum Match Age In Days"].value;
+
+    const uniqueCombos = await getUniqueMapGametypeCombosInPastDays(maxDays);
+
+    const maxMatches = setInt(settings["Maximum Matches Per Player"], 20);
+
+    for(let i = 0; i < uniqueCombos.length; i++){
+
+        const u = uniqueCombos[i];
+        new Message(`Recalculating CTF League table for gametype=${u.gametype_id} and map=${u.map_id}`,"note");
+        await calcPlayersMapResults(u.map_id, u.gametype_id, maxMatches, maxDays)
+    }
+
+    const newData = {"maps":{"Last Whole League Refresh": {"value": now.toISOString(), "category": "maps"}}};
+    await updateSettings(newData);
 }

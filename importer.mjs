@@ -8,7 +8,7 @@ import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/app/lib/logsfoldersettings.mjs";
 import { bLogAlreadyImported } from "./src/app/lib/importer.mjs";
-import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings } from "./src/app/lib/ctfLeague.mjs";
+import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, refreshAllMapTables } from "./src/app/lib/ctfLeague.mjs";
 import { setInt } from "./src/app/lib/generic.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
@@ -85,7 +85,7 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
 
 async function updateCTFLeague(m, mapCTFLeagueSettings){
 
-    if(mapCTFLeagueSettings["Enable League"] === undefined){
+    if(mapCTFLeagueSettings["Enable League"].value === undefined){
         new Message(`Map CTFLeague settings missing, please install using install.mjs.`,"error");
     }else{
 
@@ -158,7 +158,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 }
 
 //serverId is -1 if logs are from the websites /Logs folder
-async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes){
+async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, mapCTFLeagueSettings){
 
     const start = performance.now();
 
@@ -166,8 +166,6 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
     let imported = 0;
     let failed = 0;
-
-    const mapCTFLeagueSettings = await getLeagueCategorySettings("maps");
 
     for(let i = 0; i < files.length; i++){
 
@@ -198,7 +196,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 }
 
 
-async function main(){
+async function main(mapCTFLeagueSettings){
 
 
     const logsFolderSettings = await getLogsFolderSettings();
@@ -210,7 +208,7 @@ async function main(){
 
     new Message(`Checking for leftover logs...`,"progress");
     const ls = logsFolderSettings;
-    await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime, ls.append_team_sizes);
+    await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime, ls.append_team_sizes, mapCTFLeagueSettings);
     new Message(`Completed parsing Leftover logs completed`,"pass");
 
     const query = "SELECT * FROM nstats_ftp ORDER BY id ASC";
@@ -263,7 +261,8 @@ async function main(){
             r.ignore_duplicates,
             r.min_players,
             r.min_playtime,
-            r.append_team_sizes
+            r.append_team_sizes,
+            mapCTFLeagueSettings
         );
     }  
 
@@ -272,27 +271,40 @@ async function main(){
 }
 
 
+async function startImport(){
+
+    const mapCTFLeagueSettings = await getLeagueCategorySettings("maps");
+    await main(mapCTFLeagueSettings);
+
+    if(mapCTFLeagueSettings["Update Whole League End Of Import"].value === "true"){
+
+        await refreshAllMapTables();
+    }
+}
+
 
 (async () =>{
 
     if(importInterval === 0){
 
         new Message(`ImportInterval is set to 0, the importer will run just once and then exit.`,"note");
-        await main();
+        await startImport();
 
         process.exit();
 
     }else{
 
-        let bPreviousImportCompleted = true;
+        let bPreviousImportCompleted = false;
+        await startImport();
+        bPreviousImportCompleted = true;
 
         setInterval(async () =>{
 
             if(bPreviousImportCompleted){
 
                 bPreviousImportCompleted = false;
-                await main();
-                bPreviousImportCompleted = true;
+                await startImport();
+                bPreviousImportCompleted = true;  
 
             }else{
                 new Message(`Previous import cycle is running, skipping this cycle.`,"progress");

@@ -4,6 +4,7 @@ import Tabs from "../Tabs";
 import {useEffect, useReducer } from "react";
 import WarningBox from "../WarningBox";
 import TrueFalseButton from "../TrueFalseButton";
+import { convertTimestamp } from "@/app/lib/generic.mjs";
 
 function reducer(state, action){
 
@@ -116,6 +117,11 @@ function renderMapOptions(state, dispatch){
 
                 dispatch({"type": "update-settings", "dataType": "bool", "category": value.category, "key": key, "value":!value.value});
             }}/>;
+
+        }else if(value.type === "datetime"){
+
+            elem = <td>{convertTimestamp(Math.floor(new Date(value.value)), true)}</td>
+
         }
 
         rows.push(<tr key={rows.length}>
@@ -145,7 +151,9 @@ function renderMapOptions(state, dispatch){
                 <li>Maximum matches per player refers to the maximum number of matches that can be counted towards a league table.
                 If a player is over the maximum number of matches only their latest games are counted towards the league table.</li>
                 <li>Maximum match age is the limit of how old a match is compared to the current date, if you set it to 90 only matches 
-                    that where in the previous 90 days will count towards the league table.</li>
+                    that where in the previous 90 days will count towards the league table.
+                </li>
+                <li>Update Whole League End Of Import will refresh all league tables at the end of the import process when the last refresh was more than 24 hours ago.</li>
             </ul>
         </div>
         <table className="t-width-3">

@@ -9,7 +9,7 @@ import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
-import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate } from "./generic.mjs";
+import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
 
@@ -1514,4 +1514,41 @@ export async function changeMatchGametype(matchId, gametypeId){
         await simpleQuery(`UPDATE nstats_${t} SET gametype_id=? WHERE match_id=?`, [gametypeId, matchId]);
 
     }
+}
+
+
+/**
+ * Get match id, map_id, gametype_ids of matches played in the past x days
+ * @param {*} daysLimit 
+ */
+export async function getBasicMatchesInfoInPastDays(daysLimit){
+
+    daysLimit = setInt(daysLimit, 28);
+    if(daysLimit < 1) daysLimit = 1;
+
+    const query = `SELECT id,map_id,gametype_id FROM nstats_matches WHERE date>=? ORDER BY date DESC`;
+
+    const now = Date.now();
+    const minDate = new Date(now - daysLimit * DAY);
+
+    return await simpleQuery(query, [minDate]);
+}
+
+/**
+ * 
+ * @param {*} daysLimit 
+ * @returns Unique gametype, map combinations e
+ */
+export async function getUniqueMapGametypeCombosInPastDays(daysLimit){
+
+    daysLimit = setInt(daysLimit, 28);
+    if(daysLimit < 1) daysLimit = 1;
+
+    const query = `SELECT DISTINCT map_id,gametype_id FROM nstats_matches WHERE date>=? GROUP BY map_id,gametype_id`;
+
+    const now = Date.now();
+    const minDate = new Date(now - daysLimit * DAY);
+
+    return await simpleQuery(query, [minDate]);
+    
 }
