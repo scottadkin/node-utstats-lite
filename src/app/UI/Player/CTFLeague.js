@@ -2,7 +2,7 @@
 import Header from "../Header";
 import { useState } from "react";
 import InteractiveTable from "../InteractiveTable";
-import { ignore0 } from "@/app/lib/generic.mjs";
+import { getOrdinal, ignore0 } from "@/app/lib/generic.mjs";
 
 function sortByName(a, b){
     a = a.name.toLowerCase();
@@ -86,8 +86,12 @@ function renderEntries(data, selectedGametype, selectedMap, gametypeNames, mapNa
         const gName = gametypeNames[d.gametype_id] ?? "Not Found";
         const mName = mapNames[d.map_id] ?? "Not Found";
 
+        let pos = d.pos;
+
+       // if(pos === 0) pos = 1;
+
         rows.push({
-            "place": {"value": i, "displayValue": `X`, "className": "ordinal"},
+            "place": {"value": pos, "displayValue": `${pos}${getOrdinal(pos)}`, "className": "ordinal"},
             "gametype": {"value": gName.toLowerCase(), "displayValue": gName},
             "map": {"value": mName.toLowerCase(), "displayValue": mName},
             "played": {"value": d.total_matches},

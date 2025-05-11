@@ -179,7 +179,7 @@ export async function getMapTable(mapId, gametypeId, page, perPage){
 
     const query = `SELECT player_id,first_match,last_match,total_matches,wins,draws,losses,
     cap_for,cap_against,cap_offset,points FROM nstats_player_map_ctf_league WHERE map_id=? 
-    AND gametype_id=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset ASC LIMIT ?, ?`;
+    AND gametype_id=? ORDER BY points DESC, total_matches ASC, wins DESC, draws DESC, losses ASC, cap_offset DESC LIMIT ?, ?`;
     
 
     const start = page * perPage;
@@ -313,8 +313,32 @@ export async function refreshAllMapTables(){
 
 export async function getPlayerMapsLeagueData(playerId){
 
-    const query = `SELECT gametype_id,map_id,total_matches,wins,draws,losses,cap_for,cap_against,cap_offset,points 
+    const query = `SELECT gametype_id,map_id,total_matches,wins,draws,losses,cap_for,cap_against,cap_offset,points
     FROM nstats_player_map_ctf_league WHERE player_id=?`;
 
-    return await simpleQuery(query, [playerId]);
+    const result = await simpleQuery(query, [playerId]);
+
+
+    await getPlayerMapsPosition(playerId, result);
+
+    return result;
+}
+
+
+/**
+ * probably not an efficent way of doing this...
+ * @param {*} playerId 
+ * @param {*} targetData 
+ */
+export async function getPlayerMapsPosition(playerId, targetData){
+
+    const query = `SELECT COUNT(*) as pos FROM nstats_player_map_ctf_league 
+    WHERE gametype_id=? AND map_id=? AND points>=? 
+    ORDER BY points DESC, total_matches ASC, wins DESC, draws DESC, losses ASC, cap_offset DESC`;
+
+    for(let i = 0; i < targetData.length; i++){
+        const t = targetData[i];
+        const pos = await simpleQuery(query, [t.gametype_id, t.map_id, t.points]);
+        if(pos.length > 0) t.pos = pos[0].pos;
+    }
 }
