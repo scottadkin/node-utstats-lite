@@ -180,7 +180,6 @@ async function loadSettings(dispatch){
 
         dispatch({"type": "load-settings", "settings": res});
 
-        console.log(res);
     }catch(err){
         console.trace(err);
     }

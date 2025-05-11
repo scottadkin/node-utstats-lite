@@ -107,9 +107,15 @@ export default async function MapPage({params, searchParams}){
 
     elems[pageLayout["Rankings"]] = (pageSettings["Display Rankings"]) ? <PlayerRankings key="rankings" id={id}/> : null ;
 
+ 
+
+    if(ctfLeagueSettings["Enable League"].value === "true" && pageSettings["Display CTF League"] === "1"){
+        elems[pageLayout["CTF League"]] = <PlayerLeague key="" mapId={id} lastPlayedGametypeId={lastPlayedGametypeId} gametypes={gametypeNames} leagueSettings={ctfLeagueSettings}/>
+    }
+
     return <main>
         <Header>{info.name}</Header>
-        <PlayerLeague mapId={id} lastPlayedGametypeId={lastPlayedGametypeId} gametypes={gametypeNames} leagueSettings={ctfLeagueSettings}/>
+       
         <div className="map-sshot">
             <Image src={`/images/maps/${image}`} width={1920} height={1080} alt="image"/>
         </div>
