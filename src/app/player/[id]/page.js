@@ -20,6 +20,8 @@ import AddToSavedPlayers from "@/app/UI/Player/AddToSavedPlayers";
 //import {getWeaponNames} from "@/app/lib/weapons.mjs";
 import ActivityHeatMap from "@/app/UI/ActivityHeatMap";
 import { getMapNames } from "@/app/lib/maps.mjs";
+import CTFLeague from "@/app/UI/Player/CTFLeague";
+import { getPlayerMapsLeagueData } from "@/app/lib/ctfLeague.mjs";
 
 export async function generateMetadata({ params, searchParams }, parent) {
 
@@ -115,6 +117,8 @@ export default async function Page({params, searchParams}){
         })
     )];
 
+    const leagueData = await getPlayerMapsLeagueData(realId);
+
 
     const gametypeNames = await getGametypeNames(gametypeIds);
 
@@ -180,6 +184,7 @@ export default async function Page({params, searchParams}){
             <PermaLink url={`/player/${hash}`} text="Copy Permanent Player Link To Clipboard"/><br/>
             <AddToSavedPlayers hash={hash}/>
         </div>
+        <CTFLeague data={leagueData} gametypeNames={gametypeNames} mapNames={mapNames}/>
         {elems}
         
         

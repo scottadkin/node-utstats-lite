@@ -308,3 +308,13 @@ export async function refreshAllMapTables(){
     const newData = {"maps":{"Last Whole League Refresh": {"value": now.toISOString(), "category": "maps"}}};
     await updateSettings(newData);
 }
+
+
+
+export async function getPlayerMapsLeagueData(playerId){
+
+    const query = `SELECT gametype_id,map_id,total_matches,wins,draws,losses,cap_for,cap_against,cap_offset,points 
+    FROM nstats_player_map_ctf_league WHERE player_id=?`;
+
+    return await simpleQuery(query, [playerId]);
+}

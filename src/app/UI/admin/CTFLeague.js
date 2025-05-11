@@ -120,7 +120,7 @@ function renderMapOptions(state, dispatch){
 
         }else if(value.type === "datetime"){
 
-            elem = <td>{convertTimestamp(Math.floor(new Date(value.value)), true)}</td>
+            elem = <td>{value.value}</td>
 
         }
 
