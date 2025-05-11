@@ -333,8 +333,8 @@ export async function getPlayerMapsLeagueData(playerId){
 export async function getPlayerMapsPosition(playerId, targetData){
 
     const query = `SELECT COUNT(*) as pos FROM nstats_player_map_ctf_league 
-    WHERE gametype_id=? AND map_id=? AND points>=? 
-    ORDER BY points DESC, total_matches ASC, wins DESC, draws DESC, losses ASC, cap_offset DESC`;
+    WHERE gametype_id=? AND map_id=? AND points>?
+    ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset DESC`;
 
     for(let i = 0; i < targetData.length; i++){
         const t = targetData[i];

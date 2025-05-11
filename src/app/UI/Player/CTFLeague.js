@@ -60,7 +60,7 @@ function renderTabs(selectedGametype, selectedMap, gametypeNames, mapNames, setG
 function renderEntries(data, selectedGametype, selectedMap, gametypeNames, mapNames){
 
     const headers = {
-        "place": {"title": "Place"},
+        "place": {"title": "Place", "mouseOverBox": {"title": "Note", "content": "Place in this table is only based by points."}},
         "gametype": {"title": "Gametype"},
         "map": {"title": "Map"},
         "played": {"title": "Played"},
@@ -88,7 +88,12 @@ function renderEntries(data, selectedGametype, selectedMap, gametypeNames, mapNa
 
         let pos = d.pos;
 
-       // if(pos === 0) pos = 1;
+        if(pos === 0){
+            pos = 1;
+        }else if(pos > 1){
+            pos++;
+        }
+        
 
         rows.push({
             "place": {"value": pos, "displayValue": `${pos}${getOrdinal(pos)}`, "className": "ordinal"},
