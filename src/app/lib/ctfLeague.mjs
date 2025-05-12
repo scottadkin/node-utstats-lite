@@ -175,7 +175,7 @@ export async function getMapTable(mapId, gametypeId, page, perPage){
 
     const totalMatches = await getMapTotalPossibleResults(mapId, gametypeId);
 
-    if(totalMatches === 0) return {};
+    if(totalMatches === 0) return {"data": [], "totalResults": 0};
 
     const query = `SELECT player_id,first_match,last_match,total_matches,wins,draws,losses,
     cap_for,cap_against,cap_offset,points FROM nstats_player_map_ctf_league WHERE map_id=? 

@@ -136,7 +136,9 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await m.main();
 
-        await updateCTFLeague(m, mapCTFLeagueSettings);
+        if(m.ctf.bMatchCTF){
+            await updateCTFLeague(m, mapCTFLeagueSettings);
+        }
 
         await InsertLogHistory(file, serverId, m.matchId);
 

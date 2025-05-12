@@ -8,11 +8,12 @@ export class CTF{
 
     constructor(){
 
+        this.bMatchCTF = false;
+        this.bCheckedForCTF = false;
         this.events = [];
 
         this.flags = [];
         
-
         for(let i = 0; i < 4; i++){
 
             this.flags.push(new ctfFlag(i));
@@ -208,6 +209,8 @@ export class CTF{
 
     bAnyCTFEvents(players){
 
+        if(this.bCheckedForCTF) return;
+
         let keys = null;
 
         for(const playerData of Object.values(players)){
@@ -217,16 +220,17 @@ export class CTF{
             for(let i = 0; i < keys.length; i++){
 
                 if(keys[i] === "flagCarryTime") continue;
-                if(playerData.stats.ctf[keys[i]] !== 0) return true;
+                if(playerData.stats.ctf[keys[i]] !== 0){
+                    this.bMatchCTF = true;
+                    return;
+                }
             }
-        }
-
-        return false;
+        } 
     }
 
     async insertPlayerMatchData(playerManager, matchId, gametypeId, mapId){
 
-        if(this.bAnyCTFEvents(playerManager.mergedPlayers)){
+        if(this.bMatchCTF){
             await insertPlayerMatchData(playerManager, matchId, gametypeId, mapId);
         }
     }
@@ -234,7 +238,7 @@ export class CTF{
 
     async updatePlayerTotals(playerManager){
 
-        if(this.bAnyCTFEvents(playerManager.mergedPlayers)){
+        if(this.bMatchCTF){
 
             const playerIds = [];
 

@@ -174,6 +174,7 @@ export default function PlayerLeague({mapId, gametypes, leagueSettings, lastPlay
     }, [mapId, state.gametypeId, state.page, state.perPage]);
 
 
+    if(state.data.length === 0) return null;
 
 
     return <>

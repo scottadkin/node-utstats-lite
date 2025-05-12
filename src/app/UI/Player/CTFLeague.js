@@ -121,6 +121,8 @@ export default function CTFLeague({data, gametypeNames, mapNames}){
     const [selectedGametype, setSelectedGametype] = useState("0");
     const [selectedMap, setSelectedMap] = useState("0");
 
+    if(data.length === 0) return null;
+    
     return <>
         <Header>CTF League</Header>
         {renderTabs(selectedGametype, selectedMap, gametypeNames, mapNames, setSelectedGametype, setSelectedMap)}
