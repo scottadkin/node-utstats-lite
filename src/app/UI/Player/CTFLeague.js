@@ -124,6 +124,6 @@ export default function CTFLeague({data, gametypeNames, mapNames}){
     return <>
         <Header>CTF League</Header>
         {renderTabs(selectedGametype, selectedMap, gametypeNames, mapNames, setSelectedGametype, setSelectedMap)}
-        {renderEntries(data, selectedGametype, selectedMap, gametypeNames, mapNames)}
+        {renderEntries(data, selectedGametype, selectedMap, gametypeNames, mapNames)} 
     </>
 }

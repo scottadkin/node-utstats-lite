@@ -225,6 +225,10 @@ form{
 	margin-top:var(--margin-1);
 }
 
+.p-bottom-1{
+	padding-bottom: var(--padding-1);
+}
+
 table{
     border-collapse: collapse;
     color:var(--font-color-1);

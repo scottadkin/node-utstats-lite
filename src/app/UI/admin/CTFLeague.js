@@ -4,7 +4,7 @@ import Tabs from "../Tabs";
 import {useEffect, useReducer } from "react";
 import WarningBox from "../WarningBox";
 import TrueFalseButton from "../TrueFalseButton";
-import { convertTimestamp } from "@/app/lib/generic.mjs";
+import ErrorBox from "../ErrorBox";
 
 function reducer(state, action){
 
@@ -33,6 +33,18 @@ function reducer(state, action){
             return {
                 ...state,
                 "settings": {...s}
+            }
+        }
+        case "set-map-recalc": {
+            return {
+                ...state,
+                "bMapRecalcInProgress": action.value
+            }
+        }
+        case "set-error": {
+            return {
+                ...state,
+                "error": action.value
             }
         }
     }
@@ -91,8 +103,50 @@ async function saveChanges(changes, dispatch){
     }catch(err){
         console.trace(err);
     }
-
 }
+
+
+async function recalcMapTables(state, dispatch){
+
+    try{
+        dispatch({"type": "set-map-recalc", "value": true});
+
+        const req = await fetch("./api/admin?mode=recalculate-player-map-ctf-league");
+
+        const res = await req.json();
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        dispatch({"type": "set-map-recalc", "value": false});
+
+    }catch(err){
+        console.trace(err);
+        dispatch({"type": "set-error", "value": err.toString()});
+    }
+}
+
+function renderRecalculateMaps(state, dispatch){
+
+    let button = <div className="info">Recalculating in progress....<br/>You can leave this area while the data is being processed.</div>;
+
+    if(!state.bMapRecalcInProgress){
+        button = <div className="text-center p-bottom-1">
+            <button className="submit-button" onClick={() =>{
+                recalcMapTables(state, dispatch);
+            }}>Recalculate Tables</button>
+        </div>;
+    }
+
+    return <>
+        <Header>Recalculate Map Leagues</Header>
+        <div className="info">
+            Recalculate all player map CTF league tables, it is recommended to do this after modifying map league settings.
+            
+        </div>
+        {button}
+    </>
+}
+
 
 function renderMapOptions(state, dispatch){
 
@@ -165,6 +219,7 @@ function renderMapOptions(state, dispatch){
                 {rows}
             </tbody>
         </table>
+        {renderRecalculateMaps(state, dispatch)}
     </>
 }
 
@@ -190,7 +245,9 @@ export default function CTFLeague({}){
     const [state, dispatch] = useReducer(reducer, {
         "mode": "map",
         "settings": {},
-        "savedSettings": {}
+        "savedSettings": {},
+        "bMapRecalcInProgress": false,
+        "error": null
     });
 
     useEffect(() =>{
@@ -206,6 +263,8 @@ export default function CTFLeague({}){
         <Tabs options={tabOptions} selectedValue={state.mode} changeSelected={(value) =>{
             dispatch({"type": "change-mode", "mode": value});
         }}/>
+        {(state.error !== null) ? <ErrorBox title="Error">{state.error}</ErrorBox> : null}
         {renderMapOptions(state, dispatch)}
+        
     </>
 }

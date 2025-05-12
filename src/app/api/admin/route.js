@@ -25,6 +25,7 @@ import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/da
 import { adminGetMatchLogDetails, adminGetMatches, deleteMatch } from "@/app/lib/matches.mjs";
 import { getAllNames as getAllGametypeNames, getSplitByTeamSizeInfo, appendTeamsToAllGametypes } from "@/app/lib/gametypes.mjs";
 import { getAllNames as getAllServerNames } from "@/app/lib/servers.mjs";
+import { refreshAllMapTables as refreshAllMapCTFTables } from "@/app/lib/ctfLeague.mjs";
 
 
 
@@ -446,6 +447,11 @@ export async function GET(req){
         if(mode === "append-team-sizes-to-gametypes"){
 
             return Response.json(await appendTeamsToAllGametypes());
+        }
+
+        if(mode === "recalculate-player-map-ctf-league"){
+            await refreshAllMapCTFTables(true);
+            return Response.json({"message": "passed"});
         }
 
         return Response.json({"message": "hi"});

@@ -268,7 +268,9 @@ export async function updateSettings(data){
 
 
 
-export async function refreshAllMapTables(){
+export async function refreshAllMapTables(bOverrideTimeLimit){
+
+    if(bOverrideTimeLimit === undefined) bOverrideTimeLimit = false;
 
     const settings = await getLeagueCategorySettings("maps");
 
@@ -285,7 +287,7 @@ export async function refreshAllMapTables(){
 
     const timeSinceLastRefresh = now - lastImport;
 
-    if(timeSinceLastRefresh < DAY){
+    if(!bOverrideTimeLimit && timeSinceLastRefresh < DAY){
         new Message(`Less than 24 hours have passed since last CTF map league refresh, skipping.`,"note");
         return;
     }

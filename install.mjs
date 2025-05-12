@@ -899,7 +899,7 @@ async function insertCTFLeagueSettings(){
 
 
         new Message(`Refreshing player ctf league tables.`,"note");
-        await refreshAllMapTables();
+        await refreshAllMapTables(true);
         process.exit();
 
     }catch(err){

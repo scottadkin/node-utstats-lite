@@ -186,12 +186,5 @@ export default async function Page({params, searchParams}){
         </div>
         <CTFLeague data={leagueData} gametypeNames={gametypeNames} mapNames={mapNames}/>
         {elems}
-        
-        
-        
-        
-        
-        
-        
     </main>
 }
