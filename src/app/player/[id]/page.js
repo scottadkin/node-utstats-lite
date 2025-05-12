@@ -176,6 +176,8 @@ export default async function Page({params, searchParams}){
     elems[pageLayout["Activity Heatmap"]] = (pageSettings["Display Activity Heatmap"] === "1") ? <ActivityHeatMap key="act" targetId={player.id} queryMode="get-matches-played-between" apiURL="/api/players"/> : null;
     
 
+    elems[pageLayout["CTF League"]] = (pageSettings["Display CTF League"] === "1") ? <CTFLeague key="ctf-league" data={leagueData} gametypeNames={gametypeNames} mapNames={mapNames}/> : null;
+
     return <main>
         <Header>
             <CountryFlag code={player.country}/>{player.name}&apos;s Player Summary
@@ -184,7 +186,6 @@ export default async function Page({params, searchParams}){
             <PermaLink url={`/player/${hash}`} text="Copy Permanent Player Link To Clipboard"/><br/>
             <AddToSavedPlayers hash={hash}/>
         </div>
-        <CTFLeague data={leagueData} gametypeNames={gametypeNames} mapNames={mapNames}/>
         {elems}
     </main>
 }

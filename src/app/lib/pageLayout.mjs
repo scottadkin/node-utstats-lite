@@ -4,7 +4,7 @@ const DEFAULT_PAGE_LAYOUTS = {
     "home": ["Welcome Message", "Social Media", "Recent Matches", "Activity Heatmap", "Most Played Maps", "Most Played Gametypes", "Servers"],
     "map": ["Basic Summary", "Activity Heatmap", "Recent Matches", "Rankings", "Weapon Statistics", "CTF League", "Player Top Averages"],
     "match": ["Basic Info", "Screenshot", "Frags", "CTF", "CTF Caps", "DOM","Damage Stats","Classic Weapon Stats", "Weapons", "Items", "Special Events", "Kills", "Pings", "JSON Links"],
-    "player": ["Gametype Totals", "CTF", "Special Events", "Weapons", "Rankings", "Items","Activity Heatmap", "Recent Matches"],
+    "player": ["Gametype Totals", "CTF","CTF League", "Special Events", "Weapons", "Rankings", "Items","Activity Heatmap", "Recent Matches"],
     "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Register", "Watchlist"]
 };
 
@@ -57,6 +57,25 @@ export async function getPageLayout(pageName){
     return data;
 }
 
+
+async function bPageIndexInUse(page, index){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_page_layout WHERE page=? AND page_order=?`;
+
+    const result = await simpleQuery(query, [page, index]);
+  
+    return result[0].total_rows > 0;
+}
+
+async function getLastIndex(page){
+
+    const query = `SELECT page_order FROM nstats_page_layout WHERE page=? ORDER BY page_order DESC LIMIT 1`;
+    const result = await simpleQuery(query, [page]);
+
+    if(result.length > 0) return result[0].page_order;
+    return 0;
+
+}
 
 export async function addPageLayout(page, item, pageOrder){
 
@@ -111,6 +130,12 @@ async function insertPageLayout(page, itemName, pageOrder){
     page = page.toLowerCase();
 
     if(await bPageOrderItemExists(page, itemName)) return;
+
+    const bIndexInUse = await bPageIndexInUse(page, pageOrder);
+
+    if(bIndexInUse){
+        pageOrder = await getLastIndex(page) + 1;
+    }
 
     const query = `INSERT INTO nstats_page_layout VALUES(NULL,?,?,?)`;
 
