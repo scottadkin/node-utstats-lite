@@ -13,18 +13,72 @@ function sortByName(a, b){
     return 0;
 }
 
-function renderTabs(selectedGametype, selectedMap, gametypeNames, mapNames, setGametype, setMap){
+function getGametypeMapTotalMatches(data, targetGametype, targetMap){
+
+    let total = 0;
+
+    if(targetGametype === null && targetMap === null){
+        return data.reduce((acc, cur) =>{
+            return acc += cur.total_matches;
+        },0);
+
+    }
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+        
+        if(targetGametype !== null && targetMap !== null){
+            if(d.gametype_id === targetGametype && d.map_id === targetMap){
+                return d.total_matches;
+            }
+        }
+
+        if(targetGametype === null){
+
+            if(d.map_id === targetMap){
+                total += d.total_matches;
+                continue;
+            }
+        }
+
+        if(targetMap === null){
+            if(d.gametype_id === targetGametype){
+                total += d.total_matches;
+                continue;
+            }
+        }
+
+    }
+
+
+    return total;
+}
+
+function renderTabs(data, selectedGametype, selectedMap, gametypeNames, mapNames, setGametype, setMap){
 
     const gametypeOptions = [];
 
+    selectedGametype = parseInt(selectedGametype);
+    selectedMap = parseInt(selectedMap);
+
+    if(selectedGametype === 0) selectedGametype = null;
+    if(selectedMap === 0) selectedMap = null;
+
     for(const [id, name] of Object.entries(gametypeNames)){
-        gametypeOptions.push({"name": name, "value": id});
+
+        const total = getGametypeMapTotalMatches(data, (name !== "All") ? parseInt(id) : null, null);
+
+        gametypeOptions.push({"name": `${name} (${total})`, "value": id});
     }
 
     const mapOptions = [];
 
     for(const [id, name] of Object.entries(mapNames)){
-        mapOptions.push({"name": name, "value": id});
+
+        const total = getGametypeMapTotalMatches(data, selectedGametype, parseInt(id));
+  
+        mapOptions.push({"name": `${name} (${total})`, "value": id});
     }
 
     gametypeOptions.sort(sortByName);
@@ -48,7 +102,7 @@ function renderTabs(selectedGametype, selectedMap, gametypeNames, mapNames, setG
             <select className="default-select" onChange={(e) =>{
                 setMap(e.target.value);
             }}>
-                <option value="0">All</option>
+                <option value="0">All ({getGametypeMapTotalMatches(data, (selectedGametype !== 0) ? selectedGametype : null, null)})</option>
                 {mapOptions.map((m, i) =>{
                     return <option key={i} value={m.value}>{m.name}</option>
                 })}
@@ -125,7 +179,7 @@ export default function CTFLeague({data, gametypeNames, mapNames}){
     
     return <>
         <Header>CTF League</Header>
-        {renderTabs(selectedGametype, selectedMap, gametypeNames, mapNames, setSelectedGametype, setSelectedMap)}
+        {renderTabs(data, selectedGametype, selectedMap, gametypeNames, mapNames, setSelectedGametype, setSelectedMap)}
         {renderEntries(data, selectedGametype, selectedMap, gametypeNames, mapNames)} 
     </>
 }

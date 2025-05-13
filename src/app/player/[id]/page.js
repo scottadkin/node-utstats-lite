@@ -174,7 +174,6 @@ export default async function Page({params, searchParams}){
     elems[pageLayout["Recent Matches"]] = matchesElem;
 
     elems[pageLayout["Activity Heatmap"]] = (pageSettings["Display Activity Heatmap"] === "1") ? <ActivityHeatMap key="act" targetId={player.id} queryMode="get-matches-played-between" apiURL="/api/players"/> : null;
-    
 
     elems[pageLayout["CTF League"]] = (pageSettings["Display CTF League"] === "1") ? <CTFLeague key="ctf-league" data={leagueData} gametypeNames={gametypeNames} mapNames={mapNames}/> : null;
 
