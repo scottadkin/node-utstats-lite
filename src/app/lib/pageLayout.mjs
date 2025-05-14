@@ -5,7 +5,7 @@ const DEFAULT_PAGE_LAYOUTS = {
     "map": ["Basic Summary", "Activity Heatmap", "Recent Matches", "Rankings", "Weapon Statistics", "CTF League", "Player Top Averages"],
     "match": ["Basic Info", "Screenshot", "Frags", "CTF", "CTF Caps", "DOM","Damage Stats","Classic Weapon Stats", "Weapons", "Items", "Special Events", "Kills", "Pings", "JSON Links"],
     "player": ["Gametype Totals", "CTF","CTF League", "Special Events", "Weapons", "Rankings", "Items","Activity Heatmap", "Recent Matches"],
-    "nav": ["Home", "Matches", "Players", "Rankings", "Records", "Maps", "Admin", "Login/Register", "Watchlist"]
+    "nav": ["Home", "Matches", "Players", "Rankings","CTF League", "Records", "Maps", "Admin", "Login/Register", "Watchlist"]
 };
 
 function getNextAvailableIndex(usedIndexes, targetIndex){

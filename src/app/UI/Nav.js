@@ -105,6 +105,19 @@ export default function Nav({settings, sessionInfo, bAdmin, layout}){
         );
     }
 
+    if(settings["Display CTF League"] === "1"){
+
+        options.push({
+                "name": "CTF League",
+                "url": "/ctfleague",
+                "matches": [
+                    "/ctfleague",
+                ],
+                "index": layout["CTF League"]
+            }
+        );
+    }
+
     if(sessionInfo !== null && settings["Display Admin"] === "1"){
 
         options.push({

@@ -60,6 +60,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Nav" ,"type": `bool`, "name": "Display Matches", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Players", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Rankings", "value": 1},
+    {"category": "Nav" ,"type": `bool`, "name": "Display CTF League", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Records", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Maps", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Admin", "value": 1},
