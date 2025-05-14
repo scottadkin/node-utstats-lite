@@ -8,7 +8,7 @@ import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/app/lib/logsfoldersettings.mjs";
 import { bLogAlreadyImported } from "./src/app/lib/importer.mjs";
-import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, refreshAllMapTables } from "./src/app/lib/ctfLeague.mjs";
+import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, refreshAllTables } from "./src/app/lib/ctfLeague.mjs";
 import { setInt } from "./src/app/lib/generic.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
@@ -83,25 +83,34 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
 }
 
 
-async function updateCTFLeague(m, mapCTFLeagueSettings){
+async function updateCTFLeague(m, ctfLeagueSettings){
 
-    if(mapCTFLeagueSettings["Enable League"].value === undefined){
-        new Message(`Map CTFLeague settings missing, please install using install.mjs.`,"error");
-    }else{
+    const types = ["maps", "gametypes"];
 
-        const bEnabledMapCTF = mapCTFLeagueSettings["Enable League"]?.value ?? "false";
-        const maxMatches = setInt(mapCTFLeagueSettings["Maximum Matches Per Player"]?.value, 5);
-        const maxDays = setInt(mapCTFLeagueSettings["Maximum Match Age In Days"]?.value, 180);
+    for(let i = 0; i < types.length; i++){
 
-        if(bEnabledMapCTF === "true"){
-            await leagueCalcPlayerMapResults(m.map.id, m.gametype.id, maxMatches, maxDays);
+        const t = types[i];
+
+        const settings = ctfLeagueSettings[t];
+
+        if(settings["Enable League"].value === undefined){
+            new Message(`${t.toUpperCase()} CTFLeague settings missing, please install using install.mjs.`,"error");
         }else{
-            new Message(`CTF map league is disabled, skipping.`,"note");
+
+            const bEnabledMapCTF = settings["Enable League"]?.value ?? "false";
+            const maxMatches = setInt(settings["Maximum Matches Per Player"]?.value, 5);
+            const maxDays = setInt(settings["Maximum Match Age In Days"]?.value, 180);
+
+            if(bEnabledMapCTF === "true"){
+                await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays);
+            }else{
+                new Message(`CTF ${t.toUpperCase()} league is disabled, skipping.`,"note");
+            }
         }
-    }
+    } 
 }
 
-async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, mapCTFLeagueSettings){
+async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, ctfLeagueSettings){
 
     try{
 
@@ -137,7 +146,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
         await m.main();
 
         if(m.ctf.bMatchCTF){
-            await updateCTFLeague(m, mapCTFLeagueSettings);
+            await updateCTFLeague(m, ctfLeagueSettings);
         }
 
         await InsertLogHistory(file, serverId, m.matchId);
@@ -160,7 +169,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 }
 
 //serverId is -1 if logs are from the websites /Logs folder
-async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, mapCTFLeagueSettings){
+async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings){
 
     const start = performance.now();
 
@@ -175,7 +184,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
         
         if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
 
-        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, mapCTFLeagueSettings)){
+        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, ctfLeagueSettings)){
             imported++;
         }else{
             failed++;
@@ -198,7 +207,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 }
 
 
-async function main(mapCTFLeagueSettings){
+async function main(ctfLeagueSettings){
 
 
     const logsFolderSettings = await getLogsFolderSettings();
@@ -210,7 +219,7 @@ async function main(mapCTFLeagueSettings){
 
     new Message(`Checking for leftover logs...`,"progress");
     const ls = logsFolderSettings;
-    await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime, ls.append_team_sizes, mapCTFLeagueSettings);
+    await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime, ls.append_team_sizes, ctfLeagueSettings);
     new Message(`Completed parsing Leftover logs completed`,"pass");
 
     const query = "SELECT * FROM nstats_ftp ORDER BY id ASC";
@@ -264,7 +273,7 @@ async function main(mapCTFLeagueSettings){
             r.min_players,
             r.min_playtime,
             r.append_team_sizes,
-            mapCTFLeagueSettings
+            ctfLeagueSettings
         );
     }  
 
@@ -275,12 +284,21 @@ async function main(mapCTFLeagueSettings){
 
 async function startImport(){
 
-    const mapCTFLeagueSettings = await getLeagueCategorySettings("maps");
-    await main(mapCTFLeagueSettings);
+    const maps = await getLeagueCategorySettings("maps");
+    const gametypes = await getLeagueCategorySettings("gametypes");
 
-    if(mapCTFLeagueSettings["Update Whole League End Of Import"].value === "true"){
+    const ctfLeagueSettings = {"maps": maps, "gametypes": gametypes};
 
-        await refreshAllMapTables();
+    await main(ctfLeagueSettings);
+
+    if(ctfLeagueSettings.maps["Update Whole League End Of Import"].value === "true"){
+
+        await refreshAllTables(false, "maps");
+    }
+
+    if(ctfLeagueSettings.gametypes["Update Whole League End Of Import"].value === "true"){
+
+        await refreshAllTables(false, "gametypes");
     }
 }
 

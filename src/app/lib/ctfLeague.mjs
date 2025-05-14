@@ -3,19 +3,31 @@ import { simpleQuery, bulkInsert } from "./database.mjs";
 import { getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
 import { DAY, setInt } from "./generic.mjs";
-import { getUniqueMapGametypeCombosInPastDays } from "./matches.mjs";
+import { getUniqueMapGametypeCombosInPastDays, getUniqueGametypesInPastDays } from "./matches.mjs";
 import Message from "./message.mjs";
 
 
-async function getMapPlayerHistory(mapId, gametypeId, maxAgeDays){
+async function getPlayerHistory(mapId, gametypeId, maxAgeDays){
 
-    const query = `SELECT match_id,player_id,team FROM nstats_match_players 
-    WHERE time_on_server>0 AND spectator=0 AND map_id=? AND gametype_id=? AND match_date>=? ORDER BY match_date DESC`;
 
     const now = Date.now();
     const minDate = new Date(now - maxAgeDays * DAY);
 
-    const result = await simpleQuery(query, [mapId, gametypeId, minDate]);
+    let query = ``;
+    let vars = [];
+
+
+    if(mapId !== 0){
+        query = `SELECT match_id,player_id,team FROM nstats_match_players 
+        WHERE time_on_server>0 AND spectator=0 AND map_id=? AND gametype_id=? AND match_date>=? ORDER BY match_date DESC`;
+        vars = [mapId, gametypeId, minDate]
+    }else{
+        query = `SELECT match_id,player_id,team FROM nstats_match_players 
+        WHERE time_on_server>0 AND spectator=0 AND gametype_id=? AND match_date>=? ORDER BY match_date DESC`;
+        vars = [gametypeId, minDate];
+    }
+
+    const result = await simpleQuery(query, vars);
 
     const matchIds = new Set();
     const matchesToPlayers = {};
@@ -95,14 +107,15 @@ class CTFLeaguePlayerObject{
     }
 }
 
-async function deleteAllMapEntries(mapId, gametypeId){
+async function deleteAllEntries(mapId, gametypeId){
 
     const query = `DELETE FROM nstats_player_ctf_league WHERE map_id=? AND gametype_id=?`;
+    const vars = [mapId, gametypeId];
 
-    return await simpleQuery(query, [mapId, gametypeId]);
+    return await simpleQuery(query, vars);
 }
 
-async function bulkInsertMapEntries(mapId, gametypeId, tableData){
+async function bulkInsertEntries(mapId, gametypeId, tableData){
 
     const insertVars = [];
 
@@ -128,7 +141,7 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
     if(maxMatches === undefined) maxMatches = 5;
     if(maxDays === undefined) maxDays = 180;
 
-    const history = await getMapPlayerHistory(mapId, gametypeId, maxDays);
+    const history = await getPlayerHistory(mapId, gametypeId, maxDays);
     const matchResults = await getMatchesTeamResults(history.matchIds);
     const table = {};
 
@@ -156,8 +169,9 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
         }  
     }
 
-    await deleteAllMapEntries(mapId, gametypeId);
-    await bulkInsertMapEntries(mapId, gametypeId, table);
+
+    await deleteAllEntries(mapId, gametypeId);
+    await bulkInsertEntries(mapId, gametypeId, table);
 }
 
 
@@ -223,7 +237,11 @@ export async function getLeagueSiteSettings(){
             }
         }
 
-        settings[r.name] = {"category": r.category, "type": r.type, "value": value}
+        if(settings[r.category] === undefined){
+            settings[r.category] = {}; 
+        }
+
+        settings[r.category][r.name] = {"type": r.type, "value": value}
     }
 
     return settings;
@@ -259,7 +277,7 @@ export async function updateSettings(data){
 
             let v = setting.value.toString();
     
-            const vars = [v, setting.category, key];
+            const vars = [v, categoryName, key];
     
             await simpleQuery(query, vars);
         }
@@ -268,16 +286,18 @@ export async function updateSettings(data){
 
 
 
-export async function refreshAllMapTables(bOverrideTimeLimit){
+export async function refreshAllTables(bOverrideTimeLimit, type){
 
     if(bOverrideTimeLimit === undefined) bOverrideTimeLimit = false;
 
-    const settings = await getLeagueCategorySettings("maps");
+    if(type === undefined) throw new Error(`Refresh all tables requires a type`);
 
-    if(settings["Enable League"] === undefined) throw new Error(`CTF Map League Missing Setting, Enable League`);
+    const settings = await getLeagueCategorySettings(type);
+
+    if(settings["Enable League"] === undefined) throw new Error(`CTF ${type} League Missing Setting, Enable League`);
 
     if(settings["Enable League"].value === "false"){
-        new Message(`Player CTF Map League is disabled, skipping.`,"note");
+        new Message(`Player CTF ${type} League is disabled, skipping.`,"note");
         return;
     }
 
@@ -288,26 +308,43 @@ export async function refreshAllMapTables(bOverrideTimeLimit){
     const timeSinceLastRefresh = now - lastImport;
 
     if(!bOverrideTimeLimit && timeSinceLastRefresh < DAY){
-        new Message(`Less than 24 hours have passed since last CTF map league refresh, skipping.`,"note");
+        new Message(`Less than 24 hours have passed since last CTF ${type} league refresh, skipping.`,"note");
         return;
     }
 
-    if(settings["Maximum Match Age In Days"] === undefined) throw new Error(`CTF Map League Missing Setting, Maximum Match Age In Days`);
+    if(settings["Maximum Match Age In Days"] === undefined) throw new Error(`CTF ${type} League Missing Setting, Maximum Match Age In Days`);
 
     const maxDays = settings["Maximum Match Age In Days"].value;
 
-    const uniqueCombos = await getUniqueMapGametypeCombosInPastDays(maxDays);
+    let uniqueCombos = [];
+    if(type === "maps"){
+        uniqueCombos = await getUniqueMapGametypeCombosInPastDays(maxDays);
+    }else{
+        uniqueCombos = await getUniqueGametypesInPastDays(maxDays);
+    }
 
     const maxMatches = setInt(settings["Maximum Matches Per Player"], 20);
 
     for(let i = 0; i < uniqueCombos.length; i++){
 
         const u = uniqueCombos[i];
-        new Message(`Recalculating CTF League table for gametype=${u.gametype_id} and map=${u.map_id}`,"note");
-        await calcPlayersMapResults(u.map_id, u.gametype_id, maxMatches, maxDays)
+
+        let message = "";
+
+        if(type === "maps"){
+            message = `Recalculating CTF Map League table for gametype=${u.gametype_id} and map=${u.map_id}`;
+        }else{
+            message = `Recalculating CTF Gametype League table for gametype=${u.gametype_id} `;
+        }
+
+        new Message(message, "note");
+
+        let mapId = (type === "maps") ? u.map_id : 0;
+
+        await calcPlayersMapResults(mapId, u.gametype_id, maxMatches, maxDays)
     }
 
-    const newData = {"maps":{"Last Whole League Refresh": {"value": now.toISOString(), "category": "maps"}}};
+    const newData = {"maps":{"Last Whole League Refresh": {"value": now.toISOString(), "category": type}}};
     await updateSettings(newData);
 }
 

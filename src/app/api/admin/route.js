@@ -25,7 +25,7 @@ import { changePlayerMatchIds as changeDamagePlayerMatchIds } from "@/app/lib/da
 import { adminGetMatchLogDetails, adminGetMatches, deleteMatch } from "@/app/lib/matches.mjs";
 import { getAllNames as getAllGametypeNames, getSplitByTeamSizeInfo, appendTeamsToAllGametypes } from "@/app/lib/gametypes.mjs";
 import { getAllNames as getAllServerNames } from "@/app/lib/servers.mjs";
-import { refreshAllMapTables as refreshAllMapCTFTables } from "@/app/lib/ctfLeague.mjs";
+import { refreshAllTables as refreshAllCTFLeagueTables } from "@/app/lib/ctfLeague.mjs";
 
 
 
@@ -449,8 +449,11 @@ export async function GET(req){
             return Response.json(await appendTeamsToAllGametypes());
         }
 
-        if(mode === "recalculate-player-map-ctf-league"){
-            await refreshAllMapCTFTables(true);
+        if(mode === "recalculate-player-ctf-league"){
+
+            const cat = searchParams.get("cat") ?? null;
+            if(cat === null) throw new Error(`recalculate-player-ctf-league requires a category`);
+            await refreshAllCTFLeagueTables(true, cat);
             return Response.json({"message": "passed"});
         }
 

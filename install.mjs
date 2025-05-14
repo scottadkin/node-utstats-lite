@@ -12,7 +12,7 @@ import { setMatchMapGametypeIds } from "./src/app/lib/players.mjs";
 import { setAllPlayerMapAverages } from "./src/app/lib/players.mjs";
 import { setAllMapTotals } from "./src/app/lib/weapons.mjs";
 import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./src/app/lib/damage.mjs";
-import { refreshAllMapTables } from "./src/app/lib/ctfLeague.mjs";
+import { refreshAllTables } from "./src/app/lib/ctfLeague.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -794,11 +794,11 @@ async function addPageLayouts(){
     await restoreDefaultLayouts();
 }
 
-async function bCTFSettingExist(name){
+async function bCTFSettingExist(name, category){
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_ctf_league_settings WHERE name=?`;
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_ctf_league_settings WHERE name=? AND category=?`;
 
-    const result = await simpleQuery(query, [name]);
+    const result = await simpleQuery(query, [name, category]);
 
     return result[0].total_rows > 0;
 }
@@ -815,13 +815,18 @@ async function insertCTFLeagueSettings(){
         {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
         {"category": "maps", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
         {"category": "maps", "name": "Last Whole League Refresh", "type": "datetime", "value": dummyDate.toISOString()},
+        {"category": "gametypes", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
+        {"category": "gametypes", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
+        {"category": "gametypes", "name": "Enable League", "type": "bool", "value": "true"},
+        {"category": "gametypes", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
+        {"category": "gametypes", "name": "Last Whole League Refresh", "type": "datetime", "value": dummyDate.toISOString()},
     ];
 
     for(let i = 0; i < settings.length; i++){
 
         const s = settings[i];
 
-        if(!await bCTFSettingExist(s.name)){
+        if(!await bCTFSettingExist(s.name, s.category)){
             
             await simpleQuery(query, [s.category, s.name, s.type, s.value]);
         }
@@ -928,8 +933,10 @@ async function insertCTFLeagueSettings(){
         await damageSetMatchMapGametypeIds();
 
 
-        new Message(`Refreshing player ctf league tables.`,"note");
-        await refreshAllMapTables(true);
+        new Message(`Refreshing player ctf league Map tables.`,"note");
+        await refreshAllTables(true, "maps");
+        new Message(`Refreshing player ctf league Gametype tables.`,"note");
+        await refreshAllTables(true, "gametypes");
         process.exit();
 
     }catch(err){

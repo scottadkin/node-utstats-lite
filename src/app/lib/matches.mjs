@@ -1552,3 +1552,17 @@ export async function getUniqueMapGametypeCombosInPastDays(daysLimit){
     return await simpleQuery(query, [minDate]);
     
 }
+
+export async function getUniqueGametypesInPastDays(daysLimit){
+
+    daysLimit = setInt(daysLimit, 28);
+    if(daysLimit < 1) daysLimit = 1;
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_matches WHERE date>=?`;
+
+    const now = Date.now();
+    const minDate = new Date(now - daysLimit * DAY);
+
+    return await simpleQuery(query, [minDate]);
+    
+}

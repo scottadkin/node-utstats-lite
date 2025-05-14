@@ -16,6 +16,7 @@ function reducer(state, action){
             }
         }
         case "load-settings": {
+
             return {
                 ...state,
                 "settings": action.settings,
@@ -26,9 +27,10 @@ function reducer(state, action){
 
             const s = JSON.parse(JSON.stringify(state.settings));
 
-            if(s[action.key] === undefined) throw new Error("Setting does not exist!");
+            if(s[action.category] === undefined) throw new Error(`Setting category doesn't exist.`);
+            if(s[action.category][action.key] === undefined) throw new Error("Setting does not exist!");
 
-            s[action.key].value = action.value;
+            s[action.category][action.key].value = action.value;
             
             return {
                 ...state,
@@ -62,17 +64,20 @@ function getChangesSettings(state){
         "totalChanges": 0
     };
 
-    for(const [key, setting] of Object.entries(saved)){
+    for(const [category, settings] of Object.entries(saved)){
 
-        if(setting.value !== current[key].value){
-            
-            if(changed[setting.category] === undefined){
-                changed[setting.category] = {};
+        for(const [setting, data] of Object.entries(settings)){
+
+            if(current[category][setting].value !== data.value){
+
+                if(changed[category] === undefined){
+                    changed[category] = {};
+                }
+
+                changed[category][setting] = current[category][setting];
+                changed.totalChanges++;
             }
-
-            changed[setting.category][key] = current[key];
-            changed.totalChanges++;
-        }
+        }   
     }
 
     return changed;
@@ -106,12 +111,12 @@ async function saveChanges(changes, dispatch){
 }
 
 
-async function recalcMapTables(state, dispatch){
+async function recalcTables(state, dispatch){
 
     try{
         dispatch({"type": "set-map-recalc", "value": true});
 
-        const req = await fetch("./api/admin?mode=recalculate-player-map-ctf-league");
+        const req = await fetch(`./api/admin?mode=recalculate-player-ctf-league&cat=${state.mode}`);
 
         const res = await req.json();
 
@@ -125,22 +130,30 @@ async function recalcMapTables(state, dispatch){
     }
 }
 
-function renderRecalculateMaps(state, dispatch){
+function renderRecalculate(state, dispatch){
 
     let button = <div className="info">Recalculating in progress....<br/>You can leave this area while the data is being processed.</div>;
 
     if(!state.bMapRecalcInProgress){
         button = <div className="text-center p-bottom-1">
             <button className="submit-button" onClick={() =>{
-                recalcMapTables(state, dispatch);
+                recalcTables(state, dispatch);
             }}>Recalculate Tables</button>
         </div>;
     }
 
+    let title = "";
+
+    if(state.mode === "maps"){
+        title = "Map";
+    }else if(state.mode === "gametypes"){
+        title = "Gametype";
+    }
+
     return <>
-        <Header>Recalculate Map Leagues</Header>
+        <Header>Recalculate {title} Leagues</Header>
         <div className="info">
-            Recalculate all player map CTF league tables, it is recommended to do this after modifying map league settings.
+            Recalculate all player {title.toLowerCase()} CTF league tables, it is recommended to do this after modifying {title.toLowerCase()} league settings.
             
         </div>
         {button}
@@ -148,34 +161,36 @@ function renderRecalculateMaps(state, dispatch){
 }
 
 
-function renderMapOptions(state, dispatch){
+function renderOptions(state, dispatch){
 
-    if(state.mode !== "map") return null;
+
+    const targetCategory = state.mode;
 
     const rows = [];
 
-    for(const [key, value] of Object.entries(state.settings)){
+    if(state.settings[targetCategory] === undefined){
+        return null;
+    }
 
-        if(value.category !== "maps") continue;
+    for(const [key, value] of Object.entries(state.settings[targetCategory])){
+
         let elem = null;
 
         if(value.type === "integer"){
 
-            elem = <td><input className="textbox" type="number" defaultValue={value.value} onChange={(e) =>{
-                dispatch({"type": "update-settings","dataType": "integer", "category": value.category, "key": key, "value": e.target.value});
+            elem = <td><input className="textbox" type="number" value={value.value} onChange={(e) =>{
+                dispatch({"type": "update-settings","dataType": "integer", "category": targetCategory, "key": key, "value": e.target.value});
             }}/></td>;
 
         }else if(value.type === "bool"){
 
             elem = <TrueFalseButton bTableElem={true} value={value.value} setValue={() =>{  
-
-                dispatch({"type": "update-settings", "dataType": "bool", "category": value.category, "key": key, "value":!value.value});
+                dispatch({"type": "update-settings", "dataType": "bool", "category": targetCategory, "key": key, "value":!value.value});
             }}/>;
 
         }else if(value.type === "datetime"){
 
             elem = <td>{value.value}</td>
-
         }
 
         rows.push(<tr key={rows.length}>
@@ -188,7 +203,7 @@ function renderMapOptions(state, dispatch){
 
     let warn = null;
 
-    const changes = getChangesSettings(state)
+    const changes = getChangesSettings(state);
 
     if(changes.totalChanges > 0){
         warn = <WarningBox>
@@ -219,7 +234,7 @@ function renderMapOptions(state, dispatch){
                 {rows}
             </tbody>
         </table>
-        {renderRecalculateMaps(state, dispatch)}
+        {renderRecalculate(state, dispatch)}
     </>
 }
 
@@ -243,7 +258,7 @@ async function loadSettings(dispatch){
 export default function CTFLeague({}){
 
     const [state, dispatch] = useReducer(reducer, {
-        "mode": "map",
+        "mode": "maps",
         "settings": {},
         "savedSettings": {},
         "bMapRecalcInProgress": false,
@@ -255,7 +270,8 @@ export default function CTFLeague({}){
     },[]);
 
     const tabOptions = [
-        {"name": "Maps", "value": "map"}
+        {"name": "Maps", "value": "maps"},
+        {"name": "Gametypes", "value": "gametypes"},
     ];
 
     return <>
@@ -264,7 +280,7 @@ export default function CTFLeague({}){
             dispatch({"type": "change-mode", "mode": value});
         }}/>
         {(state.error !== null) ? <ErrorBox title="Error">{state.error}</ErrorBox> : null}
-        {renderMapOptions(state, dispatch)}
+        {renderOptions(state, dispatch)}
         
     </>
 }
