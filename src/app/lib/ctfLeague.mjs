@@ -97,7 +97,7 @@ class CTFLeaguePlayerObject{
 
 async function deleteAllMapEntries(mapId, gametypeId){
 
-    const query = `DELETE FROM nstats_player_map_ctf_league WHERE map_id=? AND gametype_id=?`;
+    const query = `DELETE FROM nstats_player_ctf_league WHERE map_id=? AND gametype_id=?`;
 
     return await simpleQuery(query, [mapId, gametypeId]);
 }
@@ -111,14 +111,14 @@ async function bulkInsertMapEntries(mapId, gametypeId, tableData){
         insertVars.push([
             d.playerId, gametypeId, mapId, 
             d.firstMatch, d.lastMatch, d.matches,
-            d.wins, d.draws, d.losses, 0, 
+            0, d.wins, d.draws, d.losses, 0, 
             d.capFor, d.capAgainst, d.capOffset,
             d.points
         ]);
     }
 
-    const query = `INSERT INTO nstats_player_map_ctf_league (player_id,gametype_id,map_id,first_match,last_match,
-    total_matches,wins,draws,losses,winrate,cap_for,cap_against,cap_offset,points) VALUES ?`;
+    const query = `INSERT INTO nstats_player_ctf_league (player_id,gametype_id,map_id,first_match,last_match,
+    total_matches,playtime,wins,draws,losses,winrate,cap_for,cap_against,cap_offset,points) VALUES ?`;
 
     await bulkInsert(query, insertVars);
 }
@@ -163,7 +163,7 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
 
 async function getMapTotalPossibleResults(mapId, gametypeId){
 
-    const query = `SELECT COUNT(*) as total_players FROM nstats_player_map_ctf_league WHERE map_id=? 
+    const query = `SELECT COUNT(*) as total_players FROM nstats_player_ctf_league WHERE map_id=? 
     AND gametype_id=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset ASC`;
 
     const result = await simpleQuery(query, [mapId, gametypeId]);
@@ -178,7 +178,7 @@ export async function getMapTable(mapId, gametypeId, page, perPage){
     if(totalMatches === 0) return {"data": [], "totalResults": 0};
 
     const query = `SELECT player_id,first_match,last_match,total_matches,wins,draws,losses,
-    cap_for,cap_against,cap_offset,points FROM nstats_player_map_ctf_league WHERE map_id=? 
+    cap_for,cap_against,cap_offset,points FROM nstats_player_ctf_league WHERE map_id=? 
     AND gametype_id=? ORDER BY points DESC, total_matches ASC, wins DESC, draws DESC, losses ASC, cap_offset DESC LIMIT ?, ?`;
     
 
@@ -316,7 +316,7 @@ export async function refreshAllMapTables(bOverrideTimeLimit){
 export async function getPlayerMapsLeagueData(playerId){
 
     const query = `SELECT gametype_id,map_id,total_matches,wins,draws,losses,cap_for,cap_against,cap_offset,points
-    FROM nstats_player_map_ctf_league WHERE player_id=?`;
+    FROM nstats_player_ctf_league WHERE player_id=?`;
 
     const result = await simpleQuery(query, [playerId]);
 
@@ -334,7 +334,7 @@ export async function getPlayerMapsLeagueData(playerId){
  */
 export async function getPlayerMapsPosition(playerId, targetData){
 
-    const query = `SELECT COUNT(*) as pos FROM nstats_player_map_ctf_league 
+    const query = `SELECT COUNT(*) as pos FROM nstats_player_ctf_league 
     WHERE gametype_id=? AND map_id=? AND points>?
     ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset DESC`;
 

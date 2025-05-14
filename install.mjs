@@ -587,7 +587,7 @@ const queries = [
             damage int NOT NULL
             ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_player_map_ctf_league (
+        `CREATE TABLE IF NOT EXISTS nstats_player_ctf_league (
         id int NOT NULL AUTO_INCREMENT,
         player_id int NOT NULL,
         gametype_id int NOT NULL,
