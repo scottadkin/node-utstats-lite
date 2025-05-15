@@ -381,3 +381,63 @@ export async function getPlayerMapsPosition(playerId, targetData){
         if(pos.length > 0) t.pos = pos[0].pos;
     }
 }
+
+
+/**
+* Only return gametypes with mapId=0
+*/
+export async function getUniqueGametypeLeagues(){
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_player_ctf_league WHERE map_id=0`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) =>{
+        return r.gametype_id;
+    });
+}
+
+export async function getUniqueMapLeagues(){
+
+    const query = `SELECT DISTINCT map_id FROM nstats_player_ctf_league WHERE map_id!=0`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) =>{
+        return r.map_id;
+    });
+}
+
+
+/**
+ * get top x for every gametype specified
+ */
+export async function getGametypesTopX(gametypeIds, max){
+
+    if(gametypeIds.length === 0) return {};
+    max = setInt(max, 10);
+
+    const query = `SELECT player_id,first_match,last_match,total_matches,wins,draws,losses,
+    cap_for,cap_against,cap_offset,points FROM nstats_player_ctf_league WHERE gametype_id=? AND map_id=0 ORDER BY points DESC LIMIT ?`;
+
+    const data = {};
+    const uniquePlayers = new Set();
+
+    for(let i = 0; i < gametypeIds.length; i++){
+
+        const g = parseInt(gametypeIds[i]);
+        if(g !== g) continue;
+        const result = await simpleQuery(query, [g, max]); 
+        data[g] = result;
+
+        for(let x = 0; x < result.length; x++){
+
+            uniquePlayers.add(result[x].player_id);
+        }
+    }
+
+    const playerNames = await getBasicPlayerInfo([...uniquePlayers]);
+
+    return {"data": data, "playerNames": playerNames};
+
+}

@@ -908,3 +908,20 @@ ul{
 	margin-left:auto;
 	margin-right: auto;
 }
+
+
+.view-all{
+	background-color:var(--bg-color-2);
+	color:var(--font-color-1);
+	width:75%;
+	max-width:500px;
+	text-align:center;
+	margin-bottom:var(--margin-1);
+	padding:var(--padding-1);
+	font-size:var(--font-size-small);
+}
+
+.view-all:hover{
+	cursor: pointer;
+	background-color:var(--bg-color-3);
+}
