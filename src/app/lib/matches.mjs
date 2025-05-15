@@ -12,6 +12,7 @@ import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
+import { getValidGametypes } from "./ctfLeague.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, matchStart, matchEnd,
@@ -1563,6 +1564,19 @@ export async function getUniqueGametypesInPastDays(daysLimit){
     const now = Date.now();
     const minDate = new Date(now - daysLimit * DAY);
 
-    return await simpleQuery(query, [minDate]);
+    const validGametypes = await getValidGametypes();
+
+    const result = await simpleQuery(query, [minDate]);
+
+    const data = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        if(validGametypes.indexOf(result[i].gametype_id) !== -1){
+            data.push(result[i]);
+        }
+    }
+
+    return data;
     
 }

@@ -285,6 +285,20 @@ export async function updateSettings(data){
 }
 
 
+/**
+ * Get only valid CTF gametypes based on data stroed in player match_ctf table
+ */
+export async function getValidGametypes(){
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_match_ctf`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) =>{
+        return r.gametype_id;
+    });
+}
+
 
 export async function refreshAllTables(bOverrideTimeLimit, type){
 
@@ -344,7 +358,9 @@ export async function refreshAllTables(bOverrideTimeLimit, type){
         await calcPlayersMapResults(mapId, u.gametype_id, maxMatches, maxDays)
     }
 
-    const newData = {"maps":{"Last Whole League Refresh": {"value": now.toISOString(), "category": type}}};
+    const newData = {};
+    
+    newData[type] = {"Last Whole League Refresh": {"value": now.toISOString(), "category": type}};
     await updateSettings(newData);
 }
 

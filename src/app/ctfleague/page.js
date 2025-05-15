@@ -1,6 +1,6 @@
 import Header from "../UI/Header";
 import TabsLinks from "../UI/TabsLinks";
-import { getUniqueGametypeLeagues, getUniqueMapLeagues, getLeagueCategorySettings, getGametypesTopX } from "../lib/ctfLeague.mjs";
+import { getUniqueMapLeagues, getLeagueCategorySettings, getGametypesTopX, getValidGametypes } from "../lib/ctfLeague.mjs";
 import { getGametypeNames } from "../lib/gametypes.mjs";
 import { getMapNames } from "../lib/maps.mjs";
 import { DefaultGametypeDisplay } from "../UI/CTFLeague/DefaultGametypeDisplay";
@@ -16,7 +16,7 @@ export default async function Page({params, searchParams}){
 
     mode = mode.toLowerCase();
 
-    const gametypeIds = await getUniqueGametypeLeagues();
+    const gametypeIds = await getValidGametypes();
     const gametypeNames = await getGametypeNames(gametypeIds, true);
 
 
