@@ -286,7 +286,7 @@ export async function updateSettings(data){
 
 
 /**
- * Get only valid CTF gametypes based on data stroed in player match_ctf table
+ * Get only valid CTF gametypes based on data stored in player match_ctf table
  */
 export async function getValidGametypes(){
 
@@ -299,6 +299,20 @@ export async function getValidGametypes(){
     });
 }
 
+/**
+ * Get only valid CTF maps based on data stored in player match_ctf table
+ */
+
+export async function getValidMaps(){
+
+    const query = `SELECT DISTINCT map_id FROM nstats_match_ctf`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) =>{
+        return r.map_id;
+    });
+}
 
 export async function refreshAllTables(bOverrideTimeLimit, type){
 

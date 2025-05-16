@@ -12,7 +12,7 @@ import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
-import { getValidGametypes } from "./ctfLeague.mjs";
+import { getValidGametypes, getValidMaps } from "./ctfLeague.mjs";
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta, date, playtime, matchStart, matchEnd,
@@ -1545,12 +1545,27 @@ export async function getUniqueMapGametypeCombosInPastDays(daysLimit){
     daysLimit = setInt(daysLimit, 28);
     if(daysLimit < 1) daysLimit = 1;
 
-    const query = `SELECT DISTINCT map_id,gametype_id FROM nstats_matches WHERE date>=? GROUP BY map_id,gametype_id`;
+    const validGametypes = await getValidGametypes();
+    const validMaps = await getValidMaps();
+
+    const query = `SELECT DISTINCT map_id,gametype_id FROM nstats_matches 
+    WHERE date>=? ${(validGametypes.length > 0) ? "AND gametype_id IN(?) " : ""} 
+    ${(validMaps.length > 0) ? "AND map_id IN(?)" : ""} 
+    GROUP BY map_id,gametype_id`;
 
     const now = Date.now();
     const minDate = new Date(now - daysLimit * DAY);
 
-    return await simpleQuery(query, [minDate]);
+    const vars = [minDate];
+
+    if(validGametypes.length > 0){
+        vars.push(validGametypes);
+    }
+    if(validMaps.length > 0){
+        vars.push(validMaps);
+    }
+
+    return await simpleQuery(query, vars);
     
 }
 
