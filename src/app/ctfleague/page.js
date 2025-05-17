@@ -4,6 +4,7 @@ import { getUniqueMapLeagues, getLeagueCategorySettings, getGametypesTopX, getVa
 import { getGametypeNames } from "../lib/gametypes.mjs";
 import { getMapNames } from "../lib/maps.mjs";
 import { DefaultGametypeDisplay } from "../UI/CTFLeague/DefaultGametypeDisplay";
+import LeagueSettings from "../UI/CTFLeague/LeagueSettings";
 
 export default async function Page({params, searchParams}){
 
@@ -11,10 +12,12 @@ export default async function Page({params, searchParams}){
     const sp = await searchParams;
 
     let mode = sp.mode ?? "";
+    let id = sp.id ?? null;
 
     if(mode === "") mode = "gametypes";
-
     mode = mode.toLowerCase();
+
+    id = parseInt(id);
 
     const gametypeIds = await getValidGametypes();
     const gametypeNames = await getGametypeNames(gametypeIds, true);
@@ -22,11 +25,9 @@ export default async function Page({params, searchParams}){
 
     const mapIds = await getUniqueMapLeagues();
     const mapNames = await getMapNames(mapIds);
+
+    const leagueSettings = (mode === "gametypes") ? await getLeagueCategorySettings("gametypes") : await getLeagueCategorySettings("maps");
    
-
-    const gametypeSettings = await getLeagueCategorySettings("gametypes");
-    const mapSettings = await getLeagueCategorySettings("maps");
-
     const tabs = [
         {"display": "Gametypes", "value": "gametypes"},
         {"display": "Maps", "value": "maps"}
@@ -46,7 +47,7 @@ export default async function Page({params, searchParams}){
     return <main>
         <Header>CTF League</Header>
         <TabsLinks options={tabs} url={`/ctfleague?mode=`} selectedValue={mode}/>
-        <div className="info">Display league settings here</div>
+        <LeagueSettings settings={leagueSettings} mode={mode}/>
         {elems}
     </main>
 }
