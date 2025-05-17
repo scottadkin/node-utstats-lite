@@ -473,9 +473,6 @@ export async function getGametypesTopX(gametypeIds, max){
 }
 
 
-
-
-
 export async function getMapPlayedValidGametypes(mapId){
 
     if(mapId === 0) return {};
@@ -490,4 +487,15 @@ export async function getMapPlayedValidGametypes(mapId){
     }
 
     return data;
+}
+
+export async function getLastestMapGametypePlayed(){
+
+    const query = `SELECT gametype_id,map_id FROM nstats_player_ctf_league WHERE map_id!=0 ORDER by id DESC LIMIT 1`;
+
+    const result = await simpleQuery(query);
+
+    if(result.length > 0) return result[0];
+
+    return null;
 }

@@ -51,11 +51,11 @@ function sortByName(a, b){
     return 0;
 }
 
-export default function MapDisplay({mapNames, gametypeNames}){
+export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCombo}){
 
     const [state, dispatch] = useReducer(reducer, {
-        "selectedMap": 0,
-        "selectedGametype": 0,
+        "selectedMap": (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.map_id :0,
+        "selectedGametype": (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.gametype_id :0,
         "data": [],
         "gametypeInfo": {}
     });
@@ -88,7 +88,7 @@ export default function MapDisplay({mapNames, gametypeNames}){
         <div className="form">
             <div className="form-row">
                 <label>Map</label>
-                <select defaultValue={0} onChange={(e) =>{
+                <select value={state.selectedMap} onChange={(e) =>{
    
                     const params = new URLSearchParams(searchParams.toString());
                     params.set('id', e.target.value);
@@ -102,7 +102,12 @@ export default function MapDisplay({mapNames, gametypeNames}){
             </div>
             <div className="form-row">
                 <label>Gametype</label>
-                <select>
+                <select value={state.selectedGametype} onChange={(e) =>{
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('gid', e.target.value);
+                    dispatch({"type": "set-selected", "gametype": e.target.value, "map": state.selectedMap});
+                    window.history.pushState(null, '', `?${params.toString()}`)
+                }}>
 
                     {gametypeOptions.map((g, i) =>{
                         return <option value={g.value} key={`g-${i}`}>{g.display}</option>
