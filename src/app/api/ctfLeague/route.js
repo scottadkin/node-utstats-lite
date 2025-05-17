@@ -1,4 +1,4 @@
-import { getMapTable, getLeagueSiteSettings, updateSettings } from "@/app/lib/ctfLeague.mjs";
+import { getMapTable, getLeagueSiteSettings, updateSettings, getMapPlayedValidGametypes } from "@/app/lib/ctfLeague.mjs";
 import { setInt } from "@/app/lib/generic.mjs";
 
 export async function GET(req){
@@ -31,6 +31,12 @@ export async function GET(req){
             const settings = await getLeagueSiteSettings();
 
             return Response.json(settings);
+        }
+
+        if(mode === "get-map-valid-gametypes"){
+
+            const data = await getMapPlayedValidGametypes(mapId);
+            return Response.json(data);
         }
 
     }catch(err){

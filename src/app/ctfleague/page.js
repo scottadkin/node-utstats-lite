@@ -3,7 +3,8 @@ import TabsLinks from "../UI/TabsLinks";
 import { getUniqueMapLeagues, getLeagueCategorySettings, getGametypesTopX, getValidGametypes } from "../lib/ctfLeague.mjs";
 import { getGametypeNames } from "../lib/gametypes.mjs";
 import { getMapNames } from "../lib/maps.mjs";
-import { DefaultGametypeDisplay } from "../UI/CTFLeague/DefaultGametypeDisplay";
+import  DefaultGametypeDisplay from "../UI/CTFLeague/DefaultGametypeDisplay";
+import MapDisplay from "../UI/CTFLeague/MapDisplay";
 import LeagueSettings from "../UI/CTFLeague/LeagueSettings";
 
 export default async function Page({params, searchParams}){
@@ -22,10 +23,6 @@ export default async function Page({params, searchParams}){
     const gametypeIds = await getValidGametypes();
     const gametypeNames = await getGametypeNames(gametypeIds, true);
 
-
-    const mapIds = await getUniqueMapLeagues();
-    const mapNames = await getMapNames(mapIds);
-
     const leagueSettings = (mode === "gametypes") ? await getLeagueCategorySettings("gametypes") : await getLeagueCategorySettings("maps");
    
     const tabs = [
@@ -42,6 +39,11 @@ export default async function Page({params, searchParams}){
         data = await getGametypesTopX(gametypeIds, 10);
 
         elems.push(<DefaultGametypeDisplay data={data} names={gametypeNames} key="d-gametypes" />);
+    }else{
+
+        const mapIds = await getUniqueMapLeagues();
+        const mapNames = await getMapNames(mapIds);
+        elems.push(<MapDisplay leagueSettings={leagueSettings} gametypeNames={gametypeNames} mapNames={mapNames} key="d-maps" />);
     }
 
     return <main>

@@ -471,3 +471,23 @@ export async function getGametypesTopX(gametypeIds, max){
     return {"data": data, "playerNames": playerNames};
 
 }
+
+
+
+
+
+export async function getMapPlayedValidGametypes(mapId){
+
+    if(mapId === 0) return {};
+
+    const query = `SELECT gametype_id,COUNT(*) as total_matches FROM nstats_player_ctf_league WHERE map_id=? GROUP BY gametype_id`;
+    const result = await simpleQuery(query, [mapId]);
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        data[result[i].gametype_id] = result[i].total_matches;
+    }
+
+    return data;
+}

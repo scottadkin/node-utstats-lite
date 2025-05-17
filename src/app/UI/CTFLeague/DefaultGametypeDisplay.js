@@ -2,7 +2,7 @@
 import Header from "../Header";
 import GenericTable from "./GenericTable";
 
-export function DefaultGametypeDisplay({data, names}){
+export default function DefaultGametypeDisplay({data, names}){
 
     const elems = [];
 
