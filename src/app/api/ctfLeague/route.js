@@ -1,4 +1,4 @@
-import { getMapTable, getLeagueSiteSettings, updateSettings, getMapPlayedValidGametypes } from "@/app/lib/ctfLeague.mjs";
+import { getMapTable, getLeagueSiteSettings, updateSettings, getMapPlayedValidGametypes, getSingleTopX } from "@/app/lib/ctfLeague.mjs";
 import { setInt } from "@/app/lib/generic.mjs";
 
 export async function GET(req){
@@ -17,6 +17,8 @@ export async function GET(req){
 
     try{
 
+        
+
         if(mode === "") throw new Error("No mode specified");
 
 
@@ -34,6 +36,8 @@ export async function GET(req){
         }
 
         if(mode === "get-map-valid-gametypes"){
+
+            const test = await getSingleTopX(gametypeId, mapId, page, perPage);
 
             const data = await getMapPlayedValidGametypes(mapId);
             return Response.json(data);

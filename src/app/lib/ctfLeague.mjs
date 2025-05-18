@@ -2,7 +2,7 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
-import { DAY, setInt } from "./generic.mjs";
+import { DAY, getPlayer, setInt } from "./generic.mjs";
 import { getUniqueMapGametypeCombosInPastDays, getUniqueGametypesInPastDays } from "./matches.mjs";
 import Message from "./message.mjs";
 
@@ -498,4 +498,46 @@ export async function getLastestMapGametypePlayed(){
     if(result.length > 0) return result[0];
 
     return null;
+}
+
+export async function getTotalEntries(gametypeId, mapId){
+
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_player_ctf_league WHERE gametype_id=? AND map_id=?`;
+
+    const result = await simpleQuery(query, [gametypeId, mapId]);
+
+    if(result.length > 0) return result[0].total_matches;
+
+    return 0;
+}
+
+export async function getSingleTopX(gametypeId, mapId, page, perPage){
+
+    page = setInt(page, 1);
+    perPage = setInt(perPage, 25);
+    page--;
+    if(page < 0) page = 0;
+    if(perPage < 1 || perPage > 100) perPage = 100;
+    let start = perPage * page;
+
+    const query = `SELECT * FROM nstats_player_ctf_league WHERE map_id=? AND gametype_id=? ORDER BY points DESC LIMIT ?, ?`;
+
+    const result = await simpleQuery(query, [mapId, gametypeId, start, perPage]);
+
+    const playerIds = [...new Set(result.map((p) =>{
+        return p.player_id;
+    }))];
+
+    const playerNames = await getBasicPlayerInfo(playerIds);
+
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        r.player = getPlayer(playerNames, r.player_id);
+    }
+
+    const totalRows = await getTotalEntries(gametypeId, mapId);
+
+    return {"data": result, totalRows};
 }

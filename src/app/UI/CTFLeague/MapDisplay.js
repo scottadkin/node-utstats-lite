@@ -28,7 +28,7 @@ async function loadData(state, dispatch){
 
     try{
 
-        const req = await fetch(`/api/ctfLeague/?mode=get-map-valid-gametypes&mId=${state.selectedMap}`);
+        const req = await fetch(`/api/ctfLeague/?mode=get-map-valid-gametypes&mId=${state.selectedMap}&gId=${state.selectedGametype}`);
 
         const res = await req.json();
 
