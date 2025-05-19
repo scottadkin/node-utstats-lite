@@ -313,10 +313,18 @@ export class CTF{
 
             if(flag === undefined) continue;
             
-            const playerTeam = playerManager.getPlayerTeamAt(playerId, timestamp);
+            let playerTeam = playerManager.getPlayerTeamAt(playerId, timestamp);
 
             if(playerTeam === null && playerId !== null){
-                new Message(`ctf.processFlagEvents(): Failed to get playerTeam is null`,"error");
+
+                //const fallback = playerManager.getPlayerById(playerId);
+
+               // if(fallback !== null){
+              //      playerTeam = fallback.team;
+              //  }else{
+
+                    new Message(`ctf.processFlagEvents(): Failed to get playerTeam is null`,"error");
+               // }
             }
 
             if(playerId === null && type === "timeout"){
@@ -358,6 +366,7 @@ export class CTF{
             }
 
             if(type === "capture"){
+
 
                 flag.captured(playerManager, killsManager, correctedTimestamp, playerId, playerTeam);
                 continue;

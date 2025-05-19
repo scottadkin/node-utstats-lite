@@ -1,5 +1,6 @@
 import { bulkInserKills } from "../kills.mjs";
 import { removeDoubleEnforcer } from "../generic.mjs";
+import Message from "../message.mjs";
 
 export class KillsManager{
 
@@ -285,14 +286,35 @@ export class KillsManager{
             if(k.timestamp < start) continue;
             if(k.timestamp > end) break;
 
-
-            
-            
-
             if(type === "kills"){
 
-                const killerTeam = this.playerManager.getPlayerTeamAt(k.killerId, k.timestamp);
-                const victimTeam = this.playerManager.getPlayerTeamAt(k.victimId, k.timestamp);
+                let killerTeam = this.playerManager.getPlayerTeamAt(k.killerId, k.timestamp);
+                let victimTeam = this.playerManager.getPlayerTeamAt(k.victimId, k.timestamp);
+
+                if(killerTeam === null){
+
+                    const fallback = this.playerManager.getPlayerById(k.killerId);
+      
+                    if(fallback !== null){
+                        new Message("Failed to get killerTeam(KillsManager.getTypeBetween()) using fallback","warning");
+                        killerTeam = fallback.team;
+                    }else{
+                        new Message(`Failed to get killerTeam(KillsManager.getTypeBetween())`,"error");
+                    }
+                }
+
+                if(victimTeam === null){
+
+                    const fallback = this.playerManager.getPlayerById(k.victimId);
+            
+                    if(fallback !== null){
+                        new Message("Failed to get victimTeam(KillsManager.getTypeBetween()) using fallback","warning");
+                        victimTeam = fallback.team;
+                    }else{
+                        new Message(`Failed to get victimTeam(KillsManager.getTypeBetween())`,"error");
+                    }
+       
+                }
 
                 data.push({
                     "timestamp": k.timestamp, 

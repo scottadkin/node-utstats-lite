@@ -316,7 +316,7 @@ async function insertCarryTimes(playerManager, matchId, mapId, gametypeId, capId
 }
 
 
-function setCapTeamTotalKills(cap){
+function setCapTeamTotalKills(playerManager, cap){
 
     const kills = {"red": 0, "blue": 0, "green": 0, "yellow": 0};
 
@@ -329,7 +329,7 @@ function setCapTeamTotalKills(cap){
             case 1: {   kills.blue++; } break;
             case 2: {   kills.green++; } break;
             case 3: {   kills.yellow++; } break;
-            default: { new Message(`setCapTeamKills Unknown team`,"warning")} break;
+            default: { new Message(`setCapTeamKills Unknown team ${k.killerTeam}`,"warning")} break;
         }
     }
 
@@ -400,7 +400,8 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
     const query = `INSERT INTO nstats_ctf_caps VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
-    const kills = setCapTeamTotalKills(cap);
+    const kills = setCapTeamTotalKills(playerManager, cap);
+
     const suicides = setCapTeamTotalSuicides(cap);
 
    // const suicides = {"red": 0, "blue": 0, "green": 0, "yellow": 0};
