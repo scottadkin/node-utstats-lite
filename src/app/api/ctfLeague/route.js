@@ -37,11 +37,11 @@ export async function GET(req){
 
         if(mode === "get-map-valid-gametypes"){
 
-            const test = await getSingleTopX(gametypeId, mapId, page, perPage);
+            const data = await getSingleTopX(gametypeId, mapId, page, perPage);
 
-            const data = await getMapPlayedValidGametypes(mapId);
+            const validOptions = await getMapPlayedValidGametypes(mapId);
 
-            return Response.json(data);
+            return Response.json({data, validOptions});
         }
 
     }catch(err){

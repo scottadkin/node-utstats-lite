@@ -20,9 +20,15 @@ export default function GenericTable({title, data, type, gametypeNames, mapNames
         };
 
  
-     const rows = data.map((r, i) =>{
+    const rows = data.map((r, i) =>{
         
-        const player = getPlayer(playerNames, r.player_id);
+        let player = null;
+
+        if(playerNames !== null){
+            player = getPlayer(playerNames, r.player_id);
+        }else{
+            player = r.player;
+        }
 
         return {
             "place": {"value": i+1, "displayValue": `${i + 1}${getOrdinal(i + 1)}`, "className": "ordinal"},

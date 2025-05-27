@@ -2,6 +2,7 @@
 import { useSearchParams } from "next/navigation";
 import {useEffect, useReducer} from "react";
 import Header from "../Header";
+import GenericTable from "./GenericTable";
 
 
 function reducer(state, action){
@@ -17,7 +18,9 @@ function reducer(state, action){
         case "set-gametype-info": {
             return {
                 ...state,
-                "gametypeInfo": action.data
+                "gametypeInfo": action.valid,
+                "data": action.data,
+                "totalRows": action.totalRows
             }
         }
     }
@@ -33,11 +36,10 @@ async function loadData(state, dispatch){
         const res = await req.json();
 
         if(res.error !== undefined) throw new Error(res.error);
-      
+    
+        if(res.validOptions[state.selectedGametype] === undefined){
 
-        if(res[state.selectedGametype] === undefined){
-
-            const keys = Object.keys(res);
+            const keys = Object.keys(res.validOptions);
             if(keys.length > 0){             
                 dispatch({"type": "set-selected", "gametype": keys[0], "map": state.selectedMap});
             }else{
@@ -45,7 +47,7 @@ async function loadData(state, dispatch){
             }
         }
 
-        dispatch({"type": "set-gametype-info", "data": res});
+        dispatch({"type": "set-gametype-info", "valid": res.validOptions, "data": res.data.data, "totalRows": res.data.totalRows});
 
     }catch(err){
         console.trace(err);
@@ -67,7 +69,8 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
         "selectedMap": (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.map_id :0,
         "selectedGametype": (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.gametype_id :0,
         "data": [],
-        "gametypeInfo": {}
+        "gametypeInfo": {},
+        "totalRows": 0
     });
 
     useEffect(() =>{
@@ -91,7 +94,6 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
 
     gametypeOptions.sort(sortByName);
 
-    //console.log(searchParams.get("id"));
 
     return <>
     
@@ -126,7 +128,9 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
             </div>
             
             <Header>Top {mapNames[state.selectedMap]}(gametypename) Players</Header>
+            <GenericTable title="Title" data={state.data} playerNames={null}/>
+
             
         </div>
     </>
-}
+}//title, data, type, gametypeNames, mapNames, playerNames
