@@ -33,7 +33,17 @@ async function loadData(state, dispatch){
         const res = await req.json();
 
         if(res.error !== undefined) throw new Error(res.error);
-        console.log(res);
+      
+
+        if(res[state.selectedGametype] === undefined){
+
+            const keys = Object.keys(res);
+            if(keys.length > 0){             
+                dispatch({"type": "set-selected", "gametype": keys[0], "map": state.selectedMap});
+            }else{
+                dispatch({"type": "set-selected", "gametype": 0, "map": state.selectedMap});
+            }
+        }
 
         dispatch({"type": "set-gametype-info", "data": res});
 

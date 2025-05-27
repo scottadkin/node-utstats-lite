@@ -40,6 +40,7 @@ export async function GET(req){
             const test = await getSingleTopX(gametypeId, mapId, page, perPage);
 
             const data = await getMapPlayedValidGametypes(mapId);
+
             return Response.json(data);
         }
 
