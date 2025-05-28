@@ -3,21 +3,21 @@ import InteractiveTable from "../InteractiveTable";
 import PlayerLink from "../PlayerLink";
 
 
-export default function GenericTable({title, data, type, gametypeNames, mapNames, playerNames}){
+export default function GenericTable({title, data, playerNames}){
 
 
     const headers = {
-            "place": {"title": "Place"},
-            "player": {"title": "Player"},
-            "total_matches": {"title": "Played"},
-            "wins": {"title": "Wins"},
-            "draws": {"title": "Draws"},
-            "loss": {"title": "Losses"},
-            "cap_for": {"title": "Caps For"},
-            "cap_against": {"title": "Caps Against"},
-            "cap_offset": {"title": "Cap Offset"},
-            "points": {"title": "Points"},
-        };
+        "place": {"title": "Place"},
+        "player": {"title": "Player"},
+        "total_matches": {"title": "Played"},
+        "wins": {"title": "Wins"},
+        "draws": {"title": "Draws"},
+        "loss": {"title": "Losses"},
+        "cap_for": {"title": "Caps For"},
+        "cap_against": {"title": "Caps Against"},
+        "cap_offset": {"title": "Cap Offset"},
+        "points": {"title": "Points"},
+    };
 
  
     const rows = data.map((r, i) =>{
@@ -26,6 +26,8 @@ export default function GenericTable({title, data, type, gametypeNames, mapNames
 
         if(playerNames !== null){
             player = getPlayer(playerNames, r.player_id);
+        }else if(r.playerName !== undefined){
+            player = {"id": r.player_id,"name": r.playerName, "country": r.playerCountry};
         }else{
             player = r.player;
         }

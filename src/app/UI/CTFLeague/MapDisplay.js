@@ -127,8 +127,8 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
                 </select>
             </div>
             
-            <Header>Top {mapNames[state.selectedMap]}(gametypename) Players</Header>
-            <GenericTable title="Title" data={state.data} playerNames={null}/>
+            <Header>{mapNames[state.selectedMap]} ({gametypeNames[state.selectedGametype]}) Player League</Header>
+            <GenericTable title={`${mapNames[state.selectedMap]} (${gametypeNames[state.selectedGametype]})`} data={state.data} playerNames={null}/>
 
             
         </div>

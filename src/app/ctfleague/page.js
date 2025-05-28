@@ -1,11 +1,12 @@
 import Header from "../UI/Header";
 import TabsLinks from "../UI/TabsLinks";
-import { getUniqueMapLeagues, getLeagueCategorySettings, getGametypesTopX, getValidGametypes, getLastestMapGametypePlayed } from "../lib/ctfLeague.mjs";
+import { getUniqueMapLeagues, getLeagueCategorySettings, getValidGametypes, getLastestMapGametypePlayed } from "../lib/ctfLeague.mjs";
 import { getGametypeNames } from "../lib/gametypes.mjs";
 import { getMapNames } from "../lib/maps.mjs";
 import  DefaultGametypeDisplay from "../UI/CTFLeague/DefaultGametypeDisplay";
 import MapDisplay from "../UI/CTFLeague/MapDisplay";
 import LeagueSettings from "../UI/CTFLeague/LeagueSettings";
+import { setInt } from "../lib/generic.mjs";
 
 export default async function Page({params, searchParams}){
 
@@ -14,6 +15,8 @@ export default async function Page({params, searchParams}){
 
     let mode = sp.mode ?? "";
     let id = sp.id ?? null;
+
+    const page = (sp.page !== undefined) ? setInt(sp.page, 1) : 1;
 
     if(mode === "") mode = "gametypes";
     mode = mode.toLowerCase();
@@ -32,15 +35,13 @@ export default async function Page({params, searchParams}){
         {"display": "Maps", "value": "maps"}
     ];
 
-    let data = null;
-
     const elems = [];
 
     if(mode === "gametypes"){
 
-        data = await getGametypesTopX(gametypeIds, 10);
+        //data = await getGametypesTopX(gametypeIds, 10);
 
-        elems.push(<DefaultGametypeDisplay data={data} names={gametypeNames} key="d-gametypes" />);
+        elems.push(<DefaultGametypeDisplay names={gametypeNames} selectedGametype={id} page={page} key="d-gametypes" />);
     }else{
 
         const mapIds = await getUniqueMapLeagues();

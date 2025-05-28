@@ -28,6 +28,12 @@ export async function GET(req){
             return Response.json(data);
         }
 
+        if(mode === "gametype"){
+
+            const data = await getMapTable(0, gametypeId, page, perPage);
+            return Response.json(data);
+        }
+
         if(mode === "get-settings"){
 
             const settings = await getLeagueSiteSettings();
