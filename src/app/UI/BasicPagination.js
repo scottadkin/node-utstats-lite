@@ -20,10 +20,12 @@ export default function BasicPagination({results, page, perPage, setPage}){
   
     return <div className={styles.wrapper}>
         <div className={styles.button} onClick={() =>{
+            if(previousPage === page) return;
             setPage(previousPage);
         }}>Previous</div>
         <div className={styles.info}>Viewing Page {page} of {totalPages}</div>
         <div className={styles.button} onClick={() =>{
+            if(nextPage === page) return;
             setPage(nextPage);
         }}>Next</div>
     </div>

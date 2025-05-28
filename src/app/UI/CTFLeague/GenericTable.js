@@ -3,8 +3,11 @@ import InteractiveTable from "../InteractiveTable";
 import PlayerLink from "../PlayerLink";
 
 
-export default function GenericTable({title, data, playerNames}){
+export default function GenericTable({title, data, playerNames, bDisplayAllButton, page, perPage}){
 
+    if(bDisplayAllButton === undefined) bDisplayAllButton = false;
+    if(page === undefined) page = 1;
+    if(perPage === undefined) perPage = 25;
 
     const headers = {
         "place": {"title": "Place"},
@@ -32,8 +35,10 @@ export default function GenericTable({title, data, playerNames}){
             player = r.player;
         }
 
+        let place = (page - 1) * perPage + i + 1;
+
         return {
-            "place": {"value": i+1, "displayValue": `${i + 1}${getOrdinal(i + 1)}`, "className": "ordinal"},
+            "place": {"value": i+1, "displayValue": `${place}${getOrdinal(place)}`, "className": "ordinal"},
             "player": {
                 "value": "", 
                 "displayValue": <PlayerLink bNewTab={true} country={player.country} id={player.id}>{player.name}</PlayerLink>,
@@ -53,6 +58,6 @@ export default function GenericTable({title, data, playerNames}){
 
     return <>
         <InteractiveTable width={2} headers={headers} rows={rows} bNoHeaderSorting={true}/>
-        <div className="view-all center">View All {title} Entries</div>
+        {(!bDisplayAllButton) ? null : <div className="view-all center">View All {title} Entries</div>}
     </>
 }

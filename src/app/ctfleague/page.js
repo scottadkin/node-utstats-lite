@@ -16,7 +16,8 @@ export default async function Page({params, searchParams}){
     let mode = sp.mode ?? "";
     let id = sp.id ?? null;
 
-    const page = (sp.page !== undefined) ? setInt(sp.page, 1) : 1;
+    let page = setInt(sp.page, 1);
+    if(page < 1) page = 1;
 
     if(mode === "") mode = "gametypes";
     mode = mode.toLowerCase();
@@ -39,7 +40,10 @@ export default async function Page({params, searchParams}){
 
     if(mode === "gametypes"){
 
-        //data = await getGametypesTopX(gametypeIds, 10);
+        if(id !== id && lastMapGametypeCombo !== null){
+            id = lastMapGametypeCombo.gametype_id;
+        }
+
 
         elems.push(<DefaultGametypeDisplay names={gametypeNames} selectedGametype={id} page={page} key="d-gametypes" />);
     }else{

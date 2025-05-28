@@ -29,7 +29,7 @@ export async function GET(req){
         }
 
         if(mode === "gametype"){
-
+            
             const data = await getMapTable(0, gametypeId, page, perPage);
             return Response.json(data);
         }
