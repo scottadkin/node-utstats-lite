@@ -138,7 +138,7 @@ function renderEntries(data, selectedGametype, selectedMap, gametypeNames, mapNa
         if(selectedMap !== "0" && d.map_id != selectedMap) continue;
 
         const gName = gametypeNames[d.gametype_id] ?? "Not Found";
-        const mName = mapNames[d.map_id] ?? "Not Found";
+        const mName = mapNames[d.map_id] ?? (d.map_id !== 0) ? mapNames[d.map_id] : "N/A";
 
         let pos = d.pos;
 
