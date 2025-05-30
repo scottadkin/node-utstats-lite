@@ -53,6 +53,8 @@ export default function DefaultGametypeDisplay({names, selectedGametype, page}){
         "totalRows": 0
     });
 
+    
+
     useEffect(() =>{
 
         loadData(state.selectedGametype, state.page, dispatch);
@@ -60,7 +62,7 @@ export default function DefaultGametypeDisplay({names, selectedGametype, page}){
     }, [state.selectedGametype, state.page]);
 
     const searchParams = useSearchParams();
-
+    
 
 
     const options = [];
@@ -73,11 +75,14 @@ export default function DefaultGametypeDisplay({names, selectedGametype, page}){
     return <>
         <div className="form-row">
             <label>Gametype</label>
-            <select onChange={(e) =>{
+            <select value={state.selectedGametype} onChange={(e) =>{
                 
                 const params = new URLSearchParams(searchParams.toString());
                 params.set('id', e.target.value);
                 window.history.pushState(null, '', `?${params.toString()}`)
+
+                let gametypeName = names?.[e.target.value] ?? "Not Found";
+                document.title = `${gametypeName} - CTF League`;
                 dispatch({"type": "update-selected", "selectedGametype": e.target.value, "page": 1});
             }}>
                 {options}
@@ -89,6 +94,8 @@ export default function DefaultGametypeDisplay({names, selectedGametype, page}){
             const params = new URLSearchParams(searchParams.toString());
             params.set('page', newPage);
             window.history.pushState(null, '', `?${params.toString()}`)
+            
+            
            
             dispatch({"type": "update-selected", "selectedGametype": state.selectedGametype, "page": newPage});
         }} results={state.totalRows} perPage={50} page={state.page}/>

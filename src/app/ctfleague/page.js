@@ -8,6 +8,79 @@ import MapDisplay from "../UI/CTFLeague/MapDisplay";
 import LeagueSettings from "../UI/CTFLeague/LeagueSettings";
 import { setInt } from "../lib/generic.mjs";
 
+export async function generateMetadata({ params, searchParams }, parent) {
+    //const slug = (await params).slug
+    
+    const sp = await searchParams;
+   
+    let mode = sp.mode ?? "gametypes";
+    mode = mode.toLowerCase();
+    let title = "";
+    let desc = "View all tables for the various player ctf leagues.";
+
+    let id = setInt(sp.id, 0);
+    let gId = setInt(sp.gid, 0);
+
+
+    const lastMapGametypeCombo = await getLastestMapGametypePlayed();
+
+    if(mode === "gametypes" && lastMapGametypeCombo !== null){
+
+        console.log("id", id);
+        if(id === 0){
+            id = lastMapGametypeCombo.gametype_id;
+        }else{
+            console.log("WILL YOU JUST FUCK IOFFF");
+        }
+    }
+
+    if(mode === "maps" && id === 0 && lastMapGametypeCombo !== null){
+        id = lastMapGametypeCombo.map_id;
+    }
+    
+    if(mode === "maps" && gId === 0 && lastMapGametypeCombo !== null){
+         gId = lastMapGametypeCombo.gametype_id;
+    }
+
+    let gametypeNames = {};
+
+    if(lastMapGametypeCombo !== null){
+
+        gametypeNames = await getGametypeNames([id], true);
+
+        if(mode === "gametypes"){
+
+            if(gametypeNames[id] !== undefined){
+                title = `${gametypeNames[id]} - CTF League`;
+                desc = `View the ${gametypeNames[id]} table for the player ctf league.`;
+            }else if(id === 0){
+                console.log(gametypeNames);
+                title = "Player CTF League";
+            }
+
+
+        }else if(mode === "maps"){
+            title = "Maps";
+            const mapNames = await getMapNames([id]);
+
+            gametypeNames = await getGametypeNames([gId], true);
+
+            const map = mapNames[id] ?? "Not Found";
+            const gametype = gametypeNames[gId] ?? "Not Found";
+
+            desc = `View the ${map} (${gametype}) table for the player ctf league.`;
+            title = `${map} (${gametype}) - CTF League`;
+            
+        }
+    }
+
+    
+    return {
+        "title": title,
+        "description": desc,
+    }
+}
+
 export default async function Page({params, searchParams}){
 
     const p = await params;

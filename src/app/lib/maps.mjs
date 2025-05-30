@@ -203,17 +203,20 @@ export async function getMostPlayedMaps(limit){
 }
 
 
-export async function getAllNames(bReturnArray){
+export async function getAllNames(bReturnArray, bIgnoreAny){
 
     if(bReturnArray === undefined) bReturnArray = false;
+    if(bIgnoreAny === undefined) bIgnoreAny = false;
 
     const result = await simpleQuery(`SELECT id,name FROM nstats_maps ORDER BY name ASC`);
 
     if(bReturnArray) return result;
 
-    const data = {
-        "0": "Any"
-    };
+    const data = {};
+
+    if(!bIgnoreAny){
+        data[0] = "Any";
+    }
 
     for(let i = 0; i < result.length; i++){
 

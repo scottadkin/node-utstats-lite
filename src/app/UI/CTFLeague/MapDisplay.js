@@ -8,6 +8,7 @@ import GenericTable from "./GenericTable";
 function reducer(state, action){
 
     switch(action.type){
+
         case "set-selected":{
             return {
                 ...state,
@@ -27,23 +28,24 @@ function reducer(state, action){
     return state;
 }
 
-async function loadData(state, dispatch){
+async function loadData(selectedMap, selectedGametype, dispatch){
 
     try{
 
-        const req = await fetch(`/api/ctfLeague/?mode=get-map-valid-gametypes&mId=${state.selectedMap}&gId=${state.selectedGametype}`);
+        const req = await fetch(`/api/ctfLeague/?mode=get-map-valid-gametypes&mId=${selectedMap}&gId=${selectedGametype}`);
 
         const res = await req.json();
 
         if(res.error !== undefined) throw new Error(res.error);
-    
-        if(res.validOptions[state.selectedGametype] === undefined){
+
+        if(res.validOptions[selectedGametype] === undefined){
 
             const keys = Object.keys(res.validOptions);
+
             if(keys.length > 0){             
-                dispatch({"type": "set-selected", "gametype": keys[0], "map": state.selectedMap});
+                dispatch({"type": "set-selected", "gametype": keys[0], "map": selectedMap});
             }else{
-                dispatch({"type": "set-selected", "gametype": 0, "map": state.selectedMap});
+                dispatch({"type": "set-selected", "gametype": 0, "map": selectedMap});
             }
         }
 
@@ -74,8 +76,16 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
     });
 
     useEffect(() =>{
-        loadData(state, dispatch);
+        loadData(state.selectedMap, state.selectedGametype, dispatch);
     },[state.selectedGametype, state.selectedMap]);
+
+
+    useEffect(() =>{
+        let mapName = mapNames?.[state.selectedMap] ?? "Not Found";
+        let gametypeName = gametypeNames?.[state.selectedGametype] ?? "Not Found";
+
+        document.title = `${mapName} (${gametypeName}) - CTF League`;
+    },[state.selectedGametype]);
 
     const searchParams = useSearchParams();
     const mapOptions = [{"display": "-", "value": 0}];
@@ -106,6 +116,11 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
                     params.set('id', e.target.value);
                     dispatch({"type": "set-selected", "gametype": state.selectedGametype, "map": e.target.value});
                     window.history.pushState(null, '', `?${params.toString()}`)
+
+                    let mapName = mapNames?.[e.target.value] ?? "Not Found";
+                    let gametypeName = gametypeNames?.[state.selectedGametype] ?? "Not Found";
+
+                    document.title = `${mapName} (${gametypeName}) - CTF League`;
                 }}>
                     {mapOptions.map((m, i) =>{
                         return <option value={m.value} key={`m-${i}`}>{m.display}</option>
@@ -119,6 +134,11 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
                     params.set('gid', e.target.value);
                     dispatch({"type": "set-selected", "gametype": e.target.value, "map": state.selectedMap});
                     window.history.pushState(null, '', `?${params.toString()}`)
+
+                    let mapName = mapNames?.[state.selectedMap] ?? "Not Found";
+                    let gametypeName = gametypeNames?.[e.target.value] ?? "Not Found";
+
+                    document.title = `${mapName} (${gametypeName}) - CTF League`;
                 }}>
 
                     {gametypeOptions.map((g, i) =>{
@@ -133,4 +153,4 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
             
         </div>
     </>
-}//title, data, type, gametypeNames, mapNames, playerNames
+}
