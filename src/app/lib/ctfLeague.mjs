@@ -515,7 +515,6 @@ export async function getSingleTopX(gametypeId, mapId, page, perPage){
 
     page = setInt(page, 1);
     perPage = setInt(perPage, 25);
-    page--;
     if(page < 0) page = 0;
     if(perPage < 1 || perPage > 100) perPage = 100;
     let start = perPage * page;

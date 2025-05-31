@@ -22,6 +22,7 @@ export async function GET(req){
         if(mode === "") throw new Error("No mode specified");
 
 
+
         if(mode === "map"){
 
             const data = await getMapTable(mapId, gametypeId, page, perPage);
@@ -29,7 +30,6 @@ export async function GET(req){
         }
 
         if(mode === "gametype"){
-            
             const data = await getMapTable(0, gametypeId, page, perPage);
             return Response.json(data);
         }

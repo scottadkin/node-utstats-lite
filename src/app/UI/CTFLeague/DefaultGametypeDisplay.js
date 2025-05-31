@@ -5,6 +5,7 @@ import GenericTable from "./GenericTable";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useReducer } from "react";
 import BasicPagination from "../BasicPagination";
+import { setInt } from "@/app/lib/generic.mjs";
 
 function reducer(state, action){
 
@@ -29,10 +30,12 @@ function reducer(state, action){
     return state;
 }
 
-async function loadData(selectedGametype, page, dispatch){
+async function loadData(selectedGametype, page, perPage, dispatch){
 
     try{
-        const req = await fetch(`/api/ctfLeague?mode=gametype&gId=${selectedGametype}&page=${page}&perPage=50`);
+
+        
+        const req = await fetch(`/api/ctfLeague?mode=gametype&gId=${selectedGametype}&page=${page}&perPage=${perPage}`);
 
         const res = await req.json();
 
@@ -44,7 +47,7 @@ async function loadData(selectedGametype, page, dispatch){
     }
 }
 
-export default function DefaultGametypeDisplay({names, selectedGametype, page}){
+export default function DefaultGametypeDisplay({names, selectedGametype, page, perPage}){
 
     const [state, dispatch] = useReducer(reducer, {
         "selectedGametype": selectedGametype,
@@ -53,11 +56,11 @@ export default function DefaultGametypeDisplay({names, selectedGametype, page}){
         "totalRows": 0
     });
 
-    
+    perPage = setInt(perPage, 25);
 
     useEffect(() =>{
 
-        loadData(state.selectedGametype, state.page, dispatch);
+        loadData(state.selectedGametype, state.page, perPage, dispatch);
 
     }, [state.selectedGametype, state.page]);
 
@@ -98,8 +101,8 @@ export default function DefaultGametypeDisplay({names, selectedGametype, page}){
             
            
             dispatch({"type": "update-selected", "selectedGametype": state.selectedGametype, "page": newPage});
-        }} results={state.totalRows} perPage={50} page={state.page}/>
-        <GenericTable title={names[state.selectedGametype] ?? "Not Found"} data={state.data} playerNames={null} page={state.page} perPage={50}/>
+        }} results={state.totalRows} perPage={perPage} page={state.page}/>
+        <GenericTable title={names[state.selectedGametype] ?? "Not Found"} data={state.data} playerNames={null} page={state.page} perPage={perPage}/>
   
     </>
 }

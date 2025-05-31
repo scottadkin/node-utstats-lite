@@ -3,6 +3,8 @@ import { useSearchParams } from "next/navigation";
 import {useEffect, useReducer} from "react";
 import Header from "../Header";
 import GenericTable from "./GenericTable";
+import { setInt } from "@/app/lib/generic.mjs";
+import BasicPagination from "../BasicPagination";
 
 
 function reducer(state, action){
@@ -13,7 +15,8 @@ function reducer(state, action){
             return {
                 ...state,
                 "selectedMap": action.map,
-                "selectedGametype": action.gametype
+                "selectedGametype": action.gametype,
+                "page": 1
             }
         }
         case "set-gametype-info": {
@@ -24,15 +27,21 @@ function reducer(state, action){
                 "totalRows": action.totalRows
             }
         }
+        case "set-page": {
+            return {
+                ...state,
+                "page": action.value
+            }
+        }
     }
     return state;
 }
 
-async function loadData(selectedMap, selectedGametype, dispatch){
+async function loadData(selectedMap, selectedGametype, dispatch, page, perPage){
 
     try{
 
-        const req = await fetch(`/api/ctfLeague/?mode=get-map-valid-gametypes&mId=${selectedMap}&gId=${selectedGametype}`);
+        const req = await fetch(`/api/ctfLeague/?mode=get-map-valid-gametypes&mId=${selectedMap}&gId=${selectedGametype}&page=${page}&perPage=${perPage}`);
 
         const res = await req.json();
 
@@ -65,19 +74,25 @@ function sortByName(a, b){
     return 0;
 }
 
-export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCombo}){
+export default function MapDisplay({mapNames, gametypeNames, selectedGametype, selectedMap, latestGametypeMapCombo, perPage}){
+    
 
     const [state, dispatch] = useReducer(reducer, {
-        "selectedMap": (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.map_id :0,
-        "selectedGametype": (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.gametype_id :0,
+       // "selectedMap": (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.map_id :0,
+        "selectedMap": (selectedMap !== 0) ? selectedMap : (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.map_id :0,
+        "selectedGametype": (selectedGametype !== 0) ? selectedGametype : (latestGametypeMapCombo !== null) ?latestGametypeMapCombo.gametype_id :0,
+       // "selectedGametype": (latestGametypeMapCombo !== null) ? latestGametypeMapCombo.gametype_id :0,
         "data": [],
         "gametypeInfo": {},
-        "totalRows": 0
+        "totalRows": 0,
+        "page": 1
     });
 
+    perPage = setInt(perPage, 25);
+
     useEffect(() =>{
-        loadData(state.selectedMap, state.selectedGametype, dispatch);
-    },[state.selectedGametype, state.selectedMap]);
+        loadData(state.selectedMap, state.selectedGametype, dispatch, state.page, perPage);
+    },[state.selectedGametype, state.selectedMap, state.page]);
 
 
     useEffect(() =>{
@@ -148,7 +163,15 @@ export default function MapDisplay({mapNames, gametypeNames, latestGametypeMapCo
             </div>
             
             <Header>{mapNames[state.selectedMap]} ({gametypeNames[state.selectedGametype]}) Player League</Header>
-            <GenericTable title={`${mapNames[state.selectedMap]} (${gametypeNames[state.selectedGametype]})`} data={state.data} playerNames={null}/>
+            <BasicPagination results={state.totalRows} perPage={perPage} page={state.page} setPage={(newPage) =>{
+                dispatch({"type": "set-page", "value": newPage});
+            }}/>
+            <GenericTable 
+                page={state.page} 
+                perPage={perPage} 
+                title={`${mapNames[state.selectedMap]} (${gametypeNames[state.selectedGametype]})`} 
+                data={state.data} playerNames={null}
+            />
 
             
         </div>
