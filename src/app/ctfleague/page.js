@@ -7,6 +7,7 @@ import  DefaultGametypeDisplay from "../UI/CTFLeague/DefaultGametypeDisplay";
 import MapDisplay from "../UI/CTFLeague/MapDisplay";
 import LeagueSettings from "../UI/CTFLeague/LeagueSettings";
 import { setInt } from "../lib/generic.mjs";
+import { getCategorySettings } from "../lib/siteSettings.mjs";
 
 
 
@@ -44,6 +45,8 @@ export async function generateMetadata({ params, searchParams }, parent) {
     let title = "";
     let desc = "View all tables for the various player ctf leagues.";
 
+    const settings = await getCategorySettings("Branding");
+
     const lastMapGametypeCombo = await getLastestMapGametypePlayed();
     
     const {id, gId} = setIds(sp, mode, lastMapGametypeCombo);
@@ -78,6 +81,8 @@ export async function generateMetadata({ params, searchParams }, parent) {
             title = `${map} (${gametype}) - CTF League`;
             
         }
+
+        title += ` - ${settings["Site Name"] || "Node UTStats Lite"}`;
     }
 
     
@@ -126,7 +131,7 @@ export default async function Page({params, searchParams}){
         if(id !== id && lastMapGametypeCombo !== null){
             id = lastMapGametypeCombo.gametype_id;
         }
-        
+
         elems.push(<DefaultGametypeDisplay names={gametypeNames} selectedGametype={id} page={page} perPage={perPage} key="d-gametypes" />);
 
     }else{
