@@ -62,7 +62,7 @@ export default function DefaultGametypeDisplay({names, selectedGametype, page, p
 
         loadData(state.selectedGametype, state.page, perPage, dispatch);
 
-    }, [state.selectedGametype, state.page]);
+    }, [state.selectedGametype, state.page, perPage]);
 
     const searchParams = useSearchParams();
     

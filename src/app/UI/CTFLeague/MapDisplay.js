@@ -92,7 +92,7 @@ export default function MapDisplay({mapNames, gametypeNames, selectedGametype, s
 
     useEffect(() =>{
         loadData(state.selectedMap, state.selectedGametype, dispatch, state.page, perPage);
-    },[state.selectedGametype, state.selectedMap, state.page]);
+    },[state.selectedGametype, state.selectedMap, state.page, perPage]);
 
 
     useEffect(() =>{
@@ -100,7 +100,7 @@ export default function MapDisplay({mapNames, gametypeNames, selectedGametype, s
         let gametypeName = gametypeNames?.[state.selectedGametype] ?? "Not Found";
 
         document.title = `${mapName} (${gametypeName}) - CTF League`;
-    },[state.selectedGametype]);
+    },[state.selectedGametype, state.selectedMap, gametypeNames, mapNames]);
 
     const searchParams = useSearchParams();
     const mapOptions = [{"display": "-", "value": 0}];
