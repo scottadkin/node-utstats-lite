@@ -6,6 +6,7 @@ import { getSessionInfo } from "./lib/authentication";
 import { getCategorySettings } from "./lib/siteSettings.mjs";
 import { headers } from 'next/headers';
 import { getPageLayout } from "./lib/pageLayout.mjs";
+import { getLeaguesEnabledStatus } from "./lib/ctfLeague.mjs";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -39,12 +40,13 @@ export default async function RootLayout({ children }) {
 
 	const navSettings = await getCategorySettings("Nav");
 	const navLayout = await getPageLayout("Nav");
+	const leagueStatus = await getLeaguesEnabledStatus();
 	
 	return (
 		<html lang="en">
 		<body className={inter.className}>
 			<UpdateSession />
-			<Nav settings={navSettings} sessionInfo={sessionInfo} bAdmin={true} layout={navLayout}/>
+			<Nav settings={navSettings} sessionInfo={sessionInfo} bAdmin={true} layout={navLayout} leagueStatus={leagueStatus}/>
 			<div className="padding-top"></div>
 			{children}
 			<footer>

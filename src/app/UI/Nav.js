@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { logout } from "../lib/authentication";
 
 
-export default function Nav({settings, sessionInfo, bAdmin, layout}){
+export default function Nav({settings, sessionInfo, bAdmin, layout, leagueStatus}){
 
     const router = useRouter();
     const pathname = usePathname().toLowerCase();
@@ -105,7 +105,7 @@ export default function Nav({settings, sessionInfo, bAdmin, layout}){
         );
     }
 
-    if(settings["Display CTF League"] === "1"){
+    if(settings["Display CTF League"] === "1" && leagueStatus.maps || leagueStatus.gametypes){
 
         options.push({
                 "name": "CTF League",

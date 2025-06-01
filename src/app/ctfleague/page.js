@@ -1,6 +1,6 @@
 import Header from "../UI/Header";
 import TabsLinks from "../UI/TabsLinks";
-import { getUniqueMapLeagues, getLeagueCategorySettings, getValidGametypes, getLastestMapGametypePlayed } from "../lib/ctfLeague.mjs";
+import { getUniqueMapLeagues, getLeagueCategorySettings, getValidGametypes, getLastestMapGametypePlayed, getLeaguesEnabledStatus } from "../lib/ctfLeague.mjs";
 import { getGametypeNames } from "../lib/gametypes.mjs";
 import { getMapNames } from "../lib/maps.mjs";
 import  DefaultGametypeDisplay from "../UI/CTFLeague/DefaultGametypeDisplay";
@@ -39,6 +39,16 @@ export async function generateMetadata({ params, searchParams }, parent) {
     //const slug = (await params).slug
     
     const sp = await searchParams;
+
+    const leagueStatus = await getLeaguesEnabledStatus();
+
+    if(!leagueStatus.maps && !leagueStatus.gametypes){
+
+        return {
+            "title": "CTF League Disabled",
+            "description": "CTF league has been disabled."
+        }
+    } 
    
     let mode = sp.mode ?? "gametypes";
     mode = mode.toLowerCase();
@@ -63,7 +73,6 @@ export async function generateMetadata({ params, searchParams }, parent) {
                 title = `${gametypeNames[id]} - CTF League`;
                 desc = `View the ${gametypeNames[id]} table for the player ctf league.`;
             }else if(id === 0){
-                console.log(gametypeNames);
                 title = "Player CTF League";
             }
 
@@ -97,13 +106,29 @@ export default async function Page({params, searchParams}){
     const p = await params;
     const sp = await searchParams;
 
+    const leagueStatus = await getLeaguesEnabledStatus();
+
+    if(!leagueStatus.maps && !leagueStatus.gametypes){
+
+        return <main><div className="info">
+            CTF League is disabled.
+        </div> </main>
+    } 
+
     let mode = sp.mode ?? "";
     //let id = sp.id ?? null;
 
     let page = setInt(sp.page, 1);
     if(page < 1) page = 1;
 
-    if(mode === "") mode = "gametypes";
+    if(mode === ""){
+
+        if(leagueStatus.gametypes){
+            mode = "gametypes";
+        }else if(leagueStatus.maps){
+            mode = "maps";
+        }
+    }
     mode = mode.toLowerCase();
 
     const lastMapGametypeCombo = await getLastestMapGametypePlayed();
@@ -150,9 +175,17 @@ export default async function Page({params, searchParams}){
         />);
     }
 
+    let tabsElem = null;
+    
+    if(leagueStatus.maps && leagueStatus.gametypes){
+        tabsElem = <TabsLinks options={tabs} url={`/ctfleague?mode=`} selectedValue={mode}/>;
+    }
+
+
+
     return <main>
         <Header>CTF League</Header>
-        <TabsLinks options={tabs} url={`/ctfleague?mode=`} selectedValue={mode}/>
+        {tabsElem}
         <LeagueSettings settings={leagueSettings} mode={mode}/>
         {elems}
     </main>

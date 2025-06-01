@@ -540,3 +540,23 @@ export async function getSingleTopX(gametypeId, mapId, page, perPage){
 
     return {"data": result, totalRows};
 }
+
+
+
+export async function getLeaguesEnabledStatus(){
+
+    const query = `SELECT category,value FROM nstats_ctf_league_settings WHERE name="Enable League"`;
+    const result = await simpleQuery(query);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const {category, value} = result[i];
+
+        data[category] = value === "true";
+    }
+
+
+    return data;
+}

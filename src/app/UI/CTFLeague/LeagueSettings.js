@@ -14,7 +14,6 @@ export default function LeagueSettings({settings, mode}){
     const lastRefresh = settings["Last Whole League Refresh"].value;
 
     return <>
-        <Header>{title} CTF League Settings</Header>
         <div className="info">
             <b>Scoring System</b><br/>
             <ul className="text-center">
