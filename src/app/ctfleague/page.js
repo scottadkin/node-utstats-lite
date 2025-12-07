@@ -133,7 +133,7 @@ export default async function Page({params, searchParams}){
 
     const lastMapGametypeCombo = await getLastestMapGametypePlayed();
     
-    const {id, gId} = setIds(sp, mode, lastMapGametypeCombo);
+    let {id, gId} = setIds(sp, mode, lastMapGametypeCombo);
 
     const perPage = 25;
 

@@ -1,3 +1,9 @@
+export async function POST(req, res){
+
+    return Response.json({"error": "Disabled temporarily, you can still manually place images in your /public/images/maps folder"});
+}
+
+/*
 import { getSessionInfo } from "@/app/lib/authentication";
 import {writeFile, unlink} from "node:fs/promises";
 import Jimp from "jimp";
@@ -113,4 +119,4 @@ export async function POST(req, res){
 
         return Response.json({"error": err.toString()});
     }
-}
+}*/

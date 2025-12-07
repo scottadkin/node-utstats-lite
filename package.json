@@ -10,21 +10,17 @@
   },
   "dependencies": {
     "basic-ftp": "^5.0.5",
-    "canvas": "^3.0.1",
-    "encoding-japanese": "^2.1.0",
+    "canvas": "^3.2.0",
+    "encoding-japanese": "^2.2.0",
     "geoip-lite": "^1.4.10",
-    "jimp": "^0.22.12",
-    "js-sha256": "^0.11.0",
+    "jimp": "^1.6.0",
+    "js-sha256": "^0.11.1",
     "md5": "^2.3.0",
-    "mysql2": "^3.10.3",
-    "next": "^15.3.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "sharp": "^0.33.3",
-    "ssh2-sftp-client": "^11.0.0"
-  },
-  "devDependencies": {
-    "eslint": "^8",
-    "eslint-config-next": "^15.1.6"
+    "mysql2": "^3.15.3",
+    "next": "^16.0.7",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "sharp": "^0.34.5",
+    "ssh2-sftp-client": "^12.0.1"
   }
 }
