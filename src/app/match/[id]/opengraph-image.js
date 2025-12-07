@@ -5,11 +5,8 @@ import { headers } from 'next/headers';
  
 export async function generateImageMetadata({ params }) {
 
-   // console.log(test);
-  //const images = await getOGImages(params.id)
-  //console.log("fart");
     return [{
-        "id": params.id,
+        "id": "medium",
         "size": { "width": 1200, "height": 600 },
         "alt": "Match Sshot",
         "contentType": 'image/png',
