@@ -3,6 +3,19 @@ Unreal Tournament stats website for the https://github.com/rxut/UTStatsLite
 
 **Note:** If you are upgrading from a version prior to v1.5.1 you also need to update the utstats-lite-mutator
 
+### Security Issue v1.2.0-v1.8.0
+Multiple version of node-ustats-lite were affected by Next.js vulnerability https://github.com/advisories/GHSA-9qr9-h5gf-34mp
+
+Affected node-utstats-lite Versions:
+- https://github.com/scottadkin/node-utstats-lite/tree/v1.8.0
+- https://github.com/scottadkin/node-utstats-lite/releases/tag/v1.7.0_fix
+- https://github.com/scottadkin/node-utstats-lite/releases/tag/v1.6.0
+- https://github.com/scottadkin/node-utstats-lite/releases/tag/v1.5.1
+- https://github.com/scottadkin/node-utstats-lite/releases/tag/v1.5.0
+- https://github.com/scottadkin/node-utstats-lite/releases/tag/v1.4.0
+- https://github.com/scottadkin/node-utstats-lite/releases/tag/v1.3.0
+- https://github.com/scottadkin/node-utstats-lite/releases/tag/v1.2.0
+
 ## Requirements 
 - MYSQL Server
 - Node.js 18.17 or later.
