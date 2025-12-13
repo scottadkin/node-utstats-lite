@@ -1,6 +1,6 @@
 {
   "name": "node-utstats-lite",
-  "version": "1.8.2",
+  "version": "1.8.3",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -17,9 +17,9 @@
     "js-sha256": "^0.11.1",
     "md5": "^2.3.0",
     "mysql2": "^3.15.3",
-    "next": "^16.0.7",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "next": "^16.0.10",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "sharp": "^0.34.5",
     "ssh2-sftp-client": "^12.0.1"
   }
