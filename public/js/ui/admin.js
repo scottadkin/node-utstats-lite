@@ -30,7 +30,7 @@ class AdminFTPManager{
         this.wrapper = document.createElement("div");
         UIHeader(this.wrapper, "Importer Manager");
         this.parent.appendChild(this.wrapper);
-        this.mode = "edit-folder";
+        this.mode = "current";
 
         this.selectedFTPServer = "";
         this.bActionInProgress = false;

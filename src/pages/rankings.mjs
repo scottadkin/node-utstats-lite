@@ -8,6 +8,7 @@ import { getCategorySettings } from "../siteSettings.mjs";
 export async function renderRankingsPage(req, res, userSession){
 
     try{
+
         let mode = req?.query?.mode ?? "gametype";
         mode = mode.toLowerCase();
 
@@ -39,16 +40,23 @@ export async function renderRankingsPage(req, res, userSession){
 
         if(mode === "gametype"){
 
-            const names = await getGametypeNames(targetId, true);
-            typeName = names?.[targetId] ?? "Not Found";
-            title = `${typeName} Player Gametype Rankings`;
+            
+            if(targetId !== 0){
+                const names = await getGametypeNames(targetId, true);
+                typeName = `${names?.[targetId]} ` ?? "Not Found ";
+            }
+            
+            title = `${typeName}Player Gametype Rankings`;
             ids = await getUniqueGametypes();
 
         }else if(mode === "map"){
+  
+            if(targetId !== 0){
+                const names = await getMapNames(targetId);
+                typeName = `${names?.[targetId]} ` ?? "Not Found ";
+            }
 
-            const names = await getMapNames(targetId);
-            typeName = names?.[targetId] ?? "Not Found";
-            title = `${typeName} Player Map Rankings`;
+            title = `${typeName}Player Map Rankings`;
             ids = await getUniqueMaps();
         }
 
