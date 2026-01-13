@@ -70,7 +70,8 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 - To Create an admin account go to [http://localhost:3000/register](http://localhost:3000/register), the first account is auto activated, every following account needs to be activated.
 - To Login go to [http://localhost:3000/login](http://localhost:3000/login)
 - To go to the admin area go to [http://localhost:3000/admin](http://localhost:3000/admin)
-- In the admin you can then add S/FTP servers to the importer list. ![ftp admin image](https://i.imgur.com/gA2WpT4.png "FTP Admin Image")
+- In the admin you can then add S/FTP servers to the importer list. <img width="1276" height="1079" alt="image" src="https://github.com/user-attachments/assets/637d9425-d403-4d05-ac6e-f94ce37a3f2b" />
+
 - If you want to separate gametypes by team sizes, for example CTF 1v1, CTF 2v2 there is now a setting for each ftp server and logs folder called **append team sizes**, if the all teams have the same amount of players the importer will now append the team sizes to the end of the gametype to keep rankings/records separate. 
 
 ## Running The Log Importer
@@ -79,7 +80,9 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 
 ## Optional Damage Mutator
 You can enable basic damage tracking for players by adding [this mutator](https://github.com/scottadkin/UTStats-Lite-Damage)
-So far there is only match player data displayed for damage.
+So far there is only match player data displayed for damage, here is an example of what data is tracked.
+<img width="1145" height="626" alt="image" src="https://github.com/user-attachments/assets/89eda51c-5f18-4ca3-9151-bf1d980bf55c" />
+
 
 ## Classic UTStats Damage Support
 - There is also basic support for classic UTStats logs damage mutator that is displayed on match reports only.
