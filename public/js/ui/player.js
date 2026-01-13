@@ -736,6 +736,8 @@ class PlayerRankingSummary{
 
     constructor(parent, data){
 
+        if(data.gametypes.length === 0 && data.maps.length === 0) return;
+
         this.parent = document.querySelector(parent);
         this.data = data;
 
@@ -820,6 +822,7 @@ class PlayerCTFLeague{
 
     constructor(parent, data){
 
+        if(data.length === 0) return;
         this.parent = document.querySelector(parent);
         this.data = data;
 

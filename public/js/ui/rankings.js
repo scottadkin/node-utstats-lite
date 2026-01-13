@@ -133,7 +133,14 @@ class RankingsSearchForm{
 
     render(){
 
-        if(this.data.length === 0) return;
+        if(this.data.length === 0){
+
+            const noData = UIDiv("info");
+            noData.append(`There has not been enough matches played yet for there to be any rankings.`);
+
+            this.parent.append(noData);
+            return;
+        }
 
         const headers = ["Place", "Player", "Last Active", "Playtime", "Matches", "Score"];
 
