@@ -122,6 +122,8 @@ class RecordsDataDisplay{
 
     constructor(parent, mode, cat, gametype, data, title, gametypeNames, totalResults, page, perPage){
 
+        if(data.length === 0) return;
+        
         this.parent = document.querySelector(parent);
         this.mode = mode;
         this.cat = cat;

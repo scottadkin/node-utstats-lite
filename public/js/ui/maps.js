@@ -88,6 +88,8 @@ class MapListDisplay{
 
     constructor(parent, data, displayMode){
 
+        if(data.length === 0) return;
+        
         this.parent = document.querySelector(parent);
         this.data = data;
         this.displayMode = displayMode.toLowerCase();

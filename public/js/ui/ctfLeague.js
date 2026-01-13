@@ -139,6 +139,9 @@ class CTFLeagueTable{
         this.parent = document.querySelector(parent);
         this.mode = mode;
         this.data = data;
+
+        if(this.data.data.length === 0) return;
+
         this.id = id;
         this.gId = gId;
         this.currentPage = page;

@@ -10,6 +10,8 @@ function renderMatchesTable(parent, data, bMapsPage){
 
     const matches = data.data;
 
+    if(matches.length === 0) return;
+
     if(bMapsPage === undefined) bMapsPage = false;
 
     const wrapper = document.createElement("div");

@@ -105,6 +105,7 @@ function renderSocials(parent, settings){
 
 function renderServerList(parent, servers){
 
+    if(servers.length === 0) return;
     UIHeader(parent, "Our Servers");
     parent = document.querySelector(parent);
 

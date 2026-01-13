@@ -6,6 +6,9 @@ class PlayersSearchList{
         this.parent = document.querySelector(parent);
         this.players = players.players;
         this.totalPlayers = players.totalPlayers;
+
+        if(this.totalPlayers === 0) return;
+
         this.name = name;
         this.sortBy = sortBy;
         this.order = order;

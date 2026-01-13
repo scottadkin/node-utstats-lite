@@ -82,10 +82,17 @@ app.engine('.html', ejs.__express);
 
 app.get('/', async (req, res) => {
 
+	try{
 	
-	const userSession = await getSessionInfo(req, sessionStore);
-	renderHomePage(req, res, userSession);	
+		const userSession =  await getSessionInfo(req, sessionStore);
+		renderHomePage(req, res, userSession);	
+		
+	}catch(err){
+		console.trace(err);
+		res.send(err.toString());
+	}
 });
+
 
 app.get('/match/:id', async (req, res) => {
 	const userSession = await getSessionInfo(req, sessionStore);
