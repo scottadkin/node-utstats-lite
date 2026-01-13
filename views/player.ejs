@@ -1,0 +1,38 @@
+
+<%- include("header.ejs", {
+    "mode": "player", 
+    meta,
+    host,
+    userSession
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/player.js"></script>
+
+<div id="root">
+    <div class="header-wrapper">
+        <img class="header-country-flag" src="/images/flags/<%= basicPlayerInfo.country %>.svg" alt="flag"/>
+        <%= basicPlayerInfo.name %> Player Profile
+    </div>
+    <div id="perma-links" class="text-center"></div>
+</div>
+
+<script>
+
+    const gametypeTotals = <%- JSON.stringify(gametypeTotals) %>;
+    const gametypeNames = <%- JSON.stringify(gametypeNames) %>;
+
+    playerPermaLinks("#perma-links", "<%= basicPlayerInfo.hash %>");
+    playerGametypeTotals("#root", gametypeTotals);
+    new PlayerCTFSummary("#root", <%- JSON.stringify(ctfTotals) %>);
+    new PlayerCTFLeague("#root", <%- JSON.stringify(ctfLeagueData) %>);
+    new PlayerRankingSummary("#root", <%- JSON.stringify(rankings) %>);
+    new PlayerSpecialEvents("#root", gametypeTotals);
+    new PlayerWeaponsSummary("#root", <%- JSON.stringify(weaponTotals) %>, gametypeNames);
+    new PlayerItemsSummary("#root", gametypeTotals);
+    const rm = new PlayerRecentMatches("#root", <%= playerId %>, gametypeNames, <%- JSON.stringify(mapNames) %>);
+</script>
+
+
+<%- include("footer.ejs") -%>

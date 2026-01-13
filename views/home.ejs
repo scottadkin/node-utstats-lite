@@ -1,0 +1,98 @@
+<%- include("header.ejs", {
+    "mode": "home", 
+    "host": host,
+    "userSession": userSession,
+    meta
+    }) -%>
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/matches.js"></script>
+<script src="../js/ui/home.js"></script>
+
+<div id="root">
+    <%
+       if(message !== null){
+
+            let messageContent = "";
+            let messageClass = "";
+
+            if(message === "account-created"){
+
+                messageContent = `Your account has been created, you have to wait for an admin to activate your account before you can login.`;
+                messageClass = "team-green";
+
+            }else if(message === "banned"){
+
+                messageContent = `You have been banned from login attempts due to too many failed login attempts, please try again later.`;
+                messageClass = "team-red";
+
+            }else if(message === "already"){
+
+                messageContent = `You are already logged in.`;
+                messageClass = "team-red";
+
+            }else if(message === "login"){
+
+                messageContent = `You have logged in successfully`;
+                messageClass = "team-green";
+
+            }else if(message === "logout"){
+                
+                messageContent = `You have successfully logged out`;
+                messageClass = "team-green";
+            }
+
+            %> 
+            <div class="box <%= messageClass %>">
+                <%= messageContent %> 
+            </div>
+            <%
+
+       }
+    %>
+
+</div>
+<script>
+
+    <% 
+
+
+    if(pageSettings["Display Welcome Message"] === "1" && welcomeMessageSettings !== undefined){
+
+      %>
+        
+        const welcomeTitle = "<%= welcomeMessageSettings["Welcome Title"] %>";
+        const welcomeContent = "<%= JSON.stringify(welcomeMessageSettings["Welcome Message"]) %>";
+        renderWelcomeMessage("#root", welcomeTitle, welcomeContent);
+      <%
+        
+    }
+    %>
+
+    <%
+    if(pageSettings["Display Recent Matches"] === "1"){
+        %>const recentMatchesData = <%- JSON.stringify(recentMatches) %>;  
+        
+        homeRenderRecentMatches("#root", recentMatchesData);
+        
+        <%
+    }%>
+
+    <%
+    if(pageSettings["Display Social Media"] === "1"){
+
+        %>
+        renderSocials("#root", <%- JSON.stringify(socialSettings) %>);
+        <%
+    }
+    %>
+
+    <%
+    if(pageSettings["Display Servers"] === "1"){
+
+        %>
+        renderServerList("#root", <%- JSON.stringify(serversList) %>);
+        <%
+    }
+    %>
+</script>
+<%- include('footer.ejs') -%>

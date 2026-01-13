@@ -1,0 +1,60 @@
+
+<%- include("header.ejs", {
+    "mode": "ctfleague", 
+    meta,
+    host,
+    userSession
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/ctfLeague.js"></script>
+
+<div class="header-wrapper">CTF League</div>
+<div id="tabs"></div>
+<script>
+    renderTypeTabs("#tabs", "<%= mode %>");
+</script>
+<div id="root">
+
+    <div class="info">
+        <b>Scoring System</b><br>
+        <ul class="text-center">
+            <li>3 points if the player is on the winning team.</li>
+            <li>1 point if the match ends in a tie.</li>
+            <li>0 points for a loss.</li>
+        </ul><br>
+
+
+        <% 
+
+        let leagueType = "Unknown";
+
+        if(mode === "gametypes") leagueType = "Gametype";
+        if(mode === "maps") leagueType = "Map";
+        if(mode === "combined") leagueType = "Combined(Any CTF Gametype and Map combination)";
+
+        if(maxMatchAge != 0){
+            %>
+                Only matches played in the previous <b><%= maxMatchAge %> days</b> are counted towards a league.<br>
+            <%
+        }
+
+        if(maxMatchesPerPlayer != 0){
+            %>
+                Each player can have a maximum of <b><%= maxMatchesPerPlayer %> matches</b> counted towards a league.<br>
+                If the player has played more than <b><%= maxMatchesPerPlayer %></b> matches, only their <b><%= maxMatchesPerPlayer %> most recent matches</b> are counted towards a league.<br>
+            <%
+        }
+
+        %>
+        All leagues are refreshed once every 24 hours to remove players and matches outside the specified time frame, 
+        and every time a match with the same gametype or map is imported.
+        <br>Last whole <b><%= leagueType %></b> League refresh was <b><%= lastLeagueRefresh %></b></div>
+</div>
+<script>
+    new CTFLeagueFilterForm("#root", "<%= mode %>", <%- JSON.stringify(gametypeNames) %>, <%- JSON.stringify(mapNames) %>, "<%= id %>", "<%= gId %>");
+    new CTFLeagueTable("#root", "<%= mode %>", <%- JSON.stringify(data) %>,  "<%= id %>", "<%= gId %>", "<%= page %>", "<%= perPage %>", "<%= subHeader %>");
+</script>
+
+<%- include("footer.ejs") -%>

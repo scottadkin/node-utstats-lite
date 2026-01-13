@@ -1,0 +1,65 @@
+<% 
+const test = ["a","b","c"];
+
+const options = [
+    {"name": "Home", "url": "/", "highlight": ["home"]},
+    {"name": "Matches", "url": "/matches", "highlight": ["match"]},
+    {"name": "Players", "url": "/players", "highlight": ["player", "players"]},
+    {"name": "Rankings", "url": "/rankings", "highlight": ["rankings"]},
+    {"name": "CTF League", "url": "/ctfleague", "highlight": ["ctfleague"]},
+    {"name": "Records", "url": "/records", "highlight": ["records"]},
+    {"name": "Maps", "url": "/maps", "highlight": ["maps"]}
+];
+
+if(userSession === null){
+    options.push({"name": "Login", "url": "/login", "highlight": ["login"]});
+    options.push({"name": "Register", "url": "/register", "highlight": ["register"]});
+}else{
+    options.push({"name": "Admin", "url": "/admin", "highlight": ["admin"]},);
+    options.push({"name": "Logout", "url": "/logout", "highlight": ["logout"]},);
+}
+
+options.push({"name": "Watchlist", "url": "/watchlist", "highlight": ["watchlist"]},);
+
+const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
+
+
+
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title><%= title %></title>
+    <meta name="description" content="<%=  meta.description %>"/>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="/css/main.css"/>
+    <meta property="og:image" content="http://<%= `${host}/${meta.image}` %>"/>
+    <meta property="og:image:secure_url" content="https://<%= `${host}/${meta.image}` %>"/>
+    <meta property="og:site_name" content="Node UTStats Lite" />
+    <meta name="twitter:card" content="summary_large_image"/>
+
+    <script src="../js/main.js"></script>
+</head>
+<body>
+    
+    <nav>
+        <%
+            for(let i = 0; i < options.length; i++){
+
+                const {name, url, highlight} = options[i];
+
+                let className = "";
+
+                if(highlight.indexOf(mode) !== -1){
+                    className = `nav-active`;
+                }
+
+                %>
+                <a class="<%= className %>" href="<%= url %>"><%= name %></a>
+                <%
+            }
+        %>
+    </nav>
+    <main>

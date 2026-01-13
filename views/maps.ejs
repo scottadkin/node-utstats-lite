@@ -1,0 +1,26 @@
+
+<%- include("header.ejs", {
+    "mode": "maps", 
+    meta,
+    host,
+    userSession
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/maps.js"></script>
+
+<div class="header-wrapper">
+    Maps
+</div>
+
+<div id="root">
+</div>
+
+<script>
+    const searchForm = new MapsSearchForm("#root", "<%= nameSearch %>", "<%= displayMode %>");
+    const display = new MapListDisplay("#root", <%- JSON.stringify(data) %>, "<%= displayMode %>");
+</script>
+
+
+<%- include("footer.ejs") -%>

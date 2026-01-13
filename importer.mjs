@@ -1,15 +1,15 @@
-import Message from "./src/app/lib/message.mjs";
-import {simpleQuery} from "./src/app/lib/database.mjs";
-import { FTPImporter } from "./src/app/lib/ftpimporter.mjs";
-import { SFTPImporter } from "./src/app/lib/sftpimporter.mjs";
+import Message from "./src/message.mjs";
+import {simpleQuery} from "./src/database.mjs";
+import { FTPImporter } from "./src/ftpimporter.mjs";
+import { SFTPImporter } from "./src/sftpimporter.mjs";
 import { readFile, readdir, rename } from 'node:fs/promises';
-import { MatchParser } from "./src/app/lib/matchParser.mjs";
+import { MatchParser } from "./src/matchParser.mjs";
 import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
-import { getSettings as getLogsFolderSettings } from "./src/app/lib/logsfoldersettings.mjs";
-import { bLogAlreadyImported } from "./src/app/lib/importer.mjs";
-import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, refreshAllTables } from "./src/app/lib/ctfLeague.mjs";
-import { setInt } from "./src/app/lib/generic.mjs";
+import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
+import { bLogAlreadyImported } from "./src/importer.mjs";
+import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, refreshAllTables } from "./src/ctfLeague.mjs";
+import { setInt } from "./src/generic.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
 
@@ -101,8 +101,18 @@ async function updateCTFLeague(m, ctfLeagueSettings){
             const maxMatches = setInt(settings["Maximum Matches Per Player"]?.value, 5);
             const maxDays = setInt(settings["Maximum Match Age In Days"]?.value, 180);
 
+
             if(bEnabledMapCTF === "true"){
+
+                //we only want to do all time once
+                if(i === 0){
+                    await leagueCalcPlayerMapResults(0, 0, maxMatches, maxDays);
+                }
+                //map gametype
                 await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays);
+                //map all time
+                await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, 0, maxMatches, maxDays);
+
             }else{
                 new Message(`CTF ${t.toUpperCase()} league is disabled, skipping.`,"note");
             }
@@ -286,8 +296,9 @@ async function startImport(){
 
     const maps = await getLeagueCategorySettings("maps");
     const gametypes = await getLeagueCategorySettings("gametypes");
+    const combined = await getLeagueCategorySettings("combined");
 
-    const ctfLeagueSettings = {"maps": maps, "gametypes": gametypes};
+    const ctfLeagueSettings = {maps, gametypes, combined};
 
     await main(ctfLeagueSettings);
 
@@ -299,6 +310,11 @@ async function startImport(){
     if(ctfLeagueSettings.gametypes["Update Whole League End Of Import"].value === "true"){
 
         await refreshAllTables(false, "gametypes");
+    }
+
+    if(ctfLeagueSettings.combined["Update Whole League End Of Import"].value === "true"){
+
+        await refreshAllTables(false, "combined");
     }
 }
 

@@ -1,26 +1,39 @@
 {
-  "name": "node-utstats-lite",
-  "version": "1.8.3",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+  "name": "node-ustats-lite",
+  "version": "2.0.0",
+  "description": "UTStats built using node.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scottadkin/node-utstats-lite"
   },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "utstats",
+    "unreal",
+    "tournament",
+    "node"
+  ],
+  "author": "Scott Adkin",
+  "license": "ISC",
   "dependencies": {
     "basic-ftp": "^5.0.5",
+    "body-parser": "^2.2.2",
     "canvas": "^3.2.0",
+    "cookie-parser": "^1.4.7",
+    "ejs": "^3.1.10",
     "encoding-japanese": "^2.2.0",
+    "express": "^5.2.1",
+    "express-mysql-session": "^3.0.3",
+    "express-session": "^1.18.2",
     "geoip-lite": "^1.4.10",
     "jimp": "^1.6.0",
     "js-sha256": "^0.11.1",
     "md5": "^2.3.0",
+    "multer": "^2.0.2",
     "mysql2": "^3.15.3",
-    "next": "^16.0.10",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "sharp": "^0.34.5",
     "ssh2-sftp-client": "^12.0.1"
   }
 }

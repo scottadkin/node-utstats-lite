@@ -1,0 +1,66 @@
+<%
+
+%>
+
+<%- include("header.ejs", {
+    "mode": "match", 
+    "meta": meta,
+    "host": host,
+    userSession
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/match.js"></script>
+<script src="../js/matchScreenshot.js"></script>
+<script src="../js/ui/canvas-graphs.js"></script>
+
+<div id="basic-info"></div>
+
+<div class="text-center margin-bottom-1">
+    <div class="header-wrapper">Match Screenshot</div>
+    <canvas id="test-canvas" class="match-sshot text-center" width="1920" height="1080"></canvas>
+</div>
+
+<div id="root">
+</div>
+
+<script>
+    const basic = <%- JSON.stringify(data.basic) %>;
+    const playerData = <%- JSON.stringify(data.playerData) %>;
+    const parsedData = <%- JSON.stringify(data) %>;
+    const basicPlayers = parsedData.basicPlayers;
+
+    const classicWeaponData = <%- JSON.stringify(classicWeaponStats) %>;
+
+    console.log(parsedData);
+
+    renderBasicInfo("#basic-info", basic, basicPlayers);
+
+    const a = new matchScreenshot("#test-canvas", <%- JSON.stringify(data) %>, false);
+    a.render();
+
+    renderFragsTables("#root", basic.total_teams, playerData);
+    renderDominationSummary("#root", basic.total_teams, parsedData);
+    renderCTFSummary("#root", basic.total_teams, parsedData.ctf, basicPlayers);
+    new CTFCaps("#root", basic.total_teams, parsedData.ctf, basicPlayers);
+
+    renderSpecialEvents("#root", basic.total_teams, playerData);
+
+    new MatchWeaponSummary("#root", parsedData.weaponStats, basicPlayers, basic.total_teams, basic.playtime);
+    new MatchClassicWeaponStats("#root", classicWeaponData, parsedData.weaponStats.names, basicPlayers, basic.total_teams);
+    new MatchDamageSummary("#root", playerData, basic.total_teams);
+
+    new MatchItemsSummary("#root", playerData, basic.total_teams);
+    new MatchKillsGraph("#root", basic, basicPlayers);
+    new MatchKillsMatchUp("#root", parsedData.kills, basicPlayers, basic.total_teams);
+
+    renderMatchPings("#root", playerData, basic.total_teams);
+
+
+    
+
+</script>
+
+
+<%- include("footer.ejs") -%>

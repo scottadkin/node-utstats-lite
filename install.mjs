@@ -1,18 +1,17 @@
 
 import fs from "fs";
-import Message from "./src/app/lib/message.mjs";
+import Message from "./src/message.mjs";
 import { mysqlSettings } from "./config.mjs";
 import mysql from "mysql2/promise";
-import {createRandomString} from "./src/app/lib/generic.mjs";
-import { simpleQuery } from "./src/app/lib/database.mjs";
-import { restoreDefaultSettings } from "./src/app/lib/siteSettings.mjs";
-import { restoreDefaultLayouts } from "./src/app/lib/pageLayout.mjs";
-import { setMatchMapGametypeIds } from "./src/app/lib/players.mjs";
-
-import { setAllPlayerMapAverages } from "./src/app/lib/players.mjs";
-import { setAllMapTotals } from "./src/app/lib/weapons.mjs";
-import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./src/app/lib/damage.mjs";
-import { refreshAllTables } from "./src/app/lib/ctfLeague.mjs";
+import {createRandomString} from "./src/generic.mjs";
+import { simpleQuery } from "./src/database.mjs";
+import { restoreDefaultSettings } from "./src/siteSettings.mjs";
+import { restoreDefaultLayouts } from "./src/pageLayout.mjs";
+import { setMatchMapGametypeIds } from "./src/players.mjs";
+import { setAllPlayerMapAverages } from "./src/players.mjs";
+import { setAllMapTotals } from "./src/weapons.mjs";
+import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./src/damage.mjs";
+import { refreshAllTables } from "./src/ctfLeague.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -63,16 +62,6 @@ const queries = [
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(32) NOT NULL,
             country varchar(3) NOT NULL,
-            matches int NOT NULL,
-            score int NOT NULL,
-            frags int NOT NULL,
-            kills int NOT NULL,
-            deaths int NOT NULL,
-            suicides int NOT NULL,
-            eff float NOT NULL,
-            ttl int NOT NULL,
-            playtime float NOT NULL,
-            last_active DATETIME NOT NULL,
             hash varchar(32) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
@@ -143,6 +132,7 @@ const queries = [
             map_id int NOT NULL,
             gametype_id int NOT NULL,
             match_date datetime NOT NULL,
+            match_result varchar(1) NOT NULL,
             bot int(1) NOT NULL,
             ping_min int(11) NOT NULL,
             ping_avg int(11) NOT NULL,
@@ -251,6 +241,7 @@ const queries = [
             id int NOT NULL AUTO_INCREMENT,
             player_id int NOT NULL,
             gametype_id int NOT NULL,
+            map_id int NOT NULL,
             last_active datetime NOT NULL,
             playtime float NOT NULL,
             total_matches int NOT NULL,
@@ -305,20 +296,34 @@ const queries = [
             id int NOT NULL AUTO_INCREMENT,
             player_id int NOT NULL,
             gametype_id int NOT NULL,
+            map_id int NOT NULL,
             total_matches int NOT NULL,
             flag_taken int NOT NULL,
+            max_flag_taken int NOT NULL,
             flag_pickup int NOT NULL,
+            max_flag_pickup int NOT NULL,
             flag_drop int NOT NULL,
+            max_flag_drop int NOT NULL,
             flag_assist int NOT NULL,
+            max_flag_assist int NOT NULL,
             flag_cover int NOT NULL,
+            max_flag_cover int NOT NULL,
             flag_seal int NOT NULL,
+            max_flag_seal int NOT NULL,
             flag_cap int NOT NULL,
+            max_flag_cap int NOT NULL,
             flag_kill int NOT NULL,
+            max_flag_kill int NOT NULL,
             flag_return int NOT NULL,
+            max_flag_return int NOT NULL,
             flag_return_base int NOT NULL,
+            max_flag_return_base int NOT NULL,
             flag_return_mid int NOT NULL,
+            max_flag_return_mid int NOT NULL,
             flag_return_enemy_base int NOT NULL,
-            flag_return_save int NOT NULL
+            max_flag_return_enemy_base int NOT NULL,
+            flag_return_save int NOT NULL,
+            max_flag_return_save int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_users (
@@ -329,11 +334,19 @@ const queries = [
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_sessions (
+        session_id varchar(128) COLLATE utf8mb4_bin NOT NULL,
+        expires int(11) unsigned NOT NULL,
+        user_id int(11) unsigned DEFAULT 0,
+        data mediumtext COLLATE utf8mb4_bin,
+        PRIMARY KEY (session_id)
+        ) ENGINE=InnoDB`,
+       /* `CREATE TABLE IF NOT EXISTS nstats_sessions (
             id int NOT NULL AUTO_INCREMENT,
-            user int NOT NULL,
-            hash varchar(64) NOT NULL,
-            ip varchar(50) NOT NULL
-        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+            session_id varchar(128) NOT NULL,
+            user_id int NOT NULL,
+            expires datetime NOT NULL,
+            data mediumtext NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,*/
 
         `CREATE TABLE IF NOT EXISTS nstats_logs (
             id int NOT NULL AUTO_INCREMENT,
@@ -606,56 +619,20 @@ const queries = [
         points int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
-
-        `CREATE TABLE IF NOT EXISTS nstats_player_map_totals (
-        id int NOT NULL AUTO_INCREMENT,
-        player_id int NOT NULL,
-        map_id int NOT NULL,
-        last_active datetime NOT NULL,
-        playtime float NOT NULL,
-        total_matches int NOT NULL,
-        wins int NOT NULL,
-        draws int NOT NULL,
-        losses int NOT NULL,
-        winrate float NOT NULL,
-        score int NOT NULL,
-        frags int NOT NULL,
-        kills int NOT NULL,
-        deaths int NOT NULL,
-        suicides int NOT NULL,
-        team_kills int NOT NULL,
-        efficiency float NOT NULL,
-        ttl float NOT NULL,
-        first_blood int(1) NOT NULL,
-        spree_1 int NOT NULL,
-        spree_2 int NOT NULL,
-        spree_3 int NOT NULL,
-        spree_4 int NOT NULL,
-        spree_5 int NOT NULL,
-        spree_best int NOT NULL,
-        multi_1 int NOT NULL,
-        multi_2 int NOT NULL,
-        multi_3 int NOT NULL,
-        multi_4 int NOT NULL,
-        multi_best int NOT NULL,
-        headshots int NOT NULL,
-        item_amp int NOT NULL,
-        item_belt int NOT NULL,
-        item_boots int NOT NULL,
-        item_body int NOT NULL,
-        item_pads int NOT NULL,
-        item_invis int NOT NULL,
-        item_shp int NOT NULL,
-        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
-
         `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
         id INT NOT NULL AUTO_INCREMENT,
         category varchar(255) NOT NULL,
         name varchar(255) NOT NULL,
         type varchar(255) NOT NULL,
         value varchar(255) NOT NULL,
-        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
+       `CREATE TABLE IF NOT EXISTS nstats_user_login_attempts (
+        id INT NOT NULL AUTO_INCREMENT,
+        date DATETIME NOT NULL,
+        target_username varchar(100),
+        ip varchar(39) NOT NULL,
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 ];
 
@@ -810,6 +787,12 @@ async function insertCTFLeagueSettings(){
     const dummyDate = new Date(0);
 
     const settings = [
+        {"category": "combined", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
+        {"category": "combined", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
+        {"category": "combined", "name": "Enable League", "type": "bool", "value": "true"},
+        {"category": "combined", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
+        {"category": "combined", "name": "Last Whole League Refresh", "type": "datetime", "value": dummyDate.toISOString()},
+
         {"category": "maps", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
         {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
         {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
@@ -879,39 +862,15 @@ async function insertCTFLeagueSettings(){
             fs.writeFileSync("./salt.mjs", fileContents);
         }
 
-        //Just in case user had an early test build that was missing this column
-        await addColumn("nstats_ftp", "delete_tmp_files", "INT(1) NOT NULL AFTER enabled");
-        await addColumn("nstats_matches", "hash", "varchar(32) NOT NULL AFTER mutators");
+        if(!fs.existsSync("./secret.mjs")){
 
-        await addColumn("nstats_players", "hash", "varchar(32) NOT NULL AFTER last_active");
+            new Message(`Creating session secret`, "note");
+            const seed2 = createRandomString(2048);
+            const fileContents2 = `export const SESSION_SECRET = \`${seed2}\`;`;
+            fs.writeFileSync("./secret.mjs", fileContents2);
+        }
 
 
-        await simpleQuery("ALTER TABLE nstats_site_settings MODIFY COLUMN setting_value text NOT NULL");
-
-        await simpleQuery("ALTER TABLE nstats_ranking_settings MODIFY COLUMN points float NOT NULL");
-
-        await addColumn("nstats_matches", "match_start", "FLOAT NOT NULL AFTER playtime");
-        await addColumn("nstats_matches", "match_end", "FLOAT NOT NULL AFTER match_start");
-        
-    
-        await addColumn("nstats_match_players", "map_id", "INT NOT NULL AFTER match_id");
-        await addColumn("nstats_match_players", "gametype_id", "INT NOT NULL AFTER map_id");
-
-        await addColumn("nstats_match_ctf", "map_id", "INT NOT NULL AFTER match_id");
-        await addColumn("nstats_match_ctf", "gametype_id", "INT NOT NULL AFTER map_id");
-
-        await addColumn("nstats_match_ctf", "flag_carry_time", "FLOAT NOT NULL AFTER flag_return_save");
-        await addColumn("nstats_match_ctf", "flag_carry_time_min", "FLOAT NOT NULL AFTER flag_carry_time");
-        await addColumn("nstats_match_ctf", "flag_carry_time_max", "FLOAT NOT NULL AFTER flag_carry_time_min");
-
-        await addColumn("nstats_match_dom", "map_id", "INT NOT NULL AFTER match_id");
-        await addColumn("nstats_match_dom", "gametype_id", "INT NOT NULL AFTER map_id");
-
-        await addColumn("nstats_match_weapon_stats", "map_id", "INT NOT NULL AFTER match_id");
-        await addColumn("nstats_match_weapon_stats", "gametype_id", "INT NOT NULL AFTER map_id");
-
-        await addColumn("nstats_match_weapon_stats", "suicides", "INT NOT NULL AFTER team_kills");
-        await addColumn("nstats_player_totals_weapons", "suicides", "INT NOT NULL AFTER deaths");
         await addPageLayouts();
 
         new Message("Setting match map & gametype ids.", "note");
@@ -923,13 +882,6 @@ async function insertCTFLeagueSettings(){
         new Message("Calculating Map Totals", "note");
         await setAllMapTotals();
 
-        await addColumn("nstats_damage_match", "map_id", "INT NOT NULL after match_id");
-        await addColumn("nstats_damage_match", "gametype_id", "INT NOT NULL after map_id");
-
-
-        await addColumn("nstats_ftp", "append_team_sizes", "INT(1) NOT NULL AFTER delete_tmp_files");
-        await addColumn("nstats_logs_folder", "append_team_sizes", "INT(1) NOT NULL AFTER min_playtime");
-        
         await damageSetMatchMapGametypeIds();
 
 

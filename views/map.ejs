@@ -1,0 +1,40 @@
+
+<%- include("header.ejs", {
+        "mode": "maps", 
+        meta,
+        host,
+        userSession
+    });
+-%>
+
+
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/matches.js"></script>
+<script src="../js/ui/maps.js"></script>
+
+<div class="header-wrapper">
+    <%= basic.name %>
+</div>
+
+<div id="root">
+</div>
+
+<script>
+
+    const validTypes = <%- JSON.stringify(validTypes) %>;
+    const pageSettings = <%- JSON.stringify(pageSettings) %>;
+    const ctfLeagueSettings = <%- JSON.stringify(ctfLeagueSettings) %>
+
+    UIMapImage("#root", "<%= basic.image %>");
+    UIMapBasicSummary("#root", <%- JSON.stringify(basic) %>);
+    UIMapWeaponsSummary("#root", <%- JSON.stringify(weaponStats) %>);
+
+    new UIMapPlayerRankings("#root", "<%= basic.id %>");
+    new UIMapCTFLeague("#root", "<%= basic.id %>", pageSettings, ctfLeagueSettings);
+    new UIMapRecentMatches("#root", "<%= basic.id %>");
+    new UIMapPlayerAverages("#root", "<%= basic.id %>", validTypes);
+</script>
+
+
+<%- include("footer.ejs") -%>

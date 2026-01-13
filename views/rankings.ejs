@@ -1,0 +1,33 @@
+
+<%- include("header.ejs", {
+    "mode": "rankings", 
+    meta,
+    host,
+    userSession
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/rankings.js"></script>
+
+<div class="header-wrapper">
+    <%= (mode === "gametype") ? "Gametype" : "Map" %> Rankings
+</div>
+
+<div id="root">
+
+</div>
+
+<script>
+
+    new RankingsSearchForm("#root", "<%= mode %>", 
+    <%- JSON.stringify(data) %>,
+    <%- JSON.stringify(names) %>, 
+    "<%= selectedId %>",
+    "<%= selectedTimeRange %>",
+    "<%= selectedPerPage %>",
+    "<%= currentPage %>");
+</script>
+
+
+<%- include("footer.ejs") -%>

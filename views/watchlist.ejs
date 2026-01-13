@@ -1,0 +1,32 @@
+
+<%- include("header.ejs", {
+    "mode": "watchlist", 
+    meta,
+    host,
+    userSession
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/watchlist.js"></script>
+<div class="header-wrapper">
+    Your Watchlist
+</div>
+
+<div id="root">
+
+    <div class="info">
+        Keep a list of players, and matches that you can get back to easily.<br>
+        No account is necessary, everything is saved to your localstorage on your browser.
+    </div>
+
+</div>
+
+<script>
+    new UIWatchlistPlayers("#root");
+    new UIWatchlistMatches("#root");
+</script>
+
+
+
+<%- include("footer.ejs") -%>

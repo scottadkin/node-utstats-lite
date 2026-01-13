@@ -1,0 +1,58 @@
+<%- include("header.ejs", {
+    "mode": "players", 
+    host,
+    meta,
+    userSession
+    }) -%>
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/players.js"></script>
+
+
+<div id="root">
+    <div class="header-wrapper">Player List</div>
+    <form class="form" action="/players" method="GET">
+        <div class="form-row">
+            <label for="name">Name</label>
+            <input type="text" class="textbox" id="name" name="name" value="<%- searchName %>" placeholder="Player Name..."/>
+        </div>
+
+        <div class="form-row">
+            <label for="sortBy">Sort By</label>
+            <select class="default-select" id="sortBy" name="sortBy">
+                <% 
+                for(let i = 0; i < sortByOptions.length; i++){
+                    const {value, display} = sortByOptions[i];
+                    %><option <%= (value === sortBy) ? "selected" : "" %> value="<%= value %>"><%= display %></option><%
+                }
+                %>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label for="order">Order</label>
+            <select class="default-select" id="order" name="order">
+                <option value="ASC" <%= (order === "ASC") ? "selected" : "" %>>Ascending</option>
+                <option value="DESC"<%= (order === "DESC") ? "selected" : "" %>>Descending</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <label for="perPage">Per Page</label>
+            <select class="default-select" name="perPage" id="perPage">
+             <% 
+                for(let i = 0; i < perPageOptions.length; i++){
+                    const {value, display} = perPageOptions[i];
+                    %><option <%= (value == perPage) ? "selected" : "" %> value="<%= value %>"><%= display %></option><%
+                }
+                %>
+            </select>
+        </div>
+        <input type="submit" class="submit-button" value="Search"/>
+    </form>
+</div>
+
+<script>
+    new PlayersSearchList("#root", <%- JSON.stringify(players) %>, "<%= searchName %>", "<%= sortBy%>", "<%= order %>", "<%= perPage %>", "<%= page %>")
+</script>
+<%- include('footer.ejs') -%>

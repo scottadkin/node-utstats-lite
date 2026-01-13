@@ -1,0 +1,32 @@
+
+<%- include("header.ejs", {
+    "mode": "register", 
+    "meta": meta,
+    "host": host
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+
+<div class="header-wrapper">
+    Register
+</div>
+
+<form id="root" class="form text-center margin-bottom-1" method="POST" action="/register" enctype="application/x-www-form-urlencoded">
+    <div class="form-row">
+        <label for="username">Username</label>
+        <input type="text" class="textbox" id="username" name="username" placeholder="Username..."/>
+    </div>
+    <div class="form-row">
+        <label for="password">Password</label>
+        <input type="password" class="textbox" id="password" name="password" placeholder="Password..."/>
+    </div>
+    <div class="form-row">
+        <label for="password2">Password Again</label>
+        <input type="password" class="textbox" id="password2" name="password2" placeholder="Password..."/>
+    </div>
+    <input type="submit" class="submit-button" value="Register"/>
+</form>
+
+
+<%- include("footer.ejs") -%>

@@ -1,0 +1,47 @@
+
+<%- include("header.ejs", {
+    "mode": "records", 
+    meta,
+    host,
+    userSession
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/records.js"></script>
+
+<div class="header-wrapper">
+    Records
+</div>
+
+<div id="root">
+</div>
+
+<script>
+
+    new RecordsSearchForm(
+        "#root", 
+        "<%= mode %>",
+        <%- JSON.stringify(validMatchTypes) %>, 
+        <%- JSON.stringify(validLifetimeTypes) %>, 
+        <%- JSON.stringify(gametypeNames) %>,
+        "<%= selectedGametype %>",
+        "<%= selectedCat %>"
+    );
+
+    new RecordsDataDisplay(
+        "#root", 
+        "<%= mode %>", 
+        "<%= selectedCat %>", 
+        "<%= selectedGametype %>", 
+        <%- JSON.stringify(data) %>, 
+        "<%= catTitle %>", 
+        <%- JSON.stringify(gametypeNames) %>, 
+        <%= totalResults %>,
+        <%= page %>,
+        <%= perPage %>,
+        );
+</script>
+
+
+<%- include("footer.ejs") -%>

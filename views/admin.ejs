@@ -1,0 +1,134 @@
+<%
+/*"description": `Manage how the importer processes utstats logs, you can adjust minimum player requirements, 
+        ignore duplicate logs and many more settings.
+        Here you can add S/FTP servers so the importer can download ut stats logs.
+        You can also adjust the importer settings if you manually place utstats logs in the website&apos;s <b>./Logs</b> Folder`*/
+
+const modes = [
+    {
+        "display": "Site Settings",
+        "value": "site-settings",
+        "description": "Branding Settings, Page Settings, Social Settings, Welcome Message"
+    },
+    {
+        "display": "Importer Manager", 
+        "value": "importer", 
+        "description": "General Overview, Add FTP Server, Edit FTP Server Settings, Edit Logs Folder Settings"
+        
+    },
+    {
+        "display": "Map Manager", 
+        "value": "maps", 
+        "description": "Upload map screenshots."
+    },
+    {
+        "display": "Ranking Manager",
+        "value": "rankings",
+        "description": `Adjust ranking event values, Recalculate Rankings`
+    },
+    {
+        "display": "CTF League Manager",
+        "value": "ctf-league",
+        "description": "Combined Settings, Gametype Settings, Map Settings"
+    }
+];
+
+modes.sort((a, b) =>{
+
+    a = a.display.toLowerCase();
+    b = b.display.toLowerCase();
+
+    if(a < b){
+        return -1;
+    }else if(a > b){
+        return 1;
+    }
+
+    return 0;
+});
+
+modes.push({
+    "display": "Clear Database Tables",
+    "value": "clear-database",
+    "description": `Delete all match and player data from the database`,
+    "style": "background-color:var(--team-color-red);"
+});
+
+
+function renderModes(mode){
+
+    if(mode !== "") return;
+
+    %><div class="admin-cat-wrapper"><%
+    
+    for(let i = 0; i < modes.length; i++){
+
+        const {display, value, description, style} = modes[i];
+
+        %>
+            <div class="admin-cat-box" <%- (style !== undefined) ? `style="${style}"` : ""%>>
+                <a href="/admin?mode=<%- value %>">
+                    <div class="admin-cat-title"><%= display %></div>
+                    <div class="admin-cat-info"><%- description %></div>
+                </a>
+            </div>
+        <%
+    }
+    %></div><%
+}
+
+
+function renderGoBackToMain(mode){
+
+    if(mode === "") return;
+
+
+    %>
+    <a href="/admin">
+        <div class="admin-home">Return To Admin Home</div>
+    </a>
+    <%
+}
+
+
+
+
+function renderCategory(mode){
+
+    if(mode === "") return;
+
+    if(mode === "importer"){
+        %><script>new AdminFTPManager("#root");</script> <%
+    }else if(mode === "maps"){
+        %><script>new AdminMapsManager("#root");</script> <%
+    }else if(mode === "site-settings"){
+        %><script>new AdminSiteSettingsManager("#root")</script><%
+    }else if(mode === "rankings"){
+        %><script>new AdminRankingManager("#root");</script><%
+    }else if(mode === "clear-database"){
+        %><script>new AdminClearDatabase("#root");</script><%
+    }else if(mode === "ctf-league"){
+        %><script>new AdminCTFLeagueManager("#root");</script><%
+    }
+}
+
+%>
+
+<%- include("header.ejs", {
+    "mode": "admin", 
+    host,
+    "userSession": userSession,
+    meta
+    }) -%>
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/admin.js"></script>
+
+
+<div class="header-wrapper">Admin Control Panel</div>
+
+<% renderModes(mode) %>
+<% renderGoBackToMain(mode) %>
+<div id="root"></div>
+<% renderCategory(mode) %>
+
+<%- include('footer.ejs') -%>

@@ -1,0 +1,52 @@
+
+<%- include("header.ejs", {
+    "mode": "login", 
+    "meta": meta,
+    "host": host
+    }) -%>
+
+
+<script src="../js/ui/ui.js"></script>
+
+<div class="header-wrapper">
+    Login
+</div>
+
+<%
+if(error !== null){
+
+    let errorString = "";
+
+    if(error === "incorrect"){
+        errorString = `Incorrect Username or Password.`;
+    }else if(error === "already"){
+        errorString = `You are already logged in.`;
+    }else if(error === "banned"){
+        errorString = `You have been temporarily banned for too many failed login attempts in a certain timeframe.`;
+    }else if(error === "not-active"){
+        errorString = `Your account has not been activated by an admin.`;
+    }
+
+    %>
+    <div class="error">
+        <div class="error-title">Failed To Login</div>
+        <div class="error-text"><%= errorString %></div>
+    </div>
+    <%
+}
+%>
+
+<form id="root" class="form text-center margin-bottom-1" method="POST" action="/login" enctype="application/x-www-form-urlencoded">
+    <div class="form-row">
+        <label for="username">Username</label>
+        <input type="text" class="textbox" id="username" name="username" placeholder="Username..."/>
+    </div>
+    <div class="form-row">
+        <label for="password">Password</label>
+        <input type="password" class="textbox" id="password" name="password" placeholder="Password..."/>
+    </div>
+    <input type="submit" class="submit-button" value="Login"/>
+</form>
+
+
+<%- include("footer.ejs") -%>
