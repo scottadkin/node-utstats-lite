@@ -5,6 +5,8 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Matches" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
     {"category": "Matches" ,"type": `displayMode`, "name": "Default Display Mode", "value": "default"},
     {"category": "Players" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
+    {"category": "Players" ,"type": `playersSortBy`, "name": "Default Sort By", "value": "name"},
+    {"category": "Players" ,"type": `order`, "name": "Default Order", "value": "ASC"},
     {"category": "Home" ,"type": `bool`, "name": "Display Welcome Message", "value": 1},
     {"category": "Home" ,"type": `bool`, "name": "Display Social Media", "value": 1},
     {"category": "Home" ,"type": `bool`, "name": "Display Recent Matches", "value": 1},

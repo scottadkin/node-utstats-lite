@@ -26,10 +26,14 @@ export async function renderPlayersPage(req, res, userSession){
 
         const DEFAULT_PER_PAGE = 25;
 
+
+        const pageSettings = await getCategorySettings("Players");
+        console.log(pageSettings);
+
         let searchName = req?.query?.name ?? "";
-        let sortBy = req?.query?.sortBy ?? "name";
-        let order = req?.query?.order ?? "ASC";
-        let perPage = req?.query?.perPage ?? DEFAULT_PER_PAGE;
+        let sortBy = req?.query?.sortBy ?? pageSettings["Default Sort By"] ?? "name";
+        let order = req?.query?.order  ?? pageSettings["Default Order"] ?? "ASC";
+        let perPage = req?.query?.perPage ?? pageSettings["Results Per Page"] ?? DEFAULT_PER_PAGE;
         if(perPage != perPage) perPage = DEFAULT_PER_PAGE;
         if(perPage < 5 || perPage > 100) perPage = DEFAULT_PER_PAGE;
 
