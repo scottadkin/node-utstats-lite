@@ -8,13 +8,14 @@ export async function renderMatchesPage(req, res, userSession){
 
     try{
 
-        const perPage = 25;
-
         const serverNames = await getAllServerNames(true);
         const gametypeNames = await getAllGametypeNames(true);
         const mapNames = await getAllMapNames(true);
         const pageSettings = await getCategorySettings("Matches");
         
+        let perPage = pageSettings?.["Results Per Page"] ?? 25;
+        perPage = parseInt(perPage);
+        if(perPage !== perPage) perPage = 25;
 
         let selectedServer = (req.query.s !== undefined) ? parseInt(req.query.s) : 0;
         if(selectedServer !== selectedServer) selectedServer = 0;
@@ -28,9 +29,8 @@ export async function renderMatchesPage(req, res, userSession){
         let page = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
         if(page !== page) page = 1;
 
-        let displayMode = req?.query?.display ?? "default"; 
+        let displayMode = req?.query?.display ?? pageSettings?.["Default Display Mode"] ?? "default"; 
         displayMode = displayMode.toLowerCase();
- 
         const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap);
 
         
