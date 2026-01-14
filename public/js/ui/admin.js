@@ -1203,7 +1203,7 @@ class AdminSiteSettingsManager{
                     newValue = (c.setting_value === true) ? 1 : 0; 
                 }
 
-                if(c.setting_value.indexOf("<script>") !== -1){
+                if(c.setting_type === "longtext" && c.setting_value.indexOf("<script>") !== -1){
                     throw new Error(`You can not have <script> tags in your welcome message`);
                 }
 

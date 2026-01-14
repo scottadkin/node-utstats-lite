@@ -12,7 +12,10 @@ export async function renderHomePage(req, res, userSession){
 
     const socialSettings = await getCategorySettings("Social Media");
     const welcomeMessageSettings = await getCategorySettings("Welcome Message");
-    const recentMatches = await getRecentMatches(1, 5, 0, 0, 0);
+
+    let perPage = pageSettings["Total Recent Matches"] ?? 5;
+
+    const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0);
 
     const serversList = await getBasicServerList();
 
