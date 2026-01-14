@@ -2,6 +2,7 @@ import { getMatchData } from "../matches.mjs";
 import { getMatchData as getClassicStatsData } from "../classicWeaponStats.mjs";
 import { convertTimestamp, plural, toPlaytime } from "../generic.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
+import { getPageLayout } from "../pageLayout.mjs";
 
 export async function renderMatchPage(req, res, userSession){
 
@@ -29,6 +30,8 @@ export async function renderMatchPage(req, res, userSession){
         const classicWeaponStats = await getClassicStatsData(matchId);
 
         const brandingSettings = await getCategorySettings("Branding");
+        const pageSettings = await getCategorySettings("Match");
+        const pageLayout = await getPageLayout("Match");
 
         res.render('match.ejs', {
             "title": `${b.map_name} - ${dateString} Match Report - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`,
@@ -39,7 +42,9 @@ export async function renderMatchPage(req, res, userSession){
             },
             userSession,
             data,	
-            classicWeaponStats
+            classicWeaponStats,
+            pageSettings,
+            pageLayout
 
         });
 

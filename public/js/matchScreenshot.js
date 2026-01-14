@@ -5,7 +5,7 @@ const blueTeamColor = "rgb(0,193,255)";
 const greenTeamColor = "rgb(0,255,0)";
 const yellowTeamColor = "rgb(255,255,0)";
 
-class matchScreenshot{
+class MatchScreenshot{
 
     constructor(canvas, data, bServerSide){
 
@@ -21,7 +21,11 @@ class matchScreenshot{
            // this.canvas = createCanvas(1920, 1080);
         }*/
 
-        this.canvas = document.querySelector(canvas);
+        if(typeof canvas === "string"){
+            this.canvas = document.querySelector(canvas);
+        }else{
+            this.canvas = canvas;
+        }
 
         this.context = this.canvas.getContext("2d");
 

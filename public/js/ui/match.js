@@ -1853,3 +1853,21 @@ class MatchKillsGraph{
         );
     }
 }
+
+
+function renderMatchScreenshot(parent, matchData){
+
+    parent = document.querySelector(parent);
+
+    const wrapper = UIDiv("text-center margin-bottom-1");
+    UIHeader(wrapper, "Match Screenshot");
+    const canvas = document.createElement("canvas"); 
+    canvas.className = "match-sshot text-center";
+    canvas.width = 1920;
+    canvas.height = 1080;
+    wrapper.append(canvas);
+    const sshot = new MatchScreenshot(canvas, matchData, false);
+    sshot.render();
+    
+    parent.append(wrapper);
+}

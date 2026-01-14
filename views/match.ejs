@@ -1,66 +1,112 @@
-<%
-
-%>
-
 <%- include("header.ejs", {
     "mode": "match", 
     "meta": meta,
     "host": host,
     userSession
     }) -%>
-
-
 <script src="../js/ui/ui.js"></script>
 <script src="../js/ui/match.js"></script>
 <script src="../js/matchScreenshot.js"></script>
 <script src="../js/ui/canvas-graphs.js"></script>
-
-<div id="basic-info"></div>
-
-<div class="text-center margin-bottom-1">
-    <div class="header-wrapper">Match Screenshot</div>
-    <canvas id="test-canvas" class="match-sshot text-center" width="1920" height="1080"></canvas>
-</div>
-
-<div id="root">
-</div>
-
+<div id="root"></div>
 <script>
-    const basic = <%- JSON.stringify(data.basic) %>;
-    const playerData = <%- JSON.stringify(data.playerData) %>;
-    const parsedData = <%- JSON.stringify(data) %>;
+    const basic = <%- JSON.stringify(data.basic) -%>;
+    const playerData = <%- JSON.stringify(data.playerData) -%>;
+    const parsedData = <%- JSON.stringify(data) -%>;
     const basicPlayers = parsedData.basicPlayers;
+    const classicWeaponData = <%- JSON.stringify(classicWeaponStats) -%>;
+    <%
+    for(let i = 0; i < pageLayout.length; i++){
 
-    const classicWeaponData = <%- JSON.stringify(classicWeaponStats) %>;
+        const pageKey = pageLayout[i];
+        const settingKey = `Display ${pageKey}`;
 
-    console.log(parsedData);
+        if(pageSettings[settingKey] === undefined) throw new Error(`Page setting not found = ${settingKey}`);
 
-    renderBasicInfo("#basic-info", basic, basicPlayers);
+        if(pageSettings[settingKey] === "0") continue;
 
-    const a = new matchScreenshot("#test-canvas", <%- JSON.stringify(data) %>, false);
-    a.render();
+        switch(settingKey){
 
-    renderFragsTables("#root", basic.total_teams, playerData);
-    renderDominationSummary("#root", basic.total_teams, parsedData);
-    renderCTFSummary("#root", basic.total_teams, parsedData.ctf, basicPlayers);
-    new CTFCaps("#root", basic.total_teams, parsedData.ctf, basicPlayers);
+            case "Display Basic Info": {
 
-    renderSpecialEvents("#root", basic.total_teams, playerData);
+                %>renderBasicInfo("#root", basic, basicPlayers);<%
 
-    new MatchWeaponSummary("#root", parsedData.weaponStats, basicPlayers, basic.total_teams, basic.playtime);
-    new MatchClassicWeaponStats("#root", classicWeaponData, parsedData.weaponStats.names, basicPlayers, basic.total_teams);
-    new MatchDamageSummary("#root", playerData, basic.total_teams);
+            } break;
 
-    new MatchItemsSummary("#root", playerData, basic.total_teams);
-    new MatchKillsGraph("#root", basic, basicPlayers);
-    new MatchKillsMatchUp("#root", parsedData.kills, basicPlayers, basic.total_teams);
+            case "Display Screenshot": {
 
-    renderMatchPings("#root", playerData, basic.total_teams);
+                %>renderMatchScreenshot("#root", parsedData);<%
+
+            }  break;
+
+            case "Display Frags": {
+
+                %>renderFragsTables("#root", basic.total_teams, playerData);<%
+
+            } break;
+
+            case "Display DOM": {
+
+                %>renderDominationSummary("#root", basic.total_teams, parsedData);<%
+
+            } break;
+
+            case "Display CTF": {
+
+                %>renderCTFSummary("#root", basic.total_teams, parsedData.ctf, basicPlayers);<%
+
+            } break;
+
+            case "Display CTF Caps": {
+
+                %>new CTFCaps("#root", basic.total_teams, parsedData.ctf, basicPlayers);<%
+
+            } break;
+
+            case "Display Special Events": {
+
+                %>renderSpecialEvents("#root", basic.total_teams, playerData);<%
+
+            } break;
+
+            case "Display Weapons": {
+
+                %>new MatchWeaponSummary("#root", parsedData.weaponStats, basicPlayers, basic.total_teams, basic.playtime);<%
+
+            } break;
+
+            case "Display Classic Weapon Stats": {
+
+                %>new MatchClassicWeaponStats("#root", classicWeaponData, parsedData.weaponStats.names, basicPlayers, basic.total_teams);<%
+
+            } break;
+
+            case "Display Damage Stats": {
+
+                %>new MatchDamageSummary("#root", playerData, basic.total_teams);<%
+
+            } break;
 
 
-    
+            case "Display Items": {
 
+                %>new MatchItemsSummary("#root", playerData, basic.total_teams);<%
+
+            } break;
+
+            case "Display Kills": {
+
+                %>new MatchKillsGraph("#root", basic, basicPlayers);<%
+                %>new MatchKillsMatchUp("#root", parsedData.kills, basicPlayers, basic.total_teams);<%
+
+            } break;
+
+            case "Display Pings": {
+                %>renderMatchPings("#root", playerData, basic.total_teams);<%
+
+            } break;
+        }
+    }
+    _%>
 </script>
-
-
 <%- include("footer.ejs") -%>
