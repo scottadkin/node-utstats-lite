@@ -41,17 +41,13 @@ export async function getPageLayout(pageName){
 
     if(result.length === 0) return null;
 
-    const data = {};
-
-    const indexesUsed = [];
+    const data = [];
 
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
-        const index = getNextAvailableIndex(indexesUsed, r.page_order);
-
-        data[r.item] = index;
+        data.push(r.item);
     }
 
     return data;

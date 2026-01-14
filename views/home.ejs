@@ -4,6 +4,8 @@
     "userSession": userSession,
     meta
     }) -%>
+
+
 <script src="../js/ui/ui.js"></script>
 <script src="../js/ui/matches.js"></script>
 <script src="../js/ui/home.js"></script>
@@ -46,53 +48,59 @@
                 <%= messageContent %> 
             </div>
             <%
-
        }
     %>
-
 </div>
 <script>
-
+    
     <% 
 
+    for(let i = 0; i < pageLayout.length; i++){
 
-    if(pageSettings["Display Welcome Message"] === "1" && welcomeMessageSettings !== undefined){
+        const settingKey = pageLayout[i];
 
-      %>
+        if(pageSettings[`Display ${settingKey}`] === "1"){
+
+            const displayKey = [`Display ${settingKey}`];
+
+            switch(settingKey){
+
+                case "Welcome Message": {
+
+                    if(welcomeMessageSettings !== undefined){
+
+                        %>
         
-        const welcomeTitle = "<%= welcomeMessageSettings["Welcome Title"] %>";
-        const welcomeContent = "<%= JSON.stringify(welcomeMessageSettings["Welcome Message"]) %>";
-        renderWelcomeMessage("#root", welcomeTitle, welcomeContent);
-      <%
-        
+                            const welcomeTitle = "<%= welcomeMessageSettings["Welcome Title"] %>";
+                            const welcomeContent = "<%= JSON.stringify(welcomeMessageSettings["Welcome Message"]) %>";
+                            renderWelcomeMessage("#root", welcomeTitle, welcomeContent);
+                        <%
+                    }
+                } break;
+
+                case "Recent Matches": {
+                    %>
+                        const recentMatchesData = <%- JSON.stringify(recentMatches) %>;  
+                        homeRenderRecentMatches("#root", recentMatchesData); 
+                    <%
+
+                } break;
+
+                case "Social Media": {
+                    %>
+                        renderSocials("#root", <%- JSON.stringify(socialSettings) %>);
+                    <%
+                } break;
+
+                case "Servers": {
+                    %>
+                        renderServerList("#root", <%- JSON.stringify(serversList) %>);
+                    <%
+                } break;
+            }
+        }
     }
     %>
 
-    <%
-    if(pageSettings["Display Recent Matches"] === "1"){
-        %>const recentMatchesData = <%- JSON.stringify(recentMatches) %>;  
-        
-        homeRenderRecentMatches("#root", recentMatchesData);
-        
-        <%
-    }%>
-
-    <%
-    if(pageSettings["Display Social Media"] === "1"){
-
-        %>
-        renderSocials("#root", <%- JSON.stringify(socialSettings) %>);
-        <%
-    }
-    %>
-
-    <%
-    if(pageSettings["Display Servers"] === "1"){
-
-        %>
-        renderServerList("#root", <%- JSON.stringify(serversList) %>);
-        <%
-    }
-    %>
 </script>
 <%- include('footer.ejs') -%>

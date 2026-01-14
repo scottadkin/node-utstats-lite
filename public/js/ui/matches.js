@@ -110,8 +110,6 @@ class MatchRichViewBox{
 
     createElems(){
 
-        console.log(this.data);
-
         const title = document.createElement("div");
         title.className = "rich-title";
         title.appendChild(document.createTextNode(this.data.map_name));
