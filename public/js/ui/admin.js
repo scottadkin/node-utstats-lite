@@ -1114,7 +1114,7 @@ class AdminSiteSettingsManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "welcome-message-settings";
+        this.mode = "page-settings";
         
         this.pageSettings = [];
 
@@ -1122,7 +1122,7 @@ class AdminSiteSettingsManager{
             /*"Branding",*/"CTF League", "Home", "Map", "Maps", 
             "Match", "Matches", /*"Nav",*/ 
             "Player", "Players", /*"Social Media", 
-            "Welcome Message"*/"Rankings",
+            "Welcome Message"*/"Rankings", "Records"
         ];
 
         this.selectedPage = this.pages[0];
@@ -1175,8 +1175,9 @@ class AdminSiteSettingsManager{
 
             this.pageSettings = res.pageSettings;
             this.savedPageSettings = JSON.parse(JSON.stringify(res.pageSettings));
+            this.validRecordTypes = res.validRecordTypes;
 
-
+            console.log(res);
             this.render();
 
         }catch(err){
@@ -1431,7 +1432,22 @@ class AdminSiteSettingsManager{
                 new UILastActiveSelect(row, s.setting_value, null, (newValue) =>{this.changePageSetting(s.id, newValue)});
 
             }else if(s.setting_type === "ctfLeagueMode"){
+
                 new UICTFLeagueModeSelect(row, s.setting_value, null, (newValue) =>{ this.changePageSetting(s.id, newValue)});
+
+            }else if(s.setting_type === "recordsMode"){
+                
+                new UIRecordsModeSelect(row, s.setting_value, (newValue) => { this.changePageSetting(s.id, newValue)});
+
+            }else if(s.setting_type === "recordsType"){
+                
+                new UIRecordsTypeSelect(
+                    row, 
+                    (s.setting_name === "Default Record Type(Matches)") ? "match" : "lifetime", 
+                    s.setting_value, 
+                    this.validRecordTypes, 
+                    (newValue) =>{ this.changePageSetting(s.id, newValue)}
+                );
             }else{
 
                 console.log(s.setting_type);
@@ -1544,7 +1560,7 @@ class AdminSiteSettingsManager{
                 const warning = UIDiv("warning");
                 warning.innerHTML = `Input must be valid HTML, if you input invalid HTML the home page may experience 
                 problems rendering the rest of the content correctly. <br><br>Script tags are not permitted.
-                <br>You also have to have Welcome Message enabled in the Home Page settings for this are to be visible.`;
+                <br>You also have to have Welcome Message enabled in the Home Page settings for this area to be visible.`;
                 div.append(warning);
                 
                 const textarea = document.createElement("textarea");

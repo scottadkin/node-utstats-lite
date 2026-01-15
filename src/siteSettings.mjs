@@ -77,9 +77,13 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Rankings" ,"type": `activeIn`, "name": "Default Last Active Limit(Gametypes)", "value": 28},
     {"category": "Rankings" ,"type": `activeIn`, "name": "Default Last Active Limit(Maps)", "value": 90},
 
-
     {"category": "CTF League" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
     {"category": "CTF League" ,"type": `ctfLeagueMode`, "name": "Default Mode", "value": "gametypes"},
+
+    {"category": "Records" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
+    {"category": "Records" ,"type": `recordsMode`, "name": "Default Mode", "value": "match"},
+    {"category": "Records" ,"type": `recordsType`, "name": "Default Record Type(Matches)", "value": "kills"},
+    {"category": "Records" ,"type": `recordsType`, "name": "Default Record Type(Lifetime)", "value": "kills"},
 ];
 
 

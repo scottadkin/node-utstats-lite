@@ -853,6 +853,31 @@ class UICTFLeagueModeSelect{
     }
 }
 
+class UIRecordsModeSelect{
+
+    constructor(parent, initialValue, callback){
+
+        this.elem = new UISelect(parent, [
+            {"display": "Single Match", "value": "match"},
+            {"display": "Lifetime", "value": "lifetime"},
+        ], initialValue, callback);
+    }
+}
+
+class UIRecordsTypeSelect{
+
+    constructor(parent, recordMode, initialValue, validTypes, callback){
+
+        if(recordMode !== "match" && recordMode !== "lifetime"){
+            throw new Error(`Not a valid record type (${recordMode})`);
+        }
+
+        const types = (recordMode === "match") ? validTypes.matches : validTypes.lifetime;
+
+        this.elem = new UISelect(parent, types, initialValue, callback);
+    }
+}
+
 
 class InteractiveTable{
 

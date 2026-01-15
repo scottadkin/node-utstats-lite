@@ -11,6 +11,7 @@ import { getAllPagesLayout } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
 import { clearAllDataTables } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
+import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 
 
 
@@ -124,8 +125,9 @@ export default class AdminJSONManager{
 
                 const settings = await getAllSiteSettings();
                 const layouts = await getAllPagesLayout();
+                const validRecordTypes = {"matches": VALID_PLAYER_MATCH_TYPES, "lifetime": VALID_PLAYER_LIFETIME_TYPES};
 
-                return this.res.json({"pageSettings": settings, "pageLayouts": layouts});
+                return this.res.json({"pageSettings": settings, "pageLayouts": layouts, validRecordTypes});
 
             }else if(this.mode === "save-site-setting-changes"){
 

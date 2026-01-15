@@ -7,13 +7,22 @@ export async function renderRecordsPage(req, res, userSession){
 
     try{
         
+        const pageSettings = await getCategorySettings("Records");
         const gametypeNames = await getAllNames(true);
 
-        let mode = req?.query?.mode ?? "match";
-        let selectedGametype = req?.query?.g ?? -1;
-        let selectedCat = req?.query?.cat ?? "kills";
-        let page = req?.query?.page ?? 1;
-        let perPage = req?.query?.perPage ?? 50;
+        let mode = req.query?.mode ?? pageSettings["Default Mode"] ?? "match";
+        mode = mode.toLowerCase();
+
+        if(mode !== "match" && mode !== "lifetime") throw new Error(`Not a valid record mode`);
+
+        let selectedGametype = req.query?.g ?? -1;
+
+        const fallbackCat = pageSettings[`Default Record Type(${(mode === "match") ? "Matches" : "Lifetime"})`] 
+
+        const selectedCat = req.query?.cat ?? fallbackCat ?? "kills";
+
+        let page = req.query.page ?? 1;
+        let perPage = req.query?.perPage ?? pageSettings["Results Per Page"] ?? 50;
 
         page = parseInt(page);
         if(page !== page) page = 1;
@@ -24,7 +33,6 @@ export async function renderRecordsPage(req, res, userSession){
         let currentGametypeName = "Not Found";
 
         for(let i = 0; i < gametypeNames.length; i++){
-
 
             if(gametypeNames[i].id == selectedGametype) currentGametypeName = gametypeNames[i].name;
             if(gametypeNames[i].id === 0) gametypeNames[i].id = -1;

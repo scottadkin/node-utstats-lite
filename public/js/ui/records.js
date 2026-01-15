@@ -40,14 +40,14 @@ class RecordsSearchForm{
         this.form.action = `/records/`;
         this.form.method = "GET";
 
-        this.parent.appendChild(this.form);
+        this.parent.append(this.form);
 
         const hidden = document.createElement("input");
         hidden.type = "hidden";
         hidden.value = this.mode;
         hidden.id = "mode";
         hidden.name = "mode";
-        this.form.appendChild(hidden);
+        this.form.append(hidden);
 
         const typeRow = document.createElement("div");
         typeRow.className = "form-row";
@@ -55,37 +55,27 @@ class RecordsSearchForm{
         const tLabel = document.createElement("label");
         tLabel.htmlFor = "cat";
         tLabel.innerHTML = "Record Type";
-        typeRow.appendChild(tLabel);
+        typeRow.append(tLabel);
 
-        const tSelect = document.createElement("select");
-        tSelect.className = "default-select";
-        tSelect.id = "cat";
-        tSelect.name = "cat";
+        const tSelect = new UIRecordsTypeSelect(
+            typeRow, 
+            this.mode, 
+            this.selectedCat, 
+            {"matches": this.matchTypes , "lifetime": this.lifetimeTypes}
+        );
 
-        const recordTypes = (this.mode === "match") ? this.matchTypes : this.lifetimeTypes;
+        tSelect.elem.select.id = tSelect.elem.select.name = "cat";
 
-        for(let i = 0; i < recordTypes.length; i++){
-
-            const {display, value} = recordTypes[i];
-
-            const option = document.createElement("option");
-
-            if(value == this.selectedCat) option.selected = true;
-            option.value = value;
-            option.innerHTML = display;
-            tSelect.appendChild(option);
-        }
-
-        typeRow.appendChild(tSelect);
+        typeRow.append(tSelect.elem.select);
         
-        this.form.appendChild(typeRow);
+        this.form.append(typeRow);
 
         const gametypeRow = document.createElement("div");
         gametypeRow.className = "form-row";
         const gLable = document.createElement("label");
         gLable.htmlFor = "g";
         gLable.innerHTML = `Gametype`;
-        gametypeRow.appendChild(gLable);
+        gametypeRow.append(gLable);
 
         const gSelect = document.createElement("select");
         gSelect.className = "default-select";
@@ -101,19 +91,19 @@ class RecordsSearchForm{
             option.value = id;
             option.innerHTML = name;
              if(id == this.selectedGametype) option.selected = true;
-            gSelect.appendChild(option);
+            gSelect.append(option);
         }
 
-        gametypeRow.appendChild(gSelect);
+        gametypeRow.append(gSelect);
 
-        this.form.appendChild(gametypeRow);
+        this.form.append(gametypeRow);
 
         const submit = document.createElement("input");
         submit.type = "submit";
         submit.value = "Search";
         submit.className = "submit-button";
 
-        this.form.appendChild(submit);
+        this.form.append(submit);
     }
 }
 
