@@ -9,13 +9,28 @@ export async function renderRankingsPage(req, res, userSession){
 
     try{
 
+        const pageSettings = await getCategorySettings("Rankings");
+
         let mode = req?.query?.mode ?? "gametype";
         mode = mode.toLowerCase();
 
-        let page = (req?.query?.p !== undefined) ? parseInt(req.query.p) : 1;
-        let perPage = (req?.query?.pp !== undefined) ? parseInt(req.query.pp) : 25;
-        let targetId = (req?.query?.id !== undefined) ? parseInt(req.query.id) : 0;
-        let timeRange = (req?.query?.tf !== undefined) ? parseInt(req.query.tf) : 0;
+        if(mode !== "gametype" && mode !== "map") mode = "gametype";
+
+        let page = (req.query?.p !== undefined) ? parseInt(req.query.p) : 1;
+        let perPage = req.query.pp ?? pageSettings["Results Per Page"] ?? 25;
+        let targetId = (req.query?.id !== undefined) ? parseInt(req.query.id) : 0;
+
+        let defaultLastActive = 28;
+
+        if(req.query.tf !== undefined){
+            defaultLastActive = req.query.tf;
+        }else{
+
+            const key = (mode === "gametype") ? "Default Last Active Limit(Gametypes)" : "Default Last Active Limit(Maps)"
+            defaultLastActive = pageSettings?.[key];
+        }
+
+        const timeRange = defaultLastActive;
 
         if(targetId === 0){
 
@@ -24,7 +39,7 @@ export async function renderRankingsPage(req, res, userSession){
 
             if(latestIds !== null){
 
-                if(mode !== "maps"){
+                if(mode !== "map"){
                     targetId = latestIds.gametypeId;
                 }else{
                     targetId = latestIds.mapId;
@@ -86,7 +101,8 @@ export async function renderRankingsPage(req, res, userSession){
             "selectedTimeRange": timeRange,
             "selectedPerPage": perPage,
             "currentPage": page,
-            userSession
+            userSession,
+            pageSettings
         });
     }catch(err){
         res.send(err.toString());

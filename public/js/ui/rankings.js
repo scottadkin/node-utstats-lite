@@ -42,7 +42,7 @@ class RankingsSearchForm{
 
         this.tabs = new UITabs(this.parent, options, this.mode);
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
-            window.location.replace(`/rankings/?mode=${e.detail.newTab}&tf=${this.selectedTimeRange}`);// = "#";
+            window.location.replace(`/rankings/?mode=${e.detail.newTab}`);// = "#";
         });
     }
 
@@ -79,16 +79,6 @@ class RankingsSearchForm{
 
     createForm(){
 
-        const activeOptions = [
-            {"name": "24 Hours", "value": 1},
-            {"name": "7 Days", "value": 7},
-            {"name": "14 Days", "value": 14},
-            {"name": "28 Days", "value": 28},
-            {"name": "90 Days", "value": 90},
-            {"name": "365 Days", "value": 365},
-            {"name": "No Limit", "value": 0},
-        ];
-
         const nameOptions = [];
         
         for(const [id, name] of Object.entries(this.names)){
@@ -103,18 +93,22 @@ class RankingsSearchForm{
             return 0;
         });
 
-        const perPageOptions = [
-            {"name": "5", "value": 5},
-            {"name": "10", "value": 10},
-            {"name": "25", "value": 25},
-            {"name": "50", "value": 50},
-            {"name": "100", "value": 100}
-        ];
 
         this.createDropDownRow("id", "Name", nameOptions, this.selectedId);
-        this.createDropDownRow("tf", "Active In Previous", activeOptions, this.selectedTimeRange);
-        this.createDropDownRow("pp", "Results Per Page", perPageOptions, this.selectedPerPage);
 
+        const row = UIDiv("form-row");
+        row.id = "last-active-row";
+        row.append(UILabel("Active In Previous", "tf"));
+        const la = new UILastActiveSelect(row, this.selectedTimeRange, "tf");
+        row.append(la.elem.select);
+        this.wrapper.append(row);
+
+        const perPageRow = UIDiv("form-row");
+        perPageRow.append(UILabel("Results Per Page", "pp"));
+
+        const pp = new UIPerPageSelect(perPageRow, this.selectedPerPage, "pp");
+        perPageRow.append(pp.elem.select);
+        this.wrapper.append(perPageRow);
 
         const hidden = document.createElement("input");
         hidden.type = "hidden";

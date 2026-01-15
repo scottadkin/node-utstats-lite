@@ -345,6 +345,9 @@ export function removeDoubleEnforcer(name){
 
 export function sanitizePagePerPage(page, perPage){
 
+    page = parseInt(page);
+    perPage = parseInt(perPage);
+    
     if(page !== page || perPage !== perPage) throw new Error(`Page and perPage must be valid integers`);
     page--;
     if(page < 0) page = 0;

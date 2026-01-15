@@ -762,13 +762,17 @@ class UISelect{
 
 class UIPerPageSelect{
 
-    constructor(parent, initialValue, callback){
+    constructor(parent, initialValue, name, callback){
 
         const perPageValues = [5,10,15,20,25,50,75,100];
 
-        new UISelect(parent, perPageValues.map((p) =>{
+        this.elem = new UISelect(parent, perPageValues.map((p) =>{
             return {"value": p, "display": p};
         }), initialValue, callback);
+
+        if(name !== null){
+            this.elem.select.name = this.elem.select.id = name;
+        }
     }
 }
 
@@ -804,6 +808,26 @@ class UIPlayerSortBySelect{
     }
 
     setName(name){
+        this.elem.select.name = this.elem.select.id = name;
+    }
+}
+
+
+class UILastActiveSelect{
+
+    constructor(parent, initialValue, name, callback){
+
+        const options = [
+            {"display": "24 Hours", "value": 1},
+            {"display": "7 Days", "value": 7},
+            {"display": "14 Days", "value": 14},
+            {"display": "28 Days", "value": 28},
+            {"display": "90 Days", "value": 90},
+            {"display": "365 Days", "value": 365},
+            {"display": "No Limit", "value": 0}
+        ];
+
+        this.elem = new UISelect(parent, options, initialValue, callback);
         this.elem.select.name = this.elem.select.id = name;
     }
 }

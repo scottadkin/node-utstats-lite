@@ -1122,7 +1122,7 @@ class AdminSiteSettingsManager{
             /*"Branding",*/ "Home", "Map", "Maps", 
             "Match", "Matches", /*"Nav",*/ 
             "Player", "Players", /*"Social Media", 
-            "Welcome Message"*/
+            "Welcome Message"*/"Rankings"
         ];
 
         this.selectedPage = this.pages[0];
@@ -1405,7 +1405,7 @@ class AdminSiteSettingsManager{
 
             }else if(s.setting_type === "perPage"){
                 
-                new UIPerPageSelect(row, s.setting_value, (newValue) =>{
+                new UIPerPageSelect(row, s.setting_value, null, (newValue) =>{
                     this.changePageSetting(s.id, newValue);
                 });
                 
@@ -1422,8 +1422,13 @@ class AdminSiteSettingsManager{
                 
                 new UIOrderSelect(row, s.setting_value, (newValue) => {this.changePageSetting(s.id, newValue)});
                 
-            }else if(s.setting_type = "playersSortBy"){
+            }else if(s.setting_type === "playersSortBy"){
+
                 new UIPlayerSortBySelect(row, s.setting_value, (newValue) =>{this.changePageSetting(s.id, newValue)});
+
+            }else if(s.setting_type === "activeIn"){
+                
+                new UILastActiveSelect(row, s.setting_value, null, (newValue) =>{this.changePageSetting(s.id, newValue)});
             }else{
 
                 console.log(s.setting_type);

@@ -72,6 +72,10 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Nav" ,"type": `bool`, "name": "Display Login/Register", "value": 1},
     {"category": "Nav" ,"type": `bool`, "name": "Display Watchlist", "value": 1},
     {"category": "Nav" ,"type": `string`, "name": "Discord URL", "value": ""},
+
+    {"category": "Rankings" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
+    {"category": "Rankings" ,"type": `activeIn`, "name": "Default Last Active Limit(Gametypes)", "value": 28},
+    {"category": "Rankings" ,"type": `activeIn`, "name": "Default Last Active Limit(Maps)", "value": 90},
 ];
 
 
