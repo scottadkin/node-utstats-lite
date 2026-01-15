@@ -28,7 +28,6 @@ export async function renderPlayersPage(req, res, userSession){
 
 
         const pageSettings = await getCategorySettings("Players");
-        console.log(pageSettings);
 
         let searchName = req?.query?.name ?? "";
         let sortBy = req?.query?.sortBy ?? pageSettings["Default Sort By"] ?? "name";

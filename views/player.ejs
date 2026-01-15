@@ -22,17 +22,43 @@
 
     const gametypeTotals = <%- JSON.stringify(gametypeTotals) %>;
     const gametypeNames = <%- JSON.stringify(gametypeNames) %>;
-
+    const weaponTotals = <%-  JSON.stringify(weaponTotals) %>;
     playerPermaLinks("#perma-links", "<%= basicPlayerInfo.hash %>");
-    playerGametypeTotals("#root", gametypeTotals);
-    new PlayerCTFSummary("#root", <%- JSON.stringify(ctfTotals) %>);
-    new PlayerCTFLeague("#root", <%- JSON.stringify(ctfLeagueData) %>);
-    new PlayerRankingSummary("#root", <%- JSON.stringify(rankings) %>);
-    new PlayerSpecialEvents("#root", gametypeTotals);
-    new PlayerWeaponsSummary("#root", <%- JSON.stringify(weaponTotals) %>, gametypeNames);
-    new PlayerItemsSummary("#root", gametypeTotals);
-    const rm = new PlayerRecentMatches("#root", <%= playerId %>, gametypeNames, <%- JSON.stringify(mapNames) %>);
+    <% 
+    for(let i = 0; i < pageLayout.length; i++){
+
+        const key = pageLayout[i];
+        const settingKey = `Display ${key}`;
+        if(pageSettings[settingKey] === "0") continue;
+
+        switch(settingKey){
+
+            case "Display Gametype Totals": {
+                %>playerGametypeTotals("#root", gametypeTotals);<%
+            } break;
+            case "Display CTF": {
+                %>new PlayerCTFSummary("#root", <%- JSON.stringify(ctfTotals) %>);<%
+            } break;
+            case "Display CTF League": {
+                %>new PlayerCTFLeague("#root", <%- JSON.stringify(ctfLeagueData) %>);<%
+            } break;
+            case "Display Rankings": {
+                %>new PlayerRankingSummary("#root", <%- JSON.stringify(rankings) %>);<%
+            } break;
+            case "Display Special Events": {
+                %>new PlayerSpecialEvents("#root", gametypeTotals);<%
+            } break;
+            case "Display Weapons": {
+                %>new PlayerWeaponsSummary("#root", weaponTotals, gametypeNames);<%
+            } break;
+            case "Display Items": {
+                %>new PlayerItemsSummary("#root", gametypeTotals);<%
+            } break;
+            case "Display Recent Matches": {
+                %>const rm = new PlayerRecentMatches("#root", <%= playerId %>, gametypeNames, <%- JSON.stringify(mapNames) %>);<%
+            } break;
+        }
+    }
+    %>
 </script>
-
-
 <%- include("footer.ejs") -%>

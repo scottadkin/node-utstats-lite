@@ -12,6 +12,7 @@ import { getPlayerTotals as getPlayerWeaponTotals } from "../weapons.mjs";
 import { getPlayerRankings } from "../rankings.mjs";
 import { getPlayerMapsLeagueData } from "../ctfLeague.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
+import { getPageLayout } from "../pageLayout.mjs";
 
 
 function setTypeName(type, data, names){
@@ -24,8 +25,6 @@ function setTypeName(type, data, names){
         nameKey = "map_name";
     }
 
-   
-
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
@@ -35,7 +34,6 @@ function setTypeName(type, data, names){
             d[nameKey] = "All";       
             continue;
         }
-
         d[nameKey] = names?.[d[targetKey]] ?? "Not Found";
     }
 }
@@ -45,7 +43,7 @@ export async function renderPlayerPage(req, res, userSession){
 
     try{
         //getPlayerRecentMatches(playerId, gametype, map, page, perPage)
-        let id = req?.params?.id ?? ""
+        let id = req?.params?.id ?? "";
 
         const basicPlayerInfo = await getPlayerByAuto(id);
 
@@ -58,7 +56,9 @@ export async function renderPlayerPage(req, res, userSession){
 
         if(basicPlayerInfo.country === "") basicPlayerInfo.country = "xx";
 
-    // const recentMatches = await getPlayerRecentMatches(playerId, 0, 0, 1, 25);
+        const pageSettings = await getCategorySettings("Player");
+        const pageLayout = await getPageLayout("Player");
+
 
         const uniquePlayedGametypes = await getUniquePlayedGametypes(playerId);
         const uniquePlayedMaps = await getUniquePlayedMaps(playerId);
@@ -67,21 +67,41 @@ export async function renderPlayerPage(req, res, userSession){
         const mapNames = await getMapNamesByIds(uniquePlayedMaps);
         const gametypeNames = await getGametypeNames(uniquePlayedGametypes, true);
 
-        const gametypeTotals = await getPlayerGametypeTotals(playerId);
-        const ctfTotals = await getPlayerCTFTotals(playerId);
+        let gametypeTotals = [];
+        
+        if(pageSettings["Display Gametype Totals"] === "1"){
+            gametypeTotals = await getPlayerGametypeTotals(playerId);
+        }
 
-        const weaponTotals = await getPlayerWeaponTotals(playerId);
+        let ctfTotals = [];
+
+        if(pageSettings["Display CTF"] === "1"){
+            ctfTotals = await getPlayerCTFTotals(playerId);
+        }
+
+        let weaponTotals = [];
+
+        if(pageSettings["Display Weapons"] === "1"){
+            weaponTotals = await getPlayerWeaponTotals(playerId);
+        }
 
         const month = 60 * 60 * 24 * 28;
 
         const minDate = new Date(Date.now() - month * 1000);
 
-        const rankings = await getPlayerRankings(playerId, minDate);
-        rankings.minDate = minDate;
+        let rankings = null;
 
-        const ctfLeagueData = await getPlayerMapsLeagueData(playerId);
+        if(pageSettings["Display Rankings"] === "1"){
+            rankings = await getPlayerRankings(playerId, minDate);
+            rankings.minDate = minDate;
+        }
         
+        let ctfLeagueData = [];
 
+        if(pageSettings["Display CTF League"] === "1"){
+            ctfLeagueData = await getPlayerMapsLeagueData(playerId);
+        }
+        
         setTypeName("gametypes", gametypeTotals, gametypeNames);
         setTypeName("gametypes", ctfTotals, gametypeNames);
         setTypeName("gametypes", weaponTotals, gametypeNames);
@@ -89,8 +109,6 @@ export async function renderPlayerPage(req, res, userSession){
         setTypeName("maps", ctfLeagueData, mapNames);
         setTypeName("maps", ctfTotals, mapNames);
 
-
-        
         const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
@@ -107,7 +125,9 @@ export async function renderPlayerPage(req, res, userSession){
             weaponTotals,
             rankings,
             ctfLeagueData,
-            userSession
+            userSession,
+            pageSettings,
+            pageLayout
         });
 
     }catch(err){

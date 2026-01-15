@@ -241,6 +241,8 @@ class PlayerRecentMatches{
 
 function playerGametypeTotals(parent, data){
 
+    if(data.length === 0) return;
+
     parent = document.querySelector(parent);
 
     UIHeader(parent, "Gametype Totals");
