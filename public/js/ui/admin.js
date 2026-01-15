@@ -1119,10 +1119,10 @@ class AdminSiteSettingsManager{
         this.pageSettings = [];
 
         this.pages = [
-            /*"Branding",*/ "Home", "Map", "Maps", 
+            /*"Branding",*/"CTF League", "Home", "Map", "Maps", 
             "Match", "Matches", /*"Nav",*/ 
             "Player", "Players", /*"Social Media", 
-            "Welcome Message"*/"Rankings"
+            "Welcome Message"*/"Rankings",
         ];
 
         this.selectedPage = this.pages[0];
@@ -1429,6 +1429,9 @@ class AdminSiteSettingsManager{
             }else if(s.setting_type === "activeIn"){
                 
                 new UILastActiveSelect(row, s.setting_value, null, (newValue) =>{this.changePageSetting(s.id, newValue)});
+
+            }else if(s.setting_type === "ctfLeagueMode"){
+                new UICTFLeagueModeSelect(row, s.setting_value, null, (newValue) =>{ this.changePageSetting(s.id, newValue)});
             }else{
 
                 console.log(s.setting_type);

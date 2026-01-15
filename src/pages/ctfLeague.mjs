@@ -8,10 +8,13 @@ import { getCategorySettings } from "../siteSettings.mjs";
 export async function renderCTFLeaguePage(req, res, userSession){
 
     try{
-        const mode = req?.query?.mode ?? "gametypes";
-        let id = req?.query?.id ?? "";
+
+        const pageSettings = await getCategorySettings("CTF League");
+
+        const mode = req.query?.mode ?? pageSettings["Default Mode"] ?? "gametypes";
+        let id = req.query?.id ?? "";
         //gid only used for maps mode as id in that case is the map id
-        let gId = req?.query?.gid ?? "";
+        let gId = req.query?.gid ?? "";
 
         if(id === "" && gId === ""){
 
@@ -28,8 +31,10 @@ export async function renderCTFLeaguePage(req, res, userSession){
             }
         }
 
-        let page = req?.query?.page ?? 1;
-        let perPage = req?.query?.perPage ?? 25;
+        let page = req.query?.page ?? 1;
+        let perPage = req.query?.perPage ?? pageSettings["Results Per Page"] ?? 25;
+
+        if(perPage !== perPage) perPage = 25;
     
         const leagueSettings = await getLeagueSiteSettings();
 

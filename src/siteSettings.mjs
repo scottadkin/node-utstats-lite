@@ -76,6 +76,10 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Rankings" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
     {"category": "Rankings" ,"type": `activeIn`, "name": "Default Last Active Limit(Gametypes)", "value": 28},
     {"category": "Rankings" ,"type": `activeIn`, "name": "Default Last Active Limit(Maps)", "value": 90},
+
+
+    {"category": "CTF League" ,"type": `perPage`, "name": "Results Per Page", "value": 50},
+    {"category": "CTF League" ,"type": `ctfLeagueMode`, "name": "Default Mode", "value": "gametypes"},
 ];
 
 

@@ -828,7 +828,28 @@ class UILastActiveSelect{
         ];
 
         this.elem = new UISelect(parent, options, initialValue, callback);
-        this.elem.select.name = this.elem.select.id = name;
+
+        if(name !== null){
+            this.elem.select.name = this.elem.select.id = name;
+        }
+    }
+}
+
+class UICTFLeagueModeSelect{
+
+    constructor(parent, initialValue, name, callback){
+
+        const options = [
+            {"display": "Combined", "value": "combined"},
+            {"display": "Gametypes", "value": "gametypes"},
+            {"display": "Maps", "value": "maps"},
+        ];
+
+        this.elem = new UISelect(parent, options, initialValue, callback);
+
+        if(name !== null){
+            this.elem.select.name = this.elem.select.id = name;
+        }
     }
 }
 

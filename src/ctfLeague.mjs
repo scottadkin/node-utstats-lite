@@ -2,7 +2,7 @@
 import { simpleQuery, bulkInsert } from "./database.mjs";
 import { getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
-import { DAY, getPlayer, setInt } from "./generic.mjs";
+import { DAY, getPlayer, sanitizePagePerPage, setInt } from "./generic.mjs";
 import { getUniqueMapGametypeCombosInPastDays, getUniqueGametypesInPastDays } from "./matches.mjs";
 import Message from "./message.mjs";
 
@@ -550,16 +550,9 @@ export async function getTotalEntries(gametypeId, mapId){
     return 0;
 }
 
-export async function getSingleCTFLeague(gametypeId, mapId, page, perPage){
+export async function getSingleCTFLeague(gametypeId, mapId, dirtyPage, dirtyPerPage){
 
-    page = parseInt(page);
-    if(page !== page) page = 1;
-    page--;
-    perPage = setInt(perPage, 25);
-    if(page < 0) page = 0;
-    if(perPage < 1 || perPage > 100) perPage = 100;
-    let start = perPage * page;
-
+    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
     const query = `SELECT * FROM nstats_player_ctf_league WHERE map_id=? AND gametype_id=? ORDER BY points DESC LIMIT ?, ?`;
 
