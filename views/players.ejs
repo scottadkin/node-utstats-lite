@@ -17,16 +17,13 @@
             <input type="text" class="textbox" id="name" name="name" value="<%- searchName %>" placeholder="Player Name..."/>
         </div>
 
-        <div class="form-row">
+        <div class="form-row" id="players-sort-by">
             <label for="sortBy">Sort By</label>
-            <select class="default-select" id="sortBy" name="sortBy">
-                <% 
-                for(let i = 0; i < sortByOptions.length; i++){
-                    const {value, display} = sortByOptions[i];
-                    %><option <%= (value === sortBy) ? "selected" : "" %> value="<%= value %>"><%= display %></option><%
-                }
-                %>
-            </select>
+            <script>
+                const parent = document.querySelector("#players-sort-by");
+                const playerSort = new UIPlayerSortBySelect(parent, "<%= sortBy %>"); 
+                playerSort.setName("sortBy");
+            </script>
         </div>
 
         <div class="form-row">

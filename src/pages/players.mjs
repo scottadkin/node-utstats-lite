@@ -6,19 +6,6 @@ export async function renderPlayersPage(req, res, userSession){
 
     try{
 
-        const sortByOptions =  [
-            {"value": "name", "display": "Name"}, 
-            {"value": "last_active", "display": "Last Active"}, 
-            {"value": "score", "display": "Score"}, 
-            {"value": "frags", "display": "Frags"}, 
-            {"value": "kills", "display": "Kills"}, 
-            {"value": "deaths", "display": "Deaths"}, 
-            {"value": "suicides", "display": "Suicides"}, 
-            {"value": "eff", "display": "Efficiency"}, 
-            {"value": "matches", "display": "Matches"}, 
-            {"value": "playtime", "display": "Playtime"}
-        ];
-
         const orderOptions = [
             {"value": "ASC", "display": "Ascending"}, 
             {"value": "DESC", "display": "Descending"}, 
@@ -61,7 +48,6 @@ export async function renderPlayersPage(req, res, userSession){
             "host": req.headers.host,
             "title": title,
             "meta": {"description": description, "image": "images/maps/default.jpg"},
-            sortByOptions,
             orderOptions,
             searchName,
             sortBy,

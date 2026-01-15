@@ -733,8 +733,11 @@ class UISelect{
         this.initialValue = initialValue;
 
         this.select = document.createElement("select");
+
         this.select.addEventListener("change", (e) =>{
-            callback(e.target.value);
+            if(callback !== undefined){
+                callback(e.target.value);
+            }
         });
 
         this.createOptions();
@@ -766,6 +769,42 @@ class UIPerPageSelect{
         new UISelect(parent, perPageValues.map((p) =>{
             return {"value": p, "display": p};
         }), initialValue, callback);
+    }
+}
+
+class UIOrderSelect{
+
+    constructor(parent, initialValue, callback){
+
+        new UISelect(parent, [
+            {"value": "ASC", "display": "Ascending"},
+            {"value": "DESC", "display": "Descending"},
+        ], initialValue, callback);
+    }
+}
+
+class UIPlayerSortBySelect{
+
+    constructor(parent, initialValue, callback){
+
+        const options =  [
+            {"value": "name", "display": "Name"}, 
+            {"value": "last_active", "display": "Last Active"}, 
+            {"value": "score", "display": "Score"}, 
+            {"value": "frags", "display": "Frags"}, 
+            {"value": "kills", "display": "Kills"}, 
+            {"value": "deaths", "display": "Deaths"}, 
+            {"value": "suicides", "display": "Suicides"}, 
+            {"value": "eff", "display": "Efficiency"}, 
+            {"value": "matches", "display": "Matches"}, 
+            {"value": "playtime", "display": "Playtime"}
+        ];
+
+        this.elem = new UISelect(parent, options, initialValue, callback);
+    }
+
+    setName(name){
+        this.elem.select.name = this.elem.select.id = name;
     }
 }
 

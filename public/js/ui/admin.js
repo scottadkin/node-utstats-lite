@@ -1418,6 +1418,12 @@ class AdminSiteSettingsManager{
                     this.changePageSetting(s.id, newValue);
                 });
 
+            }else if(s.setting_type === "order"){
+                
+                new UIOrderSelect(row, s.setting_value, (newValue) => {this.changePageSetting(s.id, newValue)});
+                
+            }else if(s.setting_type = "playersSortBy"){
+                new UIPlayerSortBySelect(row, s.setting_value, (newValue) =>{this.changePageSetting(s.id, newValue)});
             }else{
 
                 console.log(s.setting_type);
