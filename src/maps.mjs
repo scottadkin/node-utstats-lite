@@ -735,11 +735,27 @@ export async function getPlayedGametypes(mapId){
 }
 
 
-export async function search(name){
+async function getTotalPossibleMatches(nameSearch){
 
-    const query = `SELECT id,name,first_match,last_match,matches,playtime FROM nstats_maps WHERE name LIKE ? ORDER BY name ASC`;
 
-    const result = await simpleQuery(query, [`%${name}%`]);
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_maps WHERE name LIKE ?`;
+
+    const result = await simpleQuery(query, [`%${nameSearch}%`]);
+
+    return result[0].total_rows;
+}
+
+export async function search(name, dirtyPage, dirtyPerPage){
+
+    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+
+    const query = `SELECT id,name,first_match,last_match,matches,playtime 
+    FROM nstats_maps 
+    WHERE name LIKE ? 
+    ORDER BY name ASC
+    LIMIT ?, ?`;
+
+    const result = await simpleQuery(query, [`%${name}%`, start, perPage]);
 
     const images = new Set();
 
@@ -759,7 +775,9 @@ export async function search(name){
         r.image = mapImages?.[r.name.toLowerCase()] ?? "default.jpg";
     }
 
-    return result;
+    const totalMatches = await getTotalPossibleMatches(name);
+
+    return {totalMatches, "maps": result};
 }
 
 

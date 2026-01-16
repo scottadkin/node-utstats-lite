@@ -1,11 +1,12 @@
 class MapsSearchForm{
 
-    constructor(parent, nameSearch, displayMode){
+    constructor(parent, nameSearch, displayMode, perPage){
 
 
         this.parent = document.querySelector(parent);
         this.nameSearch = decodeHTML(nameSearch);
         this.displayMode = displayMode;
+        this.perPage = perPage;
 
         this.displayModes = [
             {"display": "Default", "value": "default"},
@@ -39,7 +40,7 @@ class MapsSearchForm{
         nameElem.name = "name";
         nameElem.value = this.nameSearch;
 
-        nameRow.appendChild(nameElem);
+        nameRow.append(nameElem);
 
         this.form.appendChild(nameRow);
 
@@ -50,7 +51,7 @@ class MapsSearchForm{
         displayLabel.innerHTML = "Display Mode";
         displayLabel.htmlFor = "display";
 
-        displayRow.appendChild(displayLabel);
+        displayRow.append(displayLabel);
 
         const displayElem = document.createElement("select");
         displayElem.className = "default-select";
@@ -66,19 +67,26 @@ class MapsSearchForm{
             option.innerHTML = display;
 
             if(value == this.displayMode) option.selected = true;
-            displayElem.appendChild(option);
+            displayElem.append(option);
         }
 
-        displayRow.appendChild(displayElem);
-        this.form.appendChild(displayRow);
+        displayRow.append(displayElem);
+        this.form.append(displayRow);
 
         const submit = document.createElement("input");
         submit.type = "submit";
         submit.className = "submit-button";
         submit.value = "Search";
 
-        this.form.appendChild(submit);
-        this.parent.appendChild(this.form);
+
+        const hidden = document.createElement("input");
+        hidden.type = "hidden";
+        hidden.name = hidden.id = "perPage";
+        hidden.value = this.perPage;
+        this.form.append(hidden);
+
+        this.form.append(submit);
+        this.parent.append(this.form);
 
     }
 }
@@ -86,16 +94,26 @@ class MapsSearchForm{
 
 class MapListDisplay{
 
-    constructor(parent, data, displayMode){
+    constructor(parent, data, totalMatches, nameSearch, displayMode, page, perPage){
 
         if(data.length === 0) return;
-        
+
+        this.nameSearch = nameSearch; 
         this.parent = document.querySelector(parent);
         this.data = data;
         this.displayMode = displayMode.toLowerCase();
 
         if(this.displayMode === "table") this.renderTable();
         if(this.displayMode === "default") this.renderRichView();
+
+        //parent, url, totalResults, perPage, currentPage
+        new UIPagination(
+            this.parent, 
+            `/maps/?name=${this.nameSearch}&display=${displayMode}&perPage=${perPage}&page=`,
+            totalMatches,
+            perPage,
+            page
+        );
     }
 
     renderTable(){

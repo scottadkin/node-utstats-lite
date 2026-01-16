@@ -18,8 +18,16 @@
 </div>
 
 <script>
-    const searchForm = new MapsSearchForm("#root", "<%= nameSearch %>", "<%= displayMode %>");
-    const display = new MapListDisplay("#root", <%- JSON.stringify(data) %>, "<%= displayMode %>");
+    const searchForm = new MapsSearchForm("#root", "<%= nameSearch %>", "<%= displayMode %>", "<%= perPage %>");
+    const display = new MapListDisplay(
+        "#root", 
+        <%- JSON.stringify(maps) %>, 
+        <%= totalMatches %>, 
+        "<%= nameSearch %>", 
+        "<%= displayMode %>",
+        "<%= page %>", 
+        "<%= perPage %>"
+    );
 </script>
 
 
