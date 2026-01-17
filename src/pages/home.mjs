@@ -3,6 +3,7 @@ import { getRecentMatches } from "../matches.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getBasicList as getBasicServerList } from "../servers.mjs";
+import { getMostPlayedGametypes } from "../gametypes.mjs";
 
 export async function renderHomePage(req, res, userSession){
 
@@ -17,7 +18,18 @@ export async function renderHomePage(req, res, userSession){
 
     const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0);
 
-    const serversList = await getBasicServerList();
+    let serversList = [];
+
+    if(pageSettings["Display Servers"] === "1"){
+        serversList = await getBasicServerList();
+    }
+
+    let mostPlayedGametypes = [];
+
+    if(pageSettings["Display Most Played Gametypes"] === "1"){
+
+        mostPlayedGametypes = await getMostPlayedGametypes(pageSettings["Total Most Played Gametypes"]);
+    }
 
     const brandingSettings = await getCategorySettings("Branding");
 
@@ -40,7 +52,8 @@ export async function renderHomePage(req, res, userSession){
         recentMatches,
         serversList,
         userSession,
-        message
+        message,
+        mostPlayedGametypes
     });
 
 

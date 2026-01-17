@@ -391,3 +391,14 @@ export async function getSplitByTeamSizeInfo(){
         "gametypesCreated": newGametypes.length
     };
 }
+
+
+
+export async function getMostPlayedGametypes(limit){
+
+    limit = parseInt(limit);
+
+    const query = `SELECT * FROM nstats_gametypes ORDER BY playtime DESC LIMIT ?`;
+
+    return await simpleQuery(query, [limit]);
+}

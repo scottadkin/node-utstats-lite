@@ -157,3 +157,39 @@ function homeRenderRecentMatches(parent, data){
 
     new MatchesRichView("#home-recent-matches", data);
 }
+
+function homeRenderMostPlayedGametypes(parent, data){
+
+    if(data.length === 0) return;
+    parent = document.querySelector(parent);
+    UIHeader(parent, "Most Played Gametypes");
+
+    const table = document.createElement("table");
+    table.className = "t-width-1";
+
+    const headers = ["Name", "First", "Last", "Matches", "Playtime"];
+    const headerRow = document.createElement("tr");
+
+    for(let i = 0; i < headers.length; i++){
+        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
+    }
+
+    table.append(headerRow);
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const row = document.createElement("tr");
+
+        row.append(UITableColumn({"content": d.name, "className": "text-left"}));
+        row.append(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date"}));
+        row.append(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date"}));
+        row.append(UITableColumn({"content": d.matches}));
+        row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+        table.append(row);
+    }
+
+
+    parent.append(table);
+}

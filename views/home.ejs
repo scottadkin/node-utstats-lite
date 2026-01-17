@@ -97,6 +97,12 @@
                         renderServerList("#root", <%- JSON.stringify(serversList) %>);
                     <%
                 } break;
+
+                case "Most Played Gametypes": {
+                    %>
+                        homeRenderMostPlayedGametypes("#root", <%- JSON.stringify(mostPlayedGametypes) %>);
+                    <%
+                } break;
             }
         }
     }

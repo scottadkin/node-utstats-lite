@@ -15,6 +15,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Home" ,"type": `bool`, "name": "Display Servers", "value": 1},
     {"category": "Home" ,"type": `integer`, "name": "Total Recent Matches", "value": 3},
     {"category": "Home" ,"type": `integer`, "name": "Total Most Played Maps", "value": 3},
+    {"category": "Home" ,"type": `integer`, "name": "Total Most Played Gametypes", "value": 5},
     {"category": "Home" ,"type": `bool`, "name": "Display Activity Heatmap", "value": 1},
     {"category": "Branding" ,"type": `string`, "name": "Site Name", "value": "Node UTStats Lite"},
     {"category": "Branding" ,"type": `string`, "name": "Description", "value": "Stats based website made for the UTStats-lite mutator."},
