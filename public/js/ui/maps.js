@@ -323,8 +323,11 @@ class UIMapRecentMatches{
 
 function UIMapWeaponsSummary(parent, data){
 
+    if(data === null) return;
     parent = document.querySelector(parent);
+
     UIHeader(parent, "Weapons Summary");
+
     data.weapons.sort((a, b) =>{
         a = a.name.toLowerCase();
         b = b.name.toLowerCase();
@@ -701,9 +704,10 @@ class UIMapCTFLeague{
         this.bLoadedGametypes = false;
         this.data = [];
         this.totalResults = 0;
+        this.bNoDataFound = false;
         if(this.pageSettings["Display CTF League"] === "0") return;
 
-        this.wrapper = UIDiv();
+        this.wrapper = UIDiv("hidden");
         UIHeader(this.wrapper, "Player CTF League");
         
         this.parent.appendChild(this.wrapper);
@@ -759,13 +763,17 @@ class UIMapCTFLeague{
 
         try{
 
-            
-
             const req = await fetch(`/json/map-ctf-league-gametypes/?mapId=${this.mapId}&range=${this.timeRange}`);
 
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
+
+            if(res.data.length > 0){
+                this.wrapper.className = "";   
+            }else{
+                this.bNoDataFound = true;
+            }
 
             this.gametypes = res.data;
             this.bLoadedGametypes = true;
@@ -783,6 +791,8 @@ class UIMapCTFLeague{
             if(!this.bLoadedGametypes){
                 await this.loadGametypes();
             }
+
+            if(this.bNoDataFound) return;
 
             const urlParts = `${this.mapId}&gametypeId=${this.gametypeId}&page=${this.page}&perPage=${this.perPage}&range=${this.timeRange}`;
      

@@ -1,4 +1,3 @@
-
 <%- include("header.ejs", {
         "mode": "maps", 
         meta,
@@ -6,35 +5,57 @@
         userSession
     });
 -%>
-
-
-
 <script src="../js/ui/ui.js"></script>
 <script src="../js/ui/matches.js"></script>
 <script src="../js/ui/maps.js"></script>
-
 <div class="header-wrapper">
     <%= basic.name %>
 </div>
-
 <div id="root">
 </div>
-
 <script>
-
     const validTypes = <%- JSON.stringify(validTypes) %>;
     const pageSettings = <%- JSON.stringify(pageSettings) %>;
     const ctfLeagueSettings = <%- JSON.stringify(ctfLeagueSettings) %>
+    <%
+    for(let i = 0; i < pageOrder.length; i++){
 
-    UIMapImage("#root", "<%= basic.image %>");
-    UIMapBasicSummary("#root", <%- JSON.stringify(basic) %>);
-    UIMapWeaponsSummary("#root", <%- JSON.stringify(weaponStats) %>);
+        const key = pageOrder[i];
+        const settingKey = `Display ${key}`;
 
-    new UIMapPlayerRankings("#root", "<%= basic.id %>");
-    new UIMapCTFLeague("#root", "<%= basic.id %>", pageSettings, ctfLeagueSettings);
-    new UIMapRecentMatches("#root", "<%= basic.id %>");
-    new UIMapPlayerAverages("#root", "<%= basic.id %>", validTypes);
+        if(pageSettings[settingKey] !== "1") continue;
+
+        switch(settingKey){
+
+            case "Display Map Screenshot": {
+                %>UIMapImage("#root", "<%= basic.image %>");<%
+            } break;
+
+            case "Display Basic Summary":{
+                %>UIMapBasicSummary("#root", <%- JSON.stringify(basic) %>);<%
+            } break;
+
+            case "Display Weapon Statistics": {
+                %>UIMapWeaponsSummary("#root", <%- JSON.stringify(weaponStats) %>);<%
+            } break;
+
+            case "Display Rankings": {
+                %>new UIMapPlayerRankings("#root", "<%= basic.id %>");<%
+            } break;
+
+            case "Display CTF League": {
+                %>new UIMapCTFLeague("#root", "<%= basic.id %>", pageSettings, ctfLeagueSettings);<%
+            } break;
+
+            case "Display Recent Matches": {
+                %>new UIMapRecentMatches("#root", "<%= basic.id %>");<%
+            } break;
+
+            case "Display Player Top Averages": {
+                %>new UIMapPlayerAverages("#root", "<%= basic.id %>", validTypes);<%
+            }  break;
+        }
+    }
+    %>
 </script>
-
-
 <%- include("footer.ejs") -%>

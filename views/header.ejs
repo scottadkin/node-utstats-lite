@@ -26,35 +26,31 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 <html lang="en">
 <head>
     <title><%= title %></title>
-    <meta name="description" content="<%=  meta.description %>"/>
+    <meta name="description" content="<%=  meta.description %>">
     <meta charset="utf-8">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
-    <link rel="stylesheet" type="text/css" href="/css/main.css"/>
-    <meta property="og:image" content="http://<%= `${host}/${meta.image}` %>"/>
-    <meta property="og:image:secure_url" content="https://<%= `${host}/${meta.image}` %>"/>
-    <meta property="og:site_name" content="Node UTStats Lite" />
-    <meta name="twitter:card" content="summary_large_image"/>
-
+    <link rel="stylesheet" type="text/css" href="/css/main.css">
+    <meta property="og:image" content="http://<%= `${host}/${meta.image}` %>">
+    <meta property="og:image:secure_url" content="https://<%= `${host}/${meta.image}` %>">
+    <meta property="og:site_name" content="Node UTStats Lite" >
+    <meta name="twitter:card" content="summary_large_image">
     <script src="../js/main.js"></script>
 </head>
-<body>
-    
+<body> 
     <nav>
         <%
-            for(let i = 0; i < options.length; i++){
+        for(let i = 0; i < options.length; i++){
 
-                const {name, url, highlight} = options[i];
+            const {name, url, highlight} = options[i];
 
-                let className = "";
+            let className = "";
 
-                if(highlight.indexOf(mode) !== -1){
-                    className = `nav-active`;
-                }
-
-                %>
-                <a class="<%= className %>" href="<%= url %>"><%= name %></a>
-                <%
+            if(highlight.indexOf(mode) !== -1){
+                className = `nav-active`;
             }
+
+            _%><a href="<%= url %>"<%- (className === "") ? "" :` class="${className}"`%>><%= name %></a><%_
+        }
         %>
     </nav>
-    <main>
+<main>

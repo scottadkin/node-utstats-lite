@@ -24,11 +24,14 @@ export async function renderMapPage(req, res, userSession){
         let ctfLeagueSettings = {};
 
         if(pageSettings["Display CTF League"] === "1"){
-
             ctfLeagueSettings = await getLeagueCategorySettings("maps");
         }
 
-        const weaponStats = await getMapWeaponStats(basic.id);
+        let weaponStats = null;
+
+        if(pageSettings["Display Weapon Statistics"] === "1"){
+            weaponStats = await getMapWeaponStats(basic.id);
+        }
 
         const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
