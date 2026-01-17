@@ -7,7 +7,7 @@ import { Jimp } from "jimp";
 import { writeFile, rm } from 'node:fs/promises';
 import { mapScreenshotQuality } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
-import { getAllPagesLayout } from "../pageLayout.mjs";
+import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
 import { clearAllDataTables } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
@@ -136,8 +136,12 @@ export default class AdminJSONManager{
                 if(changes === null) throw new Error(`You have not provided an array of changes`);
 
                 const {passed, failed} = await updateSiteSettings(changes);
+                const [lPassed, lFailed] = await savePageLayoutChanges(changes);
 
-                return this.res.json({passed, failed});
+                return this.res.json({
+                    "passed": passed + lPassed, 
+                    "failed": failed + lFailed
+                });
 
             }else if(this.mode === "load-ranking-settings"){
 

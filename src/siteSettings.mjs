@@ -113,6 +113,7 @@ export async function updateSiteSettings(changes){
     for(let i = 0; i < changes.length; i++){
 
         const c = changes[i];
+        if(c.value === undefined) continue;
         const result = await updateSetting(c.id, c.value);
 
         if(result.affectedRows > 0){

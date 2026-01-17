@@ -184,3 +184,30 @@ export async function restoreDefaultPageLayout(page){
         await insertPageLayout(page, s, i + 1);
     }
 }
+
+
+export async function savePageLayoutChanges(data){
+
+    let passed = 0;
+    let failed = 0; 
+
+    const query = `UPDATE nstats_page_layout SET page_order=? WHERE id=?`;
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        if(d.pageIndex === undefined) continue;
+
+        const result = await simpleQuery(query, [d.pageIndex, d.id]);
+
+        if(result.affectedRows > 0){
+            passed++;
+        }else{
+            failed++;
+        }
+
+    }
+
+    return [passed, failed];
+}

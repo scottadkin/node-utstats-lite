@@ -1257,17 +1257,25 @@ class AdminSiteSettingsManager{
 
                 const c = changes[i];
 
-                let newValue = c.setting_value;
 
-                if(c.setting_type === "bool"){
-                    newValue = (c.setting_value === true) ? 1 : 0; 
+                if(c.setting_value !== undefined){
+
+                    let newValue = c.setting_value;
+
+                    if(c.setting_type === "bool"){
+                        newValue = (c.setting_value === true) ? 1 : 0; 
+                    }
+
+                    if(c.setting_type === "longtext" && c.setting_value.indexOf("<script>") !== -1){
+                        throw new Error(`You can not have <script> tags in your welcome message`);
+                    }
+
+                    data.push({"id": c.id, "value": newValue});
+
+                }else{
+
+                    data.push({"id": c.id, "pageIndex": c.page_order});
                 }
-
-                if(c.setting_type === "longtext" && c.setting_value.indexOf("<script>") !== -1){
-                    throw new Error(`You can not have <script> tags in your welcome message`);
-                }
-
-                data.push({"id": c.id, "value": newValue});
             }
 
             const req = await fetch("/admin", {
@@ -1292,6 +1300,7 @@ class AdminSiteSettingsManager{
             );
 
             this.savedPageSettings = JSON.parse(JSON.stringify(this.pageSettings));
+            this.savedPageLayouts = JSON.parse(JSON.stringify(this.pageLayouts));
             this.renderUnsavedChanges();
             this.render();
 
@@ -1379,6 +1388,29 @@ class AdminSiteSettingsManager{
             }
         }
 
+        const pageKeys = Object.keys(this.pageLayouts);
+
+        for(let i = 0; i < pageKeys.length; i++){
+
+            const currentLayout = this.pageLayouts[pageKeys[i]];
+            const savedLayout = this.savedPageLayouts[pageKeys[i]];
+
+            for(let x = 0; x < currentLayout.length; x++){
+
+                const current = currentLayout[x];
+
+                for(let z = 0; z < savedLayout.length; z++){
+
+                    const saved = savedLayout[z];
+
+                    if(current.item === saved.item && current.page_order !== saved.page_order){
+                        found.push(current);
+                    }
+                    //console.log(current.item, saved.item);
+                }
+            }
+        }
+
         return found;
     }
 
@@ -1403,7 +1435,22 @@ class AdminSiteSettingsManager{
         this.renderUnsavedChanges();
     }
 
-    createSaveButton(){
+    createSaveButton(bLayoutEditor){
+
+        if(bLayoutEditor === undefined) bLayoutEditor = false;
+
+        if(bLayoutEditor){
+
+            this.layoutSaveButton = document.createElement("button");
+            this.layoutSaveButton.innerHTML = "Save Changes";
+            this.layoutSaveButton.className = `submit-button${(this.getUnsavedChanges().length === 0) ? " hidden": ""}`;
+
+            this.layoutSaveButton.addEventListener("click", () =>{
+                this.saveChanges();
+            });
+
+            return this.layoutSaveButton;
+        }
 
         this.saveButton = document.createElement("button");
         this.saveButton.innerHTML = `Save Changes`;
@@ -1552,7 +1599,6 @@ class AdminSiteSettingsManager{
 
             if(e.settings.id === id){
 
-
                 if(i === 0 && newPosition === "up"){
                     //item is already at top nothing needs to change
                     return;
@@ -1580,7 +1626,6 @@ class AdminSiteSettingsManager{
 
                     next.settings.page_order = e.settings.page_order;
                     e.settings.page_order++;
-                
                 }
             }
         }
@@ -1600,14 +1645,21 @@ class AdminSiteSettingsManager{
 
         this.pageLayoutEditor.innerHTML = ``;
 
+        const newLayout = [];
+
         for(let i = 0; i < this.editorElems.length; i++){
 
             const e = this.editorElems[i];
 
             e.settings.page_order = i;
+            newLayout.push(e.settings);
 
             this.pageLayoutEditor.append(e.wrapper);
         }
+
+        this.pageLayouts[this.selectedPage.toLowerCase()] = newLayout;
+
+        this.renderUnsavedChanges();
     }   
 
     renderPageLayoutEditor(){
@@ -1636,6 +1688,11 @@ class AdminSiteSettingsManager{
 
         this.wrapper.append(this.pageLayoutEditor);
 
+        const bWrapper = UIDiv("text-center margin-bottom-1");
+
+        bWrapper.append(this.createSaveButton(true));
+        this.wrapper.append(bWrapper);
+
     }
 
 
@@ -1648,12 +1705,14 @@ class AdminSiteSettingsManager{
 
         if(changes.length === 0){
             this.saveButton.className = "hidden";
+            this.layoutSaveButton.className = "hidden";
             return;
         }
 
         this.warningElem.className = `warning`;
         this.warningElem.append(`You have ${changes.length} unsaved changes.`);
         this.saveButton.className = "submit-button";
+         this.layoutSaveButton.className = "submit-button";
     }
 
     renderSettings(type){
