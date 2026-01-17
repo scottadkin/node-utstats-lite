@@ -84,19 +84,28 @@ export async function addPageLayout(page, item, pageOrder){
 
 export async function getAllPagesLayout(){
 
-    const query = `SELECT * FROM nstats_page_layout`;
+    const query = `SELECT * FROM nstats_page_layout ORDER BY page ASC, page_order ASC`;
+    const result = await simpleQuery(query);
 
-    return await simpleQuery(query);
+    const settings = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r= result[i];
+
+        if(settings[r.page] === undefined) settings[r.page] = [];
+
+        settings[r.page].push(r);
+    }
+
+    return settings;
 }
-
 
 
 async function deleteAllPageLayouts(){
 
     return await simpleQuery("DELETE FROM nstats_page_layout");
 }
-
-
 
 export async function saveChanges(changes){
 

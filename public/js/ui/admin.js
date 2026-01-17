@@ -1107,6 +1107,62 @@ class AdminMapsManager{
 }
 
 
+class UIPageEditorBox{
+
+    constructor(parent, itemSettings){
+
+        this.parent = parent;
+        this.settings = itemSettings;
+
+        this.wrapper = UIDiv("page-layout-editor-box");
+        this.title = UIDiv("page-layout-editor-title");
+        this.title.append(this.settings.item);
+        this.wrapper.append(this.title);
+        
+        this.parent.append(this.wrapper);
+
+        this.createButtons()
+    }
+
+
+
+    createButtons(){
+
+        const elem = UIDiv("page-layout-editor-options");
+        this.wrapper.append(elem);
+
+        const buttons = [];
+        const values = ["To Bottom", "Move Down", "Move Up", "To Top"];
+
+        for(let i = 0; i < values.length; i++){
+
+            const b = document.createElement("button");
+            b.innerHTML = values[i];
+            buttons.push(b);
+        }
+
+        const eventNames = ["bottom", "down", "up", "top"];
+
+        for(let i = 0; i < buttons.length; i++){
+
+            buttons[i].className = "hover";
+
+            buttons[i].addEventListener("click", () =>{
+                this.wrapper.dispatchEvent(new CustomEvent("movePageComponent", {
+                    "detail": {
+                        "id": this.settings.id,
+                        "newPosition": eventNames[i]
+                    }
+                }));
+            });
+
+            elem.append(buttons[i]);
+        }
+        
+    }
+
+}
+
 class AdminSiteSettingsManager{
 
     constructor(parent){
@@ -1117,6 +1173,7 @@ class AdminSiteSettingsManager{
         this.mode = "page-settings";
         
         this.pageSettings = [];
+        this.pageLayouts = [];
 
         this.pages = [
             /*"Branding",*/"CTF League", "Home", "Map", "Maps", 
@@ -1125,7 +1182,7 @@ class AdminSiteSettingsManager{
             "Welcome Message"*/"Rankings", "Records"
         ];
 
-        this.selectedPage = this.pages[0];
+        this.selectedPage = "Home"//this.pages[0];
 
         UIHeader(this.parent, "Site Settings Manager");
 
@@ -1177,7 +1234,9 @@ class AdminSiteSettingsManager{
             this.savedPageSettings = JSON.parse(JSON.stringify(res.pageSettings));
             this.validRecordTypes = res.validRecordTypes;
 
-            console.log(res);
+            this.pageLayouts = res.pageLayouts;
+            this.savedPageLayouts = JSON.parse(JSON.stringify(this.pageLayouts));
+
             this.render();
 
         }catch(err){
@@ -1458,10 +1517,127 @@ class AdminSiteSettingsManager{
 
        
         elem.append(this.createSaveButton());
-        
-
         this.wrapper.append(elem);
+
+        this.renderPageLayoutEditor();
     }
+
+    getPageLayoutItem(page, id){
+
+        const pageLayout = this.pageLayouts[page] ?? null;
+        if(pageLayout === null) return null;
+
+        for(let i = 0; i < pageLayout.length; i++){
+
+            const p = pageLayout[i];
+            if(p.id === id) return p;
+        }
+
+        return null;
+    }
+
+    movePageComponent(details){
+
+        const {id, newPosition} = details;
+
+        const targetSetting = this.getPageLayoutItem(this.selectedPage.toLowerCase(), id);
+        if(targetSetting === null) throw new Error(`Could not find page layout item`);
+
+        for(let i = 0; i < this.editorElems.length; i++){
+
+            const e = this.editorElems[i];
+
+            const previous = this.editorElems?.[i - 1] ?? null;
+            const next = this.editorElems?.[i + 1] ?? null;
+
+            if(e.settings.id === id){
+
+
+                if(i === 0 && newPosition === "up"){
+                    //item is already at top nothing needs to change
+                    return;
+                }   
+
+                if(i === this.editorElems.length - 1 && newPosition === "down"){
+                    //already at bottom nothing needs to change
+                    return;
+                }
+
+                if(newPosition === "top"){
+
+                    e.settings.page_order = -1;
+
+                }else if(newPosition === "bottom"){
+
+                    e.settings.page_order = 999999;
+
+                }else if(newPosition === "up"){
+
+                    e.settings.page_order--;
+                    previous.settings.page_order++;     
+
+                }else if(newPosition === "down"){
+
+                    next.settings.page_order = e.settings.page_order;
+                    e.settings.page_order++;
+                
+                }
+            }
+        }
+
+        this.editorElems.sort((a, b) =>{
+
+            a = a.settings.page_order;
+            b = b.settings.page_order;
+
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+            return 0;
+        });
+
+        this.pageLayoutEditor.innerHTML = ``;
+
+        for(let i = 0; i < this.editorElems.length; i++){
+
+            const e = this.editorElems[i];
+
+            e.settings.page_order = i;
+
+            this.pageLayoutEditor.append(e.wrapper);
+        }
+    }   
+
+    renderPageLayoutEditor(){
+
+        const pageLayout = this.pageLayouts[this.selectedPage.toLowerCase()] ?? null;
+        if(pageLayout === null) return;
+
+        UIHeader(this.wrapper, "Page Layout Editor");
+
+        this.pageLayoutEditor = UIDiv("page-layout-editor-wrapper");
+
+        this.editorElems = [];
+
+        for(let i = 0; i < pageLayout.length; i++){
+
+            const s = pageLayout[i];
+
+            const elem = new UIPageEditorBox(this.pageLayoutEditor, s);
+
+            elem.wrapper.addEventListener("movePageComponent", (e) =>{
+                this.movePageComponent(e.detail);
+            });
+
+            this.editorElems.push(elem);
+        }
+
+        this.wrapper.append(this.pageLayoutEditor);
+
+    }
+
 
 
     renderUnsavedChanges(){
@@ -1582,6 +1758,7 @@ class AdminSiteSettingsManager{
         this.wrapper.append(form);
     }
 
+    
     render(){
 
         this.wrapper.innerHTML = ``;
