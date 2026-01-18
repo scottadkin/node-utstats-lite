@@ -911,7 +911,39 @@ function UIMapRichBox(data){
 
     link.appendChild(wrapper);
     return link;
-    
+}
+
+class UIBasicMouseOver{
+
+    constructor(parent, title, content){
+        this.parent = parent;
+        this.wrapper = UIDiv();
+
+        const titleElem = UIDiv("basic-mouse-over-title");
+        titleElem.append(title);
+
+        const contentElem = UIDiv("basic-mouse-over-content");
+        contentElem.append(content);
+
+        this.wrapper.append(titleElem, contentElem);
+        this.hide();
+    }
+
+    hide(){
+        this.wrapper.className = "hidden";
+    }
+
+    display(){
+
+        this.wrapper.className = "basic-mouse-over";
+
+        const parentBounds = this.parent.getBoundingClientRect();
+
+        const bounds = this.wrapper.getBoundingClientRect();
+
+        this.wrapper.style.cssText = `margin-top:-${bounds.height}px;`;
+
+    }
 }
 
 class UICalendarHeatMap{
@@ -939,15 +971,35 @@ class UICalendarHeatMap{
         this.selectedYear = this.now.getFullYear();
         this.selectedMonth = this.now.getMonth();
 
+        this.selectedMode = "playtime";
         //cache data instead of fetching the same data twice
         this.data = {};
 
         UIHeader(this.div, header);
+
+
+        this.createTabs();
         this.div.append(this.wrapper);
 
         this.createHeatMap();
         this.render();
         this.loadData();
+    }
+
+    createTabs(){
+
+        const options = [
+            {"display": "By Playtime", "value": "playtime"},
+            {"display": "By Total Matches", "value": "matches"},
+            {"display": "By Total Players", "value": "players"},    
+        ];
+
+        this.tabs = new UITabs(this.div, options, options[0].value);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.selectedMode = e.detail.newTab;
+            this.render();
+        });
     }
 
     async loadData(){
@@ -1070,7 +1122,27 @@ class UICalendarHeatMap{
             if(playtime > this.maxPlaytime) this.maxPlaytime = playtime;
             if(matches > this.maxMatches) this.maxMatches = matches;
         }
+    }
 
+    calculatePercent(stats){
+
+        let max = 0;
+
+        if(this.selectedMode === "playtime"){
+            max = this.maxPlaytime;
+        }else if(this.selectedMode === "players"){
+            max = this.maxPlayers;
+        }else if(this.selectedMode === "matches"){
+            max = this.maxMatches;
+        }else{
+            throw new Error(`Unknown mode`);
+        }
+
+        const value = stats[this.selectedMode];
+
+        if(value === 0 || max === 0) return 0;
+
+        return (value > 0) ? value / max: 0;
     }
 
     render(){
@@ -1110,11 +1182,21 @@ class UICalendarHeatMap{
 
             if(stats !== undefined){
 
-                const playtimePercent = (stats[i].playtime > 0) ? stats[i].playtime / this.maxPlaytime : 0;
- 
-                if(playtimePercent > 0){
-                    elem.style.cssText = `background-color:rgba(150,0,0,${playtimePercent})`;
+                const percent = this.calculatePercent(stats[i]);
+
+                if(percent > 0){
+                    elem.style.cssText = `background-color:rgba(150,0,0,${percent})`;
                 }
+
+                const mouseTest = new UIBasicMouseOver(elem, `${i + 1}`, stats[i][this.selectedMode]);
+                elem.append(mouseTest.wrapper);
+                elem.addEventListener("mouseover", () =>{
+                    mouseTest.display();
+                });
+
+                elem.addEventListener("mouseleave", () =>{
+                    mouseTest.hide();
+                });
             }
 
             const ordinal = UISpan(getOrdinal(i+1), "tiny-font");
