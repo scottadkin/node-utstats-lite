@@ -914,6 +914,171 @@ function UIMapRichBox(data){
     
 }
 
+class UICalendarHeatMap{
+
+    constructor(parent, header){
+
+        this.parent = document.querySelector(parent);
+
+        this.div = UIDiv("text-center");
+        this.parent.append(this.div);
+
+        this.wrapper = UIDiv("calendar-heatmap text-center");
+
+        this.now = new Date(Date.now());
+
+        this.currentYear = this.now.getFullYear();
+        this.currentMonth = this.now.getMonth();
+        this.currentDate = this.now.getDate();
+
+        this.selectedYear = this.now.getFullYear();
+        this.selectedMonth = this.now.getMonth();
+
+
+        UIHeader(this.div, header);
+        this.div.append(this.wrapper);
+
+        
+
+        this.createHeatMap();
+        this.render();
+    }
+
+    createHeatMap(){
+ 
+        this.buttons = UIDiv("calendar-heatmap-buttons");
+
+        this.previous = document.createElement("button");
+        this.previous.innerHTML = "Previous Month";
+
+        this.previous.addEventListener("click", () =>{
+
+            if(this.selectedMonth - 1 < 0){
+                this.selectedMonth = 11;
+                this.selectedYear--;    
+            }else{
+                this.selectedMonth--;
+            }
+
+            this.render();
+        });
+
+        this.next = document.createElement("button");
+        this.next.innerHTML = "Next Month";
+
+        this.next.addEventListener("click", () =>{
+
+            if(this.selectedMonth + 1 > 11){
+                this.selectedMonth = 0;
+                this.selectedYear++;
+            }else{
+                this.selectedMonth++;
+            }
+
+            this.render();
+        });
+
+        this.buttons.append(this.previous, this.next);
+        this.wrapper.append(this.buttons);
+
+        this.title = UIDiv("calendar-heatmap-title");
+        this.updateTitle();
+        this.wrapper.append(this.title);
+
+        this.content = UIDiv("calendar-heatmap-content");
+        this.wrapper.append(this.content);
+
+    }
+
+    updateTitle(){
+
+        this.title.innerHTML = `${getMonthName(this.selectedMonth, true)} ${this.selectedYear}`;
+        
+        const endOfMonth = new Date(this.selectedYear, this.selectedMonth + 1, -1);
+        //starts at 0 not 1
+        this.lastDayOfMonth = endOfMonth.getDate(); 
+
+        const start = new Date(this.selectedYear, this.selectedMonth, 1);
+
+        //0-6
+        this.startDayOfMonth = start.getDay();
+        
+    }
+
+    createHeaderColumns(){
+
+        const row = UIDiv("calendar-heatmap-week");
+
+        for(let i = 0; i < 7; i++){
+            const elem = UIDiv("calendar-heatmap-day calendar-heatmap-day-header");
+
+            const dayName = getDayName(i);
+            elem.innerHTML = dayName[0];
+            elem.title = dayName;
+            row.append(elem);
+        }
+
+        return row;
+    }
+
+    render(){
+
+        this.updateTitle();
+
+        this.content.innerHTML = ``;
+
+        let i = 0;
+        let dayOfWeek = this.startDayOfMonth;
+
+        this.content.append(this.createHeaderColumns());
+
+        let currentRow = UIDiv("calendar-heatmap-week");
+
+        //need to add missing days to keep format
+        for(let x = 0; x < dayOfWeek; x++){
+
+            const elem = UIDiv("calendar-heatmap-day empty-date");
+            currentRow.append(elem);
+        }
+
+        while(i <= this.lastDayOfMonth){
+
+            let bDateMatchToday = false;
+
+            if(this.selectedYear === this.currentYear
+                && this.currentMonth === this.selectedMonth 
+                && i === this.currentDate
+            ){ 
+                bDateMatchToday = true;      
+            }
+
+            const elem = UIDiv(`calendar-heatmap-day hover${(bDateMatchToday) ? " calendar-heatmap-today" : ""}`);
+            const ordinal = UISpan(getOrdinal(i+1), "tiny-font");
+         
+            elem.append(`${i + 1}`, ordinal);
+
+            currentRow.append(elem);
+            i++;
+
+            dayOfWeek++;
+
+            if(dayOfWeek > 6){
+                dayOfWeek = 0;
+                this.content.append(currentRow);
+            }    
+        }
+
+        if(dayOfWeek > 0){
+
+            for(let i = dayOfWeek; i < 7; i++){
+                const elem = UIDiv("calendar-heatmap-day empty-date");
+                currentRow.append(elem);
+            }
+            this.content.append(currentRow);
+        }
+    }
+}
+
 
 class InteractiveTable{
 

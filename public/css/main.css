@@ -924,38 +924,6 @@ canvas{
 	height:14px;
 }
 
-.calendar-block{
-	display:inline-block;
-	padding:var(--padding-2);
-	color:white;
-	background-color: var(--bg-color-3);
-	text-align:center;
-	border:1px solid black;
-	margin-top:-1px;
-	margin-left:-1px;
-	font-size:14px;
-}
-
-.calendar-heat-map-wrapper{
-	width:350px;
-	background-color: var(--bg-color-3);
-	display:inline-block;
-}
-
-.calendar-row{
-	background-color: var(--bg-color-2);
-	display:grid;
-	grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-}
-
-.calendar-title{
-	text-align: center;
-	color:var(--font-color-1);
-	padding:var(--padding-2);
-	border:1px solid black;
-	margin-top:-1px;
-}
-
 .tiny-font{
 	font-size: var(--tiny-font-size);
 }
@@ -1193,4 +1161,71 @@ nav a:hover{
 .notification-content{
 	padding:var(--padding-1);
 	font-size:var(--font-size-1);
+}
+
+
+.calendar-heatmap{
+	background-color:var(--bg-color-2);
+	margin-bottom:var(--margin-1);
+	color:white;
+	display:inline-block;
+	
+}
+
+.calendar-heatmap-buttons{
+	display:grid;
+	grid-template-columns: 1fr 1fr;
+}
+
+.calendar-heatmap-buttons button{
+	background-color:var(--bg-color-2);
+	border:1px solid var(--bg-color-1);
+	color:white;
+	padding:5px;
+	font-weight: 500;
+	transition: all 0.5s;
+}
+
+.calendar-heatmap-buttons button:hover{
+	background-color:var(--bg-color-5);
+	color:yellow;
+	cursor: pointer;
+}
+
+.calendar-heatmap-title{
+	padding:var(--padding-1);
+}
+
+.calendar-heatmap-week{
+	display:grid;
+	grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.calendar-heatmap-day{
+	font-size:14px;
+	padding:7px;
+	border:1px solid var(--border-color-3);
+	margin-left:-1px;
+	margin-top:-1px;
+	transition: all 0.5s;
+}
+
+.calendar-heatmap-today{
+	font-weight: bold;
+	border:1px solid rgba(255,255,255,0.5);
+}
+
+.calendar-heatmap-day:hover{
+	color:yellow;
+	background-color:rgba(0,0,0,0.25);
+}
+
+.calendar-heatmap-day-header{
+	color:rgb(150,150,150);
+	font-weight:500;
+	background-color:rgba(0,0,0,0.25);
+}
+
+.empty-date{
+	background-color:rgba(0,0,0,0.25);
 }
