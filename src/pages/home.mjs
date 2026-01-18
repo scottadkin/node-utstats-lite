@@ -4,6 +4,7 @@ import { getCategorySettings } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getBasicList as getBasicServerList } from "../servers.mjs";
 import { getMostPlayedGametypes } from "../gametypes.mjs";
+import { getMostPlayedMaps } from "../maps.mjs";
 
 export async function renderHomePage(req, res, userSession){
 
@@ -27,8 +28,13 @@ export async function renderHomePage(req, res, userSession){
     let mostPlayedGametypes = [];
 
     if(pageSettings["Display Most Played Gametypes"] === "1"){
-
         mostPlayedGametypes = await getMostPlayedGametypes(pageSettings["Total Most Played Gametypes"]);
+    }
+
+    let mostPlayedMaps = [];
+
+    if(pageSettings["Display Most Played Maps"] === "1"){
+        mostPlayedMaps = await getMostPlayedMaps(pageSettings["Total Most Played Maps"]);
     }
 
     const brandingSettings = await getCategorySettings("Branding");
@@ -53,7 +59,8 @@ export async function renderHomePage(req, res, userSession){
         serversList,
         userSession,
         message,
-        mostPlayedGametypes
+        mostPlayedGametypes,
+        mostPlayedMaps
     });
 
 

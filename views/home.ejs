@@ -103,6 +103,16 @@
                         homeRenderMostPlayedGametypes("#root", <%- JSON.stringify(mostPlayedGametypes) %>);
                     <%
                 } break;
+
+                case "Most Played Maps": {
+                    %>
+                        homeRenderMostPlayedMaps(
+                            "#root", 
+                            <%- JSON.stringify(mostPlayedMaps) %>, 
+                            "<%= pageSettings["Most Played Maps Display Mode"] %>"
+                        );
+                    <%
+                } break;
             }
         }
     }

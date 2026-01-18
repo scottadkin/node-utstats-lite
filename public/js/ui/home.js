@@ -128,11 +128,13 @@ function renderServerList(parent, servers){
 
         const tableRow = document.createElement("tr");
 
-        tableRow.appendChild(UITableColumn({"content": s.name, "className": "text-left"}));
-        tableRow.appendChild(UITableColumn({"content": toDateString(s.first_match, true), "className": "date"}));
-        tableRow.appendChild(UITableColumn({"content": toDateString(s.last_match, true), "className": "date"}));
-        tableRow.appendChild(UITableColumn({"content": toPlaytime(s.playtime), "className": "date"}));
-        tableRow.appendChild(UITableColumn({"content": s.matches}));
+        const url = `/matches/?s=${s.id}`;
+
+        tableRow.appendChild(UITableColumn({"content": s.name, "className": "text-left", url}));
+        tableRow.appendChild(UITableColumn({"content": toDateString(s.first_match, true), "className": "date", url}));
+        tableRow.appendChild(UITableColumn({"content": toDateString(s.last_match, true), "className": "date", url}));
+        tableRow.appendChild(UITableColumn({"content": toPlaytime(s.playtime), "className": "date", url}));
+        tableRow.appendChild(UITableColumn({"content": s.matches, url}));
 
         table.appendChild(tableRow);
     }
@@ -182,14 +184,63 @@ function homeRenderMostPlayedGametypes(parent, data){
 
         const row = document.createElement("tr");
 
-        row.append(UITableColumn({"content": d.name, "className": "text-left"}));
-        row.append(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date"}));
-        row.append(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date"}));
-        row.append(UITableColumn({"content": d.matches}));
-        row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+        const url = `/matches/?g=${d.id}`;
+
+        row.append(UITableColumn({"content": d.name, "className": "text-left", url}));
+        row.append(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date", url}));
+        row.append(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date", url}));
+        row.append(UITableColumn({"content": d.matches, url}));
+        row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
         table.append(row);
     }
 
-
     parent.append(table);
+}
+
+function homeRenderMostPlayedMaps(parent, data, displayMode){
+
+    if(data.length === 0) return;
+    parent = document.querySelector(parent);
+
+    UIHeader(parent, "Most Played Maps");
+
+    let wrapper = null;
+
+    if(displayMode === "default"){
+        wrapper = UIDiv("rich-outter");
+    }else{
+
+        wrapper = document.createElement("table");
+        wrapper.className = "t-width-1";
+        
+        const headers = ["Name", "First", "Last", "Matches", "Playtime"];
+        const headerRow = document.createElement("tr");
+
+        for(let i = 0; i < headers.length; i++){
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
+        }
+        wrapper.append(headerRow);
+    }
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        if(displayMode === "default"){
+            wrapper.append(UIMapRichBox(d));
+        }else{
+
+            const row = document.createElement("tr");
+            const url = `/map/${d.id}`;
+
+            row.append(UITableColumn({"content": d.name, "className": "text-left", url}));
+            row.append(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date", url}));
+            row.append(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date", url}));
+            row.append(UITableColumn({"content": d.matches, url}));
+            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
+            wrapper.append(row);
+        }
+    }
+
+    parent.append(wrapper);  
 }

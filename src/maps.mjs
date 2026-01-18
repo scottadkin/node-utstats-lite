@@ -200,9 +200,15 @@ export async function getMostPlayedMaps(limit){
 
     const result = await simpleQuery(query, [limit]);
 
-    const images = await getMapImages(...[result.map(r => r.name.toLowerCase())]);
+    const images = await getMapImages(result.map(r => r.name.toLowerCase()));
 
-    return {"data": result, images};
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        r.image = images[r.name.toLowerCase()];
+    }
+
+    return result;
 }
 
 

@@ -153,43 +153,7 @@ class MapListDisplay{
         this.parent.appendChild(table);
     }
 
-
-    createRichBox(data){
-
-        const link = document.createElement("a");
-        link.href = `/map/${data.id}`;
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "rich-wrapper";
-
-        const title = document.createElement("div");
-        title.className = "rich-title";
-        title.appendChild(document.createTextNode(data.name));
-
-        wrapper.appendChild(title);
-
-        const image = document.createElement("img");
-        image.className = "rich-image";
-        image.src = `/images/maps/${data.image}`;
-        wrapper.appendChild(image);
-
-        const info = document.createElement("div");
-        info.className = "rich-info";
-        info.appendChild(document.createTextNode(`${data.matches} Match${(data.matches === 1) ? "" : "es"} Played`));
-
-        info.appendChild(document.createElement("br"));
-        info.appendChild(document.createTextNode(`Playtime ${toPlaytime(data.playtime)}`));
-        info.appendChild(document.createElement("br"));
-        info.appendChild(document.createTextNode(`Last Match ${toDateString(data.last_match, true)}`));
-
-        wrapper.appendChild(info);
-
-        link.appendChild(wrapper);
-        return link;
-    }
-
     renderRichView(){
-
 
         const wrapper = document.createElement("div");
         wrapper.className = "rich-outter";
@@ -200,7 +164,7 @@ class MapListDisplay{
 
             const d = this.data[i];
 
-            wrapper.appendChild(this.createRichBox(d));
+            wrapper.appendChild(UIMapRichBox(d));
         }
     }
 }
