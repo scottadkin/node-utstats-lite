@@ -1,5 +1,5 @@
 import { getPlayerRecentMatches } from "../players.mjs";
-import { getTotalMatches, getMatchesByHashes } from "../matches.mjs";
+import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData } from "../matches.mjs";
 import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages} from "../maps.mjs";
 import { getRankingsWithPlayerNames } from "../rankings.mjs";
 import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
@@ -181,6 +181,18 @@ export default class JSONManager{
         this.res.status(200).json(data);
     }
 
+    async getHeatMapData(){
+
+        const gametypeId = this.querySanitizeInteger("gid");
+        const mapId = this.querySanitizeInteger("mid");
+        const year = this.querySanitizeInteger("y");
+        const month = this.querySanitizeInteger("m");
+
+        const data = await getActivtyHeatMapData(gametypeId, mapId, year, month);
+
+        this.res.status(200).json({data});
+    }
+
     async init(){
 
         try{
@@ -224,6 +236,10 @@ export default class JSONManager{
 
             if(this.mode === "match-kills-graph"){
                 return await this.getMatchKillsGraph();
+            }
+
+            if(this.mode === "activity-heatmap-data"){
+                return await this.getHeatMapData();
             }
 
             console.log(this.mode);

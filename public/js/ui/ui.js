@@ -916,9 +916,14 @@ function UIMapRichBox(data){
 
 class UICalendarHeatMap{
 
-    constructor(parent, header){
+    constructor(parent, header, targetGametype, targetMap){
 
         this.parent = document.querySelector(parent);
+        if(targetGametype === undefined) targetGametype = 0;
+        if(targetMap === undefined) targetMap = 0;
+
+        this.targetGametype = targetGametype;
+        this.targetMap = targetMap;
 
         this.div = UIDiv("text-center");
         this.parent.append(this.div);
@@ -934,14 +939,41 @@ class UICalendarHeatMap{
         this.selectedYear = this.now.getFullYear();
         this.selectedMonth = this.now.getMonth();
 
+        //cache data instead of fetching the same data twice
+        this.data = {};
 
         UIHeader(this.div, header);
         this.div.append(this.wrapper);
 
-        
-
         this.createHeatMap();
         this.render();
+        this.loadData();
+    }
+
+    async loadData(){
+
+        try{
+
+            const dateKey = `${this.selectedYear}-${this.selectedMonth}`;
+
+            //we cache data that we have already fetched
+            if(this.data[dateKey] !== undefined){
+                this.render();
+                return;
+            }
+
+            const req = await fetch(`./json/activity-heatmap-data/?gid=${this.targetGametype}&mid=${this.targetMap}&y=${this.selectedYear}&m=${this.selectedMonth}`);
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.data[dateKey] = res.data;
+       
+            this.render();
+
+        }catch(err){
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
     }
 
     createHeatMap(){
@@ -960,7 +992,7 @@ class UICalendarHeatMap{
                 this.selectedMonth--;
             }
 
-            this.render();
+            this.loadData();
         });
 
         this.next = document.createElement("button");
@@ -975,7 +1007,7 @@ class UICalendarHeatMap{
                 this.selectedMonth++;
             }
 
-            this.render();
+            this.loadData();
         });
 
         this.buttons.append(this.previous, this.next);
@@ -1021,11 +1053,33 @@ class UICalendarHeatMap{
         return row;
     }
 
+    calcMinMax(){
+
+        this.maxMatches = 0;
+        this.maxPlayers = 0;
+        this.maxPlaytime = 0;;
+
+        const data = this.data[`${this.selectedYear}-${this.selectedMonth}`];
+        if(data === undefined) return;
+
+        for(const stats of Object.values(data)){
+
+            const {players, playtime, matches} = stats;
+
+            if(players > this.maxPlayers) this.maxPlayers = players;
+            if(playtime > this.maxPlaytime) this.maxPlaytime = playtime;
+            if(matches > this.maxMatches) this.maxMatches = matches;
+        }
+
+    }
+
     render(){
 
         this.updateTitle();
+        this.calcMinMax();
 
         this.content.innerHTML = ``;
+        const stats = this.data[`${this.selectedYear}-${this.selectedMonth}`];
 
         let i = 0;
         let dayOfWeek = this.startDayOfMonth;
@@ -1053,6 +1107,16 @@ class UICalendarHeatMap{
             }
 
             const elem = UIDiv(`calendar-heatmap-day hover${(bDateMatchToday) ? " calendar-heatmap-today" : ""}`);
+
+            if(stats !== undefined){
+
+                const playtimePercent = (stats[i].playtime > 0) ? stats[i].playtime / this.maxPlaytime : 0;
+ 
+                if(playtimePercent > 0){
+                    elem.style.cssText = `background-color:rgba(150,0,0,${playtimePercent})`;
+                }
+            }
+
             const ordinal = UISpan(getOrdinal(i+1), "tiny-font");
          
             elem.append(`${i + 1}`, ordinal);

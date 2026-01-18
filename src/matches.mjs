@@ -1657,3 +1657,62 @@ export async function getLatestMatchGametypeMapIds(){
 
     return {"gametypeId": result[0].gametype_id, "mapId": result[0].map_id};
 }
+
+
+
+export async function getActivtyHeatMapData(gametypeId, mapId, year, month){
+
+    month = parseInt(month) + 1;
+    year = parseInt(year);
+
+    if(month < 10) month = `0${month}`;
+
+    const lastDayOfMonth = new Date(year, month, -1);
+    const lastDate = lastDayOfMonth.getDate();
+
+    const start = `${year}-${month}-01 00:00:00`; 
+
+    if(month >= 12){
+        month = 1;
+        year++;
+    }else{
+        month++;
+    }
+
+    const end = `${year}-${month}-01 00:00:00`;
+
+    let where = ``;
+    const vars = [];
+
+    if(gametypeId != 0){
+        where += ` AND gametype_id=?`;
+        vars.push(gametypeId);
+    }
+
+    if(mapId !== 0){
+        where += ` AND map_id=?`;
+        vars.push(mapId);
+    }
+
+    const query = `SELECT date,playtime,players FROM nstats_matches WHERE date>=? AND date<?${where} ORDER BY date DESC`;
+    const result = await simpleQuery(query, [start, end, ...vars]);
+
+    const data = {};
+
+    for(let i = 0; i <= lastDate; i++ ){
+        data[i] = {"matches": 0, "playtime": 0, "players": 0};
+    }
+    
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        const currentDate = new Date(r.date);
+
+        const index = currentDate.getDate();
+        data[index].matches++;
+        data[index].playtime += r.playtime;
+        data[index].players += r.players;
+    }
+
+    return data;
+}

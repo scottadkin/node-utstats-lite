@@ -653,6 +653,7 @@ canvas{
 	color:var(--font-color-1);
 	padding:var(--padding-1);
     text-overflow: ellipsis;
+	font-weight:500;
 }
 
 .rich-image{
@@ -1179,11 +1180,12 @@ nav a:hover{
 
 .calendar-heatmap-buttons button{
 	background-color:var(--bg-color-2);
-	border:1px solid var(--bg-color-1);
+	border:0px solid var(--bg-color-1);
 	color:white;
 	padding:5px;
 	font-weight: 500;
 	transition: all 0.5s;
+	font-size:12px;
 }
 
 .calendar-heatmap-buttons button:hover{
@@ -1193,7 +1195,10 @@ nav a:hover{
 }
 
 .calendar-heatmap-title{
-	padding:var(--padding-1);
+	padding:var(--padding-2);
+	font-size:14px;
+	border-top:1px solid rgba(255,255,255,0.125);
+	border-bottom:1px solid rgba(255,255,255,0.125);
 }
 
 .calendar-heatmap-week{
@@ -1203,7 +1208,7 @@ nav a:hover{
 
 .calendar-heatmap-day{
 	font-size:14px;
-	padding:7px;
+	padding:10px;
 	border:1px solid var(--border-color-3);
 	margin-left:-1px;
 	margin-top:-1px;
