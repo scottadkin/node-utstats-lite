@@ -365,7 +365,7 @@ class AdminFTPManager{
         let sftpValue = false;
         let nameValue = "";
         let hostValue = "";
-        let portValue = 7777;
+        let portValue = 21;
         let userValue = "";
         let passwordValue = "";
         let folderValue = "";
