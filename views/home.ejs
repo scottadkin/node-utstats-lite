@@ -51,6 +51,7 @@
        }
     %>
 </div>
+<script src="js/MatchScreenshot.js"></script>
 <script>
     
     <% 
@@ -117,6 +118,10 @@
                 case "Activity Heatmap": {
 
                     %>new UICalendarHeatMap("#root", "Activity HeatMap", 0,0,"<%= pageSettings["Activity Heatmap Default Mode"]%>");<%
+                } break;
+
+                case "Latest Screenshot": {
+                    %>new UIMatchScreenshot("#root", <%- JSON.stringify(screenshotData) %>, true);<%
                 } break;
             }
         }

@@ -19,6 +19,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Home" ,"type": `displayMode`, "name": "Most Played Maps Display Mode", "value": "default"},
     {"category": "Home" ,"type": `bool`, "name": "Display Activity Heatmap", "value": 1},
     {"category": "Home" ,"type": `heatmapMode`, "name": "Activity Heatmap Default Mode", "value": "matches"},
+    {"category": "Home" ,"type": `bool`, "name": "Display Latest Screenshot", "value": 1},
     {"category": "Branding" ,"type": `string`, "name": "Site Name", "value": "Node UTStats Lite"},
     {"category": "Branding" ,"type": `string`, "name": "Description", "value": "Stats based website made for the UTStats-lite mutator."},
     {"category": "Social Media" ,"type": `string`, "name": "External Site", "value": ""},

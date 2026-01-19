@@ -313,7 +313,7 @@ class MatchScreenshot{
         const date = new Date(this.data.basic.date);
 
         const footerBOptions = {
-            "text": `${toDateString(Math.floor(date * 0.001),true)} Elapsed Time: ${MMSS(this.data.basic.playtime)}`,
+            "text": `${toDateString(Math.floor(date),true)} Elapsed Time: ${MMSS(this.data.basic.playtime)}`,
             "x": 50,
             "y": 98.2
         };
@@ -525,7 +525,7 @@ class MatchScreenshot{
         const fontSize = 1.5;
 
         const line1 = "[SmartCTF 4E {PiN}Kev | {DnF2}SiNiSTeR | [es]Rush | adminthis & The_Cowboy & Sp0ngeb0b]";
-        const line2 = `${toDateString(new Date(this.data.basic.date) * 0.001)} | Elapsed Time: ${MMSS(this.data.basic.playtime)}`;
+        const line2 = `${toDateString(new Date(this.data.basic.date))} | Elapsed Time: ${MMSS(this.data.basic.playtime)}`;
         const line3 = `Playing ${this.data.basic.map_name} on ${this.data.basic.server_name}`;
 
         this.fillText({

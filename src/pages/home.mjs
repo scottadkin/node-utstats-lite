@@ -1,5 +1,5 @@
 
-import { getRecentMatches } from "../matches.mjs";
+import { getRecentMatches, getMatchData } from "../matches.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getBasicList as getBasicServerList } from "../servers.mjs";
@@ -18,6 +18,12 @@ export async function renderHomePage(req, res, userSession){
     let perPage = pageSettings["Total Recent Matches"] ?? 5;
 
     const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0);
+
+    let screenshotData = null;
+
+    if(pageSettings["Display Latest Screenshot"] === "1" && recentMatches.total > 0){
+        screenshotData = await getMatchData(recentMatches.data[0].id, true, true, false, false);
+    }
 
     let serversList = [];
 
@@ -60,7 +66,8 @@ export async function renderHomePage(req, res, userSession){
         userSession,
         message,
         mostPlayedGametypes,
-        mostPlayedMaps
+        mostPlayedMaps,
+        screenshotData
     });
 
 

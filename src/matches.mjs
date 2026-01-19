@@ -243,7 +243,6 @@ export async function getRecentMatches(page, perPage, server, gametype, map){
 //
 export async function getMatch(id){
 
-    const start = performance.now();
     if(id === null) return null;
 
     const query = `SELECT ${MATCH_TABLE_COLUMNS_VERBOSE},
@@ -268,8 +267,6 @@ export async function getMatch(id){
 
     const mapImages = await getMapImages([data.map_name]);
     data.mapImage = Object.values(mapImages)[0];
-
-    const end = performance.now();
 
     return data;
 }
