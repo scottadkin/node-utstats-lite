@@ -53,7 +53,6 @@
 </div>
 <script>
     
-    new UICalendarHeatMap("#root", "Activity HeatMap");
     <% 
 
     for(let i = 0; i < pageLayout.length; i++){
@@ -113,6 +112,11 @@
                             "<%= pageSettings["Most Played Maps Display Mode"] %>"
                         );
                     <%
+                } break;
+
+                case "Activity Heatmap": {
+
+                    %>new UICalendarHeatMap("#root", "Activity HeatMap", 0,0,"<%= pageSettings["Activity Heatmap Default Mode"]%>");<%
                 } break;
             }
         }

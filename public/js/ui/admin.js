@@ -1554,6 +1554,10 @@ class AdminSiteSettingsManager{
                     this.validRecordTypes, 
                     (newValue) =>{ this.changePageSetting(s.id, newValue)}
                 );
+
+            }else if(s.setting_type === "heatmapMode"){
+                
+                new UIHeatmapModeSelect(row, s.setting_value, (newValue) =>{ this.changePageSetting(s.id, newValue)});
             }else{
 
                 console.log(s.setting_type);

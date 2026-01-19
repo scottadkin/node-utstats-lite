@@ -878,6 +878,18 @@ class UIRecordsTypeSelect{
     }
 }
 
+class UIHeatmapModeSelect{
+
+    constructor(parent, initialValue, callback){
+
+        this.elem = new UISelect(parent, [
+            {"display": "Matches Played", "value": "matches"},
+            {"display": "Total Players", "value": "players"},
+            {"display": "Total Playtime", "value": "playtime"},
+        ], initialValue, callback);
+    }
+}
+
 
 function UIMapRichBox(data){
 
@@ -916,7 +928,7 @@ function UIMapRichBox(data){
 class UIBasicMouseOver{
 
     constructor(parent, title, content){
-        
+
         this.parent = parent;
         this.wrapper = UIDiv();
 
@@ -974,11 +986,9 @@ class UIBasicMouseOver{
 
 class UICalendarHeatMap{
 
-    constructor(parent, header, targetGametype, targetMap){
+    constructor(parent, header, targetGametype, targetMap, defaultMode){
 
         this.parent = document.querySelector(parent);
-        if(targetGametype === undefined) targetGametype = 0;
-        if(targetMap === undefined) targetMap = 0;
 
         this.targetGametype = targetGametype;
         this.targetMap = targetMap;
@@ -997,7 +1007,7 @@ class UICalendarHeatMap{
         this.selectedYear = this.now.getFullYear();
         this.selectedMonth = this.now.getMonth();
 
-        this.selectedMode = "playtime";
+        this.selectedMode = defaultMode;
         //cache data instead of fetching the same data twice
         this.data = {};
 
@@ -1020,7 +1030,7 @@ class UICalendarHeatMap{
             {"display": "By Total Players", "value": "players"},    
         ];
 
-        this.tabs = new UITabs(this.div, options, options[0].value);
+        this.tabs = new UITabs(this.div, options, this.selectedMode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
             this.selectedMode = e.detail.newTab;
@@ -1199,7 +1209,7 @@ class UICalendarHeatMap{
 
             if(this.selectedYear === this.currentYear
                 && this.currentMonth === this.selectedMonth 
-                && i === this.currentDate
+                && i + 1 === this.currentDate
             ){ 
                 bDateMatchToday = true;      
             }
