@@ -1,12 +1,8 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName, 
-    mysqlSetTotalsByDate, sanitizePagePerPage,
-    removeGametypePrefix
+    mysqlSetTotalsByDate, sanitizePagePerPage
 } from "./generic.mjs";
-import { getAll, getGametypeNames } from "./gametypes.mjs";
-import { getServerNames } from "./servers.mjs";
-import { getBasicPlayerInfo } from "./players.mjs";
 import { getPlayerMapTotals as getPlayerCTFMapTotals } from "./ctf.mjs";
 import { getPlayerMapTotals as getPlayerDOMMapTotals } from "./domination.mjs";
 import Message from "./message.mjs";

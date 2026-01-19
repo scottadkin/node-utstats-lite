@@ -36,6 +36,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Map" ,"type": `bool`, "name": "Display Player Top Averages", "value": 1},
     {"category": "Map" ,"type": `bool`, "name": "Display Weapon Statistics", "value": 1},
     {"category": "Map" ,"type": `bool`, "name": "Display Activity Heatmap", "value": 1},
+    {"category": "Map" ,"type": `heatmapMode`, "name": "Activity Heatmap Default Mode", "value": "matches"},
     {"category": "Map" ,"type": `bool`, "name": "Display CTF League", "value": 1},
 
     {"category": "Maps" ,"type": `displayMode`, "name": "Default Display Mode", "value": "default"},

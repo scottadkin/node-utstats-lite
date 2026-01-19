@@ -54,6 +54,10 @@
             case "Display Player Top Averages": {
                 %>new UIMapPlayerAverages("#root", "<%= basic.id %>", validTypes);<%
             }  break;
+
+            case "Display Activity Heatmap": {
+                %>new UICalendarHeatMap("#root", "Activity Heatmap", 0, <%= basic.id %>, "<%= pageSettings["Activity Heatmap Default Mode"]%>", "../");<%
+            } break;
         }
     }
     %>

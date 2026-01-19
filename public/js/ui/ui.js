@@ -986,13 +986,13 @@ class UIBasicMouseOver{
 
 class UICalendarHeatMap{
 
-    constructor(parent, header, targetGametype, targetMap, defaultMode){
+    constructor(parent, header, targetGametype, targetMap, defaultMode, urlOffset){
 
         this.parent = document.querySelector(parent);
 
         this.targetGametype = targetGametype;
         this.targetMap = targetMap;
-
+        this.urlOffset = urlOffset ?? "";
         this.div = UIDiv("text-center");
         this.parent.append(this.div);
 
@@ -1050,7 +1050,8 @@ class UICalendarHeatMap{
                 return;
             }
 
-            const req = await fetch(`./json/activity-heatmap-data/?gid=${this.targetGametype}&mid=${this.targetMap}&y=${this.selectedYear}&m=${this.selectedMonth}`);
+            const slug = `?gid=${this.targetGametype}&mid=${this.targetMap}&y=${this.selectedYear}&m=${this.selectedMonth}`;
+            const req = await fetch(`${this.urlOffset}json/activity-heatmap-data/${slug}`);
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
