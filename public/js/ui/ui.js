@@ -1390,6 +1390,7 @@ class InteractiveTable{
 
 function UIMatchScreenshot(parent, matchData, bLatest){
 
+    if(matchData === null) return;
     if(bLatest === undefined) bLatest = false;
 
     parent = document.querySelector(parent);
