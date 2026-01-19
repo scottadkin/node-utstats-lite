@@ -113,10 +113,16 @@ function getOrdinal(value){
 
 function plural(value, word){
 
-    //if(value == "") return word;
-
     if(value === 1) return word;
 
+    const es = ["s","ch","sh","ss","x","z"];
+
+    for(let i = 0; i < es.length; i++){
+
+        if(word.endsWith(es[i])){
+            return `${word}es`;
+        }
+    }
     return `${word}s`;
 }
 

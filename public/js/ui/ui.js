@@ -916,6 +916,7 @@ function UIMapRichBox(data){
 class UIBasicMouseOver{
 
     constructor(parent, title, content){
+        
         this.parent = parent;
         this.wrapper = UIDiv();
 
@@ -926,6 +927,7 @@ class UIBasicMouseOver{
         contentElem.append(content);
 
         this.wrapper.append(titleElem, contentElem);
+        
         this.hide();
     }
 
@@ -933,15 +935,39 @@ class UIBasicMouseOver{
         this.wrapper.className = "hidden";
     }
 
+    removePx(value){
+        if(typeof value !== "string") return value;
+        return parseInt(value.replace(/\D/ig, ""));
+    }
+
     display(){
 
         this.wrapper.className = "basic-mouse-over";
 
-        const parentBounds = this.parent.getBoundingClientRect();
-
         const bounds = this.wrapper.getBoundingClientRect();
 
-        this.wrapper.style.cssText = `margin-top:-${bounds.height}px;`;
+        const test = window.getComputedStyle(this.parent);
+
+        let paddingTop = test.getPropertyValue("padding-top");
+        let paddingLeft = test.getPropertyValue("padding-left");
+
+        if(paddingTop !== ""){
+            paddingTop = this.removePx(paddingTop);
+        }else{
+            paddingTop = 0;
+        }
+
+        if(paddingLeft !== ""){
+            paddingLeft = this.removePx(paddingLeft);
+        }else{
+            paddingTop = 0;
+        }
+
+
+        const marginTop = bounds.height + paddingTop
+        const marginLeft = paddingLeft;
+
+        this.wrapper.style.cssText = `margin-top:-${marginTop}px;margin-left:-${marginLeft}px;`;
 
     }
 }
@@ -1188,8 +1214,21 @@ class UICalendarHeatMap{
                     elem.style.cssText = `background-color:rgba(150,0,0,${percent})`;
                 }
 
-                const mouseTest = new UIBasicMouseOver(elem, `${i + 1}`, stats[i][this.selectedMode]);
+                const title = `${getDayName(dayOfWeek)} ${i+1}${getOrdinal(i+1)}`;
+                let currentValue = stats[i][this.selectedMode];
+
+                if(this.selectedMode === "playtime"){
+                    currentValue = toPlaytime(currentValue);
+                }else if(this.selectedMode === "players"){
+                    currentValue = `${currentValue} ${plural(currentValue, "player")}`;
+                }else if(this.selectedMode === "matches"){
+                    currentValue = `${currentValue} ${plural(currentValue, "match")}`;
+                }
+
+                const mouseTest = new UIBasicMouseOver(elem, title, currentValue);
+
                 elem.append(mouseTest.wrapper);
+
                 elem.addEventListener("mouseover", () =>{
                     mouseTest.display();
                 });

@@ -1214,7 +1214,20 @@ nav a:hover{
 }
 
 .basic-mouse-over{
-	background-color:green;
+	background-color:rgba(0,0,0,0.85);
 	position:absolute;
 	padding:5px;
+	color:white;
+	border:1px solid var(--border-color-2);
+	font-weight:400;
+}
+
+.basic-mouse-over-title{
+	font-size:14px;
+	padding:3px;
+}
+
+.basic-mouse-over-content{
+	font-size:12px;
+	margin-top:5px;
 }
