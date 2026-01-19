@@ -1164,6 +1164,7 @@ nav a:hover{
 	font-weight: 500;
 	transition: all 0.5s;
 	font-size:12px;
+	user-select: none;
 }
 
 .calendar-heatmap-buttons button:hover{

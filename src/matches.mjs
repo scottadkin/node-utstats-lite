@@ -9,7 +9,7 @@ import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData } from "./domination.mjs";
 import md5 from "md5";
-import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, getMapImageName } from "./generic.mjs";
+import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, getMapImageName, getHeatmapDates } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
 import { getValidGametypes, getValidMaps } from "./ctfLeague.mjs";
@@ -1659,24 +1659,7 @@ export async function getLatestMatchGametypeMapIds(){
 
 export async function getActivtyHeatMapData(gametypeId, mapId, year, month){
 
-    month = parseInt(month) + 1;
-    year = parseInt(year);
-
-    if(month < 10) month = `0${month}`;
-
-    const lastDayOfMonth = new Date(year, month, -1);
-    const lastDate = lastDayOfMonth.getDate();
-
-    const start = `${year}-${month}-01 00:00:00`; 
-
-    if(month >= 12){
-        month = 1;
-        year++;
-    }else{
-        month++;
-    }
-
-    const end = `${year}-${month}-01 00:00:00`;
+    const {start, end, lastDayOfMonth} = getHeatmapDates(month, year);
 
     let where = ``;
     const vars = [];
@@ -1696,7 +1679,7 @@ export async function getActivtyHeatMapData(gametypeId, mapId, year, month){
 
     const data = {};
 
-    for(let i = 0; i <= lastDate; i++ ){
+    for(let i = 0; i <= lastDayOfMonth; i++ ){
         data[i] = {"matches": 0, "playtime": 0, "players": 0};
     }
     

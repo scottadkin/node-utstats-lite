@@ -117,7 +117,13 @@
 
                 case "Activity Heatmap": {
 
-                    %>new UICalendarHeatMap("#root", "Activity HeatMap", 0,0,"<%= pageSettings["Activity Heatmap Default Mode"]%>");<%
+                    %>new UIMatchesActivtyHeatmap("#root", {
+                        "header": "Activity HeatMap", 
+                        "gametype": 0,
+                        "map": 0, 
+                        "defaultMode": "<%= pageSettings["Activity Heatmap Default Mode"]%>",
+                        "jsonURL": `./json/activity-heatmap-data/`
+                    });<%
                 } break;
 
                 case "Latest Screenshot": {

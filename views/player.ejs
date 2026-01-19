@@ -57,6 +57,16 @@
             case "Display Recent Matches": {
                 %>const rm = new PlayerRecentMatches("#root", <%= playerId %>, gametypeNames, <%- JSON.stringify(mapNames) %>);<%
             } break;
+            case "Display Activity Heatmap": {
+                %>new UIPlayerActivityHeatmap("#root", {
+                    "gametype": 0,
+                    "map": 0,
+                    "header": "Activity Heatmap",
+                    "jsonURL": "../json/player-activity-heatmap-data/",
+                    "player": <%= basicPlayerInfo.id %>,
+                    "defaultMode": "<%= pageSettings["Activity Heatmap Default Mode"] %>"
+                });<%
+            } break;
         }
     }
     %>

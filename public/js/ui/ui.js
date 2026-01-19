@@ -890,6 +890,21 @@ class UIHeatmapModeSelect{
     }
 }
 
+class UIPlayerHeatmapModeSelect{
+
+    constructor(parent, initialValue, callback){
+
+        this.elem = new UISelect(parent, [
+            {"display": "Matches Played", "value": "matches"},
+            {"display": "Total Playtime", "value": "playtime"},
+            {"display": "Daily Winrate", "value": "winrate"},
+            {"display": "Wins", "value": "wins"},
+            {"display": "Draws", "value": "draws"},
+            {"display": "Losses", "value": "losses"},
+        ], initialValue, callback);
+    }
+}
+
 
 function UIMapRichBox(data){
 
@@ -986,13 +1001,11 @@ class UIBasicMouseOver{
 
 class UICalendarHeatMap{
 
-    constructor(parent, header, targetGametype, targetMap, defaultMode, urlOffset){
+    constructor(parent, options){
 
         this.parent = document.querySelector(parent);
 
-        this.targetGametype = targetGametype;
-        this.targetMap = targetMap;
-        this.urlOffset = urlOffset ?? "";
+        this.jsonURL = options?.jsonURL ?? "/json/unkown/";
         this.div = UIDiv("text-center");
         this.parent.append(this.div);
 
@@ -1007,12 +1020,30 @@ class UICalendarHeatMap{
         this.selectedYear = this.now.getFullYear();
         this.selectedMonth = this.now.getMonth();
 
-        this.selectedMode = defaultMode;
+        this.selectedMode = options?.defaultMode ?? "playtime";
         //cache data instead of fetching the same data twice
         this.data = {};
 
-        UIHeader(this.div, header);
+        UIHeader(this.div, options?.header ?? "Heatmap");
 
+    }
+
+    init(){
+
+        if(this.modes === undefined){
+            this.modes = [
+                {"display": "By Playtime", "value": "playtime"},
+                {"display": "By Total Matches", "value": "matches"},
+                {"display": "By Total Players", "value": "players"},    
+            ];
+        }
+
+        if(this.targetPlayer !== null){
+            this.heatmapType = "players";
+        }else{
+            this.heatmapType = "matches";
+        }
+        
 
         this.createTabs();
         this.div.append(this.wrapper);
@@ -1023,14 +1054,8 @@ class UICalendarHeatMap{
     }
 
     createTabs(){
-
-        const options = [
-            {"display": "By Playtime", "value": "playtime"},
-            {"display": "By Total Matches", "value": "matches"},
-            {"display": "By Total Players", "value": "players"},    
-        ];
-
-        this.tabs = new UITabs(this.div, options, this.selectedMode);
+      
+        this.tabs = new UITabs(this.div, this.modes, this.selectedMode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
             this.selectedMode = e.detail.newTab;
@@ -1050,8 +1075,23 @@ class UICalendarHeatMap{
                 return;
             }
 
-            const slug = `?gid=${this.targetGametype}&mid=${this.targetMap}&y=${this.selectedYear}&m=${this.selectedMonth}`;
-            const req = await fetch(`${this.urlOffset}json/activity-heatmap-data/${slug}`);
+            let slug = `?y=${this.selectedYear}&m=${this.selectedMonth}`;
+
+            const keysToSlugs = {
+                "targetGametype": "gid",
+                "targetMap": "mid",
+                "targetPlayer": "pid",
+            };
+
+
+            for(const [varName, keyName] of Object.entries(keysToSlugs)){
+
+                if(this[varName] !== undefined){
+                    slug += `&${keyName}=${this[varName]}`;
+                }
+            }
+    
+            const req = await fetch(`${this.jsonURL}${slug}`);
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
@@ -1144,42 +1184,106 @@ class UICalendarHeatMap{
 
     calcMinMax(){
 
-        this.maxMatches = 0;
-        this.maxPlayers = 0;
-        this.maxPlaytime = 0;;
+        this.max = {};
 
         const data = this.data[`${this.selectedYear}-${this.selectedMonth}`];
         if(data === undefined) return;
 
         for(const stats of Object.values(data)){
 
-            const {players, playtime, matches} = stats;
+            for(let i = 0; i < this.modes.length; i++){
 
-            if(players > this.maxPlayers) this.maxPlayers = players;
-            if(playtime > this.maxPlaytime) this.maxPlaytime = playtime;
-            if(matches > this.maxMatches) this.maxMatches = matches;
+                const key = this.modes[i].value;
+                const value = stats[key];
+                if(this.max[key] === undefined) this.max[key] = 0;
+
+                if(this.max[key] < value) this.max[key] = value;
+            }
         }
+
     }
 
     calculatePercent(stats){
 
         let max = 0;
 
-        if(this.selectedMode === "playtime"){
-            max = this.maxPlaytime;
-        }else if(this.selectedMode === "players"){
-            max = this.maxPlayers;
-        }else if(this.selectedMode === "matches"){
-            max = this.maxMatches;
-        }else{
-            throw new Error(`Unknown mode`);
-        }
+        max = this.max[this.selectedMode];
+
+        if(max === undefined) throw new Error(`this.max.${this.selectedMode} not found`);
 
         const value = stats[this.selectedMode];
 
         if(value === 0 || max === 0) return 0;
 
         return (value > 0) ? value / max: 0;
+    }
+
+
+    createDayElem(i, dayOfWeek, stats){
+
+        let bDateMatchToday = false;
+
+        if(this.selectedYear === this.currentYear
+            && this.currentMonth === this.selectedMonth 
+            && i + 1 === this.currentDate
+        ){ 
+            bDateMatchToday = true;      
+        }
+
+        const elem = UIDiv(`calendar-heatmap-day hover${(bDateMatchToday) ? " calendar-heatmap-today" : ""}`);
+
+        if(stats !== undefined){
+
+            const percent = this.calculatePercent(stats[i]);
+
+            if(percent > 0){
+                elem.style.cssText = `background-color:rgba(150,0,0,${percent})`;
+            }
+
+            const title = `${getDayName(dayOfWeek)} ${i+1}${getOrdinal(i+1)}`;
+            let currentValue = stats[i][this.selectedMode];
+
+
+            if(this.selectedMode === "playtime"){
+                currentValue = toPlaytime(currentValue);
+            }else if(this.selectedMode === "players"){
+                currentValue = `${currentValue} ${plural(currentValue, "player")}`;
+            }else if(this.selectedMode === "matches"){
+                currentValue = `${currentValue} ${plural(currentValue, "match")}`;
+            }else if(this.selectedMode === "wins"){
+                currentValue = `${currentValue} ${plural(currentValue, "win")}`;
+            }else if(this.selectedMode === "draws"){
+                currentValue = `${currentValue} ${plural(currentValue, "draw")}`;
+            }else if(this.selectedMode === "losses"){
+                currentValue = `${currentValue} ${plural(currentValue, "loss")}`;
+            }else if(this.selectedMode === "winrate"){
+
+                if(currentValue === 0){
+                    currentValue = "No matches played";
+                }else{
+                    currentValue = `${currentValue}% of ${stats[i].matches} ${plural(currentValue, "match")}`;
+                }
+
+            }
+
+            const mouseTest = new UIBasicMouseOver(elem, title, currentValue);
+
+            elem.append(mouseTest.wrapper);
+
+            elem.addEventListener("mouseover", () =>{
+                mouseTest.display();
+            });
+
+            elem.addEventListener("mouseleave", () =>{
+                mouseTest.hide();
+            });
+        }
+
+        const ordinal = UISpan(getOrdinal(i+1), "tiny-font");
+        
+        elem.append(`${i + 1}`, ordinal);
+
+        return elem;
     }
 
     render(){
@@ -1206,52 +1310,7 @@ class UICalendarHeatMap{
 
         while(i <= this.lastDayOfMonth){
 
-            let bDateMatchToday = false;
-
-            if(this.selectedYear === this.currentYear
-                && this.currentMonth === this.selectedMonth 
-                && i + 1 === this.currentDate
-            ){ 
-                bDateMatchToday = true;      
-            }
-
-            const elem = UIDiv(`calendar-heatmap-day hover${(bDateMatchToday) ? " calendar-heatmap-today" : ""}`);
-
-            if(stats !== undefined){
-
-                const percent = this.calculatePercent(stats[i]);
-
-                if(percent > 0){
-                    elem.style.cssText = `background-color:rgba(150,0,0,${percent})`;
-                }
-
-                const title = `${getDayName(dayOfWeek)} ${i+1}${getOrdinal(i+1)}`;
-                let currentValue = stats[i][this.selectedMode];
-
-                if(this.selectedMode === "playtime"){
-                    currentValue = toPlaytime(currentValue);
-                }else if(this.selectedMode === "players"){
-                    currentValue = `${currentValue} ${plural(currentValue, "player")}`;
-                }else if(this.selectedMode === "matches"){
-                    currentValue = `${currentValue} ${plural(currentValue, "match")}`;
-                }
-
-                const mouseTest = new UIBasicMouseOver(elem, title, currentValue);
-
-                elem.append(mouseTest.wrapper);
-
-                elem.addEventListener("mouseover", () =>{
-                    mouseTest.display();
-                });
-
-                elem.addEventListener("mouseleave", () =>{
-                    mouseTest.hide();
-                });
-            }
-
-            const ordinal = UISpan(getOrdinal(i+1), "tiny-font");
-         
-            elem.append(`${i + 1}`, ordinal);
+            const elem = this.createDayElem(i, dayOfWeek, stats);
 
             currentRow.append(elem);
             i++;
@@ -1275,6 +1334,41 @@ class UICalendarHeatMap{
     }
 }
 
+class UIMatchesActivtyHeatmap extends UICalendarHeatMap{
+
+    constructor(parent, options){
+
+        super(parent, options);
+
+        this.targetGametype = options?.gametype ?? "";
+        this.targetMap = options?.map ?? "";
+        super.init();
+    }
+}
+
+class UIPlayerActivityHeatmap extends UICalendarHeatMap{
+
+    constructor(parent, options){
+
+        super(parent, options);
+        this.modes = [
+            {"display": "Playtime", "value": "playtime"},
+            {"display": "Total Matches", "value": "matches"},
+            {"display": "Daily Winrate", "value": "winrate"},
+            {"display": "Wins", "value": "wins"},
+            {"display": "Draws", "value": "draws"},
+            {"display": "Losses", "value": "losses"},
+        ];
+
+        this.header = `Activity Heatmap`;
+
+        this.targetGametype = options?.gametype ?? "";
+        this.targetMap = options?.map ?? "";
+        this.targetPlayer = options?.player ?? "";
+        
+        super.init();
+    }
+}
 
 class InteractiveTable{
 

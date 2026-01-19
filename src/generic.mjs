@@ -550,3 +550,30 @@ export function stripFileExtension(name){
 
     return result[1];
 }
+
+
+export function getHeatmapDates(month, year){
+
+    month = parseInt(month) + 1;
+    year = parseInt(year);
+
+    if(month < 10) month = `0${month}`;
+
+    console.log(`${year}-${month}`);
+
+    const lastDate = new Date(year, month, -1);
+    const lastDayOfMonth = lastDate.getDate();
+
+    const start = `${year}-${month}-01 00:00:00`; 
+
+    if(month >= 12){
+        month = 1;
+        year++;
+    }else{
+        month++;
+    }
+
+    const end = `${year}-${month}-01 00:00:00`;
+
+    return {start, end, lastDayOfMonth};
+}

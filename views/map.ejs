@@ -56,7 +56,14 @@
             }  break;
 
             case "Display Activity Heatmap": {
-                %>new UICalendarHeatMap("#root", "Activity Heatmap", 0, <%= basic.id %>, "<%= pageSettings["Activity Heatmap Default Mode"]%>", "../");<%
+                %>new UIMatchesActivtyHeatmap("#root", {
+                    "header": "Activity HeatMap", 
+                    "gametype": 0,
+                    "map": <%= basic.id %>, 
+                    "jsonURL": `../json/activity-heatmap-data/`,
+                    "defaultMode": "<%= pageSettings["Activity Heatmap Default Mode"]%>"}
+                );<%
+               
             } break;
         }
     }

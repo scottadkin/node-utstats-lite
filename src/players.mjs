@@ -1,7 +1,5 @@
 import {simpleQuery, bulkInsert} from "./database.mjs";
-import {getMultipleMatchDetails} from "./matches.mjs";
-import { getWinner, getPlayer, mysqlSetTotalsByDate } from "./generic.mjs";
-import { deleteAllPlayerTotals as deleteAllPlayerGametypeTotals } from "./gametypes.mjs";
+import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
@@ -1263,4 +1261,63 @@ export async function getUniquePlayedGametypes(playerId){
 
 export async function getUniquePlayedMaps(playerId){
     return await getUniquePlayedType(playerId, "maps");
+}
+
+export async function getPlayerActivityHeatmapData(playerId, gametypeId, mapId, year, month){
+
+    const {start, end, lastDayOfMonth} = getHeatmapDates(month, year);
+
+    let where = ``;
+    const vars = [];
+
+    if(gametypeId != 0){
+        where += ` AND gametype_id=?`;
+        vars.push(gametypeId);
+    }
+
+    if(mapId !== 0){
+        where += ` AND map_id=?`;
+        vars.push(mapId);
+    }
+
+    const query = `SELECT match_date,time_on_server as playtime,match_result 
+    FROM nstats_match_players WHERE player_id=? AND match_date>=? AND match_date<?${where} ORDER BY match_date DESC`;
+    const result = await simpleQuery(query, [playerId, start, end, ...vars]);
+
+    const data = {};
+
+    for(let i = 0; i <= lastDayOfMonth; i++ ){
+        data[i] = {
+            "matches": 0, 
+            "playtime": 0,
+            "wins": 0,
+            "draws": 0,
+            "losses": 0,
+            "winrate": 0
+        };
+    }
+    
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        const currentDate = new Date(r.match_date);
+
+        const index = currentDate.getDate();
+        data[index].matches++;
+        data[index].playtime += r.playtime;
+
+        if(r.match_result === "w"){
+            data[index].wins++;
+        }else if(r.match_result === "l"){
+            data[index].losses++;
+        }else if(r.match_result === "d"){
+            data[index].draws++;
+        }
+
+        if(data[index].wins > 0){
+            data[index].winrate = data[index].wins / data[index].matches * 100;
+        }
+    }
+
+    return data;
 }

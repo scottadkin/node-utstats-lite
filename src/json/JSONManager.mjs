@@ -1,4 +1,4 @@
-import { getPlayerRecentMatches } from "../players.mjs";
+import { getPlayerActivityHeatmapData, getPlayerRecentMatches } from "../players.mjs";
 import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData } from "../matches.mjs";
 import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages} from "../maps.mjs";
 import { getRankingsWithPlayerNames } from "../rankings.mjs";
@@ -193,53 +193,65 @@ export default class JSONManager{
         this.res.status(200).json({data});
     }
 
+    async getPlayerHeatMapData(){
+
+        const gametypeId = this.querySanitizeInteger("gid");
+        const mapId = this.querySanitizeInteger("mid");
+        const playerId = this.querySanitizeInteger("pid");
+        const year = this.querySanitizeInteger("y");
+        const month = this.querySanitizeInteger("m");
+
+        const data = await getPlayerActivityHeatmapData(playerId, gametypeId, mapId, year, month);
+        this.res.status(200).json({data});
+    }
+
     async init(){
 
         try{
 
             if(this.mode === "player-recent-matches"){
 
-                return await this.playerRecentMatches();       
-            }
+                return await this.playerRecentMatches(); 
 
-            if(this.mode === "map-recent-matches"){
+            }else if(this.mode === "map-recent-matches"){
 
                 return await this.mapRecentMatches();
-            }
 
-            if(this.mode === "map-rankings"){
+            }else if(this.mode === "map-rankings"){
+
                 return await this.mapRankings();
-            }
 
-            if(this.mode === "map-player-averages"){
+            }else if(this.mode === "map-player-averages"){
 
                 //getMapPlayerAverages(mapId, category, initialPage, initialPerPage)
                 return await this.mapPlayerAverages();
-            }
 
-            if(this.mode === "map-ctf-league-gametypes"){
+            }else if(this.mode === "map-ctf-league-gametypes"){
+
                 return await this.mapPlayerCTFLeagueGametypes();
-            }
 
-            if(this.mode === "map-ctf-league"){
+            }else if(this.mode === "map-ctf-league"){
 
                 return await this.mapPlayerCTFLeague();
-            }
 
-            if(this.mode === "get-matches-by-hashes"){
+            }else if(this.mode === "get-matches-by-hashes"){
+
                 return await this.getMatchesByHashes();
-            }
 
-            if(this.mode === "get-players-by-hashes"){
+            }else if(this.mode === "get-players-by-hashes"){
+
                 return await this.getPlayersByHashes();
-            }
 
-            if(this.mode === "match-kills-graph"){
+            }else if(this.mode === "match-kills-graph"){
+
                 return await this.getMatchKillsGraph();
-            }
 
-            if(this.mode === "activity-heatmap-data"){
+            }else if(this.mode === "activity-heatmap-data"){
+
                 return await this.getHeatMapData();
+
+            }else if(this.mode === "player-activity-heatmap-data"){
+                return await this.getPlayerHeatMapData();
             }
 
             console.log(this.mode);
