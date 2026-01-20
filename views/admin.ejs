@@ -1,9 +1,4 @@
 <%
-/*"description": `Manage how the importer processes utstats logs, you can adjust minimum player requirements, 
-        ignore duplicate logs and many more settings.
-        Here you can add S/FTP servers so the importer can download ut stats logs.
-        You can also adjust the importer settings if you manually place utstats logs in the website&apos;s <b>./Logs</b> Folder`*/
-
 const modes = [
     {
         "display": "Site Settings",
@@ -30,6 +25,11 @@ const modes = [
         "display": "CTF League Manager",
         "value": "ctf-league",
         "description": "Combined Settings, Gametype Settings, Map Settings"
+    },
+    {
+        "display": "Matches Manager",
+        "value": "matches",
+        "description": "Delete Matches"
     }
 ];
 
@@ -77,11 +77,9 @@ function renderModes(mode){
     %></div><%
 }
 
-
 function renderGoBackToMain(mode){
 
     if(mode === "") return;
-
 
     %>
     <a href="/admin">
@@ -89,9 +87,6 @@ function renderGoBackToMain(mode){
     </a>
     <%
 }
-
-
-
 
 function renderCategory(mode){
 
@@ -109,6 +104,8 @@ function renderCategory(mode){
         %><script>new AdminClearDatabase("#root");</script><%
     }else if(mode === "ctf-league"){
         %><script>new AdminCTFLeagueManager("#root");</script><%
+    }else if(mode === "matches"){
+        %><script>new AdminMatchesManager("#root");</script><%
     }
 }
 

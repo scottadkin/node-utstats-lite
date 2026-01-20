@@ -2,6 +2,7 @@ import { bulkInsert, simpleQuery } from "./database.mjs";
 import { getMatchesGametype, getMatchesPlaytime } from "./matches.mjs";
 import { getAllMapIds, getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
+import Message from "./message.mjs";
 
 
 export async function getWeaponId(name){
@@ -97,18 +98,22 @@ export async function getMatchWeaponStats(matchId){
 
 
 
-async function _getAllPlayerMatchData(playerIds){
+async function getAllPlayerMatchData(playerIds){
 
-    const query = `SELECT match_id,player_id,weapon_id,kills,deaths,team_kills,suicides FROM nstats_match_weapon_stats WHERE player_id IN (?)`;
+    const query = `SELECT 
+    gametype_id,
+    player_id,
+    weapon_id,
+    COUNT(*) as total_matches,
+    SUM(kills) as kills,
+    SUM(deaths) as deaths,
+    SUM(team_kills) as team_kills,
+    SUM(suicides) as suicides
+    FROM nstats_match_weapon_stats 
+    WHERE player_id IN (?)
+    GROUP BY player_id,gametype_id,weapon_id`;
 
-    const result = await simpleQuery(query, [playerIds]);
-
-    const matchIds = [...new Set(result.map((r) =>{
-        return r.match_id;
-    }))];
-
-
-    return {"data": result, "matchIds": matchIds}
+    return await simpleQuery(query, [playerIds]);
 
 }
 
@@ -130,6 +135,11 @@ function _updatePlayerTotals(totals, data, gametypeId){
 
     const playerId = data.player_id;
     const weaponId = data.weapon_id;
+
+    data.kills = parseInt(data.kills);
+    data.deaths = parseInt(data.deaths);
+    data.suicides = parseInt(data.suicides);
+    data.team_kills = parseInt(data.team_kills);
 
     if(totals[playerId] === undefined){
         totals[playerId] = {};
@@ -155,7 +165,7 @@ function _updatePlayerTotals(totals, data, gametypeId){
 
 
         totals[playerId][gametypeId][weaponId]  = {      
-            "matches": 1,
+            "matches": data.total_matches,
             "kills": data.kills,
             "deaths": data.deaths,
             "team_kills": data.team_kills,
@@ -186,43 +196,30 @@ function _updatePlayerTotals(totals, data, gametypeId){
 
     t.eff = eff;
 
-    t.matches++;
+    t.matches+=data.total_matches;
 }
 
-/*async function deletePlayerTotals(playerId, gametypeId, weaponId){
+async function deleteMultiplePlayerTotals(playerIds){
 
-    const query = `DELETE FROM nstats_player_totals_weapons WHERE player_id=? AND gametype_id=? AND weapon_id=?`;
+    if(playerIds.length === 0) return;
+    const query = `DELETE FROM nstats_player_totals_weapons WHERE player_id IN (?)`;
 
-    return await simpleQuery(query, [playerId, gametypeId, weaponId]);
-}*/
-
-async function deletePlayerTotals(playerId, gametypeIds, weaponIds){
-
-    if(gametypeIds.length === 0 || weaponIds.length === 0) return;
-
-    const query = `DELETE FROM nstats_player_totals_weapons WHERE player_id=? AND gametype_id IN (?) AND weapon_id IN (?)`;
-
-    return await simpleQuery(query, [playerId, gametypeIds, weaponIds]);
+    return await simpleQuery(query, [playerIds]);
 }
 
 async function bulkInsertPlayerTotals(totals){
 
     const insertVars = [];
 
+    const playerIds = new Set();
+
     for(const [playerId, playerData] of Object.entries(totals)){
 
-        const gametypeIdsToDelete = [];
-        const weaponIdsToDelete = [];
+        playerIds.add(playerId);
 
         for(const [gametypeId, gametypeData] of Object.entries(playerData)){
 
-            gametypeIdsToDelete.push(gametypeId);
-
             for(const [weaponId, weaponData] of Object.entries(gametypeData)){
-
-                weaponIdsToDelete.push(weaponId);
-
-                //await deletePlayerTotals(playerId, gametypeId, weaponId);
 
                 insertVars.push([
                     playerId, gametypeId, weaponId,
@@ -231,9 +228,9 @@ async function bulkInsertPlayerTotals(totals){
                 ]);
             }
         }
-
-        await deletePlayerTotals(playerId, gametypeIdsToDelete, weaponIdsToDelete);
     }
+
+    await deleteMultiplePlayerTotals([...playerIds]);
 
     const query = `INSERT INTO nstats_player_totals_weapons (
         player_id, gametype_id, weapon_id,
@@ -241,39 +238,25 @@ async function bulkInsertPlayerTotals(totals){
     ) VALUES ?`;
 
     await bulkInsert(query, insertVars);
-   //console.log(insertVars);
-   //console.log(insertVars.length);
 }
 
 export async function updatePlayerTotals(playerIds){
 
     if(playerIds.length === 0) return null;
 
-    const {data, matchIds} = await _getAllPlayerMatchData(playerIds);
+    const data = await getAllPlayerMatchData(playerIds);
 
-    const matchGametypeIds = await getMatchesGametype(matchIds);
-    //console.log(matchIds);
-
-    //const gametypeIds = [...new Set(Object.values(matchGametypeIds))];
-    //const gametypeNames = await getGametypeNames(gametypeIds);
-
-    //console.log(matchGametypeIds);
     const totals = {};
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
-        const gametypeId = matchGametypeIds[d.match_id];
-
         //all time totals
         _updatePlayerTotals(totals, d, 0);
         //gametype specific 
-        _updatePlayerTotals(totals, d, gametypeId);
+        _updatePlayerTotals(totals, d, d.gametype_id);
     }
-
-   // console.log(totals);
-
 
     await bulkInsertPlayerTotals(totals);
 
@@ -288,7 +271,7 @@ export async function getPlayerTotals(playerId){
     nstats_player_totals_weapons.kills,
     nstats_player_totals_weapons.deaths,
     nstats_player_totals_weapons.team_kills,
-    nstats_player_totals_weapons.eff ,
+    nstats_player_totals_weapons.eff,
     nstats_weapons.name as weapon_name
     FROM nstats_player_totals_weapons 
     LEFT JOIN nstats_weapons ON nstats_weapons.id = nstats_player_totals_weapons.weapon_id

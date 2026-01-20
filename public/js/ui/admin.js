@@ -2531,5 +2531,14 @@ class AdminCTFLeagueManager{
 
         this.content.append(form);
     }
-    
+}
+
+class AdminMatchesManager{
+
+    constructor(parent){
+
+        this.parent = document.querySelector(parent);
+
+        UIHeader(this.parent, "Matches Manager");
+    }
 }

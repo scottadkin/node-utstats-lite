@@ -445,32 +445,6 @@ export async function getMultipleMatchDetails(matchIds){
     }
 
     return data;
-
-    /*const gametypeIds = new Set();
-    const mapIds = new Set();
-
-    for(let i = 0; i < details.length; i++){
-
-        const d = details[i];
-
-        gametypeIds.add(d.gametype_id);
-        mapIds.add(d.map_id);
-    }
-
-    console.log(details);
-
-   //const gametypeNames = await getGametypeNames([...gametypeIds]);
-    //const mapNames = await getGametypeNames([...mapIds]);
-    //console.log(gametypeNames);
-    //console.log(mapNames);
-    return;
-
-    const query = `SELECT id,name FROM nstats_gametypes WHERE id IN(?)`;
-
-    const result = await simpleQuery(query, [gametypeIds]);
-
-    console.log(result);*/
-    
 }
 
 
@@ -1286,37 +1260,32 @@ export async function deleteMatch(id){
     try{
 
         const basicInfo = await getBasicMatchesInfo([id]);
-
         const playerIds = await getPlayerIdsInMatch(id);
-
 
         await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
         await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
         await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
         await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
 
-
         await deleteMatchKills(id);
         await deleteMatchDamage(id);
         await ctfDeleteMatch(id);
-
 
         if(basicInfo[id] !== undefined){
 
             const basic = basicInfo[id];
 
-            await gametypeUpdateBasicTotals(basic.gametype_id);
-            await mapUpdateTotals(basic.map_id);
-            await weaponCalcMapWeaponsTotals(basic.map_id);
-            await setPlayerMapAverages(basic.map_id);
-            await rankingRecalculateGametype(basic.gametype_id);
+            await gametypeUpdateBasicTotals(basic.gametype_id); //no changes needed
+            await mapUpdateTotals(basic.map_id); //no changes needed
+            await weaponCalcMapWeaponsTotals(basic.map_id); //no changes needed
+            await setPlayerMapAverages(basic.map_id); //no changes needed
+            await rankingRecalculateGametype(basic.gametype_id); //no changes needed
             await rankingRecalculateMap(basic.map_id);
 
             if(playerIds.length > 0){
-                await weaponUpdatePlayerTotals(playerIds);
+                await weaponUpdatePlayerTotals(playerIds); //done
             }
         }
-
 
         if(playerIds.length > 0){
             await updatePlayerTotals(playerIds);

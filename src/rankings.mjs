@@ -319,7 +319,6 @@ export async function calculateRankings(targetId, playerIds, type){
     }
 
     await bulkInsertRankings(targetId, Object.values(mergedData), type);
-
 }
 
 
