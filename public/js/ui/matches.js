@@ -104,7 +104,6 @@ class MatchRichViewBox{
 
         info.appendChild(document.createTextNode(toPlaytime(d.playtime)));
 
-
         this.wrapper.appendChild(info);
     }
 

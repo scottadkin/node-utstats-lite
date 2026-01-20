@@ -24,16 +24,19 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
             currentElem.className = getTeamColorClass(i);
 
             if(image !== null){
-                currentElem.appendChild(image);
+                currentElem.append(image);
             }
 
 
             const currentScoreElem = document.createElement("div");
+            if(!small){
+                currentScoreElem.className = `match-scorebox-score`;
+            }
             currentScoreElem.innerHTML = data[`team_${i}_score`];
 
-            currentElem.appendChild(currentScoreElem);
+            currentElem.append(currentScoreElem);
 
-            wrapper.appendChild(currentElem);
+            wrapper.append(currentElem);
         }
 
     }else{
@@ -50,16 +53,19 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
         currentElem.className = getTeamColorClass(255);
 
         if(image !== null){
-            currentElem.appendChild(image);
+            currentElem.append(image);
         }
 
 
         const currentScoreElem = document.createElement("div");
+        if(!small){
+            currentScoreElem.className = `match-scorebox-score`;
+        }
         currentScoreElem.innerHTML = `${data.solo_winner_name} Wins with ${data.solo_winner_score}`;
 
-        currentElem.appendChild(currentScoreElem);
+        currentElem.append(currentScoreElem);
 
-        wrapper.appendChild(currentElem);
+        wrapper.append(currentElem);
 
     }
 
@@ -67,7 +73,7 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
 
     wrapper.className = wrapperClassName;
 
-    parent.appendChild(wrapper);
+    parent.append(wrapper);
 }
 
 function UICountryFlag(country){

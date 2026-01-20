@@ -7,7 +7,7 @@
 	--bg-color-4:rgb(56,56,56);
 	--bg-color-5:rgb(18,18,18);
 	--font-color-1:rgb(255,255,255);
-	--font-color-2:rgb(164,164,164);
+	--font-color-2:rgb(196,196,196);
 	--font-color-3:yellow;
 	--active-font-color-1:yellow;
 	--active-link-color:yellow;
@@ -33,6 +33,7 @@
 	--line-height-1:24px;
 	--line-height-2:32px;
 	--line-height-3:20px;
+	--line-height-5:19px;
 	--font-size-2:16px;
 	--font-size-3:18px;
 	--font-size-4:13px;
@@ -627,22 +628,23 @@ canvas{
 }
 
 .rich-outter{
-	text-align:center;
 	margin-top:var(--margin-1);
 	margin-bottom:var(--margin-1);
 	max-width:var(--max-width-1);
 	margin-left:auto;
 	margin-right:auto;
+	display:grid;
+	grid-template-columns: repeat(auto-fit, var(--rich-box-width));
+	justify-content: center;
+	column-gap: 10px;
+	row-gap: 10px;
+	max-width:80%;
 }
 
 .rich-wrapper{
-    display:inline-block;
 	background-color:var(--bg-color-2);
-	margin-right:var(--margin-2);
-	margin-left:var(--margin-2);
-	margin-bottom: var(--margin-2);
 	width:var(--rich-box-width);
-    border:1px solid var(--border-color-1);
+    border:1px solid var(--border-color-2);
     overflow: hidden;
     white-space: nowrap;
 	font-size:var(--font-size-4);
@@ -665,9 +667,9 @@ canvas{
 .rich-info{
     color:var(--font-color-2);
     font-size:var(--font-size-5);
-    line-height: var(--line-height-3);
+	line-height: var(--line-height-5);
     text-overflow: ellipsis;
-	padding:5px;
+	padding:5px 5px;
 }
 
 .admin-textarea-wrapper{
@@ -989,7 +991,6 @@ nav a:hover{
 
 
 .match-scorebox-wrapper{
-    height:72px;
     color:white;
     text-align:center;
 }
@@ -997,8 +998,7 @@ nav a:hover{
 .match-scorebox-wrapper div img{
     width:32px;
     height:32px;
-    margin-top:10px;
-    margin-bottom:5px;
+    margin-top:5px;
 }
 
 .match-scorebox-score{
@@ -1021,11 +1021,13 @@ nav a:hover{
     color:var(--font-color-1);
     user-select: none;
     font-size:14px;
-    padding:5px 20px;
+    padding:15px 15px;
+	transition: all 0.5s;
 }
 
 .pagination-button:hover{
     cursor: pointer;
+	background-color:var(--bg-color-4);
 }
 
 .pagination-active{
@@ -1038,7 +1040,7 @@ nav a:hover{
     font-size:var(--tiny-font-size);
     color:var(--font-color-2);
     padding:var(--padding-2);
-    line-height:14px;
+    line-height:16px;
 }
 
 
