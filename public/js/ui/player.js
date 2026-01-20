@@ -29,7 +29,7 @@ class PlayerRecentMatches{
 
 
         //need to add support for event classback is url is set to null, make sure dont create link elemens
-        this.pagination = new UIPagination(this.parent, (newPage) =>{
+        this.pagination = new UIPagination(this.wrapper, (newPage) =>{
             this.page = newPage;
             this.loadData();
         }, this.totalMatches, this.perPage, this.page);

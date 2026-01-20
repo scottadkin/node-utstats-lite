@@ -884,7 +884,6 @@ async function insertCTFLeagueSettings(){
 
         await damageSetMatchMapGametypeIds();
 
-
         new Message(`Refreshing player ctf league Map tables.`,"note");
         await refreshAllTables(true, "maps");
         new Message(`Refreshing player ctf league Gametype tables.`,"note");
