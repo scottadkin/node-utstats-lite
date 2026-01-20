@@ -158,29 +158,11 @@ export async function getTotalMatches(server, gametype, map){
     return 0;
 }
 
-export async function getRecentMatches(page, perPage, server, gametype, map){
+export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype, map){
 
     const DEFAULT_PER_PAGE = 50;
 
-    if(perPage === undefined){
-        perPage = DEFAULT_PER_PAGE;
-    }else{
-        perPage = parseInt(perPage);
-        if(perPage !== perPage) perPage = DEFAULT_PER_PAGE;
-    }
-
-    page = parseInt(page);
-
-    if(page !== page){
-        page = 1;
-    }
-
-    page--;
-
-    if(page < 0) page = 0;
-
-    let start = page * perPage;
-    if(start < 0) start = 0;
+    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
     server = parseInt(server);
     gametype = parseInt(gametype);
@@ -189,7 +171,6 @@ export async function getRecentMatches(page, perPage, server, gametype, map){
     if(server !== server || gametype !== gametype || map !== map){
         throw new Error(`server, gametype, and map must be a valid integer`);
     }
-
     const {where, vars} = createSearchWhere(server, gametype, map);
 
     let query = `SELECT ${MATCH_TABLE_COLUMNS_VERBOSE},
@@ -1275,15 +1256,15 @@ export async function deleteMatch(id){
 
             const basic = basicInfo[id];
 
-            await gametypeUpdateBasicTotals(basic.gametype_id); //no changes needed
-            await mapUpdateTotals(basic.map_id); //no changes needed
-            await weaponCalcMapWeaponsTotals(basic.map_id); //no changes needed
-            await setPlayerMapAverages(basic.map_id); //no changes needed
-            await rankingRecalculateGametype(basic.gametype_id); //no changes needed
+            await gametypeUpdateBasicTotals(basic.gametype_id); 
+            await mapUpdateTotals(basic.map_id); 
+            await weaponCalcMapWeaponsTotals(basic.map_id); 
+            await setPlayerMapAverages(basic.map_id); 
+            await rankingRecalculateGametype(basic.gametype_id);
             await rankingRecalculateMap(basic.map_id);
 
             if(playerIds.length > 0){
-                await weaponUpdatePlayerTotals(playerIds); //done
+                await weaponUpdatePlayerTotals(playerIds);
             }
         }
 

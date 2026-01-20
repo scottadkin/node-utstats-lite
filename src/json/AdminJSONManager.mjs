@@ -1,7 +1,7 @@
 import { getSessionInfo } from "../authentication.mjs";
 import { getAllFTPSettings, addFTPServer, editFTPServer, deleteFTPServer } from "../ftp.mjs";
 import { updateLogsFolderSettings } from "../logsfoldersettings.mjs";
-import { getAllMaps, getAllMapImages } from "../maps.mjs";
+import { getAllMaps, getAllMapImages, getAllNames as getAllMapNames} from "../maps.mjs";
 import { getMapImageName, stripFileExtension } from "../generic.mjs";
 import { Jimp } from "jimp";
 import { writeFile, rm } from 'node:fs/promises';
@@ -12,6 +12,9 @@ import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalcu
 import { clearAllDataTables } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
+import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
+import { getAllNames as getAllServerNames } from "../servers.mjs";
+import { getRecentMatches } from "../matches.mjs";
 
 
 
@@ -184,6 +187,25 @@ export default class AdminJSONManager{
                 await adminUpdateCTFLeagueSettings(changes);
 
                 return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "get-all-matches-names"){
+
+                const servers = await getAllServerNames(true);
+                const gametypes = await getAllGametypeNames(true);
+                const maps = await getAllMapNames(true);
+
+                return this.res.json({servers, gametypes, maps});
+
+            }else if(this.mode === "search-matches"){
+
+                const server = this.req.body?.server ?? 0;
+                const gametype = this.req.body?.gametype ?? 0;
+                const map = this.req.body?.map ?? 0;
+                const page = this.req.body?.page ?? 1;
+                const perPage = this.req.body?.perPage ?? 25;
+
+                return this.res.json(await getRecentMatches(page, perPage, server, gametype, map));
+                //getRecentMatches(page, perPage, server, gametype, map)
             }
 
 

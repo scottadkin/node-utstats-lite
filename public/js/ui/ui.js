@@ -184,15 +184,15 @@ function UITableColumn(params){
         url.href = params.url;
 
         if(params.urlTarget !== undefined) url.target = params.urlTarget;
-        url.appendChild(text);
-        elem.appendChild(url);
+        url.append(text);
+        elem.append(url);
 
     }else{
 
         if(contentType != "object"){
-            elem.appendChild(text);
+            elem.append(text);
         }else{
-            elem.appendChild(content);
+            elem.append(content);
         }
     }
     

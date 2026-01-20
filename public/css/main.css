@@ -723,6 +723,7 @@ canvas{
 
 .delete-button{
 	background-color:var(--team-color-red);
+	border:1px solid var(--border-color-2);
 	color:white;
 	padding:var(--padding-1);
 	display:inline-block;
@@ -731,6 +732,7 @@ canvas{
 .delete-button:hover{
 	color:yellow;
 	background-color:var(--team-color-none);
+	cursor: pointer;
 }
 
 .header-wrapper{

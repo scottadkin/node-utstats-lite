@@ -549,13 +549,7 @@ function _updateTotals(totals, playerData, gametypeId, mapId){
  */
 export async function calcPlayerTotals(playerIds/*, gametypeId, mapId*/){
 
-
-    /*if(gametypeId === undefined || mapId === undefined){
-        throw new Error(`You must now supply gametypeId, and mapId to players.calcPlayerTotals`);
-    }*/
-
     if(playerIds.length === 0) return [];
-
 
     let query = `SELECT
     player_id,
@@ -628,44 +622,6 @@ export async function calcPlayerTotals(playerIds/*, gametypeId, mapId*/){
     }
     
     return totals;
-    /*const matchData = await getPlayersAllMatchData(playerIds, gametypeId, mapId);
-
-    //get gametype and map id for every played match
-   // const matchBasicInfo = await getMultipleMatchDetails(matchData.matchIds);
-
-    //playerId => gametypes => gametypeId => gametypeTotals
-    const totals = {};
-
-    for(let i = 0; i < matchData.data.length; i++){
-
-        const m = matchData.data[i];
-        const info = matchBasicInfo[m.match_id];
-
-       // const matchResult = getWinner(info);
-        //const playerTeam = m.team;
-        //console.log(matchResult);
-
-        //let bWinner = 0;
-        //let bDraw = 0;
-
-        //const gametypeId = info.gametype;
-        //const date = info.date;
-        //const mapId = matchTypeIds[m.match_id].map;
-        //console.log(gametypeId, mapId);
-
-        //console.log(m);
-        //all time totals
-        _updateTotals(totals, 0, m, date, bWinner, bDraw);
-        //gametype totals
-        _updateTotals(totals, gametypeId, m, date, bWinner, bDraw);
-        
-    }
-
-    //delete old player totals in nstats_player_totals
-    //insert new data
-
-    return totals;*/
-
 }
 
 

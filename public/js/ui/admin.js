@@ -2539,6 +2539,232 @@ class AdminMatchesManager{
 
         this.parent = document.querySelector(parent);
 
+        this.servers = [];
+        this.selectedServer = "0";
+        this.gametypes = [];
+        this.selectedGametype = "0";
+        this.maps = [];
+        this.selectedMap = "0";
+        this.perPage = 25;
+        this.page = 1;
+
+        this.deletePending = [];
+
+        this.data = [];
+        this.totalMatches = 0;
+
         UIHeader(this.parent, "Matches Manager");
+
+        this.init();
+    }
+
+    async init(){
+        
+        this.wrapper = UIDiv();
+
+        this.parent.append(this.wrapper);
+
+        this.searchForm = UIDiv("form");
+
+        this.wrapper.append(this.searchForm);
+
+        await this.loadNames();
+
+        const serverOptions = this.servers.map((s) =>{
+            return {"value": s.id, "display": s.name};
+        });
+
+        const serverRow = UIDiv("form-row");
+        serverRow.append(UILabel("Server"));
+
+        this.serverSelect = new UISelect(
+            serverRow, 
+            serverOptions, 
+            this.selectedServer, 
+            (newValue) =>{
+                this.selectedServer = newValue;
+                this.loadData();
+            } 
+        );
+
+        const gametypeOptions = this.gametypes.map((g) =>{
+            return {"value": g.id, "display": g.name};
+        });
+
+        const gametypeRow = UIDiv("form-row");
+        gametypeRow.append(UILabel("Gametype"));
+
+        this.gametypeSelect = new UISelect(
+            gametypeRow, 
+            gametypeOptions, 
+            this.selectedGametype, 
+            (newValue) =>{
+                this.selectedGametype = newValue;
+                this.loadData();
+            } 
+        );
+
+
+        const mapOptions = this.maps.map((m) =>{
+            return {"value": m.id, "display": m.name};
+        });
+
+        const mapRow = UIDiv("form-row");
+
+        mapRow.append(UILabel("Map"));
+
+        this.mapSelect = new UISelect(
+            mapRow, 
+            mapOptions, 
+            this.selectedMap, 
+            (newValue) =>{
+                this.selectedMap = newValue;
+                this.loadData();
+            } 
+        );
+
+
+        this.searchForm.append(serverRow, gametypeRow, mapRow);
+
+        this.content = UIDiv();
+        this.content.innerHTML = ``;
+        this.parent.append(this.content);
+
+        this.pagination = new UIPagination(this.parent, (newPage) =>{
+
+            this.page = newPage;
+            this.loadData();
+
+        }, this.totalMatches, this.perPage, this.page);
+
+        await this.loadData();
+    }
+
+    async loadNames(){
+
+        try{
+
+
+            const req = await fetch(`/admin`, {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "get-all-matches-names"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.servers = res.servers;
+            this.gametypes = res.gametypes;
+            this.maps = res.maps;
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Names", err.toString());
+        }
+    }
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch(`/admin`, {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "search-matches",
+                    "server": this.selectedServer,
+                    "gametype": this.selectedGametype,
+                    "map": this.selectedMap,
+                    "page": this.page,
+                    "perPage": this.perPage
+                })
+            });
+
+            const res = await req.json();
+            console.log(res);
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.data = res.data;
+            this.totalMatches = res.total;
+
+            this.pagination.updateResults(this.page, res.total, this.perPage);
+
+            this.render();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Matches", err.toString());
+        }
+    }
+
+    addToDelete(id){
+
+        if(this.deletePending.indexOf(id) !== -1){
+
+            new UINotification(
+                this.parent, 
+                "warning", 
+                `Please Wait`, 
+                `The match is already queued for deletion please wait.`
+            );
+            return;
+        }
+
+        this.deletePending.push(id);
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        const info = UIDiv("info");
+        info.append(`Found ${this.totalMatches} ${plural(this.totalMatches, "match")}`);
+        info.append(UIBr(), `Clicking a link opens the match in a new tab`);
+        this.content.append(info);
+
+
+        const table = document.createElement("table");
+        table.className = "t-width-1";
+
+        const headers = ["Date", "Server", "Gametype", "Map", "Players", "Playtime", "Delete"];
+
+        const headerRow = document.createElement("tr");
+
+        for(let i = 0; i < headers.length; i++){
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
+        }
+
+        table.append(headerRow);
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            const row = document.createElement("tr");
+            const url = `/match/${d.id}`;
+            const urlTarget = `_blank`;
+
+            row.append(UITableColumn({"content": d.date, "parse": ["date"], "className": "date", url, urlTarget}));
+            row.append(UITableColumn({"content": d.server_name, url, urlTarget, "className": "font-small" }));
+            row.append(UITableColumn({"content": d.gametype_name, url, urlTarget, "className": "font-small"}));
+            row.append(UITableColumn({"content": d.map_name, url, urlTarget, "className": "font-small"}));
+            row.append(UITableColumn({"content": d.players, url, urlTarget}));
+            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url, urlTarget}));
+
+            const deleteButton = document.createElement("button");
+            deleteButton.innerHTML = "Delete Match";
+            deleteButton.className = "delete-button";
+            deleteButton.addEventListener("click", () =>{
+                console.log(`delete ${d.id}`);
+                this.addToDelete(d.id);
+            });
+            row.append(UITableColumn({"content": deleteButton}));
+            table.append(row);
+        }
+
+        this.content.append(table);
     }
 }
