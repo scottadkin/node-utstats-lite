@@ -178,7 +178,9 @@ class RecordsDataDisplay{
 
             const row = document.createElement("tr");
 
-            row.appendChild(UITableColumn({"content": i + 1, "parse": ["ordinal"], "className": "ordinal"}));
+            const place = i + 1 + (this.perPage * this.currentPage);
+
+            row.appendChild(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
             row.appendChild(UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}));
             row.appendChild(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
             row.appendChild(UITableColumn({"content": this.getGametypeName(d.gametype_id)}));
@@ -217,8 +219,9 @@ class RecordsDataDisplay{
             const d = this.data[i];
 
             const row = document.createElement("tr");
+            const place = i + 1 + (this.perPage * this.currentPage);
 
-            row.appendChild(UITableColumn({"content": i + 1, "parse": ["ordinal"], "className": "ordinal"}));
+            row.appendChild(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
             row.appendChild(UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}));
             row.appendChild(UITableColumn({"content": d.match_date, "parse": ["date"], "className": "date"}));
             row.appendChild(UITableColumn({"content": d.time_on_server, "parse": ["playtime"], "className": "playtime"}));

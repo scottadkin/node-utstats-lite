@@ -625,14 +625,6 @@ export async function calcPlayerTotals(playerIds/*, gametypeId, mapId*/){
 }
 
 
-async function deletePlayerTotals(playerId, gametypeId, mapId){
-
-    const query = `DELETE FROM nstats_player_totals WHERE player_id=? AND gametype_id=? AND map_id=?`;
-
-    return await simpleQuery(query, [playerId, gametypeId, mapId]);
-}
-
-
 /**
  * When we recalculate player totals we use this to delete all the previous player
  * all time totals, gametype totals, and map totals
@@ -930,20 +922,6 @@ export async function getAllIds(){
 
     return result.map(m => m.id);
 }
-
-
-export async function recalcAllPlayerTotals(){
-
-    throw new Error(`recalcAllPlayerTotals need to make changes for the map_id also being in table`);
-
-    /*
-    const playerIds = await getAllIds();
-
-    await deleteAllPlayerGametypeTotals();
-
-    await updatePlayerGametypeTotals(playerIds);*/
-}
-
 
 export async function getPlayersByHashes(hashes){
 
