@@ -722,7 +722,7 @@ async function getTotalsFromMatchData(){
     SUM(flag_return_enemy_base) as flag_return_enemy_base,
     SUM(flag_return_save) as flag_return_save
     FROM nstats_match_ctf
-    GROUP BY player_id,gametype_id`;
+    GROUP BY player_id,gametype_id,map_id`;
 
     const result = await simpleQuery(query);
 
@@ -759,7 +759,7 @@ async function getTotalsFromMatchData(){
 
 
         insertVars.push([
-            r.player_id, r.gametype_id, r.total_matches, r.flag_taken, r.flag_pickup,
+            r.player_id, r.gametype_id, 0, r.total_matches, r.flag_taken, r.flag_pickup,
             r.flag_drop, r.flag_assist, r.flag_cover, r.flag_seal, r.flag_cap, r.flag_kill,
             r.flag_return, r.flag_return_base, r.flag_return_mid, r.flag_return_enemy_base,
             r.flag_return_save
@@ -770,7 +770,7 @@ async function getTotalsFromMatchData(){
     for(const [playerId, d] of Object.entries(allTimeTotals)){
 
         insertVars.push([
-            playerId, 0, d.total_matches, d.flag_taken, d.flag_pickup,
+            playerId, 0, 0, d.total_matches, d.flag_taken, d.flag_pickup,
             d.flag_drop, d.flag_assist, d.flag_cover, d.flag_seal, d.flag_cap, d.flag_kill,
             d.flag_return, d.flag_return_base, d.flag_return_mid, d.flag_return_enemy_base,
             d.flag_return_save
@@ -778,7 +778,7 @@ async function getTotalsFromMatchData(){
     }
 
     const insertQuery = `INSERT INTO nstats_player_totals_ctf (
-    player_id, gametype_id, total_matches, flag_taken, flag_pickup,
+    player_id, gametype_id, map_id, total_matches, flag_taken, flag_pickup,
     flag_drop, flag_assist, flag_cover, flag_seal, flag_cap, flag_kill,
     flag_return, flag_return_base, flag_return_mid, flag_return_enemy_base,
     flag_return_save
@@ -788,26 +788,30 @@ async function getTotalsFromMatchData(){
 
 }
 
-async function recalculateTotals(){
+async function recalculateTotals(playerIds){
 
+    await updatePlayerTotals(playerIds);
+    //const gametypeTotals = await getTotalsFromMatchData();
+}
 
-    const gametypeTotals = await getTotalsFromMatchData();
+async function getPlayerIdsInMatch(matchId){
+
+    const query = `SELECT DISTINCT player_id FROM nstats_match_ctf WHERE match_id=?`;
+    const result = await simpleQuery(query, [matchId]);
+
+    return result.map((r) =>{
+        return r.player_id;
+    });
 }
 
 export async function deleteMatch(matchId){
-
-    /*nstats_ctf_caps, match_id
-     * nstats_ctf_cap_kills, match_id
-     * nstats_ctf_cap_suicides, match_id
-     * nstats_ctf_carry_times, match_id
-     * nstats_ctf_covers, match_id*/
-
-    //nstats_player_totals_ctf
 
     const deleteFromTables = [
         "nstats_ctf_caps","nstats_ctf_cap_kills","nstats_ctf_cap_suicides",
         "nstats_ctf_carry_times","nstats_ctf_covers", "nstats_match_ctf"
     ];
+
+    const playerIds = await getPlayerIdsInMatch(matchId);
 
     for(let i = 0; i < deleteFromTables.length; i++){
 
@@ -816,8 +820,8 @@ export async function deleteMatch(matchId){
         await simpleQuery(`DELETE FROM ${t} WHERE match_id=?`, [matchId]);
     }
 
-
-    await recalculateTotals();
+    //TODO: recalculate affected ctf league tables
+    await recalculateTotals(playerIds);
 }
 
 

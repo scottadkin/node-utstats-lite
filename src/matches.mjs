@@ -1238,81 +1238,38 @@ export async function getMatchesGametypes(matchIds){
 
 export async function deleteMatch(id){
     
-    try{
+    const basicInfo = await getBasicMatchesInfo([id]);
+    const playerIds = await getPlayerIdsInMatch(id);
 
-        const basicInfo = await getBasicMatchesInfo([id]);
-        const playerIds = await getPlayerIdsInMatch(id);
+    await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
+    await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
+    await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
+    await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
 
-        await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
-        await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
-        await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
-        await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
+    await deleteMatchKills(id);
+    await deleteMatchDamage(id);
+    await ctfDeleteMatch(id);
 
-        await deleteMatchKills(id);
-        await deleteMatchDamage(id);
-        await ctfDeleteMatch(id);
+    if(basicInfo[id] !== undefined){
 
-        if(basicInfo[id] !== undefined){
+        const basic = basicInfo[id];
 
-            const basic = basicInfo[id];
-
-            await gametypeUpdateBasicTotals(basic.gametype_id); 
-            await mapUpdateTotals(basic.map_id); 
-            await weaponCalcMapWeaponsTotals(basic.map_id); 
-            await setPlayerMapAverages(basic.map_id); 
-            await rankingRecalculateGametype(basic.gametype_id);
-            await rankingRecalculateMap(basic.map_id);
-
-            if(playerIds.length > 0){
-                await weaponUpdatePlayerTotals(playerIds);
-            }
-        }
+        await gametypeUpdateBasicTotals(basic.gametype_id); 
+        await mapUpdateTotals(basic.map_id); 
+        await weaponCalcMapWeaponsTotals(basic.map_id); 
+        await setPlayerMapAverages(basic.map_id); 
+        await rankingRecalculateGametype(basic.gametype_id);
+        await rankingRecalculateMap(basic.map_id);
 
         if(playerIds.length > 0){
-            await updatePlayerTotals(playerIds);
+            await weaponUpdatePlayerTotals(playerIds);
         }
-
-        return true;
-
-    }catch(err){
-        console.trace(err);
-        return false;
     }
 
-    
+    if(playerIds.length > 0){
+        await updatePlayerTotals(playerIds);
+    }
 
-    //delete from these tables
-    /**
-     * --------nstats_ctf_caps, match_id
-     * --------nstats_ctf_cap_kills, match_id
-     * --------nstats_ctf_cap_suicides, match_id
-     * --------nstats_ctf_carry_times, match_id
-     * --------nstats_ctf_covers, match_id
-     * 
-     * ----------nstats_damage_match, match_id
-     * ----------nstats_kills, match_id
-     * ----------nstats_matches, id
-     * ----------nstats_match_ctf, match_id
-     * ----------nstats_match_dom, match_id
-     * ----------nstats_match_players, match_id
-     * ----------nstats_match_weapon_stats, match_id
-     * 
-     * 
-     */ 
-
-
-    //recalculate totals for these tables
-    /**
-     * ------- nstats_gametypes
-     * ------- nstats_maps
-     * ------- nstats_map_weapon_totals
-     * ------- nstats_player_map_minute_averages
-     * ------- nstats_player_totals	
-     * ------- nstats_player_totals_ctf
-     * ------- nstats_player_totals_damage
-     * -------- nstats_player_totals_weapons
-     * --------	nstats_rankings
-     */
 }
 
 function _generateAdminGetMatchesWhere(map, gametype, server){

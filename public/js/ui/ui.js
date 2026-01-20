@@ -1413,3 +1413,11 @@ function UIMatchScreenshot(parent, matchData, bLatest){
     
     parent.append(wrapper);
 }
+
+function UILoading(parent){
+
+    const img = document.createElement("img");
+    img.className = "loading";
+    img.src = `/images/loading.png`;
+    parent.append(img);
+}

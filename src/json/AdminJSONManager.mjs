@@ -14,7 +14,7 @@ import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../c
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
 import { getAllNames as getAllServerNames } from "../servers.mjs";
-import { getRecentMatches } from "../matches.mjs";
+import { getRecentMatches, deleteMatch } from "../matches.mjs";
 
 
 
@@ -206,7 +206,21 @@ export default class AdminJSONManager{
 
                 return this.res.json(await getRecentMatches(page, perPage, server, gametype, map));
                 //getRecentMatches(page, perPage, server, gametype, map)
+
+            }else if(this.mode === "delete-match"){
+
+                let id = this.req.body?.id ?? null;
+
+                if(id === null) throw new Error(`You must provide a match id to delete a match.`);
+                id = parseInt(id);
+                if(id !== id) throw new Error(`Match id must be an integer`);
+
+                await deleteMatch(id);
+
+                return this.res.json({"message": "passed", "id": id});
+
             }
+
 
 
 

@@ -727,6 +727,7 @@ canvas{
 	color:white;
 	padding:var(--padding-1);
 	display:inline-block;
+	user-select: none;
 }
 
 .delete-button:hover{
@@ -1005,4 +1006,15 @@ nav a:hover{
 
 .false{
 	background-color:var(--team-color-red);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading{
+	width: 32px;
+	height: 32px;
+	animation: spin 1s linear infinite;
 }

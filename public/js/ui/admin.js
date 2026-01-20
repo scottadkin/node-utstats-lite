@@ -2549,6 +2549,7 @@ class AdminMatchesManager{
         this.page = 1;
 
         this.deletePending = [];
+        this.bDeleteInProgress = false;
 
         this.data = [];
         this.totalMatches = 0;
@@ -2700,7 +2701,57 @@ class AdminMatchesManager{
         }
     }
 
+    async deleteMatch(id, rowElem){
+
+        let bFailed = false;
+
+        try{
+
+            this.bDeleteInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "delete-match", "id": id})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+        }catch(err){
+
+            bFailed = true;
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Delete Match", err.toString());
+
+        }finally{
+
+            this.bDeleteInProgress = false;
+
+            if(!bFailed){
+                rowElem.remove();
+                this.totalMatches--;
+                this.pagination.updateResults(this.page, this.totalMatches, this.perPage);
+            }else{
+                rowElem.style.cssText = "background-color:var(--team-color-red)";
+                const actionElem = document.querySelector(`#match-action-${id}`);
+                actionElem.innerHTML = `Error`;
+            }
+            
+            if(this.deletePending.length === 0) return;
+            const nextId = this.deletePending[0];
+
+            const nextRow = document.querySelector(`#match-row-${nextId}`);
+            this.deletePending.splice(0, 1);
+            await this.deleteMatch(nextId, nextRow);
+        }
+    }
+
     addToDelete(id){
+
+        const rowElem = document.querySelector(`#match-row-${id}`);
+        rowElem.style.cssText = "background-color:var(--team-color-yellow);";
 
         if(this.deletePending.indexOf(id) !== -1){
 
@@ -2713,7 +2764,11 @@ class AdminMatchesManager{
             return;
         }
 
-        this.deletePending.push(id);
+        if(!this.bDeleteInProgress){
+            this.deleteMatch(id, rowElem);
+        }else{
+            this.deletePending.push(id);
+        }
     }
 
     render(){
@@ -2744,6 +2799,7 @@ class AdminMatchesManager{
             const d = this.data[i];
 
             const row = document.createElement("tr");
+            row.id = `match-row-${d.id}`;
             const url = `/match/${d.id}`;
             const urlTarget = `_blank`;
 
@@ -2757,11 +2813,18 @@ class AdminMatchesManager{
             const deleteButton = document.createElement("button");
             deleteButton.innerHTML = "Delete Match";
             deleteButton.className = "delete-button";
+
             deleteButton.addEventListener("click", () =>{
-                console.log(`delete ${d.id}`);
+                const elem = document.querySelector(`#match-action-${d.id}`);
+                //put loading thing here
+                elem.innerHTML = ``;
+                UILoading(elem, "test");
                 this.addToDelete(d.id);
             });
-            row.append(UITableColumn({"content": deleteButton}));
+
+            const actionTd = UITableColumn({"content": deleteButton});
+            actionTd.id = `match-action-${d.id}`;
+            row.append(actionTd);
             table.append(row);
         }
 
