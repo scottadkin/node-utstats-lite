@@ -8,6 +8,57 @@ import { getPlayerMapTotals, deleteCurrentPlayerMapAverages, updateCurrentPlayer
 import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 
+
+const PLAYER_TOTALS_COLUMNS_MATCHES = `player_id,
+gametype_id,
+map_id,
+COUNT(*) as total_matches,
+SUM(time_on_server) as time_on_server,
+MAX(match_date) as last_active,
+SUM(CASE
+    WHEN match_result = 'w' THEN 1
+    ELSE 0
+    END
+) as wins,
+    SUM(CASE
+    WHEN match_result = 'd' THEN 1
+    ELSE 0
+    END
+) as draws,
+    SUM(CASE
+    WHEN match_result = 'l' THEN 1
+    ELSE 0
+    END
+) as losses,
+SUM(score) as score,
+SUM(frags) as frags,
+SUM(kills) as kills,
+SUM(deaths) as deaths,
+SUM(suicides) as suicides,
+SUM(team_kills) as team_kills,
+SUM(time_on_server) as time_on_server,
+SUM(ttl) as ttl,
+SUM(first_blood) as first_blood,
+SUM(spree_1) as spree_1,
+SUM(spree_2) as spree_2,
+SUM(spree_3) as spree_3,
+SUM(spree_4) as spree_4,
+SUM(spree_5) as spree_5,
+MAX(spree_best) as spree_best,
+SUM(multi_1) as multi_1,
+SUM(multi_2) as multi_2,
+SUM(multi_3) as multi_3,
+SUM(multi_4) as multi_4,
+MAX(multi_best) as multi_best,
+SUM(headshots) as headshots,
+SUM(item_amp) as item_amp,
+SUM(item_belt) as item_belt,
+SUM(item_boots) as item_boots,
+SUM(item_body) as item_body,
+SUM(item_pads) as item_pads,
+SUM(item_invis) as item_invis,
+SUM(item_shp) as item_shp`;
+
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
     //const query = `SELECT id FROM nstats_players WHERE name=? AND hwid=? AND mac1=? AND mac2=?`;
@@ -542,68 +593,8 @@ function _updateTotals(totals, playerData, gametypeId, mapId){
     }
 }
 
-/**
- * 
- * @param {*} playerId 
- * @returns 
- */
-export async function calcPlayerTotals(playerIds/*, gametypeId, mapId*/){
 
-    if(playerIds.length === 0) return [];
-
-    let query = `SELECT
-    player_id,
-    gametype_id,
-    map_id,
-    COUNT(*) as total_matches,
-    SUM(time_on_server) as time_on_server,
-    MAX(match_date) as last_active,
-    SUM(CASE
-        WHEN match_result = 'w' THEN 1
-        ELSE 0
-        END
-    ) as wins,
-      SUM(CASE
-        WHEN match_result = 'd' THEN 1
-        ELSE 0
-        END
-    ) as draws,
-      SUM(CASE
-        WHEN match_result = 'l' THEN 1
-        ELSE 0
-        END
-    ) as losses,
-    SUM(score) as score,
-    SUM(frags) as frags,
-    SUM(kills) as kills,
-    SUM(deaths) as deaths,
-    SUM(suicides) as suicides,
-    SUM(team_kills) as team_kills,
-    SUM(time_on_server) as time_on_server,
-    SUM(ttl) as ttl,
-    SUM(first_blood) as first_blood,
-    SUM(spree_1) as spree_1,
-    SUM(spree_2) as spree_2,
-    SUM(spree_3) as spree_3,
-    SUM(spree_4) as spree_4,
-    SUM(spree_5) as spree_5,
-    MAX(spree_best) as spree_best,
-    SUM(multi_1) as multi_1,
-    SUM(multi_2) as multi_2,
-    SUM(multi_3) as multi_3,
-    SUM(multi_4) as multi_4,
-    MAX(multi_best) as multi_best,
-    SUM(headshots) as headshots,
-    SUM(item_amp) as item_amp,
-    SUM(item_belt) as item_belt,
-    SUM(item_boots) as item_boots,
-    SUM(item_body) as item_body,
-    SUM(item_pads) as item_pads,
-    SUM(item_invis) as item_invis,
-    SUM(item_shp) as item_shp
-    FROM nstats_match_players WHERE spectator=0 AND player_id IN (?) GROUP BY player_id,gametype_id,map_id,match_result`;
-
-    const result = await simpleQuery(query, [playerIds]);
+function createPlayerTotalsFromData(result){
 
     const totals = {};
 
@@ -620,8 +611,37 @@ export async function calcPlayerTotals(playerIds/*, gametypeId, mapId*/){
         //all time totals
         _updateTotals(totals, r, 0, 0);
     }
-    
+
     return totals;
+}
+/**
+ * 
+ * @param {*} playerId 
+ * @returns 
+ */
+export async function calcPlayerTotals(playerIds/*, gametypeId, mapId*/){
+
+    if(playerIds.length === 0) return [];
+
+    let query = `SELECT
+    ${PLAYER_TOTALS_COLUMNS_MATCHES}
+    FROM nstats_match_players WHERE spectator=0 AND player_id IN (?) GROUP BY player_id,gametype_id,map_id,match_result`;
+
+    const result = await simpleQuery(query, [playerIds]);
+
+    return createPlayerTotalsFromData(result);
+  
+}
+
+export async function calculateAllPlayerTotals(){
+
+    let query = `SELECT
+    ${PLAYER_TOTALS_COLUMNS_MATCHES}
+    FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id,match_result`;
+
+    const result = await simpleQuery(query, [playerIds]);
+
+    return createPlayerTotalsFromData(result);
 }
 
 

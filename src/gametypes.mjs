@@ -2,7 +2,7 @@ import { simpleQuery } from "./database.mjs";
 import { getKey } from "./generic.mjs";
 import { changeMatchGametype, getAllMatchesGametypesPlayersTotalTeams } from "./matches.mjs";
 import Message from "./message.mjs";
-import { recalcAllPlayerTotals } from "./players.mjs";
+import { calculateAllPlayerTotals } from "./players.mjs";
 import { recalculateAllRankings } from "./rankings.mjs";
 
 
@@ -309,7 +309,8 @@ export async function appendTeamsToAllGametypes(){
 
     //recalcualte all gametype,player totals
 
-    await recalcAllPlayerTotals();
+    await calculateAllPlayerTotals();
+    //await recalcAllPlayerTotals();
     await calcAllTotalsFromMatchesData();
     //recalc gametype totals delete ones with 0 matches played
 
