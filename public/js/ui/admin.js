@@ -2550,13 +2550,34 @@ class AdminMatchesManager{
 
         this.deletePending = [];
         this.bDeleteInProgress = false;
+        this.bDeleteDuplicatesInProgress = false;
+
+        this.selectedTab = "duplicate-matches";
 
         this.data = [];
         this.totalMatches = 0;
 
-        UIHeader(this.parent, "Matches Manager");
+        UIHeader(this.parent, "Matches Manager", "matches");
+
+        this.createTabs();
 
         this.init();
+    }
+
+    createTabs(){
+
+        const options = [
+            {"value": "match-list", "display": "Match List"},
+            {"value": "duplicate-matches", "display": "Duplicate Matches"},
+        ];
+
+        this.tabs = new UITabs(this.parent, options, this.selectedTab);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.selectedTab = e.detail.newTab;
+            this.pagination.updateResults(1, 0, this.perPage);
+            this.loadData();
+        });
     }
 
     async init(){
@@ -2666,6 +2687,47 @@ class AdminMatchesManager{
         }
     }
 
+    getJSONBody(){
+
+        const body = {}
+
+        if(this.selectedTab === "match-list"){
+            body.mode = "search-matches";
+            body.server = this.selectedServer;
+            body.gametype = this.selectedGametype;
+            body.map = this.selectedMap;
+            body.page = this.page;
+            body.perPage = this.perPage;
+
+        }else if(this.selectedTab === "duplicate-matches"){
+
+            body.mode = "get-duplicate-matches";
+
+        }
+
+
+        return body;
+    }
+
+
+    parseResponse(res){
+
+        if(res.error !== undefined) throw new Error(res.error);
+
+        if(this.selectedTab === "match-list"){
+
+            this.data = res.data;
+            this.totalMatches = res.total;
+            this.pagination.updateResults(this.page, res.total, this.perPage);
+
+        }else if(this.selectedTab === "duplicate-matches"){
+
+            this.data = res.matches;
+            this.totalMatches = 0;
+        }
+
+    }
+
     async loadData(){
 
         try{
@@ -2673,31 +2735,18 @@ class AdminMatchesManager{
             const req = await fetch(`/admin`, {
                 "headers": {"Content-type": "application/json"},
                 "method": "POST",
-                "body": JSON.stringify({
-                    "mode": "search-matches",
-                    "server": this.selectedServer,
-                    "gametype": this.selectedGametype,
-                    "map": this.selectedMap,
-                    "page": this.page,
-                    "perPage": this.perPage
-                })
+                "body": JSON.stringify(this.getJSONBody())
             });
 
             const res = await req.json();
-            console.log(res);
 
-            if(res.error !== undefined) throw new Error(res.error);
-
-            this.data = res.data;
-            this.totalMatches = res.total;
-
-            this.pagination.updateResults(this.page, res.total, this.perPage);
-
+            this.parseResponse(res);
+    
             this.render();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Matches", err.toString());
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
         }
     }
 
@@ -2771,15 +2820,11 @@ class AdminMatchesManager{
         }
     }
 
-    render(){
-
-        this.content.innerHTML = ``;
+    renderMatchList(){
 
         const info = UIDiv("info");
-        info.append(`Found ${this.totalMatches} ${plural(this.totalMatches, "match")}`);
-        info.append(UIBr(), `Clicking a link opens the match in a new tab`);
+        info.append(`Clicking a link opens the match in a new tab`);
         this.content.append(info);
-
 
         const table = document.createElement("table");
         table.className = "t-width-1";
@@ -2829,5 +2874,125 @@ class AdminMatchesManager{
         }
 
         this.content.append(table);
+    }
+
+    
+    async deleteAllDuplicates(){
+
+        if(this.bDeleteDuplicatesInProgress){
+            new UINotification(this.parent, "error", "Failed To Delete Duplicates", `Already Processing`);
+            return;
+        }
+
+        try{
+
+            
+            this.bDeleteDuplicatesInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "delete-all-match-duplicates"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            await this.loadData();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Delete Duplicates", err.toString());
+        }finally{
+
+            this.bDeleteDuplicatesInProgress = false;
+        }
+    }
+
+    renderDuplicates(){
+
+
+        const info = UIDiv("info");
+
+        info.append(`Delete all duplicate matches.`,  UIBr(),
+            `Remove all duplicate matches leaving only their most recent import of each match.`,
+            UIBr(),
+            `This action also recalculates player totals, gametype totals, map totals, and player rankings.`
+        );
+        this.content.append(info);
+
+        const table = document.createElement("table");
+        table.className = "t-width-1";
+
+        const headers = ["Date", "Server", "Gametype", "Map", "Total Duplicates"];
+
+        const headerRow = document.createElement("tr");
+
+        for(let i = 0; i < headers.length; i++){
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
+        }
+
+        table.append(headerRow);
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            const row = document.createElement("tr");
+
+            const url = `/match/${d.latest_id}`;
+            const urlTarget = "_blank";
+            
+            row.append(UITableColumn({"content": d.latest_date, "parse": ["date"], "className": "date", url, urlTarget}));
+            row.append(UITableColumn({"content": d.server_name, "className": "font-small", url, urlTarget}));
+            row.append(UITableColumn({"content": d.gametype_name, "className": "font-small", url, urlTarget}));
+            row.append(UITableColumn({"content": d.map_name, "className": "font-small", url, urlTarget}));
+            row.append(UITableColumn({"content": d.total_matches - 1, url, urlTarget}));
+
+            table.append(row);
+        }
+
+        if(this.data.length === 0){
+
+            const row = document.createElement("tr");
+            const col = UITableColumn({"content": "None Found"});
+            col.colSpan = 5;
+            row.append(col);
+            table.append(row);
+        }
+
+        const deleteAllButton = document.createElement("button");
+        deleteAllButton.innerHTML = `Delete All Duplicate Matches`;
+        deleteAllButton.className = "delete-button";
+
+        deleteAllButton.addEventListener("click", () =>{
+            this.deleteAllDuplicates();
+        });
+
+        info.append(UIBr(), deleteAllButton);
+
+        this.content.append(table);
+
+        
+
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        if(this.selectedTab === "match-list"){
+            this.searchForm.className = "info";
+            this.renderMatchList();
+            return;
+        }
+
+        this.searchForm.className = "hidden";
+        
+        if(this.selectedTab === "duplicate-matches"){
+            this.renderDuplicates();
+            return;
+        }
     }
 }

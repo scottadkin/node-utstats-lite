@@ -386,7 +386,7 @@ class UITabs{
     }
 }
 
-function UIHeader(parent, text){
+function UIHeader(parent, text, id){
 
     if(typeof parent === "string"){
         parent = document.querySelector(parent);
@@ -394,9 +394,20 @@ function UIHeader(parent, text){
 
     const elem = document.createElement("div");
     elem.className = "header-wrapper";
-    elem.appendChild(document.createTextNode(text));
-    parent.appendChild(elem);
 
+    if(id !== undefined){
+
+        elem.id = id;
+        const a = document.createElement("a");
+        a.href = `#${id}`;
+        a.innerHTML = text;
+        elem.append(a);
+
+    }else{
+        elem.append(document.createTextNode(text));
+    }
+
+    parent.append(elem);
 }
 
 function UIDiv(className){

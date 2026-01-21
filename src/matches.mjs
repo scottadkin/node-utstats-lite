@@ -501,11 +501,9 @@ export async function getBasicMatchesInfo(matchIds){
         const r = result[i];
         data[r.id] = r;
 
-  
-
-        r.serverName = serverNames[r.server_id];
-        r.gametypeName = gametypeNames[r.gametype_id];
-        r.mapName = mapNames[r.map_id];
+        r.server_name = serverNames[r.server_id];
+        r.gametype_name = gametypeNames[r.gametype_id];
+        r.map_name = mapNames[r.map_id];
     }
 
 
@@ -1602,4 +1600,84 @@ export async function getActivtyHeatMapData(gametypeId, mapId, year, month){
     }
 
     return data;
+}
+
+
+export async function getAllDuplicateMatches(bSkipNames){
+
+    if(bSkipNames === undefined) bSkipNames = false;
+
+    const query = `SELECT 
+    hash,
+    COUNT(*) as total_matches,
+    MAX(id) as latest_id,
+    MAX(date) as latest_date
+    FROM nstats_matches
+    WHERE hash!=""
+    GROUP BY hash HAVING total_matches>1 ORDER BY total_matches DESC`;
+
+    const result = await simpleQuery(query);
+
+    if(bSkipNames) return result;
+
+    const matchIds = new Set();
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        matchIds.add(r.latest_id);
+    }
+
+    const matchInfo = await getBasicMatchesInfo([...matchIds]);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const info = matchInfo?.[r.latest_id];
+
+        r.server_name = info?.server_name ?? "Not Found";
+        r.gametype_name = info?.gametype_name ?? "Not Found";
+        r.map_name = info?.map_name ?? "Not Found";
+    }
+
+    const total = result.reduce((accumulator, match) =>{
+        return accumulator + match.total_matches;
+    }, 0);
+
+    return {total, "matches": result};
+
+}
+
+
+async function getDuplicateNonLatestIds(hash, id){
+
+    const query = `SELECT id FROM nstats_matches WHERE hash=? AND id !=?`;
+
+    const result = await simpleQuery(query, [hash, id]);
+
+    return result.map((r) =>{
+        return r.id;
+    });
+}
+
+/**
+ * We only want to keep the latest_id and delete all older imports
+ */
+export async function deleteAllDuplicateMatches(){
+
+    const data = await getAllDuplicateMatches(true);
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const toDelete = await getDuplicateNonLatestIds(d.hash, d.latest_id);
+
+        for(let x = 0; x < toDelete.length; x++){
+
+            await deleteMatch(toDelete[x]);
+            console.log(`deleted matchId ${toDelete[x]}`);
+        }
+    }
 }

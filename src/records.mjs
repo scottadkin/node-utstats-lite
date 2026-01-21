@@ -128,9 +128,9 @@ export async function getPlayersMatchRecords(type, gametype, page, perPage, bOnl
             continue;
         }
 
-        r.server_name = matchesInfo[r.match_id].serverName;
-        r.gametype_name = matchesInfo[r.match_id].gametypeName;
-        r.map_name = matchesInfo[r.match_id].mapName;
+        r.server_name = matchesInfo[r.match_id].server_name;
+        r.gametype_name = matchesInfo[r.match_id].gametype_name;
+        r.map_name = matchesInfo[r.match_id].map_name;
 
 
     }

@@ -14,7 +14,7 @@ import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../c
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
 import { getAllNames as getAllServerNames } from "../servers.mjs";
-import { getRecentMatches, deleteMatch } from "../matches.mjs";
+import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 
 
 
@@ -219,6 +219,15 @@ export default class AdminJSONManager{
 
                 return this.res.json({"message": "passed", "id": id});
 
+            }else if(this.mode === "get-duplicate-matches"){
+
+                return this.res.json(await getAllDuplicateMatches());
+
+            }else if(this.mode === "delete-all-match-duplicates"){
+
+                const result = await deleteAllDuplicateMatches();
+
+                return this.res.json({"message": "passed"});
             }
 
 
