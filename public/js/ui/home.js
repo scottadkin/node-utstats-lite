@@ -244,3 +244,53 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
 
     parent.append(wrapper);  
 }
+
+function homeRenderMostActivePlayers(parent, data){
+
+    if(data.length === 0) return;
+
+    parent = document.querySelector(parent);
+
+    const wrapper = UIDiv();
+
+    UIHeader(wrapper, "Most Active Players");
+
+
+    const table = document.createElement("table");
+    table.className = "t-width-1";
+
+    const headers = ["Name", "Last Active", "Matches Played", "Wins", "Total Playtime"];
+
+    const headerRow = document.createElement("tr");
+
+    for(let i = 0; i < headers.length; i++){
+
+        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
+    }
+
+    table.append(headerRow);
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const row = document.createElement("tr");
+
+        row.append(UIPlayerLink({
+            "playerId": d.id,
+            "name": d.name,
+            "country": d.country,
+            "bTableElem": true
+        }));
+
+        row.append(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
+        row.append(UITableColumn({"content": d.total_matches}));
+        row.append(UITableColumn({"content": d.wins, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+        table.append(row);
+    }
+
+    wrapper.append(table);
+
+    parent.append(wrapper);
+}

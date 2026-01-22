@@ -1,7 +1,7 @@
 import { simpleQuery } from "./database.mjs";
 
 const DEFAULT_PAGE_LAYOUTS = {
-    "home": ["Welcome Message", "Social Media","Latest Screenshot", "Recent Matches", "Activity Heatmap", "Most Played Maps", "Most Played Gametypes", "Servers"],
+    "home": ["Welcome Message", "Social Media","Latest Screenshot", "Recent Matches", "Activity Heatmap", "Most Played Maps", "Most Played Gametypes", "Most Active Players", "Servers"],
     "map": ["Map Screenshot", "Basic Summary", "Activity Heatmap", "Recent Matches", "Rankings", "Weapon Statistics", "CTF League", "Player Top Averages"],
     "match": ["Basic Info", "Screenshot", "Frags", "CTF", "CTF Caps", "DOM","Damage Stats","Classic Weapon Stats", "Weapons", "Items", "Special Events", "Kills", "Pings", "JSON Links"],
     "player": ["Gametype Totals","Activity Heatmap", "CTF","CTF League", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"],

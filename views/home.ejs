@@ -129,6 +129,10 @@
                 case "Latest Screenshot": {
                     %>new UIMatchScreenshot("#root", <%- JSON.stringify(screenshotData) %>, true);<%
                 } break;
+
+                case "Most Active Players": {
+                    %>homeRenderMostActivePlayers("#root", <%- JSON.stringify(mostActivePlayers) %>)<%
+                } break;
             }
         }
     }

@@ -1275,3 +1275,28 @@ export async function getPlayerActivityHeatmapData(playerId, gametypeId, mapId, 
 
     return data;
 }
+
+
+export async function getMostActivePlayers(limit){
+
+    limit = parseInt(limit);
+
+    if(limit !== limit) throw new Error("getMostActivePlayers limit must be an integer");
+
+    const query = `SELECT
+    nstats_players.id,
+    nstats_players.name,
+    nstats_players.country,
+    nstats_player_totals.playtime,
+    nstats_player_totals.total_matches,
+    nstats_player_totals.wins,
+    nstats_player_totals.last_active
+    FROM nstats_players
+    LEFT JOIN nstats_player_totals ON nstats_player_totals.player_id = nstats_players.id
+    WHERE nstats_player_totals.gametype_id=0 AND nstats_player_totals.map_id=0
+    ORDER BY playtime DESC, wins DESC LIMIT ?
+    `;
+
+    return await simpleQuery(query, [limit]);
+
+}
