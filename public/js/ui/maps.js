@@ -494,9 +494,9 @@ class UIMapPlayerAverages{
         UIHeader(this.wrapper, "Top Player Averages");
         this.createOptions();
         this.content = UIDiv();
-        this.parent.appendChild(this.content);
+        this.wrapper.appendChild(this.content);
 
-        this.pagination = new UIPagination(this.parent, async (newPage) =>{ 
+        this.pagination = new UIPagination(this.wrapper, async (newPage) =>{ 
 
             if(newPage === this.page) return;
 
@@ -640,7 +640,7 @@ class UIMapPlayerAverages{
             this.cat = e.target.value;
             this.loadData();
         });
-        this.parent.appendChild(row);
+        this.wrapper.appendChild(row);
     }
 
     render(){
