@@ -220,6 +220,7 @@ export class CTF{
             for(let i = 0; i < keys.length; i++){
 
                 if(keys[i] === "flagCarryTime") continue;
+
                 if(playerData.stats.ctf[keys[i]] !== 0){
                     this.bMatchCTF = true;
                     return;

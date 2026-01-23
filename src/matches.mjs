@@ -1246,11 +1246,17 @@ export async function deleteMatch(id){
 
     await deleteMatchKills(id);
     await deleteMatchDamage(id);
-    await ctfDeleteMatch(id);
+    const ctfRowsDeleted = await ctfDeleteMatch(id);
+    
 
     if(basicInfo[id] !== undefined){
 
         const basic = basicInfo[id];
+
+        
+        if(ctfRowsDeleted > 0){
+            await deleteMatchCTFLeague(basic.map_id, basic.gametype_id);
+        }
 
         await gametypeUpdateBasicTotals(basic.gametype_id); 
         await mapUpdateTotals(basic.map_id); 
@@ -1264,7 +1270,7 @@ export async function deleteMatch(id){
         }
 
 
-        await deleteMatchCTFLeague(basic.map_id, basic.gametype_id);
+        
     }
 
     if(playerIds.length > 0){

@@ -813,15 +813,22 @@ export async function deleteMatch(matchId){
 
     const playerIds = await getPlayerIdsInMatch(matchId);
 
+    let rowsAffected = 0;
+
     for(let i = 0; i < deleteFromTables.length; i++){
 
         const t = deleteFromTables[i];
 
-        await simpleQuery(`DELETE FROM ${t} WHERE match_id=?`, [matchId]);
+        const result = await simpleQuery(`DELETE FROM ${t} WHERE match_id=?`, [matchId]);
+
+        if(result.affectedRows !== undefined){
+            rowsAffected += result.affectedRows;
+        }
     }
 
-    //TODO: recalculate affected ctf league tables
     await recalculateTotals(playerIds);
+
+    return rowsAffected;
 }
 
 
