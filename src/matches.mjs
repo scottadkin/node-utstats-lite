@@ -12,7 +12,7 @@ import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, getMapImageName, getHeatmapDates } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
-import { getValidGametypes, getValidMaps } from "./ctfLeague.mjs";
+import { getValidGametypes, getValidMaps, deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
 
 
 const MATCH_TABLE_COLUMNS_VERBOSE = `nstats_matches.id,
@@ -1262,6 +1262,9 @@ export async function deleteMatch(id){
         if(playerIds.length > 0){
             await weaponUpdatePlayerTotals(playerIds);
         }
+
+
+        await deleteMatchCTFLeague(basic.map_id, basic.gametype_id);
     }
 
     if(playerIds.length > 0){

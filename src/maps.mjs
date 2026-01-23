@@ -172,12 +172,21 @@ async function calculateTotals(mapId){
     return result[0];
 }
 
+export async function deleteMap(mapId){
+
+    const query = `DELETE FROM nstats_maps WHERE id=?`;
+
+    return await simpleQuery(query, [mapId]);
+}
+
 export async function updateTotals(mapId){
 
     const totals = await calculateTotals(mapId);
 
     if(totals === null){
-        new Message(`Failed to calculate map totals.`,`error`);
+        await deleteMap(mapId);
+       // new Message(`Failed to calculate map totals.`,`error`);
+       return
     }
 
     const query = `UPDATE nstats_maps SET matches=?, playtime=?, first_match=?, last_match=? WHERE id=?`;

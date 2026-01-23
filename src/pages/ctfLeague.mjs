@@ -19,7 +19,6 @@ export async function renderCTFLeaguePage(req, res, userSession){
         if(id === "" && gId === ""){
 
             const latestIds = await getLatestMapGametypePlayed();
-
             if(latestIds !== null){
 
                 if(mode === "gametypes"){

@@ -860,3 +860,12 @@ export async function getMatchesTeamResults(matchIds){
     }
     return data;
 }
+
+export async function getCTFGametypes(){
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_match_ctf`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) => r.gametype_id);
+}

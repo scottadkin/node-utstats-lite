@@ -1,13 +1,13 @@
 
 import { simpleQuery, bulkInsert } from "./database.mjs";
-import { getMatchesTeamResults } from "./ctf.mjs";
+import { getCTFGametypes, getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
 import { DAY, getPlayer, sanitizePagePerPage, setInt } from "./generic.mjs";
 import { getUniqueMapGametypeCombosInPastDays, getUniqueGametypesInPastDays } from "./matches.mjs";
 import Message from "./message.mjs";
 
 
-async function getPlayerHistory(mapId, gametypeId, maxAgeDays){
+async function getPlayerHistory(mapId, gametypeId, maxAgeDays, ctfGametypes){
 
 
     const now = Date.now();
@@ -27,6 +27,11 @@ async function getPlayerHistory(mapId, gametypeId, maxAgeDays){
     if(gametypeId !== 0){
         where += ` AND gametype_id=?`;
         vars.push(gametypeId);
+    }
+
+    if(gametypeId === 0){
+        where += ` AND gametype_id IN(?)`;
+        vars.push(ctfGametypes);
     }
 
     const result = await simpleQuery(`${query}${where}`, vars);
@@ -143,7 +148,9 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
     if(maxMatches === undefined) maxMatches = 5;
     if(maxDays === undefined) maxDays = 180;
 
-    const history = await getPlayerHistory(mapId, gametypeId, maxDays);
+    const ctfGametypes = await getCTFGametypes();
+
+    const history = await getPlayerHistory(mapId, gametypeId, maxDays, ctfGametypes);
     const matchResults = await getMatchesTeamResults(history.matchIds);
     const table = {};
 
@@ -530,7 +537,7 @@ export async function getMapPlayedValidGametypes(mapId){
 
 export async function getLatestMapGametypePlayed(){
 
-    const query = `SELECT gametype_id,map_id FROM nstats_player_ctf_league WHERE map_id!=0 ORDER by id DESC LIMIT 1`;
+    const query = `SELECT gametype_id,map_id FROM nstats_player_ctf_league WHERE map_id!=0 AND gametype_id!=0 ORDER by id DESC LIMIT 1`;
 
     const result = await simpleQuery(query);
 
@@ -550,11 +557,12 @@ export async function getTotalEntries(gametypeId, mapId){
     return 0;
 }
 
-export async function getSingleCTFLeague(gametypeId, mapId, dirtyPage, dirtyPerPage){
+export async function getSingleCTFLeague(gametypeId, mapId, dirtyPage, dirtyPerPage, bOnlyCombined){
 
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
-    const query = `SELECT * FROM nstats_player_ctf_league WHERE map_id=? AND gametype_id=? ORDER BY points DESC LIMIT ?, ?`;
+    const query = `SELECT * FROM nstats_player_ctf_league 
+    WHERE map_id=? AND gametype_id=? ORDER BY points DESC LIMIT ?, ?`;
 
     const result = await simpleQuery(query, [mapId, gametypeId, start, perPage]);
 
@@ -639,5 +647,53 @@ export async function adminUpdateCTFLeagueSettings(changes){
         const {id, value} = changes[i];
 
         await simpleQuery(query, [value, id]);
+    }
+}
+
+
+export async function deleteMatch(mapId, gametypeId){
+
+    const settings = await getLeagueSiteSettings();
+
+    if(settings.maps["Enable League"].value){
+
+        //map all time 
+        await calcPlayersMapResults(
+            mapId, 
+            0, 
+            settings.maps["Maximum Matches Per Player"].value,
+            settings.maps["Maximum Match Age In Days"].value
+        );
+
+        //map + gametype 
+        await calcPlayersMapResults(
+            mapId, 
+            gametypeId, 
+            settings.maps["Maximum Matches Per Player"].value,
+            settings.maps["Maximum Match Age In Days"].value
+        );
+    }
+
+
+    if(settings.gametypes["Enable League"].value){
+
+        //gametype all time
+        await calcPlayersMapResults(
+            0, 
+            gametypeId, 
+            settings.gametypes["Maximum Matches Per Player"].value,
+            settings.gametypes["Maximum Match Age In Days"].value
+        );
+    }
+
+    if(settings.combined["Enable League"].value){
+
+        //lifetime
+        await calcPlayersMapResults(
+            0, 
+            0, 
+            settings.combined["Maximum Matches Per Player"].value,
+            settings.combined["Maximum Match Age In Days"].value
+        );
     }
 }
