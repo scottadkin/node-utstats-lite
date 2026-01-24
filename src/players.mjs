@@ -59,6 +59,12 @@ SUM(item_pads) as item_pads,
 SUM(item_invis) as item_invis,
 SUM(item_shp) as item_shp`;
 
+
+export const VALID_PLAYER_SORT_BYS = [
+    "name", "last_active", "score", "frags", "kills", "deaths",
+    "suicides", "efficiency", "matches", "playtime"
+];
+
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
     //const query = `SELECT id FROM nstats_players WHERE name=? AND hwid=? AND mac1=? AND mac2=?`;
@@ -327,14 +333,10 @@ export async function searchPlayers(name, sortBy, order, page, perPage){
         order = "ASC";
     }
 
-    const validSortBys = [
-        "name", "last_active", "score", "frags", "kills", "deaths",
-        "suicides", "efficiency", "matches", "playtime"
-    ];
 
     if(sortBy === "eff") sortBy = "efficiency";
 
-    const sortIndex = validSortBys.indexOf(sortBy);
+    const sortIndex = VALID_PLAYER_SORT_BYS.indexOf(sortBy);
 
     if(sortIndex === -1){
         throw new Error(`${sortBy} is not a valid sortBy option`);
@@ -346,7 +348,7 @@ export async function searchPlayers(name, sortBy, order, page, perPage){
     const sortByTable = (playerMainColumns.indexOf(sortBy) === -1) ? "nstats_player_totals" : "nstats_players";
 
     if(sortBy !== "matches"){
-        sortBy = validSortBys[sortIndex];
+        sortBy = VALID_PLAYER_SORT_BYS[sortIndex];
     }else{
         sortBy = "total_matches";
     }

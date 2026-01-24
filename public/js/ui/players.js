@@ -3,11 +3,11 @@ class PlayersSearchList{
 
     constructor(parent, players, name, sortBy, order, perPage, page){
 
-        this.parent = document.querySelector(parent);
+        this.parent = parent;
         this.players = players.players;
         this.totalPlayers = players.totalPlayers;
 
-        if(this.totalPlayers === 0) return;
+        //if(this.totalPlayers === 0) return;
 
         this.name = name;
         this.sortBy = sortBy;
@@ -66,21 +66,28 @@ class PlayersSearchList{
 
         this.table.append(headerRow);
 
+
+        if(this.totalPlayers === 0){
+
+            const row = document.createElement("tr");
+            const col = UITableColumn({"content": "No players matching your search terms"});
+            col.colSpan = 10;
+            row.append(col);
+            this.table.append(row);
+            return;
+        }
+
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
             this.table.append(this.createPlayerRow(p));
         }
-
-        const url = `/players/?name=${this.name}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}&page=`;
-
-        this.pagination = new UIPagination(this.parent, url, this.totalPlayers, this.perPage, this.page);
     }
 }
 
 class PlayersSearchForm{
 
-    constructor(parent, searchName, sortBy, order, perPage){
+    constructor(parent, searchName, sortBy, order, perPage, page){
 
         this.parent = document.querySelector(parent);
 
@@ -88,20 +95,55 @@ class PlayersSearchForm{
         this.sortBy = sortBy;
         this.order = order;
         this.perPage = perPage;
+        this.page = page;
+
+        this.data = {"players": [], "totalPlayers": 0};
 
         UIHeader(this.parent, "Player Search");
         this.wrapper = UIDiv("form");
 
+
+        this.content = UIDiv();
+
         this.createFormElems();
 
+        this.loadData();
+
         this.parent.append(this.wrapper);
+        this.parent.append(this.content);
+
+    }
+
+    async loadData(){
+
+        try{
+
+            let slug = `?name=${this.searchName}&sortBy=${this.sortBy}`;
+            slug += `&order=${this.order}&perPage=${this.perPage}&page=${this.page}`;
+            const req = await fetch(`/json/player-search/${slug}`);
+
+            const res = await req.json();
+         
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.data = res;
+       
+            this.render();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Players", err.toString());
+        }
     }
 
     changeSelected(){
 
         const url = `/players/?name=${this.searchName}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}`;
 
-        window.location.href = url;
+        history.pushState(null, "", url);
+
+        this.loadData();
+        
     }
 
     createFormElems(){
@@ -111,6 +153,7 @@ class PlayersSearchForm{
 
         const nameElem = UIInput("text", "name", this.searchName, "Player Name...", (newValue) =>{
             this.searchName = newValue;
+            this.page = 1;
             this.changeSelected();
         });
 
@@ -122,6 +165,7 @@ class PlayersSearchForm{
 
         const sortByElem = new UIPlayerSortBySelect(sortRow, this.sortBy, (newValue) =>{
             this.sortBy = newValue;
+            this.page = 1;
             this.changeSelected();
         });
 
@@ -144,5 +188,21 @@ class PlayersSearchForm{
         });
 
         this.wrapper.append(searchRow, sortRow, orderRow, perPageRow);
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        this.list = new PlayersSearchList(
+            this.content, this.data, 
+            this.searchName, this.sortBy, 
+            this.order, this.perPage, this.page
+        );
+
+        this.pagination = new UIPagination(this.content, (newPage) =>{
+            this.page = newPage;
+            this.changeSelected();
+        }, this.data.totalPlayers, this.perPage, this.page);
     }
 }

@@ -10,10 +10,6 @@
 
 <div id="root"></div>
 <script>
-    new PlayersSearchForm("#root", "<%= searchName %>", "<%= sortBy %>", "<%= order %>", "<%= perPage %>");
-</script>
-
-<script>
-    new PlayersSearchList("#root", <%- JSON.stringify(players) %>, "<%= searchName %>", "<%= sortBy%>", "<%= order %>", "<%= perPage %>", "<%= page %>")
+    new PlayersSearchForm("#root", "<%= searchName %>", "<%= sortBy %>", "<%= order %>", "<%= perPage %>", "<%= page %>");
 </script>
 <%- include('footer.ejs') -%>

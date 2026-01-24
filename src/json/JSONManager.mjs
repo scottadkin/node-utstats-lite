@@ -3,7 +3,7 @@ import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData } from "../m
 import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages} from "../maps.mjs";
 import { getRankingsWithPlayerNames } from "../rankings.mjs";
 import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
-import { getPlayersByHashes } from "../players.mjs";
+import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
 
 export default class JSONManager{
@@ -84,6 +84,20 @@ export default class JSONManager{
 
         const value = parseFloat(this.req.query[key]);
         if(value !== value) throw new Error(`${key} must be a valid number`);
+
+        return value;
+    }
+
+
+    querySanatizeOrder(key){
+
+        this.throwErrorIfQueryMissingKey(key);
+
+        const value = this.req.query[key].toLowerCase();
+
+        if(value !== "asc" && value !== "desc"){
+            throw new Error(`${value} is an order key, it must be either asc or desc`);
+        }
 
         return value;
     }
@@ -205,6 +219,22 @@ export default class JSONManager{
         this.res.status(200).json({data});
     }
 
+
+    async getPlayerSearch(){
+
+        const {page, perPage} = this.getPageAndPerPage();
+        const order = this.querySanatizeOrder("order");
+
+        this.throwErrorIfQueryMissingKey("sortBy");
+        this.throwErrorIfQueryMissingKey("name");
+
+        const sortBy = this.req.query.sortBy.toLowerCase();
+        const searchName = this.req.query.name;
+
+        const data = await searchPlayers(searchName, sortBy, order, page, perPage);
+        this.res.status(200).json(data);
+    }
+
     async init(){
 
         try{
@@ -251,7 +281,12 @@ export default class JSONManager{
                 return await this.getHeatMapData();
 
             }else if(this.mode === "player-activity-heatmap-data"){
+
                 return await this.getPlayerHeatMapData();
+
+            }else if(this.mode === "player-search"){
+
+                return await this.getPlayerSearch();
             }
 
             console.log(this.mode);
