@@ -7,8 +7,6 @@ class PlayersSearchList{
         this.players = players.players;
         this.totalPlayers = players.totalPlayers;
 
-        //if(this.totalPlayers === 0) return;
-
         this.name = name;
         this.sortBy = sortBy;
         this.order = order;
@@ -26,32 +24,6 @@ class PlayersSearchList{
         ];
 
         this.render();
-    }
-
-
-    createPlayerRow(player){
-
-        const row = document.createElement("tr");
-
-        row.append(UIPlayerLink({
-            "playerId": player.id,
-            "name": player.name, 
-            "country": player.country, 
-            "bTableElem": true, 
-            "className": "text-left"
-        }));
-
-        row.append(UITableColumn({"content": toDateString(player.last_active, true), "className": "date"}));
-        row.append(UITableColumn({"content": player.score, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.frags, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.kills, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.deaths, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.suicides, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": `${player.efficiency.toFixed(2)}%` }));
-        row.append(UITableColumn({"content": player.total_matches, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.playtime, "parse": ["playtime"], "className": "playtime"}));
-
-        return row;
     }
 
     render(){
@@ -87,7 +59,7 @@ class PlayersSearchList{
 
 class PlayersSearchForm{
 
-    constructor(parent, searchName, sortBy, order, perPage, page){
+    constructor(parent, searchName, sortBy, order, perPage, page, siteName){
 
         this.parent = document.querySelector(parent);
 
@@ -96,6 +68,7 @@ class PlayersSearchForm{
         this.order = order;
         this.perPage = perPage;
         this.page = page;
+        this.siteName = siteName;
 
         this.data = {"players": [], "totalPlayers": 0};
 
@@ -104,6 +77,25 @@ class PlayersSearchForm{
 
 
         this.content = UIDiv();
+
+        this.table = document.createElement("table");
+        this.table.className = "t-width-1";
+
+        this.parent.append(this.content);
+
+        this.headers = [
+            {"display": "Name", "value": "name"}, 
+            {"display": "Last Active", "value": "last_active"}, 
+            {"display": "Score",  "value": "score"}, 
+            {"display": "Frags",  "value": "frags"}, 
+            {"display": "Kills",  "value": "kills"}, 
+            {"display": "Deaths",  "value": "deaths"}, 
+            {"display": "Suicides",  "value": "suicides"}, 
+            {"display": "Eff",  "value": "efficiency"}, 
+            {"display": "Matches",  "value": "matches"}, 
+            {"display": "Playtime", "value": "playtime"},
+        ];
+
 
         this.createFormElems();
 
@@ -153,6 +145,7 @@ class PlayersSearchForm{
 
         const nameElem = UIInput("text", "name", this.searchName, "Player Name...", (newValue) =>{
             this.searchName = newValue;
+            document.title = `${(newValue !== "") ? `${newValue} - ` : ``}Player Search - ${this.siteName}`;
             this.page = 1;
             this.changeSelected();
         });
@@ -190,17 +183,85 @@ class PlayersSearchForm{
         this.wrapper.append(searchRow, sortRow, orderRow, perPageRow);
     }
 
+    createPlayerRow(player){
+
+        const row = document.createElement("tr");
+
+        row.append(UIPlayerLink({
+            "playerId": player.id,
+            "name": player.name, 
+            "country": player.country, 
+            "bTableElem": true, 
+            "className": "text-left"
+        }));
+
+        row.append(UITableColumn({"content": toDateString(player.last_active, true), "className": "date"}));
+        row.append(UITableColumn({"content": player.score, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": player.frags, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": player.kills, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": player.deaths, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": player.suicides, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": `${player.efficiency.toFixed(2)}%` }));
+        row.append(UITableColumn({"content": player.total_matches, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": player.playtime, "parse": ["playtime"], "className": "playtime"}));
+
+        return row;
+    }
+
+    sortByHeader(targetKey){
+
+        if(this.sortBy === targetKey){
+            this.order = (this.order === "ASC") ? "DESC" : "ASC";
+        }else{
+            this.order = "ASC";
+            this.sortBy = targetKey;
+        }
+
+        this.changeSelected();
+    }
+
     render(){
 
         this.content.innerHTML = ``;
 
-        this.list = new PlayersSearchList(
-            this.content, this.data, 
-            this.searchName, this.sortBy, 
-            this.order, this.perPage, this.page
-        );
+        this.table.innerHTML = "";
 
-        this.pagination = new UIPagination(this.content, (newPage) =>{
+        const headerRow = document.createElement("tr");
+
+        for(let i = 0; i < this.headers.length; i++){
+
+            const hc = UITableHeaderColumn({"content": this.headers[i].display});
+            hc.className = "hover";
+
+            hc.addEventListener("click", () =>{
+                this.sortByHeader(this.headers[i].value);
+            });
+
+            headerRow.append(hc);
+        }
+
+        this.table.append(headerRow);
+
+
+        if(this.data.totalPlayers === 0){
+
+            const row = document.createElement("tr");
+            const col = UITableColumn({"content": "No players matching your search terms"});
+            col.colSpan = 10;
+            row.append(col);
+            this.table.append(row);
+      
+        }
+
+        for(let i = 0; i < this.data.players.length; i++){
+
+            const p = this.data.players[i];
+            this.table.append(this.createPlayerRow(p));
+        }
+
+        this.content.append(this.table);
+
+         this.pagination = new UIPagination(this.content, (newPage) =>{
             this.page = newPage;
             this.changeSelected();
         }, this.data.totalPlayers, this.perPage, this.page);

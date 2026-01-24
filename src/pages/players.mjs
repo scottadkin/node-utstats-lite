@@ -42,7 +42,9 @@ export async function renderPlayersPage(req, res, userSession){
 
         
         const brandingSettings = await getCategorySettings("Branding");
-        title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+        const siteName = brandingSettings?.["Site Name"] ?? "Node UTStats Lite";
+        
+        title = `${title} - ${siteName}`;
 
         res.render("players.ejs", {
             "host": req.headers.host,
@@ -56,7 +58,8 @@ export async function renderPlayersPage(req, res, userSession){
             page,
             "perPageOptions": PER_PAGE_OPTIONS,
             players,
-            userSession
+            userSession,
+            siteName
         });
         
     }catch(err){

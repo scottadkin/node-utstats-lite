@@ -132,7 +132,14 @@ function UITableHeaderColumn(params){
         elem.className = params.className;
     }
 
-    elem.appendChild(text);
+    if(params.url === undefined){
+        elem.appendChild(text);
+    }else{
+        const a = document.createElement("a");
+        a.append(text);
+        a.href = params.url;
+        elem.append(a);
+    }
 
     return elem;
 }
