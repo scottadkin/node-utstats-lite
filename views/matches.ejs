@@ -8,47 +8,18 @@
 <script src="../js/ui/ui.js"></script>
 <script src="../js/ui/matches.js"></script>
 
-<div class="header-wrapper">Recent Matches</div>
-<form class="form" action="/matches" method="GET">
-    <div class="form-row">
-        <label for="server">Server</label>
-        <select id="server" name="s" class="default-select">
-            <% serverNames.map((s) =>{
-                    %><option <%= (s.id === selectedServer) ? "selected" : "" %> value="<%= s.id %>">
-                        <%= s.name %>
-                    </option> <%
-            }) %>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="gametype">Gametype</label>
-        <select id="gametype" name="g" class="default-select">
-            <% 
-                gametypeNames.map((g) =>{
-                    %><option <%= (g.id === selectedGametype) ? "selected" : "" %> value="<%= g.id %>"><%= g.name %></option><%
-                });
-            %>
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="map">Map</label>
-        <select id="map" name="m" class="default-select">
-            <% 
-                mapNames.map((m) =>{
-                    %><option <%= (m.id === selectedMap) ? "selected" : "" %> value="<%= m.id%>"><%= m.name%></option><%
-                })
-            %>    
-        </select>
-    </div>
-    <div class="form-row">
-        <label for="display">Display Mode</label>
-        <select id="display" name="display" class="default-select">
-            <option value="default" <%= (displayMode === "default") ? "selected" : "" %> >Default View</option>  
-            <option value="table" <%= (displayMode !== "default") ? "selected" : "" %>>Table View</option>  
-        </select>
-    </div>
-    <input type="submit" class="submit-button" value="Search"/>
-</form>
+<div id="root"></div>
+<script>
+
+    new MatchesSearchForm(
+        "#root", 
+        <%- JSON.stringify(serverNames) %>, 
+        <%- JSON.stringify(gametypeNames) %>,
+        <%- JSON.stringify(mapNames)%>,
+        "<%= selectedServer %>", "<%= selectedGametype %>", "<%= selectedMap %>",
+        "<%= displayMode %>"
+    );
+</script>
 
 <div id="matches"></div>
 <script>
