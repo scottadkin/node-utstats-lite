@@ -804,7 +804,7 @@ class UIOrderSelect{
 
     constructor(parent, initialValue, callback){
 
-        new UISelect(parent, [
+        this.elem = new UISelect(parent, [
             {"value": "ASC", "display": "Ascending"},
             {"value": "DESC", "display": "Descending"},
         ], initialValue, callback);

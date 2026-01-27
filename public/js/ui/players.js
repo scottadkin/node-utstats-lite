@@ -91,7 +91,7 @@ class PlayersSearchForm{
             {"display": "Kills",  "value": "kills"}, 
             {"display": "Deaths",  "value": "deaths"}, 
             {"display": "Suicides",  "value": "suicides"}, 
-            {"display": "Eff",  "value": "efficiency"}, 
+            {"display": "Eff",  "value": "eff"}, 
             {"display": "Matches",  "value": "matches"}, 
             {"display": "Playtime", "value": "playtime"},
         ];
@@ -134,6 +134,9 @@ class PlayersSearchForm{
 
         history.pushState(null, "", url);
 
+        this.sortByElem.elem.select.value = this.sortBy;
+        this.orderElem.elem.select.value = this.order;
+
         this.loadData();
         
     }
@@ -156,18 +159,18 @@ class PlayersSearchForm{
 
         const sortRow = UIDiv("form-row");
 
-        const sortByElem = new UIPlayerSortBySelect(sortRow, this.sortBy, (newValue) =>{
+        this.sortByElem = new UIPlayerSortBySelect(sortRow, this.sortBy, (newValue) =>{
             this.sortBy = newValue;
             this.page = 1;
             this.changeSelected();
         });
 
-        sortRow.append(UILabel("Sort By"), sortByElem.elem.select);
+        sortRow.append(UILabel("Sort By"), this.sortByElem.elem.select);
 
         const orderRow = UIDiv("form-row");
         orderRow.append(UILabel("Order"));
 
-        new UIOrderSelect(orderRow, this.order, (newValue) =>{
+        this.orderElem = new UIOrderSelect(orderRow, this.order, (newValue) =>{
             this.order = newValue;
             this.changeSelected();
         })
