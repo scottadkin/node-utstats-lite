@@ -1,5 +1,3 @@
-
-
 class RankingsSearchForm{
 
     constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage){
@@ -74,7 +72,19 @@ class RankingsSearchForm{
 
         row.appendChild(select);
 
+        select.addEventListener("change", (e) =>{
+            this.selectedId = e.target.value;
+            this.changeURL();
+        });
+
         this.wrapper.appendChild(row);
+    }
+
+
+    changeURL(){
+
+        window.location.href = `?mode=${this.mode}&id=${this.selectedId}&tf=${this.selectedTimeRange}&pp=${this.selectedPerPage}&p=1`
+
     }
 
     createForm(){
@@ -101,28 +111,26 @@ class RankingsSearchForm{
         row.append(UILabel("Active In Previous", "tf"));
         const la = new UILastActiveSelect(row, this.selectedTimeRange, "tf");
         row.append(la.elem.select);
+
+        la.elem.select.addEventListener("change", (e) =>{
+            this.selectedTimeRange = e.target.value;
+            this.changeURL();
+        });
+
         this.wrapper.append(row);
 
         const perPageRow = UIDiv("form-row");
         perPageRow.append(UILabel("Results Per Page", "pp"));
 
         const pp = new UIPerPageSelect(perPageRow, this.selectedPerPage, "pp");
+
+        pp.elem.select.addEventListener("change", (e) =>{
+            this.selectedPerPage = e.target.value;
+            this.changeURL();
+        });
+
         perPageRow.append(pp.elem.select);
         this.wrapper.append(perPageRow);
-
-        const hidden = document.createElement("input");
-        hidden.type = "hidden";
-        hidden.value = this.mode;
-        hidden.name = "mode";
-        hidden.id = "mode";
-
-        this.wrapper.appendChild(hidden);
-
-        const searchButton = document.createElement("input");
-        searchButton.type = "submit";
-        searchButton.className = "submit-button";
-        searchButton.value = "Search";
-        this.wrapper.appendChild(searchButton);
     }
 
     render(){
@@ -131,7 +139,7 @@ class RankingsSearchForm{
 
             const noData = UIDiv("info");
             noData.append(`There has not been enough matches played yet for there to be any rankings.`);
-
+            this.table.className = "hidden";
             this.parent.append(noData);
             return;
         }

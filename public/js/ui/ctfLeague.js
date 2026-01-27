@@ -83,6 +83,10 @@ class CTFLeagueFilterForm{
 
         orderedNames.sort(this.sortByName);
 
+        if(this.mode === "maps" && type == "gametypes"){
+            orderedNames.unshift({"id": "0", "name": "Any"});
+        }
+
         for(let i = 0; i < orderedNames.length; i++){
 
             const {id, name} = orderedNames[i];

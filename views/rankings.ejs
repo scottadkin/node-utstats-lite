@@ -14,12 +14,8 @@
     <%= (mode === "gametype") ? "Gametype" : "Map" %> Rankings
 </div>
 
-<div id="root">
-
-</div>
-
+<div id="root"></div>
 <script>
-
     new RankingsSearchForm("#root", "<%= mode %>", 
     <%- JSON.stringify(data) %>,
     <%- JSON.stringify(names) %>, 
@@ -28,6 +24,4 @@
     "<%= selectedPerPage %>",
     "<%= currentPage %>");
 </script>
-
-
 <%- include("footer.ejs") -%>

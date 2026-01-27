@@ -178,7 +178,7 @@ class RecordsDataDisplay{
 
             const row = document.createElement("tr");
 
-            const place = i + 1 + (this.perPage * this.currentPage);
+            const place = i + 1 + (this.perPage * (this.currentPage - 1));
 
             row.appendChild(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
             row.appendChild(UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}));
@@ -219,7 +219,7 @@ class RecordsDataDisplay{
             const d = this.data[i];
 
             const row = document.createElement("tr");
-            const place = i + 1 + (this.perPage * this.currentPage);
+            const place = i + 1 + (this.perPage * (this.currentPage - 1));
 
             row.appendChild(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
             row.appendChild(UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}));
