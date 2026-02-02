@@ -2,11 +2,12 @@ import {multiKillTimeLimit} from "../../config.mjs";
 
 export class Player{
 
-    constructor(timestamp, name, playerId){
+    constructor(/*timestamp,*/ name, playerId){
 
-        this.timestamp = timestamp;
+        //this.timestamp = timestamp;
         this.name = name;
         this.id = playerId;
+        this.matchIds = [playerId];
 
         this.ip = "";
         this.hwid = "";
@@ -31,7 +32,7 @@ export class Player{
 
         this.pings = [];
 
-        this.connects = [timestamp];
+        this.connects = [/*timestamp*/];
         this.disconnects = [];
 
         this.stats = {

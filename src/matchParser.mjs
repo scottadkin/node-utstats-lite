@@ -15,6 +15,7 @@ import {calculateRankings} from "./rankings.mjs";
 import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
 
+
 export class MatchParser{
 
     constructor(rawData, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes){
@@ -107,6 +108,8 @@ export class MatchParser{
 
         this.players.bIgnoreBots = this.bIgnoreBots;
 
+        await this.players.setPlayerMasterIds(this.match.date);
+
 
         this.kills.setAllDeaths();
         //append (insta) if game is instagib
@@ -148,7 +151,7 @@ export class MatchParser{
         //this.players.scalePlaytimes(this.gametype.bHardcore);
 
 
-        await this.players.setPlayerMasterIds(this.match.date);
+        //await this.players.setPlayerMasterIds(this.match.date);
 
         const soloStats = this.players.getSoloWinner(this.totalTeams);
 
@@ -272,6 +275,7 @@ export class MatchParser{
 
     }
 
+
     parseLines(){
 
         const test = this.rawData;
@@ -282,6 +286,10 @@ export class MatchParser{
         const logStandardReg = /^.+info\tLog_Standard\t(.+)$/i;
 
         //check if utstats-lite log because stat_player behaves differently(merges player stats into one for multiple reconnects) 
+
+        //this.testFartNoise(lines);
+
+        this.players.createPlayers(lines);
 
 
         const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
@@ -463,9 +471,7 @@ export class MatchParser{
 
             if(this.damageManager.parseString(subString)){
                 continue;
-            }
-
-            
+            }   
         }
 
     }

@@ -20,6 +20,138 @@ export class PlayerManager{
         this.namesToIds = {};
     }
 
+
+    createPlayers(lines){
+
+        const testPlayers = [];
+
+        const namesToIds = {};
+        const idsToNames = {};
+
+        const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
+        const reg =  /^player\t(.+?)\t(.+)$/i;
+        const renameReg = /^(.+)\t(\d+)$/i;
+        const connectReg = /^(.+)\t(\d+?)\t.+$/i;
+        const disConnectReg = /^(.+)\t(\d+?)$/i;
+
+   
+        const connectEvents = [];
+
+        const targetKeys = ["connect", "disconnect", "rename"];
+
+        for(let i = lines.length; i > 0; i--){
+
+           // console.log(lines[i]);
+
+            const line = lines[i];
+
+            const timestampResult = timestampReg.exec(line);
+
+            if(timestampResult === null) continue;
+
+            const timestamp = parseFloat(timestampResult[1]);
+
+            const subString = timestampResult[2];
+
+            const result = reg.exec(subString);
+
+            if(result === null) continue;
+
+            const type = result[1].toLowerCase();
+
+            if(targetKeys.indexOf(type) === -1) continue;
+
+            
+
+            if(type === "rename"){
+
+                const nameResult = renameReg.exec(result[2]);
+                const playerId = parseInt(nameResult[2]);
+                const playerName = nameResult[1].toLowerCase();
+
+                if(namesToIds[playerName] === undefined){
+                    namesToIds[playerName] = [playerId];
+                }else{
+                    namesToIds[playerName].push(playerId);
+                }
+
+                //we only care about the last used name for each id
+                if(idsToNames[playerId] === undefined){
+
+                    idsToNames[playerId] = nameResult[1];
+
+                }
+
+                connectEvents.push({
+                    timestamp,
+                    type,
+                    "name": nameResult[1], 
+                    "playerId": parseInt(nameResult[2])
+                });
+                //const player = this.getTestPlayer(testPlayers, playerId);
+
+                //if(player === null){
+                  //  testPlayers.push(new TestPlayer(playerId, nameResult[1]));
+                //}
+                continue;
+
+            }else if(type === "connect"){
+
+                //connectEvents.push(line);
+                //console.log(connectReg.exec(result[2]));
+
+                const cResult = connectReg.exec(result[2]);
+
+                if(cResult === null) continue;
+
+                console.log(cResult);
+                //const playerName = cResult[1].toLowerCase();
+                //const playerId = parseInt(cResult[2]);
+                connectEvents.push({
+                    timestamp,
+                    type,
+                    "name": cResult[1], 
+                    "playerId": parseInt(cResult[2])
+                });
+                
+
+            }else if(type === "disconnect"){
+
+                //if disconnect before match start time set to spectator
+            }
+
+        }
+
+
+
+
+
+        for(let [playerId, playerName] of Object.entries(idsToNames)){
+            console.log(playerId, playerName);
+            playerId = parseInt(playerId);
+            const player = this.getPlayerByName(playerName);
+
+            if(player === null){
+                this.players.push(new Player(playerName, playerId));
+            }else{
+                player.matchIds.push(playerId);
+            }
+
+            
+           // this.players.push(new Player());
+        }
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+            console.log(p.name, p.matchIds);
+        }
+       // process.exit();
+        //console.log(connectEvents);
+        console.log(connectEvents);
+        process.exit();
+    }
+
     parseLine(timestamp, line){
 
         const typeReg = /^player\t((.+?)\t.+)$/i;
@@ -41,7 +173,7 @@ export class PlayerManager{
         const type = typeResult[2].toLowerCase();
         line = typeResult[1];
 
-        if(type === "rename"){
+        /*if(type === "rename"){
 
             const result = playerNameReg.exec(line);
             if(result === null) return;
@@ -50,7 +182,7 @@ export class PlayerManager{
             //set bSPectator to true and on the connect event set to true(rename always happens before connect, but no connect for spectators)
             this.addPlayer(timestamp, result[1], parseInt(result[2]), true);
             return;
-        }
+        }*/
 
         if(type === "connect"){
 
@@ -70,8 +202,6 @@ export class PlayerManager{
 
             this.setDisconnectEvent(parseInt(result[1]), timestamp);
             return;
-
-    
         }
 
         if(type === "isabot"){
@@ -174,7 +304,7 @@ export class PlayerManager{
 
         if(player === null){
 
-            this.addPlayer(timestamp, "", playerId);
+            //this.addPlayer(timestamp, "", playerId);
             //new Message(`Failed to get player by id ${playerId}, parseTeamChange()`,"warning");
             return;
         }
@@ -263,13 +393,15 @@ export class PlayerManager{
 
             const p = this.players[i];
 
-            if(p.id === id) return p;
+            if(p.matchIds.indexOf(id) !== -1) return p;
+
+            //if(p.id === id) return p;
         }
 
         return null;
     }
 
-    addPlayer(timestamp, name, playerId, bSpectator){
+    /*addPlayer(timestamp, name, playerId, bSpectator){
 
         if(bSpectator === undefined) bSpectator = false;
         const testPlayer = this.getPlayerById(playerId);
@@ -288,7 +420,7 @@ export class PlayerManager{
         }
 
         this.players.push(new Player(timestamp, name, playerId));
-    }
+    }*/
 
     setConnectionEvent(playerId, timestamp){
 
@@ -361,7 +493,11 @@ export class PlayerManager{
 
     async setPlayerMasterIds(matchDate){
 
-        for(const p of Object.values(this.mergedPlayers)){
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            //console.log(p.name);
 
             let masterId = await getPlayerMasterId(p.name);
 
@@ -375,8 +511,6 @@ export class PlayerManager{
             if(masterId !== masterId) throw new Error(`Player masterId is not a valid integer`);
 
             p.masterId = masterId;
-            //we need to make sure duplicates have there master ids set correctly
-            this.setNonMergedPlayersMasterId(p.name, masterId);
 
         }
         

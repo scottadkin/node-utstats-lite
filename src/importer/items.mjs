@@ -16,7 +16,7 @@ export default class Items{
         const itemName = result[1].toLowerCase();
         const playerId = parseInt(result[2]);
 
-        this.events.push({"item": itemName, "playerId": playerId});
+        this.events.push({timestamp, "item": itemName, "playerId": playerId});
     }
 
 
@@ -31,6 +31,7 @@ export default class Items{
             "invisibility": "invis",
             "super health pack": "shp"
         };
+
 
         for(let i = 0; i < this.events.length; i++){
 
