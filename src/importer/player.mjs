@@ -1,4 +1,5 @@
 import {multiKillTimeLimit} from "../../config.mjs";
+import Message from "../message.mjs";
 
 export class Player{
 
@@ -6,8 +7,8 @@ export class Player{
 
         //this.timestamp = timestamp;
         this.name = name;
-        this.id = playerId;
         this.matchIds = [playerId];
+        
 
         this.ip = "";
         this.hwid = "";
@@ -16,12 +17,14 @@ export class Player{
         this.team = -1;
         this.bBot = 0;
         this.country = "";
-        this.bHadConnectEvent = false;
-        this.bSpectator = 1;
+        this.bSpectator = true;
+        this.bConnectedToServer = false;
+        this.lastConnectInfo = null;
+        //sometime a player can rejoin the server before their last session timesout
+        this.highestConnectId = -1;
         this.masterId = null;
         this.bFirstBlood = 0;
         this.playtime = 0;
-        this.bConnectedToServer = false;
         this.matchResult = "s";
 
         this.ping = {
@@ -31,9 +34,6 @@ export class Player{
         };
 
         this.pings = [];
-
-        this.connects = [/*timestamp*/];
-        this.disconnects = [];
 
         this.stats = {
             "score": 0,
@@ -115,33 +115,65 @@ export class Player{
         this.connectEvents = [];
     }
 
-    connected(timestamp, bAsPlayer){
 
-        this.bConnectedToServer = true;
-        if(this.connects.indexOf(timestamp) === -1) this.connects.push(timestamp);
+    //only keep track of non spectator connect events
+    connected(timestamp, matchStart, playerId){
 
-        this.connectEvents.push({
+        const info = {
             "type": "connect",
             "timestamp": timestamp,
-            "bPlayer": bAsPlayer
-        });
-
-        if(bAsPlayer){
-            this.bHadConnectEvent = true;
-            this.bSpectator = 0;
+            "bBeforeMatchStart": timestamp < matchStart,
+            playerId
         }
+
+        
+        if(playerId > this.highestConnectId){
+            this.highestConnectId = playerId;
+        }
+
+        this.connectEvents.push(info);
+
+        this.lastConnectInfo = info;
+ 
+        this.bSpectator = false;
+        this.bConnectedToServer = true;
+
     }
 
-    disconnect(timestamp){
+
+    disconnect(timestamp, matchStart, playerId){
+
+        if(playerId !== null && playerId < this.highestConnectId){
+
+            new Message(`${this.name} rejoined server before old connection dropped, skipping disconnect event`, "warning");
+            return;
+        }
 
         this.bConnectedToServer = false;
-        this.disconnects.push(timestamp);
+
+        if(this.bSpectator){
+            this.lastConnectInfo = null;
+            return;
+        }
+
+        if(timestamp < matchStart) this.bSpectator = true;
 
         this.connectEvents.push({
             "type": "disconnect",
-            "timestamp": timestamp,
-            "bPlayer": null
+            "timestamp": timestamp, 
+            playerId
         });
+
+        if(this.lastConnectInfo !== null){
+
+            const previousTimestamp = (this.lastConnectInfo.bBeforeMatchStart) ? matchStart : timestamp;
+            if(timestamp < matchStart) timestamp = matchStart;
+
+            this.playtime += (timestamp - previousTimestamp);
+        }
+        
+
+        this.lastConnectInfo = null;
     }
 
     changeTeam(newTeam, timestamp){
@@ -229,61 +261,14 @@ export class Player{
         this.stats.teamKills++;
     }
 
-    matchEnded(matchStart, matchEnd){
+    matchEnded(){
 
         this.updateMultiHistory();
         this.updateSpreeHistory();
-        this.disconnects.push(matchEnd);
     }
 
     headshot(){
         this.stats.headshots++;
     }
 
-
-    setPlaytime(matchStart, matchEnd, totalTeams){
-
-        let playtime = 0;
-
-        //spectators won't have connect events if they were never a player
-        if(this.connects.length === 0){
-            this.playtime = 0;
-            return;
-        }
-
-        for(let i = 0; i < this.connects.length; i++){
-
-            let con = this.connects[i];
-            let disc = this.disconnects[i];
-   
-
-            if(con < matchStart) con = matchStart;
-            if(disc === undefined) disc = matchEnd;
-
-            if(disc < matchStart) continue;
-
-            //
-           // if(disc <= con) continue;
-
-            if(disc < matchStart) continue;
-
-            
-
-            let diff = disc - con;
-
-            //ignore connects before match start, if diff < 0 disconnect happened before match start
-            if(diff <= 0) continue;
-
-            playtime += diff;
-
-        }
-
-        this.playtime = playtime;
-
-        //lazy i know...
-        if(this.playtime > matchEnd - matchStart){
-            this.playtime = matchEnd - matchStart;
-        }
-
-    }
 }

@@ -159,7 +159,7 @@ export class KillsManager{
     /**
      * set players multi kills, sprees, and headshots
      */
-    setPlayerSpecialEvents(playerManager, bHardcore){
+    setPlayerSpecialEvents(playerManager){
 
         for(let i = 0; i < this.kills.length; i++){
 

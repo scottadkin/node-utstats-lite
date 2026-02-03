@@ -46,7 +46,7 @@ export async function createMatch(serverId, gametypeId, mapId, bHardcore, bInsta
     const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"")`;
 
     const vars = [
-        serverId, gametypeId, mapId, bHardcore, bInsta, 
+        serverId, gametypeId, mapId, (bHardcore) ? 1 : 0, bInsta, 
         date, playtime, matchStart, matchEnd, players, totalTeams, team0Scores, 
         team1Scores, team2Scores, team3Score, soloWinner, soloWinnerScore,
         targetScore, timeLimit, mutators

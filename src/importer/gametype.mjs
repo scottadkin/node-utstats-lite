@@ -5,7 +5,6 @@ export class Gametype{
     constructor(){
 
         this.name = "";
-        this.bHardcore = 0;
         this.bInsta = 0;
         this.targetScore = 0;
         this.timeLimit = 0;
@@ -30,17 +29,6 @@ export class Gametype{
             return;
         }
 
-        if(type === "hardcore"){
-
-            value = value.toLowerCase();
-
-            if(value === "true"){
-                this.bHardcore = 1;
-            }else{
-                this.bHardcore = 0;
-            }
-            return;
-        }
 
         if(type === "insta"){
 

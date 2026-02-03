@@ -3,6 +3,7 @@ import Message from "../message.mjs";
 import { getPlayerMasterId, createMasterPlayer, updateMasterPlayers, 
     updatePlayerTotals, bulkInsertPlayerMatchData, updateMapAverages } from "../players.mjs";
 import geoip from "geoip-lite";
+import { scalePlaytime } from "../generic.mjs";
 
 
 export class PlayerManager{
@@ -21,9 +22,7 @@ export class PlayerManager{
     }
 
 
-    createPlayers(lines){
-
-        const testPlayers = [];
+    createPlayers(lines, matchStart, matchEnd, bHardcore){
 
         const namesToIds = {};
         const idsToNames = {};
@@ -32,9 +31,7 @@ export class PlayerManager{
         const reg =  /^player\t(.+?)\t(.+)$/i;
         const renameReg = /^(.+)\t(\d+)$/i;
         const connectReg = /^(.+)\t(\d+?)\t.+$/i;
-        const disConnectReg = /^(.+)\t(\d+?)$/i;
 
-   
         const connectEvents = [];
 
         const targetKeys = ["connect", "disconnect", "rename"];
@@ -49,7 +46,7 @@ export class PlayerManager{
 
             if(timestampResult === null) continue;
 
-            const timestamp = parseFloat(timestampResult[1]);
+            const timestamp = scalePlaytime(parseFloat(timestampResult[1]), bHardcore);
 
             const subString = timestampResult[2];
 
@@ -59,9 +56,11 @@ export class PlayerManager{
 
             const type = result[1].toLowerCase();
 
+            
+
             if(targetKeys.indexOf(type) === -1) continue;
 
-            
+
 
             if(type === "rename"){
 
@@ -76,38 +75,23 @@ export class PlayerManager{
                 }
 
                 //we only care about the last used name for each id
-                if(idsToNames[playerId] === undefined){
+                if(idsToNames[playerId] === undefined) idsToNames[playerId] = nameResult[1];
 
-                    idsToNames[playerId] = nameResult[1];
-
-                }
-
-                connectEvents.push({
+                connectEvents.unshift({
                     timestamp,
                     type,
                     "name": nameResult[1], 
                     "playerId": parseInt(nameResult[2])
                 });
-                //const player = this.getTestPlayer(testPlayers, playerId);
-
-                //if(player === null){
-                  //  testPlayers.push(new TestPlayer(playerId, nameResult[1]));
-                //}
-                continue;
-
+ 
+   
             }else if(type === "connect"){
-
-                //connectEvents.push(line);
-                //console.log(connectReg.exec(result[2]));
 
                 const cResult = connectReg.exec(result[2]);
 
                 if(cResult === null) continue;
 
-                console.log(cResult);
-                //const playerName = cResult[1].toLowerCase();
-                //const playerId = parseInt(cResult[2]);
-                connectEvents.push({
+                connectEvents.unshift({
                     timestamp,
                     type,
                     "name": cResult[1], 
@@ -117,9 +101,10 @@ export class PlayerManager{
 
             }else if(type === "disconnect"){
 
-                //if disconnect before match start time set to spectator
-            }
+                const playerId = parseInt(result[2]);
 
+                connectEvents.unshift({type, timestamp, "playerId": playerId});
+            }
         }
 
 
@@ -127,7 +112,7 @@ export class PlayerManager{
 
 
         for(let [playerId, playerName] of Object.entries(idsToNames)){
-            console.log(playerId, playerName);
+      
             playerId = parseInt(playerId);
             const player = this.getPlayerByName(playerName);
 
@@ -135,24 +120,39 @@ export class PlayerManager{
                 this.players.push(new Player(playerName, playerId));
             }else{
                 player.matchIds.push(playerId);
+            }    
+        }
+
+        
+
+        for(let i = 0; i < connectEvents.length; i++){
+
+ 
+            const {timestamp, type, name, playerId} = connectEvents[i];
+        
+            const player = this.getPlayerById(playerId);
+
+            if(player === null){
+                new Message(`Player is null, playerManager->createPlayers()`, "error");
+                continue;
             }
 
-            
-           // this.players.push(new Player());
+            if(type === "connect"){
+
+                player.connected(timestamp, matchStart, playerId);
+
+            }else if(type === "disconnect"){
+
+                player.disconnect(timestamp, matchStart, playerId);
+            }
         }
 
-        for(let i = 0; i < this.players.length; i++){
-
-            const p = this.players[i];
-            console.log(p.name, p.matchIds);
-        }
-        process.exit();
-        //console.log(connectEvents);
-        console.log(connectEvents);
-
+       for(let i = 0; i < this.players.length; i++){
+            this.players[i].disconnect(matchEnd, matchStart, null);
+       }
     }
 
-    parseLine(timestamp, line){
+    parseLine(timestamp, subString){
 
         const typeReg = /^player\t((.+?)\t.+)$/i;
 
@@ -161,48 +161,13 @@ export class PlayerManager{
         const teamReg = /^team\t(\d+?)\t(\d+)$/i;
         const ipReg = /^ip\t(\d+?)\t(.+)$/i;
         const genericReg = /^(.+?)\t(\d+?)\t(.+)$/i;
-        //87.97	player	Connect	Illana	16	False
-        const connectReg = /^connect\t(.+?)\t(\d+)\t.+$/i;
 
-        const disconnectReg = /^disconnect\t(\d+)$/i;
-
-        const typeResult = typeReg.exec(line);
+        const typeResult = typeReg.exec(subString);
 
         if(typeResult === null) return;
 
         const type = typeResult[2].toLowerCase();
-        line = typeResult[1];
-
-        /*if(type === "rename"){
-
-            const result = playerNameReg.exec(line);
-            if(result === null) return;
-
-            this.namesToIds[result[1]] = parseInt(result[2]);
-            //set bSPectator to true and on the connect event set to true(rename always happens before connect, but no connect for spectators)
-            this.addPlayer(timestamp, result[1], parseInt(result[2]), true);
-            return;
-        }*/
-
-        if(type === "connect"){
-
-            const result = connectReg.exec(line);
-
-            if(result === null) return;
-
-            this.setConnectionEvent(parseInt(result[2]), timestamp);
-            return;
-        }
-
-        if(type === "disconnect"){
-
-            const result = disconnectReg.exec(line);
-
-            if(result === null) return;
-
-            this.setDisconnectEvent(parseInt(result[1]), timestamp);
-            return;
-        }
+        const line = typeResult[1];
 
         if(type === "isabot"){
 
@@ -385,8 +350,6 @@ export class PlayerManager{
 
     getPlayerById(id){
 
-       // create player if not exists, just set id set name and everything else to null
-
         id = parseInt(id);
 
         for(let i = 0; i < this.players.length; i++){
@@ -395,41 +358,22 @@ export class PlayerManager{
 
             if(p.matchIds.indexOf(id) !== -1) return p;
 
-            //if(p.id === id) return p;
         }
 
         return null;
     }
 
-    /*addPlayer(timestamp, name, playerId, bSpectator){
+    setConnectionEvent(playerId, timestamp){
 
-        if(bSpectator === undefined) bSpectator = false;
-        const testPlayer = this.getPlayerById(playerId);
+        const player = this.getPlayerById(playerId);
 
-        
-
-        this.idsToNames[playerId] = name;
-
-        if(testPlayer !== null){
-            //process.exit();
-
-            this.renameHistory.push({"playerId": playerId, "newName": name});
-            testPlayer.name = name;
-           // testPlayer.connected(timestamp);
+        if(player === null){
+            new Message(`Failed to get player by id setConnectionEvent`,"warning");
             return;
         }
 
-        this.players.push(new Player(timestamp, name, playerId));
-    }*/
-
-    setConnectionEvent(playerId, timestamp){
-
-        for(let i = 0; i < this.players.length; i++){
-
-            const p = this.players[i];
-
-            if(p.id === playerId) p.connected(timestamp, true);
-        }
+        player.connected(timestamp, true)
+        
     }
 
     setDisconnectEvent(playerId, timestamp){
@@ -440,7 +384,6 @@ export class PlayerManager{
             new Message(`Failed to get player by id setDisconnectEvent`,"warning");
             return;
         }
-
 
         player.disconnect(timestamp);
     }
@@ -542,8 +485,6 @@ export class PlayerManager{
                 "name": p.name,
                 "hwid": p.hwid,
                 "mac1": p.mac1,
-                "connect": p.connects,
-                "disconnect": p.disconnects,
                 "mac2": p.mac2,
                 "bSpectator": p.bSpectator,
                 "multis": p.stats.multis,
@@ -654,40 +595,12 @@ export class PlayerManager{
     }
 
 
-    //if a player joins the match as player and leaves before start the improter doesn't correct them as a spectator if they rejoin
-    fixBSpectator(player, matchStart, totalTeams){
-
-       /* if(player.connectEvents.length > 0){
-
-            const last = player.connectEvents[player.connectEvents.length - 1];
-
-            //if there is no connect event after the last disconnect event player was never active during matchtime
-            if(last.type === "disconnect" && last.timestamp < matchStart){
-                player.bSpectator = 1;
-            }
-        }
-
-        console.log(player.disconnects[player.disconnects.length - 1], player.connects[player.connects.length - 1], player.name);*/
-
-        player.bSpectator = 1;
-
-        for(let i = 0; i < player.connectEvents.length; i++){
-
-            const c = player.connectEvents[i];
-
-            if(c.type === "connect"){
-                player.bSpectator = 0;
-            }else{
-                if(c.timestamp < matchStart) player.bSpectator = 1;
-            }
-
-           // if(c.type === "connect")
-        }
-
-    }
+    
 
     mergePlayers(matchStart, bUTStatsLiteLog, totalTeams, bFoundClassicWeaponData){
 
+        //will not be needed with new changes
+        return;
         //so old utstats logs still can import
         const legacyMergeKeys = ["frags", "kills", "deaths",
             "suicides", "teamKills"];

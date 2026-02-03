@@ -301,7 +301,7 @@ export class CTF{
     }
 
 
-    async processFlagEvents(playerManager, killsManager, matchId, mapId, gametypeId, bHardcore){
+    async processFlagEvents(playerManager, killsManager, matchId, mapId, gametypeId){
 
         for(let i = 0; i < this.events.length; i++){
 
