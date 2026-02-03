@@ -56,29 +56,11 @@ export class MatchParser{
         this.bUTStatsLiteLog = false;
         
 
-        //scale timestamps at the start for hardcore instead of over and over in different methodd
-        this.setBHardcore();
-
+        this.preliminaryChecks();
         this.parseLines();
 
     }
 
-    setBHardcore(){
-
-        this.bHardcore = false;
-
-        //0.00	game	HardCore	True
-
-        const reg = /^\d+?\.\d+?\tgame\thardcore\t(.+)$/igm;
-
-        const result = reg.exec(this.rawData);
-
-        if(result === null) return;
-
-        const value = result[1].toLowerCase();
-
-        if(value === "true") this.bHardcore = true;
-    }
 
     async main(){
 
@@ -273,21 +255,49 @@ export class MatchParser{
 
         await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players, this.weapons);
 
+
+        this.players.debugListAllPlayers();
+    }
+
+
+    preliminaryChecks(){
+
+
+        this.bHardcore = false;
+
+        const reg = /\d+\.\d+\tgame\thardcore\t(.+)\s/i;
+        const result = reg.exec(this.rawData);
+
+        const value = result[1].toLowerCase();
+
+        if(value === "true") this.bHardcore = true;
+
+        const startReg = /(\d+\.\d+)\tgame\trealstart\s/i;
+        const startResult = startReg.exec(this.rawData);
+
+        if(startResult === null) return;
+        this.matchStart = scalePlaytime(parseFloat(startResult[1]), this.bHardcore);
+
+        const endReg = /(\d+\.\d+)\tgame_end\t(.+?)\s/i
+        const endResult = endReg.exec(this.rawData);
+
+        if(endResult === null) return;
+        this.matchEnd = scalePlaytime(parseFloat(endResult[1]), this.bHardcore);
+
     }
 
 
     parseLines(){
 
-        const test = this.rawData;
+        if(this.matchStart === -1) return;
+        if(this.matchEnd === -1) return;
 
         const lineReg = /^(.+?)$/img;
-        const lines = test.match(lineReg);
+        const lines = this.rawData.match(lineReg);
 
         const logStandardReg = /^.+info\tLog_Standard\t(.+)$/i;
 
         //check if utstats-lite log because stat_player behaves differently(merges player stats into one for multiple reconnects) 
-
-        //this.testFartNoise(lines);
 
         this.players.createPlayers(lines);
 
@@ -305,8 +315,6 @@ export class MatchParser{
         const teamScoreReg = /^teamscore\t(\d+)\t(.+)$/i;
         const headshotReg = /^headshot\t.+$/i;
 
-        const endReg = /^game_end\t(.+)$/i;
-
         const firstBloodReg = /^first_blood\t(\d+)$/i;
 
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
@@ -317,8 +325,6 @@ export class MatchParser{
         const liteReg = /lite/i;
 
         const classWeaponStatReg = /^weap_.+?\t(.+?)\t(\d+?)\t(.+?)$/i;
-
-        //16521.67	game_end	mapchange
 
         for(let i = 0; i < lines.length; i++){
             
@@ -374,13 +380,6 @@ export class MatchParser{
 
                 const result = gameReg.exec(subString);
 
-                const subType = result[1].toLowerCase();
-
-                if(subType === "realstart"){
-                    this.matchStart = timestamp;
-                    continue;
-                }
-
                 this.gametype.parseLine(result[1]);
                 continue;
             }
@@ -399,21 +398,6 @@ export class MatchParser{
                 continue;
             }
 
-            if(endReg.test(subString)){
-
-                const gameEndResult = endReg.exec(subString);
-                //Ignore logs where the match ended because of map change
-                if(gameEndResult !== null && gameEndResult[1].toLowerCase() === "mapchange"){
-    
-                    new Message(`Match end type was map change, skipping log parsing.`,"error");
-                    this.matchStart = -1;
-                    this.matchEnd = -1;
-                    return;
-                }
-
-                this.matchEnd = timestamp;
-                continue;
-            }
 
             if(this.matchStart !== -1 && headshotReg.test(subString)){
 

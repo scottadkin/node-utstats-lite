@@ -146,10 +146,10 @@ export class PlayerManager{
             const p = this.players[i];
             console.log(p.name, p.matchIds);
         }
-       // process.exit();
+        process.exit();
         //console.log(connectEvents);
         console.log(connectEvents);
-        process.exit();
+
     }
 
     parseLine(timestamp, line){
@@ -542,6 +542,8 @@ export class PlayerManager{
                 "name": p.name,
                 "hwid": p.hwid,
                 "mac1": p.mac1,
+                "connect": p.connects,
+                "disconnect": p.disconnects,
                 "mac2": p.mac2,
                 "bSpectator": p.bSpectator,
                 "multis": p.stats.multis,
