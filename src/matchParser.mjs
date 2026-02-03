@@ -125,15 +125,11 @@ export class MatchParser{
         await this.weapons.setWeaponIds();
 
         this.classicWeaponStats.setPlayerStats(this.weapons, this.players);
-
-
-        this.players.mergePlayers(this.matchStart, this.bUTStatsLiteLog, this.totalTeams, this.classicWeaponStats.bFoundData);
         
         this.players.setPlayerPingStats();
 
         this.players.setCountries();
         this.players.matchEnded(this.matchStart, this.matchEnd);
-        this.players.setPlayerPlaytime(this.matchStart, this.matchEnd, this.totalTeams);
 
         const totalPlayers = this.players.getTotalUniquePlayers(this.totalTeams);
 
@@ -199,7 +195,7 @@ export class MatchParser{
         await this.players.insertPlayerMatchData(this.matchId, this.match.date, this.gametype.id, this.map.id);
 
         //TODO add gametype & map ids to weapons, CTF AND DOM TABLES
-        await this.ctf.insertPlayerMatchData(this.players, this.matchId, this.gametype.id, this.map.id);
+        await this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
         await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
        // await this.weapons.setWeaponIds();
         this.kills.setWeaponIds(this.weapons);
@@ -210,22 +206,22 @@ export class MatchParser{
 
         this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides);
         await this.weapons.insertPlayerMatchStats(this.matchId, this.gametype.id, this.map.id);
-        await this.weapons.updatePlayerTotals(this.players.mergedPlayers);
+        await this.weapons.updatePlayerTotals(this.players.players);
 
 
         await this.players.updatePlayerTotals(this.match.date, this.gametype.id, this.map.id);
         //await this.players.updatePlayerFullTotals();
 
-        await this.ctf.updatePlayerTotals(this.players);
+        await this.ctf.updatePlayerTotals(this.players.players);
 
 
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
         await this.map.updateTotals();
 
-        const validMergedPlayerIds = this.players.getMergedPlayerIds();
+        const uniquePlayerIds = this.players.getUniquePlayerIds();
 
-        await calculateRankings(this.gametype.id, validMergedPlayerIds);
-        await calculateRankings(this.map.id, validMergedPlayerIds, "map");
+        await calculateRankings(this.gametype.id, uniquePlayerIds);
+        await calculateRankings(this.map.id, uniquePlayerIds, "map");
         
 
         const hashVars = [this.map.name, 
@@ -249,8 +245,8 @@ export class MatchParser{
         await setMatchHash(this.matchId, hashVars.toString());
 
 
-        await this.damageManager.insertMatchData(this.players, this.matchId, this.map.id, this.gametype.id);
-        await this.damageManager.updatePlayerTotals(this.players, this.gametype.id);
+        await this.damageManager.insertMatchData(this.players.players, this.matchId, this.map.id, this.gametype.id);
+        await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
 
 
         await this.players.updateMapAverages(this.gametype.id, this.map.id);
@@ -259,7 +255,7 @@ export class MatchParser{
 
         await this.weapons.updateMapTotals(this.map.id);
 
-        await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players, this.weapons);
+        await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
 
 
        // this.players.debugListAllPlayers();

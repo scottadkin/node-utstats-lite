@@ -108,11 +108,11 @@ export default class ClassicWeaponStats{
     }
 
 
-    async insertMatchStats(matchId, mapId, gametypeId, playerManager, weaponsManager){
+    async insertMatchStats(matchId, mapId, gametypeId, players, weaponsManager){
 
 
 
-        await bulkInsertMatchStats(matchId, mapId, gametypeId, playerManager, weaponsManager);
+        await bulkInsertMatchStats(matchId, mapId, gametypeId, players, weaponsManager);
         
     }
 }

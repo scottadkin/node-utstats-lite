@@ -64,44 +64,37 @@ async function updatePlayerTotal(playerId, gametypeId){
     }
 }
 
-export async function updatePlayerTotals(playerManager, gametypeId){
+export async function updatePlayerTotals(players, gametypeId){
 
-    for(const p of Object.values(playerManager.mergedPlayers)){
+    for(let i = 0; i < players.length; i++){
+
+        const p = players[i];
+        if(p.playtime === 0) continue;
 
         const d = p.damageData;
 
         if(d === undefined) continue;
 
         await updatePlayerTotal(p.masterId, gametypeId);
-
-       /* insertVars.push([
-            p.masterId,
-            matchId,
-            d.damageDelt,
-            d.damageTaken,
-            d.selfDamage,
-            d.teamDamageDelt,
-            d.teamDamageTaken,
-            d.fallDamage,
-            d.drownDamage,
-            d.cannonDamage
-        ]);*/
     }
+
 
 }
 
 
-export async function insertMatchData(playerManager, matchId, mapId, gametypeId){
+export async function insertMatchData(players, matchId, mapId, gametypeId){
 
     const insertVars = [];
 
     const query = `INSERT INTO nstats_damage_match 
     (player_id,match_id,map_id,gametype_id,damage_delt,damage_taken,self_damage,team_damage_delt,team_damage_taken,fall_damage,drown_damage,cannon_damage) VALUES ?`;
 
-    for(const p of Object.values(playerManager.mergedPlayers)){
+    for(let i = 0; i < players.length; i++){
+
+        const p = players[i];
+        if(p.playtime === 0) continue;
 
         const d = p.damageData;
-
         if(d === undefined) continue;
 
         insertVars.push([

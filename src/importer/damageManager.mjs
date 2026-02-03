@@ -58,16 +58,14 @@ export default class DamageManager{
         }
     }
 
-    async insertMatchData(playerManager, matchId, mapId, gametypeId){
+    async insertMatchData(players, matchId, mapId, gametypeId){
 
-        await insertMatchData(playerManager, matchId, mapId, gametypeId);
+        await insertMatchData(players, matchId, mapId, gametypeId);
     }
 
-    async updatePlayerTotals(playerManager, gametypeId){
+    async updatePlayerTotals(players, gametypeId){
 
-
-        await updatePlayerTotals(playerManager, gametypeId);
-
+        await updatePlayerTotals(players, gametypeId);
     }
 
 }

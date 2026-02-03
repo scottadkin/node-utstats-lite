@@ -133,9 +133,11 @@ export class WeaponsManager{
 
         const playerIds = [];
 
-        for(const player of Object.values(players)){
+        for(let i = 0; i < players.length; i++){
 
-            playerIds.push(player.masterId);
+            const p = players[i];
+            if(p.playtime === 0) continue;
+            playerIds.push(p.masterId);
         }
 
         await updatePlayerTotals(playerIds);

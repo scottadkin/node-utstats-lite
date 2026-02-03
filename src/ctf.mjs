@@ -3,7 +3,7 @@ import { getMatchesGametype } from "./matches.mjs";
 import Message from "./message.mjs";
 
 
-export async function insertPlayerMatchData(playerManager, matchId, gametypeId, mapId){
+export async function insertPlayerMatchData(players, matchId, gametypeId, mapId){
 
     const query = `INSERT INTO nstats_match_ctf (
     match_id,map_id,gametype_id,player_id,flag_taken,flag_pickup,flag_drop,
@@ -13,12 +13,14 @@ export async function insertPlayerMatchData(playerManager, matchId, gametypeId, 
 
     const insertVars = [];
 
-    for(const player of Object.values(playerManager.mergedPlayers)){
+    for(let i = 0; i < players.length; i++){
         
-        const s = player.stats.ctf;
+        const p = players[i];
+        if(p.playtime === 0) continue;
+        const s = p.stats.ctf;
 
         insertVars.push([
-            matchId, mapId, gametypeId, player.masterId, s.taken, s.pickedup, s.dropped,
+            matchId, mapId, gametypeId, p.masterId, s.taken, s.pickedup, s.dropped,
             s.assist, s.cover, s.seal, s.capture, s.kill,
             s.return, s.returnBase, s.returnMid, s.returnEnemyBase,
             s.returnSave, s.flagCarryTime.total, s.flagCarryTime.min, s.flagCarryTime.max 

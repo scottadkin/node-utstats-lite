@@ -12,9 +12,6 @@ export class PlayerManager{
 
         this.players = [];
 
-        this.mergedPlayers = {};
-
-
         this.renameHistory = [];
 
         this.idsToNames = {};
@@ -422,18 +419,6 @@ export class PlayerManager{
         player.stats[key] = value;
     }
 
-
-    //lazy way for kills and other events, as kill data ids have not been merged into one
-    setNonMergedPlayersMasterId(playerName, masterId){
-
-        for(let i = 0; i < this.players.length; i++){
-
-            const p = this.players[i];
-
-            if(p.name === playerName) p.masterId = masterId;
-        }
-    }
-
     async setPlayerMasterIds(matchDate){
 
         for(let i = 0; i < this.players.length; i++){
@@ -463,13 +448,8 @@ export class PlayerManager{
     //change to bulkinsert
     async insertPlayerMatchData(matchId, matchDate, gametypeId, mapId){
 
+        await bulkInsertPlayerMatchData(this.players, matchId, matchDate, gametypeId, mapId);
 
-        await bulkInsertPlayerMatchData(this.mergedPlayers, matchId, matchDate, gametypeId, mapId);
-
-        /*for(const p of Object.values(this.mergedPlayers)){
-
-            await insertPlayerMatchData(p, matchId, matchDate);
-        }*/
     }
 
 
@@ -502,14 +482,15 @@ export class PlayerManager{
 
         const uniqueNames = [];
 
-        for(const p of Object.values(this.mergedPlayers)){
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
 
             if(p.playtime === 0) continue;
 
             //players set to spectators by a mutator?
             if(totalTeams > 1 && p.team === 255) continue;
             
-
             if(p.bSpectator === 1 && p.playtime === 0) continue;
 
             if(p.bBot === 0){
@@ -519,10 +500,8 @@ export class PlayerManager{
             if(p.bBot === 1 && !this.bIgnoreBots){
                 uniqueNames.push(p.name);
             }
-        }
+        }  
         
-        
-
         return uniqueNames.length;
     }
 
@@ -533,10 +512,12 @@ export class PlayerManager{
         if(totalTeams >= 2) return {"id": 0, "score": 0};
 
         const basicPlayers = [];
-        
-        for(const p of Object.values(this.mergedPlayers)){
+
+        for(let i = 0; i < this.players.length; i++){
+            const p = this.players[i];
             basicPlayers.push({"id": p.masterId, "score": parseInt(p.stats.score), "deaths": parseInt(p.stats.deaths)});
         }
+        
 
         basicPlayers.sort((a, b) =>{
 
@@ -576,338 +557,6 @@ export class PlayerManager{
         return oldName;
     }
 
-    getLastUsedIndexByName(name){
-
-        let max = -1;
-
-        for(let [key, value] of Object.entries(this.idsToNames)){
-
-            if(value !== name) continue;
-
-            key = parseInt(key);
-
-            if(key > max){
-                max = key;
-            }
-        }
-
-        return max;
-    }
-
-
-    
-
-    mergePlayers(matchStart, bUTStatsLiteLog, totalTeams, bFoundClassicWeaponData){
-
-        //will not be needed with new changes
-        return;
-        //so old utstats logs still can import
-        const legacyMergeKeys = ["frags", "kills", "deaths",
-            "suicides", "teamKills"];
-
-        //utstats lite merges everything but score mutator side
-
-        let mergeKeys = [
-            "score", "headshots"
-        ];
-
-        //we want all stat_player stuff to merge for old utstats
-        if(!bUTStatsLiteLog){
-            mergeKeys = [...mergeKeys, ...legacyMergeKeys];
-        }
-
-
-        const intTypes = [
-            "score", "frags", "kills", "deaths",
-            "suicides", "teamKills"
-        ];
-        
-        const spreeMergeKeys = [
-            "spree", "rampage", "dominating", "unstoppable", "godlike"
-        ];
-
-        const multiMergeKeys = [
-            "double", "multi", "ultra", "monster"
-        ];
-
-        let ctfKeys = [];
-
-        if(this.players.length > 0){
-
-            ctfKeys = Object.keys(this.players[0].stats.ctf);
-
-            const carryIndex = ctfKeys.indexOf("flagCarryTime");
-
-            if(carryIndex !== -1){
-                ctfKeys.splice(carryIndex, 1);
-            }
-        }
-
-
-        const damageKeys = [
-            "damageDelt",
-            "damageTaken",
-            "selfDamage",
-            "teamDamageDelt",
-            "teamDamageTaken",
-            "fallDamage",
-            "drownDamage",
-            "cannonDamage"
-        ];
-
-
-        for(let i = 0; i < this.players.length; i++){
-
-            const p = this.players[i];
-
-
-            const finalName = this.idsToNames[p.id];    
-
-
-            if(this.mergedPlayers[finalName] === undefined){
-                this.mergedPlayers[finalName] = p;
-                this.mergedPlayers[finalName].merges = 1;
-                this.mergedPlayers[finalName].totalEff = parseFloat(p.stats.efficiency);
-                this.mergedPlayers[finalName].totalTTL = parseFloat(p.stats.ttl);
-
-                //if(p.playtime === 0) this.mergedPlayers[finalName].bSpectator = 0;
-
-                //forgot to set this... :/
-                if(!p.bHadConnectEvent){
-                    this.mergedPlayers[finalName].bSpectator = 1;
-                }
-
-
-                this.fixBSpectator(this.mergedPlayers[finalName], matchStart);
-
-                //if(p.playtime === 0) this.mergedPlayers[finalName].bSpectator = 1;
-               // if(p.stats.timeOnServer > 0) this.mergedPlayers[finalName].bSpectator = 0;
-                continue;
-            }
-
-            const master = this.mergedPlayers[finalName];
-            master.merges += 1;
-
-            if(master.hwid === "") master.hwid = p.hwid;
-            if(master.mac1 === "") master.mac1 = p.mac1;
-            if(master.mac2 === "") master.mac2 = p.mac2;
-
-            if(master.bHadConnectEvent || p.bHadConnectEvent){
-                //master.bHadConnectEvent = 1;
-                master.bSpectator = 0;
-            }else if(!master.bHadConnectEvent && !p.bHadConnectEvent){
-                master.bSpectator = 1;
-            }
-            //if player played at any point don't mark them as a spectator even after reconnects
-            if(master.bSpectator === 0 || p.bSpectator === 0) master.bSpectator = 0;
-
-
-            master.team = p.team;
-            
-            
-            //merge basic stats events
-            for(let x = 0; x < mergeKeys.length; x++){
-
-                const type = mergeKeys[x];
-
-                if(intTypes.indexOf(type) !== -1){
-
-                    master.stats[type] = parseInt(master.stats[type]);
-                    master.stats[type] += parseInt(p.stats[type]);   
-                }else{
-                    master.stats[type] += p.stats[type];   
-                }   
-            }
-
-            for(let x = 0; x < multiMergeKeys.length; x++){
-
-                const type = multiMergeKeys[x];
-
-                master.stats.multis[type] += p.stats.multis[type];
-            }
-
-            if(p.stats.multis.best > master.stats.multis.best){
-                master.stats.multis.best = p.stats.multis.best;
-            }
-
-            if(p.stats.sprees.best > master.stats.sprees.best){
-                master.stats.sprees.best = p.stats.sprees.best;
-            }
-
-            for(let x = 0; x < spreeMergeKeys.length; x++){
-
-                const type = spreeMergeKeys[x];
-
-                master.stats.sprees[type] += p.stats.sprees[type];
-            }
-
-            for(let x = 0; x < ctfKeys.length; x++){
-
-                const type = ctfKeys[x];
-
-                master.stats.ctf[type] += p.stats.ctf[type];
-            }
-            
-
-            //
-            if(master.stats.ctf.flagCarryTime.min > p.stats.ctf.flagCarryTime.min){
-
-                master.stats.ctf.flagCarryTime.min = p.stats.ctf.flagCarryTime.min;
-            }
-
-            if(master.stats.ctf.flagCarryTime.max < p.stats.ctf.flagCarryTime.max){
-
-                master.stats.ctf.flagCarryTime.max = p.stats.ctf.flagCarryTime.max;
-            }
-
-            master.stats.ctf.flagCarryTime.total += p.stats.ctf.flagCarryTime.total;
-
-
-            for(const [pointId, pointCaps] of Object.entries(p.stats.dom.controlPoints)){
-                
-                if(master.stats.dom.controlPoints[pointId] === undefined){
-                    master.stats.dom.controlPoints[pointId] = 0;
-                }
-
-                master.stats.dom.controlPoints[pointId] += pointCaps;
-            }
-
-            for(const [itemType, timesUsed] of Object.entries(p.stats.items)){
-
-                master.stats.items[itemType] += timesUsed;
-            }
-
-
-            if(master.stats.kills > 0){
-
-                if(master.stats.deaths > 0){
-                    master.stats.efficiency = master.stats.kills / (master.stats.kills + master.stats.deaths) * 100;
-                }else{
-                    master.stats.efficiency = 100;
-                }
-            }else{
-                master.stats.efficiency = 0;
-            }
-
-
-            if(master.stats.totalTTL > 0){
-                master.stats.ttl = master.stats.totalTTL / master.stats.merges;
-            }
-
-            master.pings = [...master.pings, ...p.pings];
-
-            master.connects = [... new Set([...master.connects, ...p.connects])];
-
-            master.disconnects = [... new Set([...master.disconnects, ...p.disconnects])];
-
-            master.connectEvents = [...master.connectEvents, ...p.connectEvents];
-            
-            //console.log(this.bDisconnectBeforeMatchStart(master, matchStart));
-
-            //if(master.stats.timeOnServer > 0) master.bSpectator = 0;
-
-
-            for(let x = 0; x < damageKeys.length; x++){
-
-                const d = damageKeys[x];
-
-                if(p.damageData === undefined) break;
-
-                if(master.damageData === undefined){
-                    master.damageData = p.damageData;
-                    continue;
-                }
-
-                master.damageData[d] += p.damageData[d];
-            }
-
-            master.teamChanges = [...master.teamChanges, ...p.teamChanges];
-
-            master.matchResult = p.matchResult;
-
-
-            //classic utstats weapon stats
-            if(bFoundClassicWeaponData){
-
-                const mWS = master.classicWeaponStats;
-                const masterWeaponKeys = Object.keys(master.classicWeaponStats);
-
-                for(const [weaponId, weaponStats] of Object.entries(p.classicWeaponStats)){
-
-                    const wIndex = masterWeaponKeys.indexOf(weaponId);
-
-                    if(wIndex === -1){
-
-                        mWS[weaponId] = weaponStats;
-                        continue;
-
-                    }else{
-
-
-                        mWS[weaponId].shots += parseInt(weaponStats.shots);
-                        mWS[weaponId].hits += parseInt(weaponStats.hits);
-                        mWS[weaponId].damage += parseInt(weaponStats.damage);
-
-                        let acc = 0;
-
-                        if(mWS[weaponId].hits > 0){
-
-                            if(mWS[weaponId].shots > 0){
-                                acc = mWS[weaponId].hits / mWS[weaponId].shots * 100;
-                            }else{
-                                acc = 100;
-                            }
-                        }
-                        mWS[weaponId].accuracy = acc;
-                    }
-                }
-            }
-
-
-            this.fixBSpectator(master, matchStart, totalTeams);
-        }  
-
-
-
-        for(const [name, playerData] of Object.entries(this.mergedPlayers)){
-
-            //get around utstatslite behav
-            if(playerData.merges > 1 && bUTStatsLiteLog){
-
-
-                const lastUsedId = this.getLastUsedIndexByName(name);
-
-
-                if(lastUsedId === playerData.id) continue;
-
-
-                const latestData = this.getPlayerById(lastUsedId);
-
-                playerData.stats.frags = parseInt(latestData.stats.frags);
-                playerData.stats.kills = parseInt(latestData.stats.kills);
-                playerData.stats.deaths = parseInt(latestData.stats.deaths);
-                playerData.stats.suicides = parseInt(latestData.stats.suicides);
-                playerData.stats.teamKills = parseInt(latestData.stats.teamKills);
-                //playerData.stats.kills = latestData.stats.efficiency;
-
-
-            if(playerData.stats.kills > 0){
-
-                    if(playerData.stats.deaths > 0){
-                        playerData.stats.efficiency = playerData.stats.kills / (playerData.stats.kills + playerData.stats.deaths) * 100;
-
-                    }else{
-                        playerData.stats.efficiency = 100;
-                    }
-                }else{
-                    playerData.stats.efficiency = 0;
-                }
-            
-            }
-        }
-
-    }
-
     matchEnded(matchStart, matchEnd){
 
         for(let i = 0; i < this.players.length; i++){
@@ -920,42 +569,28 @@ export class PlayerManager{
 
     setCountries(){
 
-        for(const p of Object.values(this.mergedPlayers)){
+        for(let i = 0; i < this.players.length; i++){
 
+            const p = this.players[i];
             const lookup = geoip.lookup(p.ip);
 
-            if(lookup !== null){
-                if(lookup.country !== undefined) p.country = lookup.country.toLowerCase();
+            if(lookup !== null && lookup.country !== undefined){
+                p.country = lookup.country.toLowerCase();
             }
+            
         }
     }
-
-    setPlayerPlaytime(matchStart, matchEnd, totalTeams){
-
-        for(const p of Object.values(this.mergedPlayers)){
-
-            p.setPlaytime(matchStart, matchEnd, totalTeams);
-        }
-    }
-
-    /*scalePlaytimes(bHardcore){
-
-        if(bHardcore === 0) return;
-
-        for(const player of Object.values(this.mergedPlayers)){
-
-            player.playtime = scalePlaytime(player.playtime, bHardcore);
-        }
-    }*/
 
     async updatePlayerTotals(date, gametypeId, mapId){
 
         const masterIds = [];
         const idsToCountries = {};
 
-        for(const p of Object.values(this.mergedPlayers)){
-            
-            if(p.bSpectator === 0){
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(p.playtime > 0){
                 masterIds.push(p.masterId);
                 idsToCountries[p.masterId] = p.country;
             }
@@ -966,17 +601,14 @@ export class PlayerManager{
         await updatePlayerTotals(masterIds, gametypeId, mapId);
         
     }
-    /**
-     * Update totals that are used for player profiles
-     */
-    async updatePlayerFullTotals(){
-        
-    }
-
 
     setPlayerPingStats(){
 
-        for(const player of Object.values(this.mergedPlayers)){
+        for(let i = 0; i < this.players.length; i++){
+
+            const player = this.players[i];
+
+            if(player.playtime === 0) continue;
 
             let total = 0;
             let min = -1;
@@ -984,6 +616,7 @@ export class PlayerManager{
             let max = -1;
 
             for(let i = 0; i < player.pings.length; i++){
+
                 const p = player.pings[i];
 
                 if(i === 0 || p < min){
@@ -1008,24 +641,22 @@ export class PlayerManager{
     }
 
 
-    getMergedPlayerIds(){
+    /**
+     * Only get players with playtime
+     */
+    getUniquePlayerIds(){
 
-        const ids = [];
+        const found = [];
 
-        for(const player of Object.values(this.mergedPlayers)){
+        for(let i = 0; i < this.players.length; i++){
 
-            if(player.bSpectator === 1 && player.stats.timeOnServer === 0) continue;
+            const p = this.players[i];
 
-            if(player.bBot === 0){
-                ids.push(player.masterId);
-            }
+            if(p.playtime > 0) found.push(p.masterId);
 
-            if(player.bBot === 1 && !this.bIgnoreBots){
-                ids.push(player.masterId);
-            }
         }
 
-        return ids;
+        return found;
     }
 
     getPlayerTeamAt(playerId, timestamp){
@@ -1043,14 +674,9 @@ export class PlayerManager{
 
     async updateMapAverages(gametypeId, mapId){
 
-        const playerIds = new Set();
+        const playerIds = this.getUniquePlayerIds();
 
-        for(const player of Object.values(this.mergedPlayers)){
-
-            playerIds.add(player.masterId);
-        }
-
-        await updateMapAverages([...playerIds], gametypeId, mapId);
+        await updateMapAverages(playerIds, gametypeId, mapId);
     }
 
 
@@ -1058,12 +684,16 @@ export class PlayerManager{
 
         if(soloWinner !== 0){
 
-            for(const player of Object.values(this.mergedPlayers)){
+            for(let i = 0; i < this.players.length; i++){
 
-                if(player.masterId === soloWinner){
-                    player.matchResult = "w";
+                const p = this.players[i];
+
+                if(p.playtime === 0) continue;
+
+                if(p.masterId === soloWinner){
+                    p.matchResult = "w";
                 }else{
-                    if(player.playtime !== 0) player.matchResult = "l";
+                    if(p.playtime !== 0) p.matchResult = "l";
                 }
             }
 
@@ -1085,23 +715,25 @@ export class PlayerManager{
             if(t === winningTeamScore) winningTeams.push(i);
         }
 
-        for(const player of Object.values(this.mergedPlayers)){
+        for(let i = 0; i < this.players.length; i++){
 
-            if(player.bSpectator === 1) continue;
+            const p = this.players[i];
 
-            if(winningTeams.length === 1 && winningTeams.indexOf(player.team) !== -1){
-                player.matchResult = "w";
+            if(p.playtime === 0) continue;
+
+            if(winningTeams.length === 1 && winningTeams.indexOf(p.team) !== -1){
+                p.matchResult = "w";
                 continue;
             }
 
-            if(winningTeams.length > 1 && winningTeams.indexOf(player.team) !== -1){
+            if(winningTeams.length > 1 && winningTeams.indexOf(p.team) !== -1){
 
-                player.matchResult = "d";
+                p.matchResult = "d";
                 continue;
             }
 
 
-            player.matchResult = "l";
+            p.matchResult = "l";
         }
     }
 

@@ -1,14 +1,17 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
 
-export async function bulkInsertMatchStats(matchId, mapId, gametypeId, playerManager, weaponsManager){
+export async function bulkInsertMatchStats(matchId, mapId, gametypeId, players, weaponsManager){
 
     const insertVars = [];
 
-    for(const player of Object.values(playerManager.mergedPlayers)){
+    for(let i = 0; i < players.length; i++){
 
-        for(const [weaponId, s] of Object.entries(player.classicWeaponStats)){
+        const p = players[i];
+        if(p.playtime === 0) continue;
 
-            const altStats = weaponsManager.getPlayerWeaponStats(player.masterId, weaponId);
+        for(const [weaponId, s] of Object.entries(p.classicWeaponStats)){
+
+            const altStats = weaponsManager.getPlayerWeaponStats(p.masterId, weaponId);
 
             let kills = 0;
             let deaths = 0;
@@ -22,7 +25,7 @@ export async function bulkInsertMatchStats(matchId, mapId, gametypeId, playerMan
             }
 
             insertVars.push([
-                matchId, gametypeId, mapId, player.masterId, weaponId, kills, deaths, s.shots, s.hits, s.accuracy, s.damage
+                matchId, gametypeId, mapId, p.masterId, weaponId, kills, deaths, s.shots, s.hits, s.accuracy, s.damage
             ]);
         }
     }
