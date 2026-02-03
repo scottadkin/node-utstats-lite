@@ -64,6 +64,12 @@ export class MatchParser{
 
     async main(){
 
+        if(this.bMapChangeEnd){
+            new Message(`Match end type was map change, skipping log parsing.`,"error");
+            throw new Error("MAP CHANGE END");
+        }
+
+
         if(this.matchStart === -1){
             new Message(`There was no match start event in this log.`, "error");
             throw new Error("NO START");
@@ -282,6 +288,17 @@ export class MatchParser{
         const endResult = endReg.exec(this.rawData);
 
         if(endResult === null) return;
+
+        this.bMapChangeEnd = false;
+
+        if(endResult[2].toLowerCase() !== "mapchange"){
+
+            this.matchStart = -1;
+            this.matchEnd = -1;
+            this.bMapChangeEnd = true;
+            return
+        }
+
         this.matchEnd = scalePlaytime(parseFloat(endResult[1]), this.bHardcore);
 
     }
