@@ -144,7 +144,9 @@ export class PlayerManager{
             }
         }
 
+
        for(let i = 0; i < this.players.length; i++){
+ 
             this.players[i].disconnect(matchEnd, matchStart, null);
        }
     }
@@ -665,7 +667,7 @@ export class PlayerManager{
 
             const p = this.players[i];
 
-            if(p.id === playerId) return p.getTeamAt(timestamp);
+            if(p.matchIds.indexOf(playerId) !== -1) return p.getTeamAt(timestamp);
         }
 
         return null;

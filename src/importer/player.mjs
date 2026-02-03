@@ -152,6 +152,7 @@ export class Player{
         this.bConnectedToServer = false;
 
         if(this.bSpectator){
+ 
             this.lastConnectInfo = null;
             return;
         }
@@ -166,12 +167,13 @@ export class Player{
 
         if(this.lastConnectInfo !== null){
 
-            const previousTimestamp = (this.lastConnectInfo.bBeforeMatchStart) ? matchStart : timestamp;
+
+            const previousTimestamp = (this.lastConnectInfo.bBeforeMatchStart) ? matchStart : this.lastConnectInfo.timestamp;
+
             if(timestamp < matchStart) timestamp = matchStart;
 
             this.playtime += (timestamp - previousTimestamp);
         }
-        
 
         this.lastConnectInfo = null;
     }

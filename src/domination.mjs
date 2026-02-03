@@ -35,7 +35,9 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
 
     const insertVars = [];
 
-    for(const player of Object.values(players)){
+    for(let i = 0; i < players.length; i++){
+
+        const player = players[i];
 
         for(const [pointId, pointCaps] of Object.entries(player.stats.dom.controlPoints)){
 

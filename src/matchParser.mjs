@@ -69,8 +69,6 @@ export class MatchParser{
         //set matchStart, matchEnd, hardcore, skip parsing log in some conditions
         this.preliminaryChecks();
 
-        
-
         this.players.createPlayers(this.lines, this.matchStart, this.matchEnd, this.bHardcore);
  
         this.parseLines();

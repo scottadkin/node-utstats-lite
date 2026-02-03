@@ -229,8 +229,6 @@ export class CTF{
                 }
             }
         }
-
-        process.exit();
     }
 
     async insertPlayerMatchData(players, matchId, gametypeId, mapId){

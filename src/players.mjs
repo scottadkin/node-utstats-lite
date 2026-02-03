@@ -111,15 +111,17 @@ export async function updateMasterPlayers(playerIds, idsToCountries, date){
 
 export async function bulkInsertPlayerMatchData(players, matchId, matchDate, gametypeId, mapId){
 
-    if(Object.keys(players).length === 0) return;
+    if(players.length === 0) return;
 
     const insertVars = [];
 
-    for(const p of Object.values(players)){
+    for(let i = 0; i < players.length; i++){
+
+        const p = players[i];
 
         insertVars.push([
             p.masterId,
-            (p.playtime > 0) ? p.bSpectator : 1,
+            (p.playtime === 0) ? 1 : 0,
             p.ip,
             p.country,
             p.hwid,
@@ -165,6 +167,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate, gam
             p.stats.items.invis,
             p.stats.items.shp
         ]);
+
     }
 
     const query = `INSERT INTO nstats_match_players (
