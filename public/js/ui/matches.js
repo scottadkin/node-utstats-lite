@@ -92,7 +92,7 @@ class MatchRichViewBox{
         const gametype = document.createElement("div");
         gametype.className = "white";
 
-        gametype.append(document.createTextNode(d.gametype_name));
+        gametype.append(UIB(document.createTextNode(d.gametype_name)));
         info.append(gametype);
 
         info.append(document.createTextNode(toDateString(d.date, true)));

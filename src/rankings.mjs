@@ -7,7 +7,7 @@ import { getAllMapIds } from "./maps.mjs";
 
 const VALID_RANKING_TYPES = ["gametype", "map"];
 
-const PLAYER_MATCHES_FRAGS_TOTALS_COLUMNS = `
+const PLAYER_MATCHES_TOTALS_COLUMNS = `
 nstats_match_players.player_id,
 MAX(nstats_match_players.match_date) as last_active,
 SUM(nstats_match_players.time_on_server) as playtime,
@@ -37,7 +37,6 @@ SUM(nstats_match_ctf.flag_return_save) as flag_return_save
 function bValidRankingType(type){
 
     type = type.toLowerCase();
-
     return VALID_RANKING_TYPES.indexOf(type) !== -1;
 }
 
@@ -51,10 +50,11 @@ async function getPlayerTotals(type, targetId, playerIds){
 
     if(type === "map") column = "map_id";
 
-    const query = `SELECT ${PLAYER_MATCHES_FRAGS_TOTALS_COLUMNS}
+    const query = `SELECT ${PLAYER_MATCHES_TOTALS_COLUMNS}
     FROM nstats_match_players 
     LEFT JOIN nstats_match_ctf ON nstats_match_ctf.match_id = nstats_match_players.match_id AND nstats_match_ctf.player_id = nstats_match_players.match_id
-    WHERE nstats_match_players.${column}=? AND nstats_match_players.player_id IN(?) GROUP BY nstats_match_players.player_id`;
+    WHERE nstats_match_players.${column}=? AND nstats_match_players.player_id IN(?) AND nstats_match_players.spectator=0
+    GROUP BY nstats_match_players.player_id`;
 
     return await simpleQuery(query, [targetId, playerIds]);
 

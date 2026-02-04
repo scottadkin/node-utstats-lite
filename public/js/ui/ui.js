@@ -8,7 +8,7 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
     if(data.total_teams === 3) wrapperClassName = "trio";
     if(data.total_teams === 4) wrapperClassName = "quad";
 
-    if(data.total_teams > 0){
+    if(data.total_teams > 1){
 
         for(let i = 0; i < data.total_teams; i++){
 
@@ -45,6 +45,7 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
 
         if(!small){
             image = document.createElement("img");
+            
             image.src = `/images/${getTeamIcon(255)}`;
             image.alt = "image";
         }

@@ -694,10 +694,6 @@ async function insertPlayerGametypeTotals(data){
         }
     }
 
-    
-
-    //process.exit();
-
     await deleteMultiplePlayerTotals([...playerIds]);
 
     const query = `INSERT INTO nstats_player_totals (player_id,gametype_id,map_id,last_active,playtime,total_matches,
