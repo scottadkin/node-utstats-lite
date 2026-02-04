@@ -218,6 +218,7 @@ export class MatchParser{
 
         const uniquePlayerIds = this.players.getUniquePlayerIds();
 
+
         await calculateRankings(this.gametype.id, uniquePlayerIds);
         await calculateRankings(this.map.id, uniquePlayerIds, "map");
         
@@ -256,7 +257,7 @@ export class MatchParser{
         await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
 
 
-       // this.players.debugListAllPlayers();
+        //this.players.debugListAllPlayers();
     }
 
 

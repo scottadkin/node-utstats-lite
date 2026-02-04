@@ -617,6 +617,7 @@ function createPlayerTotalsFromData(result){
         _updateTotals(totals, r, 0, 0);
     }
 
+
     return totals;
 }
 /**
@@ -624,13 +625,13 @@ function createPlayerTotalsFromData(result){
  * @param {*} playerId 
  * @returns 
  */
-export async function calcPlayerTotals(playerIds/*, gametypeId, mapId*/){
+export async function calcPlayerTotals(playerIds){
 
     if(playerIds.length === 0) return [];
 
     let query = `SELECT
     ${PLAYER_TOTALS_COLUMNS_MATCHES}
-    FROM nstats_match_players WHERE spectator=0 AND player_id IN (?) GROUP BY player_id,gametype_id,map_id,match_result`;
+    FROM nstats_match_players WHERE spectator=0 AND player_id IN (?) GROUP BY player_id,gametype_id,map_id`;
 
     const result = await simpleQuery(query, [playerIds]);
 
@@ -692,6 +693,10 @@ async function insertPlayerGametypeTotals(data){
             }
         }
     }
+
+    
+
+    //process.exit();
 
     await deleteMultiplePlayerTotals([...playerIds]);
 

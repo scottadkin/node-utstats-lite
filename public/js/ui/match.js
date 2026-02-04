@@ -987,6 +987,8 @@ class MatchWeaponSummary{
         this.matchLength = matchLength;
 
         this.wrapper = document.createElement("div");
+        this.wrapper.className = `scroll-x t-width-1 center`;
+
         const title = document.createElement("div");
         title.className = "header-wrapper";
         title.innerHTML = `Weapons Summary`;
@@ -996,7 +998,8 @@ class MatchWeaponSummary{
         this.createTabs();
 
         this.table = document.createElement("table");
-        this.parent.appendChild(this.table);
+        this.wrapper.append(this.table);
+        this.parent.append(this.wrapper);
 
         this.render();
 
@@ -1034,6 +1037,7 @@ class MatchWeaponSummary{
 
         playerId = parseInt(playerId);
         weaponId = parseInt(weaponId);
+
         for(let i = 0; i < this.weaponStats.data.length; i++){
 
             const w = this.weaponStats.data[i];
@@ -1051,6 +1055,8 @@ class MatchWeaponSummary{
     renderStatType(){
 
         if(this.currentMode === "totals") return;
+
+       // this.table.style.cssText = ``;
 
         const headerRow = document.createElement("tr");
 

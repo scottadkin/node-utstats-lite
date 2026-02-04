@@ -7,6 +7,14 @@ import { getAllMapIds } from "./maps.mjs";
 
 const VALID_RANKING_TYPES = ["gametype", "map"];
 
+const PLAYER_MATCHES_FRAGS_TOTALS_COLUMNS = `player_id,MAX(match_date) as last_active,
+SUM(time_on_server) as playtime,
+COUNT(*) as total_matches,
+SUM(kills) as kills, SUM(deaths) as deaths,
+SUM(suicides) as suicides, SUM(team_kills) as team_kills, 
+SUM(spree_1) as spree_1, SUM(spree_2) as spree_2, SUM(spree_3) as spree_3,
+SUM(spree_4) as spree_4, SUM(spree_5) as spree_5, SUM(multi_1) as multi_1, 
+SUM(multi_2) as multi_2, SUM(multi_3) as multi_3, SUM(multi_4) as multi_4`;
 
 function bValidRankingType(type){
 
@@ -17,14 +25,15 @@ function bValidRankingType(type){
 
 async function getPlayerFragTotals(gametypeId, playerIds){
 
-    const query = `SELECT player_id,last_active,playtime,total_matches,kills,deaths,suicides,
-    team_kills,spree_1,spree_2,spree_3,spree_4,spree_5,multi_1,multi_2,multi_3,multi_4
-    FROM nstats_player_totals WHERE gametype_id=? AND player_id IN(?)`;
+    const query = `SELECT ${PLAYER_MATCHES_FRAGS_TOTALS_COLUMNS}
+    FROM nstats_match_players WHERE gametype_id=? AND player_id IN(?) GROUP BY player_id`;
 
     return await simpleQuery(query, [gametypeId, playerIds]);
 
 }
 
+
+//TODO use player CTF matches table data to calculate totlas
 async function getPlayerCTFTotals(gametypeId, playerIds){
 
     const query = `SELECT player_id,flag_taken,flag_pickup,flag_drop,flag_assist,flag_cover,flag_seal,
@@ -113,8 +122,7 @@ function _mergeTotalsData(fragTotals, ctfTotals){
     for(let i = 0; i < fragTotals.length; i++){
 
         const f = fragTotals[i];
-        f.rankingPoints = 0;
-
+  
         data[f.player_id] = f;
     }
 
@@ -186,6 +194,7 @@ function _setRankingPoints(settings, playerData){
 
     const t = playerData;
 
+
     let currentPoints = 0;
 
     for(const category of Object.keys(settings)){
@@ -219,9 +228,8 @@ function _setRankingPoints(settings, playerData){
         t.ranking_points = 0;
     }
 
-    //console.log(t.total_matches);
-
     _applyTimePenalty(t, settings.penalty, mins);
+
     
 }
 
@@ -245,9 +253,7 @@ async function getPlayerMapFragTotals(mapId, playerIds){
 
     if(playerIds.length === 0) return [];
 
-    const query = `SELECT player_id,MAX(match_date) as last_active,SUM(time_on_server) as playtime,COUNT(*) as total_matches,SUM(kills) as kills, SUM(deaths) as deaths,
-    SUM(suicides) as suicides, SUM(team_kills) as team_kills, SUM(spree_1) as spree_1, SUM(spree_2) as spree_2, SUM(spree_3) as spree_3,
-    SUM(spree_4) as spree_4, SUM(spree_5) as spree_5, SUM(multi_1) as multi_1, SUM(multi_2) as multi_2, SUM(multi_3) as multi_3, SUM(multi_4) as multi_4
+    const query = `SELECT ${PLAYER_MATCHES_FRAGS_TOTALS_COLUMNS}
     FROM nstats_match_players WHERE map_id=? AND player_id IN(?) GROUP BY player_id`;
 
     return await simpleQuery(query, [mapId, playerIds]);
@@ -274,7 +280,6 @@ export async function calculateRankings(targetId, playerIds, type){
     if(type === undefined) type = "gametype";
 
     type = type.toLowerCase();
-
 
     if(!bValidRankingType(type)) throw new Error(`Not a valid type for calculateRankings`);
 
@@ -317,6 +322,7 @@ export async function calculateRankings(targetId, playerIds, type){
         minMatches = minMatches.points;
         mergedData = _removePlayersUnderMatchLimit(mergedData, minMatches);
     }
+
 
     await bulkInsertRankings(targetId, Object.values(mergedData), type);
 }

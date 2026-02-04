@@ -124,6 +124,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
     try{
 
+        const start = performance.now();
         new Message(`Starting parsing of log ${file}`,"note");
 
         if(bIgnoreDuplicates){
@@ -163,7 +164,10 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
         
+        const end = performance.now();
+
         new Message(`Finished parsing log ${file}`,"pass");
+        new Message(`Log imported in ${(end - start) * 0.001} seconds`,"pass");
         return true;
 
     }catch(err){

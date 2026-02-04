@@ -1015,3 +1015,7 @@ nav a:hover{
 	height: 32px;
 	animation: spin 1s linear infinite;
 }
+
+.scroll-x{
+	overflow-x: auto;
+}

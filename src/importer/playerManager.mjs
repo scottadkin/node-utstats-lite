@@ -35,7 +35,6 @@ export class PlayerManager{
 
         for(let i = lines.length; i > 0; i--){
 
-           // console.log(lines[i]);
 
             const line = lines[i];
 
@@ -53,11 +52,7 @@ export class PlayerManager{
 
             const type = result[1].toLowerCase();
 
-            
-
             if(targetKeys.indexOf(type) === -1) continue;
-
-
 
             if(type === "rename"){
 
@@ -111,6 +106,7 @@ export class PlayerManager{
         for(let [playerId, playerName] of Object.entries(idsToNames)){
       
             playerId = parseInt(playerId);
+
             const player = this.getPlayerByName(playerName);
 
             if(player === null){
@@ -124,8 +120,7 @@ export class PlayerManager{
 
         for(let i = 0; i < connectEvents.length; i++){
 
- 
-            const {timestamp, type, name, playerId} = connectEvents[i];
+            const {timestamp, type, playerId} = connectEvents[i];
         
             const player = this.getPlayerById(playerId);
 
@@ -465,13 +460,14 @@ export class PlayerManager{
 
             players.push({
                 "name": p.name,
+                "playtime": p.playtime,
                 "hwid": p.hwid,
                 "mac1": p.mac1,
                 "mac2": p.mac2,
                 "bSpectator": p.bSpectator,
-                "multis": p.stats.multis,
-                "sprees": p.stats.sprees,
-                "ctf": p.stats.ctf
+               // "multis": p.stats.multis,
+                //"sprees": p.stats.sprees,
+               // "ctf": p.stats.ctf
             });
         }
 
@@ -600,7 +596,7 @@ export class PlayerManager{
 
         await updateMasterPlayers(masterIds, idsToCountries, date);
 
-        await updatePlayerTotals(masterIds, gametypeId, mapId);
+        await updatePlayerTotals(masterIds);
         
     }
 

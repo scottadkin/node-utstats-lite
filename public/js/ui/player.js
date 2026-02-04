@@ -298,7 +298,7 @@ function playerGametypeTotals(parent, data){
         }));
 
         row.appendChild(UITableColumn({
-            "content": d.matches, 
+            "content": d.total_matches, 
             "parse": ["ignore0"]
         }))
         row.appendChild(UITableColumn({
@@ -399,7 +399,6 @@ class PlayerSpecialEvents{
             }
 
             for(let x = 0; x < keys.length; x++){
-
                 row.appendChild(UITableColumn({"content": d[keys[x]], "parse": ["ignore0"]}));
             }
 
