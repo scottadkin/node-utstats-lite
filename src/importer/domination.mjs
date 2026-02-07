@@ -111,11 +111,14 @@ export class Domination{
     }
 
 
-    setPlayerCapStats(playerManager, matchStart, matchEnd){
+    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength){
   
         for(let i = 0; i < this.capEvents.length; i++){
 
             const c = this.capEvents[i];
+
+
+            if(c.timestamp < matchStart) continue;
 
             const player = playerManager.getPlayerById(c.playerId);
             
@@ -141,7 +144,38 @@ export class Domination{
         for(const controlPoint of Object.values(this.controlPoints)){
             controlPoint.matchEnded(matchEnd);
         }
+
+        this.setPercentValues(playerManager, matchLength);
     
+    }
+
+
+    setPercentValues(playerManager, matchLength){
+
+        if(matchLength === 0) return;
+
+        const totalControlPoints = Object.keys(this.controlPoints).length;
+
+        if(totalControlPoints === 0) return;
+
+        const maxCombinedTime = matchLength * totalControlPoints;
+
+        for(let i = 0; i < playerManager.players.length; i++){
+
+            const p = playerManager.players[i];
+
+            const controlPoints = p.stats.dom.controlPoints;
+            
+            for(const [pointId, pointData] of Object.entries(controlPoints)){
+
+                const maxTime = (pointId == 0) ? maxCombinedTime : matchLength;
+
+
+                if(pointData.totalTimeControlled === 0) continue;
+
+                pointData.controlPercent = pointData.totalTimeControlled / maxTime * 100;
+            }
+        }
     }
 
     async insertPlayerMatchData(players, matchId, gametypeId, mapId){

@@ -35,7 +35,8 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
     match_id,map_id,gametype_id,
     player_id,point_id,total_caps,
     total_control_time, longest_control_time,
-    shortest_control_time
+    shortest_control_time,
+    control_percent
     ) VALUES ?`;
 
     const insertVars = [];
@@ -50,7 +51,7 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
                 matchId, mapId, gametypeId, 
                 player.masterId, pointId, capData.caps,
                 capData.totalTimeControlled, capData.longestTimeControlled, 
-                capData.shortestTimeControlled
+                capData.shortestTimeControlled, capData.controlPercent
             ]);
         }
     }
@@ -79,7 +80,7 @@ async function getControlPointNames(ids){
 
 export async function getMatchData(matchId){
 
-    const query = `SELECT player_id,point_id,total_caps FROM nstats_match_dom WHERE match_id=?`;
+    const query = `SELECT player_id,point_id,total_caps,total_control_time,longest_control_time,shortest_control_time FROM nstats_match_dom WHERE match_id=?`;
 
     const result = await simpleQuery(query, [matchId]);
 

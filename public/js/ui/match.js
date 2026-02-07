@@ -402,6 +402,8 @@ function renderDominationSummary(parent, totalTeams, data){
 
     if(data.dom.data.length === 0) return;
 
+    console.log(data);
+
     parent = document.querySelector(parent);
 
     const wrapper = document.createElement("div");

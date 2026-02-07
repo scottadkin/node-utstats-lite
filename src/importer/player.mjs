@@ -299,6 +299,8 @@ export class Player{
         }
 
         d.totalTimeControlled += timeHeld;
+
+        if(pointId !== 0) this.updateDomControlPointStats(0, timeHeld);
     }
 
 }
