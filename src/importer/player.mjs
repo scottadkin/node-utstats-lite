@@ -26,6 +26,7 @@ export class Player{
         this.bFirstBlood = 0;
         this.playtime = 0;
         this.matchResult = "s";
+        
 
         this.ping = {
             "min": null,
@@ -271,6 +272,27 @@ export class Player{
 
     headshot(){
         this.stats.headshots++;
+    }
+
+
+    updateDomControlPointStats(pointId, timeHeld){
+
+        if(this.stats.dom.controlPoints[pointId] === undefined){
+            this.stats.dom.controlPoints[pointId] = {"caps": 0, "totalTimeHeld": 0, "shortestTimeHeld": null, "longestTimeHeld": 0};
+        }
+
+        const d = this.stats.dom.controlPoints[pointId];
+        d.caps++;
+
+        if(d.shortestTimeHeld === null || timeHeld < d.shortestTimeHeld){
+            d.shortestTimeHeld = timeHeld;
+        }
+
+        if(d.longestTimeHeld < timeHeld){
+            d.longestTimeHeld = timeHeld;
+        }
+
+        d.totalTimeHeld += timeHeld;
     }
 
 }

@@ -533,7 +533,8 @@ canvas{
 	border:1px solid rgba(0,0,0,0.125);
 	border-bottom:2px solid rgba(0,0,0,0.25);
 	background-color: rgba(0,0,0,0.125);
-	margin-top:-1px;
+	margin-top:-2px;
+	margin-bottom:-2px;
 }
 
 .tab:hover{
@@ -762,7 +763,8 @@ canvas{
     background-color:var(--header-bg-color);
     font-weight:500;
     margin-bottom:25px;
-    font-size:16px;
+    font-size:18px;
+	text-shadow: 1px 1px rgba(0,0,0,0.5);
 	border-top:2px solid var(--border-color-4);
 	border-bottom:2px solid var(--border-color-4);
 }

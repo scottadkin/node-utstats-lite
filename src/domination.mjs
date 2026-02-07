@@ -39,12 +39,13 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
 
         const player = players[i];
 
-        for(const [pointId, pointCaps] of Object.entries(player.stats.dom.controlPoints)){
+        for(const [pointId, capData] of Object.entries(player.stats.dom.controlPoints)){
 
-            insertVars.push([matchId, mapId, gametypeId, player.masterId, pointId, pointCaps]);
+            insertVars.push([matchId, mapId, gametypeId, player.masterId, pointId, capData.caps]);
         }
     }
 
+    console.log(insertVars);
     await bulkInsert(query, insertVars);
 }
 

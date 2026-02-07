@@ -1,10 +1,65 @@
 import { getPointsIds, createControlPoint, insertPlayerMatchData } from "../domination.mjs";
 import Message from "../message.mjs";
 
+
+class DomControlPoint{
+
+    constructor(id, name){
+
+        this.id = id;
+        this.name = name;
+        this.firstTouchedTimestamp = null;
+        this.lastTouchedTimestamp = null;
+        this.instigator = null;
+        this.totalCaps = 0;
+        this.totalCapTime = 0;
+        this.longestTimeHeld = null;
+        this.shortestTimeHeld = null;
+    }
+
+    touched(timestamp, instigator){
+
+        if(this.instigator !== null){
+
+            const timeHeld = timestamp - this.lastTouchedTimestamp;
+            this.totalCapTime += timeHeld;
+
+            if(this.longestTimeHeld === null || this.longestTimeHeld < timeHeld){
+                this.longestTimeHeld = timeHeld;
+            }
+
+            if(this.shortestTimeHeld === null || this.shortestTimeHeld > timeHeld){
+                this.shortestTimeHeld = timeHeld;
+            }
+
+            instigator.updateDomControlPointStats(this.id, timeHeld);
+
+        }else{
+
+            this.firstTouchedTimestamp = timestamp;
+        }
+
+        this.instigator = instigator;
+        this.lastTouchedTimestamp = timestamp;
+        this.totalCaps++;
+
+        
+    }
+
+    matchEnded(timestamp){
+
+        if(this.instigator === null) return;
+        
+        const timeHeld = timestamp - this.lastTouchedTimestamp;
+        this.instigator.updateDomControlPointStats(this.id, timeHeld);
+    }
+}
+
 export class Domination{
 
     constructor(){
 
+        this.pointNames = new Set();
         this.controlPoints = {};
 
         this.capEvents = [];  
@@ -17,20 +72,18 @@ export class Domination{
 
         const capResult = capReg.exec(line);
 
-        if(capResult !== null){
+        if(capResult === null) return;
 
-            if(this.controlPoints[capResult[1]] === undefined){
-                this.controlPoints[capResult[1]] = null;
-            }
+        this.pointNames.add(capResult[1]);
 
-            const playerId = parseInt(capResult[2]);
-            this.capEvents.push({"timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
-        }    
+        const playerId = parseInt(capResult[2]);
+        this.capEvents.push({"timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
+      
     }
 
     async setPointIds(){
 
-        const names = Object.keys(this.controlPoints);
+        const names = [...this.pointNames];
 
         const namesToIds = await getPointsIds(names);
 
@@ -43,21 +96,22 @@ export class Domination{
             }
         }
 
-        for(const pointName of Object.keys(this.controlPoints)){
+        for(let i = 0; i < names.length; i++){
 
-            this.controlPoints[pointName] = namesToIds[pointName];
+            this.controlPoints[names[i]] = new DomControlPoint(namesToIds[names[i]], names[i]);
         }
 
         for(let i = 0; i < this.capEvents.length; i++){
 
             const c = this.capEvents[i];
 
-            c.point = this.controlPoints[c.point] ?? -1;
+            c.point = this.controlPoints[c.point]?.name ?? "Not Found";
         }
+
     }
 
 
-    setPlayerCapStats(playerManager){
+    setPlayerCapStats(playerManager, matchStart, matchEnd){
   
         for(let i = 0; i < this.capEvents.length; i++){
 
@@ -70,13 +124,24 @@ export class Domination{
                 continue;
             }
 
+            const controlPoint = this.controlPoints[c.point];
 
-            if(player.stats.dom.controlPoints[c.point] === undefined){
-                player.stats.dom.controlPoints[c.point] = 0;
+            if(controlPoint === undefined){
+
+                new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
+                continue;
             }
 
-            player.stats.dom.controlPoints[c.point]++;
+            controlPoint.touched(c.timestamp, player);
+
         }
+
+
+        //match ended need to update the current player stats that have control of points
+        for(const controlPoint of Object.values(this.controlPoints)){
+            controlPoint.matchEnded(matchEnd);
+        }
+    
     }
 
     async insertPlayerMatchData(players, matchId, gametypeId, mapId){

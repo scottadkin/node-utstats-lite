@@ -113,7 +113,7 @@ export class MatchParser{
         
         this.ctf.bAnyCTFEvents(this.players.players);
         await this.dom.setPointIds();
-        this.dom.setPlayerCapStats(this.players);
+        this.dom.setPlayerCapStats(this.players, this.matchStart, this.matchEnd);
         
         this.kills.setPlayerSpecialEvents(this.players);
         this.items.setPlayerStats(this.players);
