@@ -232,7 +232,11 @@ function ignore0(value){
     return value;
 }
 
-function MMSS(timestamp){
+function MMSS(timestamp, bIncludeMilliSeconds){
+
+    if(bIncludeMilliSeconds === undefined){
+        bIncludeMilliSeconds = false;
+    }
 
     let seconds = Math.floor(timestamp % 60);
     let minutes = Math.floor(timestamp / 60);
@@ -249,14 +253,20 @@ function MMSS(timestamp){
         minutes = `0${minutes}`;
     }
 
+    const milliSeconds = Math.floor(timestamp % 1 * 100);
+
+    let milliString = ``;
+
+    if(bIncludeMilliSeconds) milliString = `.${milliSeconds}`;
+
     if(hours < 1){
-        return `${minutes}:${seconds}`;
+        return `${minutes}:${seconds}${milliString}`;
     }else{
 
         minutes = minutes % 60;
         if(minutes < 10) minutes = `0${minutes}`;
         
-        return `${hours}:${minutes}:${seconds}`;
+        return `${hours}:${minutes}:${seconds}${milliString}`;
     }
 }
 

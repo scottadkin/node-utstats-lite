@@ -15,6 +15,7 @@ class DomControlPoint{
         this.totalCapTime = 0;
         this.longestTimeControlled = null;
         this.shortestTimeControlled = null;
+        this.totalControlTime = 0;
     }
 
     touched(timestamp, instigator){
@@ -52,6 +53,8 @@ class DomControlPoint{
         
         const timeHeld = timestamp - this.lastTouchedTimestamp;
         this.instigator.updateDomControlPointStats(this.id, timeHeld);
+
+        this.totalControlTime = timestamp - this.firstTouchedTimestamp;
     }
 }
 
@@ -150,6 +153,30 @@ export class Domination{
     }
 
 
+    getControlPointById(id){
+
+        id = parseInt(id);
+
+        for(const [pointName, data] of Object.entries(this.controlPoints)){
+
+            if(data.id === id) return data;
+        }
+
+        return null;
+    }
+
+    getAllControlPointsControlTime(){
+
+        let total = 0;
+
+        for(const cp of Object.values(this.controlPoints)){
+
+            total += cp.totalControlTime;
+        }
+
+        return total;
+
+    }
     setPercentValues(playerManager, matchLength){
 
         if(matchLength === 0) return;
@@ -158,7 +185,8 @@ export class Domination{
 
         if(totalControlPoints === 0) return;
 
-        const maxCombinedTime = matchLength * totalControlPoints;
+        const maxCombinedTime = this.getAllControlPointsControlTime();
+
 
         for(let i = 0; i < playerManager.players.length; i++){
 
@@ -168,7 +196,11 @@ export class Domination{
             
             for(const [pointId, pointData] of Object.entries(controlPoints)){
 
-                const maxTime = (pointId == 0) ? maxCombinedTime : matchLength;
+                const cp = this.getControlPointById(pointId);
+
+                if(pointId == 0 && maxCombinedTime === 0) continue;
+
+                const maxTime = (pointId == 0) ? maxCombinedTime : cp.totalControlTime;
 
 
                 if(pointData.totalTimeControlled === 0) continue;

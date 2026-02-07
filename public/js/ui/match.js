@@ -391,98 +391,213 @@ function getPlayerDomPointCaps(playerId, pointId, capData){
     for(let i = 0; i < capData.length; i++){
 
         if(capData[i].player_id === playerId && capData[i].point_id == pointId){
-            return capData[i].total_caps;
+            return capData[i];
         }
     }
 
-    return 0;
+    return null;
 }
 
-function renderDominationSummary(parent, totalTeams, data){
 
-    if(data.dom.data.length === 0) return;
 
-    console.log(data);
+class MatchDominationSummary{
 
-    parent = document.querySelector(parent);
+    constructor(parent, totalTeams, data){
 
-    const wrapper = document.createElement("div");
+        if(data.dom.data.length === 0) return;
 
-    const title = document.createElement("div");
-    title.className = "header-wrapper";
-    title.innerHTML = "Domination Summary";
-    wrapper.appendChild(title);
+        if(totalTeams < 2) return;
 
-    for(let i = 0; i < totalTeams; i++){
+        this.totalTeams = totalTeams;
+        this.data = data;
 
-        const table = document.createElement("table");
-        table.className = "t-width-4";
+        this.parent = document.querySelector(parent);
 
-        const headerRow = document.createElement("tr");
+        this.wrapper = document.createElement("div");
+
+        this.mode = "percent";
+
+        this.title = document.createElement("div");
+        this.title.className = "header-wrapper";
+        this.title.innerHTML = "Domination Summary";
+        this.wrapper.append(this.title);
+
+        this.createTabs();
+
+        this.info = UIDiv("info");
+        this.content = UIDiv();
+        this.wrapper.append(this.info, this.content);
+        this.render();
+
+        this.parent.append(this.wrapper);
+
         
-        headerRow.appendChild(UITableHeaderColumn({"content": "Player"}));
-
-        const totals = {};
-
-        for(const [pointId, pointName] of Object.entries(data.dom.controlPoints)){
-            headerRow.appendChild(UITableHeaderColumn({"content": pointName}));
-
-            totals[pointId] = 0;
-        }
-
-        table.appendChild(headerRow);
-
-        for(let x = 0; x < data.playerData.length; x++){
-
-            const p = data.playerData[x];
-
-            if(p.spectator) continue;
-
-            if(p.team !== i) continue;
-
-            const dataRow = document.createElement("tr");
-
-            dataRow.appendChild(UIPlayerLink({
-                "playerId": p.player_id, 
-                "className": `${getTeamColorClass(p.team)} text-left`, 
-                "country": p.country, 
-                "bTableElem": true, 
-                "name": p.name
-            }));
-
-            for(const pointId  of Object.keys(data.dom.controlPoints)){
-
-                const caps = getPlayerDomPointCaps(p.player_id, pointId, data.dom.data);
-
-                totals[pointId] += caps;
-
-                dataRow.appendChild(UITableColumn({
-                    "content": caps,
-                    "parse": ["ignore0"]
-                }));
-            }
-           
-            table.appendChild(dataRow);
-        }
-
-        const totalRow = document.createElement("tr");
-
-        totalRow.appendChild(UITableColumn({
-            "content": "Totals", "className": "team-none"
-        }));
-
-        for(const pointId of Object.keys(data.dom.controlPoints)){
-            totalRow.appendChild(UITableColumn({"content": totals[pointId], "parse": ["ignore0"]}));
-
-            totals[pointId] = 0;
-        }
-
-        table.appendChild(totalRow);
-
-        wrapper.appendChild(table);
     }
 
-    parent.appendChild(wrapper);
+    createTabs(){
+
+        const tabOptions = [
+            {"display": "Control Percent", "value": "percent"},
+            {"display": "Control Time", "value": "time"},
+            {"display": "Total Caps", "value": "caps"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.render();
+        });
+    }
+
+
+    createHeaderRow(controlPoints){
+
+        const headerRow = document.createElement("tr");
+            
+        headerRow.append(UITableHeaderColumn({"content": "Player"}));
+
+        
+
+        for(const [pointId, pointName] of Object.entries(controlPoints)){
+            headerRow.append(UITableHeaderColumn({"content": pointName}));
+        }
+
+        return headerRow;
+    }
+
+
+    getContent(caps, bTotals){
+
+        let className = "";
+        let content = "";
+        let currentValue = 0;
+
+        if(caps === null) return {className, content, currentValue}
+
+
+        if(this.mode === "percent"){
+
+            currentValue = (bTotals) ? caps : caps.control_percent;
+            content = `${currentValue.toFixed(2)}%`;
+
+        }else if(this.mode === "time"){
+
+            currentValue = (bTotals) ? caps : caps.total_control_time;
+            content= `${toPlaytime(currentValue, true)}`;
+            className = "playtime";
+
+        }else if(this.mode === "caps"){
+            currentValue = (bTotals) ? ignore0(caps) : caps.total_caps;
+            content= currentValue;
+        }
+        
+
+
+        return {className, content, currentValue}
+    }
+
+
+    updateInfo(){
+
+        this.info.innerHTML = ``;
+
+
+
+        if(this.mode === "percent"){
+
+            this.info.append("Total control percent, based on first touch timestamp to match end.");
+
+        }else if(this.mode === "time"){
+
+            this.info.append("Total time each player had control of each control point.");
+
+        }else if(this.mode === "caps"){
+            this.info.append("Total times a player captured the control point.");
+        }
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+        this.updateInfo();
+        const playerData = this.data.playerData;
+        const controlPoints = this.data.dom.controlPoints;
+        const domData = this.data.dom.data;
+
+        for(let i = 0; i < this.totalTeams; i++){
+
+            const table = document.createElement("table");
+            table.className = "t-width-4";
+            table.append(this.createHeaderRow(controlPoints));
+
+            const totals = {};
+
+            for(let x = 0; x < playerData.length; x++){
+
+                const p = playerData[x];
+
+                if(p.spectator || p.team !== i) continue;
+
+                const dataRow = document.createElement("tr");
+
+                dataRow.append(UIPlayerLink({
+                    "playerId": p.player_id, 
+                    "className": `${getTeamColorClass(p.team)} text-left`, 
+                    "country": p.country, 
+                    "bTableElem": true, 
+                    "name": p.name
+                }));
+
+                for(const pointId of Object.keys(controlPoints)){
+
+                    const caps = getPlayerDomPointCaps(p.player_id, pointId, domData);
+
+                    
+                    if(totals[pointId] === undefined){
+                        totals[pointId] = 0;
+                    }
+                    const {content, className, currentValue} = this.getContent(caps, false);
+
+                    if(currentValue > 0){
+                        totals[pointId] += currentValue;
+                    }
+
+                    const col = UITableColumn({
+                        "content": content    
+                    });
+
+                    if(className !== "") col.className = className;
+
+                    dataRow.append(col);
+                }
+            
+                table.append(dataRow);
+            }
+
+            const totalRow = document.createElement("tr");
+
+            totalRow.append(UITableColumn({
+                "content": "Combined", "className": "team-none"
+            }));
+
+
+            for(const pointId of Object.keys(controlPoints)){
+
+                const {content, className, currentValue} = this.getContent(totals[pointId], true);
+
+                const col = UITableColumn({content});
+
+                if(className !== "") col.className = className;
+
+                totalRow.append(col);
+            }
+
+            table.append(totalRow);
+
+            this.content.append(table);
+        }
+    }
 }
 
 
