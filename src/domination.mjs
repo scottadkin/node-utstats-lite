@@ -31,7 +31,12 @@ export async function createControlPoint(name){
 
 export async function insertPlayerMatchData(players, matchId, gametypeId, mapId){
 
-    const query = `INSERT INTO nstats_match_dom (match_id,map_id,gametype_id,player_id,point_id,total_caps) VALUES ?`;
+    const query = `INSERT INTO nstats_match_dom (
+    match_id,map_id,gametype_id,
+    player_id,point_id,total_caps,
+    total_control_time, longest_control_time,
+    shortest_control_time
+    ) VALUES ?`;
 
     const insertVars = [];
 
@@ -41,11 +46,15 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
 
         for(const [pointId, capData] of Object.entries(player.stats.dom.controlPoints)){
 
-            insertVars.push([matchId, mapId, gametypeId, player.masterId, pointId, capData.caps]);
+            insertVars.push([
+                matchId, mapId, gametypeId, 
+                player.masterId, pointId, capData.caps,
+                capData.totalTimeControlled, capData.longestTimeControlled, 
+                capData.shortestTimeControlled
+            ]);
         }
     }
 
-    console.log(insertVars);
     await bulkInsert(query, insertVars);
 }
 

@@ -234,7 +234,10 @@ const queries = [
             gametype_id int NOT NULL,
             player_id int NOT NULL,
             point_id int NOT NULL,
-            total_caps int NOT NULL
+            total_caps int NOT NULL,
+            total_control_time float NOT NULL,
+            longest_control_time float NOT NULL,
+            shortest_control_time float NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals (     
@@ -780,6 +783,14 @@ async function bCTFSettingExist(name, category){
     return result[0].total_rows > 0;
 }
 
+
+async function updateDominationTables(){
+
+    await addColumn("nstats_match_dom", "total_control_time", "float NOT NULL");
+    await addColumn("nstats_match_dom", "longest_control_time", "float NOT NULL");
+    await addColumn("nstats_match_dom", "shortest_control_time", "float NOT NULL");
+}
+
 async function insertCTFLeagueSettings(){
 
     const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?,?)`;
@@ -851,6 +862,9 @@ async function insertCTFLeagueSettings(){
         await insertRankingSettings();
 
         await insertCTFLeagueSettings();
+
+
+        await updateDominationTables();
 
         if(!fs.existsSync("./salt.mjs")){
 

@@ -278,21 +278,27 @@ export class Player{
     updateDomControlPointStats(pointId, timeHeld){
 
         if(this.stats.dom.controlPoints[pointId] === undefined){
-            this.stats.dom.controlPoints[pointId] = {"caps": 0, "totalTimeHeld": 0, "shortestTimeHeld": null, "longestTimeHeld": 0};
+
+            this.stats.dom.controlPoints[pointId] = {
+                "caps": 0, 
+                "totalTimeControlled": 0, 
+                "shortestTimeControlled": null, 
+                "longestTimeControlled": 0
+            };
         }
 
         const d = this.stats.dom.controlPoints[pointId];
         d.caps++;
 
-        if(d.shortestTimeHeld === null || timeHeld < d.shortestTimeHeld){
-            d.shortestTimeHeld = timeHeld;
+        if(d.shortestTimeControlled=== null || timeHeld < d.shortestTimeControlled){
+            d.shortestTimeControlled = timeHeld;
         }
 
-        if(d.longestTimeHeld < timeHeld){
-            d.longestTimeHeld = timeHeld;
+        if(d.longestTimeControlled < timeHeld){
+            d.longestTimeControlled = timeHeld;
         }
 
-        d.totalTimeHeld += timeHeld;
+        d.totalTimeControlled += timeHeld;
     }
 
 }

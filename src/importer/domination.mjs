@@ -13,8 +13,8 @@ class DomControlPoint{
         this.instigator = null;
         this.totalCaps = 0;
         this.totalCapTime = 0;
-        this.longestTimeHeld = null;
-        this.shortestTimeHeld = null;
+        this.longestTimeControlled = null;
+        this.shortestTimeControlled = null;
     }
 
     touched(timestamp, instigator){
@@ -24,12 +24,12 @@ class DomControlPoint{
             const timeHeld = timestamp - this.lastTouchedTimestamp;
             this.totalCapTime += timeHeld;
 
-            if(this.longestTimeHeld === null || this.longestTimeHeld < timeHeld){
-                this.longestTimeHeld = timeHeld;
+            if(this.longestTimeControlled === null || this.longestTimeControlled < timeHeld){
+                this.longestTimeControlled = timeHeld;
             }
 
-            if(this.shortestTimeHeld === null || this.shortestTimeHeld > timeHeld){
-                this.shortestTimeHeld = timeHeld;
+            if(this.shortestTimeControlled === null || this.shortestTimeControlled > timeHeld){
+                this.shortestTimeControlled = timeHeld;
             }
 
             instigator.updateDomControlPointStats(this.id, timeHeld);
