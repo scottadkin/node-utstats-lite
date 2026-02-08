@@ -42,23 +42,31 @@ export class Gametype{
             return;
         }
 
-        if(type === "timelimit"){
-            this.timeLimit = parseInt(result[2]);
-        }
-
-        if(type === "fraglimit"){
-            this.targetScore = parseInt(result[2]);
-        }
-
-        if(type === "goalteamscore"){
-            this.targetScore = parseInt(result[2]);
-        }
-
         if(type === "goodmutator"){
-
             if(this.mutators !== "") this.mutators += ", "
             this.mutators += result[2];
+
+            return;
         }
+
+        const intValue = parseInt(result[2]);
+
+        if(type === "timelimit"){
+            this.timeLimit = intValue;
+        }else if(type === "fraglimit"){
+            this.targetScore = intValue;
+        }else if(type === "goalteamscore"){
+            this.targetScore = intValue;
+        }else if(type === "gamespeed"){
+
+            if(intValue !== intValue || intValue === 0){
+                throw new Error(`Gamespeed is invalid`);
+            }
+            this.gameSpeed = intValue / 100;
+
+        }
+
+
     }
 
     async setId(totalTeams, totalPlayers, bIncludeTeamSize){

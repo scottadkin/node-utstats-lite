@@ -1,8 +1,6 @@
 import Message from "../message.mjs";
 import { insertPlayerMatchData, updatePlayerTotals, insertCaps } from "../ctf.mjs";
 import ctfFlag from "./ctfFlag.mjs";
-import { bulkInsert, simpleQuery } from "../database.mjs";
-import { getTeamName, scalePlaytime } from "../generic.mjs";
 
 export class CTF{
 

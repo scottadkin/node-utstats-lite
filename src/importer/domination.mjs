@@ -1,5 +1,35 @@
 import { getPointsIds, createControlPoint, insertPlayerMatchData } from "../domination.mjs";
+import { scalePlaytime } from "../generic.mjs";
 import Message from "../message.mjs";
+
+/*
+game timer
+
+every 5 times log player scores
+    if controlPoint has been activated for 2 seconds, since last 1 second timer
+
+
+
+0.0 log scores
+4.7 control point touched
+5.0 log scores //do nothing
+6.0 do nothing
+6.7 control point can now be counted for points
+7.0 this is the first time the control point will be counted as activated and give player points
+8.0 player gets 0.2
+9.0 player gets 0.2
+10.0 log scores
+15.0 log scores
+
+
+loop through all touched events after finding the time difference between each dom_score log and update player scores
+
+
+now = 0;
+
+for now < matchEnd, now++
+*/
+
 
 
 class DomControlPoint{
@@ -17,10 +47,21 @@ class DomControlPoint{
         this.shortestTimeControlled = null;
         this.totalControlTime = 0;
         //total amount of time the point was giving players/teams points
-        //only start counting up if timeHeld is 2 or more
+        //only starts counting up if timeHeld is 2 or more
         this.totalScoreTime = 0;
+
         this.totalScoreGiven = 0;
     }
+
+          /*  156.19	dom_score_update	0	34.200058
+156.19	dom_score_update	1	10.999994
+156.19	dom_score_update	2	3.600001
+156.19	dom_score_update	3	10.399995 //59.200047999999995
+
+156.19	teamscore	0	34
+156.19	teamscore	1	10
+156.19	teamscore	2	3
+156.19	teamscore	3	10   //57*/
 
     updatePointsGiven(timeHeld){
 
@@ -28,20 +69,23 @@ class DomControlPoint{
 
         const scorePerSecond = 0.2;
         const minTimeRequired = 2;
-        
 
+        let scoreTime = 0;
+        
         let score = 0;
 
         if(timeHeld >= minTimeRequired){
 
-            const extra = 1 + Math.floor(timeHeld - minTimeRequired);
+            const extra = Math.ceil(timeHeld - minTimeRequired);
             score = scorePerSecond * extra;
 
+            scoreTime = timeHeld - minTimeRequired;
+
+            this.totalScoreTime += timeHeld - minTimeRequired;
             this.totalScoreGiven += score;
         }
 
-
-        return score;
+        return {score, scoreTime};
     }
 
     touched(timestamp, instigator){
@@ -57,12 +101,10 @@ class DomControlPoint{
 
             if(this.shortestTimeControlled === null || this.shortestTimeControlled > timeHeld){
                 this.shortestTimeControlled = timeHeld;
-            }
+            }  
 
-            
-
-            const scoreGiven = this.updatePointsGiven(timeHeld);
-            instigator.updateDomControlPointStats(this.id, timeHeld, scoreGiven);
+            const {score, scoreTime} = this.updatePointsGiven(timeHeld);
+            instigator.updateDomControlPointStats(this.id, timeHeld, score, scoreTime);
 
         }else{
 
@@ -71,34 +113,37 @@ class DomControlPoint{
 
         this.instigator = instigator;
         this.lastTouchedTimestamp = timestamp;
-        this.totalCaps++;
-
-        
+        this.totalCaps++; 
     }
 
     matchEnded(timestamp){
 
+
         if(this.instigator === null) return;
         
-        //const timeHeld = timestamp - this.lastTouchedTimestamp;
+        const timeHeld = timestamp - this.lastTouchedTimestamp;
 
-        //this.instigator.updateDomControlPointStats(this.id, timeHeld);
-
+        console.log(`ggggggggggggggggggggggggggg ${timeHeld}`);
         this.totalControlTime = timestamp - this.firstTouchedTimestamp;
 
+        
+        //ut skips this for some reason
+        const {score, scoreTime} = this.updatePointsGiven(timeHeld);
 
-        //ut doesnt do this
-        //this.updatePointsGiven(timeHeld);
+        this.instigator.updateDomControlPointStats(this.id, timeHeld, score, scoreTime);
 
     }
 }
 
 export class Domination{
 
+
     constructor(){
 
         this.pointNames = new Set();
         this.controlPoints = {};
+
+        this.scoreUpdateTimestamps = new Set();
 
         this.capEvents = [];  
     }
@@ -148,14 +193,63 @@ export class Domination{
 
     }
 
-    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength){
+    getTimeThing(gameSpeed){
+
+        //if gamespeed is 100 and game is not hardcore
+        const defaultTimerRange = 5;
+
+        const realTimeRange = 5 * gameSpeed;
+
+        const timestamps = [...this.scoreUpdateTimestamps];
+
+        if(timestamps.length === 0) return;
+
+
+        const firstSeen = timestamps[0];
+
+        console.log(firstSeen);
+        console.log(`real time range `, realTimeRange);
+
+        const testPre = firstSeen - realTimeRange;
+
+        console.log(`test -1 `, testPre);
+        console.log(`test +1 `, firstSeen + realTimeRange);
+
+   
+
+        let previous = null;
+
+        for(let i = 0; i < timestamps.length; i++){
+
+            const t = timestamps[i];
+            if(i === 0){
+                previous = t;
+                continue;
+            }
+
+            //const fart = firstSeen + (realTimeRange * i);
+            //console.log(`${i} real=${t}, ${parseFloat(fart.toFixed(2))}`);
+           // console.log(t - previous);
+            previous = t;
+        }
+        
+
+    }
+
+    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed){
+
+
+        this.getTimeThing(gameSpeed);
+
+        console.log(`gameSpeed is ${gameSpeed}`);
+
   
         for(let i = 0; i < this.capEvents.length; i++){
 
             const c = this.capEvents[i];
 
 
-            if(c.timestamp < matchStart) continue;
+            if(c.originalTimestamp < matchStart) continue;
 
             const player = playerManager.getPlayerById(c.playerId);
             
@@ -184,8 +278,11 @@ export class Domination{
         for(const controlPoint of Object.values(this.controlPoints)){
             controlPoint.matchEnded(matchEnd);
             totalPoints += controlPoint.totalScoreGiven;
+            console.log("controlPoint.totalScoreGiven, controlPoint.totalScoreTime");
+            console.log(controlPoint.totalScoreGiven, controlPoint.totalScoreTime);
         }
         
+        console.log(`totalpoints `, totalPoints);
 
         this.setPercentValues(playerManager, matchLength);
     

@@ -69,10 +69,12 @@ export class MatchParser{
 
     async main(){
 
+        
+
         //set matchStart, matchEnd, hardcore, skip parsing log in some conditions
         this.preliminaryChecks();
 
-        this.players.createPlayers(this.lines, this.matchStart, this.matchEnd, this.bHardcore);
+        this.players.createPlayers(this.lines, this.matchStart, this.matchEnd, this.gameSpeed);
  
         this.parseLines();
 
@@ -93,6 +95,7 @@ export class MatchParser{
         }
 
         this.matchLength = this.matchEnd - this.matchStart;
+
 
         if(this.matchLength < this.minPlaytime){
 
@@ -117,7 +120,7 @@ export class MatchParser{
         this.ctf.bAnyCTFEvents(this.players.players);
         await this.dom.setPointIds();
 
-        this.dom.setPlayerCapStats(this.players, this.matchStart, this.matchEnd, this.matchLength);
+        this.dom.setPlayerCapStats(this.players, this.matchStart, this.matchEnd, this.matchLength, this.gameSpeed);
         
         this.kills.setPlayerSpecialEvents(this.players);
         this.items.setPlayerStats(this.players);
@@ -268,6 +271,18 @@ export class MatchParser{
     preliminaryChecks(){
 
 
+        const gameSpeedReg = /\d+\.\d+\tgame\tgamespeed\t(\d+)\s/i;
+
+        const gameSpeedResult = gameSpeedReg.exec(this.rawData);
+
+        if(gameSpeedResult === null) throw new Error(`Failed to find gamespeed`);
+        if(gameSpeedResult[1] === "0") throw new Error(`Not a valid gamespeed`);
+
+        this.gameSpeed = parseInt(gameSpeedResult[1]) / 100;
+
+        console.log(this.gameSpeed);
+
+
         this.bHardcore = false;
 
         const reg = /\d+\.\d+\tgame\thardcore\t(.+)\s/i;
@@ -275,13 +290,17 @@ export class MatchParser{
 
         const value = result[1].toLowerCase();
 
-        if(value === "true") this.bHardcore = true;
+        if(value === "true"){
+            this.bHardcore = true;
+            this.gameSpeed *= 1.1;
+        }
+        console.log(this.gameSpeed);
 
         const startReg = /(\d+\.\d+)\tgame\trealstart\s/i;
         const startResult = startReg.exec(this.rawData);
 
         if(startResult === null) return;
-        this.matchStart = scalePlaytime(parseFloat(startResult[1]), this.bHardcore);
+        this.matchStart = scalePlaytime(parseFloat(startResult[1]), this.gameSpeed);
         this.originalMatchStart = parseFloat(startResult[1]);
 
         const endReg = /(\d+\.\d+)\tgame_end\t(.+?)\s/i
@@ -297,8 +316,9 @@ export class MatchParser{
             return
         }
 
-        this.matchEnd = scalePlaytime(parseFloat(endResult[1]), this.bHardcore);
+        this.matchEnd = scalePlaytime(parseFloat(endResult[1]), this.gameSpeed);
         this.originalMatchEnd = parseFloat(endResult[1]);
+
 
     }
 
@@ -329,6 +349,7 @@ export class MatchParser{
 
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
         const domCapReg = /^controlpoint_capture\t.+$/i;
+        const domScoreReg = /dom_score_update\t(\d+)\t.+/i;
 
         const itemGetReg = /^item_get\t(.+)$/i;
 
@@ -359,7 +380,7 @@ export class MatchParser{
             //needed for domination
             const originalTimestamp = parseFloat(timestampResult[1]);
 
-            const timestamp = (this.bHardcore) ? parseFloat(scalePlaytime(timestampResult[1], this.bHardcore).toFixed(2)) : parseFloat(timestampResult[1]);
+            const timestamp = parseFloat(scalePlaytime(timestampResult[1], this.gameSpeed)).toFixed(2);
             const subString = timestampResult[2];
 
             if(classWeaponStatReg.test(timestampResult[2])){
@@ -456,8 +477,14 @@ export class MatchParser{
 
             if(domCapReg.test(subString)){
 
-                this.dom.parseLine(originalTimestamp, timestamp, subString);
+                this.dom.parseLine(timestamp, timestamp, subString);
                 continue;
+            }
+
+            if(domScoreReg.test(subString)){
+
+                this.dom.scoreUpdateTimestamps.add(timestamp);
+                //console.log(timestamp);
             }
 
             if(itemGetReg.test(subString)){
@@ -471,6 +498,8 @@ export class MatchParser{
             }   
         }
 
+        console.log(this.matchStart, this.originalMatchStart);
+        console.log(this.dom.scoreUpdateTimestamps);
     }
 
 

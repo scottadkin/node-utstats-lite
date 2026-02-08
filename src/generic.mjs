@@ -302,15 +302,12 @@ export function plural(value, word){
     return `${word}s`;
 }
 
-export function scalePlaytime(playtime, bHardcore){
+export function scalePlaytime(playtime, gameSpeed){
 
-    if(playtime <= 0) return 0;
+    if(playtime <= 0 || gameSpeed === 0) return 0;
 
-    if(bHardcore){
-        return playtime / 1.1;      
-    }
+    return playtime / gameSpeed;      
 
-    return playtime;
 }
 
 

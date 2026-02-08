@@ -19,7 +19,7 @@ export class PlayerManager{
     }
 
 
-    createPlayers(lines, matchStart, matchEnd, bHardcore){
+    createPlayers(lines, matchStart, matchEnd, gameSpeed){
 
         const namesToIds = {};
         const idsToNames = {};
@@ -42,7 +42,7 @@ export class PlayerManager{
 
             if(timestampResult === null) continue;
 
-            const timestamp = scalePlaytime(parseFloat(timestampResult[1]), bHardcore);
+            const timestamp = scalePlaytime(parseFloat(timestampResult[1]), gameSpeed);
 
             const subString = timestampResult[2];
 

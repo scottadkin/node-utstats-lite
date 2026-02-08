@@ -168,8 +168,6 @@ export class KillsManager{
             const killer = playerManager.getPlayerById(k.killerId);
             const victim = playerManager.getPlayerById(k.victimId);
 
-            //let timestamp = k.timestamp;
-            //if(bHardcore) timestamp = scalePlaytime(timestamp);
 
             killer.killed(k.timestamp);
             victim.died(k.timestamp);
@@ -182,9 +180,6 @@ export class KillsManager{
 
             const killer = playerManager.getPlayerById(k.killerId);
             const victim = playerManager.getPlayerById(k.victimId);
-
-            let timestamp = k.timestamp;
-            //if(bHardcore) timestamp = scalePlaytime(timestamp);
 
             //dont count team kills for sprees and multis
             //killer.killed(k.timestamp);
