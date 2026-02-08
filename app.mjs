@@ -17,7 +17,7 @@ import { renderRankingsPage } from './src/pages/rankings.mjs';
 import { renderCTFLeaguePage } from './src/pages/ctfLeague.mjs';
 import { renderRecordsPage } from './src/pages/records.mjs';
 import JSONManager from './src/json/JSONManager.mjs';
-import AdminJSONManager from './src/json/adminJSONManager.mjs';
+import AdminJSONManager from './src/json/AdminJSONManager.mjs';
 import session from 'express-session';
 import { renderLoginPage } from './src/pages/login.mjs';
 import { renderRegisterPage } from './src/pages/register.mjs';
