@@ -16,6 +16,32 @@ class DomControlPoint{
         this.longestTimeControlled = null;
         this.shortestTimeControlled = null;
         this.totalControlTime = 0;
+        //total amount of time the point was giving players/teams points
+        //only start counting up if timeHeld is 2 or more
+        this.totalScoreTime = 0;
+        this.totalScoreGiven = 0;
+    }
+
+    updatePointsGiven(timeHeld){
+
+        //0.2 per second after 2 seconds held by same player/team
+
+        const scorePerSecond = 0.2;
+        const minTimeRequired = 2;
+        
+
+        let score = 0;
+
+        if(timeHeld >= minTimeRequired){
+
+            const extra = 1 + Math.floor(timeHeld - minTimeRequired);
+            score = scorePerSecond * extra;
+
+            this.totalScoreGiven += score;
+        }
+
+
+        return score;
     }
 
     touched(timestamp, instigator){
@@ -33,7 +59,10 @@ class DomControlPoint{
                 this.shortestTimeControlled = timeHeld;
             }
 
-            instigator.updateDomControlPointStats(this.id, timeHeld);
+            
+
+            const scoreGiven = this.updatePointsGiven(timeHeld);
+            instigator.updateDomControlPointStats(this.id, timeHeld, scoreGiven);
 
         }else{
 
@@ -51,10 +80,16 @@ class DomControlPoint{
 
         if(this.instigator === null) return;
         
-        const timeHeld = timestamp - this.lastTouchedTimestamp;
-        this.instigator.updateDomControlPointStats(this.id, timeHeld);
+        //const timeHeld = timestamp - this.lastTouchedTimestamp;
+
+        //this.instigator.updateDomControlPointStats(this.id, timeHeld);
 
         this.totalControlTime = timestamp - this.firstTouchedTimestamp;
+
+
+        //ut doesnt do this
+        //this.updatePointsGiven(timeHeld);
+
     }
 }
 
@@ -69,7 +104,7 @@ export class Domination{
     }
 
 
-    parseLine(timestamp, line){
+    parseLine(originalTimestamp, timestamp, line){
 
         const capReg = /^controlpoint_capture\t(.+?)\t(\d+)$/i;
 
@@ -80,7 +115,7 @@ export class Domination{
         this.pointNames.add(capResult[1]);
 
         const playerId = parseInt(capResult[2]);
-        this.capEvents.push({"timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
+        this.capEvents.push({originalTimestamp, "timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
       
     }
 
@@ -113,7 +148,6 @@ export class Domination{
 
     }
 
-
     setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength){
   
         for(let i = 0; i < this.capEvents.length; i++){
@@ -138,15 +172,20 @@ export class Domination{
                 continue;
             }
 
-            controlPoint.touched(c.timestamp, player);
+            controlPoint.touched(c.originalTimestamp, player);
 
         }
 
 
         //match ended need to update the current player stats that have control of points
+
+        let totalPoints = 0;
+
         for(const controlPoint of Object.values(this.controlPoints)){
             controlPoint.matchEnded(matchEnd);
+            totalPoints += controlPoint.totalScoreGiven;
         }
+        
 
         this.setPercentValues(playerManager, matchLength);
     
@@ -177,6 +216,7 @@ export class Domination{
         return total;
 
     }
+
     setPercentValues(playerManager, matchLength){
 
         if(matchLength === 0) return;

@@ -50,6 +50,9 @@ export class MatchParser{
         this.bMapChangeEnd = false;
         this.matchStart = -1;
         this.matchEnd = -1;
+        //unscaled timestamps needed to calc domination scores
+        this.originalMatchStart = -1;
+        this.originalMatchEnd = -1
         this.matchLength = 0;
         this.totalTeams = 0;
         this.teamScores = [0,0,0,0];
@@ -113,6 +116,7 @@ export class MatchParser{
         
         this.ctf.bAnyCTFEvents(this.players.players);
         await this.dom.setPointIds();
+
         this.dom.setPlayerCapStats(this.players, this.matchStart, this.matchEnd, this.matchLength);
         
         this.kills.setPlayerSpecialEvents(this.players);
@@ -278,6 +282,7 @@ export class MatchParser{
 
         if(startResult === null) return;
         this.matchStart = scalePlaytime(parseFloat(startResult[1]), this.bHardcore);
+        this.originalMatchStart = parseFloat(startResult[1]);
 
         const endReg = /(\d+\.\d+)\tgame_end\t(.+?)\s/i
         const endResult = endReg.exec(this.rawData);
@@ -293,6 +298,7 @@ export class MatchParser{
         }
 
         this.matchEnd = scalePlaytime(parseFloat(endResult[1]), this.bHardcore);
+        this.originalMatchEnd = parseFloat(endResult[1]);
 
     }
 
@@ -349,6 +355,9 @@ export class MatchParser{
             const timestampResult = timestampReg.exec(line);
 
             if(timestampResult === null) continue;
+
+            //needed for domination
+            const originalTimestamp = parseFloat(timestampResult[1]);
 
             const timestamp = (this.bHardcore) ? parseFloat(scalePlaytime(timestampResult[1], this.bHardcore).toFixed(2)) : parseFloat(timestampResult[1]);
             const subString = timestampResult[2];
@@ -447,7 +456,7 @@ export class MatchParser{
 
             if(domCapReg.test(subString)){
 
-                this.dom.parseLine(timestamp, subString);
+                this.dom.parseLine(originalTimestamp, timestamp, subString);
                 continue;
             }
 

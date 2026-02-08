@@ -275,7 +275,7 @@ export class Player{
     }
 
 
-    updateDomControlPointStats(pointId, timeHeld){
+    updateDomControlPointStats(pointId, timeHeld, scoreGiven){
 
         if(this.stats.dom.controlPoints[pointId] === undefined){
 
@@ -283,7 +283,9 @@ export class Player{
                 "caps": 0, 
                 "totalTimeControlled": 0, 
                 "shortestTimeControlled": null, 
-                "longestTimeControlled": 0
+                "longestTimeControlled": 0,
+                "totalPointsEarned": 0,
+                "maxPointsEarned": 0
             };
         }
 
@@ -299,8 +301,13 @@ export class Player{
         }
 
         d.totalTimeControlled += timeHeld;
+        d.totalPointsEarned += scoreGiven;
 
-        if(pointId !== 0) this.updateDomControlPointStats(0, timeHeld);
+        if(scoreGiven > d.maxPointsEarned){
+            d.maxPointsEarned = scoreGiven;
+        }
+
+        if(pointId !== 0) this.updateDomControlPointStats(0, timeHeld, scoreGiven);
     }
 
 }

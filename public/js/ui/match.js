@@ -440,7 +440,12 @@ class MatchDominationSummary{
             {"display": "Control Percent", "value": "percent"},
             {"display": "Control Time", "value": "time"},
             {"display": "Total Caps", "value": "caps"},
+            {"display": "Shortest Time Held", "value": "short"},
+            {"display": "Longest Time Held", "value": "long"},
         ];
+
+
+
 
         this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
 
