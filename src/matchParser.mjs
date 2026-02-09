@@ -120,7 +120,7 @@ export class MatchParser{
         this.ctf.bAnyCTFEvents(this.players.players);
         await this.dom.setPointIds(this.gameSpeed);
 
-        this.dom.setPlayerCapStats(this.players, this.matchStart, this.matchEnd, this.matchLength, this.gameSpeed);
+        this.dom.setPlayerCapStats(this.players, this.originalMatchStartInt, this.originalMatchEndInt, this.matchLength, this.gameSpeedInt);
         
         this.kills.setPlayerSpecialEvents(this.players);
         this.items.setPlayerStats(this.players);
@@ -279,6 +279,7 @@ export class MatchParser{
         if(gameSpeedResult[1] === "0") throw new Error(`Not a valid gamespeed`);
 
         this.gameSpeed = parseInt(gameSpeedResult[1]) / 100;
+        this.gameSpeedInt = parseInt(gameSpeedResult[1]);
 
         console.log(this.gameSpeed);
 
@@ -293,6 +294,7 @@ export class MatchParser{
         if(value === "true"){
             this.bHardcore = true;
             this.gameSpeed *= 1.1;
+            this.gameSpeedInt += 10;
         }
         console.log(this.gameSpeed);
 
@@ -302,6 +304,7 @@ export class MatchParser{
         if(startResult === null) return;
         this.matchStart = scalePlaytime(parseFloat(startResult[1]), this.gameSpeed);
         this.originalMatchStart = parseFloat(startResult[1]);
+        this.originalMatchStartInt = parseInt(startResult[1].replace(".",""));
 
         const endReg = /(\d+\.\d+)\tgame_end\t(.+?)\s/i
         const endResult = endReg.exec(this.rawData);
@@ -318,6 +321,7 @@ export class MatchParser{
 
         this.matchEnd = scalePlaytime(parseFloat(endResult[1]), this.gameSpeed);
         this.originalMatchEnd = parseFloat(endResult[1]);
+        this.originalMatchEndInt = parseInt(endResult[1].replace(".",""));
 
 
     }
@@ -378,8 +382,11 @@ export class MatchParser{
             if(timestampResult === null) continue;
 
         
-            //needed for domination
-            const originalTimestamp = parseFloat(timestampResult);
+           // process.exit();
+            const origianlStringTimestamp = timestampResult[1].replace(".", "");
+            const originalTimestampInt = parseInt(origianlStringTimestamp);
+
+            const originalTimestamp = parseFloat(timestampResult[1]);
 
             const timestamp = scalePlaytime(parseFloat(timestampResult[1]), this.gameSpeed);
 
@@ -483,13 +490,13 @@ export class MatchParser{
 
             if(domCapReg.test(subString)){
 
-                this.dom.parseLine(originalTimestamp, timestamp, subString);
+                this.dom.parseLine(originalTimestampInt, timestamp, subString);
                 continue;
             }
 
             if(domScoreReg.test(subString)){
 
-                this.dom.scoreUpdateTimestamps.add(timestamp);
+                this.dom.scoreUpdateTimestamps.add(originalTimestampInt);
                 //console.log(timestamp);
             }
 
