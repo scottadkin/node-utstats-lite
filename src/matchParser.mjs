@@ -118,7 +118,7 @@ export class MatchParser{
 
         
         this.ctf.bAnyCTFEvents(this.players.players);
-        await this.dom.setPointIds();
+        await this.dom.setPointIds(this.gameSpeed);
 
         this.dom.setPlayerCapStats(this.players, this.matchStart, this.matchEnd, this.matchLength, this.gameSpeed);
         
@@ -349,7 +349,7 @@ export class MatchParser{
 
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
         const domCapReg = /^controlpoint_capture\t.+$/i;
-        const domScoreReg = /dom_score_update\t(\d+)\t.+/i;
+        const domScoreReg = /dom_playerscore_update\t(\d+)\t.+/i;
 
         const itemGetReg = /^item_get\t(.+)$/i;
 
@@ -377,10 +377,16 @@ export class MatchParser{
 
             if(timestampResult === null) continue;
 
+        
             //needed for domination
-            const originalTimestamp = parseFloat(timestampResult[1]);
+            const originalTimestamp = parseFloat(timestampResult);
 
-            const timestamp = parseFloat(scalePlaytime(timestampResult[1], this.gameSpeed)).toFixed(2);
+            const timestamp = scalePlaytime(parseFloat(timestampResult[1]), this.gameSpeed);
+
+
+            //process.exit();
+
+           // process.exit();
             const subString = timestampResult[2];
 
             if(classWeaponStatReg.test(timestampResult[2])){
@@ -477,7 +483,7 @@ export class MatchParser{
 
             if(domCapReg.test(subString)){
 
-                this.dom.parseLine(timestamp, timestamp, subString);
+                this.dom.parseLine(originalTimestamp, timestamp, subString);
                 continue;
             }
 
@@ -498,8 +504,6 @@ export class MatchParser{
             }   
         }
 
-        console.log(this.matchStart, this.originalMatchStart);
-        console.log(this.dom.scoreUpdateTimestamps);
     }
 
 

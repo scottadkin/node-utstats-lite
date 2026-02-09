@@ -34,10 +34,11 @@ for now < matchEnd, now++
 
 class DomControlPoint{
 
-    constructor(id, name){
+    constructor(id, name, gameSpeed){
 
         this.id = id;
         this.name = name;
+        this.gameSpeed = gameSpeed;
         this.firstTouchedTimestamp = null;
         this.lastTouchedTimestamp = null;
         this.instigator = null;
@@ -49,6 +50,7 @@ class DomControlPoint{
         //total amount of time the point was giving players/teams points
         //only starts counting up if timeHeld is 2 or more
         this.totalScoreTime = 0;
+        this.lastTouchedTick = -999;
 
         this.totalScoreGiven = 0;
     }
@@ -63,21 +65,21 @@ class DomControlPoint{
 156.19	teamscore	2	3
 156.19	teamscore	3	10   //57*/
 
-    updatePointsGiven(timeHeld){
+    updatePointsGiven(timeHeld, totalTicks){
 
-        //0.2 per second after 2 seconds held by same player/team
+        //0.2 per second after 2 * gamespeed seconds held by same player/team
 
-        const scorePerSecond = 0.2;
-        const minTimeRequired = 2;
+        const scorePerTick = 0.2;
+        const minTimeRequired = 2 * this.gameSpeed;
 
         let scoreTime = 0;
         
         let score = 0;
 
-        if(timeHeld >= minTimeRequired){
+        if(totalTicks >= 2){
 
-            const extra = Math.ceil(timeHeld - minTimeRequired);
-            score = scorePerSecond * extra;
+            const extra = totalTicks//Math.ceil(timeHeld - minTimeRequired);
+            score = scorePerTick * (totalTicks );
 
             scoreTime = timeHeld - minTimeRequired;
 
@@ -88,9 +90,16 @@ class DomControlPoint{
         return {score, scoreTime};
     }
 
-    touched(timestamp, instigator){
 
-        if(this.instigator !== null){
+    //nextScoreTick is the next timer event, only start count ticks up after 1 tick after that
+   // touched(timestamp, instigator, nextScoreTick){
+    touched(pingId, latestPing, timestamp, instigator){
+
+        
+        if(this.instigator === null){
+            this.firstTouchedTimestamp = timestamp;
+
+        }else{
 
             const timeHeld = timestamp - this.lastTouchedTimestamp;
             this.totalCapTime += timeHeld;
@@ -103,34 +112,76 @@ class DomControlPoint{
                 this.shortestTimeControlled = timeHeld;
             }  
 
-            const {score, scoreTime} = this.updatePointsGiven(timeHeld);
-            instigator.updateDomControlPointStats(this.id, timeHeld, score, scoreTime);
+            console.log(`TIMEHELD ${timeHeld}, ${pingId}, can score after ${this.canScoreAfterPing}`);
+            console.log(pingId, this.canScoreAfterPing)
 
-        }else{
+            console.log(`TIMESTAMP: ${timestamp}, LATESTPING ${latestPing}`);
+            
 
-            this.firstTouchedTimestamp = timestamp;
+            if(pingId >= this.canScoreAfterPing){
+
+                const timeOffset = timestamp - this.lastTouchedTimestamp;
+
+                if(timeOffset >= 1){
+
+                    //console.log(timeOffset, "fasfasfasfsafsafsafsasfasfasffsafsa");
+                   // console.log(`totalPingsAAAA ${pingId - this.canScoreAfterPing}`);
+
+                    let totalTicks = pingId - this.canScoreAfterPing;
+
+                   // console.log(`totalTicks = ${totalTicks}, ${totalTicks * 0.2}`);
+                    let score = totalTicks * 0.2;
+                    //if(bEnd) score = score - 0.2;
+                    console.log(`I GOT POINTS`, score);
+
+                    this.totalScoreGiven += score;
+                }
+            }else{
+                new Message(pingId - this.canScoreAfterPing,"error");
+            }
         }
 
-        this.instigator = instigator;
         this.lastTouchedTimestamp = timestamp;
         this.totalCaps++; 
+
+        this.lastPingId = pingId;
+        //                   next ping + min 2 pings
+        this.canScoreAfterPing = pingId + 1;
+        this.lastScorePing = latestPing;
+        this.instigator = instigator;
+
     }
 
-    matchEnded(timestamp){
 
+    //always seems to be 0.6 off real value is match length is short?
+    matchEnded(pingId, timestamp){
+
+        //works if 1 touch until end
 
         if(this.instigator === null) return;
+
+        let test = this.canScoreAfterPing ;
+
+        console.log(`MATCH END`);
+        console.log(`tick = ${pingId}, last tick = ${this.lastPingId}, can score after(${test})`);
+
+        //if(pingId >= test){
+
+                const offset = timestamp - this.lastTouchedTimestamp;
+
+                if(offset >= 1){
+                    console.log(`totalPings ${pingId - test}`);
+
+                    let score = ((pingId - test) * 0.2);
+                    //if(bEnd) score = score - 0.2;
+                    console.log(`I GOT POINTbbbS`, score);
+
+                    console.log(`total score was ${this.totalScoreGiven}`);
+                    this.totalScoreGiven += score;
+                    console.log(`total score is now ${this.totalScoreGiven}`);
+                }
+         //   }
         
-        const timeHeld = timestamp - this.lastTouchedTimestamp;
-
-        console.log(`ggggggggggggggggggggggggggg ${timeHeld}`);
-        this.totalControlTime = timestamp - this.firstTouchedTimestamp;
-
-        
-        //ut skips this for some reason
-        const {score, scoreTime} = this.updatePointsGiven(timeHeld);
-
-        this.instigator.updateDomControlPointStats(this.id, timeHeld, score, scoreTime);
 
     }
 }
@@ -160,11 +211,11 @@ export class Domination{
         this.pointNames.add(capResult[1]);
 
         const playerId = parseInt(capResult[2]);
-        this.capEvents.push({originalTimestamp, "timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
+        this.capEvents.push({"originalTimestamp":parseFloat(originalTimestamp.toFixed(2)), "timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
       
     }
 
-    async setPointIds(){
+    async setPointIds(gameSpeed){
 
         const names = [...this.pointNames];
 
@@ -181,7 +232,7 @@ export class Domination{
 
         for(let i = 0; i < names.length; i++){
 
-            this.controlPoints[names[i]] = new DomControlPoint(namesToIds[names[i]], names[i]);
+            this.controlPoints[names[i]] = new DomControlPoint(namesToIds[names[i]], names[i], gameSpeed);
         }
 
         for(let i = 0; i < this.capEvents.length; i++){
@@ -193,63 +244,150 @@ export class Domination{
 
     }
 
-    getTimeThing(gameSpeed){
 
-        //if gamespeed is 100 and game is not hardcore
-        const defaultTimerRange = 5;
+    testtest(playerManager, matchEnd){
 
-        const realTimeRange = 5 * gameSpeed;
+        const all = [...this.capEvents];
 
-        const timestamps = [...this.scoreUpdateTimestamps];
+        const pings = [...this.scoreUpdateTimestamps];
 
-        if(timestamps.length === 0) return;
+        //last ping isn't a real one just the last log player/team scores
+        for(let i = 0; i < pings.length - 1; i++){
 
+            const p = pings[i];
 
-        const firstSeen = timestamps[0];
+           // console.log(p);
 
-        console.log(firstSeen);
-        console.log(`real time range `, realTimeRange);
-
-        const testPre = firstSeen - realTimeRange;
-
-        console.log(`test -1 `, testPre);
-        console.log(`test +1 `, firstSeen + realTimeRange);
-
-   
-
-        let previous = null;
-
-        for(let i = 0; i < timestamps.length; i++){
-
-            const t = timestamps[i];
             if(i === 0){
-                previous = t;
-                continue;
+                all.push({"type": "ping", "timestamp": p - 4});
+            all.push({"type": "ping", "timestamp": p - 3});
+            all.push({"type": "ping", "timestamp": p - 2});
+            all.push({"type": "ping", "timestamp": p - 1});
             }
 
-            //const fart = firstSeen + (realTimeRange * i);
-            //console.log(`${i} real=${t}, ${parseFloat(fart.toFixed(2))}`);
-           // console.log(t - previous);
-            previous = t;
+            all.push({"type": "ping", "bReal": "TRUE", "timestamp": p});
+            all.push({"type": "ping", "timestamp": p + 1});
+            all.push({"type": "ping", "timestamp": p + 2});
+            all.push({"type": "ping", "timestamp": p + 3});
+            all.push({"type": "ping", "timestamp": p + 4});
         }
+
+
+        //console.log(all);
+
+       // process.exit();
+
+
+
+        all.sort((a, b) =>{
+            a = a.timestamp;
+            b = b.timestamp;
+
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+            return 0;
+        });
+
+
         
+
+        let lastPing = 0;
+        let pingId = -1;
+
+        for(let i = 0; i < all.length; i++){
+
+            
+            const e = all[i];
+
+            if(e.type === undefined){
+
+                const player = playerManager.getPlayerById(e.playerId);
+                
+                if(player === null){
+                    new Message(`dom.setPlayerCapStats() player is null`,"warning");
+                    continue;
+                }
+
+                const controlPoint = this.controlPoints[e.point];
+
+                if(controlPoint === undefined){
+
+                    new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
+                    continue;
+                }
+
+               // console.log(player.name);
+
+                //touched(pingId, latestPing, timestamp, instigator){
+                controlPoint.touched(pingId, lastPing, e.timestamp, player, false);
+            }
+
+            if(e.type !== undefined){
+              //  console.log("ping");
+                lastPing = e.timestamp;
+                pingId++;
+                
+            }
+
+            continue;
+
+            
+
+        // console.log(`SCORET ICK = `,this.getScoreTick(c.originalTimestamp));
+
+          //  const scoreTick = this.getScoreTick(e.timestamp);
+           // controlPoint.touched(e.timestamp, player, scoreTick);
+        }
+
+        let totalPoints = 0;
+
+        for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
+
+            console.log(pingId);
+
+            console.log(`totalPoints before ${controlPoint.totalScoreGiven}`);
+            controlPoint.matchEnded(pingId, lastPing, controlPoint.instigator);
+
+            totalPoints += controlPoint.totalScoreGiven;
+        }
+
+        console.log(`totalPoints = ${totalPoints}`);
 
     }
 
     setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed){
 
 
-        this.getTimeThing(gameSpeed);
+        //console.log(this.capEvents);
+       // console.log(this.scoreUpdateTimestamps);
+
+
+        this.testtest(playerManager, matchEnd);
+        console.log(matchLength);
+        return;
+        process.exit();
+        //this.getTimeThing(gameSpeed);
 
         console.log(`gameSpeed is ${gameSpeed}`);
 
+        
+        const pingIntervals = 1//1 * gameSpeed;
+
+        this.testPingIntervals(pingIntervals, matchStart, matchEnd);
+        console.log(pingIntervals);
+        //process.exit();
+
+        //process.exit();
   
         for(let i = 0; i < this.capEvents.length; i++){
 
             const c = this.capEvents[i];
 
 
-            if(c.originalTimestamp < matchStart) continue;
+            if(c.timestamp < matchStart) continue;
 
             const player = playerManager.getPlayerById(c.playerId);
             
@@ -266,7 +404,10 @@ export class Domination{
                 continue;
             }
 
-            controlPoint.touched(c.originalTimestamp, player);
+           // console.log(`SCORET ICK = `,this.getScoreTick(c.originalTimestamp));
+
+            const scoreTick = this.getScoreTick(c.timestamp);
+            //controlPoint.touch/ed(c.timestamp, player, scoreTick);
 
         }
 
@@ -275,8 +416,14 @@ export class Domination{
 
         let totalPoints = 0;
 
+        console.log(`matchEND ${matchEnd}, matchLength ${matchLength} last tick timestamp = ${this.scoreTicks[this.scoreTicks.length - 1]}`);
+
+        const boring = [...this.scoreTicks];
         for(const controlPoint of Object.values(this.controlPoints)){
-            controlPoint.matchEnded(matchEnd);
+
+            const nextScoreTick = this.getScoreTick( boring[boring.length - 2]);
+            console.log(`nexticsk fskfs = ${nextScoreTick}`);
+            controlPoint.matchEnded(matchEnd, nextScoreTick ); // add + 1?
             totalPoints += controlPoint.totalScoreGiven;
             console.log("controlPoint.totalScoreGiven, controlPoint.totalScoreTime");
             console.log(controlPoint.totalScoreGiven, controlPoint.totalScoreTime);
@@ -284,6 +431,7 @@ export class Domination{
         
         console.log(`totalpoints `, totalPoints);
 
+        //process.exit();
         this.setPercentValues(playerManager, matchLength);
     
     }
