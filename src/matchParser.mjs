@@ -354,6 +354,7 @@ export class MatchParser{
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
         const domCapReg = /^controlpoint_capture\t.+$/i;
         const domScoreReg = /dom_playerscore_update\t(\d+)\t.+/i;
+        const domTeamScoreReg = /dom_score_update\t(\d+)\t(.+)/i;
 
         const itemGetReg = /^item_get\t(.+)$/i;
 
@@ -498,6 +499,24 @@ export class MatchParser{
 
                 this.dom.scoreUpdateTimestamps.add(originalTimestampInt);
                 //console.log(timestamp);
+            }
+
+            if(domTeamScoreReg.test(subString)){
+
+                const scoreResult = domTeamScoreReg.exec(subString);
+
+                if(scoreResult !== null){
+
+                    if(this.dom.teamScoreTimestamps[originalTimestampInt] === undefined){
+                        this.dom.teamScoreTimestamps[originalTimestampInt] = [];
+                    }
+
+                    this.dom.teamScoreTimestamps[originalTimestampInt].push({
+                        "intTimestamp": originalTimestampInt,
+                        "teamId": scoreResult[1],
+                        "score": scoreResult[2]
+                    });
+                }
             }
 
             if(itemGetReg.test(subString)){

@@ -53,6 +53,10 @@ class DomControlPoint{
         this.lastTouchedTick = -999;
 
         this.totalScoreGiven = 0;
+
+
+        this.bScoreReady = false;
+        this.scoreTime = 2;
     }
 
 
@@ -82,100 +86,6 @@ class DomControlPoint{
     }
 
 
-    //nextScoreTick is the next timer event, only start count ticks up after 1 tick after that
-   // touched(timestamp, instigator, nextScoreTick){
-    touched(pingId, latestPing, timestamp, instigator){
-
-        
-        if(this.instigator === null){
-            this.firstTouchedTimestamp = timestamp;
-
-        }else{
-
-            const timeHeld = timestamp - this.lastTouchedTimestamp;
-            this.totalCapTime += timeHeld;
-
-            if(this.longestTimeControlled === null || this.longestTimeControlled < timeHeld){
-                this.longestTimeControlled = timeHeld;
-            }
-
-            if(this.shortestTimeControlled === null || this.shortestTimeControlled > timeHeld){
-                this.shortestTimeControlled = timeHeld;
-            }  
-
-            //console.log(`TIMEHELD ${timeHeld}, ${pingId}, can score after ${this.canScoreAfterPing}`);
-            //console.log(pingId, this.canScoreAfterPing)
-
-            //console.log(`TIMESTAMP: ${timestamp}, LATESTPING ${latestPing}`);
-            
-
-            if(pingId >= this.canScoreAfterPing){
-
-                const timeOffset = timestamp - this.lastTouchedTimestamp;
-
-                if(timeOffset >= 1){
-
-                    //console.log(timeOffset, "fasfasfasfsafsafsafsasfasfasffsafsa");
-                   // console.log(`totalPingsAAAA ${pingId - this.canScoreAfterPing}`);
-
-                    let totalTicks = pingId - this.canScoreAfterPing;
-
-                   // console.log(`totalTicks = ${totalTicks}, ${totalTicks * 0.2}`);
-                    let score = totalTicks * 0.2;
-                    //if(bEnd) score = score - 0.2;
-                    console.log(`I GOT POINTS`, score);
-
-                    this.totalScoreGiven += score;
-                }
-            }else{
-                new Message(pingId - this.canScoreAfterPing,"error");
-            }
-        }
-
-        this.lastTouchedTimestamp = timestamp;
-        this.totalCaps++; 
-
-        this.lastPingId = pingId;
-        //                   next ping + min 2 pings
-        this.canScoreAfterPing = pingId + 1;
-        this.lastScorePing = latestPing;
-        this.instigator = instigator;
-
-    }
-
-
-    //always seems to be 0.6 off real value is match length is short?
-    matchEnded(pingId, timestamp){
-
-        //works if 1 touch until end
-
-        if(this.instigator === null) return;
-
-        let test = this.canScoreAfterPing ;
-
-        console.log(`MATCH END`);
-        console.log(`tick = ${pingId}, last tick = ${this.lastPingId}, can score after(${test})`);
-
-        //if(pingId >= test){
-
-                const offset = timestamp - this.lastTouchedTimestamp;
-
-                if(offset >= 1){
-                    console.log(`totalPings ${pingId - test}`);
-
-                    let score = ((pingId - test) * 0.2);
-                    //if(bEnd) score = score - 0.2;
-                    console.log(`I GOT POINTbbbS`, score);
-
-                    console.log(`total score was ${this.totalScoreGiven}`);
-                    this.totalScoreGiven += score;
-                    console.log(`total score is now ${this.totalScoreGiven}`);
-                }
-         //   }
-
-    }
-
-
      touchedINT(pingId, latestPing, timestamp, instigator, pingInterval){
 
         if(this.instigator === null){
@@ -184,7 +94,7 @@ class DomControlPoint{
 
         }else{
 
-            const timeHeld = timestamp - this.lastTouchedTimestamp;
+            /*const timeHeld = timestamp - this.lastTouchedTimestamp;
 
             if(pingId >= this.canScoreAfterPing){
 
@@ -203,9 +113,10 @@ class DomControlPoint{
 
                     this.totalScoreGiven += score;
               //  }
+              
             }else{
                 new Message(pingId - this.canScoreAfterPing,"error");
-            }
+            }*/
         }
 
         this.lastTouchedTimestamp = timestamp;
@@ -213,15 +124,19 @@ class DomControlPoint{
 
         this.lastPingId = pingId;
         //                   next ping + min 2 pings
-        this.canScoreAfterPing = pingId + 1;
+        //this.canScoreAfterPing = pingId + 1;
         this.lastScorePing = latestPing;
         this.instigator = instigator;
+
+        this.bScoreReady = false;
+        this.scoreTime = 2;
 
     }
 
     //always seems to be 0.6 off real value is match length is short?
     matchEndedINT(pingId, timestamp, instigator, pingInterval){
 
+        return;
         if(this.instigator === null) return;
 
         //let test = this.canScoreAfterPing ;
@@ -262,6 +177,40 @@ class DomControlPoint{
          //   }
 
     }
+
+
+    ping(intTimestamp){
+
+        //console.log(this.name, "PINGED");
+
+        if(this.instigator === null){
+         //   console.log(`${this.name} is not active yet`);
+            return;
+        }
+
+        
+
+        this.scoreTime--;
+
+        if(this.scoreTime <= 0){
+            this.bScoreReady = true;
+            //this.scoreTicks = 0;
+            //console.log(`${this.name} is now score ready`);
+        }
+
+        if(this.bScoreReady){
+
+            //this.scoreTicks++;
+           // console.log(`${this.name} is score ready`);
+
+            //console.log(this.instigator.name, this.scoreTicks);
+
+            this.totalScoreGiven += 0.2;//+= (0.2 * this.scoreTicks);
+
+            return;
+        }
+        
+    }
 }
 
 export class Domination{
@@ -273,6 +222,7 @@ export class Domination{
         this.controlPoints = {};
 
         this.scoreUpdateTimestamps = new Set();
+        this.teamScoreTimestamps = {};
 
         this.capEvents = [];  
     }
@@ -322,121 +272,6 @@ export class Domination{
 
     }
 
-
-    testtest(playerManager, matchEnd){
-
-        const all = [...this.capEvents];
-
-        const pings = [...this.scoreUpdateTimestamps];
-
-        //last ping isn't a real one just the last log player/team scores
-        for(let i = 0; i < pings.length - 1; i++){
-
-            const p = pings[i];
-
-           // console.log(p);
-
-            if(i === 0){
-                all.push({"type": "ping", "timestamp": p - 4});
-            all.push({"type": "ping", "timestamp": p - 3});
-            all.push({"type": "ping", "timestamp": p - 2});
-            all.push({"type": "ping", "timestamp": p - 1});
-            }
-
-            all.push({"type": "ping", "bReal": "TRUE", "timestamp": p});
-            all.push({"type": "ping", "timestamp": p + 1});
-            all.push({"type": "ping", "timestamp": p + 2});
-            all.push({"type": "ping", "timestamp": p + 3});
-            all.push({"type": "ping", "timestamp": p + 4});
-        }
-
-
-        console.log(all);
-
-       process.exit();
-
-
-
-        all.sort((a, b) =>{
-            a = a.timestamp;
-            b = b.timestamp;
-
-            if(a < b){
-                return -1;
-            }else if(a > b){
-                return 1;
-            }
-            return 0;
-        });
-
-
-        
-
-        let lastPing = 0;
-        let pingId = -1;
-
-        for(let i = 0; i < all.length; i++){
-
-            
-            const e = all[i];
-
-            if(e.type === undefined){
-
-                const player = playerManager.getPlayerById(e.playerId);
-                
-                if(player === null){
-                    new Message(`dom.setPlayerCapStats() player is null`,"warning");
-                    continue;
-                }
-
-                const controlPoint = this.controlPoints[e.point];
-
-                if(controlPoint === undefined){
-
-                    new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
-                    continue;
-                }
-
-               // console.log(player.name);
-
-                //touched(pingId, latestPing, timestamp, instigator){
-                controlPoint.touched(pingId, lastPing, e.timestamp, player, false);
-            }
-
-            if(e.type !== undefined){
-              //  console.log("ping");
-                lastPing = e.timestamp;
-                pingId++;
-                
-            }
-
-            continue;
-
-            
-
-        // console.log(`SCORET ICK = `,this.getScoreTick(c.originalTimestamp));
-
-          //  const scoreTick = this.getScoreTick(e.timestamp);
-           // controlPoint.touched(e.timestamp, player, scoreTick);
-        }
-
-        let totalPoints = 0;
-
-        for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
-
-            console.log(pingId);
-
-            console.log(`totalPoints before ${controlPoint.totalScoreGiven}`);
-            controlPoint.matchEnded(pingId, lastPing, controlPoint.instigator);
-
-            totalPoints += controlPoint.totalScoreGiven;
-        }
-
-        console.log(`totalPoints = ${totalPoints}`);
-
-    }
-
-
     testtest2(playerManager, matchEnd, pingInterval){
 
         const all =[...this.capEvents];
@@ -457,13 +292,26 @@ export class Domination{
             let p = pings[i];
 
             
+            
 
             if(i === 0){
+
                 firstRealPing = p;
-                all.push({"type": "ping", "intTimestamp": p - pingInterval * 4});
-                all.push({"type": "ping", "intTimestamp": p - pingInterval * 3});
-                all.push({"type": "ping", "intTimestamp": p - pingInterval * 2});
-                all.push({"type": "ping", "intTimestamp": p - pingInterval});
+               // all.push({"type": "ping", "intTimestamp": p - pingInterval * 4});
+               // all.push({"type": "ping", "intTimestamp": p - pingInterval * 3});
+               // all.push({"type": "ping", "intTimestamp": p - pingInterval * 2});
+               // all.push({"type": "ping", "intTimestamp": p - pingInterval});
+
+              
+                for(let x = 1; x < 5; x++){
+
+                    const current = p - pingInterval * x;
+                    if(p < 0) break;
+                    all.push({"type": "ping", "intTimestamp": current});
+      
+                }
+                
+            
             }
 
             all.push({"type": "ping", "bReal": "TRUE", "intTimestamp": p});
@@ -472,14 +320,23 @@ export class Domination{
             all.push({"type": "ping", "intTimestamp": p + pingInterval * 3});
             all.push({"type": "ping", "intTimestamp": p + pingInterval * 4});
 
+
+            /*if(i === pings.length - 1){
+
+                for(let x = 5; x < 100; x++){
+                    all.push({"type": "ping", "intTimestamp": p + pingInterval * x});
+                }
+                
+               
+            }*/
             lastRealPing = p;
 
             if(i > 1){
-                console.log(`######`);
+                //console.log(`######`);
                 
 
                 const diff = lastRealPing - pings[i - 1];
-                console.log(diff, pingInterval);
+                //console.log(diff, pingInterval);
                 if(diff !== pingInterval * 5){
 
                     roundingErrors++;
@@ -490,13 +347,13 @@ export class Domination{
             }
         }
 
-        console.log(firstRealPing, lastRealPing);
+       // console.log(firstRealPing, lastRealPing);
 
         new Message(`Total rounding errors = ${roundingErrors}, totalOffset = ${totalRoundingOffset}`, "error");
 
-        console.log(roundingErrors, totalRoundingOffset);
+       // console.log(roundingErrors, totalRoundingOffset);
 
-        process.exit();
+       
 
 
         all.sort((a, b) =>{
@@ -527,8 +384,14 @@ export class Domination{
                 pingId++;
                 //console.log(i, pingId, latestPing);
 
+                this.pingAllControlPoints(e.intTimestamp);
+
+                console.log(`PING @ ${e.intTimestamp}, matchEnds at ${matchEnd}`);
+
             }else{
 
+                console.log(e.intTimestamp - latestPing, e.intTimestamp, latestPing, "GFDSAGISDJHGOIHSDOKIGNSDOIKGNSODKNG");
+                
                 const controlPoint = this.controlPoints[e.point];
 
                 if(controlPoint === undefined){
@@ -548,11 +411,10 @@ export class Domination{
 
                 //touched(pingId, latestPing, timestamp, instigator){
                 controlPoint.touchedINT(pingId, latestPing, e.intTimestamp, player, pingInterval);
-            }
-
-            
+            }  
         }
 
+        //process.exit();
          let totalPoints = 0;
 
         for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
@@ -560,7 +422,7 @@ export class Domination{
             console.log(pingId);
 
             console.log(`totalPoints before ${controlPoint.totalScoreGiven}`);
-            controlPoint.matchEndedINT(pingId, matchEnd, controlPoint.instigator, pingInterval);
+            //controlPoint.matchEndedINT(pingId, matchEnd, controlPoint.instigator, pingInterval);
 
             totalPoints += controlPoint.totalScoreGiven;
         }
@@ -568,6 +430,16 @@ export class Domination{
         console.log(`totalPoints = ${totalPoints}`);
 
        //process.exit();
+    }
+
+    pingAllControlPoints(intTimestamp){
+
+        console.log(`ping all control points`);
+
+        for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
+
+            controlPoint.ping(intTimestamp);
+        }
     }
 
     setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed){
@@ -595,6 +467,8 @@ export class Domination{
         console.log(realPingInterval);
 
         this.testtest2(playerManager, matchEnd, realPingInterval);
+
+        console.log(this.teamScoreTimestamps);
         return;
         process.exit();
         //this.getTimeThing(gameSpeed);
