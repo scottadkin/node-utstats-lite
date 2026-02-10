@@ -179,44 +179,39 @@ class DomControlPoint{
     }
 
 
-    ping(intTimestamp, totalOffset, pingInterval){
+    ping(intTimestamp, totalOffset, pingInterval,maxUnderOffset, 
+                    maxOverOffset, 
+                    minTotalOffset, 
+                    maxTotalOffset){
 
         //console.log(this.name, "PINGED");
-
-        this.scoreTime--;
-
-        if(this.scoreTime >= 0){
-            this.bScoreReady = false;
-            
-            //this.scoreTicks = 0;
-            //console.log(`${this.name} is now score ready`);
-        }else{
-            this.bScoreReady = true;
-            this.scoreTime = 0;
-        }
 
         if(this.instigator === null){
          //   console.log(`${this.name} is not active yet`);
             return;
         }
 
-        const offset = intTimestamp - this.lastTouchedTimestamp;
+        this.scoreTime--;
 
-            console.log(`offset = ${offset}`);
-
-        const lowerLimit = pingInterval - 1 + totalOffset;
-        const upperLimit = pingInterval + 1 + totalOffset;
-
-        if(offset >= lowerLimit){
-
+        if(this.scoreTime > 0){
+            this.bScoreReady = false;
             
+            //this.scoreTicks = 0;
+            //console.log(`${this.name} is now score ready`);
+        }else{
+            this.bScoreReady = true;
+        }
 
-            this.totalScoreGiven += 0.2;//+= (0.2 * this.scoreTicks);
+        
+        
+        if(this.bScoreReady){
 
-        }else if(offset >= lowerLimit && offset <= upperLimit){
              this.totalScoreGiven += 0.2;//+= (0.2 * this.scoreTicks);
+             return;
             
         }
+
+        
 
         
 
@@ -314,6 +309,12 @@ export class Domination{
 
         let totalOffset = 0;
 
+        let maxOverOffset = 0;
+        let maxUnderOffset = 0;
+
+        let maxTotalOffset = 0;
+        let minTotalOffset = 0;
+
         //last ping isn't a real one just the last log player/team scores
         for(let i = 0; i < pings.length - 1; i++){
 
@@ -351,28 +352,59 @@ export class Domination{
             if(i + 1 < pings.length - 1 && nextRealPing !== null && nextFakePing !== nextRealPing){
 
                 
-                console.log(nextFakePing, nextRealPing);
+                //console.log(nextFakePing, nextRealPing);
 
-                console.log(nextFakePing - nextRealPing);
+                //console.log(nextFakePing - nextRealPing);
 
                 offset =  nextRealPing - nextFakePing;
 
+                if(offset > maxOverOffset){
+                    maxOverOffset = offset;
+                }
+
+                if(offset < maxUnderOffset){
+                    maxUnderOffset = offset;
+                }
+
+                //console.log(`under ${maxUnderOffset}, over ${maxOverOffset}`);
+
                 totalOffset += offset;
                 //process.exit();
+
+                if(totalOffset > maxTotalOffset){
+                    maxTotalOffset = totalOffset;
+                }
+
+                if(totalOffset < minTotalOffset){
+                    minTotalOffset = totalOffset;
+                }
+
+                //console.log(`mTotal = ${minTotalOffset}, maxTotal = ${maxTotalOffset}`);
                 //all.push({"type": "ping", "intTimestamp": p + pingInterval * 5});
             }
 
-            console.log("offset, p,pingInterval");
-            console.log(offset, p,pingInterval, totalOffset);
+            //console.log("offset, p,pingInterval");
+            //console.log(offset, p,pingInterval, totalOffset);
 
-            all.push({"type": "ping", "bReal": true, "intTimestamp": p, "totalOffset": 0, "offset": 0});
+            all.push({"type": "ping", "bReal": true, "intTimestamp": p, "totalOffset": 0, "offset": 0,
+                "totalOffset": totalOffset,
+                    "offset": offset,
+                    maxUnderOffset, 
+                    maxOverOffset, 
+                    minTotalOffset, 
+                    maxTotalOffset
+            });
 
             for(let x = 1; x < 5; x++){
                 all.push({
                     "type": "ping", 
                     "intTimestamp": p + pingInterval * x,
                     "totalOffset": totalOffset,
-                    "offset": offset
+                    "offset": offset,
+                    maxUnderOffset, 
+                    maxOverOffset, 
+                    minTotalOffset, 
+                    maxTotalOffset
                 });
         
             }
@@ -443,7 +475,11 @@ export class Domination{
                 pingId++;
                 //console.log(i, pingId, latestPing);
 
-                this.pingAllControlPoints(e.intTimestamp, e.totalOffset, pingInterval);
+               // console.log(maxUnderOffset, maxOverOffset, minTotalOffset, maxTotalOffset);
+                this.pingAllControlPoints(e.intTimestamp, e.totalOffset, pingInterval, e.maxUnderOffset, 
+                    e.maxOverOffset, 
+                    e.minTotalOffset, 
+                    e.maxTotalOffset );
 
                 //console.log(`PING @ ${e.intTimestamp}, matchEnds at ${matchEnd}`);
 
@@ -507,15 +543,23 @@ export class Domination{
         }
 
         console.log(`totalPoints = ${totalPoints}`);
+        console.log(`matchEnd = ${matchEnd}`);
+        console.log("LOGSCORE",this.getLogScoresAt(matchEnd));
 
        //process.exit();
     }
 
-    pingAllControlPoints(intTimestamp, totalOffset, pingInterval){
+    pingAllControlPoints(intTimestamp, totalOffset, pingInterval, maxUnderOffset, 
+                    maxOverOffset, 
+                    minTotalOffset, 
+                    maxTotalOffset){
 
         for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
 
-            controlPoint.ping(intTimestamp, totalOffset, pingInterval);
+            controlPoint.ping(intTimestamp, totalOffset, pingInterval, maxUnderOffset, 
+                    maxOverOffset, 
+                    minTotalOffset, 
+                    maxTotalOffset);
         }
     }
 
@@ -532,9 +576,15 @@ export class Domination{
 
             if(currentTimestamp < timestamp) continue;
 
-            for(let i = 0; i < scores.length; i++){
+            //sometimes UT will log everything twice at the same timestamp if the match ends on dom tick
+            const usedTeams = [];
 
+            for(let i = 0; i < scores.length; i++){
+          
+                if(usedTeams.indexOf(scores[i].teamId) !== -1) continue;
                 totalScore += parseFloat(scores[i].score);
+
+                usedTeams.push(scores[i].teamId);
             }
 
             break;
@@ -543,7 +593,7 @@ export class Domination{
         return totalScore;
     }
 
-    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed){
+    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, serverInfo){
 
 
         //console.log(this.capEvents);
@@ -562,15 +612,16 @@ export class Domination{
 
 
        // this.testtest(playerManager, matchEnd);
-        console.log(matchLength);
-        console.log(arguments);
+        //console.log(matchLength);
+        //console.log(arguments);
 
-        console.log(realPingInterval);
+        //console.log(realPingInterval);
 
-        console.log(this.teamScoreTimestamps);
+       // console.log(this.teamScoreTimestamps);
 
         this.testtest2(playerManager, matchEnd, realPingInterval);
-
+        console.log(gametypeInfo);
+        console.log(serverInfo);
        // COMPARE TOTAL SCORE WITH CONTROL POINTS TOTAL SCORE TO SEE WHEN SCORES START TO DRIFT APART
         //console.log(this.teamScoreTimestamps);
         return;
