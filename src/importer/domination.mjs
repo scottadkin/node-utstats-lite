@@ -88,54 +88,6 @@ class DomControlPoint{
     }
 
 
-     touchedINT(pingId, latestPing, timestamp, instigator, pingInterval){
-        process.exit();
-        if(this.instigator === null){
-
-            this.firstTouchedTimestamp = timestamp;
-
-        }else{
-
-            /*const timeHeld = timestamp - this.lastTouchedTimestamp;
-
-            if(pingId >= this.canScoreAfterPing){
-
-                const timeOffset = timestamp - this.lastTouchedTimestamp;
-
-                console.log(timeOffset, pingInterval * 2);
-
-               // if(timeOffset >= pingInterval * 2){
-
-                    let totalTicks = pingId - this.canScoreAfterPing;
-
-
-                    let score = totalTicks * 0.2;
-                    //if(bEnd) score = score - 0.2;
-                    console.log(`I GOT POINTS`, score, timeOffset);
-
-                    this.totalScoreGiven += score;
-              //  }
-              
-            }else{
-                new Message(pingId - this.canScoreAfterPing,"error");
-            }*/
-        }
-
-        this.lastTouchedTimestamp = timestamp;
-        this.totalCaps++; 
-
-        this.lastPingId = pingId;
-        //                   next ping + min 2 pings
-        //this.canScoreAfterPing = pingId + 1;
-        this.lastScorePing = latestPing;
-        this.instigator = instigator;
-
-        this.bScoreReady = false;
-        this.scoreTime = 2;
-
-    }
-
-
 
      touchedINT2(instigator){
 
@@ -150,45 +102,7 @@ class DomControlPoint{
     matchEndedINT(pingId, timestamp, instigator, pingInterval){
 
         return;
-        if(this.instigator === null) return;
-
-        //let test = this.canScoreAfterPing ;
-
-        console.log(`MATCH END`);
-        console.log(`tick = ${pingId}, last tick = ${this.lastPingId}, can score after(${this.canScoreAfterPing})`);
-
-        //if(pingId >= test){
-
-                const offset = timestamp - this.lastTouchedTimestamp;
-                console.log(`time offset was ${offset}, ${pingInterval} ${(pingInterval * 2)}`);
-
-                if(offset >= pingInterval * 2){
-                    console.log("HORSE NOISE", offset / pingInterval);
-
-                    console.log(Math.floor(offset / pingInterval));
-
-                    const totalPings = Math.floor(offset / pingInterval);
-
-                    console.log(totalPings, 0.2 * totalPings);
-
-                    const score = totalPings * 0.2;
-
-                    this.totalScoreGiven += score;
-                }
-
-                return;
-
-               // if(offset >= pingInterval){
-                    console.log(`totalPings ${pingId - test}`);
-
-                    let score = ((pingId - test) * 0.2);
-                    //if(bEnd) score = score - 0.2;
-                    console.log(`I GOT POINTbbbS`, score);
-
-                    this.totalScoreGiven += score;
-                //}
-         //   }
-
+       
     }
 
 
@@ -203,8 +117,17 @@ class DomControlPoint{
             console.log(offsetSinceLastScoreGiven);
             console.log(this.lastScoreGivenPing, this.scoreTime, this.bScoreReady);
 
+            //this.scoreTime--;
+
+            /*if(this.scoreTime === 1){
+                console.log(this.totalScoreGiven,`GIVE POINTS`, this.name);
+                this.totalScoreGiven += 0.2;
+                console.log(`now = ${this.totalScoreGiven}`);
+                return;
+            }*/
             //this shouldnt give scores but ut looks like it does
-            if(offsetSinceLastScoreGiven > 100) this.totalScoreGiven+=0.2;
+            //CHANGE THIS TO PING INTERVAL NOT 100
+            if(offsetSinceLastScoreGiven != 0 && !this.bScoreReady) this.totalScoreGiven+=0.2;
             return;
         }
 
@@ -373,7 +296,7 @@ export class Domination{
             const p = pings[i];
             const bestMatch = p//this.getClosestFakePing(p);
 
-            if(Math.abs(p - bestMatch) > pingInterval) throw new Error(`dfasfasfsdfsa`);
+            //if(Math.abs(p - bestMatch) > pingInterval) throw new Error(`dfasfasfsdfsa`);
 
 
             if(i === 0){
@@ -499,17 +422,22 @@ export class Domination{
         
 
 
-        console.log(all.reverse());
+       // console.log(all.reverse());
 
         this.pingAllControlPoints(matchEnd,true);
 
-        console.log("LOGSCORE",this.getFinalLogScores());
-        console.log(`IMPORTER score`, this.getTotalControlPointScores());
+        const endLogScore = this.getFinalLogScores();
+        const endImporterScore = this.getTotalControlPointScores();
+
+        console.log("LOGSCORE",endLogScore);
+        console.log(`IMPORTER score`, endImporterScore);
+        console.log(`totalOffset `, (endImporterScore - endLogScore));
+
         new Message(`First offset of scores at ${firstDiffTimestamp}`,"error");
         console.log(`${matchEnd} <- matchEnd`);
         
         
-       // process.exit();
+        //process.exit();
     }
     
 
