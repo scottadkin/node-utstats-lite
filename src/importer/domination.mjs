@@ -1,35 +1,5 @@
 import { getPointsIds, createControlPoint, insertPlayerMatchData } from "../domination.mjs";
-import { scalePlaytime } from "../generic.mjs";
 import Message from "../message.mjs";
-
-/*
-game timer
-
-every 5 times log player scores
-    if controlPoint has been activated for 2 seconds, since last 1 second timer
-
-
-
-0.0 log scores
-4.7 control point touched
-5.0 log scores //do nothing
-6.0 do nothing
-6.7 control point can now be counted for points
-7.0 this is the first time the control point will be counted as activated and give player points
-8.0 player gets 0.2
-9.0 player gets 0.2
-10.0 log scores
-15.0 log scores
-
-
-loop through all touched events after finding the time difference between each dom_score log and update player scores
-
-
-now = 0;
-
-for now < matchEnd, now++
-*/
-
 
 
 class DomControlPoint{
@@ -65,7 +35,9 @@ class DomControlPoint{
 
      touched(instigator, timestamp){
 
-        
+        if(this.instigator === null){
+            this.firstTouchedTimestamp = timestamp;
+        }
         this.lastTouchedTimestamp = timestamp;
         this.instigator = instigator;
 
@@ -79,31 +51,43 @@ class DomControlPoint{
         //timelimit is int, 20 = 20 minutes
         //remainingTime is int, but it's in seconds
 
+        //unlike UT our remainingTime is in 100th of a second, scale back to seconds 
+        remainingTime *= 0.01;
+
         let c = 0.2;
-		if ( timeLimit > 0 )
-		{
-			if ( remainingTime < 0.25 * timeLimit )
-			{
-				if ( remainingTime < 0.1 * timeLimit )
+		if ( timeLimit > 0 ){
+
+			if (remainingTime < 0.25 * timeLimit){
+				if (remainingTime < 0.1 * timeLimit){
 					c = 0.8;
-				else
+                }else{
 					c = 0.4;
+                }
 			}
 		}
 
         return c;
     }
 
-    ping(){
+    ping(gametypeInfo, remainingTime){
 
         if(!this.bScoreReady) return;
 
-        this.totalScoreGiven += 0.2;
+        let points = 0.2;
+
+        if(gametypeInfo.timeLimit > 0){
+            points = this.getBuggyUTTimeLimitScore(gametypeInfo.timeLimit, remainingTime);
+        }
+
+        this.totalScoreGiven += points;
     }
 
 
-    controlPointTimerPing(timestamp){
+    controlPointTimerPing(gametypeInfo, remainingTime){
 
+        
+        
+       // console.log(remainingTime);
         if(!this.bScoreReady){
 
             this.scoreTime--;
@@ -112,7 +96,7 @@ class DomControlPoint{
 
                 //console.log(this.name, "is now score ready");
                 this.bScoreReady = true;
-                this.totalScoreGiven += 0.2;
+                this.ping(gametypeInfo, remainingTime);
             }
         }
     }
@@ -348,69 +332,13 @@ export class Domination{
 
         return found;
     }
-
-    testtest3(playerManager, matchEnd, pingInterval){
-
-        const newEvents = this.testAddControlPointOwnPings([...this.capEvents], pingInterval, matchEnd);
-
-        for(let t = 0; t <= matchEnd; t+=pingInterval){
-
-            const events = this.getEventsBetween(newEvents, t, t+pingInterval-1);
-
-            for(let x = 0; x < events.length; x++){
-
-                const e = events[x];
-
-
-                if(e.type !== undefined){
-
-                    const controlPoint = this.controlPoints[e.name];
-
-                    if(controlPoint === undefined){
-
-                        new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
-                        continue;
-                    }
-
-                    controlPoint.controlPointTimerPing();
-
-                }else{
-
-                    const controlPoint = this.controlPoints[e.point];
-
-                    if(controlPoint === undefined){
-
-                        new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
-                        continue;
-                    }
-
-                    const player = playerManager.getPlayerById(e.playerId);
-                
-                    if(player === null){
-                        new Message(`dom.setPlayerCapStats() player is null`,"warning");
-                        continue;
-                    }
-
-                    controlPoint.touched(player, e.intTimestamp);
-
-                }
-            }
-            
-            this.pingAllControlPoints();
-        }
-
-
-        console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
-        return;
-
-    }
     
 
-    pingAllControlPoints(intTimestamp, bEnd){
+    pingAllControlPoints(gametypeInfo, remainingTime){
 
         for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
 
-            controlPoint.ping(intTimestamp, bEnd);
+            controlPoint.ping(gametypeInfo, remainingTime);
         }
     }
 
@@ -486,7 +414,6 @@ export class Domination{
 
                 const e = events[x];
 
-
                 if(e.type !== undefined){
 
                     const controlPoint = this.controlPoints[e.name];
@@ -497,7 +424,7 @@ export class Domination{
                         continue;
                     }
 
-                    controlPoint.controlPointTimerPing();
+                    controlPoint.controlPointTimerPing(gametypeInfo, matchEnd-e.intTimestamp);
 
                 }else{
 
@@ -521,7 +448,7 @@ export class Domination{
                 }
             }
             
-            this.pingAllControlPoints();
+            this.pingAllControlPoints(gametypeInfo, matchEnd- t);
         }
 
         console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
