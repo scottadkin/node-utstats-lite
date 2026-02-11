@@ -63,8 +63,9 @@ class DomControlPoint{
 
 
 
-     touchedINT2(instigator, timestamp){
+     touched(instigator, timestamp){
 
+        
         this.lastTouchedTimestamp = timestamp;
         this.instigator = instigator;
 
@@ -72,14 +73,6 @@ class DomControlPoint{
         this.scoreTime = 2;
 
     }
-
-    //always seems to be 0.6 off real value is match length is short?
-    matchEndedINT(pingId, timestamp, instigator, pingInterval){
-
-        return;
-       
-    }
-
 
     getBuggyUTTimeLimitScore(timeLimit, remainingTime){
 
@@ -105,7 +98,6 @@ class DomControlPoint{
 
         if(!this.bScoreReady) return;
 
-        console.log(this.name, "+= 0.2");
         this.totalScoreGiven += 0.2;
     }
 
@@ -116,16 +108,13 @@ class DomControlPoint{
 
             this.scoreTime--;
 
-            if(this.scoreTime == 1){
+            if(this.scoreTime == 0){
 
-                console.log(this.name, "is now score ready");
+                //console.log(this.name, "is now score ready");
                 this.bScoreReady = true;
+                this.totalScoreGiven += 0.2;
             }
         }
-    }
-
-    end(){
-        
     }
 }
 
@@ -337,79 +326,44 @@ export class Domination{
             return 0;
         });
 
+       // process.exit();
         return newEvents;
     }
 
 
-    endMatch(){
 
-        for(const controlPoint of Object.values(this.controlPoints)){
+    getEventsBetween(events, start, end){
 
-            controlPoint.end();
+        const found = [];
+
+        for(let i = 0; i < events.length; i++){
+
+            const e = events[i];
+
+            if(e.intTimestamp < start) continue;
+            if(e.intTimestamp > end) break;
+
+            found.push(e);
         }
+
+        return found;
     }
 
     testtest3(playerManager, matchEnd, pingInterval){
 
-        const all =[...this.capEvents];
+        const newEvents = this.testAddControlPointOwnPings([...this.capEvents], pingInterval, matchEnd);
 
-        const pings = [...this.scoreUpdateTimestamps];
+        for(let t = 0; t <= matchEnd; t+=pingInterval){
 
-        this.fakePings = this.createFakePings(matchEnd, pingInterval);
+            const events = this.getEventsBetween(newEvents, t, t+pingInterval-1);
 
+            for(let x = 0; x < events.length; x++){
 
-        for(let i = 0; i < pings.length; i++){
-
-            const p = pings[i];
-            const bestMatch = p//this.getClosestFakePing(p);
-
-            if(i === 0){
-
-                for(let x = 5; x > 0; x--){
-                    all.push({"type": "ping", "intTimestamp": bestMatch - pingInterval * x});
-                }
-            }
-
-            all.push({"type": "ping", "bReal": true, "intTimestamp": bestMatch, "bestMatch": bestMatch});
-
-            let test = 1;
-            if(i < pings.length - 2) test = 5;
-
-            for(let x = 1; x < test; x++){
-
-                const currentPing = bestMatch + pingInterval * x;
-                if(currentPing > matchEnd) break;
-                 all.push({"type": "ping", "intTimestamp": currentPing});
-            }
-        }
+                const e = events[x];
 
 
-        all.sort((a, b) =>{
+                if(e.type !== undefined){
 
-            a = a.intTimestamp;
-            b = b.intTimestamp;
-
-            if(a > b){
-                return 1;
-            }else if(a < b){
-                return -1;
-            }
-
-            return 0;
-        });
-
-
-        const newEvents = this.testAddControlPointOwnPings(all, pingInterval, matchEnd);
-
-
-        for(let i = 0; i < newEvents.length; i++){
-
-            const e = newEvents[i];
-
-            if(e.type !== undefined){
-
-                if(e.type === "controlPointPing"){
-            
                     const controlPoint = this.controlPoints[e.name];
 
                     if(controlPoint === undefined){
@@ -418,41 +372,34 @@ export class Domination{
                         continue;
                     }
 
-                    controlPoint.controlPointTimerPing(e.intTimestamp);
+                    controlPoint.controlPointTimerPing();
 
-                    continue;
                 }else{
 
-                    this.pingAllControlPoints();
+                    const controlPoint = this.controlPoints[e.point];
 
-                }
+                    if(controlPoint === undefined){
 
-            }else{
+                        new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
+                        continue;
+                    }
 
-                const controlPoint = this.controlPoints[e.point];
-
-                if(controlPoint === undefined){
-
-                    new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
-                    continue;
-                }
-
-                const player = playerManager.getPlayerById(e.playerId);
+                    const player = playerManager.getPlayerById(e.playerId);
                 
-                if(player === null){
-                    new Message(`dom.setPlayerCapStats() player is null`,"warning");
-                    continue;
-                }
+                    if(player === null){
+                        new Message(`dom.setPlayerCapStats() player is null`,"warning");
+                        continue;
+                    }
 
-            // console.log(player.name);
-                console.log(controlPoint.name, " touched at", e.intTimestamp, controlPoint.totalScoreGiven);
-                //touched(pingId, latestPing, timestamp, instigator){
-                controlPoint.touchedINT2(player, e.intTimestamp);
+                    controlPoint.touched(player, e.intTimestamp);
+
+                }
             }
+            
+            this.pingAllControlPoints();
         }
 
-        this.endMatch();
-        console.log(matchEnd);
+
         console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
         return;
 
@@ -524,25 +471,60 @@ export class Domination{
 
     setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, serverInfo){
 
-
-        //console.log(this.capEvents);
-       // console.log(this.scoreUpdateTimestamps);
-
        //1 second
        const pingInterval = 100;
 
        const realPingInterval = pingInterval + gameSpeed - 100;
-
-       console.log(pingInterval, realPingInterval);
-
       
+        const newEvents = this.testAddControlPointOwnPings([...this.capEvents], realPingInterval, matchEnd);
 
-        this.testtest3(playerManager, matchEnd, realPingInterval);
-   
-        //this.pingAllControlPoints();
-        console.log(this.getTotalControlPointScores());
-       // COMPARE TOTAL SCORE WITH CONTROL POINTS TOTAL SCORE TO SEE WHEN SCORES START TO DRIFT APART
-        //console.log(this.teamScoreTimestamps);
+        for(let t = 0; t <= matchEnd; t+=realPingInterval){
+
+            const events = this.getEventsBetween(newEvents, t, t+realPingInterval-1);
+
+            for(let x = 0; x < events.length; x++){
+
+                const e = events[x];
+
+
+                if(e.type !== undefined){
+
+                    const controlPoint = this.controlPoints[e.name];
+
+                    if(controlPoint === undefined){
+
+                        new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
+                        continue;
+                    }
+
+                    controlPoint.controlPointTimerPing();
+
+                }else{
+
+                    const controlPoint = this.controlPoints[e.point];
+
+                    if(controlPoint === undefined){
+
+                        new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
+                        continue;
+                    }
+
+                    const player = playerManager.getPlayerById(e.playerId);
+                
+                    if(player === null){
+                        new Message(`dom.setPlayerCapStats() player is null`,"warning");
+                        continue;
+                    }
+
+                    controlPoint.touched(player, e.intTimestamp);
+
+                }
+            }
+            
+            this.pingAllControlPoints();
+        }
+
+        console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
 
     }
 

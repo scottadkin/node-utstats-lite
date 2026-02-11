@@ -281,7 +281,6 @@ export class MatchParser{
         this.gameSpeed = parseInt(gameSpeedResult[1]) / 100;
         this.gameSpeedInt = parseInt(gameSpeedResult[1]);
 
-        console.log(this.gameSpeed);
 
 
         this.bHardcore = false;
@@ -296,7 +295,6 @@ export class MatchParser{
             this.gameSpeed *= 1.1;
             this.gameSpeedInt += 10;
         }
-        console.log(this.gameSpeed);
 
         const startReg = /(\d+\.\d+)\tgame\trealstart\s/i;
         const startResult = startReg.exec(this.rawData);
