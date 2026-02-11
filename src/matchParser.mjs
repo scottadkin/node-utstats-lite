@@ -498,6 +498,7 @@ export class MatchParser{
             if(domScoreReg.test(subString)){
 
                 this.dom.scoreUpdateTimestamps.add(originalTimestampInt);
+                this.dom.scoreUpdateTimestamps.add(originalTimestampInt);
                 //console.log(timestamp);
             }
 
