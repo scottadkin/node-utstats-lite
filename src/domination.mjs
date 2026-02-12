@@ -36,7 +36,11 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
     player_id,point_id,total_caps,
     total_control_time, longest_control_time,
     shortest_control_time,
-    control_percent
+    control_percent,
+    control_point_score,
+    max_control_point_score,
+    total_score_time,
+    max_total_score_time
     ) VALUES ?`;
 
     const insertVars = [];
@@ -50,8 +54,10 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
             insertVars.push([
                 matchId, mapId, gametypeId, 
                 player.masterId, pointId, capData.caps,
-                capData.totalTimeControlled, capData.longestTimeControlled, 
-                capData.shortestTimeControlled, capData.controlPercent
+                capData.totalControlTime, capData.longestTimeControlled, 
+                capData.shortestTimeControlled, capData.controlPercent,
+                capData.totalPointsEarned, capData.maxPointsEarned,
+                capData.totalScoreTime, capData.maxScoreTime
             ]);
         }
     }

@@ -20,18 +20,36 @@ class DomControlPoint{
         //total amount of time the point was giving players/teams points
         //only starts counting up if timeHeld is 2 or more
         this.totalScoreTime = 0;
-        this.lastTouchedTick = -999;
 
-        this.lastScoreGivenPing = -999;
+        this.lastScoreGivenTimestamp = -999;
 
         this.totalScoreGiven = 0;
 
 
         this.bScoreReady = false;
         this.scoreTime = 2;
+        this.currentFirstScoreGivenTimestamp = -999;
+        this.currentScoreGiven = 0;
+        this.controlPercent = 0;
     }
 
 
+    calcCurrentScore(timestamp){
+
+        const timeHeld = timestamp - this.lastTouchedTimestamp;
+
+        let scoreTimeHeld = 0;
+
+        if(this.bScoreReady){
+            scoreTimeHeld = timestamp - this.currentFirstScoreGivenTimestamp;
+        }
+
+        this.instigator.updateDomControlPointStats(this.id, timeHeld, this.currentScoreGiven, scoreTimeHeld);
+        this.lastScoreGivenTimestamp = timestamp;
+
+        this.totalScoreTime += scoreTimeHeld;
+        this.totalControlTime += timeHeld;
+    }
 
      touched(instigator, timestamp){
 
@@ -41,12 +59,20 @@ class DomControlPoint{
         //max control time ect
         if(this.instigator === null){
             this.firstTouchedTimestamp = timestamp;
+        }else{
+
+
+           this.calcCurrentScore(timestamp, false);
         }
+
         this.lastTouchedTimestamp = timestamp;
         this.instigator = instigator;
 
         this.bScoreReady = false;
         this.scoreTime = 2;
+        this.currentScoreGiven = 0;
+
+        
 
     }
 
@@ -72,7 +98,7 @@ class DomControlPoint{
         return c;
     }
 
-    ping(gametypeInfo, remainingTime){
+    ping(gametypeInfo, timestamp, remainingTime){
 
         if(!this.bScoreReady) return;
 
@@ -83,10 +109,13 @@ class DomControlPoint{
         }
 
         this.totalScoreGiven += points;
+        this.currentScoreGiven += points;
+
+        //this.instigator.updateDomControlPointStats(pointId, timeHeld, scoreGiven, scoreTime);
     }
 
 
-    controlPointTimerPing(gametypeInfo, remainingTime){
+    controlPointTimerPing(gametypeInfo, timestamp, remainingTime){
 
         
         
@@ -96,12 +125,19 @@ class DomControlPoint{
             this.scoreTime--;
 
             if(this.scoreTime == 0){
-
+                this.currentFirstScoreGivenTimestamp = timestamp;
                 //console.log(this.name, "is now score ready");
                 this.bScoreReady = true;
-                this.ping(gametypeInfo, remainingTime);
+                this.ping(gametypeInfo, timestamp, remainingTime);
             }
         }
+    }
+
+    matchEnd(timestamp){
+
+        if(this.instigator === null) return;
+
+        this.calcCurrentScore(timestamp, true);
     }
 }
 
@@ -410,7 +446,7 @@ export class Domination{
                         new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
                         continue;
                     }
-                    controlPoint.controlPointTimerPing(gametypeInfo, matchEnd-e.timestamp);
+                    controlPoint.controlPointTimerPing(gametypeInfo, e.timestamp, matchEnd-e.timestamp);
 
                 }else{
 
@@ -442,8 +478,16 @@ export class Domination{
         if(gametypeInfo.timeLimit > 0){
             this.pingAllControlPoints(gametypeInfo, matchEnd);
         }
-         console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
 
+        for(const controlPoint of Object.values(this.controlPoints)){
+            controlPoint.matchEnd(matchEnd);
+        }
+
+        console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
+
+        this.setPercentValues(playerManager, matchLength);
+        //console.log(matchLength);
+        // process.exit();
     }
 
 
@@ -496,11 +540,9 @@ export class Domination{
                 if(pointId == 0 && maxCombinedTime === 0) continue;
 
                 const maxTime = (pointId == 0) ? maxCombinedTime : cp.totalControlTime;
-
-
-                if(pointData.totalTimeControlled === 0) continue;
-
-                pointData.controlPercent = pointData.totalTimeControlled / maxTime * 100;
+                
+                if(maxTime === 0 || pointData.totalControlTime === 0) continue;
+                pointData.controlPercent = pointData.totalControlTime / maxTime * 100;
             }
         }
     }
