@@ -35,6 +35,10 @@ class DomControlPoint{
 
      touched(instigator, timestamp){
 
+       // skip int stuff and see if scores are exactly the same
+        //update player total control times
+        //min control time
+        //max control time ect
         if(this.instigator === null){
             this.firstTouchedTimestamp = timestamp;
         }
@@ -51,8 +55,7 @@ class DomControlPoint{
         //timelimit is int, 20 = 20 minutes
         //remainingTime is int, but it's in seconds
 
-        //unlike UT our remainingTime is in 100th of a second, scale back to seconds 
-        remainingTime *= 0.01;
+        remainingTime =Math.floor(remainingTime);
 
         let c = 0.2;
 		if ( timeLimit > 0 ){
@@ -146,7 +149,7 @@ export class Domination{
     }
 
 
-    parseLine(intTimestamp, timestamp, line){
+    parseLine(timestamp, line){
 
 
         const capReg = /^controlpoint_capture\t(.+?)\t(\d+)$/i;
@@ -158,7 +161,7 @@ export class Domination{
         this.pointNames.add(capResult[1]);
 
         const playerId = parseInt(capResult[2]);
-        this.capEvents.push({intTimestamp, "timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
+        this.capEvents.push({"timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
       
     }
 
@@ -205,47 +208,8 @@ export class Domination{
     }
 
 
-    createFakePings(matchEnd, pingInterval){
 
-        const test = [];
-
-        for(let i = 0; i < matchEnd; i+=pingInterval){
-
-            test.push(i);
-        }
-        
-
-        return test;
-    }
-
-    getClosestFakePing(intTimestamp){
-
-        //should be ~ pingInterval * 5
-
-   
-        let minOffset = null;
-        let bestMatch = null;
-
-        for(let i = 0; i < this.fakePings.length; i++){
-
-            const r = this.fakePings[i];
-
-            const offset = intTimestamp - r;
-
-            if(minOffset === null || Math.abs(offset) < minOffset){
-                minOffset = offset;
-                bestMatch = r;
-            }
-
-
-        }
-
-        return bestMatch;
-    }
-
-
-
-    testAddControlPointOwnPings(events, pingInterval, matchEnd){
+    addControlPointOwnPings(events, pingInterval, matchEnd){
 
         const newEvents = [];
 
@@ -265,7 +229,7 @@ export class Domination{
                 dummyControlPoints[e.point] = new TestDomControlPoint(e.point);
             }
 
-            dummyControlPoints[e.point].addTimestamp(e.intTimestamp);
+            dummyControlPoints[e.point].addTimestamp(e.timestamp);
 
         }
 
@@ -286,20 +250,20 @@ export class Domination{
 
             if(nextTouchTime === -1) nextTouchTime = matchEnd// + pingInterval * 5;
        
-            const diff = nextTouchTime - e.intTimestamp;
+            const diff = nextTouchTime - e.timestamp;
 
             if(diff >= pingInterval * 2){
 
-                for(let x = e.intTimestamp + pingInterval; x < nextTouchTime ; x+=pingInterval){
-                    newEvents.push({"type": "controlPointPing", "name": e.point, "intTimestamp": x});
+                for(let x = e.timestamp + pingInterval; x < nextTouchTime ; x+=pingInterval){
+                    newEvents.push({"type": "controlPointPing", "name": e.point, "timestamp": x});
                 }
             } 
         }
 
         newEvents.sort((a, b) =>{
 
-            a = a.intTimestamp;
-            b = b.intTimestamp;
+            a = a.timestamp;
+            b = b.timestamp;
 
             if(a > b){
                 return 1;
@@ -324,8 +288,8 @@ export class Domination{
 
             const e = events[i];
 
-            if(e.intTimestamp < start) continue;
-            if(e.intTimestamp > end) break;
+            if(e.timestamp < start) continue;
+            if(e.timestamp > end) break;
 
             found.push(e);
         }
@@ -397,18 +361,41 @@ export class Domination{
         return latestScore;
     }
 
+
+    createMissingPings(pingInterval, matchEnd){
+
+        const timestamps = [...this.scoreUpdateTimestamps];
+
+        const firstReal = timestamps[0];
+
+        const first = firstReal - pingInterval * 5;
+
+        const testTimestamps = [];
+
+        for(let i = first; i < matchEnd; i+=pingInterval){
+
+            testTimestamps.push(i);
+        }
+
+        return testTimestamps;
+    }
+
     setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, serverInfo){
 
-       //1 second
-       const pingInterval = 100;
+        const pingInterval = 1;
 
-       const realPingInterval = pingInterval + gameSpeed - 100;
-      
-        const newEvents = this.testAddControlPointOwnPings([...this.capEvents], realPingInterval, matchEnd);
+        const timestamps = this.createMissingPings(pingInterval, matchEnd);
 
-        for(let t = 0; t <= matchEnd; t+=realPingInterval){
+        const newEvents = this.addControlPointOwnPings([...this.capEvents], pingInterval, matchEnd);
 
-            const events = this.getEventsBetween(newEvents, t, t+realPingInterval-1);
+        //process.exit();
+        let lastPingTime = -999;
+   
+        for(let i = 0; i < timestamps.length; i++){
+
+            const t = timestamps[i];
+           
+            const events = this.getEventsBetween(newEvents, t, t+pingInterval);
 
             for(let x = 0; x < events.length; x++){
 
@@ -423,8 +410,7 @@ export class Domination{
                         new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
                         continue;
                     }
-
-                    controlPoint.controlPointTimerPing(gametypeInfo, matchEnd-e.intTimestamp);
+                    controlPoint.controlPointTimerPing(gametypeInfo, matchEnd-e.timestamp);
 
                 }else{
 
@@ -443,15 +429,20 @@ export class Domination{
                         continue;
                     }
 
-                    controlPoint.touched(player, e.intTimestamp);
+                    controlPoint.touched(player, e.timestamp);
 
                 }
             }
             
             this.pingAllControlPoints(gametypeInfo, matchEnd- t);
+
+            lastPingTime = t;
         }
 
-        console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
+        if(gametypeInfo.timeLimit > 0){
+            this.pingAllControlPoints(gametypeInfo, matchEnd);
+        }
+         console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
 
     }
 
