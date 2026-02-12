@@ -408,6 +408,8 @@ class MatchDominationSummary{
 
         if(totalTeams < 2) return;
 
+        console.log(data.dom.data);
+
         this.totalTeams = totalTeams;
         this.data = data;
 
@@ -440,8 +442,10 @@ class MatchDominationSummary{
             {"display": "Control Percent", "value": "percent"},
             {"display": "Control Time", "value": "time"},
             {"display": "Total Caps", "value": "caps"},
-            {"display": "Shortest Time Held", "value": "short"},
-            {"display": "Longest Time Held", "value": "long"},
+            {"display": "Shortest Time Held", "value": "short-time"},
+            {"display": "Longest Time Held", "value": "long-time"},
+            {"display": "Total Points", "value": "total-points"},
+            {"display": "Max Points", "value": "max-points"},
         ];
 
 
@@ -493,8 +497,21 @@ class MatchDominationSummary{
             className = "playtime";
 
         }else if(this.mode === "caps"){
+
             currentValue = (bTotals) ? ignore0(caps) : caps.total_caps;
             content= currentValue;
+
+        }else if(this.mode === "long-time"){
+
+            currentValue = (bTotals) ? caps : caps.longest_control_time;
+            content = `${toPlaytime(currentValue, true)}`;
+            className = "playtime";
+
+        }else if(this.mode === "short-time"){
+
+            currentValue = (bTotals) ? caps : caps.shortest_control_time;
+            content = `${toPlaytime(currentValue, true)}`;
+            className = "playtime";
         }
         
 
@@ -519,6 +536,29 @@ class MatchDominationSummary{
 
         }else if(this.mode === "caps"){
             this.info.append("Total times a player captured the control point.");
+
+        }else if(this.mode === "short-time"){
+
+            this.info.append("The shortest amount of time a player had control of the point for a single capture.");
+
+        }else if(this.mode === "long-time"){
+
+            this.info.append("The longest amount of time a player had control of the point for a single capture.");
+
+        }else if(this.mode === "total-points"){
+
+            const lines = [
+                `- Recreating the same scoring system as UT from original ut stat logs with the limited data and timestamps to only 2 decimal places caused a lot of headaches.`,
+                UIBr(),
+                `- All control points are pinged every 1 * gamespeed second in a timer function to see if they are in a state to give points.`,
+                UIBr(),      
+                `- You only get realtime score updates written to the log on every 5th timer function call.`,
+                UIBr(),
+                `- Control points also have their own timer function that starts and then is called every 1 * gamespeed second from their touchtime.`,
+                
+            ];
+         
+            this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
         }
     }
 
@@ -562,10 +602,35 @@ class MatchDominationSummary{
                     if(totals[pointId] === undefined){
                         totals[pointId] = 0;
                     }
+
                     const {content, className, currentValue} = this.getContent(caps, false);
 
                     if(currentValue > 0){
-                        totals[pointId] += currentValue;
+
+                        if(this.mode === "long-time" && totals[pointId] < currentValue){
+                            
+                            totals[pointId] = currentValue;
+                        }
+
+                        if(this.mode === "short-time"){
+
+                            if(totals[pointId] === 0){
+                                totals[pointId] = currentValue;
+                            }else{
+
+                                if(totals[pointId] > currentValue){
+                                    totals[pointId] = currentValue;
+                                }
+                            }
+                             
+                            
+                        }
+
+                        if(this.mode !== "long-time" && this.mode !== "short-time"){
+                            totals[pointId] += currentValue;
+                        }
+                    }else{
+                        console.log(this.mode, currentValue);
                     }
 
                     const col = UITableColumn({

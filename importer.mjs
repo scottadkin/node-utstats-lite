@@ -142,8 +142,10 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         const currentFileEncoding = Encoding.detect(data);
         
+        
         if(currentFileEncoding !== "UTF16"){
 
+            //old utstats backup logs are converted to UTF16 LE BOM
             data = Encoding.codeToString(Encoding.convert(data, {
                 "to": "UTF16",
                 "from": currentFileEncoding

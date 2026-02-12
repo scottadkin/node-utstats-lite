@@ -40,23 +40,23 @@ class DomControlPoint{
 
         let scoreTimeHeld = 0;
 
+    
+
         if(this.bScoreReady){
             scoreTimeHeld = timestamp - this.currentFirstScoreGivenTimestamp;
         }
 
         this.instigator.updateDomControlPointStats(this.id, timeHeld, this.currentScoreGiven, scoreTimeHeld);
-        this.lastScoreGivenTimestamp = timestamp;
+        
 
         this.totalScoreTime += scoreTimeHeld;
         this.totalControlTime += timeHeld;
     }
 
-     touched(instigator, timestamp){
+     touched(instigator, timestamp, originalTimestamp){
 
-       // skip int stuff and see if scores are exactly the same
-        //update player total control times
-        //min control time
-        //max control time ect
+       // console.log(this.name, "touched ", originalTimestamp);
+
         if(this.instigator === null){
             this.firstTouchedTimestamp = timestamp;
         }else{
@@ -81,7 +81,7 @@ class DomControlPoint{
         //timelimit is int, 20 = 20 minutes
         //remainingTime is int, but it's in seconds
 
-        remainingTime =Math.floor(remainingTime);
+        //remainingTime = Math.ceil(remainingTime);
 
         let c = 0.2;
 		if ( timeLimit > 0 ){
@@ -100,16 +100,27 @@ class DomControlPoint{
 
     ping(gametypeInfo, timestamp, remainingTime){
 
-        if(!this.bScoreReady) return;
-
+        //console.log(this.name, this.scoreTime, this.bScoreReady);
+        //if(!this.bScoreReady) return;
+        if(this.scoreTime > 1) return;
         let points = 0.2;
 
         if(gametypeInfo.timeLimit > 0){
             points = this.getBuggyUTTimeLimitScore(gametypeInfo.timeLimit, remainingTime);
         }
 
-        this.totalScoreGiven += points;
-        this.currentScoreGiven += points;
+        //console.log(this.name, `add `, points, timestamp);
+        //if(timestamp - this.lastScoreGivenTimestamp > 0){
+            this.totalScoreGiven += points;
+            this.currentScoreGiven += points;
+       // }
+        this.lastScoreGivenTimestamp = timestamp;
+
+
+        
+
+
+        //console.log(this.name, this.totalScoreGiven, timestamp);
 
         //this.instigator.updateDomControlPointStats(pointId, timeHeld, scoreGiven, scoreTime);
     }
@@ -118,19 +129,16 @@ class DomControlPoint{
     controlPointTimerPing(gametypeInfo, timestamp, remainingTime){
 
         
-        
+        this.scoreTime--;
        // console.log(remainingTime);
-        if(!this.bScoreReady){
-
-            this.scoreTime--;
-
-            if(this.scoreTime == 0){
-                this.currentFirstScoreGivenTimestamp = timestamp;
-                //console.log(this.name, "is now score ready");
-                this.bScoreReady = true;
-                this.ping(gametypeInfo, timestamp, remainingTime);
-            }
+        if(this.scoreTime > 0){
+            this.bScoreReady = false;
+        }else if(this.scoreTime === 0){
+           // this.scoreTime = 0;
+            this.bScoreReady = true;
+            this.currentFirstScoreGivenTimestamp = timestamp;
         }
+
     }
 
     matchEnd(timestamp){
@@ -185,7 +193,7 @@ export class Domination{
     }
 
 
-    parseLine(timestamp, line){
+    parseLine(timestamp, line, originalTimestamp){
 
 
         const capReg = /^controlpoint_capture\t(.+?)\t(\d+)$/i;
@@ -197,7 +205,13 @@ export class Domination{
         this.pointNames.add(capResult[1]);
 
         const playerId = parseInt(capResult[2]);
-        this.capEvents.push({"timestamp": timestamp, "playerId": playerId, "point": capResult[1]});
+        this.capEvents.push({
+             timestamp, 
+             originalTimestamp,
+            "playerId": playerId, 
+            "point": capResult[1],
+            "type": "cap"
+        });
       
     }
 
@@ -256,7 +270,7 @@ export class Domination{
             const e = events[i];
 
             
-            if(e.type !== undefined){
+            if(e.type !== "cap"){
                // newEvents.push(e);
                 continue;
             }
@@ -275,70 +289,48 @@ export class Domination{
             const e = events[i];
 
         
-            if(e.type !== undefined){
+            if(e.type !== "cap"){
                 newEvents.push(e);
                 continue;
             }
             let nextTouchTime = dummyControlPoints[e.point].getNextTouchTimestamp();
 
             newEvents.push(e);
-            //no more touches after this
 
+            //no more touches after this
             if(nextTouchTime === -1) nextTouchTime = matchEnd// + pingInterval * 5;
        
             const diff = nextTouchTime - e.timestamp;
 
+     
+
             if(diff >= pingInterval * 2){
 
+                let totalAdded = 0;
+                
+
                 for(let x = e.timestamp + pingInterval; x < nextTouchTime ; x+=pingInterval){
+          
                     newEvents.push({"type": "controlPointPing", "name": e.point, "timestamp": x});
+                    totalAdded++;
+                    //we only need a max of 2
+                    // 1st call scoreTime is 1
+                    // 2nd call scoreTime is 0 and Bready is true
+                    if(totalAdded === 2) break;
                 }
             } 
         }
 
-        newEvents.sort((a, b) =>{
-
-            a = a.timestamp;
-            b = b.timestamp;
-
-            if(a > b){
-                return 1;
-            }else if(a < b){
-                return -1;
-            }
-
-            return 0;
-        });
-
-       // process.exit();
         return newEvents;
     }
 
-
-
-    getEventsBetween(events, start, end){
-
-        const found = [];
-
-        for(let i = 0; i < events.length; i++){
-
-            const e = events[i];
-
-            if(e.timestamp < start) continue;
-            if(e.timestamp > end) break;
-
-            found.push(e);
-        }
-
-        return found;
-    }
     
 
-    pingAllControlPoints(gametypeInfo, remainingTime){
+    pingAllControlPoints(gametypeInfo, timestamp, remainingTime){
 
         for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
 
-            controlPoint.ping(gametypeInfo, remainingTime);
+            controlPoint.ping(gametypeInfo, timestamp, remainingTime);
         }
     }
 
@@ -406,15 +398,24 @@ export class Domination{
 
         const first = firstReal - pingInterval * 5;
 
+        timestamps.unshift(first);
+
         const testTimestamps = [];
 
-        for(let i = first; i < matchEnd; i+=pingInterval){
+        for(let i = 0; i < timestamps.length; i++){
 
-            testTimestamps.push(i);
+            const t = timestamps[i];
+        
+            for(let x = 0; x < 5; x++){
+
+                const current = t + pingInterval * x;
+                if(current >= matchEnd) break;
+                testTimestamps.push({"type": "ping", "timestamp": current});
+            }
         }
-
         return testTimestamps;
     }
+
 
     setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, serverInfo){
 
@@ -422,69 +423,88 @@ export class Domination{
 
         const timestamps = this.createMissingPings(pingInterval, matchEnd);
 
+
+
         const newEvents = this.addControlPointOwnPings([...this.capEvents], pingInterval, matchEnd);
 
-        //process.exit();
-        let lastPingTime = -999;
-   
-        for(let i = 0; i < timestamps.length; i++){
+        newEvents.push(...timestamps);
+        newEvents.sort((a, b) =>{
 
-            const t = timestamps[i];
-           
-            const events = this.getEventsBetween(newEvents, t, t+pingInterval);
+            a = a.timestamp;
+            b = b.timestamp;
 
-            for(let x = 0; x < events.length; x++){
-
-                const e = events[x];
-
-                if(e.type !== undefined){
-
-                    const controlPoint = this.controlPoints[e.name];
-
-                    if(controlPoint === undefined){
-
-                        new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
-                        continue;
-                    }
-                    controlPoint.controlPointTimerPing(gametypeInfo, e.timestamp, matchEnd-e.timestamp);
-
-                }else{
-
-                    const controlPoint = this.controlPoints[e.point];
-
-                    if(controlPoint === undefined){
-
-                        new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
-                        continue;
-                    }
-
-                    const player = playerManager.getPlayerById(e.playerId);
-                
-                    if(player === null){
-                        new Message(`dom.setPlayerCapStats() player is null`,"warning");
-                        continue;
-                    }
-
-                    controlPoint.touched(player, e.timestamp);
-
-                }
+            if(a > b){
+                return 1;
+            }else if(a < b){
+                return -1;
             }
+
+            return 0;
+        });
+
+        console.log(matchEnd);
+
+        
+        for(let i = 0; i < newEvents.length; i++){
+
+            const e = newEvents[i];
+
+            if(e.type === "cap"){
+
+                const controlPoint = this.controlPoints[e.point];
+
+                if(controlPoint === undefined){
+
+                    new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
+                    continue;
+                }
+
+                const player = playerManager.getPlayerById(e.playerId);
             
-            this.pingAllControlPoints(gametypeInfo, matchEnd- t);
+                if(player === null){
+                    new Message(`dom.setPlayerCapStats() player is null`,"warning");
+                    continue;
+                }
 
-            lastPingTime = t;
+                controlPoint.touched(player, e.timestamp, e.originalTimestamp);
+                continue;
+
+            }else if(e.type === "controlPointPing"){
+
+                const controlPoint = this.controlPoints[e.name];
+
+                if(controlPoint === undefined){
+
+                    new Message(`dom.setPlayerCapStats() controlPoint is undefined`, "warning");
+                    continue;
+                }
+
+                controlPoint.controlPointTimerPing(gametypeInfo, e.timestamp, matchEnd-e.timestamp);
+                continue;
+
+            }else if(e.type === "ping"){
+                this.pingAllControlPoints(gametypeInfo, e.timestamp, matchEnd-e.timestamp);
+
+                if(i % 5 === 0){
+                    console.log(`.....`,this.getLogScoresAt(e.timestamp), this.getTotalControlPointScores());
+                }
+                continue;
+            }
+
         }
 
-        if(gametypeInfo.timeLimit > 0){
-            this.pingAllControlPoints(gametypeInfo, matchEnd);
-        }
+        console.log(matchEnd);
+        //process.exit();
 
-        for(const controlPoint of Object.values(this.controlPoints)){
-            controlPoint.matchEnd(matchEnd);
-        }
+       // this.pingAllControlPoints(gametypeInfo, matchEnd, 0);
+        //for(const controlPoint of Object.values(this.controlPoints)){
+        //    controlPoint.matchEnd(matchEnd);
+        //}
 
+        console.log(gametypeInfo);
         console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
-
+       // process.exit();
+       // process.exit();
         this.setPercentValues(playerManager, matchLength);
         //console.log(matchLength);
         // process.exit();

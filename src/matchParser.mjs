@@ -491,7 +491,7 @@ export class MatchParser{
 
             if(domCapReg.test(subString)){
 
-                this.dom.parseLine(timestamp, subString);
+                this.dom.parseLine(timestamp, subString, originalTimestamp);
                 continue;
             }
 
@@ -507,12 +507,13 @@ export class MatchParser{
 
                 if(scoreResult !== null){
 
-                    if(this.dom.teamScoreTimestamps[originalTimestampInt] === undefined){
-                        this.dom.teamScoreTimestamps[originalTimestampInt] = [];
+                    if(this.dom.teamScoreTimestamps[timestamp] === undefined){
+                        this.dom.teamScoreTimestamps[timestamp] = [];
                     }
 
-                    this.dom.teamScoreTimestamps[originalTimestampInt].push({
-                        "timestamp": timestamp,
+                    this.dom.teamScoreTimestamps[timestamp].push({
+                         timestamp,
+                        originalTimestamp,
                         "teamId": scoreResult[1],
                         "score": scoreResult[2]
                     });
