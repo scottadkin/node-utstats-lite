@@ -96,6 +96,7 @@ class DomControlPoint{
 			}
 		}
 
+
         return c;
     }
 
@@ -104,11 +105,8 @@ class DomControlPoint{
         const diff = timestamp - this.lastTouchedTimestamp;
 
         if(!this.bScoreReady) return;
-        let points = 0.2;
-
-        if(this.gametypeInfo.timeLimit > 0){
-            points = this.getBuggyUTTimeLimitScore(remainingTime);
-        }
+        let points = this.getBuggyUTTimeLimitScore(remainingTime);
+        
 
         this.totalScoreGiven += points;
         this.currentScoreGiven += points;
@@ -119,15 +117,17 @@ class DomControlPoint{
 
     controlPointTimerPing(originalTimestamp){
 
+        //console.log(this.name, originalTimestamp);
         this.scoreTime--;
         if(this.scoreTime > 0){
             this.bScoreReady = false;
-        }
-        
-        if(this.scoreTime === 0){
+        }else{
            // this.scoreTime = 0;
             this.bScoreReady = true;
-            this.currentFirstScoreGivenTimestamp = originalTimestamp;
+
+            if(this.scoreTime === 0){
+                this.currentFirstScoreGivenTimestamp = originalTimestamp;
+            }
         }
 
     }
@@ -138,7 +138,7 @@ class DomControlPoint{
 
         const offset = timestamp - this.lastScoreGivenTimestamp;
 
-        if(this.bScoreReady && offset >= 1 - 0.01){
+        if(this.bScoreReady && offset >= 1){
 
 
             this.totalScoreGiven += 0.2//this.getBuggyUTTimeLimitScore(0);
@@ -306,21 +306,11 @@ export class Domination{
        
             const diff = nextTouchTime - e.timestamp;
      
-            if(diff <= 0) continue;
-            //process.exit();
+            if(diff <= 0) continue;            
 
-
-            //let totalAdded = 0;
-            
-
-            for(let x = e.timestamp + pingInterval; x <= nextTouchTime; x+= pingInterval){
+            for(let x = e.timestamp + pingInterval; x < nextTouchTime; x+= pingInterval){
         
                 newEvents.push({"type": "controlPointPing", "name": e.point, "timestamp": x});
-                //console.log({"type": "controlPointPing", "name": e.point, "timestamp": e.timestamp + pingInterval * x});
-                // totalAdded++;
-                //we only need a max of 2
-                // 1st call scoreTime is 1
-                // 2nd call scoreTime is 0 and Bready is true
             }
            
         }
@@ -402,22 +392,16 @@ export class Domination{
    
         const firstReal = timestamps[0];
 
-       // process.exit()
-
-        
-
         const first = firstReal - pingInterval * 5;
 
         timestamps.unshift(first);
-
-       
 
         const testTimestamps = [];
 
         for(let i = 0; i < timestamps.length - 1; i++){
 
             const t = timestamps[i];
-            testTimestamps.push({"type": "ping","brEadl":true, "timestamp": t});
+            testTimestamps.push({"type": "ping", "timestamp": t});
             for(let x = 1; x < 5; x++){
 
                 const current = t + pingInterval * x;
@@ -455,7 +439,6 @@ export class Domination{
         });
 
 
-        let lastPing = 0;
 
         for(let i = 0; i < newEvents.length; i++){
 
@@ -497,19 +480,22 @@ export class Domination{
 
             }else if(e.type === "ping"){
 
-                lastPing = e.timestamp;
-                
                 this.pingAllControlPoints(e.timestamp, matchEnd-e.timestamp);
 
                 continue;
             }
         }
 
+
+
         for(const controlPoint of Object.values(this.controlPoints)){
             controlPoint.matchEnd(matchEnd);
         }
+    
 
+        console.log(gametypeInfo);
         console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
+
 
         this.setPercentValues(playerManager, matchLength);
 

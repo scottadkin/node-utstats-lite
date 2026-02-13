@@ -292,6 +292,7 @@ export class MatchParser{
         this.gametype.gameSpeed = parseInt(gameSpeedResult[1]) / 100;
 
         this.bHardcore = false;
+        this.bTurbo = false;
 
         const reg = /\d+\.\d+\tgame\thardcore\t(.+)\s/i;
         const result = reg.exec(this.rawData);
@@ -302,6 +303,16 @@ export class MatchParser{
             this.bHardcore = true;
             this.gametype.gameSpeed *= 1.1;
         }
+
+        /*doesnt affect time dilation
+        const megaSpeedReg = /\d+\.\d+\tgame\tmegaspeed\t(.+)\s/i;
+
+        const megaResult = megaSpeedReg.exec(this.rawData);
+        if(megaResult !== null){
+            console.log(megaResult);
+        }*/
+
+    
 
         const startReg = /(\d+\.\d+)\tgame\trealstart\s/i;
         const startResult = startReg.exec(this.rawData);
