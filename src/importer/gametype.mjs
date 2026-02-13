@@ -9,6 +9,7 @@ export class Gametype{
         this.targetScore = 0;
         this.timeLimit = 0;
         this.mutators = "";
+        this.gameSpeed = -1;
     }
 
     parseLine(line){
@@ -57,13 +58,6 @@ export class Gametype{
             this.targetScore = intValue;
         }else if(type === "goalteamscore"){
             this.targetScore = intValue;
-        }else if(type === "gamespeed"){
-
-            if(intValue !== intValue || intValue === 0){
-                throw new Error(`Gamespeed is invalid`);
-            }
-            this.gameSpeed = intValue / 100;
-
         }
 
 

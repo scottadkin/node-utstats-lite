@@ -54,6 +54,7 @@ export class MatchParser{
         this.originalMatchStart = -1;
         this.originalMatchEnd = -1
         this.matchLength = 0;
+        this.originalMatchLength = 0;
         this.totalTeams = 0;
         this.teamScores = [0,0,0,0];
         this.soloWinner = 0;
@@ -74,7 +75,7 @@ export class MatchParser{
         //set matchStart, matchEnd, hardcore, skip parsing log in some conditions
         this.preliminaryChecks();
 
-        this.players.createPlayers(this.lines, this.matchStart, this.matchEnd, this.gameSpeed);
+        this.players.createPlayers(this.lines, this.matchStart, this.matchEnd, this.gametype.gameSpeed);
  
         this.parseLines();
 
@@ -95,6 +96,7 @@ export class MatchParser{
         }
 
         this.matchLength = this.matchEnd - this.matchStart;
+        this.originalMatchLength = this.originalMatchEnd - this.originalMatchStart;
 
 
         if(this.matchLength < this.minPlaytime){
@@ -118,14 +120,15 @@ export class MatchParser{
 
         
         this.ctf.bAnyCTFEvents(this.players.players);
-        await this.dom.setPointIds(this.gameSpeed);
+        await this.dom.setPointIds(this.gametype.gameSpeed, this.gametype);
 
+        //(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, serverInfo)
         this.dom.setPlayerCapStats(
             this.players, 
-            this.matchStart, 
-            this.matchEnd, 
-            this.matchLength, 
-            this.gameSpeed, 
+            this.originalMatchStart, 
+            this.originalMatchEnd, 
+            this.originalMatchLength, 
+            this.gametype.gameSpeed, 
             this.gametype, 
             this.match.date
         );
@@ -286,7 +289,7 @@ export class MatchParser{
         if(gameSpeedResult === null) throw new Error(`Failed to find gamespeed`);
         if(gameSpeedResult[1] === "0") throw new Error(`Not a valid gamespeed`);
 
-        this.gameSpeed = parseInt(gameSpeedResult[1]) / 100;
+        this.gametype.gameSpeed = parseInt(gameSpeedResult[1]) / 100;
 
         this.bHardcore = false;
 
@@ -297,14 +300,14 @@ export class MatchParser{
 
         if(value === "true"){
             this.bHardcore = true;
-            this.gameSpeed *= 1.1;
+            this.gametype.gameSpeed *= 1.1;
         }
 
         const startReg = /(\d+\.\d+)\tgame\trealstart\s/i;
         const startResult = startReg.exec(this.rawData);
 
         if(startResult === null) return;
-        this.matchStart = scalePlaytime(parseFloat(startResult[1]), this.gameSpeed);
+        this.matchStart = scalePlaytime(parseFloat(startResult[1]), this.gametype.gameSpeed);
         this.originalMatchStart = parseFloat(startResult[1]);
 
         const endReg = /(\d+\.\d+)\tgame_end\t(.+?)\s/i
@@ -320,7 +323,7 @@ export class MatchParser{
             return
         }
 
-        this.matchEnd = scalePlaytime(parseFloat(endResult[1]), this.gameSpeed);
+        this.matchEnd = scalePlaytime(parseFloat(endResult[1]), this.gametype.gameSpeed);
         this.originalMatchEnd = parseFloat(endResult[1]);
 
 
@@ -389,7 +392,7 @@ export class MatchParser{
 
             const originalTimestamp = parseFloat(timestampResult[1]);
 
-            const timestamp = scalePlaytime(parseFloat(timestampResult[1]), this.gameSpeed);
+            const timestamp = scalePlaytime(parseFloat(timestampResult[1]), this.gametype.gameSpeed);
 
 
             //process.exit();
@@ -489,6 +492,7 @@ export class MatchParser{
                 continue;
             }
 
+            //always use original timestamps as control point timers don't scale with gamespeed
             if(domCapReg.test(subString)){
 
                 this.dom.parseLine(timestamp, subString, originalTimestamp);
@@ -497,7 +501,7 @@ export class MatchParser{
 
             if(domScoreReg.test(subString)){
 
-                this.dom.scoreUpdateTimestamps.add(timestamp);
+                this.dom.scoreUpdateTimestamps.add(originalTimestamp);
                 //console.log(timestamp);
             }
 
@@ -507,12 +511,15 @@ export class MatchParser{
 
                 if(scoreResult !== null){
 
-                    if(this.dom.teamScoreTimestamps[timestamp] === undefined){
-                        this.dom.teamScoreTimestamps[timestamp] = [];
+                    const tScore = Math.round(originalTimestamp);
+
+                    if(this.dom.teamScoreTimestamps[tScore] === undefined){
+                        this.dom.teamScoreTimestamps[tScore] = [];
                     }
 
-                    this.dom.teamScoreTimestamps[timestamp].push({
-                         timestamp,
+                    this.dom.teamScoreTimestamps[tScore].push({
+                         
+                        timestamp,
                         originalTimestamp,
                         "teamId": scoreResult[1],
                         "score": scoreResult[2]
