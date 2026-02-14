@@ -79,22 +79,40 @@ class DomControlPoint{
 
     getBuggyUTTimeLimitScore(remainingTime){
 
+        if (this.gametypeInfo.timeLimit === 0) return 0.2;      
+
         //timelimit is int, 20 = 20 minutes
         //remainingTime is int, but it's in seconds
 
-        remainingTime = remainingTime;
+        const old = remainingTime;
+
+        if(remainingTime < 1 && remainingTime > 0){
+            remainingTime = 1;
+        }
+        //return 0.2;
+
+        //console.log("now set to", remainingTime, "was", old);
+        //always an int in UT
+        //Last Timer call is always 1 Even when called at same time as endgame
+        //End game call is always 0
+        //remainingTime = Math.ceil(remainingTime);
+
+        
+
+        
+        //if(remainingTime <= 1) return 0.2;
 
         let c = 0.2;
-		if (this.gametypeInfo.timeLimit > 0){
 
-			if (remainingTime < 0.25 * this.gametypeInfo.timeLimit){
-				if (remainingTime < 0.1 * this.gametypeInfo.timeLimit){
-					c = 0.8;
-                }else{
-					c = 0.4;
-                }
-			}
-		}
+
+        if (remainingTime < 0.25 * this.gametypeInfo.timeLimit){
+            if (remainingTime < 0.1 * this.gametypeInfo.timeLimit){
+                c = 0.8;
+            }else{
+                c = 0.4;
+            }
+        }
+    
 
 
         return c;
@@ -130,26 +148,6 @@ class DomControlPoint{
             }
         }
 
-    }
-
-    matchEnd(timestamp){
-
-        if(this.instigator === null) return;
-
-        const offset = timestamp - this.lastScoreGivenTimestamp;
-
-        if(this.bScoreReady && offset >= 1){
-
-
-            this.totalScoreGiven += 0.2//this.getBuggyUTTimeLimitScore(0);
-
-            const test = Math.floor(offset);
-            const points = test;//this.getBuggyUTTimeLimitScore(0);
-           // console.log("end game ",this.name, points, test, offset);
-           //console.log(this.gametypeInfo);
-        }
-
-        this.calcCurrentScore(timestamp, true);
     }
 }
 
@@ -386,7 +384,7 @@ export class Domination{
     }
 
 
-    createMissingPings(pingInterval, matchEnd){
+    createMissingPings(pingInterval, matchEnd, matchStart, remainingTime){
 
         const timestamps = [...this.scoreUpdateTimestamps];
    
@@ -401,16 +399,30 @@ export class Domination{
         for(let i = 0; i < timestamps.length - 1; i++){
 
             const t = timestamps[i];
-            testTimestamps.push({"type": "ping", "timestamp": t});
+
+            if(t >= matchStart && t < matchEnd){
+                remainingTime--;
+            }
+
+            console.log(remainingTime);
+
+            testTimestamps.push({"type": "ping", "timestamp": t, remainingTime});
+
+            
             for(let x = 1; x < 5; x++){
 
                 const current = t + pingInterval * x;
                 if(current >= matchEnd) break;
-                testTimestamps.push({"type": "ping", "timestamp": current});
+
+                if(current >= matchStart){
+                    remainingTime--;
+                }
+                testTimestamps.push({"type": "ping", "timestamp": current, remainingTime});
             }
         }
-
-
+        console.log(testTimestamps);
+        console.log(matchStart, matchEnd);
+        process.exit();
         return testTimestamps;
     }
 
@@ -419,7 +431,11 @@ export class Domination{
 
         const pingInterval = 1 * gameSpeed;
 
-        const timestamps = this.createMissingPings(pingInterval, matchEnd);
+        let remainingTime = gametypeInfo.timeLimit * 60;
+        //1 second is always 1 seconds for UT when using timelimit, only log timestamps are affected by gamespeed/hardcore
+        console.log(remainingTime);
+
+        const timestamps = this.createMissingPings(pingInterval, matchEnd, matchStart, remainingTime);
 
         const newEvents = this.addControlPointOwnPings([...this.capEvents], matchEnd);
 
@@ -438,6 +454,10 @@ export class Domination{
             return 0;
         });
 
+
+        
+
+        //process.exit();
 
 
         for(let i = 0; i < newEvents.length; i++){
@@ -480,17 +500,21 @@ export class Domination{
 
             }else if(e.type === "ping"){
 
-                this.pingAllControlPoints(e.timestamp, matchEnd-e.timestamp);
+                this.pingAllControlPoints(e.timestamp, remainingTime);
+
+                if(gametypeInfo.timeLimit != 0 && e.timestamp >= matchStart){
+                    
+                   // remainingTime--;
+                   // console.log(e.timestamp, matchStart, remainingTime);
+                }
 
                 continue;
             }
         }
 
 
-
-        for(const controlPoint of Object.values(this.controlPoints)){
-            controlPoint.matchEnd(matchEnd);
-        }
+        //remaining time is 0 at the end of the game when the last
+        this.pingAllControlPoints(matchEnd, 0);
     
 
         console.log(gametypeInfo);
