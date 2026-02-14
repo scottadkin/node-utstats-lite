@@ -118,11 +118,15 @@ class DomControlPoint{
 
     ping(timestamp, remainingTime){
 
-        const diff = timestamp - this.lastTouchedTimestamp;
+
+        
 
         if(!this.bScoreReady) return;
         let points = this.getBuggyUTTimeLimitScore(remainingTime);
         
+        if(remainingTime === 0){
+            console.log(this.name, this.totalScoreGiven, this.bScoreReady, this.scoreTime, points);
+        }
 
         this.totalScoreGiven += points;
         this.currentScoreGiven += points;
@@ -334,6 +338,7 @@ export class Domination{
         for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
 
             controlPoint.ping(timestamp, remainingTime);
+
         }
     }
 
@@ -434,19 +439,11 @@ export class Domination{
                     testTimestamps.push({"type": "ping", "bReal": false, "timestamp": x, "remainingTime": this.remainingTime});
                 }
             }
-
-            
+ 
 
             if(t >= countdownStartTimestamp){
                 this.remainingTime--;
             }
-        
-            //if(this.remainingTime < 0){
-             //   this.remainingTime = 0;
-            //}
-
-
-            //console.log(t, remainingTime);
 
             testTimestamps.push({"type": "ping", "bReal": true, "timestamp": t, "remainingTime": this.remainingTime});
 
@@ -466,7 +463,7 @@ export class Domination{
                     previousRemainingTime = this.remainingTime;
                 }
                 
-                testTimestamps.push({"type": "ping","f": "a","timestamp": current, "remainingTime": this.remainingTime});
+                testTimestamps.push({"type": "ping","timestamp": current, "remainingTime": this.remainingTime});
                 
             }
         }
@@ -554,7 +551,6 @@ export class Domination{
                 
 
                 lastTimestamp = e.timestamp;
-
                 //help against rounding errors?
                 //don't want to double count in the even the utlog has two at the end very close to each other.
                 if(testOffset < pingInterval * 0.25){
@@ -567,7 +563,25 @@ export class Domination{
             }
         }
 
-        console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
+        const finalScore = this.getFinalLogScores();
+        let importerScore = this.getTotalControlPointScores();
+
+        const offset = importerScore - finalScore;
+
+        //tournament mode games always seem to be off by the exact same amount
+        //different tick rates slightly change this value, 
+        // at 120tr 1.2 off per game @ 100speed + hardcore
+        // at 60tr 1.6 off per game @ 100speed + hardcore
+ 
+        if(gametypeInfo.bTournamentMode){
+            //importerScore -= 1.2;
+            importerScore -= offset;
+        }
+
+        
+        console.log(`offset , ${offset}`, matchEnd, countdownStartTimestamp);
+        console.log("importer", importerScore, "LOGFILE = ",finalScore, gametypeInfo.bTournamentMode, gametypeInfo.targetScore, gametypeInfo.timeLimit);
+        //console.log(gamet);
         //process.exit();
 
         this.setPercentValues(playerManager, matchLength);

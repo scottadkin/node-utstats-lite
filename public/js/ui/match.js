@@ -548,13 +548,10 @@ class MatchDominationSummary{
         }else if(this.mode === "total-points"){
 
             const lines = [
-                `- Recreating the same scoring system as UT from original ut stat logs with the limited data and timestamps to only 2 decimal places caused a lot of headaches.`,
+                `- Recreating the same scoring system as UT from original ut stat logs caused a lot of headaches.`,
                 UIBr(),
-                `- All control points are pinged every 1 * gamespeed second in a timer function to see if they are in a state to give points.`,
-                UIBr(),      
-                `- You only get realtime score updates written to the log on every 5th timer function call.`,
-                UIBr(),
-                `- Control points also have their own timer function that starts and then is called every 1 * gamespeed second from their touchtime.`,
+                `- After many different attempts and learning about the bugs in the domination code, the calculated scores appear to be with in -1 exact or +1 Timer call.`,
+ 
                 
             ];
          
