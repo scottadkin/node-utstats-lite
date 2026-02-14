@@ -79,16 +79,14 @@ class DomControlPoint{
 
     getBuggyUTTimeLimitScore(remainingTime){
 
+        //return 0.2;
+
+       // return 0.2;
         if (this.gametypeInfo.timeLimit === 0) return 0.2;      
 
         //timelimit is int, 20 = 20 minutes
         //remainingTime is int, but it's in seconds
 
-        const old = remainingTime;
-
-        if(remainingTime < 1 && remainingTime > 0){
-            remainingTime = 1;
-        }
         //return 0.2;
 
         //console.log("now set to", remainingTime, "was", old);
@@ -130,6 +128,8 @@ class DomControlPoint{
         this.currentScoreGiven += points;
 
         this.lastScoreGivenTimestamp = timestamp;
+
+        this.lastRemainingTime = remainingTime;
     }
 
 
@@ -147,7 +147,16 @@ class DomControlPoint{
                 this.currentFirstScoreGivenTimestamp = originalTimestamp;
             }
         }
+    }
 
+    endMatch(){
+
+        console.log("endmatch", this.lastRemainingTime);
+
+        if(this.lastRemainingTime !== 0){
+            this.totalScoreGiven += this.getBuggyUTTimeLimitScore(0);
+        }
+        //if(this.bScoreReady) this.totalScoreGiven+=0.066;
     }
 }
 
@@ -159,6 +168,7 @@ class TestDomControlPoint{
         this.name = name;
         this.touchTimestamps = [];
         this.currentTimestampIndex = 0;
+        this.remainingTime = 0;
     }
 
     addTimestamp(timestamp){
@@ -384,58 +394,101 @@ export class Domination{
     }
 
 
-    createMissingPings(pingInterval, matchEnd, matchStart, remainingTime){
+    createMissingPings(pingInterval, matchEnd, matchStart, gametypeInfo, countdownStartTimestamp){
 
         const timestamps = [...this.scoreUpdateTimestamps];
+        //dom score update always executed twice, this includes updating scores
+        timestamps.push(matchEnd);
+
+
+       // process.exit();
    
         const firstReal = timestamps[0];
 
         const first = firstReal - pingInterval * 5;
+        //remainingTime += 6;
 
-        timestamps.unshift(first);
 
         const testTimestamps = [];
 
-        for(let i = 0; i < timestamps.length - 1; i++){
+        let bCanCountdown = false;
+        
+        let nextTimestamp = 0;
+        let previousRemainingTime = -1;
+        //ignore lastTIme
+        for(let i = 0; i < timestamps.length; i++){
+
 
             const t = timestamps[i];
+            nextTimestamp = timestamps[i + 1];
 
-            if(t >= matchStart && t < matchEnd){
-                remainingTime--;
+            if(t > matchEnd) break;
+
+            if(i === 0){
+
+                 for(let x = countdownStartTimestamp; x < t; x+= pingInterval){
+
+                    if(x > countdownStartTimestamp){
+                        this.remainingTime--;
+                    }
+                    testTimestamps.push({"type": "ping", "bReal": false, "timestamp": x, "remainingTime": this.remainingTime});
+                }
             }
-
-            console.log(remainingTime);
-
-            testTimestamps.push({"type": "ping", "timestamp": t, remainingTime});
 
             
+
+            if(t >= countdownStartTimestamp){
+                this.remainingTime--;
+            }
+        
+            //if(this.remainingTime < 0){
+             //   this.remainingTime = 0;
+            //}
+
+
+            //console.log(t, remainingTime);
+
+            testTimestamps.push({"type": "ping", "bReal": true, "timestamp": t, "remainingTime": this.remainingTime});
+
+            previousRemainingTime = this.remainingTime;
+
             for(let x = 1; x < 5; x++){
 
-                const current = t + pingInterval * x;
-                if(current >= matchEnd) break;
+                let current = t + pingInterval * x;
 
-                if(current >= matchStart){
-                    remainingTime--;
+                
+                if(current > matchEnd){
+                    break;
                 }
-                testTimestamps.push({"type": "ping", "timestamp": current, remainingTime});
+
+                if(current >= countdownStartTimestamp){
+                    this.remainingTime--;
+                    previousRemainingTime = this.remainingTime;
+                }
+                
+                testTimestamps.push({"type": "ping","f": "a","timestamp": current, "remainingTime": this.remainingTime});
+                
             }
         }
-        console.log(testTimestamps);
-        console.log(matchStart, matchEnd);
-        process.exit();
+
         return testTimestamps;
     }
 
 
-    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, serverInfo){
+    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, countdownStartTimestamp){
 
         const pingInterval = 1 * gameSpeed;
 
-        let remainingTime = gametypeInfo.timeLimit * 60;
+        this.remainingTime = gametypeInfo.timeLimit * 60;
         //1 second is always 1 seconds for UT when using timelimit, only log timestamps are affected by gamespeed/hardcore
-        console.log(remainingTime);
 
-        const timestamps = this.createMissingPings(pingInterval, matchEnd, matchStart, remainingTime);
+        const timestamps = this.createMissingPings(
+            pingInterval, 
+            matchEnd, 
+            matchStart, 
+            gametypeInfo,
+            countdownStartTimestamp
+        );
 
         const newEvents = this.addControlPointOwnPings([...this.capEvents], matchEnd);
 
@@ -455,11 +508,8 @@ export class Domination{
         });
 
 
+        let lastTimestamp = -9999;
         
-
-        //process.exit();
-
-
         for(let i = 0; i < newEvents.length; i++){
 
             const e = newEvents[i];
@@ -495,31 +545,30 @@ export class Domination{
                     continue;
                 }
 
-                controlPoint.controlPointTimerPing(e.timestamp, matchEnd-e.originalTimestamp);
+                controlPoint.controlPointTimerPing(e.timestamp);
                 continue;
 
             }else if(e.type === "ping"){
 
-                this.pingAllControlPoints(e.timestamp, remainingTime);
+                const testOffset = e.timestamp - lastTimestamp;
+                
 
-                if(gametypeInfo.timeLimit != 0 && e.timestamp >= matchStart){
-                    
-                   // remainingTime--;
-                   // console.log(e.timestamp, matchStart, remainingTime);
+                lastTimestamp = e.timestamp;
+
+                //help against rounding errors?
+                //don't want to double count in the even the utlog has two at the end very close to each other.
+                if(testOffset < pingInterval * 0.25){
+                    break;
                 }
+              
+                this.pingAllControlPoints(e.timestamp, e.remainingTime);
 
                 continue;
             }
         }
 
-
-        //remaining time is 0 at the end of the game when the last
-        this.pingAllControlPoints(matchEnd, 0);
-    
-
-        console.log(gametypeInfo);
         console.log(this.getTotalControlPointScores(), "LOGFILE = ", this.getFinalLogScores());
-
+        //process.exit();
 
         this.setPercentValues(playerManager, matchLength);
 

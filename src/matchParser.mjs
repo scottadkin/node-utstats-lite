@@ -130,7 +130,7 @@ export class MatchParser{
             this.originalMatchLength, 
             this.gametype.gameSpeed, 
             this.gametype, 
-            this.match.date
+            this.matchRemainingTimeStartTimestamp
         );
         
         this.kills.setPlayerSpecialEvents(this.players);
@@ -338,6 +338,34 @@ export class MatchParser{
         this.originalMatchEnd = parseFloat(endResult[1]);
 
 
+
+        const countdownStartReg = /(\d+\.\d+)\tgame_start\s/i;
+
+
+        //the point UT's remaining time starts to countdown
+        //we need this for domination score calculation
+        this.matchRemainingTimeStartTimestamp = null;
+
+        const countdownResult = countdownStartReg.exec(this.rawData);
+
+        if(countdownResult !== null) this.matchRemainingTimeStartTimestamp = parseFloat(countdownResult[1]);
+
+
+        //0.00	game	TournamentMode	False
+        const tournamentReg = /\d+.\d+\tgame\ttournamentmode\t(.+)\s/i;
+
+        const tournamentResult = tournamentReg.exec(this.rawData);
+
+        this.gametype.bTournamentMode = false;
+
+        if(tournamentResult !== null){
+
+            this.gametype.bTournamentMode = tournamentResult[1].toLowerCase() === "true";
+        }
+
+
+
+
     }
 
 
@@ -367,7 +395,7 @@ export class MatchParser{
 
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
         const domCapReg = /^controlpoint_capture\t.+$/i;
-        const domScoreReg = /dom_playerscore_update\t(\d+)\t.+/i;
+        const domScoreReg = /dom_score_update\t(\d+)\t.+/i;
         const domTeamScoreReg = /dom_score_update\t(\d+)\t(.+)/i;
 
         const itemGetReg = /^item_get\t(.+)$/i;
