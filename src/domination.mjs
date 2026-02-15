@@ -91,7 +91,10 @@ export async function getMatchData(matchId){
 
     const query = `SELECT 
     player_id,point_id,total_caps,total_control_time,
-    longest_control_time,shortest_control_time,control_percent FROM nstats_match_dom WHERE match_id=?`;
+    longest_control_time,shortest_control_time,control_percent,
+    control_point_score,max_control_point_score,total_score_time,
+    stolen_points,stolen_caps
+     FROM nstats_match_dom WHERE match_id=?`;
 
     const result = await simpleQuery(query, [matchId]);
 

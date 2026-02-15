@@ -446,6 +446,7 @@ class MatchDominationSummary{
             {"display": "Longest Time Held", "value": "long-time"},
             {"display": "Total Points", "value": "total-points"},
             {"display": "Max Points", "value": "max-points"},
+            {"display": "Stolen Points", "value": "stolen-points"},
         ];
 
 
@@ -512,6 +513,21 @@ class MatchDominationSummary{
             currentValue = (bTotals) ? caps : caps.shortest_control_time;
             content = `${toPlaytime(currentValue, true)}`;
             className = "playtime";
+
+        }else if(this.mode === "total-points"){
+
+            currentValue = (bTotals) ? caps : caps.control_point_score;
+            content = currentValue.toFixed(2);
+     
+        }else if(this.mode === "max-points"){
+
+            currentValue = (bTotals) ? caps : caps.max_control_point_score;
+            content = currentValue.toFixed(2);
+     
+        }else if(this.mode === "stolen-points"){
+
+            currentValue = (bTotals) ? caps : caps.stolen_points;
+            content = currentValue.toFixed(2);
         }
         
 
@@ -545,14 +561,21 @@ class MatchDominationSummary{
 
             this.info.append("The longest amount of time a player had control of the point for a single capture.");
 
-        }else if(this.mode === "total-points"){
+        }else if(this.mode === "total-points" || this.mode === "max-points"){
 
+            const lines = [`- Recreated from stats log, Usually less than +-1% of real UT score.`];
+         
+            this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
+
+        }else if(this.mode === "stolen-points"){
             const lines = [
-                `- Recreating the same scoring system as UT from original ut stat logs caused a lot of headaches.`,
+                `- Recreated from stats log, Usually less than +-1% of real UT score.`,
                 UIBr(),
-                `- After many different attempts and learning about the bugs in the domination code, the calculated scores appear to be with in -1 exact or +1 Timer call.`,
- 
-                
+                `- A stolen point is when you capture the control point from another team and you get lucky with the Domination & Control Points timers.`,
+                UIBr(),
+                `- There is a bug in the Control Point code that mistakenly gives the new player points.`,
+                UIBr(),
+                `- You have to cap a control point that was already in a scoring state from another team, and the domination scoring timer must be called before the first Control Point timer`
             ];
          
             this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
