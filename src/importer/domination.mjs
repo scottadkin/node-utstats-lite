@@ -40,6 +40,8 @@ class DomControlPoint{
         this.teamScores = [0,0,0,0];
         this.stolenTeamScores = [0,0,0,0];
         this.currentStolenPoints = 0;
+        //caps where the new player stole points
+        this.stolenCaps = 0;
     }
 
 
@@ -132,6 +134,7 @@ class DomControlPoint{
         if(this.bScoreReady && this.scoreTime === 2){
       
             this.totalStolenPoints += points;
+            this.stolenCaps++;
 
             if(playerTeam !== null){
                 this.stolenTeamScores[playerTeam] += points;

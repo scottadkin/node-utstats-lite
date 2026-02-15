@@ -288,7 +288,8 @@ export class Player{
                 "totalScoreTime": 0,
                 "maxScoreTime": 0,
                 "totalControlTime": 0,
-                "stolenPoints": 0
+                "stolenPoints": 0,
+                "stolenCaps": 0
             };
         }
 
@@ -317,6 +318,9 @@ export class Player{
         }
 
         d.stolenPoints += stolenPoints;
+        if(stolenPoints > 0){
+            d.stolenCaps++;
+        }
 
         if(pointId !== 0) this.updateDomControlPointStats(0, timeHeld, scoreGiven, scoreTime, stolenPoints);
     }

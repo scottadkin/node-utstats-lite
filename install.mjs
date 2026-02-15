@@ -242,7 +242,9 @@ const queries = [
             control_point_score float NOT NULL,
             max_control_point_score float NOT NULL,
             total_score_time float NOT NULL,
-            max_total_score_time float NOT NULL
+            max_total_score_time float NOT NULL,
+            stolen_points float NOT NULL,
+            stolen_caps int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals (     
@@ -799,6 +801,8 @@ async function updateDominationTables(){
     await addColumn("nstats_match_dom", "max_control_point_score", "float NOT NULL");
     await addColumn("nstats_match_dom", "total_score_time", "float NOT NULL");
     await addColumn("nstats_match_dom", "max_total_score_time", "float NOT NULL");
+    await addColumn("nstats_match_dom", "stolen_points", "float NOT NULL");
+    await addColumn("nstats_match_dom", "stolen_caps", "int NOT NULL");
 }
 
 async function insertCTFLeagueSettings(){

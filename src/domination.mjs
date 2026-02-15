@@ -40,7 +40,9 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
     control_point_score,
     max_control_point_score,
     total_score_time,
-    max_total_score_time
+    max_total_score_time,
+    stolen_points,
+    stolen_caps
     ) VALUES ?`;
 
     const insertVars = [];
@@ -57,7 +59,8 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
                 capData.totalControlTime, capData.longestTimeControlled, 
                 capData.shortestTimeControlled, capData.controlPercent,
                 capData.totalPointsEarned, capData.maxPointsEarned,
-                capData.totalScoreTime, capData.maxScoreTime
+                capData.totalScoreTime, capData.maxScoreTime,
+                capData.stolenPoints, capData.stolenCaps
             ]);
         }
     }
