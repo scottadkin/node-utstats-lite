@@ -123,6 +123,7 @@ export class MatchParser{
         await this.dom.setPointIds(this.gametype.gameSpeed, this.gametype);
 
         //(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, serverInfo)
+
         this.dom.setPlayerCapStats(
             this.players, 
             this.originalMatchStart, 
@@ -395,8 +396,10 @@ export class MatchParser{
 
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
         const domCapReg = /^controlpoint_capture\t.+$/i;
-        const domScoreReg = /dom_score_update\t(\d+)\t.+/i;
+        const domScoreReg = /dom_playerscore_update\t(\d+)\t(.+)/i;
         const domTeamScoreReg = /dom_score_update\t(\d+)\t(.+)/i;
+
+        //const domDebugScore = /^team score id=\t(\d+)\tScore was\t(.+)$/i;
 
         const itemGetReg = /^item_get\t(.+)$/i;
 
@@ -541,6 +544,7 @@ export class MatchParser{
             if(domScoreReg.test(subString)){
 
                 this.dom.scoreUpdateTimestamps.add(originalTimestamp);
+                
                 //console.log(timestamp);
             }
 
@@ -563,8 +567,16 @@ export class MatchParser{
                         "teamId": scoreResult[1],
                         "score": scoreResult[2]
                     });
+                    
                 }
             }
+
+
+            /*if(domDebugScore.test(subString)){
+                const dResult = domDebugScore.exec(subString);
+                this.dom.debugScores.push({"timestamp": originalTimestamp, "teamId": parseInt(dResult[1]), "score": parseFloat(dResult[2]), "stringScore": dResult[2]});
+                continue;
+            }*/
 
             if(itemGetReg.test(subString)){
                 this.items.parseLine(timestamp, subString);

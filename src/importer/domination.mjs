@@ -26,6 +26,7 @@ class DomControlPoint{
         this.totalScoreGiven = 0;
 
 
+        this.bBeenScoreReady = false;
         this.bScoreReady = false;
         this.scoreTime = 2;
         this.currentFirstScoreGivenTimestamp = -999;
@@ -79,29 +80,13 @@ class DomControlPoint{
 
     getBuggyUTTimeLimitScore(remainingTime){
 
-        //return 0.2;
-
-       // return 0.2;
         if (this.gametypeInfo.timeLimit === 0) return 0.2;      
 
+        if(remainingTime <= 0) remainingTime = 1;
         //timelimit is int, 20 = 20 minutes
         //remainingTime is int, but it's in seconds
 
-        //return 0.2;
-
-        //console.log("now set to", remainingTime, "was", old);
-        //always an int in UT
-        //Last Timer call is always 1 Even when called at same time as endgame
-        //End game call is always 0
-        //remainingTime = Math.ceil(remainingTime);
-
-        
-
-        
-        //if(remainingTime <= 1) return 0.2;
-
         let c = 0.2;
-
 
         if (remainingTime < 0.25 * this.gametypeInfo.timeLimit){
             if (remainingTime < 0.1 * this.gametypeInfo.timeLimit){
@@ -110,23 +95,16 @@ class DomControlPoint{
                 c = 0.4;
             }
         }
-    
-
 
         return c;
     }
 
     ping(timestamp, remainingTime){
 
-
-        
-
+        //console.log(this.name, remainingTime);
         if(!this.bScoreReady) return;
         let points = this.getBuggyUTTimeLimitScore(remainingTime);
-        
-        if(remainingTime === 0){
-            console.log(this.name, this.totalScoreGiven, this.bScoreReady, this.scoreTime, points);
-        }
+  
 
         this.totalScoreGiven += points;
         this.currentScoreGiven += points;
@@ -140,16 +118,21 @@ class DomControlPoint{
     controlPointTimerPing(originalTimestamp){
 
         //console.log(this.name, originalTimestamp);
+        
         this.scoreTime--;
+        if(this.scoreTime < 0) return;
+
+        //console.log(originalTimestamp, this.name, this.scoreTime);
         if(this.scoreTime > 0){
             this.bScoreReady = false;
-        }else{
+        }else if(this.scoreTime === 0){
            // this.scoreTime = 0;
             this.bScoreReady = true;
 
-            if(this.scoreTime === 0){
-                this.currentFirstScoreGivenTimestamp = originalTimestamp;
-            }
+            if(!this.bBeenScoreReady) this.bBeenScoreReady = true;
+
+            this.currentFirstScoreGivenTimestamp = originalTimestamp;
+            
         }
     }
 
@@ -204,6 +187,8 @@ export class Domination{
 
         this.scoreUpdateTimestamps = new Set();
         this.teamScoreTimestamps = {};
+
+        this.debugScores = [];
 
         this.capEvents = [];  
     }
@@ -327,7 +312,6 @@ export class Domination{
            
         }
 
-
         return newEvents;
     }
 
@@ -402,30 +386,12 @@ export class Domination{
     createMissingPings(pingInterval, matchEnd, matchStart, gametypeInfo, countdownStartTimestamp){
 
         const timestamps = [...this.scoreUpdateTimestamps];
-        //dom score update always executed twice, this includes updating scores
-        timestamps.push(matchEnd);
-
-
-       // process.exit();
-   
-        const firstReal = timestamps[0];
-
-        const first = firstReal - pingInterval * 5;
-        //remainingTime += 6;
-
 
         const testTimestamps = [];
 
-        let bCanCountdown = false;
-        
-        let nextTimestamp = 0;
-        let previousRemainingTime = -1;
-        //ignore lastTIme
         for(let i = 0; i < timestamps.length; i++){
 
-
             const t = timestamps[i];
-            nextTimestamp = timestamps[i + 1];
 
             if(t > matchEnd) break;
 
@@ -442,29 +408,37 @@ export class Domination{
  
 
             if(t >= countdownStartTimestamp){
+                
                 this.remainingTime--;
             }
 
             testTimestamps.push({"type": "ping", "bReal": true, "timestamp": t, "remainingTime": this.remainingTime});
 
-            previousRemainingTime = this.remainingTime;
 
             for(let x = 1; x < 5; x++){
 
                 let current = t + pingInterval * x;
 
-                
-                if(current > matchEnd){
+                if(current >= matchEnd){
                     break;
                 }
 
+
                 if(current >= countdownStartTimestamp){
                     this.remainingTime--;
-                    previousRemainingTime = this.remainingTime;
                 }
-                
-                testTimestamps.push({"type": "ping","timestamp": current, "remainingTime": this.remainingTime});
-                
+
+                if(Math.round(current) === Math.round(matchEnd)){
+                    //just use the match end and end pings
+                    //we don't want a fake one and the real match end to be called very close too each other
+                    // this will give players and teams 2 lots of score updates instead of 1
+                  
+                    testTimestamps.push({"type": "ping","bFakeEnd": true, "bReal": false, "timestamp": matchEnd, "remainingTime": this.remainingTime});
+                    break;
+                   // process.exit();
+                }
+
+                testTimestamps.push({"type": "ping", "bReal": false, "timestamp": current, "remainingTime": this.remainingTime});
             }
         }
 
@@ -472,8 +446,49 @@ export class Domination{
     }
 
 
+    setDebugScores(){
+
+        this.testScores = {};
+
+        for(const [intTimestamp, data] of Object.entries(this.teamScoreTimestamps)){
+
+            let t = data[0].originalTimestamp;
+
+            this.testScores[t] = {
+                "totalScore": 0,
+            };
+
+            for(let x = 0; x < data.length; x++){
+
+
+                const d =data[x];
+                this.testScores[t][d.teamId] = d.score;
+                this.testScores[t].totalScore += parseFloat(d.score);
+
+                if(x>=3) break;
+            }
+        }
+    }
+
+
+    getScoreAt(timestamp){
+
+        timestamp = timestamp.toFixed(2);
+
+        if(this.testScores[timestamp] !== undefined){
+            return {...this.testScores[timestamp], timestamp};
+        }
+
+        return -1;
+    }
+
     setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, countdownStartTimestamp){
 
+        this.setDebugScores();
+
+        this.scoreOffsets = [];
+
+        //process.exit();
         const pingInterval = 1 * gameSpeed;
 
         this.remainingTime = gametypeInfo.timeLimit * 60;
@@ -489,21 +504,19 @@ export class Domination{
 
         const newEvents = this.addControlPointOwnPings([...this.capEvents], matchEnd);
 
+
         newEvents.push(...timestamps);
+
         newEvents.sort((a, b) =>{
 
-            a = a.timestamp;
-            b = b.timestamp;
-
-            if(a > b){
+            if(a.timestamp > b.timestamp){
                 return 1;
-            }else if(a < b){
+            }else if(a.timestamp < b.timestamp){
                 return -1;
             }
 
             return 0;
         });
-
 
         let lastTimestamp = -9999;
         
@@ -547,17 +560,31 @@ export class Domination{
 
             }else if(e.type === "ping"){
 
-                const testOffset = e.timestamp - lastTimestamp;
-                
-
+                //some timelimit games have duplicate dom_score_updates at the end but the scores are the same so ignore the 2nd
+                if(e.timestamp === lastTimestamp) continue;
                 lastTimestamp = e.timestamp;
-                //help against rounding errors?
-                //don't want to double count in the even the utlog has two at the end very close to each other.
-                if(testOffset < pingInterval * 0.25){
-                    break;
-                }
               
+                //if(e.timestamp >= matchEnd) continue;
+                //console.log(e);
                 this.pingAllControlPoints(e.timestamp, e.remainingTime);
+                
+                const realScore = this.getScoreAt(e.timestamp);
+
+                if(realScore !== -1){
+
+                    const calcScore = this.getTotalControlPointScores();
+
+                    this.scoreOffsets.push({
+                        "timestamp": e.timestamp, 
+                        "remainingTime": e.remainingTime, 
+                        "realScoreTeamScores": realScore,
+                        "realScore": realScore.totalScore,
+                        "importerScore": calcScore,
+                        "scoreOffset": realScore.totalScore - calcScore
+                    });
+                    
+                    //console.log("get scores at", e.timestamp, realScore.totalScore, calcScore, realScore.totalScore - calcScore, e.bReal);
+                }
 
                 continue;
             }
@@ -567,22 +594,19 @@ export class Domination{
         let importerScore = this.getTotalControlPointScores();
 
         const offset = importerScore - finalScore;
-
-        //tournament mode games always seem to be off by the exact same amount
-        //different tick rates slightly change this value, 
-        // at 120tr 1.2 off per game @ 100speed + hardcore
-        // at 60tr 1.6 off per game @ 100speed + hardcore
- 
-        if(gametypeInfo.bTournamentMode){
-            //importerScore -= 1.2;
-            importerScore -= offset;
-        }
-
+  
         
-        console.log(`offset , ${offset}`, matchEnd, countdownStartTimestamp);
-        console.log("importer", importerScore, "LOGFILE = ",finalScore, gametypeInfo.bTournamentMode, gametypeInfo.targetScore, gametypeInfo.timeLimit);
-        //console.log(gamet);
-        //process.exit();
+        console.log(
+            "MATCHEND", matchEnd,
+            "importer", importerScore, 
+            "LOGFILE = ",finalScore, 
+            "scoreOffset =", offset,
+            "errorPercent",Math.abs( 100 - (finalScore / importerScore) * 100),
+            `Tournament Mode = ${gametypeInfo.bTournamentMode}`, 
+            `TargetScore = ${gametypeInfo.targetScore}`, 
+            `Timelimit = ${gametypeInfo.timeLimit}`,
+            `GAMESPEED = ${gametypeInfo.gameSpeed}`);
+
 
         this.setPercentValues(playerManager, matchLength);
 
