@@ -275,7 +275,7 @@ export class Player{
     }
 
 
-    updateDomControlPointStats(pointId, timeHeld, scoreGiven, scoreTime){
+    updateDomControlPointStats(pointId, timeHeld, scoreGiven, scoreTime, stolenPoints){
     
         if(this.stats.dom.controlPoints[pointId] === undefined){
 
@@ -287,7 +287,8 @@ export class Player{
                 "maxPointsEarned": 0,
                 "totalScoreTime": 0,
                 "maxScoreTime": 0,
-                "totalControlTime": 0
+                "totalControlTime": 0,
+                "stolenPoints": 0
             };
         }
 
@@ -315,7 +316,9 @@ export class Player{
             d.maxScoreTime = scoreTime;
         }
 
-        if(pointId !== 0) this.updateDomControlPointStats(0, timeHeld, scoreGiven, scoreTime);
+        d.stolenPoints += stolenPoints;
+
+        if(pointId !== 0) this.updateDomControlPointStats(0, timeHeld, scoreGiven, scoreTime, stolenPoints);
     }
 
 }

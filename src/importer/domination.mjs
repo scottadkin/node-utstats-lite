@@ -1,4 +1,5 @@
 import { getPointsIds, createControlPoint, insertPlayerMatchData } from "../domination.mjs";
+import { scalePlaytime } from "../generic.mjs";
 import Message from "../message.mjs";
 
 
@@ -32,6 +33,13 @@ class DomControlPoint{
         this.currentFirstScoreGivenTimestamp = -999;
         this.currentScoreGiven = 0;
         this.controlPercent = 0;
+
+
+        //Points given to wrong player because of the bScoreReady bug
+        this.totalStolenPoints = 0;
+        this.teamScores = [0,0,0,0];
+        this.stolenTeamScores = [0,0,0,0];
+        this.currentStolenPoints = 0;
     }
 
 
@@ -46,26 +54,31 @@ class DomControlPoint{
             scoreTimeHeld = timestamp - this.currentFirstScoreGivenTimestamp;
         }
 
-        this.instigator.updateDomControlPointStats(this.id, timeHeld, this.currentScoreGiven, scoreTimeHeld);
+
+        this.instigator.updateDomControlPointStats(
+            this.id, timeHeld, 
+            this.currentScoreGiven, scoreTimeHeld, 
+            this.currentStolenPoints
+        );
         
 
         this.totalScoreTime += scoreTimeHeld;
         this.totalControlTime += timeHeld;
     }
 
-     touched(instigator, originalTimestamp){
+     touched(instigator, originalTimestamp, scaledTimestamp){
 
         //console.log(this.name, "touched ", originalTimestamp);
 
         if(this.instigator === null){
-            this.firstTouchedTimestamp = originalTimestamp;
+            this.firstTouchedTimestamp = scaledTimestamp;
         }else{
 
 
-           this.calcCurrentScore(originalTimestamp, false);
+           this.calcCurrentScore(scaledTimestamp);
         }
 
-        this.lastTouchedTimestamp = originalTimestamp;
+        this.lastTouchedTimestamp = scaledTimestamp;
         this.instigator = instigator;
 
         //UT Bug, this should be set here but gets set in the first timer call allowing new player to get points early
@@ -73,6 +86,7 @@ class DomControlPoint{
 
         this.scoreTime = 2;
         this.currentScoreGiven = 0;
+        this.currentStolenPoints = 0;
 
         
 
@@ -102,27 +116,44 @@ class DomControlPoint{
     ping(timestamp, remainingTime){
 
         //console.log(this.name, remainingTime);
+        if(this.instigator === null) return;
         if(!this.bScoreReady) return;
         let points = this.getBuggyUTTimeLimitScore(remainingTime);
   
-
         this.totalScoreGiven += points;
         this.currentScoreGiven += points;
+
+        const playerTeam = this.instigator.getTeamAt(timestamp);
+
+        if(playerTeam !== null){
+            this.teamScores[playerTeam] += points;
+        }
+
+        if(this.bScoreReady && this.scoreTime === 2){
+      
+            this.totalStolenPoints += points;
+
+            if(playerTeam !== null){
+                this.stolenTeamScores[playerTeam] += points;
+            }
+
+            this.currentStolenPoints += points;
+  
+        }
+
 
         this.lastScoreGivenTimestamp = timestamp;
 
         this.lastRemainingTime = remainingTime;
+
     }
 
 
-    controlPointTimerPing(originalTimestamp){
+    controlPointTimerPing(originalTimestamp, scaledTimestamp){
 
-        //console.log(this.name, originalTimestamp);
-        
         this.scoreTime--;
         if(this.scoreTime < 0) return;
 
-        //console.log(originalTimestamp, this.name, this.scoreTime);
         if(this.scoreTime > 0){
             this.bScoreReady = false;
         }else if(this.scoreTime === 0){
@@ -131,19 +162,9 @@ class DomControlPoint{
 
             if(!this.bBeenScoreReady) this.bBeenScoreReady = true;
 
-            this.currentFirstScoreGivenTimestamp = originalTimestamp;
+            this.currentFirstScoreGivenTimestamp = scaledTimestamp;
             
         }
-    }
-
-    endMatch(){
-
-        console.log("endmatch", this.lastRemainingTime);
-
-        if(this.lastRemainingTime !== 0){
-            this.totalScoreGiven += this.getBuggyUTTimeLimitScore(0);
-        }
-        //if(this.bScoreReady) this.totalScoreGiven+=0.066;
     }
 }
 
@@ -433,7 +454,13 @@ export class Domination{
                     //we don't want a fake one and the real match end to be called very close too each other
                     // this will give players and teams 2 lots of score updates instead of 1
                   
-                    testTimestamps.push({"type": "ping","bFakeEnd": true, "bReal": false, "timestamp": matchEnd, "remainingTime": this.remainingTime});
+                    testTimestamps.push({
+                        "type": "ping",
+                        "bFakeEnd": true, 
+                        "bReal": false, 
+                        "timestamp": matchEnd, 
+                        "remainingTime": this.remainingTime
+                    });
                     break;
                    // process.exit();
                 }
@@ -541,7 +568,7 @@ export class Domination{
                     continue;
                 }
 
-                controlPoint.touched(player, e.timestamp);
+                controlPoint.touched(player, e.timestamp, e.scaledTimestamp);
                 continue;
 
             }else if(e.type === "controlPointPing"){
@@ -555,7 +582,7 @@ export class Domination{
                     continue;
                 }
 
-                controlPoint.controlPointTimerPing(e.timestamp);
+                controlPoint.controlPointTimerPing(e.timestamp, scalePlaytime(e.timestamp, gameSpeed));
                 continue;
 
             }else if(e.type === "ping"){
@@ -564,8 +591,7 @@ export class Domination{
                 if(e.timestamp === lastTimestamp) continue;
                 lastTimestamp = e.timestamp;
               
-                //if(e.timestamp >= matchEnd) continue;
-                //console.log(e);
+
                 this.pingAllControlPoints(e.timestamp, e.remainingTime);
                 
                 const realScore = this.getScoreAt(e.timestamp);
@@ -595,7 +621,18 @@ export class Domination{
 
         const offset = importerScore - finalScore;
   
-        
+   
+        for(const controlPoint of Object.values(this.controlPoints)){
+            
+            console.log(controlPoint.teamScores, controlPoint.totalScoreGiven, controlPoint.stolenTeamScores, controlPoint.totalStolenPoints);
+        }
+
+        for(let i = 0; i < playerManager.players.length; i++){
+
+            const p = playerManager.players[i];
+            console.log(p.stats.dom);
+        }
+
         console.log(
             "MATCHEND", matchEnd,
             "importer", importerScore, 
