@@ -216,6 +216,7 @@ export class MatchParser{
         //TODO add gametype & map ids to weapons, CTF AND DOM TABLES
         await this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
         await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
+        await this.dom.insertMatchResult(this.matchId);
        // await this.weapons.setWeaponIds();
         this.kills.setWeaponIds(this.weapons);
         this.kills.setPlayerIds(this.players);

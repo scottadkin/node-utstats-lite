@@ -90,6 +90,29 @@ const queries = [
             hash varchar(32) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_matches_dom (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            match_id int(11) NOT NULL,
+            real_total_score FLOAT NOT NULL,
+            importer_total_score FLOAT NOT NULL,
+            total_control_time FLOAT NOT NULL,
+            team_0_real_score FLOAT NOT NULL,
+            team_1_real_score FLOAT NOT NULL,
+            team_2_real_score FLOAT NOT NULL,
+            team_3_real_score FLOAT NOT NULL,
+            team_0_importer_score FLOAT NOT NULL,
+            team_1_importer_score FLOAT NOT NULL,
+            team_2_importer_score FLOAT NOT NULL,
+            team_3_importer_score FLOAT NOT NULL,
+            team_0_control_time FLOAT NOT NULL,
+            team_1_control_time FLOAT NOT NULL,
+            team_2_control_time FLOAT NOT NULL,
+            team_3_control_time FLOAT NOT NULL,
+            team_0_control_percent FLOAT NOT NULL,
+            team_1_control_percent FLOAT NOT NULL,
+            team_2_control_percent FLOAT NOT NULL,
+            team_3_control_percent FLOAT NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
         `CREATE TABLE IF NOT EXISTS nstats_servers (
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,

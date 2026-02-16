@@ -28,6 +28,43 @@ export async function createControlPoint(name){
     return result.insertId;
 }
 
+export async function insertMatchResult(matchId, realScores, fakeScores){
+
+    const query = `INSERT INTO nstats_matches_dom VALUES(
+    NULL,?,?,?,?,
+    ?,?,?,?,
+    ?,?,?,?,
+    ?,?,?,?,
+    ?,?,?,?
+    )`;
+
+    const vars = [
+        matchId, 
+        realScores.totalScore, 
+        fakeScores.totalScore,
+        fakeScores.totalControlTime,
+        realScores.teamScores[0],
+        realScores.teamScores[1],
+        realScores.teamScores[2],
+        realScores.teamScores[3],
+        fakeScores.teamScores[0],
+        fakeScores.teamScores[1],
+        fakeScores.teamScores[2],
+        fakeScores.teamScores[3],
+        fakeScores.teamControlTimes[0],
+        fakeScores.teamControlTimes[1],
+        fakeScores.teamControlTimes[2],
+        fakeScores.teamControlTimes[3],
+        fakeScores.teamControlPercent[0].toFixed(2),
+        fakeScores.teamControlPercent[1].toFixed(2),
+        fakeScores.teamControlPercent[2].toFixed(2),
+        fakeScores.teamControlPercent[3].toFixed(2)
+    ];
+
+    console.log(vars);
+
+    return await simpleQuery(query, vars);
+}
 
 export async function insertPlayerMatchData(players, matchId, gametypeId, mapId){
 

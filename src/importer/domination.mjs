@@ -1,4 +1,4 @@
-import { getPointsIds, createControlPoint, insertPlayerMatchData } from "../domination.mjs";
+import { getPointsIds, createControlPoint, insertPlayerMatchData, insertMatchResult } from "../domination.mjs";
 import { scalePlaytime } from "../generic.mjs";
 import Message from "../message.mjs";
 
@@ -13,7 +13,6 @@ class DomControlPoint{
         this.lastTouchedTimestamp = null;
         this.instigator = null;
         this.totalCaps = 0;
-        this.totalCapTime = 0;
         this.longestTimeControlled = null;
         this.shortestTimeControlled = null;
         this.totalControlTime = 0;
@@ -34,18 +33,27 @@ class DomControlPoint{
         this.currentScoreGiven = 0;
         this.controlPercent = 0;
 
+        //what team was the player that capped the point at the time of the cap
+        this.lastCapTeam = -1;
 
         //Points given to wrong player because of the bScoreReady bug
         this.totalStolenPoints = 0;
         this.teamScores = [0,0,0,0];
+        this.teamCaps = [0,0,0,0];
+        this.teamControlTimes = [0,0,0,0];
         this.stolenTeamScores = [0,0,0,0];
         this.currentStolenPoints = 0;
         //caps where the new player stole points
         this.stolenCaps = 0;
+
+
+    
     }
 
 
     calcCurrentScore(timestamp){
+
+        if(this.instigator === null) return;
 
         const timeHeld = timestamp - this.lastTouchedTimestamp;
 
@@ -62,6 +70,10 @@ class DomControlPoint{
             this.currentScoreGiven, scoreTimeHeld, 
             this.currentStolenPoints
         );
+
+        if(this.lastCapTeam !== -1){
+            this.teamControlTimes[this.lastCapTeam] += timeHeld;
+        }
         
 
         this.totalScoreTime += scoreTimeHeld;
@@ -70,15 +82,22 @@ class DomControlPoint{
 
      touched(instigator, originalTimestamp, scaledTimestamp){
 
-        //console.log(this.name, "touched ", originalTimestamp);
+        this.totalCaps++
 
         if(this.instigator === null){
             this.firstTouchedTimestamp = scaledTimestamp;
-        }else{
-
-
-           this.calcCurrentScore(scaledTimestamp);
         }
+
+
+        const playerTeam = instigator.getTeamAt(scaledTimestamp);
+
+        if(playerTeam !== null){
+            this.lastCapTeam = playerTeam;
+            this.teamCaps[playerTeam]++;
+        }
+
+        this.calcCurrentScore(scaledTimestamp);
+        
 
         this.lastTouchedTimestamp = scaledTimestamp;
         this.instigator = instigator;
@@ -173,11 +192,10 @@ class DomControlPoint{
 
     matchEnd(scaledTimestamp){
 
-        if(this.instigator === null){
-            this.firstTouchedTimestamp = scaledTimestamp;
-        }else{
-           this.calcCurrentScore(scaledTimestamp);
-        }
+        if(this.instigator === null) return;
+ 
+        this.calcCurrentScore(scaledTimestamp);
+        
     }
 }
 
@@ -360,27 +378,40 @@ export class Domination{
         }
     }
 
-    getFinalLogScores(){
+    getFinalLogScores(bIncTeams){
+
+        if(bIncTeams === undefined) bIncTeams = false;
 
         let totalScore = 0;
 
-        for(let [currentTimestamp, scores] of Object.entries(this.teamScoreTimestamps)){
+        const ts = Object.keys(this.teamScoreTimestamps).map((t) =>{
+            return parseInt(t);
+        }).reverse();
 
-            
-            //sometimes UT will log everything twice at the same timestamp if the match ends on dom tick
-            const usedTeams = [];
-            totalScore = 0;
+        const lastTimestamp = ts[0];
 
-            for(let i = 0; i < scores.length; i++){
-          
-                if(usedTeams.indexOf(scores[i].teamId) !== -1) continue;
-                totalScore += parseFloat(scores[i].score);
+        const scores = this.teamScoreTimestamps[lastTimestamp];
+        //sometimes UT will log everything twice at the same timestamp if the match ends on dom tick
+        const usedTeams = [];
+        const usedTeamScores = {"0": 0,"1": 0, "2": 0, "3": 0};
 
-                usedTeams.push(scores[i].teamId);
-            }    
+        for(let i = scores.length - 1; i >= 0; i--){
+
+            const t = scores[i].teamId;
+            const s = scores[i].score;
+
+            if(usedTeams.indexOf(t) !== -1) continue;
+            totalScore += parseFloat(s);
+            usedTeamScores[t] = parseFloat(s);
+            usedTeams.push(t);
         }
 
-        return totalScore;
+        if(!bIncTeams){
+            return totalScore;
+        }else{
+            return {totalScore, "teamScores": usedTeamScores}
+        }
+
     }
 
     getLogScoresAt(timestamp){
@@ -640,12 +671,6 @@ export class Domination{
         let importerScore = this.getTotalControlPointScores();
 
         const offset = importerScore - finalScore;
-  
-        for(let i = 0; i < playerManager.players.length; i++){
-
-            const p = playerManager.players[i];
-            console.log(p.stats.dom);
-        }
 
         console.log(
             "MATCHEND", matchEnd,
@@ -723,5 +748,46 @@ export class Domination{
     async insertPlayerMatchData(players, matchId, gametypeId, mapId){
 
         await insertPlayerMatchData(players, matchId, gametypeId, mapId);
+    }
+
+    async insertMatchResult(matchId){
+
+        const realScores = this.getFinalLogScores(true);
+
+        const fakeScores = {
+            "teamScores": [0,0,0,0],
+            "teamCaps": [0,0,0,0],
+            "teamControlTimes": [0,0,0,0],
+            "teamControlPercent": [0,0,0,0],
+            "totalScore": 0,
+            "totalControlTime": 0
+        };
+
+        for(const controlPoint of Object.values(this.controlPoints)){
+
+
+            fakeScores.totalScore += controlPoint.totalScoreGiven;
+
+            for(let i = 0; i < 4; i++){
+
+                fakeScores.teamScores[i] += controlPoint.teamScores[i];
+                fakeScores.teamCaps[i] += controlPoint.teamCaps[i];
+                fakeScores.teamControlTimes[i] += controlPoint.teamControlTimes[i];
+                fakeScores.totalControlTime += controlPoint.teamControlTimes[i];
+            }
+
+            if(fakeScores.totalControlTime === 0) continue;
+
+            for(let i = 0; i < fakeScores.teamControlTimes.length; i++){
+
+                const ct = fakeScores.teamControlTimes[i];
+
+                if(ct === 0) continue;
+
+                fakeScores.teamControlPercent[i] = ct / fakeScores.totalControlTime * 100;
+            }
+        }
+
+        await insertMatchResult(matchId, realScores, fakeScores);
     }
 }
