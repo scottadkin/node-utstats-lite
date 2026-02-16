@@ -408,29 +408,37 @@ class MatchDominationSummary{
 
         if(totalTeams < 2) return;
 
-
         this.totalTeams = totalTeams;
         this.data = data;
 
         this.parent = document.querySelector(parent);
 
-        this.wrapper = document.createElement("div");
+
+        this.generalWrapper = UIDiv();
+        this.generalTitle = UIDiv("header-wrapper");
+        this.generalTitle.innerHTML = `Domination Summary`;
+        this.generalContent = UIDiv();
+        this.generalWrapper.append(this.generalTitle, this.generalContent);
+        this.parent.append(this.generalWrapper);
+        this.renderGeneral();
+
+        this.playersWrapper = document.createElement("div");
 
         this.mode = "percent";
 
-        this.title = document.createElement("div");
-        this.title.className = "header-wrapper";
-        this.title.innerHTML = "Domination Summary";
-        this.wrapper.append(this.title);
+        this.playersTitle = document.createElement("div");
+        this.playersTitle.className = "header-wrapper";
+        this.playersTitle.innerHTML = "Domination Players Summary";
+        this.playersWrapper.append(this.playersTitle);
 
         this.createTabs();
 
         this.info = UIDiv("info");
         this.content = UIDiv();
-        this.wrapper.append(this.info, this.content);
+        this.playersWrapper.append(this.info, this.content);
         this.render();
 
-        this.parent.append(this.wrapper);
+        this.parent.append(this.playersWrapper);
 
         
     }
@@ -452,7 +460,7 @@ class MatchDominationSummary{
 
 
 
-        this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
+        this.tabs = new UITabs(this.playersWrapper, tabOptions, this.mode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
             this.mode = e.detail.newTab;
@@ -467,7 +475,6 @@ class MatchDominationSummary{
             
         headerRow.append(UITableHeaderColumn({"content": "Player"}));
 
-        
 
         for(const [pointId, pointName] of Object.entries(controlPoints)){
             headerRow.append(UITableHeaderColumn({"content": pointName}));
@@ -604,9 +611,68 @@ class MatchDominationSummary{
         }
     }
 
+    renderGeneral(){
+
+        console.log(this.data);
+        //this.generalContent.innerHTML = ``;
+
+        const table = document.createElement("table");
+        table.className = "t-width-1";
+
+        const headers = [
+            "Team", 
+            "Total Captures", 
+            "Total Control Time", 
+            "Total Control Percent", 
+            "Final Score"
+        ];
+
+        const hRow = document.createElement("tr");
+
+        for(let i = 0; i < headers.length; i++){
+
+            const col = document.createElement("th");
+            col.append(headers[i]);
+            hRow.append(col);
+        }
+
+        table.append(hRow);
+
+        for(let i = 0; i < this.totalTeams; i++){
+
+            const d = this.data.dom.detailedResult;
+
+            const row = document.createElement("tr");
+     
+            row.append(UITableColumn({"content": `${getTeamName(i)} Team`, "className": getTeamColorClass(i)}));
+            row.append(UITableColumn({"content": d[`team_${i}_caps`], "parse": ["ignore0"]}));
+            
+            row.append(UITableColumn({
+                "content": d[`team_${i}_control_time`], 
+                "className": "playtime", 
+                "parse": "mmss"}
+            ));
+            row.append(UITableColumn({
+                "content": `${d[`team_${i}_control_percent`]}%`}
+            ));
+
+            row.append(UITableColumn({"content": d[`team_${i}_real_score`].toFixed(2)}));
+            
+
+            table.append(row);
+
+
+        }
+
+        this.generalContent.append(table);
+
+    }
+
     render(){
 
+
         this.content.innerHTML = ``;
+        
         this.updateInfo();
         const playerData = this.data.playerData;
         const controlPoints = this.data.dom.controlPoints;

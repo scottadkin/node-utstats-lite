@@ -111,7 +111,11 @@ const queries = [
             team_0_control_percent FLOAT NOT NULL,
             team_1_control_percent FLOAT NOT NULL,
             team_2_control_percent FLOAT NOT NULL,
-            team_3_control_percent FLOAT NOT NULL
+            team_3_control_percent FLOAT NOT NULL,
+            team_0_caps int NOT NULL,
+            team_1_caps int NOT NULL,
+            team_2_caps int NOT NULL,
+            team_3_caps int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
         `CREATE TABLE IF NOT EXISTS nstats_servers (
             id int(11) NOT NULL AUTO_INCREMENT,

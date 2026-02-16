@@ -91,12 +91,12 @@ class DomControlPoint{
 
         const playerTeam = instigator.getTeamAt(scaledTimestamp);
 
+        this.calcCurrentScore(scaledTimestamp);
+
         if(playerTeam !== null){
             this.lastCapTeam = playerTeam;
             this.teamCaps[playerTeam]++;
         }
-
-        this.calcCurrentScore(scaledTimestamp);
         
 
         this.lastTouchedTimestamp = scaledTimestamp;
@@ -494,7 +494,7 @@ export class Domination{
                 }
 
                 if(Math.round(current) === Math.round(matchEnd)){
-                    //just use the match end and end pings
+                    //just use the match end teamscore timestamp and end pings
                     //we don't want a fake one and the real match end to be called very close too each other
                     // this will give players and teams 2 lots of score updates instead of 1
                   
@@ -559,7 +559,6 @@ export class Domination{
 
         this.scoreOffsets = [];
 
-        //process.exit();
         const pingInterval = 1 * gameSpeed;
 
         this.remainingTime = gametypeInfo.timeLimit * 60;
@@ -574,7 +573,6 @@ export class Domination{
         );
 
         const newEvents = this.addControlPointOwnPings([...this.capEvents], matchEnd);
-
 
         newEvents.push(...timestamps);
 
@@ -663,7 +661,6 @@ export class Domination{
         //make sure to give players that last amount of points if any
 
         for(const controlPoint of Object.values(this.controlPoints)){
-
             controlPoint.matchEnd(scaledMatchEnd);
         }
 
@@ -762,6 +759,7 @@ export class Domination{
             "totalScore": 0,
             "totalControlTime": 0
         };
+        
 
         for(const controlPoint of Object.values(this.controlPoints)){
 
@@ -775,17 +773,15 @@ export class Domination{
                 fakeScores.teamControlTimes[i] += controlPoint.teamControlTimes[i];
                 fakeScores.totalControlTime += controlPoint.teamControlTimes[i];
             }
+        }
 
-            if(fakeScores.totalControlTime === 0) continue;
+        for(let i = 0; i < 4; i++){
 
-            for(let i = 0; i < fakeScores.teamControlTimes.length; i++){
+            const ct = fakeScores.teamControlTimes[i];
 
-                const ct = fakeScores.teamControlTimes[i];
+            if(ct === 0) continue;
 
-                if(ct === 0) continue;
-
-                fakeScores.teamControlPercent[i] = ct / fakeScores.totalControlTime * 100;
-            }
+            fakeScores.teamControlPercent[i] = ct / fakeScores.totalControlTime * 100;
         }
 
         await insertMatchResult(matchId, realScores, fakeScores);

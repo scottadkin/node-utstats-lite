@@ -35,6 +35,7 @@ export async function insertMatchResult(matchId, realScores, fakeScores){
     ?,?,?,?,
     ?,?,?,?,
     ?,?,?,?,
+    ?,?,?,?,
     ?,?,?,?
     )`;
 
@@ -58,10 +59,13 @@ export async function insertMatchResult(matchId, realScores, fakeScores){
         fakeScores.teamControlPercent[0].toFixed(2),
         fakeScores.teamControlPercent[1].toFixed(2),
         fakeScores.teamControlPercent[2].toFixed(2),
-        fakeScores.teamControlPercent[3].toFixed(2)
+        fakeScores.teamControlPercent[3].toFixed(2),
+        fakeScores.teamCaps[0],
+        fakeScores.teamCaps[1],
+        fakeScores.teamCaps[2],
+        fakeScores.teamCaps[3]
     ];
 
-    console.log(vars);
 
     return await simpleQuery(query, vars);
 }
@@ -124,6 +128,17 @@ async function getControlPointNames(ids){
     return data;
 }
 
+async function getMatchDetailedResult(matchId){
+
+    const query = `SELECT * FROM nstats_matches_dom WHERE match_id=?`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    if(result.length === 0) return {};
+
+    return result[0];
+}
+
 export async function getMatchData(matchId){
 
     const query = `SELECT 
@@ -141,7 +156,9 @@ export async function getMatchData(matchId){
 
     const pointNames = await getControlPointNames(pointIds);
 
-    return {"data": result, "controlPoints": pointNames};
+    const detailedResult = await getMatchDetailedResult(matchId);
+
+    return {"data": result, "controlPoints": pointNames, detailedResult};
 }
 
 
