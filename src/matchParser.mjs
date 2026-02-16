@@ -131,7 +131,9 @@ export class MatchParser{
             this.originalMatchLength, 
             this.gametype.gameSpeed, 
             this.gametype, 
-            this.matchRemainingTimeStartTimestamp
+            this.matchRemainingTimeStartTimestamp,
+            this.matchEnd,
+            this.matchLength
         );
         
         this.kills.setPlayerSpecialEvents(this.players);

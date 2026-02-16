@@ -408,7 +408,6 @@ class MatchDominationSummary{
 
         if(totalTeams < 2) return;
 
-        console.log(data.dom.data);
 
         this.totalTeams = totalTeams;
         this.data = data;
@@ -447,6 +446,7 @@ class MatchDominationSummary{
             {"display": "Total Points", "value": "total-points"},
             {"display": "Max Points", "value": "max-points"},
             {"display": "Stolen Points", "value": "stolen-points"},
+            {"display": "Stolen Caps", "value": "stolen-caps"},
         ];
 
 
@@ -528,6 +528,10 @@ class MatchDominationSummary{
 
             currentValue = (bTotals) ? caps : caps.stolen_points;
             content = currentValue.toFixed(2);
+
+        }else if(this.mode === "stolen-caps"){
+            currentValue = (bTotals) ? caps : caps.stolen_caps;
+            content = ignore0(currentValue);
         }
         
 
@@ -544,7 +548,7 @@ class MatchDominationSummary{
 
         if(this.mode === "percent"){
 
-            this.info.append("Total control percent, based on first touch timestamp to match end.");
+            this.info.append("Total control percent, based on first touch timestamp for each Control Point to match end.");
 
         }else if(this.mode === "time"){
 
@@ -568,17 +572,35 @@ class MatchDominationSummary{
             this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
 
         }else if(this.mode === "stolen-points"){
+
             const lines = [
                 `- Recreated from stats log, Usually less than +-1% of real UT score.`,
                 UIBr(),
-                `- A stolen point is when you capture the control point from another team and you get lucky with the Domination & Control Points timers.`,
+                `- Domination Timer runs every `,UIB("1 second * gamespeed(Hardcore games have an additional * 1.1 on top)"),`.`,
                 UIBr(),
-                `- There is a bug in the Control Point code that mistakenly gives the new player points.`,
+                `- Control Point Timers run every `,UIB("1 second(not affected by gamespeed)"),` after being touched, on the second call being set to bScoreReady.`,
+    
                 UIBr(),
-                `- You have to cap a control point that was already in a scoring state from another team, and the domination scoring timer must be called before the first Control Point timer`
+                `- A stolen point is when you capture a control point already in a scoring state from another team.`,
+                UIBr(),
+                `- Control Points are mistakenly set to `, UIB("bScoreReady=False"), 
+                ` 1 second after being touched instead of straight away.`,
+                UIBr(),
+                `- This can give the newly captured player points if the Domination Timer is called before the Control Point's.`
             ];
          
             this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
+
+        }else if(this.mode === "stolen-caps"){
+
+            const lines = [
+                `- Recreated from stats log, Usually less than +-1% of real UT score.`,
+                UIBr(),
+                `- This is the total amount of times a player got a stolen point capture.`
+            ];
+         
+            this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
+
         }
     }
 
@@ -589,6 +611,10 @@ class MatchDominationSummary{
         const playerData = this.data.playerData;
         const controlPoints = this.data.dom.controlPoints;
         const domData = this.data.dom.data;
+
+
+        const higherBetter = ["long-time", "max-points"];
+        const totalKeys = ["percent", "time", "caps", "total-points", "stolen-points", "stolen-caps"];
 
         for(let i = 0; i < this.totalTeams; i++){
 
@@ -627,7 +653,7 @@ class MatchDominationSummary{
 
                     if(currentValue > 0){
 
-                        if(this.mode === "long-time" && totals[pointId] < currentValue){
+                        if(higherBetter.indexOf(this.mode) !== -1 && totals[pointId] < currentValue){
                             
                             totals[pointId] = currentValue;
                         }
@@ -646,11 +672,9 @@ class MatchDominationSummary{
                             
                         }
 
-                        if(this.mode !== "long-time" && this.mode !== "short-time"){
+                        if(totalKeys.indexOf(this.mode) !== -1){
                             totals[pointId] += currentValue;
                         }
-                    }else{
-                        console.log(this.mode, currentValue);
                     }
 
                     const col = UITableColumn({

@@ -169,6 +169,16 @@ class DomControlPoint{
             
         }
     }
+
+
+    matchEnd(scaledTimestamp){
+
+        if(this.instigator === null){
+            this.firstTouchedTimestamp = scaledTimestamp;
+        }else{
+           this.calcCurrentScore(scaledTimestamp);
+        }
+    }
 }
 
 
@@ -512,7 +522,7 @@ export class Domination{
         return -1;
     }
 
-    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, countdownStartTimestamp){
+    setPlayerCapStats(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, countdownStartTimestamp, scaledMatchEnd, scaledMatchLength){
 
         this.setDebugScores();
 
@@ -619,17 +629,18 @@ export class Domination{
             }
         }
 
+        //make sure to give players that last amount of points if any
+
+        for(const controlPoint of Object.values(this.controlPoints)){
+
+            controlPoint.matchEnd(scaledMatchEnd);
+        }
+
         const finalScore = this.getFinalLogScores();
         let importerScore = this.getTotalControlPointScores();
 
         const offset = importerScore - finalScore;
   
-   
-        for(const controlPoint of Object.values(this.controlPoints)){
-            
-            console.log(controlPoint.teamScores, controlPoint.totalScoreGiven, controlPoint.stolenTeamScores, controlPoint.totalStolenPoints);
-        }
-
         for(let i = 0; i < playerManager.players.length; i++){
 
             const p = playerManager.players[i];
@@ -648,7 +659,7 @@ export class Domination{
             `GAMESPEED = ${gametypeInfo.gameSpeed}`);
 
 
-        this.setPercentValues(playerManager, matchLength);
+        this.setPercentValues(playerManager, scaledMatchLength);
 
     }
 
