@@ -40,8 +40,10 @@ class DomControlPoint{
         this.totalStolenPoints = 0;
         this.teamScores = [0,0,0,0];
         this.teamCaps = [0,0,0,0];
+        this.teamScoreTime = [0,0,0,0];
         this.teamControlTimes = [0,0,0,0];
         this.stolenTeamScores = [0,0,0,0];
+        this.stolenTeamCaps = [0,0,0,0];
         this.currentStolenPoints = 0;
         //caps where the new player stole points
         this.stolenCaps = 0;
@@ -73,6 +75,7 @@ class DomControlPoint{
 
         if(this.lastCapTeam !== -1){
             this.teamControlTimes[this.lastCapTeam] += timeHeld;
+            this.teamScoreTime[this.lastCapTeam] += scoreTimeHeld;
         }
         
 
@@ -157,9 +160,8 @@ class DomControlPoint{
 
             if(playerTeam !== null){
                 this.stolenTeamScores[playerTeam] += points;
+                this.stolenTeamCaps[playerTeam]++;
             }
-
-            this.currentStolenPoints += points;
   
         }
 
@@ -680,7 +682,6 @@ export class Domination{
             `Timelimit = ${gametypeInfo.timeLimit}`,
             `GAMESPEED = ${gametypeInfo.gameSpeed}`);
 
-
         this.setPercentValues(playerManager, scaledMatchLength);
 
     }
@@ -757,7 +758,13 @@ export class Domination{
             "teamControlTimes": [0,0,0,0],
             "teamControlPercent": [0,0,0,0],
             "totalScore": 0,
-            "totalControlTime": 0
+            "totalControlTime": 0,
+            "totalScoreTime": 0,
+            "teamScoreTimes": [0,0,0,0],
+            "teamStolenCaps": [0,0,0,0],
+            "teamStolenScores": [0,0,0,0],
+            "totalStolenCaps": 0,
+            "totalStolenPoints": 0,
         };
         
 
@@ -765,13 +772,20 @@ export class Domination{
 
 
             fakeScores.totalScore += controlPoint.totalScoreGiven;
+            fakeScores.totalScoreTime += controlPoint.totalScoreTime;
+            fakeScores.totalControlTime += controlPoint.totalControlTime;
+            fakeScores.totalStolenPoints += controlPoint.totalStolenPoints;
+            fakeScores.totalStolenCaps += controlPoint.stolenCaps;
 
             for(let i = 0; i < 4; i++){
 
                 fakeScores.teamScores[i] += controlPoint.teamScores[i];
                 fakeScores.teamCaps[i] += controlPoint.teamCaps[i];
                 fakeScores.teamControlTimes[i] += controlPoint.teamControlTimes[i];
-                fakeScores.totalControlTime += controlPoint.teamControlTimes[i];
+                fakeScores.teamStolenCaps[i] += controlPoint.stolenTeamCaps[i];
+                fakeScores.teamScoreTimes[i] += controlPoint.teamScoreTime[i];
+                fakeScores.teamStolenScores[i] += controlPoint.stolenTeamScores[i];
+
             }
         }
 

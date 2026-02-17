@@ -31,7 +31,10 @@ export async function createControlPoint(name){
 export async function insertMatchResult(matchId, realScores, fakeScores){
 
     const query = `INSERT INTO nstats_matches_dom VALUES(
-    NULL,?,?,?,?,
+    NULL,?,?,?,?,?,
+    ?,?,?,?,
+    ?,?,?,?,
+    ?,?,?,?,
     ?,?,?,?,
     ?,?,?,?,
     ?,?,?,?,
@@ -44,6 +47,7 @@ export async function insertMatchResult(matchId, realScores, fakeScores){
         realScores.totalScore, 
         fakeScores.totalScore,
         fakeScores.totalControlTime,
+        fakeScores.totalScoreTime,
         realScores.teamScores[0],
         realScores.teamScores[1],
         realScores.teamScores[2],
@@ -63,7 +67,20 @@ export async function insertMatchResult(matchId, realScores, fakeScores){
         fakeScores.teamCaps[0],
         fakeScores.teamCaps[1],
         fakeScores.teamCaps[2],
-        fakeScores.teamCaps[3]
+        fakeScores.teamCaps[3],
+        fakeScores.teamScoreTimes[0],
+        fakeScores.teamScoreTimes[1],
+        fakeScores.teamScoreTimes[2],
+        fakeScores.teamScoreTimes[3],
+        fakeScores.teamStolenScores[0],
+        fakeScores.teamStolenScores[1],
+        fakeScores.teamStolenScores[2],
+        fakeScores.teamStolenScores[3],
+        fakeScores.teamStolenCaps[0],
+        fakeScores.teamStolenCaps[1],
+        fakeScores.teamStolenCaps[2],
+        fakeScores.teamStolenCaps[3]
+
     ];
 
 

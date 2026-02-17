@@ -96,6 +96,7 @@ const queries = [
             real_total_score FLOAT NOT NULL,
             importer_total_score FLOAT NOT NULL,
             total_control_time FLOAT NOT NULL,
+            total_score_time FLOAT NOT NULL,
             team_0_real_score FLOAT NOT NULL,
             team_1_real_score FLOAT NOT NULL,
             team_2_real_score FLOAT NOT NULL,
@@ -115,7 +116,19 @@ const queries = [
             team_0_caps int NOT NULL,
             team_1_caps int NOT NULL,
             team_2_caps int NOT NULL,
-            team_3_caps int NOT NULL
+            team_3_caps int NOT NULL,
+            team_0_score_time float NOT NULL,
+            team_1_score_time float NOT NULL,
+            team_2_score_time float NOT NULL,
+            team_3_score_time float NOT NULL,
+            team_0_stolen_points float NOT NULL,
+            team_1_stolen_points float NOT NULL,
+            team_2_stolen_points float NOT NULL,
+            team_3_stolen_points float NOT NULL,
+            team_0_stolen_caps int NOT NULL,
+            team_1_stolen_caps int NOT NULL,
+            team_2_stolen_caps int NOT NULL,
+            team_3_stolen_caps int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
         `CREATE TABLE IF NOT EXISTS nstats_servers (
             id int(11) NOT NULL AUTO_INCREMENT,

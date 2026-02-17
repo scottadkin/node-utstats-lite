@@ -451,10 +451,10 @@ class MatchDominationSummary{
             {"display": "Total Caps", "value": "caps"},
             {"display": "Shortest Time Held", "value": "short-time"},
             {"display": "Longest Time Held", "value": "long-time"},
-            {"display": "Total Points", "value": "total-points"},
-            {"display": "Max Points", "value": "max-points"},
-            {"display": "Stolen Points", "value": "stolen-points"},
-            {"display": "Stolen Caps", "value": "stolen-caps"},
+            {"display": "Total Points*", "value": "total-points"},
+            {"display": "Max Points*", "value": "max-points"},
+            {"display": "Stolen Points*", "value": "stolen-points"},
+            {"display": "Stolen Caps*", "value": "stolen-caps"},
         ];
 
 
@@ -574,14 +574,14 @@ class MatchDominationSummary{
 
         }else if(this.mode === "total-points" || this.mode === "max-points"){
 
-            const lines = [`- Recreated from stats log, Usually less than +-1% of real UT score.`];
+            const lines = [`- Recreated from stats log, Usually less than +-0.5% of real UT score.`];
          
             this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
 
         }else if(this.mode === "stolen-points"){
 
             const lines = [
-                `- Recreated from stats log, Usually less than +-1% of real UT score.`,
+                `- Recreated from stats log, Usually less than +-0.5% of real UT score.`,
                 UIBr(),
                 `- Domination Timer runs every `,UIB("1 second * gamespeed(Hardcore games have an additional * 1.1 on top)"),`.`,
                 UIBr(),
@@ -601,7 +601,7 @@ class MatchDominationSummary{
         }else if(this.mode === "stolen-caps"){
 
             const lines = [
-                `- Recreated from stats log, Usually less than +-1% of real UT score.`,
+                `- Recreated from stats log, Usually less than +-0.5% of real UT score.`,
                 UIBr(),
                 `- This is the total amount of times a player got a stolen point capture.`
             ];
@@ -624,7 +624,11 @@ class MatchDominationSummary{
             "Total Captures", 
             "Total Control Time", 
             "Total Control Percent", 
-            "Final Score"
+            "Total Score Time*",
+            "Stolen Caps*",
+            "Stolen Score*",
+            "Importer Score*",
+            "Final UT Score"
         ];
 
         const hRow = document.createElement("tr");
@@ -644,7 +648,7 @@ class MatchDominationSummary{
 
             const row = document.createElement("tr");
      
-            row.append(UITableColumn({"content": `${getTeamName(i)} Team`, "className": getTeamColorClass(i)}));
+            row.append(UITableColumn({"content": `${getTeamName(i)} Team`, "className": `${getTeamColorClass(i)} text-left`}));
             row.append(UITableColumn({"content": d[`team_${i}_caps`], "parse": ["ignore0"]}));
             
             row.append(UITableColumn({
@@ -652,10 +656,22 @@ class MatchDominationSummary{
                 "className": "playtime", 
                 "parse": "mmss"}
             ));
+
             row.append(UITableColumn({
                 "content": `${d[`team_${i}_control_percent`]}%`}
             ));
 
+            row.append(UITableColumn({
+                "content": d[`team_${i}_score_time`], "className": "playtime", "parse": ["mmss"]}
+            ));
+
+            row.append(UITableColumn({
+                "content": d[`team_${i}_stolen_caps`], "parse": ["ignore0"]}
+            ));
+
+             row.append(UITableColumn({"content": d[`team_${i}_stolen_points`].toFixed(2)}));
+
+            row.append(UITableColumn({"content": d[`team_${i}_importer_score`].toFixed(2)}));
             row.append(UITableColumn({"content": d[`team_${i}_real_score`].toFixed(2)}));
             
 
@@ -665,6 +681,22 @@ class MatchDominationSummary{
         }
 
         this.generalContent.append(table);
+
+        const info = UIDiv("info");
+
+        info.append(
+            UIB(`* indicates calculated from stats log.`), 
+            UIBr(),
+            `With the multiple bugs in both Domination's and the Control Points, 
+            calculating scores from the limited stats log data doesn't always perfectly match UT's.`,
+            UIBr(),
+            `The calculated scores are usually within a +-0.5% error range`
+        );
+
+
+
+
+        this.generalContent.append(info);
 
     }
 
