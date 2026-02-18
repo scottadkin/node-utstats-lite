@@ -9,7 +9,6 @@ import Message from "./message.mjs";
 
 async function getPlayerHistory(mapId, gametypeId, maxAgeDays, ctfGametypes){
 
-
     const now = Date.now();
     const minDate = new Date(now - maxAgeDays * DAY);
 
@@ -30,6 +29,7 @@ async function getPlayerHistory(mapId, gametypeId, maxAgeDays, ctfGametypes){
     }
 
     if(gametypeId === 0){
+        if(ctfGametypes.length === 0) return {"matchIds": [], "matchesToPlayers": {}};
         where += ` AND gametype_id IN(?)`;
         vars.push(ctfGametypes);
     }
