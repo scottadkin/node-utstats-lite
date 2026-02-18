@@ -1,6 +1,7 @@
-import { getPointsIds, createControlPoint, insertPlayerMatchData, insertMatchResult } from "../domination.mjs";
+import { getPointsIds, createControlPoint, insertPlayerMatchData, insertMatchResult, insertMatchScoreHistory } from "../domination.mjs";
 import { scalePlaytime } from "../generic.mjs";
 import Message from "../message.mjs";
+import { dominationScoreSaveInterval } from "../../config.mjs";
 
 
 class DomControlPoint{
@@ -244,6 +245,10 @@ export class Domination{
 
         this.debugScores = [];
 
+        this.scoreDataToSave = [];
+
+        this.realScoreUpdatesSinceLastSave = dominationScoreSaveInterval;
+
         this.capEvents = [];  
     }
 
@@ -371,13 +376,50 @@ export class Domination{
 
     
 
-    pingAllControlPoints(timestamp, remainingTime){
+    pingAllControlPoints(timestamp, remainingTime, realScore, gameSpeed){
 
-        for(const [pointId, controlPoint] of Object.entries(this.controlPoints)){
 
-            controlPoint.ping(timestamp, remainingTime);
-
+        for(const controlPoint of Object.values(this.controlPoints)){
+            controlPoint.ping(timestamp, remainingTime);     
         }
+
+        if(realScore === -1) return;
+        //return;
+
+
+        this.realScoreUpdatesSinceLastSave++;
+
+        if(this.realScoreUpdatesSinceLastSave < dominationScoreSaveInterval){
+            return;
+        }
+        
+        let teamScores = [0,0,0,0];
+        let totalScore = 0;
+
+        for(const controlPoint of Object.values(this.controlPoints)){
+
+            for(let x = 0; x < 4; x++){
+                teamScores[x] += controlPoint.teamScores[x];
+            }
+
+            totalScore += controlPoint.totalScoreGiven;
+        }
+        
+
+        if(this.realScoreUpdatesSinceLastSave >= dominationScoreSaveInterval){
+
+            this.scoreDataToSave.push({
+                "timestamp": scalePlaytime(timestamp, gameSpeed),
+                "importerTeamScores": teamScores,
+                "importerTotalScore": totalScore,
+                "realScores": this.getLogScoresAt(timestamp)
+            });
+
+            
+
+            this.realScoreUpdatesSinceLastSave = 0;
+        }
+        
     }
 
     getFinalLogScores(bIncTeams){
@@ -387,7 +429,7 @@ export class Domination{
         let totalScore = 0;
 
         const ts = Object.keys(this.teamScoreTimestamps).map((t) =>{
-            return parseInt(t);
+            return t
         }).reverse();
 
         const lastTimestamp = ts[0];
@@ -418,13 +460,16 @@ export class Domination{
 
     getLogScoresAt(timestamp){
 
-        timestamp = parseInt(timestamp);
         let totalScore = 0;
 
         let latestScore = 0;
 
+        const teamScores = [0,0,0,0];
+
+        let closestTimestamp = 0;
 
         for(let [currentTimestamp, scores] of Object.entries(this.teamScoreTimestamps)){
+
 
             currentTimestamp = currentTimestamp;
 
@@ -437,16 +482,22 @@ export class Domination{
             for(let i = 0; i < scores.length; i++){
           
                 if(usedTeams.indexOf(scores[i].teamId) !== -1) continue;
-                totalScore += parseFloat(scores[i].score);
+
+                const s = parseFloat(scores[i].score);
+                totalScore += s;
+
+                teamScores[i] = s;
 
                 usedTeams.push(scores[i].teamId);
 
                 latestScore = totalScore;
             }
 
+            closestTimestamp = parseFloat(currentTimestamp);
+
         }
 
-        return latestScore;
+        return {"totalScore": latestScore, teamScores, closestTimestamp};
     }
 
 
@@ -535,7 +586,7 @@ export class Domination{
 
 
                 const d =data[x];
-                this.testScores[t][d.teamId] = d.score;
+                this.testScores[t][d.teamId] = parseFloat(d.score);
                 this.testScores[t].totalScore += parseFloat(d.score);
 
                 if(x>=3) break;
@@ -633,12 +684,12 @@ export class Domination{
 
                 //some timelimit games have duplicate dom_score_updates at the end but the scores are the same so ignore the 2nd
                 if(e.timestamp === lastTimestamp) continue;
-                lastTimestamp = e.timestamp;
-              
+                lastTimestamp = e.timestamp;    
 
-                this.pingAllControlPoints(e.timestamp, e.remainingTime);
-                
                 const realScore = this.getScoreAt(e.timestamp);
+
+                this.pingAllControlPoints(e.timestamp, e.remainingTime, realScore, gameSpeed);
+                       
 
                 if(realScore !== -1){
 
@@ -647,12 +698,12 @@ export class Domination{
                     this.scoreOffsets.push({
                         "timestamp": e.timestamp, 
                         "remainingTime": e.remainingTime, 
-                        "realScoreTeamScores": realScore,
+                        "realTeamScores": realScore,
                         "realScore": realScore.totalScore,
                         "importerScore": calcScore,
                         "scoreOffset": realScore.totalScore - calcScore
                     });
-                    
+
                     //console.log("get scores at", e.timestamp, realScore.totalScore, calcScore, realScore.totalScore - calcScore, e.bReal);
                 }
 
@@ -799,5 +850,11 @@ export class Domination{
         }
 
         await insertMatchResult(matchId, realScores, fakeScores);
+    }
+
+
+    async saveScoreIntervals(matchId){
+
+        return await insertMatchScoreHistory(matchId, this.scoreDataToSave);
     }
 }

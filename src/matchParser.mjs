@@ -217,6 +217,7 @@ export class MatchParser{
         await this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
         await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
         await this.dom.insertMatchResult(this.matchId);
+        await this.dom.saveScoreIntervals(this.matchId);
        // await this.weapons.setWeaponIds();
         this.kills.setWeaponIds(this.weapons);
         this.kills.setPlayerIds(this.players);
@@ -399,8 +400,8 @@ export class MatchParser{
 
         const ctfFlagReg = /^flag_(.+?)\t(.+)$/i;
         const domCapReg = /^controlpoint_capture\t.+$/i;
-        const domScoreReg = /dom_playerscore_update\t(\d+)\t(.+)/i;
-        const domTeamScoreReg = /dom_score_update\t(\d+)\t(.+)/i;
+        const domScoreReg = /^dom_playerscore_update\t(\d+)\t(.+)$/i;
+        const domTeamScoreReg = /^dom_score_update\t(\d+)\t(.+)$/i;
 
         //const domDebugScore = /^team score id=\t(\d+)\tScore was\t(.+)$/i;
 
@@ -557,7 +558,8 @@ export class MatchParser{
 
                 if(scoreResult !== null){
 
-                    const tScore = Math.round(originalTimestamp);
+                    const tScore = originalTimestamp.toFixed(2);
+
 
                     if(this.dom.teamScoreTimestamps[tScore] === undefined){
                         this.dom.teamScoreTimestamps[tScore] = [];

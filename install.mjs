@@ -684,6 +684,22 @@ const queries = [
         ip varchar(39) NOT NULL,
         PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_match_dom_team_score_history (
+        id INT NOT NULL AUTO_INCREMENT,
+        match_id int NOT NULL,
+        timestamp float NOT NULL,
+        real_total_score float NOT NULL,
+        real_team_0_score float NOT NULL,
+        real_team_1_score float NOT NULL,
+        real_team_2_score float NOT NULL,
+        real_team_3_score float NOT NULL,
+        importer_total_score float NOT NULL,
+        importer_team_0_score float NOT NULL,
+        importer_team_1_score float NOT NULL,
+        importer_team_2_score float NOT NULL,
+        importer_team_3_score float NOT NULL,
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+
 ];
 
 

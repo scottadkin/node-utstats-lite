@@ -222,3 +222,34 @@ export async function getPlayerMapTotals(playerIds, mapId){
 
     return data;
 }
+
+
+export async function insertMatchScoreHistory(matchId, data){
+
+
+    if(data.length === 0) return;
+
+    const query = `INSERT INTO nstats_match_dom_team_score_history (
+        match_id,timestamp,real_total_score,real_team_0_score,real_team_1_score,
+        real_team_2_score,real_team_3_score,importer_total_score,importer_team_0_score,
+        importer_team_1_score,importer_team_2_score,importer_team_3_score
+    ) VALUES ?`;
+
+    const insertVars = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const {timestamp, importerTeamScores, importerTotalScore, realScores} = data[i];
+
+        insertVars.push([
+            matchId, timestamp, realScores.totalScore, realScores.teamScores[0],
+            realScores.teamScores[1],realScores.teamScores[2],realScores.teamScores[3],
+            importerTotalScore, importerTeamScores[0], importerTeamScores[1],
+            importerTeamScores[2], importerTeamScores[3]
+        ]);
+    }
+
+
+    return await bulkInsert(query, insertVars);
+
+}

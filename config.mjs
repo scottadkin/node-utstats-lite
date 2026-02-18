@@ -33,3 +33,11 @@ export const maxLoginAttempts = 5;
 //how long an ip is banned from login attempts after failing maxLoginAttempts
 //in seconds
 export const maxLoginBanPeriod = 300;
+
+
+/*how often the importer saves the dom_team_score to the database
+UT logs this data every 5 * gamespeed * hardcore seconds (usually 5.5 seconds at 100% with hardcore mode)
+We also save our calculated domination scores at the same time.
+Setting this value to 1 will mean every 5 in game seconds data will be saved, 3 = every 15 seconds
+*/
+export const dominationScoreSaveInterval = 3;
