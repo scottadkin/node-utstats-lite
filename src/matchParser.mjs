@@ -175,6 +175,7 @@ export class MatchParser{
             this.gametype.id, 
             this.map.id, 
             this.bHardcore,
+            this.gametype.bTournamentMode,
             this.gametype.initialGameSpeed,
             this.gametype.gameSpeed,
             this.gametype.bInsta,

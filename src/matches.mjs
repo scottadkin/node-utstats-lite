@@ -39,17 +39,17 @@ const MATCH_TABLE_COLUMNS_VERBOSE = `nstats_matches.id,
     nstats_matches.hash`;
 
 
-export async function createMatch(serverId, gametypeId, mapId, bHardcore, gameSpeed, gameSpeedReal, bInsta, date, playtime, matchStart, matchEnd,
+export async function createMatch(serverId, gametypeId, mapId, bHardcore, tournamentMode, gameSpeed, gameSpeedReal, bInsta, date, playtime, matchStart, matchEnd,
      players, totalTeams, team0Scores, team1Scores, 
     team2Scores, team3Score, soloWinner, soloWinnerScore, targetScore, timeLimit, mutators){
 
-    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"")`;
+    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"")`;
 
     gameSpeed = parseInt(gameSpeed * 100);
     gameSpeedReal = parseInt(gameSpeedReal * 100);
 
     const vars = [
-        serverId, gametypeId, mapId, (bHardcore) ? 1 : 0, gameSpeed, gameSpeedReal, bInsta, 
+        serverId, gametypeId, mapId, (bHardcore) ? 1 : 0, (tournamentMode) ? 1 : 0, gameSpeed, gameSpeedReal, bInsta, 
         date, playtime, matchStart, matchEnd, players, totalTeams, team0Scores, 
         team1Scores, team2Scores, team3Score, soloWinner, soloWinnerScore,
         targetScore, timeLimit, mutators
