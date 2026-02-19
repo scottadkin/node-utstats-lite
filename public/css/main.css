@@ -909,7 +909,7 @@ nav a:hover{
 	margin-bottom:var(--margin-1);
 }
 
-.graph-wrapper canvas{
+canvas{
 	width:50%;
 }
 

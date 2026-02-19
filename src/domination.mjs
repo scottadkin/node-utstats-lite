@@ -175,7 +175,9 @@ export async function getMatchData(matchId){
 
     const detailedResult = await getMatchDetailedResult(matchId);
 
-    return {"data": result, "controlPoints": pointNames, detailedResult};
+    const scoreHistory = await getMatchScoreHistory(matchId);
+
+    return {"data": result, "controlPoints": pointNames, detailedResult, scoreHistory};
 }
 
 
@@ -252,4 +254,17 @@ export async function insertMatchScoreHistory(matchId, data){
 
     return await bulkInsert(query, insertVars);
 
+}
+
+
+export async function getMatchScoreHistory(matchId){
+
+    const query = `SELECT timestamp,real_total_score,
+    real_total_score,real_team_0_score,real_team_1_score,
+    real_team_2_score,real_team_3_score,importer_total_score,
+    importer_team_0_score,importer_team_1_score,
+    importer_team_2_score,importer_team_3_score 
+    FROM nstats_match_dom_team_score_history WHERE match_id=? ORDER BY timestamp ASC`;
+
+    return await simpleQuery(query, [matchId]);
 }

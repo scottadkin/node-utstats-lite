@@ -12,7 +12,7 @@ class Graph{
         this.context.textBaseline = "top";
         this.abortController = abortController;
         this.lastClickTime = -999;
-        this.maxDataPoints = maxDataPoints;
+        this.maxDataPoints = maxDataPoints ?? 0;
         this.bEnableAdvanced = (bEnableAdvanced !== undefined) ? bEnableAdvanced : false;
         this.minimumDataPoints = minimumDataPoints ?? 0;
         //Set to true if you want a graph that doesn't force whole numbers on the y-axis

@@ -613,7 +613,6 @@ class MatchDominationSummary{
 
     renderGeneral(){
 
-        console.log(this.data);
         //this.generalContent.innerHTML = ``;
 
         const table = document.createElement("table");
@@ -677,10 +676,8 @@ class MatchDominationSummary{
 
             table.append(row);
 
-
         }
 
-        this.generalContent.append(table);
 
         const info = UIDiv("info");
 
@@ -695,8 +692,79 @@ class MatchDominationSummary{
 
 
 
+        const canvas = document.createElement("canvas");
 
+        const testTabs = [
+            {"name": "Real Team Scores", "title": "Real Team Scores"},
+            {"name": "Importer Team Scores", "title": "Importer Team Scores"},
+            {"name": "Importer VS UT", "title": "Totals Of All Teams"},
+        ];
+
+        const labels = [];
+        
+        const d1 = [];
+        const d2 = [];
+        const totals = [];
+
+        for(let i = 0; i < this.data.basic.total_teams; i++){
+
+
+            let currentName = `${getTeamName(i)} Team`;
+            
+            const currentReal = {
+                "name": currentName,
+                "values": []
+            };
+
+            const currentFake = {
+                "name": currentName,
+                "values": []
+            };
+
+            const currentTotals = {"name": (i === 0) ? "Real Scores" : "Importer Scores", "values": []};
+
+            for(let x = 0; x < this.data.dom.scoreHistory.length; x++){
+
+            
+                const d = this.data.dom.scoreHistory[x];
+
+                if(i === 0) labels.push(MMSS(d.timestamp - this.data.basic.match_start));
+
+                currentReal.values.push(parseFloat(d[`real_team_${i}_score`].toFixed(2)));
+                currentFake.values.push(parseFloat(d[`importer_team_${i}_score`].toFixed(2)));
+
+                //only need 2 to compare log and ut scores
+                if(i > 1) continue;
+                currentTotals.values.push(parseFloat(d[`${(i === 0) ? "real" : "importer" }_total_score`].toFixed(2)));
+            }
+
+            d1.push(currentReal);
+            d2.push(currentFake);
+            if(i > 1) continue;
+            totals.push(currentTotals);
+        }
+
+        const testData = {
+            "data":[
+                d1, d2, totals
+            ],
+            "labelsPrefix": [
+                "Total Scores @ ", "Total Scores @ ", "Total Scores @ "
+            ],
+            "labels": [labels, labels, labels]
+        };
+
+      new Graph(canvas, new AbortController(), 1920, 1080, testTabs, false, testData);
+
+        
+
+        
         this.generalContent.append(info);
+        this.generalContent.append(table);
+
+        const graphWrapper = UIDiv("graph-wrapper");
+        graphWrapper.append(canvas);
+        this.generalContent.append(graphWrapper);
 
     }
 
@@ -2175,6 +2243,8 @@ class MatchKillsGraph{
                 "Player Team Deaths @ ",
             ]
         };
+
+        console.log(data);
 
         this.graph = new Graph(
             this.canvas, 

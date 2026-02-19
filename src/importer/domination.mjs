@@ -158,6 +158,7 @@ class DomControlPoint{
       
             this.totalStolenPoints += points;
             this.stolenCaps++;
+            this.currentStolenPoints = points;
 
             if(playerTeam !== null){
                 this.stolenTeamScores[playerTeam] += points;
