@@ -175,6 +175,8 @@ export class MatchParser{
             this.gametype.id, 
             this.map.id, 
             this.bHardcore,
+            this.gametype.initialGameSpeed,
+            this.gametype.gameSpeed,
             this.gametype.bInsta,
             this.match.date, 
             this.matchLength,
@@ -295,6 +297,9 @@ export class MatchParser{
         if(gameSpeedResult[1] === "0") throw new Error(`Not a valid gamespeed`);
 
         this.gametype.gameSpeed = parseInt(gameSpeedResult[1]) / 100;
+        this.gametype.initialGameSpeed = this.gametype.gameSpeed;
+
+       
 
         this.bHardcore = false;
         this.bTurbo = false;
@@ -316,8 +321,6 @@ export class MatchParser{
         if(megaResult !== null){
             console.log(megaResult);
         }*/
-
-    
 
         const startReg = /(\d+\.\d+)\tgame\trealstart\s/i;
         const startResult = startReg.exec(this.rawData);

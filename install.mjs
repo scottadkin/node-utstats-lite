@@ -71,6 +71,8 @@ const queries = [
             gametype_id int(11) NOT NULL,
             map_id int(11) NOT NULL,
             hardcore int(1) NOT NULL,
+            gamespeed int(3) DEFAULT 100,
+            gamespeed_real int(3) DEFAULT 100,
             insta int(1) NOT NULL,
             date datetime NOT NULL,
             playtime float NOT NULL,
@@ -897,6 +899,13 @@ async function insertCTFLeagueSettings(){
     }
 }
 
+
+async function updateMatchesTable(){
+
+    await addColumn("nstats_matches", "gamespeed", "int DEFAULT 100 AFTER hardcore");
+    await addColumn("nstats_matches", "gamespeed_real", "int DEFAULT 100 AFTER gamespeed");
+}
+
 (async () =>{
  
     try{
@@ -935,6 +944,9 @@ async function insertCTFLeagueSettings(){
 
 
         await updateDominationTables();
+
+
+        await updateMatchesTable();
 
         if(!fs.existsSync("./salt.mjs")){
 
