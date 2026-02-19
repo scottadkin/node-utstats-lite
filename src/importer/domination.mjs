@@ -375,6 +375,25 @@ export class Domination{
         return newEvents;
     }
 
+
+
+    getCurrentControlPointScores(){
+
+        let teamScores = [0,0,0,0];
+        let totalScore = 0;
+
+        for(const controlPoint of Object.values(this.controlPoints)){
+
+            for(let x = 0; x < 4; x++){
+                teamScores[x] += controlPoint.teamScores[x];
+            }
+
+            totalScore += controlPoint.totalScoreGiven;
+        }
+
+
+        return {teamScores, totalScore};
+    }
     
 
     pingAllControlPoints(timestamp, remainingTime, realScore, gameSpeed){
@@ -394,21 +413,10 @@ export class Domination{
             return;
         }
         
-        let teamScores = [0,0,0,0];
-        let totalScore = 0;
-
-        for(const controlPoint of Object.values(this.controlPoints)){
-
-            for(let x = 0; x < 4; x++){
-                teamScores[x] += controlPoint.teamScores[x];
-            }
-
-            totalScore += controlPoint.totalScoreGiven;
-        }
+        const {teamScores, totalScore} = this.getCurrentControlPointScores();
         
-
         if(this.realScoreUpdatesSinceLastSave >= dominationScoreSaveInterval){
-
+            
             this.scoreDataToSave.push({
                 "timestamp": scalePlaytime(timestamp, gameSpeed),
                 "importerTeamScores": teamScores,
@@ -416,7 +424,6 @@ export class Domination{
                 "realScores": this.getLogScoresAt(timestamp)
             });
 
-            
 
             this.realScoreUpdatesSinceLastSave = 0;
         }
@@ -716,6 +723,20 @@ export class Domination{
 
         for(const controlPoint of Object.values(this.controlPoints)){
             controlPoint.matchEnd(scaledMatchEnd);
+        }
+
+       
+        
+        if(this.realScoreUpdatesSinceLastSave > 0){
+
+            const {teamScores, totalScore} = this.getCurrentControlPointScores();
+      
+            this.scoreDataToSave.push({
+                "timestamp": scalePlaytime(matchEnd, gameSpeed),
+                "importerTeamScores": teamScores,
+                "importerTotalScore": totalScore,
+                "realScores": this.getLogScoresAt(matchEnd)
+            });
         }
 
         const finalScore = this.getFinalLogScores();
