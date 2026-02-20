@@ -19,6 +19,85 @@ export class PlayerManager{
     }
 
 
+
+    rename(timestamp, mainResult, idsToNames, namesToIds, connectEvents){
+
+        let playerName = "PLAYER";
+        let playerId = -1;
+
+        //normal rename/connect not broken by random chars in name
+        const normalReg = /^\t(.+?)\t(\d+)$/i;
+        const brokenReg = /^(.+?)(\d+)$/i;
+
+        if(normalReg.test(mainResult[1])){
+
+            const result = normalReg.exec(mainResult[1]);
+
+            playerName = result[1];
+            playerId = parseInt(result[2]);
+
+        }else if(brokenReg.test(mainResult[1])){
+
+            const result = brokenReg.exec(mainResult[1]);
+
+            playerName = result[1];
+            playerId = parseInt(result[2]);
+
+        }else{
+            throw new Error(`rename normalreg and brokenreg didn't work`);
+        }
+
+        if(namesToIds[playerName] === undefined){
+            namesToIds[playerName] = [playerId];
+        }else{
+            namesToIds[playerName].push(playerId);
+        }
+
+        //we only care about the last used name for each id
+        if(idsToNames[playerId] === undefined) idsToNames[playerId] = playerName;
+
+        connectEvents.unshift({
+            timestamp,
+            "type": "rename",
+            "name": playerName, 
+            "playerId": playerId
+        });
+    }
+
+    connect(timestamp, mainResult, connectEvents){
+
+        const normalReg = /^\t(.+?)\t(\d+)\t.+$/i;
+        const brokenReg = /^(.+?)(\d+)\t.+$/i;
+
+        let playerName = "PLAYER";
+        let playerId = -1;
+
+
+        if(normalReg.test(mainResult[1])){
+
+            const result = normalReg.exec(mainResult[1]);
+
+            playerName = result[1];
+            playerId = result[2];
+
+        }else if(brokenReg.test(mainResult[1])){
+
+            const result = brokenReg.exec(mainResult[1]);
+            playerName = result[1];
+            playerId = result[2];
+
+        }else{
+            throw new Error(`Both normalReg and brokenReg failed to match`);
+        }
+
+        connectEvents.unshift({
+            timestamp,
+            "type": "connect",
+            "name": playerName, 
+            "playerId": parseInt(playerId)
+        });
+    }
+
     createPlayers(lines, matchStart, matchEnd, gameSpeed){
 
         const namesToIds = {};
@@ -26,12 +105,16 @@ export class PlayerManager{
 
         const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
         const reg =  /^player\t(.+?)\t(.+)$/i;
-        const renameReg = /^(.+)\t(\d+)$/i;
-        const connectReg = /^(.+)\t(\d+?)\t.+$/i;
+        //const renameReg = /^(.+)\t(\d+)$/i;
+        //const connectReg = /^(.+)\t(\d+?)\t.+$/i;
+
+
+        const renameReg2 = /^player\trename(.+)$/i;
+        const connectReg2 = /^player\tconnect(.+)$/i;
 
         const connectEvents = [];
 
-        const targetKeys = ["connect", "disconnect", "rename"];
+        const targetKeys = ["disconnect"];
 
         for(let i = lines.length; i > 0; i--){
 
@@ -41,57 +124,39 @@ export class PlayerManager{
             const timestampResult = timestampReg.exec(line);
 
             if(timestampResult === null) continue;
-
+            
             const timestamp = scalePlaytime(parseFloat(timestampResult[1]), gameSpeed);
 
             const subString = timestampResult[2];
 
+
+            //work around rename/connects with weird characters
+            if(renameReg2.test(subString)){
+                const nameResult = renameReg2.exec(subString);
+                this.rename(timestamp, nameResult, idsToNames, namesToIds, connectEvents);
+
+                continue;
+
+            }else if(connectReg2.test(subString)){
+
+                const connectResult = connectReg2.exec(subString);
+
+                this.connect(timestamp, connectResult, connectEvents);
+                continue;
+            }
+
             const result = reg.exec(subString);
 
             if(result === null) continue;
-
+ 
             const type = result[1].toLowerCase();
 
-            if(targetKeys.indexOf(type) === -1) continue;
+            if(targetKeys.indexOf(type) === -1){
 
-            if(type === "rename"){
+                continue;
+            }
 
-                const nameResult = renameReg.exec(result[2]);
-                const playerId = parseInt(nameResult[2]);
-                const playerName = nameResult[1].toLowerCase();
-
-                if(namesToIds[playerName] === undefined){
-                    namesToIds[playerName] = [playerId];
-                }else{
-                    namesToIds[playerName].push(playerId);
-                }
-
-                //we only care about the last used name for each id
-                if(idsToNames[playerId] === undefined) idsToNames[playerId] = nameResult[1];
-
-                connectEvents.unshift({
-                    timestamp,
-                    type,
-                    "name": nameResult[1], 
-                    "playerId": parseInt(nameResult[2])
-                });
- 
-   
-            }else if(type === "connect"){
-
-                const cResult = connectReg.exec(result[2]);
-
-                if(cResult === null) continue;
-
-                connectEvents.unshift({
-                    timestamp,
-                    type,
-                    "name": cResult[1], 
-                    "playerId": parseInt(cResult[2])
-                });
-                
-
-            }else if(type === "disconnect"){
+            if(type === "disconnect"){
 
                 const playerId = parseInt(result[2]);
 
