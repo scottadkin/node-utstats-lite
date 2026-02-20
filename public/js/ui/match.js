@@ -4,7 +4,7 @@ function renderBasicInfo(parent, data, players){
     parent = document.querySelector(parent);
 
     const wrapper = document.createElement("div");
-    wrapper.className = "match-basic-info-wrapper";
+    wrapper.className = "match-basic-info-wrapper center";
 
     const header = document.createElement("div");
     header.className= "header-wrapper";
@@ -27,22 +27,26 @@ function renderBasicInfo(parent, data, players){
 
     info.className = "match-basic-info-wrapper-info";
     info.append(`${toDateString(data.date, false, false)}`, UIBr());
-    info.append(data.gametype_name, UISpan(" on ", "dull"), data.map_name, UIBr());
+    info.append(UISpan(data.gametype_name, "blue-font"), " on ", UISpan(data.map_name, "blue-font"), UIBr());
     info.append(`${data.players} ${plural(data.players, "Player")}`, UIBr());
-    info.append(UISpan("Match Length", "dull"), ` ${toPlaytime(data.playtime)}`, UIBr());
-    info.append(UISpan("Server", "dull"), ` ${data.server_name}`, UIBr());
-    info.append(UISpan("Mutators ", "dull"), UISpan(data.mutators, "font-small"), UIBr());
-
+    info.append(UISpan("Match Length", "blue-font"), ` ${toPlaytime(data.playtime)}`, UIBr());
     if(data.target_score !== 0){
-        info.append(UISpan("Target Score ", "dull"), data.target_score, UIBr());
+        info.append(UISpan("Target Score ", "blue-font"), data.target_score, UIBr());
     }
     if(data.time_limit !== 0){
         info.append(
-            UISpan("Time Limit ", "dull"), 
+            UISpan("Time Limit ", "blue-font"), 
             `${data.time_limit} ${plural(data.time_limit, "Minute")}`, 
             UIBr()
         );
     }
+    info.append(UISpan("Gamespeed", "blue-font"), ` ${data.gamespeed_real}%`, UIBr());
+    info.append(UISpan("Tournament Mode", "blue-font"), ` ${(data.tournament_mode === 1) ? "True" : "False"}`, UIBr());
+    
+    info.append(UISpan("Server", "blue-font"), ` ${data.server_name}`, UIBr());
+    info.append(UISpan("Mutators ", "blue-font"), UISpan(data.mutators, "font-small"), UIBr());
+
+    
 
     content.appendChild(info);
 

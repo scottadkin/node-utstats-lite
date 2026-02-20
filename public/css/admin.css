@@ -54,7 +54,7 @@
 	background-color:var(--bg-color-2);
 	max-width:400px;
 	min-width:400px;
-	border:1px solid var(--border-color-1);
+	border:2px solid var(--border-color-5);
 	text-align: center;
 	
 }
@@ -63,8 +63,8 @@
 	padding:var(--padding-1);
 	font-size:var(--font-size-2);
 	text-align: center;
-	color:yellow;
-	font-weight:500;
+	color:var(--font-color-blue);
+	font-weight:600;
 
 }
 
@@ -95,9 +95,11 @@
 
 .admin-home{
 	text-align:center;
+	display:inline-block;
 	font-size:var(--font-size-1);
 	margin-bottom: var(--margin-1);
-	background-color:var(--bg-color-3);
+	background-color:var(--team-color-green);
+	border:2px solid var(--border-color-5);
 	padding:var(--padding-1);
-	color:yellow;
+	font-weight:600;
 }

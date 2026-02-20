@@ -18,6 +18,7 @@
 	--border-color-2:rgba(255,255,255,0.125);
 	--border-color-3:rgba(255,255,255,0.025);
 	--border-color-4:rgba(0,0,0,0.25);
+	--border-color-5:rgba(0,0,0,0.5);
 	--max-width-1:90%;
 	--team-color-none:rgb(0,0,0);
 	--team-color-red:rgb(79,0,0);
@@ -38,10 +39,12 @@
 	--line-height-2:32px;
 	--line-height-3:20px;
 	--line-height-5:19px;
+	--line-height-6:22px;
 	--font-size-2:16px;
 	--font-size-3:18px;
 	--font-size-4:13px;
 	--font-size-5:12px;
+	--font-size-6:14px;
 	--tiny-font-size:10px;
 	--transition-1:background-color 0.5s;
 	--width-1:90%;
@@ -53,6 +56,7 @@
 	--max-table-width-3:1000px;
 	--max-table-width-4:700px;
 	--rich-box-width:325px;
+	--box-shadow-1:1px 1px 1px 1px rgba(0,0,0,0.25);
 }
 
 main{
@@ -71,6 +75,10 @@ main{
 
 .team-red{
 	background-color:var(--team-color-red);
+}
+
+.blue-font{
+	color:var(--font-color-blue);
 }
 
 .red-font{
@@ -267,7 +275,7 @@ table{
     text-align: center;
     margin-bottom:var(--margin-1);
 	background-color: var(--bg-color-2);
-	box-shadow:1px 1px 1px 1px rgba(0,0,0,0.25);
+	box-shadow:var(--box-shadow-1);
 }
 
 .table-title{
@@ -464,10 +472,6 @@ select{
 	margin-right: auto;
 }
 
-canvas{
-	display:inline-block;
-}
-
 .dull{
     color:var(--font-color-2);
 }
@@ -489,19 +493,33 @@ canvas{
 	cursor: pointer;
 }
 
-.perma-link{
-	background-color:var(--team-color-green);
-	padding:var(--padding-3);
+
+.fav, .perma-link{
 	display:inline-block;
-	margin-bottom:10px;
+	margin-bottom: var(--margin-3);
 	color:var(--font-color-1);
-	border: 1px solid var(--border-color-1);
+	border:2px solid var(--border-color-5);
+	padding:var(--padding-3) var(--padding-1);
 	font-size:var(--font-size-1);
+	font-weight:500;
 }
 
-.perma-link:hover{
+.fav:hover, .perma-link:hover{
 	cursor: pointer;
+	user-select: none;
 	color:yellow;
+}
+
+.fav-add{
+	background-color:var(--team-color-green);
+}
+
+.fav-del{
+	background-color:var(--team-color-red);
+}
+
+.perma-link{
+	background-color:var(--purple);
 }
 
 .map-sshot{
@@ -577,7 +595,7 @@ canvas{
     white-space: nowrap;
 	font-size:var(--font-size-4);
 	text-align: center;
-	box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.25);
+	box-shadow: var(--box-shadow-1);
 	transition: all 0.5s;
 }
 
@@ -654,28 +672,6 @@ canvas{
 	cursor: pointer;
 }
 
-.fav{
-	display:inline-block;
-	margin-bottom: var(--margin-2);
-	color:var(--font-color-1);
-	border:1px solid var(--border-color-1);
-	padding:var(--padding-3);
-	font-size:var(--font-size-1);
-}
-
-.fav:hover{
-	cursor: pointer;
-	user-select: none;
-	color:yellow;
-}
-
-.fav-add{
-	background-color:var(--team-color-green);
-}
-
-.fav-del{
-	background-color:var(--team-color-red);
-}
 
 .ctf-caps{
 	text-align:center;
@@ -830,12 +826,15 @@ nav a:hover{
     text-align: center;
     margin-bottom:var(--margin-1);
     color:var(--font-color-1);
+	max-width:var(--max-table-width-2);
+	border:2px solid var(--border-color-4);
 }
 
 .match-basic-info-wrapper-info{
-    padding:var(--padding-2);
-    font-size:var(--font-size-4);
-    line-height:var(--line-height-1);
+	padding-top:5px;
+	font-size: var(--font-size-6);
+	font-weight: 500;
+	line-height: var(--line-height-6);
 }
 
 
@@ -852,6 +851,7 @@ nav a:hover{
 
 .match-scorebox-score{
     padding:var(--padding-2);
+	font-weight:500;
 }
 
 .pagination-wrapper{
@@ -910,7 +910,10 @@ nav a:hover{
 }
 
 canvas{
+	display:inline-block;
 	width:50%;
+	border:2px solid var(--border-color-5);
+	box-shadow: var(--box-shadow-1);
 }
 
 .notification{
