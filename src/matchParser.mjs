@@ -120,21 +120,23 @@ export class MatchParser{
 
         
         this.ctf.bAnyCTFEvents(this.players.players);
-        await this.dom.setPointIds(this.gametype.gameSpeed, this.gametype);
 
-        //(playerManager, matchStart, matchEnd, matchLength, gameSpeed, gametypeInfo, serverInfo)
+        if(this.dom.bAnyData){
 
-        this.dom.setPlayerCapStats(
-            this.players, 
-            this.originalMatchStart, 
-            this.originalMatchEnd, 
-            this.originalMatchLength, 
-            this.gametype.gameSpeed, 
-            this.gametype, 
-            this.matchRemainingTimeStartTimestamp,
-            this.matchEnd,
-            this.matchLength
-        );
+            await this.dom.setPointIds(this.gametype.gameSpeed, this.gametype);
+
+            this.dom.setPlayerCapStats(
+                this.players, 
+                this.originalMatchStart, 
+                this.originalMatchEnd, 
+                this.originalMatchLength, 
+                this.gametype.gameSpeed, 
+                this.gametype, 
+                this.matchRemainingTimeStartTimestamp,
+                this.matchEnd,
+                this.matchLength
+            );
+        }
         
         this.kills.setPlayerSpecialEvents(this.players);
         this.items.setPlayerStats(this.players);
@@ -218,9 +220,12 @@ export class MatchParser{
 
         //TODO add gametype & map ids to weapons, CTF AND DOM TABLES
         await this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
-        await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
-        await this.dom.insertMatchResult(this.matchId);
-        await this.dom.saveScoreIntervals(this.matchId);
+        
+        if(this.dom.bAnyData){
+            await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
+            await this.dom.insertMatchResult(this.matchId);
+            await this.dom.saveScoreIntervals(this.matchId);
+        }
        // await this.weapons.setWeaponIds();
         this.kills.setWeaponIds(this.weapons);
         this.kills.setPlayerIds(this.players);

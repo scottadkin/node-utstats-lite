@@ -250,6 +250,8 @@ export class Domination{
 
         this.realScoreUpdatesSinceLastSave = dominationScoreSaveInterval;
 
+        this.bAnyData = false;
+
         this.capEvents = [];  
     }
 
@@ -262,6 +264,8 @@ export class Domination{
         const capResult = capReg.exec(line);
 
         if(capResult === null) return;
+
+        this.bAnyData = true;
 
         this.pointNames.add(capResult[1]);
 
