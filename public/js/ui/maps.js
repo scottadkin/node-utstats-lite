@@ -1,28 +1,69 @@
 class MapsSearchForm{
 
-    constructor(parent, nameSearch, displayMode, perPage){
-
+    constructor(parent, nameSearch, displayMode, page, perPage, maps, totalMatches){
 
         this.parent = document.querySelector(parent);
         this.nameSearch = decodeHTML(nameSearch);
         this.displayMode = displayMode;
         this.perPage = perPage;
+        this.page = page;
 
         this.displayModes = [
             {"display": "Default", "value": "default"},
             {"display": "Table", "value": "table"},
         ];
 
-        
         this.createForm(); 
+
+
+        this.resultWrapper = UIDiv();
+
+        this.parent.append(this.resultWrapper);
+
+        this.maps = maps;
+        this.totalMatches = totalMatches;
+        this.renderResults();
+    }
+
+    renderResults(){
+
+        this.resultWrapper.innerHTML = ``;
+
+        const display = new MapListDisplay(
+            this.resultWrapper,
+            this.maps, 
+            this.totalMatches, 
+            this.nameSearch, 
+            this.displayMode,
+            this.page, 
+            this.perPage
+        );   
+    }
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch(`/json/map-search/?name=${this.nameSearch}&page=${this.page}&perPage=${this.perPage}`);
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.maps = res.maps;
+            this.totalMatches = res.totalMatches;
+
+            this.renderResults();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
     }
 
     createForm(){
 
         this.form = document.createElement("form");
         this.form.className = "form";
-        this.form.action = "/maps/";
-        this.form.method = "GET";
 
         const nameRow = document.createElement("div");
         nameRow.className = "form-row";
@@ -30,19 +71,24 @@ class MapsSearchForm{
         const nameLabel = document.createElement("label");
         nameLabel.innerHTML = "Name";
         nameLabel.htmlFor = "name";
-        nameRow.appendChild(nameLabel);
+        nameRow.append(nameLabel);
 
         const nameElem = document.createElement("input");
         nameElem.type = "text";
         nameElem.className = "textbox";
         nameElem.placeholder = "Search for a map...";
-        nameElem.id = "name";
-        nameElem.name = "name";
+        nameElem.id = nameElem.name = "name";
         nameElem.value = this.nameSearch;
+
+        nameElem.addEventListener("input", (e) =>{
+            this.nameSearch = e.target.value;
+            this.updateUrl();
+            this.loadData();
+        });
 
         nameRow.append(nameElem);
 
-        this.form.appendChild(nameRow);
+        this.form.append(nameRow);
 
         const displayRow = document.createElement("div");
         displayRow.className = "form-row";
@@ -71,23 +117,21 @@ class MapsSearchForm{
         }
 
         displayRow.append(displayElem);
+
+        displayElem.addEventListener("change", (e) =>{
+            this.displayMode = e.target.value;
+            this.updateUrl();
+            this.renderResults();
+        });
+
         this.form.append(displayRow);
 
-        const submit = document.createElement("input");
-        submit.type = "submit";
-        submit.className = "submit-button";
-        submit.value = "Search";
-
-
-        const hidden = document.createElement("input");
-        hidden.type = "hidden";
-        hidden.name = hidden.id = "perPage";
-        hidden.value = this.perPage;
-        this.form.append(hidden);
-
-        this.form.append(submit);
         this.parent.append(this.form);
 
+    }
+
+    updateUrl(){
+        history.pushState({},"",`/maps/?name=${this.nameSearch}&display=${this.displayMode}`);
     }
 }
 
@@ -96,12 +140,18 @@ class MapListDisplay{
 
     constructor(parent, data, totalMatches, nameSearch, displayMode, page, perPage){
 
-        if(data.length === 0) return;
+        if(data.length === 0){
+
+            const info = UIDiv("info");
+            info.append(`No maps found when searching for "${nameSearch}"`);
+            parent.append(info);
+            return;   
+        }
 
         this.nameSearch = nameSearch; 
-        this.parent = document.querySelector(parent);
+        this.parent = parent;
         this.data = data;
-        this.displayMode = displayMode.toLowerCase();
+        this.displayMode = displayMode.toLowerCase();     
 
         if(this.displayMode === "table") this.renderTable();
         if(this.displayMode === "default") this.renderRichView();
@@ -127,10 +177,10 @@ class MapListDisplay{
 
         for(let i = 0; i < headers.length; i++){
 
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}))
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}))
         }
 
-        table.appendChild(headerRow);
+        table.append(headerRow);
 
         for(let i = 0; i < this.data.length; i++){
 
@@ -140,17 +190,17 @@ class MapListDisplay{
 
             const url = `/map/${d.id}`;
 
-            row.appendChild(UITableColumn({"content": d.name, "className": "text-left", url}));
-            row.appendChild(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date", url}));
-            row.appendChild(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date", url}));
-            row.appendChild(UITableColumn({"content": d.matches, url}));
-            row.appendChild(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
+            row.append(UITableColumn({"content": d.name, "className": "text-left", url}));
+            row.append(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date", url}));
+            row.append(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date", url}));
+            row.append(UITableColumn({"content": d.matches, url}));
+            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
 
-            table.appendChild(row);
+            table.append(row);
 
         }
 
-        this.parent.appendChild(table);
+        this.parent.append(table);
     }
 
     renderRichView(){
@@ -158,13 +208,13 @@ class MapListDisplay{
         const wrapper = document.createElement("div");
         wrapper.className = "rich-outter";
 
-        this.parent.appendChild(wrapper);
+        this.parent.append(wrapper);
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            wrapper.appendChild(UIMapRichBox(d));
+            wrapper.append(UIMapRichBox(d));
         }
     }
 }
@@ -183,9 +233,9 @@ function UIMapImage(parent, image){
     img.src = `../images/maps/${image}`;
     img.alt = "Map Screenshot";
 
-    wrapper.appendChild(img);
+    wrapper.append(img);
 
-    parent.appendChild(wrapper);
+    parent.append(wrapper);
 }
 
 function UIMapBasicSummary(parent, data){
@@ -203,20 +253,20 @@ function UIMapBasicSummary(parent, data){
 
     for(let i = 0; i < headers.length; i++){
 
-        headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
+        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
     }
 
-    table.appendChild(headerRow);
+    table.append(headerRow);
 
     const row = document.createElement("tr");
 
-    row.appendChild(UITableColumn({"content": data.first_match, "parse": ["date"], "className": "date"}));
-    row.appendChild(UITableColumn({"content": data.last_match, "parse": ["date"], "className": "date"}));
-    row.appendChild(UITableColumn({"content": data.matches}));
-    row.appendChild(UITableColumn({"content": data.playtime, "parse": ["playtime"], "className": "playtime"}));
+    row.append(UITableColumn({"content": data.first_match, "parse": ["date"], "className": "date"}));
+    row.append(UITableColumn({"content": data.last_match, "parse": ["date"], "className": "date"}));
+    row.append(UITableColumn({"content": data.matches}));
+    row.append(UITableColumn({"content": data.playtime, "parse": ["playtime"], "className": "playtime"}));
 
-    table.appendChild(row);
-    parent.appendChild(table);
+    table.append(row);
+    parent.append(table);
 }
 
 
@@ -237,7 +287,7 @@ class UIMapRecentMatches{
         UIHeader(this.parent, "Recent Matches");
         this.wrapper = UIDiv();
         this.wrapper.id = "map-recent-matches";
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
         this.pagination = new UIPagination(this.wrapper, async (newPage) =>{
             this.page = newPage;
@@ -313,10 +363,10 @@ function UIMapWeaponsSummary(parent, data){
 
 
     for(let i = 0; i < headers.length; i++){
-        headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
+        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
     }
 
-    table.appendChild(headerRow);
+    table.append(headerRow);
 
     for(let i = 0; i < data.weapons.length; i++){
 
@@ -331,19 +381,19 @@ function UIMapWeaponsSummary(parent, data){
 
         const row = document.createElement("tr");
 
-        row.appendChild(UITableColumn({"content": d.name, "className": "text-left"}));
-        row.appendChild(UITableColumn({"content": d.deaths, "parse": ["ignore0"]}));
-        row.appendChild(UITableColumn({"content": d.suicides, "parse": ["ignore0"]}));
-        row.appendChild(UITableColumn({"content": d.team_kills, "parse": ["ignore0"]}));
-        row.appendChild(UITableColumn({"content": d.kills, "parse": ["ignore0"]}));
-        row.appendChild(UITableColumn({"content": `${killsPercent.toFixed(2)}%`}));
-        row.appendChild(UITableColumn({"content": d.kills_per_min.toFixed(3)}));
+        row.append(UITableColumn({"content": d.name, "className": "text-left"}));
+        row.append(UITableColumn({"content": d.deaths, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": d.suicides, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": d.team_kills, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": d.kills, "parse": ["ignore0"]}));
+        row.append(UITableColumn({"content": `${killsPercent.toFixed(2)}%`}));
+        row.append(UITableColumn({"content": d.kills_per_min.toFixed(3)}));
 
-        table.appendChild(row);
+        table.append(row);
 
     }
 
-    parent.appendChild(table);
+    parent.append(table);
 }
 
 
@@ -363,14 +413,14 @@ class UIMapPlayerRankings{
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Rankings");
 
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
         this.info = UIDiv("info");
-        this.wrapper.appendChild(this.info);
+        this.wrapper.append(this.info);
         this.renderInfo();
 
         this.content = UIDiv();
-        this.parent.appendChild(this.content);
+        this.parent.append(this.content);
 
         this.loadData();
     }
@@ -411,7 +461,7 @@ class UIMapPlayerRankings{
 
         this.table = document.createElement("table");
         this.table.className = "t-width-1";
-        this.content.appendChild(this.table);
+        this.content.append(this.table);
  
         const headers = ["Place", "Name", "Last Active", "Playtime", "Matches", "Score"];
 
@@ -419,10 +469,10 @@ class UIMapPlayerRankings{
 
         for(let i = 0; i < headers.length; i++){
             
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
         }
 
-        this.table.appendChild(headerRow);
+        this.table.append(headerRow);
 
         for(let i = 0; i < this.data.length; i++){
 
@@ -432,14 +482,14 @@ class UIMapPlayerRankings{
 
             const place = i + 1 + this.perPage * (this.page - 1);
 
-            row.appendChild(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
-            row.appendChild(UIPlayerLink({"playerId": d.player_id, "name": d.name, "country": d.country, "bTableElem": true}));
-            row.appendChild(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
-            row.appendChild(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
-            row.appendChild(UITableColumn({"content": d.matches}));
-            row.appendChild(UITableColumn({"content": d.score.toFixed(2)}));
+            row.append(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
+            row.append(UIPlayerLink({"playerId": d.player_id, "name": d.name, "country": d.country, "bTableElem": true}));
+            row.append(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
+            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+            row.append(UITableColumn({"content": d.matches}));
+            row.append(UITableColumn({"content": d.score.toFixed(2)}));
 
-            this.table.appendChild(row);
+            this.table.append(row);
         }
 
     }
@@ -449,7 +499,7 @@ class UIMapPlayerRankings{
         if(this.totalMatches === 0){
             const none = UIDiv("info");
             none.innerHTML = `There are no player rankings data within the timeframe.`;
-            this.content.appendChild(none);
+            this.content.append(none);
             return;
         }
 
@@ -489,12 +539,12 @@ class UIMapPlayerAverages{
         this.totalResults = 0;
 
         this.wrapper = UIDiv();
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
         UIHeader(this.wrapper, "Top Player Averages");
         this.createOptions();
         this.content = UIDiv();
-        this.wrapper.appendChild(this.content);
+        this.wrapper.append(this.content);
 
         this.pagination = new UIPagination(this.wrapper, async (newPage) =>{ 
 
@@ -559,10 +609,10 @@ class UIMapPlayerAverages{
         const headerRow = document.createElement("tr");
 
         for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
         }
 
-        this.table.appendChild(headerRow);
+        this.table.append(headerRow);
 
 
         for(let i = 0; i < this.data.length; i++){
@@ -577,9 +627,9 @@ class UIMapPlayerAverages{
                 "className": "ordinal"}
             );
 
-            row.appendChild(ordinal);
+            row.append(ordinal);
 
-            row.appendChild(UIPlayerLink({
+            row.append(UIPlayerLink({
                 "playerId": d.player_id, 
                 "name": d.name, 
                 "country": d.country, 
@@ -587,7 +637,7 @@ class UIMapPlayerAverages{
                 "className": "text-left"
             }));
 
-            row.appendChild(UITableColumn({
+            row.append(UITableColumn({
                 "content": d.total_playtime, 
                 "parse": ["playtime"], 
                 "className": "playtime"
@@ -596,21 +646,21 @@ class UIMapPlayerAverages{
 
             const typeSettings = this.getTypeSettings();
   
-            row.appendChild(UITableColumn({
+            row.append(UITableColumn({
                 "content": d.target_value.toFixed(3), 
                 "className": typeSettings?.className ?? null
             }));
 
-            this.table.appendChild(row);
+            this.table.append(row);
         }
 
-        this.content.appendChild(this.table);
+        this.content.append(this.table);
     }
 
     createOptions(){
 
         const row = UIDiv("form-row");
-        row.appendChild(UILabel("Category","map-average-cat"));
+        row.append(UILabel("Category","map-average-cat"));
 
         const select = document.createElement("select");
         select.id = select.name = "map-average-cat";
@@ -632,15 +682,15 @@ class UIMapPlayerAverages{
             option.value = value;
             option.innerHTML = display;
             option.selected = value === this.cat;
-            select.appendChild(option);
+            select.append(option);
         }
 
-        row.appendChild(select);
+        row.append(select);
         select.addEventListener("change", (e) =>{
             this.cat = e.target.value;
             this.loadData();
         });
-        this.wrapper.appendChild(row);
+        this.wrapper.append(row);
     }
 
     render(){
@@ -674,7 +724,7 @@ class UIMapCTFLeague{
         this.wrapper = UIDiv("hidden");
         UIHeader(this.wrapper, "Player CTF League");
         
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
         this.updateSelect();
         this.createTable();
 
@@ -700,8 +750,8 @@ class UIMapCTFLeague{
 
                 const option = document.createElement("option");
                 option.value = id;
-                option.appendChild(document.createTextNode((name === null) ? "All Time" : name));
-                this.select.appendChild(option);
+                option.append(document.createTextNode((name === null) ? "All Time" : name));
+                this.select.append(option);
             }
 
             return;
@@ -710,8 +760,8 @@ class UIMapCTFLeague{
         this.select = document.createElement("select");
         this.select.id = this.select.name = "league-selected-gametype";
 
-        row.appendChild(UILabel("Gametype", "league-selected-gametype"));
-        row.appendChild(this.select);
+        row.append(UILabel("Gametype", "league-selected-gametype"));
+        row.append(this.select);
 
         this.select.addEventListener("change", (e) =>{
             this.gametypeId = e.target.value;
@@ -719,7 +769,7 @@ class UIMapCTFLeague{
             this.loadData();
         });
 
-        this.wrapper.appendChild(row);
+        this.wrapper.append(row);
 
     }
 
@@ -784,7 +834,7 @@ class UIMapCTFLeague{
         this.table.className = "t-width-1";
     
 
-        this.wrapper.appendChild(this.table);
+        this.wrapper.append(this.table);
     }
 
     render(){
@@ -802,10 +852,10 @@ class UIMapCTFLeague{
         const headerRow = document.createElement("tr");
 
         for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
         }
 
-        this.table.appendChild(headerRow);
+        this.table.append(headerRow);
 
         for(let i = 0; i < this.data.length; i++){
 
@@ -813,13 +863,13 @@ class UIMapCTFLeague{
 
             const row = document.createElement("tr");
             
-            row.appendChild(UITableColumn({
+            row.append(UITableColumn({
                 "content": i + 1 + (this.perPage * (this.page - 1)), 
                 "parse": ["ordinal"],
                 "className": "ordinal"
             }));
 
-            row.appendChild(UIPlayerLink({
+            row.append(UIPlayerLink({
                 "playerId": d.player_id, 
                 "name": d.name, 
                 "country": d.country,
@@ -827,16 +877,16 @@ class UIMapCTFLeague{
             }));
             
 
-            row.appendChild(UITableColumn({"content": d.total_matches}));
-            row.appendChild(UITableColumn({"content": d.wins, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.draws, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.losses, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.cap_for, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.cap_against, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": (d.cap_offset > 0) ? `+${d.cap_offset}` : d.cap_offset, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.points, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.total_matches}));
+            row.append(UITableColumn({"content": d.wins, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.draws, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.losses, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.cap_for, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.cap_against, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": (d.cap_offset > 0) ? `+${d.cap_offset}` : d.cap_offset, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.points, "parse": ["ignore0"]}));
 
-            this.table.appendChild(row);
+            this.table.append(row);
         }
     }
 }

@@ -167,6 +167,7 @@ label{
 	color:var(--font-color-1);
 	line-height:var(--line-height-2);
 	font-size:var(--font-size-4);
+	font-weight:500;
 }
 
 .form{
@@ -470,6 +471,8 @@ option{
 	margin-bottom:var(--margin-1);
 	font-size:var(--font-size-1);
 	line-height: var(--line-height-3);
+	border-top:2px solid var(--border-color-5);
+	border-bottom:2px solid var(--border-color-5);
 }
 
 .info-basic{

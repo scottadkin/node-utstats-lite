@@ -1,6 +1,6 @@
 import { getPlayerActivityHeatmapData, getPlayerRecentMatches } from "../players.mjs";
 import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData } from "../matches.mjs";
-import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages} from "../maps.mjs";
+import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages, search as searchMaps} from "../maps.mjs";
 import { getRankingsWithPlayerNames } from "../rankings.mjs";
 import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
@@ -235,6 +235,20 @@ export default class JSONManager{
         this.res.status(200).json(data);
     }
 
+
+    async mapSearch(){
+
+        const {page, perPage} = this.getPageAndPerPage();
+
+        this.throwErrorIfQueryMissingKey("name");
+
+        const name = this.req.query.name;
+
+        const data = await searchMaps(name, page, perPage);
+
+        this.res.status(200).json(data);
+    }
+
     async init(){
 
         try{
@@ -287,6 +301,9 @@ export default class JSONManager{
             }else if(this.mode === "player-search"){
 
                 return await this.getPlayerSearch();
+
+            }else if(this.mode === "map-search"){
+                return await this.mapSearch();
             }
 
             console.log(this.mode);
