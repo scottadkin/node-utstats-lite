@@ -1,5 +1,4 @@
-import { getRankingsWithPlayerNames, getUniqueGametypes } from "../rankings.mjs";
-import { getLatestMatchGametypeMapIds } from "../matches.mjs";
+import { getMostActiveInTimeRange, getRankingsWithPlayerNames, getUniqueGametypes } from "../rankings.mjs";
 import { getGametypeNames } from "../gametypes.mjs";
 import { getNamesByIds as getMapNames } from "../maps.mjs";
 import { getUniqueMaps } from "../rankings.mjs";
@@ -8,6 +7,7 @@ import { getCategorySettings } from "../siteSettings.mjs";
 export async function renderRankingsPage(req, res, userSession){
 
     try{
+
 
         const pageSettings = await getCategorySettings("Rankings");
 
@@ -34,17 +34,7 @@ export async function renderRankingsPage(req, res, userSession){
 
         if(targetId === 0){
 
-            const latestIds = await getLatestMatchGametypeMapIds();
-
-
-            if(latestIds !== null){
-
-                if(mode !== "map"){
-                    targetId = latestIds.gametypeId;
-                }else{
-                    targetId = latestIds.mapId;
-                }
-            }
+            targetId = await getMostActiveInTimeRange(mode, timeRange);
         }
 
         let title = `Player Rankings`;
