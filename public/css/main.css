@@ -122,7 +122,9 @@ footer{
 	color:var(--font-color-2);
 	text-align:center;
 	font-size:var(--font-size-small);
-	line-height:var(--line-height-1);
+	line-height:var(--line-height-5);
+	border-top:2px solid var(--border-color-5);
+	font-weight:500;
 }
 
 a{
@@ -305,9 +307,10 @@ th:hover{
 
 td{
 	border:2px solid var(--border-color-4);
-	padding:1px;
+	padding:1px 5px;
 	font-size:var(--font-size-4);
 	line-height:var(--line-height-1);
+	font-weight:500;
 }
 
 td a{
@@ -765,12 +768,12 @@ select{
 
 .header-wrapper{
     text-align:center;
-    padding:15px;
+    padding:10px;
     color:var(--font-color-1);
     background-color:var(--header-bg-color);
     font-weight:500;
     margin-bottom:25px;
-    font-size:18px;
+    font-size:17px;
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 	border-top:2px solid var(--border-color-4);
 	border-bottom:2px solid var(--border-color-4);

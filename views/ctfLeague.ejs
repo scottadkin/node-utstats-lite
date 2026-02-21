@@ -18,14 +18,9 @@
 <div id="root">
 
     <div class="info">
-        <b>Scoring System</b><br>
-        <ul class="text-center">
-            <li>3 points if the player is on the winning team.</li>
-            <li>1 point if the match ends in a tie.</li>
-            <li>0 points for a loss.</li>
-        </ul><br>
-
-
+        
+        <b>3 points</b> if the player is on the winning team, <b>1 point</b> for a tie, and <b>0 points</b> for a loss.
+        <br>
         <% 
 
         let leagueType = "Unknown";
@@ -42,15 +37,18 @@
 
         if(maxMatchesPerPlayer != 0){
             %>
-                Each player can have a maximum of <b><%= maxMatchesPerPlayer %> matches</b> counted towards a league.<br>
-                If the player has played more than <b><%= maxMatchesPerPlayer %></b> matches, only their <b><%= maxMatchesPerPlayer %> most recent matches</b> are counted towards a league.<br>
+                Players have a maximum of <b><%= maxMatchesPerPlayer %> matches</b> counted towards a league, only their most recent will be counted if they play more.<br>
             <%
         }
 
         %>
-        All leagues are refreshed once every 24 hours to remove players and matches outside the specified time frame, 
-        and every time a match with the same gametype or map is imported.
-        <br>Last whole <b><%= leagueType %></b> League refresh was <b><%= lastLeagueRefresh %></b></div>
+    </div>
+</div>
+<div class="info">
+    Last whole <b><%= leagueType %></b> League refresh was <b><%= lastLeagueRefresh %></b><br/>
+    All leagues are refreshed once every 24 hours to remove players and matches outside the specified time frame, 
+    and every time a match with the same gametype or map is imported.
+    
 </div>
 <script>
     new CTFLeagueFilterForm("#root", "<%= mode %>", <%- JSON.stringify(gametypeNames) %>, <%- JSON.stringify(mapNames) %>, "<%= id %>", "<%= gId %>");
