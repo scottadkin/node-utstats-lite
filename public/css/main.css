@@ -8,7 +8,7 @@
 	--bg-color-5:rgb(18,18,18);
 	--header-bg-color:rgb(25, 52, 71);
 	--header-bg-color-2:rgb(21,39,51);
-	--font-color-1:rgb(255,255,255);
+	--font-color-1:rgb(233,233,233);
 	--font-color-2:rgb(196,196,196);
 	--font-color-3:yellow;
 	--font-color-blue:rgb(0, 174, 225);
@@ -401,6 +401,11 @@ select{
 	color:var(--font-color-1);
 	font-size:var(--font-size-1);
 	border:2px solid var(--border-color-4);
+	font-weight:500;
+}
+
+option{
+	font-weight: 500;
 }
 
 .small-button{
@@ -564,8 +569,9 @@ select{
 	border:1px solid rgba(0,0,0,0.125);
 	border-bottom:2px solid rgba(0,0,0,0.25);
 	background-color: rgba(0,0,0,0.125);
-	margin-top:-2px;
+
 	margin-bottom:-2px;
+	font-weight:600;
 }
 
 .tab:hover{
