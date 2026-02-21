@@ -1,4 +1,4 @@
-import { getMostActiveInTimeRange, getRankingsWithPlayerNames, getUniqueGametypes } from "../rankings.mjs";
+import { getMinMatchesSetting, getMostActiveInTimeRange, getRankingsWithPlayerNames, getUniqueGametypes } from "../rankings.mjs";
 import { getGametypeNames } from "../gametypes.mjs";
 import { getNamesByIds as getMapNames } from "../maps.mjs";
 import { getUniqueMaps } from "../rankings.mjs";
@@ -80,6 +80,9 @@ export async function renderRankingsPage(req, res, userSession){
         const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
+
+        const minMatchesSetting = await getMinMatchesSetting(mode);
+
         res.render("rankings.ejs",{
             "host": req.headers.host,
             "title": title,
@@ -92,7 +95,8 @@ export async function renderRankingsPage(req, res, userSession){
             "selectedPerPage": perPage,
             "currentPage": page,
             userSession,
-            pageSettings
+            pageSettings,
+            minMatchesSetting
         });
     }catch(err){
         res.send(err.toString());

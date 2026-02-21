@@ -464,6 +464,14 @@ select{
 	line-height: var(--line-height-1);
 }
 
+.info-basic{
+	text-align: center;
+	color:var(--font-color-1);
+	padding:var(--padding-1) 20%;
+	font-size:var(--font-size-1);
+	line-height: var(--line-height-1);
+}
+
 
 .info-text{
 	max-width:1000px;

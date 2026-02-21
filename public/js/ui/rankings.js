@@ -1,6 +1,6 @@
 class RankingsSearchForm{
 
-    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage){
+    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage, minMatchesSetting){
 
         this.parent = document.querySelector(parent);
         this.mode = mode;
@@ -11,6 +11,7 @@ class RankingsSearchForm{
         this.selectedTimeRange = selectedTimeRange;
         this.selectedPerPage = selectedPerPage;
         this.currentPage = currentPage;
+        this.minMatchesSetting = minMatchesSetting;
 
         this.createTabs();
 
@@ -19,14 +20,14 @@ class RankingsSearchForm{
         this.wrapper.action = `/rankings/?mode=${mode}`;
         this.wrapper.method = "GET";
 
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
         this.createForm();
 
         this.table = document.createElement("table");
         this.table.className = `t-width-1`;
 
-        this.parent.appendChild(this.table);
+        this.parent.append(this.table);
 
         this.render();
     }
@@ -52,7 +53,7 @@ class RankingsSearchForm{
         const label = document.createElement("label");
         label.htmlFor = type;
         label.innerHTML = display;
-        row.appendChild(label);
+        row.append(label);
 
         const select = document.createElement("select");
         select.className = "default-select";
@@ -64,20 +65,20 @@ class RankingsSearchForm{
             const {name, value} = options[i];
 
             const option = document.createElement("option");
-            option.appendChild(document.createTextNode(name));
+            option.append(document.createTextNode(name));
             if(value == selected) option.selected = true;
             option.value = value;
-            select.appendChild(option);
+            select.append(option);
         }
 
-        row.appendChild(select);
+        row.append(select);
 
         select.addEventListener("change", (e) =>{
             this.selectedId = e.target.value;
             this.changeURL();
         });
 
-        this.wrapper.appendChild(row);
+        this.wrapper.append(row);
     }
 
 
@@ -130,7 +131,13 @@ class RankingsSearchForm{
         });
 
         perPageRow.append(pp.elem.select);
+
         this.wrapper.append(perPageRow);
+
+        const info = UIDiv("info-basic");
+        info.append(`A player needs to play a minimum of ${this.minMatchesSetting} ${plural(this.minMatchesSetting, "match")} to be eligible for a ranking score.`);
+
+        this.wrapper.append(info);
     }
 
     render(){
@@ -149,10 +156,10 @@ class RankingsSearchForm{
         const headerRow = document.createElement("tr");
 
         for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
         }
 
-        this.table.appendChild(headerRow);
+        this.table.append(headerRow);
 
         for(let i = 0; i < this.data.length; i++){
 
@@ -160,19 +167,19 @@ class RankingsSearchForm{
 
             const row = document.createElement("tr");
 
-            row.appendChild(UITableColumn({
+            row.append(UITableColumn({
                 "content": (this.selectedPerPage * (this.currentPage - 1)) + i + 1,
                 "parse": ["ordinal"], 
                 "className": "ordinal"
             }));
 
-            row.appendChild(UIPlayerLink({"playerId": d.player_id, "country": d.country, "name": d.name, "bTableElem": true}));
-            row.appendChild(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
-            row.appendChild(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
-            row.appendChild(UITableColumn({"content": d.matches}));
-            row.appendChild(UITableColumn({"content": d.score.toFixed(2)}));
+            row.append(UIPlayerLink({"playerId": d.player_id, "country": d.country, "name": d.name, "bTableElem": true}));
+            row.append(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
+            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+            row.append(UITableColumn({"content": d.matches}));
+            row.append(UITableColumn({"content": d.score.toFixed(2)}));
 
-            this.table.appendChild(row);
+            this.table.append(row);
         }
 
         new UIPagination(

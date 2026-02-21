@@ -605,3 +605,19 @@ export async function getMostActiveInTimeRange(type, timeRange){
     return result[0].id;
 
 }
+
+
+export async function getMinMatchesSetting(type){
+
+    type = type.toLowerCase();
+
+    const targetName = (type === "gametype") ? "min_matches" : "map_min_matches";
+
+    const query = `SELECT points FROM nstats_ranking_settings WHERE category="penalty" AND name=?`;
+
+    const result = await simpleQuery(query, [targetName]);
+
+    if(result.length === 0) return null;
+
+    return result[0].points;
+}
