@@ -33,7 +33,7 @@ class CTFLeagueFilterForm{
         this.wrapper.action = `/ctfleague/`;
         this.wrapper.method = "GET";
 
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
         this.createForm();
     }
@@ -56,10 +56,35 @@ class CTFLeagueFilterForm{
         const label = document.createElement("label");
         label.htmlFor = (type === "gametypes") ? "gametype" : "map";
         label.innerHTML =  (type === "gametypes") ? "Gametype" : "Map";
-        row.appendChild(label);
-        this.wrapper.appendChild(row);
+        row.append(label);
+        this.wrapper.append(row);
 
         const select = document.createElement("select");
+
+        select.addEventListener("change", (e) =>{
+
+            if(this.mode === "gametypes"){
+
+                this.id = e.target.value;
+
+            }else if(this.mode === "maps"){
+
+                const targetKey = (type === "gametypes") ? "gId" : "id";
+
+                this[targetKey] = e.target.value;
+            }
+
+            
+            let newUrl = `/ctfleague/?mode=${this.mode}`;
+
+            if(this.mode === "maps"){
+                newUrl+=`&id=${this.id}&gid=${this.gId}`;
+            }else{
+                newUrl+=`&id=${this.id}`;
+            }
+            window.location = newUrl;
+
+        });
 
         if(this.mode === "gametypes"){
 
@@ -104,11 +129,11 @@ class CTFLeagueFilterForm{
             }
 
             option.value = id;
-            option.appendChild(document.createTextNode(name));
-            select.appendChild(option);
+            option.append(document.createTextNode(name));
+            select.append(option);
         }
 
-        row.appendChild(select);
+        row.append(select);
     }
 
     createForm(){
@@ -119,19 +144,7 @@ class CTFLeagueFilterForm{
             this.createDropDown("maps");
         }
 
-        const hidden = document.createElement("input");
-        hidden.type = "hidden";
-        hidden.id = "mode";
-        hidden.name = "mode";
-        hidden.value = this.mode;
 
-        this.wrapper.appendChild(hidden);
-
-        const submit = document.createElement("input");
-        submit.type = "submit";
-        submit.value = "Search";
-        submit.className = "submit-button";
-        this.wrapper.appendChild(submit);
     }
 }
 
@@ -144,7 +157,13 @@ class CTFLeagueTable{
         this.mode = mode;
         this.data = data;
 
-        if(this.data.data.length === 0) return;
+        if(this.data.data.length === 0){
+
+            const info = UIDiv("info");
+            info.append(`There is currently no players in this CTF League Table.`);
+            this.parent.append(info);
+            return;
+        }
 
         this.id = id;
         this.gId = gId;
@@ -156,7 +175,7 @@ class CTFLeagueTable{
 
         UIHeader(this.parent, `${subHeader} - Player League`);
 
-        this.parent.appendChild(this.table);
+        this.parent.append(this.table);
         this.render();
     }
 
@@ -173,10 +192,10 @@ class CTFLeagueTable{
 
         for(let i = 0; i < headers.length; i++){
 
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
+            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
         }
 
-        this.table.appendChild(headerRow);
+        this.table.append(headerRow);
 
 
         for(let i = 0; i < this.data.data.length; i++){
@@ -188,19 +207,19 @@ class CTFLeagueTable{
 
             pos = i + 1 + (this.perPage * (this.currentPage - 1));
 
-            row.appendChild(UITableColumn({"content": pos, "parse": ["ordinal"], "className": "ordinal"}));
-            row.appendChild(UIPlayerLink({"playerId": d.player.id, "name": d.player.name, "country": d.player.country, "bTableElem": true}));
+            row.append(UITableColumn({"content": pos, "parse": ["ordinal"], "className": "ordinal"}));
+            row.append(UIPlayerLink({"playerId": d.player.id, "name": d.player.name, "country": d.player.country, "bTableElem": true}));
 
-            row.appendChild(UITableColumn({"content": d.total_matches}));
-            row.appendChild(UITableColumn({"content": d.wins, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.draws, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.losses, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.cap_for, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.cap_against, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.cap_offset, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.points, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.total_matches}));
+            row.append(UITableColumn({"content": d.wins, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.draws, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.losses, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.cap_for, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.cap_against, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.cap_offset, "parse": ["ignore0"]}));
+            row.append(UITableColumn({"content": d.points, "parse": ["ignore0"]}));
 
-            this.table.appendChild(row);
+            this.table.append(row);
         }
 
         const url = `/ctfleague?mode=${this.mode}${(this.mode === "gametypes") ? `&id=${this.id}` : `&gid=${this.gId}&id=${this.id}`}&page=`;
