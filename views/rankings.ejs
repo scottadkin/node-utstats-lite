@@ -22,8 +22,9 @@
     "<%= selectedId %>",
     "<%= selectedTimeRange %>",
     "<%= selectedPerPage %>",
-    "<%= currentPage %>",
-    "<%= minMatchesSetting %>"
+    "<%= currentPage %>"
     );
+
+    new RankingsExplain("#root", <%- JSON.stringify(rankingSettings) %>, "<%= minMatchesSetting %>");
 </script>
 <%- include("footer.ejs") -%>

@@ -1,7 +1,10 @@
-import { getMinMatchesSetting, getMostActiveInTimeRange, getRankingsWithPlayerNames, getUniqueGametypes } from "../rankings.mjs";
+import { 
+    getMinMatchesSetting, getMostActiveInTimeRange, 
+    getRankingsWithPlayerNames, 
+    getUniqueGametypes, getUniqueMaps, getRankingSettings 
+} from "../rankings.mjs";
 import { getGametypeNames } from "../gametypes.mjs";
 import { getNamesByIds as getMapNames } from "../maps.mjs";
-import { getUniqueMaps } from "../rankings.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
 
 export async function renderRankingsPage(req, res, userSession){
@@ -10,6 +13,8 @@ export async function renderRankingsPage(req, res, userSession){
 
 
         const pageSettings = await getCategorySettings("Rankings");
+
+        const rankingSettings = await getRankingSettings(true);
 
         let mode = req?.query?.mode ?? "gametype";
         mode = mode.toLowerCase();
@@ -96,6 +101,7 @@ export async function renderRankingsPage(req, res, userSession){
             "currentPage": page,
             userSession,
             pageSettings,
+            rankingSettings,
             minMatchesSetting
         });
     }catch(err){

@@ -61,9 +61,11 @@ async function getPlayerTotals(type, targetId, playerIds){
 }
 
 
-export async function getRankingSettings(){
+export async function getRankingSettings(bIncDisplayName){
 
-    const query = `SELECT category,name,points FROM nstats_ranking_settings`;
+    if(bIncDisplayName === undefined) bIncDisplayName = false;
+
+    const query = `SELECT category,name,points${(bIncDisplayName) ? ",display_name" : ""} FROM nstats_ranking_settings`;
 
     const result = await simpleQuery(query);
 
@@ -77,7 +79,12 @@ export async function getRankingSettings(){
             data[r.category] = {};
         }
 
-        data[r.category][r.name] = r;
+        
+        if(bIncDisplayName){
+            data[r.category][r.name] = {"points": r.points, "displayName": r.display_name}
+        }else{
+            data[r.category][r.name] = r.points;
+        }
     }
 
     return data;

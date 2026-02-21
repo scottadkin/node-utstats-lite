@@ -1,6 +1,6 @@
 class RankingsSearchForm{
 
-    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage, minMatchesSetting){
+    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage){
 
         this.parent = document.querySelector(parent);
         this.mode = mode;
@@ -11,7 +11,6 @@ class RankingsSearchForm{
         this.selectedTimeRange = selectedTimeRange;
         this.selectedPerPage = selectedPerPage;
         this.currentPage = currentPage;
-        this.minMatchesSetting = minMatchesSetting;
 
         this.createTabs();
 
@@ -133,11 +132,6 @@ class RankingsSearchForm{
         perPageRow.append(pp.elem.select);
 
         this.wrapper.append(perPageRow);
-
-        const info = UIDiv("info-basic");
-        info.append(`A player needs to play a minimum of ${this.minMatchesSetting} ${plural(this.minMatchesSetting, "match")} to be eligible for a ranking score.`);
-
-        this.wrapper.append(info);
     }
 
     render(){
@@ -145,7 +139,7 @@ class RankingsSearchForm{
         if(this.data.length === 0){
 
             const noData = UIDiv("info");
-            noData.append(`There has not been enough matches played yet for there to be any rankings.`);
+            noData.append(`There has not been enough matches played in the selected time range for there to be any rankings.`);
             this.table.className = "hidden";
             this.parent.append(noData);
             return;
@@ -189,5 +183,99 @@ class RankingsSearchForm{
             this.selectedPerPage, 
             this.currentPage
         );
+    }
+}
+
+class RankingsExplain{
+
+    constructor(parent, settings, minMatchesSetting){
+
+        this.parent = document.querySelector(parent);
+        this.settings = settings;
+        this.minMatchesSetting = minMatchesSetting;
+
+        this.wrapper = UIDiv();
+        this.header = UIDiv("header-wrapper");
+        this.header.append("Rankings Explained");
+
+        this.wrapper.append(this.header);
+        this.mode = "general";
+
+        this.info = UIDiv("info");
+        this.wrapper.append(this.info);
+        this.parent.append(this.wrapper);
+
+        this.info.append(
+            `Ranking scores are calculated by total various events in matches divided by playtime.`,
+            UIBr(),
+            `Players must participate in a minimum of ${this.minMatchesSetting} matches before getting a ranking score.`
+        );
+
+        
+        this.createTabs();
+        this.content = UIDiv();
+        this.wrapper.append(this.content);
+        this.renderContent();
+    }
+
+
+    createTabs(){
+
+        const options = [
+            {"display": "General Events", "value": "general"},
+            {"display": "CTF Events", "value": "ctf"},
+            {"display": "Penalties", "value": "penalty"},
+        ];
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.renderContent();
+        });
+    }
+
+    renderContent(){
+
+        
+        this.content.innerHTML = ``;
+
+        const table = document.createElement("table");
+        table.className = `rankings-explained-table`;
+
+        const headerRow = document.createElement("tr");
+        headerRow.append(UITableHeaderColumn({"content": "Event"}));
+        headerRow.append(UITableHeaderColumn({"content": (this.mode !== "penalty") ? "Value" : "Penalty"}));
+        table.append(headerRow);
+
+        let settings = this.settings[this.mode];
+
+        if(settings === undefined) return;
+
+        settings = Object.values(settings);
+
+
+        for(let i = 0; i < settings.length; i++){
+
+            const s = settings[i];
+            if(this.mode === "penalty" && !/under/i.test(s.displayName)){
+                continue;
+            }
+
+            const row = document.createElement("tr");
+
+            row.append(UITableColumn({"content": s.displayName, "className": "text-left"}));
+
+            let currentValue = s.points;
+
+            if(this.mode === "penalty"){
+                currentValue = `Final Score * ${currentValue.toFixed(2)}`;
+            }
+
+            row.append(UITableColumn({"content": currentValue, "className": "text-center"}));
+            table.append(row);
+        }
+
+        this.content.append(table);
+        
     }
 }
