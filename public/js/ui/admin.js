@@ -802,7 +802,7 @@ class AdminMapsManager{
             "image/tiff"
         ];
 
-        this.badImageChars = ["[","]","'","`"];
+        this.badImageChars = ["[","]","'","`","(",")"];
 
         this.createTabs();
         this.wrapper = UIDiv();

@@ -414,7 +414,7 @@ export function getMapImageName(name){
     if(result === null) return name;
 
     name = result[1].toLowerCase();
-    name = name.replace(/[\[\]\'\`]/ig,"");
+    name = name.replace(/[\[\]\'\,\(\)`]/ig,"");
 
     return name;
 }
