@@ -1,6 +1,6 @@
 {
   "name": "node-ustats-lite",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "UTStats built using node.js",
   "repository": {
     "type": "git",
@@ -19,21 +19,21 @@
   "author": "Scott Adkin",
   "license": "ISC",
   "dependencies": {
-    "basic-ftp": "^5.0.5",
+    "basic-ftp": "^5.2.0",
     "body-parser": "^2.2.2",
-    "canvas": "^3.2.0",
+    "canvas": "^3.2.1",
     "cookie-parser": "^1.4.7",
-    "ejs": "^3.1.10",
+    "ejs": "^4.0.1",
     "encoding-japanese": "^2.2.0",
     "express": "^5.2.1",
     "express-mysql-session": "^3.0.3",
-    "express-session": "^1.18.2",
-    "geoip-lite": "^1.4.10",
+    "express-session": "^1.19.0",
+    "geoip-lite": "^2.0.0",
     "jimp": "^1.6.0",
     "js-sha256": "^0.11.1",
     "md5": "^2.3.0",
     "multer": "^2.0.2",
-    "mysql2": "^3.15.3",
+    "mysql2": "^3.18.0",
     "ssh2-sftp-client": "^12.0.1"
   }
 }
