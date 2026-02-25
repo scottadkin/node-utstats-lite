@@ -579,6 +579,8 @@ class MatchDominationSummary{
         }else if(this.mode === "total-points" || this.mode === "max-points"){
 
             const lines = [`- Recreated from stats log, Usually less than +-0.5% of real UT score.`];
+
+            if(this.mode === "max-points") lines.push(UIBr(), `The most amount of points gotten from a single control point capture.`);
          
             this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
 
