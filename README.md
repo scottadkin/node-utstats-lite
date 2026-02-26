@@ -72,7 +72,6 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 - To go to the admin area go to [http://localhost:3000/admin](http://localhost:3000/admin)
 - In the admin you can then add S/FTP servers to the importer list. <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/72ec2c41-c008-4b6d-8c65-170381aa7a05" />
 
-
 - If you want to separate gametypes by team sizes, for example CTF 1v1, CTF 2v2 there is now a setting for each ftp server and logs folder called **append team sizes**, if the all teams have the same amount of players the importer will now append the team sizes to the end of the gametype to keep rankings/records separate. 
 
 ## Running The Log Importer
@@ -83,7 +82,6 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 You can enable basic damage tracking for players by adding [this mutator](https://github.com/scottadkin/UTStats-Lite-Damage)
 So far there is only match player data displayed for damage, here is an example of what data is tracked.
 <img width="987" height="589" alt="image" src="https://github.com/user-attachments/assets/3c440825-24f5-451e-b427-b1fabd9c2178" />
-
 
 
 ## Classic UTStats Damage Support

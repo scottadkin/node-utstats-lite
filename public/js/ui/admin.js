@@ -3007,7 +3007,7 @@ class AdminServersManager{
         
         this.header = UIHeader(this.parent, "Servers Manager", "servers");
 
-        this.mode = "list";
+        this.mode = "merge";
 
         this.createTabs();
 
@@ -3015,6 +3015,9 @@ class AdminServersManager{
         this.parent.append(this.wrapper);
 
         this.servers = [];
+
+        this.oldSelectedServer = 0;
+        this.newSelectedServer = 0;
 
 
 
@@ -3025,6 +3028,7 @@ class AdminServersManager{
 
         const options = [
             {"display": "Basic Info", "value": "list"},
+            {"display": "Merge Servers", "value": "merge"},
         ];
         this.tabs = new UITabs(this.parent, options, this.mode);
 
@@ -3062,6 +3066,8 @@ class AdminServersManager{
 
 
     renderList(){
+        
+        UIHeader(this.wrapper, "Server List");
 
         const tableOptions = {
             "width": 1,
@@ -3087,12 +3093,119 @@ class AdminServersManager{
 
     }
 
+
+    checkMergeValid(){
+
+        const oldServer = parseInt(this.oldSelectedServer);
+        const newServer = parseInt(this.newSelectedServer);
+        if(oldServer === 0 || newServer === 0) return false;
+
+        return oldServer !== newServer;
+    }
+
+    updateMerge(){
+
+        const bValid = this.checkMergeValid();
+
+        this.mergeSubmitWrapper.innerHTML = ``;
+
+        if(!bValid){
+
+            const elems = [];
+
+            this.mergeSubmitButton.className = "hidden";
+
+            if(this.newSelectedServer === this.oldSelectedServer){
+                elems.push("You can not merge a server into itself.");
+            }
+
+            if(this.newSelectedServer == 0 || this.oldSelectedServer == 0){
+                this.mergeSubmitWrapper.className = "hidden";
+                return;
+            }
+
+            this.mergeSubmitWrapper.className = "error";
+            this.mergeSubmitWrapper.append(elems);
+
+            return;
+
+        }
+        
+        this.mergeSubmitButton.className = "submit-button";
+        this.mergeSubmitWrapper.className = "hidden";
+        
+    }
+
+    renderMerge(){
+
+        UIHeader(this.wrapper, "Merge Servers");
+
+        const info = UIDiv("info");
+
+        const infoElems = [
+            "Merge one server into another.",
+            UIBr(),
+            "You may want to do this if one of your Unreal Tournament servers has had a name change.",
+            UIBr(),
+            "Updates matches played on ", UIB("Old Server"), " id to use the ", UIB("New Server"), " id, deleting ", UIB("Old Server"), " from the server list."
+        ];
+
+        info.append(...infoElems);
+        
+        this.wrapper.append(info);
+
+        const form = UIDiv("form");
+
+        
+
+        const serverOptions = this.servers.map((s) =>{
+            return {"display": s.name, "value": s.id};
+        }); 
+
+        serverOptions.unshift({"value": 0, "display": "Please Select A Server"});
+
+
+        const oldRow = UIDiv("form-row");
+
+        oldRow.append(UILabel("Old Server"));
+        
+        new UISelect(oldRow, serverOptions, serverOptions[0], (e) =>{
+            this.oldSelectedServer = e;
+            this.updateMerge();
+        });
+
+        form.append(oldRow);
+
+        const newRow = UIDiv("form-row");
+
+        newRow.append(UILabel("New Server"));
+        
+        new UISelect(newRow, serverOptions, serverOptions[0], (e) =>{
+            this.newSelectedServer = e;
+            this.updateMerge();
+        });
+
+        form.append(newRow);
+
+        this.mergeSubmitWrapper = UIDiv();
+        this.mergeSubmitWrapper.className = "hidden";
+
+        this.mergeSubmitButton = document.createElement("button");
+        this.mergeSubmitButton.className = "submit-button hidden";
+        this.mergeSubmitButton.innerHTML = `Merge Servers`;
+        form.append(this.mergeSubmitButton, this.mergeSubmitWrapper);
+
+        this.wrapper.append(form);
+    }
+
     render(){
         
         this.wrapper.innerHTML = ``;
 
         if(this.mode === "list"){
             this.renderList();
+        }else if(this.mode === "merge"){
+            this.renderMerge();
         }
     }
 }

@@ -226,7 +226,7 @@ label{
 	background-color: var(--bg-color-2);
 	padding:var(--padding-1);
 	color:var(--font-color-1);
-	border:1px solid var(--border-color-1);
+	border:2px solid var(--border-color-5);
 	font-size:var(--font-size-3);
 	transition:var(--transition-1)
 }
