@@ -13,7 +13,7 @@ import { clearAllDataTables } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
-import { getAllNames as getAllServerNames } from "../servers.mjs";
+import { getAllNames as getAllServerNames, mergeServers } from "../servers.mjs";
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { getBasicList as getBasicServerList } from "../servers.mjs";
 
@@ -234,6 +234,17 @@ export default class AdminJSONManager{
 
                 
                 return this.res.json({"servers": await getBasicServerList()});
+
+            }else if(this.mode === "merge-servers"){
+
+                if(this.req.body.oldServer === undefined || this.req.body.newServer === undefined){
+                    throw new Error("OldServer or NewServer was undefined");
+                }
+
+                const oldServer = this.req.body.oldServer;
+                const newServer = this.req.body.newServer;
+
+                return this.res.json(await mergeServers(oldServer, newServer))
             }
 
 

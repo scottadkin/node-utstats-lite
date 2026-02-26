@@ -143,3 +143,30 @@ export async function getAllNames(bReturnArray){
     return data;
 }
 
+export async function deleteServer(id){
+
+    const query = `DELETE FROM nstats_servers WHERE id=?`;
+
+    return await simpleQuery(query, [id]);
+}
+
+
+export async function mergeServers(oldId, newId){
+
+    oldId = parseInt(oldId);
+    newId = parseInt(newId);
+
+    if(oldId === newId) throw new Error(`You can't merge a server into itself.`);
+    if(oldId === 0 || newId === 0) throw new Error(`You have to select two different servers.`);
+
+    const query = `UPDATE nstats_matches SET server_id=? WHERE server_id=?`;
+
+    const result = await simpleQuery(query, [newId, oldId]);
+
+    const rowsChanged = result.changedRows;
+
+    await deleteServer(oldId);
+    await updateServerTotals(newId);
+    
+    return {rowsChanged}
+}

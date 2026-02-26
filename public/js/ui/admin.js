@@ -3019,7 +3019,7 @@ class AdminServersManager{
         this.oldSelectedServer = 0;
         this.newSelectedServer = 0;
 
-
+        this.bMergeInProgress = false;
 
         this.loadData();
     }
@@ -3050,12 +3050,10 @@ class AdminServersManager{
             });
 
             const res = await req.json();
-            console.log(res);
 
             if(res.error !== undefined) throw new Error(res.error);
             this.servers = res.servers;
             
-
         }catch(err){
             console.trace(err);
             new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
@@ -3136,6 +3134,46 @@ class AdminServersManager{
         
     }
 
+    async mergeServers(){
+
+        try{
+
+            if(this.bMergeInProgress) return;
+
+            this.bMergeInProgress = true;
+            this.mergeSubmitButton.className = "hidden";
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "merge-servers", 
+                    "oldServer": this.oldSelectedServer, 
+                    "newServer": this.newSelectedServer
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Merged Servers Successfully", `Total matches updated ${res.rowsChanged}`);
+
+            this.oldSelectedServer = 0;
+            await this.loadData();
+           
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Merge Servers", err.toString());
+        }finally{
+
+            this.bMergeInProgress = false;
+
+        }
+
+    }
+
     renderMerge(){
 
         UIHeader(this.wrapper, "Merge Servers");
@@ -3169,7 +3207,7 @@ class AdminServersManager{
 
         oldRow.append(UILabel("Old Server"));
         
-        new UISelect(oldRow, serverOptions, serverOptions[0], (e) =>{
+        new UISelect(oldRow, serverOptions, this.oldSelectedServer, (e) =>{
             this.oldSelectedServer = e;
             this.updateMerge();
         });
@@ -3180,7 +3218,7 @@ class AdminServersManager{
 
         newRow.append(UILabel("New Server"));
         
-        new UISelect(newRow, serverOptions, serverOptions[0], (e) =>{
+        new UISelect(newRow, serverOptions, this.newSelectedServer, (e) =>{
             this.newSelectedServer = e;
             this.updateMerge();
         });
@@ -3193,6 +3231,11 @@ class AdminServersManager{
         this.mergeSubmitButton = document.createElement("button");
         this.mergeSubmitButton.className = "submit-button hidden";
         this.mergeSubmitButton.innerHTML = `Merge Servers`;
+
+        this.mergeSubmitButton.addEventListener("click", (e) =>{
+            this.mergeServers();
+        });
+
         form.append(this.mergeSubmitButton, this.mergeSubmitWrapper);
 
         this.wrapper.append(form);
