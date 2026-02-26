@@ -15,6 +15,7 @@ import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validR
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
 import { getAllNames as getAllServerNames } from "../servers.mjs";
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
+import { getBasicList as getBasicServerList } from "../servers.mjs";
 
 
 
@@ -228,6 +229,11 @@ export default class AdminJSONManager{
                 const result = await deleteAllDuplicateMatches();
 
                 return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "load-servers"){
+
+                
+                return this.res.json({"servers": await getBasicServerList()});
             }
 
 

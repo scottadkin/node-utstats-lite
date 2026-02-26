@@ -1395,24 +1395,6 @@ class UIPlayerActivityHeatmap extends UICalendarHeatMap{
     }
 }
 
-class InteractiveTable{
-
-    constructor(parent, headers, rows){
-
-        this.parent = document.querySelector(parent);
-        this.headers = headers;
-        this.rows = rows;
-
-
-        this.render();
-    }
-
-    render(){
-        console.log(`renderInteractiveTable`);
-    }
-}
-
-
 function UIMatchScreenshot(parent, matchData, bLatest){
 
     if(matchData === null) return;
@@ -1439,4 +1421,98 @@ function UILoading(parent){
     img.className = "loading";
     img.src = `/images/loading.png`;
     parent.append(img);
+}
+
+
+function UITr(){
+
+    return document.createElement("tr");
+}
+
+
+
+class UITable{
+
+    constructor(parent, options, data){
+
+        this.optionKeys = Object.keys(options);
+
+        const required = [];
+
+        for(let i = 0; i < required.length; i++){
+
+            if(this.optionKeys.indexOf(required[i]) === -1) throw new Error(`Missing required key ${required[i]}`);
+        }
+
+        this.parent = parent;
+        this.options = options;
+        this.data = data;
+
+        this.init();
+        
+    }
+
+
+    bOptionExist(key){
+        return this.optionKeys.indexOf(key) !== -1;
+    }
+
+    createHeaders(){
+
+        if(!this.bOptionExist("headers")) return;
+
+        const row = UITr();
+
+        for(let i = 0; i < this.options.headers.length; i++){
+
+            const h = this.options.headers[i];
+            row.append(UITableHeaderColumn({"content": h}));
+            
+        }
+
+        this.elem.append(row);
+        
+    }
+
+    setWidth(){
+
+        if(!this.bOptionExist("width")) return;
+
+        this.elem.className = `t-width-${this.options.width}`;
+    }
+
+    init(){
+
+        this.elem = document.createElement("table");
+
+        this.createHeaders();
+            
+        this.parent.append(this.elem);
+
+        this.setWidth();
+
+        this.createDataRows();
+    }
+
+    createDataRows(){
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            const row = UITr();
+
+            for(let x = 0; x < d.length; x++){
+
+                if(typeof d[x] === "object"){
+                    row.append(UITableColumn(d[x]));
+                }else{
+                    row.append(UITableColumn({"content": d[x]}));
+                }
+            }
+
+            this.elem.append(row);
+        }
+    }
+
 }

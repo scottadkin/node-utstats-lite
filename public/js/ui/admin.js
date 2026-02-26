@@ -2996,3 +2996,103 @@ class AdminMatchesManager{
         }
     }
 }
+
+
+class AdminServersManager{
+
+    constructor(parent){
+
+        this.parent = document.querySelector(parent);
+
+        
+        this.header = UIHeader(this.parent, "Servers Manager", "servers");
+
+        this.mode = "list";
+
+        this.createTabs();
+
+        this.wrapper = UIDiv();
+        this.parent.append(this.wrapper);
+
+        this.servers = [];
+
+
+
+        this.loadData();
+    }
+
+    createTabs(){
+
+        const options = [
+            {"display": "Basic Info", "value": "list"},
+        ];
+        this.tabs = new UITabs(this.parent, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.render();
+        })
+    }
+
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch("/admin/", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-servers"})
+            });
+
+            const res = await req.json();
+            console.log(res);
+
+            if(res.error !== undefined) throw new Error(res.error);
+            this.servers = res.servers;
+            
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }finally{
+            this.render();
+        }
+    }
+
+
+    renderList(){
+
+        const tableOptions = {
+            "width": 1,
+            "headers": ["Name","First Match","Last Match", "Playtime", "Total Matches"]
+        };
+
+        const data = [];
+
+        for(let i = 0; i < this.servers.length; i++){
+
+            const s = this.servers[i];
+
+            data.push([
+                {"content": s.name, "className": "text-left"}, 
+                {"content": s.first_match, "parse": ["date"], "className": "date"}, 
+                {"content": s.last_match, "parse": ["date"], "className": "date"}, 
+                {"content": s.playtime, "parse": ["playtime"], "className": "playtime"}, 
+                s.matches
+            ]);
+        }
+
+        this.table = new UITable(this.wrapper, tableOptions, data);
+
+    }
+
+    render(){
+        
+        this.wrapper.innerHTML = ``;
+
+        if(this.mode === "list"){
+            this.renderList();
+        }
+    }
+}

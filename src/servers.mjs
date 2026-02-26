@@ -142,3 +142,4 @@ export async function getAllNames(bReturnArray){
 
     return data;
 }
+

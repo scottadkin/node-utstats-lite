@@ -30,6 +30,11 @@ const modes = [
         "display": "Matches Manager",
         "value": "matches",
         "description": "Delete Matches, Delete Duplicate Matches"
+    },
+    {
+        "display": "Server Manager",
+        "value": "servers",
+        "description": "Merge Servers"
     }
 ];
 
@@ -108,6 +113,8 @@ function renderCategory(mode){
         %><script>new AdminCTFLeagueManager("#root");</script><%
     }else if(mode === "matches"){
         %><script>new AdminMatchesManager("#root");</script><%
+    }else if(mode === "servers"){
+        %><script>new AdminServersManager("#root");</script><%
     }
 }
 
