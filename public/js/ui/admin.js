@@ -722,7 +722,7 @@ class AdminFTPManager{
         const form = document.createElement("form");
         form.className = "form"
         
-        const info = UIDiv("info");
+        const info = UIDiv("info-basic");
 
         const line1 = `These are the settings the importer will use if you manually 
         place logs into the website's /Logs folder.`
@@ -2088,7 +2088,7 @@ class AdminRankingManager{
 
         const form = UIDiv("form");
 
-        const info = UIDiv("info");
+        const info = UIDiv("info-basic");
         info.innerHTML = `Adjust how many points a player gets for each event and adjust time penalties.`;
         info.innerHTML += `<br>For time penalties every 0.01 is 1% of the original score, a value of 1 will keep the players score the same, setting it to 0.1 will reduce the players score by 90%`;
         info.innerHTML += `<br>You must recalculate rankings for the changes to take effect.`;
@@ -3007,7 +3007,7 @@ class AdminServersManager{
         
         this.header = UIHeader(this.parent, "Servers Manager", "servers");
 
-        this.mode = "merge";
+        this.mode = "rename";
 
         this.createTabs();
 
@@ -3018,6 +3018,8 @@ class AdminServersManager{
 
         this.oldSelectedServer = 0;
         this.newSelectedServer = 0;
+        this.currentRenameNameSelected = 0;
+        this.currentNewName = "";
 
         this.bMergeInProgress = false;
 
@@ -3029,6 +3031,7 @@ class AdminServersManager{
         const options = [
             {"display": "Basic Info", "value": "list"},
             {"display": "Merge Servers", "value": "merge"},
+            {"display": "Rename Servers", "value": "rename"},
         ];
         this.tabs = new UITabs(this.parent, options, this.mode);
 
@@ -3171,7 +3174,17 @@ class AdminServersManager{
             this.bMergeInProgress = false;
 
         }
+    }
 
+    getServerSelectOptions(){
+
+        const data = this.servers.map((s) =>{
+            return {"display": s.name, "value": s.id};
+        }); 
+
+        data.unshift({"value": 0, "display": "Please Select A Server"});
+
+        return data;
     }
 
     renderMerge(){
@@ -3196,12 +3209,7 @@ class AdminServersManager{
 
         
 
-        const serverOptions = this.servers.map((s) =>{
-            return {"display": s.name, "value": s.id};
-        }); 
-
-        serverOptions.unshift({"value": 0, "display": "Please Select A Server"});
-
+        const serverOptions = this.getServerSelectOptions();
 
         const oldRow = UIDiv("form-row");
 
@@ -3241,6 +3249,115 @@ class AdminServersManager{
         this.wrapper.append(form);
     }
 
+    getServerById(target){
+
+        target = parseInt(target);
+
+        for(let i = 0; i < this.servers.length; i++){
+
+            const s = this.servers[i];
+            const id = parseInt(s.id);
+
+            if(id === target) return s.name;
+        }
+
+        return "";
+    }
+
+
+    //dont want 2 servers with same name
+    bRenameValid(){
+
+        const newName = this.currentNewName.toLowerCase();
+
+        if(newName === "") return false;
+
+        for(let i = 0; i < this.servers.length; i++){
+
+            const s = this.servers[i];
+
+            const currentName = s.name.toLowerCase();
+            if(currentName === newName && this.currentRenameNameSelected !== s.id) return false;
+        }
+        
+
+        return true;
+    }
+
+    updateRenameArea(){
+
+        if(!this.bRenameValid()){
+
+            this.renameSubmitError.className = "error";
+            this.renameSubmit.className = "hidden";
+
+            let message = `You can not have two servers with the same name.`;
+
+            if(this.currentNewName === ""){
+                message = `You can not name a server a blank string.`;
+            }
+
+            this.renameSubmitError.innerHTML = message;
+        }else{
+            this.renameSubmitError.className = "hidden";
+            this.renameSubmit.className = "submit-button";
+            this.renameSubmitError.innerHTML = "";
+        }
+    }
+
+    renderRename(){
+
+        UIHeader(this.wrapper, "Rename Servers");
+
+        const form = UIDiv("form");
+
+        const serverOptions = this.getServerSelectOptions();
+
+        const currentRow = UIDiv("form-row");
+
+        currentRow.append(UILabel("Current Name"));
+        
+        new UISelect(currentRow, serverOptions, this.currentRenameNameSelected, (e) =>{
+
+            this.currentRenameNameSelected = parseInt(e);
+            const selectedName = this.getServerById(e);
+            this.currentNewName = selectedName;
+            this.newNameInput.value = selectedName;
+
+            this.updateRenameArea();
+            
+        });
+
+        form.append(currentRow);
+
+        const newRow = UIDiv("form-row");
+        newRow.append(UILabel("New Name"));
+
+        this.newNameInput = UIInput("text", "new-name", this.currentNewName, "New Name", (e) =>{
+
+            this.currentNewName = e;
+
+            this.updateRenameArea();
+        });
+
+        newRow.append(this.newNameInput);
+
+        form.append(newRow);
+
+
+        this.renameSubmitError = UIDiv("hidden");
+        this.renameSubmitError.innerHTML = ``;
+        form.append(this.renameSubmitError);
+
+        this.renameSubmit = document.createElement("button");
+        this.renameSubmit.className = "hidden";
+        this.renameSubmit.innerHTML = "Rename Server";
+        form.append(this.renameSubmit);
+
+        this.wrapper.append(form);
+
+    }
+
     render(){
         
         this.wrapper.innerHTML = ``;
@@ -3249,6 +3366,8 @@ class AdminServersManager{
             this.renderList();
         }else if(this.mode === "merge"){
             this.renderMerge();
+        }else if(this.mode === "rename"){
+            this.renderRename();
         }
     }
 }

@@ -428,6 +428,7 @@ option{
 .true, .false{
 	padding:var(--padding-2);
 	font-size:var(--font-size-2);
+	border:2px solid var(--border-color-5);
 }
 
 .warning, .error{
