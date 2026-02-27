@@ -13,9 +13,13 @@ import { clearAllDataTables } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
-import { getAllNames as getAllServerNames, mergeServers } from "../servers.mjs";
+import { 
+    getAllNames as getAllServerNames, 
+    mergeServers, 
+    getBasicList as getBasicServerList, 
+    renameServer  
+} from "../servers.mjs";
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
-import { getBasicList as getBasicServerList } from "../servers.mjs";
 
 
 
@@ -244,7 +248,16 @@ export default class AdminJSONManager{
                 const oldServer = this.req.body.oldServer;
                 const newServer = this.req.body.newServer;
 
-                return this.res.json(await mergeServers(oldServer, newServer))
+                return this.res.json(await mergeServers(oldServer, newServer));
+
+            }else if(this.mode === "rename-server"){
+
+                if(this.req.body.id === undefined || this.req.body.newName === undefined){
+
+                    throw new Error("You must specify a target server and a new name.");
+                }
+
+                return this.res.json(await renameServer(this.req.body.id, this.req.body.newName));
             }
 
 

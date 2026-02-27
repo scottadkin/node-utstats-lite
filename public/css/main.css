@@ -175,8 +175,8 @@ label{
 	margin-bottom:var(--margin-1);
 	background-color: var(--bg-color-3);
 	padding:var(--padding-1);
-	border-top:2px solid rgba(0,0,0,0.25);
-	border-bottom:2px solid rgba(0,0,0,0.25);
+	border-top:2px solid var(--border-color-5);
+	border-bottom:2px solid var(--border-color-5);
 }
 
 .form-row{

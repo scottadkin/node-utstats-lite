@@ -3007,7 +3007,7 @@ class AdminServersManager{
         
         this.header = UIHeader(this.parent, "Servers Manager", "servers");
 
-        this.mode = "rename";
+        this.mode = "list";
 
         this.createTabs();
 
@@ -3305,6 +3305,35 @@ class AdminServersManager{
         }
     }
 
+    async renameServer(){
+
+        try{
+
+            const req = await fetch("/admin/", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "rename-server", 
+                    "id": this.currentRenameNameSelected,
+                    "newName": this.currentNewName
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+            new UINotification(this.parent, "pass", "Success", "Rename completed.");
+            this.currentRenameNameSelected = 0;
+            this.currentNewName = "";
+            this.loadData();
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Rename Server", err.toString());
+
+        }
+    }
     renderRename(){
 
         UIHeader(this.wrapper, "Rename Servers");
@@ -3352,6 +3381,11 @@ class AdminServersManager{
         this.renameSubmit = document.createElement("button");
         this.renameSubmit.className = "hidden";
         this.renameSubmit.innerHTML = "Rename Server";
+
+        this.renameSubmit.addEventListener("click", () =>{
+
+            this.renameServer();
+        });
         form.append(this.renameSubmit);
 
         this.wrapper.append(form);

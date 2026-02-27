@@ -170,3 +170,33 @@ export async function mergeServers(oldId, newId){
     
     return {rowsChanged}
 }
+
+async function bNameInUse(newName, ignoreId){
+
+    const query = `SELECT COUNT(*) as total_servers FROM nstats_servers WHERE name=? AND id!=?`;
+
+    const result = await simpleQuery(query, [newName, ignoreId]);
+
+    return result[0].total_servers > 0;
+}
+
+export async function renameServer(targetId, newName){
+
+    if(await bNameInUse(newName, targetId)){
+        return {"error": "Name already in use by another server"};
+    }
+
+    if(newName === ""){
+        return {"error": "Name can't be a blank string"};
+    }
+
+    if(targetId == 0){
+        return {"error": "No server selected to rename"};
+    }
+
+    const query = `UPDATE nstats_servers SET name=? WHERE id=?`;
+
+    await simpleQuery(query,[newName, targetId]);
+
+    return {"message": "passed"};
+}
