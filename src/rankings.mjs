@@ -183,7 +183,7 @@ function _applyTimePenalty(playerData, settings, minutesPlayed){
 
     if(targetKey === null) return;
 
-    const penalty = settings[targetKey].points;
+    const penalty = settings[targetKey];
 
     if(penalty !== penalty || penalty === 0) return;
 
@@ -207,11 +207,11 @@ function _setRankingPoints(settings, playerData){
 
                 //no ctf data of this type skip, will always be null for players with no ctf matches
                 if(category === "ctf" && playerData[type] === null){    
+                    playerData[type] = 0;
                     continue;
                 }
 
-                currentPoints += playerData[type] * typeData.points;
-                //console.log(category, type, typeData);
+                currentPoints += playerData[type] * typeData;
             }
         }
     }
@@ -268,9 +268,12 @@ export async function calculateRankings(targetId, playerIds, type){
 
     const settings = await getRankingSettings();
 
+    if(settings.penalty === undefined) throw new Error("Penalty settings are missing");
+
     for(const playerData of Object.values(totals)){
         _setRankingPoints(settings, playerData);
     }
+
 
     if(type === "gametype"){
         await deletePlayerRankings(targetId, playerIds);
@@ -279,15 +282,14 @@ export async function calculateRankings(targetId, playerIds, type){
         await deletePlayerMapRankings(targetId, playerIds);
     }
 
-    let minMatches = settings?.penalty?.min_matches ?? null;
+    let minMatches = settings.penalty?.min_matches ?? null;
 
     if(type === "map"){
 
-        minMatches = settings?.penalty?.map_min_matches ?? null;
+        minMatches = settings.penalty?.map_min_matches ?? null;
     }
     
     if(minMatches !== null){
-        minMatches = minMatches.points;
         totals = _removePlayersUnderMatchLimit(totals, minMatches);
     }
 
