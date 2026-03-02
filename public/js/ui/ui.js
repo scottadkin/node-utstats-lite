@@ -1406,8 +1406,8 @@ function UIMatchScreenshot(parent, matchData, bLatest){
     UIHeader(wrapper, `${(bLatest) ? "Latest " : ""}Match Screenshot`);
     const canvas = document.createElement("canvas"); 
     canvas.className = "match-sshot text-center";
-    canvas.width = 1920;
-    canvas.height = 1080;
+    canvas.width = 2560;
+    canvas.height = 1440;
     wrapper.append(canvas);
     const sshot = new MatchScreenshot(canvas, matchData, false);
     sshot.render();

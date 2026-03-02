@@ -218,7 +218,7 @@ export default class serverMatchScreenshot{
         c.fillStyle = "rgba(0,0,0,0.65)";
         c.fillRect(0,0, this.width, this.height);
 
-        this.fillText(this.data.gametypeName, 50, 0.5, 100, 5, "white", "center");
+        this.fillText(this.data.gametype_name, 50, 0.5, 100, 5, "white", "center");
 
 
         this.renderScoreboard();

@@ -15,12 +15,6 @@ class MatchScreenshot{
 
         this.bServerSide = bServerSide;
 
-        /*if(!this.bServerSide){
-            this.canvas = canvas.current;
-        }else{
-           // this.canvas = createCanvas(1920, 1080);
-        }*/
-
         if(typeof canvas === "string"){
             this.canvas = document.querySelector(canvas);
         }else{
