@@ -563,7 +563,7 @@ class MatchScreenshot{
     renderSmartTeam(teamId){
 
         const startX = (teamId % 2 === 0) ? 5 : 55;
-        const startY = (teamId < 2) ? 6 : 50;
+        const startY = (teamId < 2) ? 6 : 50.4;
 
         const bgShade = "rgba(0,0,0,0.45)";
         const headerBgColor = this.getTeamHeaderBGColor(teamId);
@@ -708,16 +708,24 @@ class MatchScreenshot{
 
         let index = 0;
 
+        let totalPlayers = 0;
+
+        let x = 0;
+        let y = 0;
 
         for(let i = 0; i < this.data.playerData.length; i++){
 
-            if(index > maxPlayersPerTeam - 1) return;
+            
             const p = this.data.playerData[i];
 
             if(p.team !== teamId) continue;
 
-            let y = startY + playerHeight * index;
-            let x = startX;
+            totalPlayers++
+
+            if(index > maxPlayersPerTeam - 1) continue;
+
+            y = startY + playerHeight * index;
+            x = startX;
 
             this.drawImage("/images/faceless.png", startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize);
             this.strokeRect(startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize, "rgba(255,255,255,0.5)", 0.05);
@@ -764,7 +772,6 @@ class MatchScreenshot{
                 data = this.getPlayerCTFData(p.player_id);
             }else if(bDom){
                 data = this.getPlayerDomData(p.player_id);
-                console.log(data);
             }
 
             if(data === null){
@@ -775,8 +782,6 @@ class MatchScreenshot{
             for(let z = 0; z < barNames.length; z++){
 
                 const currentKey = typeNames[z];
-
-                console.log(data, currentKey);
 
                 let value = 0;
                 let maxValue = 0;
@@ -804,12 +809,26 @@ class MatchScreenshot{
                     maxValue = this.smartMax[currentKey]?.[subType] ?? 0;
                 }
 
-                
-
                 this.renderSmartBar(barNames[z], currentKey, value, maxValue, x, y, z, displayValue);
             }
 
             index++;
+        }
+
+        if(totalPlayers > maxPlayersPerTeam){
+
+            const missingPlayers = totalPlayers - maxPlayersPerTeam;
+
+            const notShownOptions = {
+                "text": `${missingPlayers} ${plural(missingPlayers, "Player")} Not Shown.`,
+                "x": x - 3.5,
+                "y": y + playerHeight * 0.69,
+                "font": `400 ${this.scale(pingFontSize * 1.1,"y")}px Arial`,
+                "color": fontColor,
+                "textAlign": "left"
+            };
+
+            this.fillText(notShownOptions);
         }
     }
 
