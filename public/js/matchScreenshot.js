@@ -469,7 +469,7 @@ class MatchScreenshot{
         return null;
     }
 
-    renderSmartCTFBar(name, typeName, value, x, y, index){
+    renderSmartBar(name, typeName, value, x, y, index){
 
         const maxWidth = 13;
 
@@ -580,17 +580,6 @@ class MatchScreenshot{
 
         if(teamId > 1) return;
 
-        const barNames = [
-            "Caps", "Covers", "Grabs", "Returns", 
-            "Assists", "FlagKills", "Seals", "CarryTime"
-        ];
-
-        const typeNames = [
-            "flag_cap", "flag_cover", "flag_taken", "flag_return",
-            "flag_assist", "flag_kill", "flag_seal", "flag_carry_time"
-        ];
-
-
         const startX = (teamId === 0) ? 5 : 55;
         const startY = 15;
 
@@ -660,6 +649,30 @@ class MatchScreenshot{
             "y": startY + 3,
         });
 
+        await this.renderSmartPlayers(
+            startX, 
+            startY + headerHeight, 
+            playerHeight, 
+            pingFontSize,
+            fontColor,
+            width,
+            teamId
+        );
+        
+    }
+
+    async renderSmartPlayers(startX, startY, playerHeight, pingFontSize, fontColor, width, teamId){
+
+        const barNames = [
+            "Caps", "Covers", "Grabs", "Returns", 
+            "Assists", "FlagKills", "Seals", "CarryTime"
+        ];
+
+        const typeNames = [
+            "flag_cap", "flag_cover", "flag_taken", "flag_return",
+            "flag_assist", "flag_kill", "flag_seal", "flag_carry_time"
+        ];
+
         const faceIconSize = 4.6;
         const nameFontSize = 2;
         
@@ -679,7 +692,7 @@ class MatchScreenshot{
 
             if(p.team !== teamId) continue;
 
-            let y = startY + headerHeight + playerHeight * index;
+            let y = startY + playerHeight * index;
             let x = startX;
 
             await this.drawImage("/images/faceless.png", startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize);
@@ -734,7 +747,7 @@ class MatchScreenshot{
 
                 const value = ctfData[currentKey];
 
-                this.renderSmartCTFBar(barNames[z], currentKey, value, x, y, z);
+                this.renderSmartBar(barNames[z], currentKey, value, x, y, z);
             }
 
             index++;
