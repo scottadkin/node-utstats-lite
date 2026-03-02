@@ -195,7 +195,7 @@ class MatchScreenshot{
         const titleOptions = {
             "text": winnerString,
             "x": 50,
-            "y": 5,
+            "y": 3,
             "color": "yellow"
         };
 
@@ -207,7 +207,7 @@ class MatchScreenshot{
         const titleOptions = {
             "text": this.data.basic.gametype_name,
             "x": 50,
-            "y": 2,
+            "y": 0.5,
             "font": `300 ${this.scale(2.5, "y")}px Arial`,
             "textAlign": "center",
             "color": "white"
@@ -222,14 +222,6 @@ class MatchScreenshot{
             this.renderSmartCTFFooter();
             return;
         }
-
-        const endedOptions = {
-            "text": "The match has ended. Hit [Fire] to continue!",
-            "x": 50,
-            "y": 92,
-            "color": "rgb(0,255,0)",
-            "font": `300 ${this.scale(1.8, "y")}px Arial`,
-        };
 
         const footerAOptions = {
             "text": `${this.data.basic.gametype_name} in ${this.data.basic.map_name}`,
@@ -247,7 +239,18 @@ class MatchScreenshot{
             "y": 98.2
         };
 
-        this.fillText(endedOptions);
+        if(!this.bDom()){
+            const endedOptions = {
+                "text": "The match has ended. Hit [Fire] to continue!",
+                "x": 50,
+                "y": 92,
+                "color": "rgb(0,255,0)",
+                "font": `300 ${this.scale(1.8, "y")}px Arial`,
+            };
+
+            this.fillText(endedOptions);
+        }
+
         this.fillText(footerAOptions);
         this.fillText(footerBOptions);
     }
@@ -398,7 +401,28 @@ class MatchScreenshot{
         return null;
     }
 
-    renderSmartBar(name, typeName, value, x, y, index){
+    getPlayerDomData(playerId){
+
+        const found = {};
+
+        for(let i = 0; i < this.data.dom.data.length; i++){
+
+            const d = this.data.dom.data[i];
+
+            if(d.player_id !== playerId) continue;
+
+            found[d.point_id] = {
+   
+                "control_point_score": d.control_point_score,
+                "total_control_time": d.total_control_time,
+            };
+
+        }
+
+        return found;
+    }
+
+    renderSmartBar(name, typeName, value, maxValue, x, y, index, displayValue){
 
         const maxWidth = 13;
 
@@ -420,11 +444,6 @@ class MatchScreenshot{
             "maxWidth": 2.2
         };
 
-        let displayValue = value;
-
-        if(typeName === "flag_carry_time"){
-            displayValue = MMSS(value);
-        }
 
         const valueOptions = {
             "text": displayValue,
@@ -442,11 +461,11 @@ class MatchScreenshot{
 
         let totalPercent = 0;
 
-        if(this.ctfMax[typeName] > 0 && value > 0){
+        if(maxValue > 0 && value > 0){
 
-            const bit = maxWidth / this.ctfMax[typeName];
+            const bit = maxWidth / maxValue;
             barWidth = bit * value;
-            totalPercent = Math.floor(value / this.ctfMax[typeName] * 100);
+            totalPercent = Math.floor(value / maxValue * 100);
           
         }
 
@@ -505,18 +524,53 @@ class MatchScreenshot{
         return Math.floor(total / playersFound);
     }
 
-    renderSmartCTFTeam(teamId){
+    getTeamFontColour(id){
 
-        if(teamId > 1) return;
+        switch(id){
+            case 0: return redTeamColor; 
+            case 1: return blueTeamColor;
+            case 2: return greenTeamColor;
+            case 3: return yellowTeamColor; 
+        }
 
-        const startX = (teamId === 0) ? 5 : 55;
-        const startY = 15;
+        return "white";
+    }
 
-        const bgShade = "rgba(0,0,0,0.25)";
-        const headerBgColor = (teamId === 0) ? "rgba(255,0,0,0.5)" : "rgba(0,0,255,0.5)";
-        const fontColor = (teamId === 0) ? redTeamColor : blueTeamColor;
+    getTeamHeaderBGColor(id){
+
+        switch(id){
+            case 0: return "rgba(255,0,0,0.5)"; 
+            case 1: return "rgba(0,0,255,0.5)";
+            case 2: return "rgba(0,255,0,0.5)";
+            case 3: return "rgba(255,255,0,0.5)";
+        }
+
+        return "rgba(0,0,0,0.5)";
+    }
+
+    getTeamHeaderIcon(id){
+
+        switch(id){
+            case 0: return "/images/red.png"; 
+            case 1: return "/images/blue.png"; 
+            case 2: return "/images/green.png"; 
+            case 3: return "/images/yellow.png"; 
+        }
+
+        return "/images/controlpoint.png";
+    }
+
+    renderSmartTeam(teamId){
+
+        const startX = (teamId % 2 === 0) ? 5 : 55;
+        const startY = (teamId < 2) ? 6 : 50;
+
+        const bgShade = "rgba(0,0,0,0.45)";
+        const headerBgColor = this.getTeamHeaderBGColor(teamId);
+
+        const fontColor = this.getTeamFontColour(teamId);
         const headerIconSize = 3.8;
-        const headerIcon = (teamId === 0) ? "/images/red.png" : "/images/blue.png";
+        const headerIcon = this.getTeamHeaderIcon(teamId);
         const headerFont = `700 ${this.scale(4,"y")}px Arial`;
         const fpFont = `700 ${this.scale(2.5,"y")}px Arial`;
 
@@ -533,6 +587,10 @@ class MatchScreenshot{
             const p = this.data.playerData[i];
             if(p.team === teamId) totalPlayers++;
         }
+
+        const maxPlayersPerTeam = (this.data.basic.total_teams > 2) ? 4 : 8;
+
+        if(totalPlayers > maxPlayersPerTeam) totalPlayers = maxPlayersPerTeam;
 
         this.fillRect(startX, startY, width, headerHeight + playerHeight * totalPlayers, bgShade);
         this.drawImage("/images/smartctfbg.png", startX, startY, width, headerHeight);
@@ -585,22 +643,57 @@ class MatchScreenshot{
             pingFontSize,
             fontColor,
             width,
-            teamId
+            teamId,
+            maxPlayersPerTeam
         );
         
     }
 
-    async renderSmartPlayers(startX, startY, playerHeight, pingFontSize, fontColor, width, teamId){
 
-        const barNames = [
+    getSmartBarTypes(bDom, bCTF){
+
+        const ctfNames = [
             "Caps", "Covers", "Grabs", "Returns", 
             "Assists", "FlagKills", "Seals", "CarryTime"
         ];
 
-        const typeNames = [
+        const ctfTypes = [
             "flag_cap", "flag_cover", "flag_taken", "flag_return",
             "flag_assist", "flag_kill", "flag_seal", "flag_carry_time"
         ];
+
+
+        if(!bDom && !bCTF){
+            return [[],[]];
+        }
+
+        let barNames = [];
+        let typeNames = [];
+
+        if(bCTF){
+
+            barNames = ctfNames;
+            typeNames = ctfTypes;
+
+        }else if(bDom){
+
+            for(const [key, value] of Object.entries(this.data.dom.controlPoints)){
+
+                barNames.push(value, value);
+                typeNames.push(key, key);
+            }
+        }
+
+        return {barNames, typeNames};
+    }
+
+    async renderSmartPlayers(startX, startY, playerHeight, pingFontSize, fontColor, 
+        width, teamId, maxPlayersPerTeam){
+
+        const bDom = this.bDom();
+        const bCTF = this.bCTF();
+
+        const {barNames, typeNames} = this.getSmartBarTypes(bDom, bCTF);
 
         const faceIconSize = 4.6;
         const nameFontSize = 2;
@@ -615,8 +708,10 @@ class MatchScreenshot{
 
         let index = 0;
 
+
         for(let i = 0; i < this.data.playerData.length; i++){
 
+            if(index > maxPlayersPerTeam - 1) return;
             const p = this.data.playerData[i];
 
             if(p.team !== teamId) continue;
@@ -663,9 +758,16 @@ class MatchScreenshot{
 
             y += nameFontSize + barsWrapperOffsetY;
 
-            const ctfData = this.getPlayerCTFData(p.player_id);
+            let data = null;
 
-            if(ctfData === null){
+            if(bCTF){
+                data = this.getPlayerCTFData(p.player_id);
+            }else if(bDom){
+                data = this.getPlayerDomData(p.player_id);
+                console.log(data);
+            }
+
+            if(data === null){
                 index++;
                 continue;
             }
@@ -674,13 +776,49 @@ class MatchScreenshot{
 
                 const currentKey = typeNames[z];
 
-                const value = ctfData[currentKey];
+                console.log(data, currentKey);
 
-                this.renderSmartBar(barNames[z], currentKey, value, x, y, z);
+                let value = 0;
+                let maxValue = 0;
+                let displayValue = null;
+
+                
+
+                if(bCTF){
+
+                    value = data[currentKey];
+                    displayValue = value;
+                    maxValue = this.smartMax[currentKey];
+
+                    if(currentKey === "flag_carry_time"){
+                        displayValue = MMSS(value);
+                    }
+
+                }else if(bDom){
+
+                    const subType = (z % 2 === 0) ? "control_point_score" : "total_control_time";
+             
+                    value = data[currentKey]?.[subType] ?? 0;
+                    displayValue = value;
+                    if(z % 2 === 1) displayValue = MMSS(value);
+                    maxValue = this.smartMax[currentKey]?.[subType] ?? 0;
+                }
+
+                
+
+                this.renderSmartBar(barNames[z], currentKey, value, maxValue, x, y, z, displayValue);
             }
 
             index++;
         }
+    }
+
+
+    appendItemString(player, display, key){
+
+        if(player[key] === undefined || player[key] === 0) return "";
+        
+        return `${display}:${player[key]} `;
     }
 
     renderSmartTimeEffData(x, y, pingFontSize, p){
@@ -701,23 +839,22 @@ class MatchScreenshot{
             }
         }
 
+        const targetItems = [
+            {"display": "HS", "dataKey": "headshots"},
+            {"display": "SB", "dataKey": "item_belt"},
+            {"display": "AMP", "dataKey": "item_amp"},
+            {"display": "INV", "dataKey": "item_invis"},
+        ];
+
         let itemString = "";
 
-        if(p.headshots > 0){
-            itemString += `HS:${p.headshots} `
+        for(let i = 0; i < targetItems.length; i++){
+
+            const {display, dataKey} = targetItems[i];
+
+            itemString += this.appendItemString(p, display, dataKey);
         }
 
-        if(p.item_belt > 0){
-            itemString += `SB:${p.item_belt} `;
-        }
-
-        if(p.item_amp > 0){
-            itemString += `AMP:${p.item_amp}`;
-        }
-
-        if(p.item_invis > 0){
-            itemString += `INV:${p.item_invis}`;
-        }
 
         this.fillText({
             "text": itemString,
@@ -789,7 +926,6 @@ class MatchScreenshot{
 
         this.data.playerData.sort((a, b) =>{
 
-
             const first = (bLMS) ? "score" : "frags";
 
             if(a[first] > b[first]) return -1;
@@ -859,44 +995,92 @@ class MatchScreenshot{
         return this.data.ctf.playerData.length > 0;
     }
 
+
     setCTFMaxValues(){
 
-        this.ctfMax = {
-            "flag_cap": 0, 
-            "flag_cover": 0, 
-            "flag_taken": 0, 
-            "flag_return": 0, 
-            "flag_assist": 0, 
-            "flag_kill": 0,
-            "flag_carry_time": 0,
-            "flag_seal": 0
-        };
+        const keys = [
+            "cap", "cover", "taken", "return", "assist",
+            "kill"," carry_time", "seal"
+        ];
 
-        this.ctfTotals = {
-            "flag_cap": 0, 
-            "flag_cover": 0, 
-            "flag_taken": 0, 
-            "flag_return": 0, 
-            "flag_assist": 0, 
-            "flag_kill": 0,
-            "flag_carry_time": 0,
-            "flag_seal": 0
-        };
+        for(let i = 0; i < keys.length; i++){
+
+            const k = `flag_${keys[i]}`;
+       
+            this.smartMax[k] = 0;
+            this.smartTotals[k] = 0;
+        }
 
         for(let i = 0; i < this.data.ctf.playerData.length; i++){
 
             const d = this.data.ctf.playerData[i];
 
-            for(const key of Object.keys(this.ctfMax)){
+            for(const key of Object.keys(this.smartMax)){
 
                 const current = d[key];
-                const max = this.ctfMax[key];
+                const max = this.smartMax[key];
 
-                if(current > max) this.ctfMax[key] = current;
+                if(current > max) this.smartMax[key] = current;
 
-                this.ctfTotals[key] += current;
+                this.smartTotals[key] += current;
             }
         }
+    }
+
+    setDomMaxValues(){
+
+        const cPoints = this.data.dom.controlPoints;
+
+        cPoints[0] = "All";
+
+        const dataKeys = [
+            "control_point_score",
+            "total_control_time",
+        ];
+
+        for(const key of Object.keys(cPoints)){
+
+            this.smartMax[key] = {};
+            this.smartTotals[key] = {};
+
+            for(let i = 0; i < dataKeys.length; i++){
+                this.smartMax[key][dataKeys[i]] = 0;
+                this.smartTotals[key][dataKeys[i]] = 0;
+            }
+        }
+    
+        for(let i = 0; i < this.data.dom.data.length; i++){
+
+            const d = this.data.dom.data[i];
+
+            for(let x = 0; x < dataKeys.length; x++){
+
+                const k = dataKeys[x];
+
+                this.smartTotals[d.point_id][k] += d[k];
+
+                if(this.smartMax[d.point_id][k] < d[k]){
+                    this.smartMax[d.point_id][k] = d[k];
+                }
+            }
+        }
+    }
+
+    setSmartMaxValues(bCTF, bDom){
+
+        this.smartMax = {};
+        this.smartTotals = {};
+
+        if(bCTF){
+            this.setCTFMaxValues();
+        }else if(bDom){
+            this.setDomMaxValues();
+        }
+    }
+
+    bDom(){
+
+        return this.data.dom.data.length > 0;
     }
 
     renderPlayers(){
@@ -904,19 +1088,18 @@ class MatchScreenshot{
         const totalTeams = this.data.basic.total_teams;
 
         const bCTF = this.bCTF();
+        const bDom = this.bDom();
 
-        if(bCTF){
-            this.setCTFMaxValues();
-        }
+        this.setSmartMaxValues(bCTF, bDom);
 
         if(totalTeams >= 2){
 
             for(let i = 0; i < totalTeams; i++){
 
-                if(!bCTF){
+                if(!bCTF && !bDom){
                     this.renderTeam(i);
                 }else{
-                    this.renderSmartCTFTeam(i);
+                    this.renderSmartTeam(i);
                 }
             }         
             
@@ -946,10 +1129,12 @@ class MatchScreenshot{
             string = `Spectators: ${string}.`
         }
 
+        const y = (this.bDom()) ? 94 : 90;
+
         const options = {
             "text": string,
             "x": 50,
-            "y": 90,
+            "y": y,
             "font": `300 ${this.scale(1.4, "y")}px Arial`,
             "textAlign": "center",
             "color": "white"
@@ -987,8 +1172,6 @@ class MatchScreenshot{
 
         const imagePromises = [];
 
-
-        
         for(let i = 0; i < imageNames.length; i++){
 
             imagePromises.push(this.loadImage(`/images/${imageNames[i]}`));
@@ -1010,8 +1193,6 @@ class MatchScreenshot{
             this.renderTitle();
             this.renderPlayers();
             this.renderSpectators();
-
-            
 
         }catch(err){
 

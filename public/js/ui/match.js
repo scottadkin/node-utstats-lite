@@ -2250,8 +2250,6 @@ class MatchKillsGraph{
             ]
         };
 
-        console.log(data);
-
         this.graph = new Graph(
             this.canvas, 
             abortController, 
