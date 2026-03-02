@@ -2262,3 +2262,59 @@ class MatchKillsGraph{
         );
     }
 }
+
+
+class MatchJSONApiInfo{
+
+    constructor(parent, matchId){
+
+        this.parent = document.querySelector(parent);
+        this.matchId = parseInt(matchId);
+
+        this.wrapper = UIDiv();
+        UIHeader(this.parent, "Match JSON API Links");
+        this.parent.append(this.wrapper);
+
+
+        this.render();
+    }
+
+    render(){
+
+        const commands = [
+            {
+                "title": "Help", 
+                "content": "Returns a list of commands.", 
+                "url": `help/?id=0`
+            },
+            {
+                "title": "Basic", 
+                "content": "Returns data such as team scores, match length, total players and total teams.",
+                "url": `basic/?id=${this.matchId}`
+            },
+            {
+                "title": "Players", 
+                "content": "Returns all the player match data.",
+                "url": `players/?id=${this.matchId}`
+            },
+        ];
+
+
+        for(let i = 0; i < commands.length; i++){
+ 
+            const {title, content, url} = commands[i];
+
+
+            const link = document.createElement("a");
+            link.href = `/api/json/match/${url}`;
+            link.className = "api-link";
+            link.target = "_blank";
+            link.append(UIB(`${title} `), content);
+
+            this.wrapper.append(link,  UIBr());
+        }
+
+
+    }
+}
+

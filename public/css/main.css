@@ -1080,3 +1080,17 @@ canvas{
 	min-width:100px;
 	padding:0px 10px;
 }
+
+
+.api-link{
+	margin-left:auto;
+	margin-right: auto;
+	display:block;
+	font-size:var(--font-size-2);
+	background-color:var(--bg-color-2);
+	border:2px solid var(--border-color-5);
+	padding:var(--padding-1);
+	text-align: left;
+	width:var(--width-1);
+	max-width:var(--max-table-width-1width-1);
+}

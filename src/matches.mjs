@@ -900,6 +900,12 @@ export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
 
 export async function getBasicMatchJSON(id){
 
+    if(id.length === 32){
+
+        id = await getMatchIdFromHash(id);
+
+        if(id === null) throw new Error(`Not a valid match hash`);
+    }
 
     const data = await getMatch(id);
 
@@ -1054,6 +1060,13 @@ async function _createPlayerWeaponKillsJSON(matchId){
 }
 
 export async function getPlayerStatsJSON(matchId){
+
+    if(matchId.length === 32){
+        matchId = await getMatchIdFromHash(matchId);
+        if(matchId === null){
+            throw new Error(`not a valid match hash`);
+        }
+    }
 
     const result = await getPlayerMatchData(matchId);
 

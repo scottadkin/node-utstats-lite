@@ -39,6 +39,7 @@ const upload = multer({ dest: 'uploads/' })
 
 //import MySQLStore from 'express-mysql-session'
 import { mysqlSettings } from './config.mjs';
+import ApiJSON from './src/json/apiJSON.mjs';
 
 const MySQLStore = __MySQLStore(session);
 
@@ -292,6 +293,19 @@ app.post("/json/:mode", async (req, res) =>{
 		const j = new JSONManager(req, res, true);
 
 		await j.init();
+	}catch(err){
+		res.send(err.toString());
+	}
+});
+
+app.get("/api/json/:mode/:cat", async (req, res) =>{
+
+	try{
+
+		const j = new ApiJSON(req, res);
+
+		await j.init();
+
 	}catch(err){
 		res.send(err.toString());
 	}
