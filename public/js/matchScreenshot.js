@@ -491,8 +491,14 @@ class MatchScreenshot{
             "maxWidth": 2.2
         };
 
+        let displayValue = value;
+
+        if(typeName === "flag_carry_time"){
+            displayValue = MMSS(value);
+        }
+
         const valueOptions = {
-            "text": value,
+            "text": displayValue,
             "textAlign": "right",
             "color":"white",
             "x": x + offsetX + 4.3,
@@ -574,13 +580,14 @@ class MatchScreenshot{
 
         if(teamId > 1) return;
 
-
         const barNames = [
-            "Caps", "Covers", "Grabs", "Returns", "Assists", "FlagKills", "Seals", "CarryTime"
+            "Caps", "Covers", "Grabs", "Returns", 
+            "Assists", "FlagKills", "Seals", "CarryTime"
         ];
 
         const typeNames = [
-            "flag_cap", "flag_cover", "flag_taken", "flag_return", "flag_assist", "flag_kill", "flag_seal", "flag_carry_time"
+            "flag_cap", "flag_cover", "flag_taken", "flag_return",
+            "flag_assist", "flag_kill", "flag_seal", "flag_carry_time"
         ];
 
 
@@ -607,7 +614,6 @@ class MatchScreenshot{
 
             const p = this.data.playerData[i];
             if(p.team === teamId) totalPlayers++;
-
         }
 
         this.fillRect(startX, startY, width, headerHeight + playerHeight * totalPlayers, bgShade);
@@ -637,7 +643,6 @@ class MatchScreenshot{
 
         this.fillText(fpOptions);
 
-
         const teamPingAverage = this.getTeamAverageValue("ping_avg", teamId);
 
         this.fillText({
@@ -657,9 +662,14 @@ class MatchScreenshot{
 
         const faceIconSize = 4.6;
         const nameFontSize = 2;
-        const effTimeFontColor = "rgb(188,188,188)";
-        const effTimeFontSize = pingFontSize;
+        
         const faceOffsetX = 0.5;
+
+        const paddingX = 0.5;
+        const barsWrapperOffsetY = 0.5;
+
+        const flagHeight = 1.3;
+        const flagWidth = 1.4;
 
         let index = 0;
 
@@ -675,7 +685,8 @@ class MatchScreenshot{
             await this.drawImage("/images/faceless.png", startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize);
             this.strokeRect(startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize, "rgba(255,255,255,0.5)", 0.05);
 
-            await this.drawImage(`/images/flags/${(p.country !== "") ? p.country: "xx"}.svg`, x + faceOffsetX + 0.5, y + faceIconSize + 1, 1.4, 1.3);
+            const flagFile = `/images/flags/${(p.country !== "") ? p.country: "xx"}.svg`;
+            await this.drawImage(flagFile, x + faceOffsetX + paddingX, y + faceIconSize + 1, flagWidth, flagHeight);
 
 
             this.fillText({
@@ -687,8 +698,8 @@ class MatchScreenshot{
                 "textAlign": "center"
             });
 
-            x += 0.5 + 0.5 + faceIconSize * 0.5625;
-            y += 0.4;
+            x += paddingX * 2 + faceIconSize * 0.5625;
+            y += barsWrapperOffsetY;
 
             const nameOptions = {
                 "text": p.name,
@@ -702,81 +713,87 @@ class MatchScreenshot{
             this.fillText(nameOptions);
 
             nameOptions.text = `${p.kills}/${p.score}`;
-            nameOptions.x = startX + width - 0.5;
+            nameOptions.x = startX + width - paddingX;
             nameOptions.textAlign = "right"
             this.fillText(nameOptions);
 
-            const nameWidth = this.context.measureText(`${p.name} `).width;
+            this.renderSmartTimeEffData(x, y, pingFontSize, p);
 
-            const time = (p.time_on_server > 0) ? Math.floor(p.time_on_server / 60) : 1;
-            let eff = 0;
-
-            if(p.kills > 0){
-                if(p.deaths > 0){
-                    eff = parseInt(p.kills / (p.kills + p.deaths + p.team_kills + p.suicides) * 100);   
-                }
-            }
-
-            let itemString = "";
-
-            if(p.headshots > 0){
-                itemString += `HS:${p.headshots} `
-            }
-
-            if(p.item_belt > 0){
-                itemString += `SB:${p.item_belt} `;
-            }
-
-            if(p.item_amp > 0){
-                itemString += `AMP:${p.item_amp}`;
-            }
-
-            if(p.item_invis > 0){
-                itemString += `INV:${p.item_invis}`;
-            }
-
-            this.fillText({
-                "text": itemString,
-                "font": `${this.scale(effTimeFontSize,"y")}px monospace`,
-                "color": effTimeFontColor,
-                "textAlign": "left",
-                "x": x + this.reverseScale(nameWidth, "x"),
-                "y": y
-            });
-
-            this.fillText({
-                "text": `TM:${time} EFF:${eff}%`,
-                "font": `${this.scale(effTimeFontSize,"y")}px monospace`,
-                "color": effTimeFontColor,
-                "textAlign": "left",
-                "x": x + this.reverseScale(nameWidth, "x"),
-                "y": y + effTimeFontSize
-            });
-
-
-            y += nameFontSize + 0.5;
+            y += nameFontSize + barsWrapperOffsetY;
 
             const ctfData = this.getPlayerCTFData(p.player_id);
+
+            if(ctfData === null){
+                index++;
+                continue;
+            }
 
             for(let z = 0; z < barNames.length; z++){
 
                 const currentKey = typeNames[z];
 
-                let value = 0;
-
-                if(ctfData !== null){
-                    value = ctfData[currentKey];
-                }
+                const value = ctfData[currentKey];
 
                 this.renderSmartCTFBar(barNames[z], currentKey, value, x, y, z);
             }
 
             index++;
+        }
+    }
 
+    renderSmartTimeEffData(x, y, pingFontSize, p){
+
+        const effTimeFontColor = "rgb(188,188,188)";
+        const effTimeFontSize = pingFontSize;
+
+        const nameWidth = this.context.measureText(`${p.name} `).width;
+
+        const time = (p.time_on_server > 0) ? Math.floor(p.time_on_server / 60) : 1;
+        let eff = 0;
+
+        if(p.kills > 0){
+            if(p.deaths > 0){
+                eff = parseInt(p.kills / (p.kills + p.deaths + p.team_kills + p.suicides) * 100);   
+            }else{
+                eff = 100;
+            }
         }
 
+        let itemString = "";
 
+        if(p.headshots > 0){
+            itemString += `HS:${p.headshots} `
+        }
 
+        if(p.item_belt > 0){
+            itemString += `SB:${p.item_belt} `;
+        }
+
+        if(p.item_amp > 0){
+            itemString += `AMP:${p.item_amp}`;
+        }
+
+        if(p.item_invis > 0){
+            itemString += `INV:${p.item_invis}`;
+        }
+
+        this.fillText({
+            "text": itemString,
+            "font": `${this.scale(effTimeFontSize,"y")}px monospace`,
+            "color": effTimeFontColor,
+            "textAlign": "left",
+            "x": x + this.reverseScale(nameWidth, "x"),
+            "y": y
+        });
+
+        this.fillText({
+            "text": `TM:${time} EFF:${eff}%`,
+            "font": `${this.scale(effTimeFontSize,"y")}px monospace`,
+            "color": effTimeFontColor,
+            "textAlign": "left",
+            "x": x + this.reverseScale(nameWidth, "x"),
+            "y": y + effTimeFontSize
+        });
     }
 
     renderSolo(){
