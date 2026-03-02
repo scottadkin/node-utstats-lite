@@ -1409,7 +1409,7 @@ function UIMatchScreenshot(parent, matchData, bLatest){
     canvas.width = 2560;
     canvas.height = 1440;
     wrapper.append(canvas);
-    const sshot = new MatchScreenshot(canvas, matchData, false);
+    const sshot = new MatchScreenshot(canvas, matchData);
     sshot.render();
     
     parent.append(wrapper);

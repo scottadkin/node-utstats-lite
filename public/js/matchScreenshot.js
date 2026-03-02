@@ -1,5 +1,3 @@
-//import { MMSS, convertTimestamp, getWinner, getTeamName, getPlayer, bLSMGame} from "./lib/generic.mjs";
-//import { createCanvas, loadImage, createImageData } from "canvas";
 const redTeamColor = "rgb(255,0,0)";
 const blueTeamColor = "rgb(0,193,255)";
 const greenTeamColor = "rgb(0,255,0)";
@@ -7,13 +5,7 @@ const yellowTeamColor = "rgb(255,255,0)";
 
 class MatchScreenshot{
 
-    constructor(canvas, data, bServerSide){
-
-        bServerSide = false;
-
-        if(bServerSide === undefined) bServerSide = false;
-
-        this.bServerSide = bServerSide;
+    constructor(canvas, data){
 
         if(typeof canvas === "string"){
             this.canvas = document.querySelector(canvas);
@@ -23,19 +15,14 @@ class MatchScreenshot{
 
         this.context = this.canvas.getContext("2d");
 
-        if(!this.bServerSide){
-
-            this.canvas.addEventListener("click", () =>{
-                      
-                this.canvas.requestFullscreen().catch((err) =>{
-                    console.trace(err);
-                });
-                
-            });
-        }
-
+        this.canvas.addEventListener("click", () =>{
+                    
+            this.canvas.requestFullscreen().catch((err) =>{
+                console.trace(err);
+            });    
+        });
+        
         this.data = data;
-    
         this.context.textBaseline = "top";
 
     }
@@ -45,16 +32,8 @@ class MatchScreenshot{
 
         if(url === "") console.trace(err);
         
-
         return new Promise((resolve, reject) =>{
             
-
-            if(this.bServerSide){
-
-                resolve();
-                return;
-            }
-
             const image = new Image();
             image.src = url;
 
@@ -69,7 +48,7 @@ class MatchScreenshot{
         });
     }
 
-    async loadFlags(){
+    getUsedCountryFlags(){
 
         const uniqueCountries = [... new Set(this.data.playerData.map((p) =>{
             return p.country;
@@ -85,10 +64,10 @@ class MatchScreenshot{
 
             if(u === "") continue;
 
-            images.push(this.loadImage(`/images/flags/${u}.svg`));
+            images.push(`flags/${u}.svg`);
         }
 
-        return await Promise.all(images);
+        return images;
     }
 
     scale(value, axis){
@@ -149,43 +128,17 @@ class MatchScreenshot{
     }
 
 
-    async drawImage(url, x, y, width, height){
+    drawImage(url, x, y, width, height){
 
-        if(!this.bServerSide){
             
-            const image = new Image();
-            image.src = url;
+        const image = new Image();
+        image.src = url;
 
-            const [scaledX, scaledY] = this.scaleXY(x, y);
-            const [scaledWidth, scaledHeight] = this.scaleXY(width, height);
+        const [scaledX, scaledY] = this.scaleXY(x, y);
+        const [scaledWidth, scaledHeight] = this.scaleXY(width, height);
 
-            this.context.drawImage(image, scaledX, scaledY, scaledWidth, scaledHeight);
-            return true;
-        }
-
-        await this.drawServerSideImage(url, x, y, width, height);
-    }
-
-    async drawServerSideImage(url, x, y, width, height){
-
-        try{
-
-            const [scaledX, scaledY] = this.scaleXY(x, y);
-            const [scaledWidth, scaledHeight] = this.scaleXY(width, height);
-
-            //server side doesnt like the svg flag images
-            if(/^.+\.svg$/i.test(url)){
-                return;
-            }
-
-            url = `./public/${url}`;
-            
-            const image = await loadImage(url);
-            this.context.drawImage(image, scaledX, scaledY, scaledWidth, scaledHeight);
-        }catch(err){
-            console.trace(err);
-            console.log(url);
-        }
+        this.context.drawImage(image, scaledX, scaledY, scaledWidth, scaledHeight);
+        return true;
     }
 
     fillText(options){
@@ -216,24 +169,6 @@ class MatchScreenshot{
         
         this.context.fillText(options.text, x, y, this.scale(maxWidth, "x"));
 
-    }
-
-    async renderBG(){
-
-        let mapImageURL = `/images/maps/${this.data.basic.mapImage}`;
-
-        try{
-
-            await this.loadImage(mapImageURL);
-        }catch(err){
-
-            mapImageURL = `/images/maps/default.jpg`;
-            await this.loadImage(mapImageURL);
-        }
-
-        await this.drawImage(mapImageURL, 0, 0, 100, 100);
- 
-        this.fillRect(0,0, 100, 100, "rgba(0,0,0,0.66)");
     }
 
     renderWinner(){
@@ -318,7 +253,7 @@ class MatchScreenshot{
     }
 
 
-    async renderTimePing(p, startX, startY, rowHeight, index, bSolo){
+    renderTimePing(p, startX, startY, rowHeight, index, bSolo){
 
         const pingFontSize = rowHeight * 0.24;
         const pingFontRowHeight = rowHeight * 0.32;
@@ -356,7 +291,7 @@ class MatchScreenshot{
 
         if(country === "") country = "xx";
 
-        await this.drawImage(`/images/flags/${country}.svg`, startX - flagOffset, y, rowHeight * 0.5, rowHeight * 0.5);
+        this.drawImage(`/images/flags/${country}.svg`, startX - flagOffset, y, rowHeight * 0.5, rowHeight * 0.5);
         this.fillText(pingOptions);
 
         const effOptions = {
@@ -372,7 +307,7 @@ class MatchScreenshot{
         this.fillText(effOptions);
     }
 
-    async renderTeam(teamId){
+    renderTeam(teamId){
 
         const startX = (teamId % 2 === 0) ? 10 : 55;
         const startY = (teamId < 2) ? 15 : 55;
@@ -421,7 +356,7 @@ class MatchScreenshot{
             if(p.team !== teamId) continue;
             if(p.spectator) continue;
 
-            await this.renderTimePing(p, startX, startY, rowHeight, index, false);
+            this.renderTimePing(p, startX, startY, rowHeight, index, false);
 
             const nameOptions = {
                 "text": p.name,
@@ -570,7 +505,7 @@ class MatchScreenshot{
         return Math.floor(total / playersFound);
     }
 
-    async renderSmartCTFTeam(teamId){
+    renderSmartCTFTeam(teamId){
 
         if(teamId > 1) return;
 
@@ -600,9 +535,9 @@ class MatchScreenshot{
         }
 
         this.fillRect(startX, startY, width, headerHeight + playerHeight * totalPlayers, bgShade);
-        await this.drawImage("/images/smartctfbg.png", startX, startY, width, headerHeight);
+        this.drawImage("/images/smartctfbg.png", startX, startY, width, headerHeight);
         this.fillRect(startX, startY, width, headerHeight, headerBgColor);
-        await this.drawImage(headerIcon, startX + 0.5, startY + 0.5, headerIconSize * 0.5625, headerIconSize);
+        this.drawImage(headerIcon, startX + 0.5, startY + 0.5, headerIconSize * 0.5625, headerIconSize);
 
         const teamScoreOptions = {
             "text": this.data.basic[`team_${teamId}_score`],
@@ -643,7 +578,7 @@ class MatchScreenshot{
             "y": startY + 3,
         });
 
-        await this.renderSmartPlayers(
+        this.renderSmartPlayers(
             startX, 
             startY + headerHeight, 
             playerHeight, 
@@ -689,11 +624,11 @@ class MatchScreenshot{
             let y = startY + playerHeight * index;
             let x = startX;
 
-            await this.drawImage("/images/faceless.png", startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize);
+            this.drawImage("/images/faceless.png", startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize);
             this.strokeRect(startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize, "rgba(255,255,255,0.5)", 0.05);
 
             const flagFile = `/images/flags/${(p.country !== "") ? p.country: "xx"}.svg`;
-            await this.drawImage(flagFile, x + faceOffsetX + paddingX, y + faceIconSize + 1, flagWidth, flagHeight);
+            this.drawImage(flagFile, x + faceOffsetX + paddingX, y + faceIconSize + 1, flagWidth, flagHeight);
 
 
             this.fillText({
@@ -964,7 +899,7 @@ class MatchScreenshot{
         }
     }
 
-    async renderPlayers(){
+    renderPlayers(){
 
         const totalTeams = this.data.basic.total_teams;
 
@@ -979,9 +914,9 @@ class MatchScreenshot{
             for(let i = 0; i < totalTeams; i++){
 
                 if(!bCTF){
-                    await this.renderTeam(i);
+                    this.renderTeam(i);
                 }else{
-                    await this.renderSmartCTFTeam(i);
+                    this.renderSmartCTFTeam(i);
                 }
             }         
             
@@ -1023,22 +958,57 @@ class MatchScreenshot{
         this.fillText(options);
     }
 
+    renderBG(){
+
+        const mapImageURL = `/images/maps/${this.bgImage}`;
+
+        this.drawImage(mapImageURL, 0, 0, 100, 100);
+ 
+        this.fillRect(0,0, 100, 100, "rgba(0,0,0,0.66)");
+    }
+
+
+
+    async loadImages(){
+
+        this.bgImage = this.data.basic.mapImage;
+
+        const imageNames = [
+            `maps/${this.bgImage}`,
+            "smartctfbg.png",
+            "red.png",
+            "blue.png",
+            "green.png",
+            "yellow.png",
+            "faceless.png",
+        ];
+
+        imageNames.push(...this.getUsedCountryFlags());
+
+        const imagePromises = [];
+
+
+        
+        for(let i = 0; i < imageNames.length; i++){
+
+            imagePromises.push(this.loadImage(`/images/${imageNames[i]}`));
+        }
+
+        return await Promise.all(imagePromises); 
+    }
+
+
     async render(){
 
         try{
 
             this.fillRect(0, 0, 100, 100, "black");
+            await this.loadImages();
 
-            await this.renderBG();
-            await this.loadFlags();
-            await this.loadImage("/images/smartctfbg.png");
-            await this.loadImage("/images/red.png");
-            await this.loadImage("/images/blue.png");
-            await this.loadImage("/images/green.png");
-            await this.loadImage("/images/yellow.png");
-            await this.loadImage("/images/faceless.png");
+            this.renderBG();
+
             this.renderTitle();
-            await this.renderPlayers();
+            this.renderPlayers();
             this.renderSpectators();
 
             
@@ -1063,10 +1033,5 @@ class MatchScreenshot{
     async toImage(){
 
         await this.render();
-
-        if(this.bServerSide /*&& this.canvas.toBuffer !== undefined*/){
-
-            return this.canvas.toBuffer("image/jpeg");
-        }
     }
 }
