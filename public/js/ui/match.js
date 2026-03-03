@@ -2305,6 +2305,7 @@ class MatchJSONApiInfo{
             {
                 "title": "Kills-Detailed", 
                 "content": "Gets full data for each kill.",
+                "format": `timestamp, killerId, killerName, victimId, victimName, killerWeapon, victimWeapon`,
                 "url": `kills-detailed/?id=${this.matchId}`
             },
         ];
