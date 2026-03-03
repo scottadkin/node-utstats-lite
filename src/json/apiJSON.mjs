@@ -34,7 +34,7 @@ export default class ApiJSON{
 
             return await getBasicMatchJSON(id);
 
-        }else if(cat === "players"){
+        }else if(cat === "players-full"){
             return await getPlayerMatchStats(id);
         }
 

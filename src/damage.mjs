@@ -25,6 +25,7 @@ export async function getMatchDamage(matchId){
 
         const r = result[i];
         data[r.player_id] = r;
+        delete data[r.player_id].player_id; 
     }
 
     return data;

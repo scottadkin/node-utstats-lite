@@ -2295,7 +2295,7 @@ class MatchJSONApiInfo{
             {
                 "title": "Players", 
                 "content": "Returns all the player match data.",
-                "url": `players/?id=${this.matchId}`
+                "url": `players-full/?id=${this.matchId}`
             },
         ];
 

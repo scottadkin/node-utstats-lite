@@ -337,10 +337,16 @@ class MatchScreenshot{
         this.fillText(effOptions);
     }
 
-    renderTeam(teamId){
+    renderTeam(teamId, totalTeams){
 
         const startX = (teamId % 2 === 0) ? 10 : 55;
-        const startY = (teamId < 2) ? 15 : 55;
+        const startY = (teamId < 2) ? 10 : 50;
+
+        let maxPlayers = 18;
+
+        if(totalTeams > 2){
+            maxPlayers = 8;
+        }
 
         let teamColor = "white";
 
@@ -413,6 +419,7 @@ class MatchScreenshot{
 
 
             index++;
+            if(index > maxPlayers) break;
         }
     }
 
@@ -640,7 +647,7 @@ class MatchScreenshot{
         this.fillText(teamScoreOptions);
 
         const teamScoreWidth = this.measureText(this.data.basic[`team_${teamId}_score`]);
-        console.log(teamScoreWidth);
+
         const fpOptions = {
             "text": "Frags / Pts",
             "x": startX + width - 1,
@@ -1153,7 +1160,7 @@ class MatchScreenshot{
             for(let i = 0; i < totalTeams; i++){
 
                 if(!bCTF && !bDom){
-                    this.renderTeam(i);
+                    this.renderTeam(i, totalTeams);
                 }else{
                     this.renderSmartTeam(i);
                 }

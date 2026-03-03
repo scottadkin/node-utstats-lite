@@ -7,7 +7,7 @@ import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, setPlayerMapAv
 import { getMatchWeaponStats, getWeaponNames, calcMapWeaponsTotals as weaponCalcMapWeaponsTotals, updatePlayerTotals as weaponUpdatePlayerTotals } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
-import { getMatchData as domGetMatchData } from "./domination.mjs";
+import { getMatchData as domGetMatchData, getDOMMatchPlayersAPIJSON } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, getMapImageName, getHeatmapDates } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
@@ -1074,6 +1074,8 @@ export async function getPlayerStatsJSON(matchId){
 
     const ctfStats = await ctfGetMatchData(matchId, true);
 
+    const domStats = await getDOMMatchPlayersAPIJSON(matchId);
+
     const playerIds = [...new Set(result.map((r) =>{
         return r.player_id;
     }))]
@@ -1141,7 +1143,10 @@ export async function getPlayerStatsJSON(matchId){
 
         if(ctfStats[r.player_id] !== undefined){
             p.ctf = ctfStats[r.player_id] 
+        }
 
+        if(domStats[r.player_id] !== undefined){
+            p.dom = domStats[r.player_id];
         }
 
         data.push(p);

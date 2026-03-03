@@ -268,3 +268,62 @@ export async function getMatchScoreHistory(matchId){
 
     return await simpleQuery(query, [matchId]);
 }
+
+
+
+export async function getDOMMatchPlayersAPIJSON(matchId){
+
+    const query = `SELECT 
+    nstats_match_dom.player_id,
+    nstats_match_dom.point_id,
+    nstats_match_dom.total_caps,
+    nstats_match_dom.total_control_time,
+    nstats_match_dom.longest_control_time,
+    nstats_match_dom.shortest_control_time,
+    nstats_match_dom.control_percent,
+    nstats_match_dom.control_point_score,
+    nstats_match_dom.max_control_point_score,
+    nstats_match_dom.total_score_time,
+    nstats_match_dom.stolen_points,
+    nstats_match_dom.stolen_caps,
+    IF(nstats_match_dom.point_id = 0, "All", nstats_dom_control_points.name) as point_name
+    FROM nstats_match_dom 
+    LEFT JOIN nstats_dom_control_points ON nstats_dom_control_points.id = nstats_match_dom.point_id
+    WHERE nstats_match_dom.match_id=?`;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        
+        if(data[r.player_id] === undefined){
+            data[r.player_id] = {};
+        }
+
+        data[r.player_id][r.point_name] = {
+            "pointId": r.point_id,
+            "caps": {"total": r.total_caps, "stolen": r.stolenCaps},
+            "controlTime": {
+                "total": r.total_control_time,
+                "longest": r.longest_control_time,
+                "shortest": r.shortest_control_time,
+            },
+            "controlPercent": r.control_percent,
+            "points": {
+                "total": r.control_point_score,
+                "max": r.max_control_point_score,
+                "stolen": r.stolen_points
+            },
+            "scoreTime": r.total_score_time
+        };
+
+    }
+
+    return data;
+
+    
+
+}
