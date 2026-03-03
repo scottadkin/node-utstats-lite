@@ -1,4 +1,4 @@
-import { getBasicMatchJSON, getPlayerStatsJSON as getPlayerMatchStats } from "../matches.mjs";
+import { getBasicMatchJSON, getMatchIdFromHash, getMatchKillsBasicJSON, getMatchKillsDetailedJSON, getPlayerStatsJSON as getPlayerMatchStats } from "../matches.mjs";
 export default class ApiJSON{
 
     constructor(req, res){
@@ -22,6 +22,11 @@ export default class ApiJSON{
 
         let id = this.req.query.id;
 
+        if(id.length === 32){
+            id = await getMatchIdFromHash(id);
+            if(id === null) throw new Error("Not a valid match hash");
+        }
+
         if(cat === "help"){
 
             return {
@@ -35,7 +40,15 @@ export default class ApiJSON{
             return await getBasicMatchJSON(id);
 
         }else if(cat === "players-full"){
+
             return await getPlayerMatchStats(id);
+
+        }else if(cat === "kills-basic"){
+
+            return await getMatchKillsBasicJSON(id);
+
+        }else if(cat === "kills-detailed"){
+            return await getMatchKillsDetailedJSON(id);
         }
 
         return {"error": "Unknown Command"};

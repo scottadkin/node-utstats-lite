@@ -915,10 +915,11 @@ export async function getBasicMatchJSON(id){
 
     const obj = {
         "matchId": data.id,
+        "date": data.date,
         "hash": data.hash,
-        "server": data.serverName,
-        "gametype": data.gametypeName,
-        "map": data.mapName,
+        "server": data.server_name,
+        "gametype": data.gametype_name,
+        "map": data.map_name,
         "playtime": data.playtime,
         "players": data.players,
         "winners": [],
@@ -970,8 +971,8 @@ export async function getMatchKillsBasicJSON(id){
         playerIds.add(d.victim_id);
 
         kills.push([
-            d.killer_id, d.victim_id
-        ]);    
+            d.timestamp, d.killer_id, d.victim_id
+        ]); 
     }
 
     const players = await getPlayerNamesByIds([...playerIds]);
@@ -997,13 +998,34 @@ export async function getMatchKillsDetailedJSON(id){
         playerIds.add(d.victim_id);
         weaponIds.add(d.killer_weapon);
         weaponIds.add(d.victim_weapon);
-        kills.push([d.timestamp, d.killer_id, d.victim_id, d.killer_weapon, d.victim_weapon]);
+       // kills.push([d.timestamp, d.killer_id, d.victim_id, d.killer_weapon, d.victim_weapon]);
     }
 
     const players = await getPlayerNamesByIds([...playerIds]);
     const weapons = await getWeaponNames([...weaponIds]);
 
-    return {"players": players, "weapons": weapons, "kills": kills};
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const killer = players[d.killer_id] ?? "Not Found";
+        const victim = players[d.victim_id] ?? "Not Found";
+        const killerWeapon = weapons[d.killer_weapon] ?? "Not Found";
+        const victimWeapon = weapons[d.victim_weapon] ?? "Not Found";
+        /*kills.push({
+            "timestamp": d.timestamp,
+            "kId": d.killer_id,
+            "killer": players[d.killer_id] ?? "Not Found",
+            "vId": d.victim_id,
+            "victim": players[d.victim_id] ?? "Not Found",
+            "killerWeapon": weapons[d.killer_weapon] ?? "Not Found",
+            "victimWeapon": weapons[d.victim_weapon] ?? "Not Found",
+        });*/
+
+        kills.push([d.timestamp, d.killer_id, killer, d.victim_id, victim, killerWeapon, victimWeapon]);
+    }
+
+    return kills//{"players": players, "weapons": weapons, "kills": kills};
 }
 
 async function _createPlayerWeaponKillsJSON(matchId){

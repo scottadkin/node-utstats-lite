@@ -2289,13 +2289,23 @@ class MatchJSONApiInfo{
             },
             {
                 "title": "Basic", 
-                "content": "Returns data such as team scores, match length, total players and total teams.",
+                "content": "Returns data such as server,gametype,map names, team scores, match length, total players and total teams.",
                 "url": `basic/?id=${this.matchId}`
             },
             {
-                "title": "Players", 
+                "title": "Players-Full", 
                 "content": "Returns all the player match data.",
                 "url": `players-full/?id=${this.matchId}`
+            },
+            {
+                "title": "Kills-Basic", 
+                "content": "Gets the timestamp, killer, and victim ids for each kill.",
+                "url": `kills-basic/?id=${this.matchId}`
+            },
+            {
+                "title": "Kills-Detailed", 
+                "content": "Gets full data for each kill.",
+                "url": `kills-detailed/?id=${this.matchId}`
             },
         ];
 
