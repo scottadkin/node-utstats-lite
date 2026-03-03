@@ -3,7 +3,11 @@ import {getMapNames, getNameById} from "./maps.mjs";
 import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
 import { getAllNames, getServerNames } from "./servers.mjs";
 import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
-import { getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, setPlayerMapAverages, getPlayerIdsInMatch, updatePlayerTotals } from "./players.mjs";
+import { 
+    getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, 
+    setPlayerMapAverages, getPlayerIdsInMatch, updatePlayerTotals,
+    getNamesAndHashesById
+ } from "./players.mjs";
 import { getMatchWeaponStats, getWeaponNames, calcMapWeaponsTotals as weaponCalcMapWeaponsTotals, updatePlayerTotals as weaponUpdatePlayerTotals } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
@@ -962,6 +966,7 @@ export async function getMatchKillsBasicJSON(id){
     const playerIds = new Set();
 
     const kills = [];
+    const teamKills = [];
 
     for(let i = 0; i < data.length; i++){
 
@@ -971,22 +976,27 @@ export async function getMatchKillsBasicJSON(id){
         playerIds.add(d.victim_id);
     }
 
-    const players = await getPlayerNamesByIds([...playerIds]);
+    const players = await getNamesAndHashesById([...playerIds]);
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
-        const killer = players[d.killer_id] ?? "Not Found";
-        const victim = players[d.victim_id] ?? "Not Found";
-        kills.push([
-            d.timestamp, killer, victim
-        ]); 
+        const killer = players[d.killer_id]?.name ?? "Not Found";
+        const victim = players[d.victim_id]?.name ?? "Not Found";
+
+        const current = {"timestamp": d.timestamp, killer, victim};
+
+        if(d.kill_type === 0){
+            kills.push(current); 
+        }else if(d.kill_type === 1){
+            teamKills.push(current);
+        }
     }
 
     
 
-    return {players, kills};
+    return {players, kills, teamKills};
 }
 
 
@@ -998,6 +1008,7 @@ export async function getMatchKillsDetailedJSON(id){
     const weaponIds = new Set();
     
     const kills = [];
+    const teamKills = [];
 
     for(let i = 0; i < data.length; i++){
 
@@ -1010,23 +1021,38 @@ export async function getMatchKillsDetailedJSON(id){
        // kills.push([d.timestamp, d.killer_id, d.victim_id, d.killer_weapon, d.victim_weapon]);
     }
 
-    const players = await getPlayerNamesByIds([...playerIds]);
+
+    const players = await getNamesAndHashesById([...playerIds]);
+
     const weapons = await getWeaponNames([...weaponIds]);
+
+    const headToHead = {}
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
-        const killer = players[d.killer_id] ?? "Not Found";
-        const victim = players[d.victim_id] ?? "Not Found";
+        const killer = players[d.killer_id]?.name ?? "Not Found";
+        const victim = players[d.victim_id]?.name ?? "Not Found";
         const killerWeapon = weapons[d.killer_weapon] ?? "Not Found";
         const victimWeapon = weapons[d.victim_weapon] ?? "Not Found";
 
+        const current = {
+            "timestamp":d.timestamp, 
+            killer, 
+            victim, 
+            killerWeapon, 
+            victimWeapon
+        };
 
-        kills.push([d.timestamp, killer, victim, killerWeapon, victimWeapon]);
+        if(d.kill_type === 1){
+            teamKills.push(current);
+        }else if(d.kill_type === 0){
+            kills.push(current);
+        }
     }
 
-    return {players, kills};
+    return {players, kills, teamKills};
 }
 
 async function _createPlayerWeaponKillsJSON(matchId){

@@ -1306,3 +1306,24 @@ export async function getMostActivePlayers(limit){
     return await simpleQuery(query, [limit]);
 
 }
+
+
+export async function getNamesAndHashesById(playerIds){
+
+    if(playerIds.length === 0) return {};
+
+    const query = `SELECT id,hash,name FROM nstats_players WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [playerIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const {id, hash, name} = result[i];
+
+        data[id] = {name, hash}
+    }
+
+    return data;
+}

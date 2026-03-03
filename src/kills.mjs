@@ -26,14 +26,17 @@ export async function bulkInserKills(kills, matchId){
 
 export async function getMatchKills(matchId){
 
-    const query = `SELECT timestamp,killer_id,killer_weapon,victim_id,victim_weapon FROM nstats_kills WHERE match_id=? ORDER BY timestamp ASC`;
+    const query = `SELECT timestamp,killer_id,killer_weapon,
+    victim_id,victim_weapon,kill_type 
+    FROM nstats_kills WHERE match_id=? ORDER BY timestamp ASC`;
 
     return await simpleQuery(query, [matchId]);
 }
 
 export async function getMatchKillsBasic(matchId){
 
-    const query = `SELECT timestamp,killer_id,victim_id FROM nstats_kills WHERE match_id=? ORDER BY timestamp ASC`;
+    const query = `SELECT timestamp,killer_id,victim_id,kill_type
+     FROM nstats_kills WHERE match_id=? ORDER BY timestamp ASC`;
 
     return await simpleQuery(query, [matchId]);
 }
