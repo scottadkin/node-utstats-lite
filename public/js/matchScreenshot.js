@@ -2,6 +2,12 @@ const redTeamColor = "rgb(255,0,0)";
 const blueTeamColor = "rgb(0,193,255)";
 const greenTeamColor = "rgb(0,255,0)";
 const yellowTeamColor = "rgb(255,255,0)";
+const DEFAULT_SHADOW = {
+    "color": "rgba(0,0,0,0.75)",
+    "x": 0.1,
+    "y": 0.1
+}
+            
 
 class MatchScreenshot{
 
@@ -166,9 +172,30 @@ class MatchScreenshot{
         if(options.color !== undefined){
             this.context.fillStyle = options.color;
         }
+
+        
+
+        if(options.shadow !== undefined){
+
+            this.context.shadowColor = options.shadow?.color ?? DEFAULT_SHADOW.color;
+            
+            let shadowX = options.shadow?.x ?? DEFAULT_SHADOW.x;
+            let shadowY = options.shadow?.y ?? DEFAULT_SHADOW.y;
+            this.context.shadowOffsetX = this.scale(shadowX, "x");
+            this.context.shadowOffsetY = this.scale(shadowY, "y");
+
+        }else{
+            this.context.shadowOffsetX = 0;
+            this.context.shadowOffsetY = 0;
+        }
         
         this.context.fillText(options.text, x, y, this.scale(maxWidth, "x"));
 
+    }
+
+    //use after fill text
+    measureText(text){
+        return this.reverseScale(this.context.measureText(text).width, "x");
     }
 
     renderWinner(){
@@ -226,7 +253,7 @@ class MatchScreenshot{
         const footerAOptions = {
             "text": `${this.data.basic.gametype_name} in ${this.data.basic.map_name}`,
             "x": 50,
-            "y": 96,
+            "y": 96.4,
             "font": `300 ${this.scale(1.8, "y")}px Arial`,
             "color": "white"
         };
@@ -599,22 +626,32 @@ class MatchScreenshot{
 
         const teamScoreOptions = {
             "text": this.data.basic[`team_${teamId}_score`],
-            "x": startX + headerIconSize * 0.9,
+            "x": startX + headerIconSize * 0.8,
             "y": startY + 0.75,
             "font": headerFont,
             "textAlign": "left",
-            "color": fontColor
+            "color": fontColor,
+            "shadow": {
+                "x": 0.1,
+                "y": 0.1
+            }
         };
 
         this.fillText(teamScoreOptions);
 
+        const teamScoreWidth = this.measureText(this.data.basic[`team_${teamId}_score`]);
+        console.log(teamScoreWidth);
         const fpOptions = {
             "text": "Frags / Pts",
             "x": startX + width - 1,
             "y": startY + 0.75,
             "font": fpFont,
             "textAlign": "right",
-            "color": fontColor
+            "color": fontColor,
+            "shadow": {
+                "x": 0.1,
+                "y": 0.1
+            }
         };
 
         this.fillText(fpOptions);
@@ -624,7 +661,7 @@ class MatchScreenshot{
         this.fillText({
             "text": `PING: ${teamPingAverage}`,
             "font": `${this.scale(pingFontSize,"y")}px monospace`,
-            "x": startX + 6,
+            "x": startX + headerIconSize + teamScoreWidth,
             "y": startY + 2,
             "textAlign": "left",
             "color": "white"
@@ -632,7 +669,7 @@ class MatchScreenshot{
 
         this.fillText({
             "text": `TM: ${Math.floor(this.data.basic.playtime / 60)}`,
-            "x": startX + 6,
+            "x": startX + headerIconSize + teamScoreWidth,
             "y": startY + 3,
         });
 
@@ -1148,7 +1185,7 @@ class MatchScreenshot{
             string = `Spectators: ${string}.`
         }
 
-        const y = (this.bDom()) ? 94 : 90;
+        const y = (this.bDom()) ? 94.8 : 90;
 
         const options = {
             "text": string,
