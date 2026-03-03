@@ -2283,44 +2283,155 @@ class MatchJSONApiInfo{
 
         const commands = [
             {
-                "title": "Help", 
-                "content": "Returns a list of commands.", 
-                "url": `help/?id=0`
-            },
-            {
-                "title": "Basic", 
-                "content": "Returns data such as server,gametype,map names, team scores, match length, total players and total teams.",
+                "title": "basic", 
+                //"content": "Returns data such as server,gametype,map names, team scores, match length, total players and total teams.",
+                "format": [
+                    UICodeLine(UIB("{")),
+                    UICodeLine(`"id": 145,`, 1),
+                    UICodeLine(`"date": "1999-12-01T19:22:22.000Z",`,1),
+                    UICodeLine(`"hash": "0123456789",`,1),
+                    UICodeLine(`"server": "Another UT Server",`,1),
+                    UICodeLine(`"gametype": "Capture the Flag",`,1),
+                    UICodeLine(`"map": "CTF-Face",`,1),
+                    UICodeLine(`"playtime": 1199.74,`,1),
+                    UICodeLine(`"players": 10,`,1),
+                    UICodeLine(`"winners": [`, 1),
+
+                        UICodeLine(`"Red"`, 2),
+                    UICodeLine(`],`,1),
+                    UICodeLine(`"bInstagib": false,`,1),
+                    UICodeLine(`"teams": 2,`,1),
+                    UICodeLine(`"redTeamScore": 5,`,1),
+                    UICodeLine(`"blueTeamScore": 3,`,1),
+                    UICodeLine(`"greenTeamScore": 0,`,1),
+                    UICodeLine(`"yellowTeamScore": 0,`,1),
+                    UICodeLine(UIB(`}`)),
+                    
+                ],
                 "url": `basic/?id=${this.matchId}`
             },
             {
-                "title": "Players-Full", 
-                "content": "Returns all the player match data.",
+                "title": "players-full", 
+                "format": [
+
+                    UICodeLine(UIB("{")),
+                    UICodeLine(`"name": "player",`, 1),
+                    UICodeLine(`"hash": "1234567890",`, 1),
+                    UICodeLine(`"id": 18,`, 1),
+                    UICodeLine(`"spectator": false,`, 1),
+                    UICodeLine(`"bot": false,`, 1),
+                    UICodeLine(`"country": "de",`, 1),
+                    UICodeLine(`"weaponStats": {`, 1),
+                    UICodeLine(`"Weapon Name": {`,2),
+                    UICodeLine(`"kills": 45,`, 3),
+                    UICodeLine(`"deaths": 27`, 3),
+                    UICodeLine("}",2),
+                    UICodeLine(`"general": {`,2),
+                    UICodeLine(`"score": 169,`,3),
+                    UICodeLine(`"frags": 53,`,3),
+                    UICodeLine(`"kills": 58,`,3),
+                    UICodeLine(`"deaths": 51,`,3),
+                    UICodeLine(`"suicides": 5,`,3),
+                    UICodeLine(`"teamKills": 0,`,3),
+                    UICodeLine(`"efficiency": 50.8772`,3),
+                    UICodeLine("}",2),
+                    UICodeLine(`"special": {`,2),
+                    UICodeLine(`"multis": [5, 1, 0, 0],`,3),
+                    UICodeLine(`"multiBest": 3,`,3),
+                    UICodeLine(`"sprees": [2, 0, 0, 0, 0],`,3),
+                    UICodeLine(`"spreeBest": 5,`,3),
+                    UICodeLine(`"firstBlood": false`,3),
+                    UICodeLine(`},`,2),
+                    UICodeLine(`"items": {`,2),
+                    UICodeLine(`"amp": 0`,3),
+                    UICodeLine(`"belt": 0,`,3),
+                    UICodeLine(`"boots": 0,`,3),
+                    UICodeLine(`"body": 2,`,3),
+                    UICodeLine(`"pads": 15,`,3),
+                    UICodeLine(`"invis": 0,`,3),
+                    UICodeLine(`"shp": 0`,3),
+                    UICodeLine(`}`,2)
+    ],
                 "url": `players-full/?id=${this.matchId}`
             },
             {
-                "title": "Kills-Basic", 
-                "content": "Gets the timestamp, killer, and victim ids for each kill.",
+                "title": "kills-detailed", 
+                "format": [
+                    UICodeLine(UIB("{")),
+                    UICodeLine(`"players":{`, 1),
+                    UICodeLine(`"1337": {`, 2),
+                    UICodeLine(`"hash": "0123456789",`, 3),
+                    UICodeLine(`"name": "Player1"`, 3),
+                    UICodeLine(`},`, 2),
+                    UICodeLine(`"2044": {`, 2),
+                    UICodeLine(`"hash": "9876543210",`, 3),
+                    UICodeLine(`"name": "Player2"`, 3),
+                    UICodeLine(`}`, 2),
+                    UICodeLine("},", 1),
+                    UICodeLine(`"kills": [`, 1),
+                    UICodeLine(`{`, 2),
+                    UICodeLine(`"timestamp": 125.08,`, 3),
+                    UICodeLine(`"killer": "Player1",`, 3),
+                    UICodeLine(`"victim": "Player2",`, 3),
+                    UICodeLine(`"killerWeapon": "Shock Rifle",`, 3),
+                    UICodeLine(`"vicimWeapon": "Ripper",`, 3),
+                    UICodeLine(`}`, 2),
+                    UICodeLine(`]`, 1),
+                    UICodeLine(`"teamKills": [`, 1),
+                    UICodeLine(`{`, 2),
+                    UICodeLine(`"timestamp": 999.08,`, 3),
+                    UICodeLine(`"killer": "Player1",`, 3),
+                    UICodeLine(`"victim": "Team Mate Name",`, 3),
+                    UICodeLine(`"killerWeapon": "Ripper",`, 3),
+                    UICodeLine(`"vicimWeapon": "Goldfish",`, 3),
+                    UICodeLine(`}`, 2),
+                    UICodeLine(`]`, 1),
+                    UICodeLine(UIB("}")),
+                ],
+                "url": `kills-detailed/?id=${this.matchId}`
+            },
+            {
+                "title": "kills-basic", 
+                "format": [
+                    UICodeLine("Same as kills-detailed, but missing killerWeapon and victimWeapon inside each kill/team kill"),
+                ],
                 "url": `kills-basic/?id=${this.matchId}`
             },
             {
-                "title": "Kills-Detailed", 
-                "content": "Gets full data for each kill.",
-                "format": `timestamp, killerId, killerName, victimId, victimName, killerWeapon, victimWeapon`,
-                "url": `kills-detailed/?id=${this.matchId}`
+                "title": "help", 
+                "format": [UICodeLine("Returns a list of commands.")], 
+                "url": `help/?id=0`
             },
         ];
 
 
         for(let i = 0; i < commands.length; i++){
  
-            const {title, content, url} = commands[i];
+            const {title, content, url, format} = commands[i];
 
 
             const link = document.createElement("a");
             link.href = `/api/json/match/${url}`;
             link.className = "api-link";
             link.target = "_blank";
-            link.append(UIB(`${title} `), content);
+            
+
+            const titleElem = UIDiv("api-title");
+            titleElem.append(`/api/json/match/${url}`);
+            link.append(titleElem);
+
+            if(content !== undefined){
+                link.append(content);
+            }
+
+
+            if(format !== undefined){
+                const test = UIDiv();
+
+                test.append(...format);
+                link.append(test);
+            }
+
 
             this.wrapper.append(link,  UIBr());
         }

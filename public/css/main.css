@@ -1094,3 +1094,28 @@ canvas{
 	width:var(--width-1);
 	max-width:var(--max-table-width-1width-1);
 }
+
+.code-line{
+	font-family: monospace;
+	font-size:12px;
+	background-color:rgba(0,0,0,0.4);
+	padding-left:5px;
+	padding-right:5px;
+	transition: all 0.5s;
+}
+
+.code-line:hover{
+	color:yellow;
+}
+
+.code-tab{
+	display:inline-block;
+	height:1px;
+	width:25px;
+}
+
+.api-title{
+	font-weight:600;
+	color:var(--font-color-blue);
+	margin-bottom:10px;
+}

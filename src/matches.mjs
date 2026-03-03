@@ -265,14 +265,21 @@ export async function getMatch(id){
 async function getPlayerMatchData(id){
 
 
-    const query = `SELECT id,player_id,spectator,country,bot,ping_min,ping_avg,ping_max,team,score,frags,kills,deaths,suicides,team_kills,efficiency,time_on_server,
-    ttl,spree_1,spree_2,spree_3,spree_4,spree_5,spree_best,first_blood,multi_1,multi_2,multi_3,multi_4,multi_best,headshots,
+    const query = `SELECT id,player_id,spectator,
+    country,bot,ping_min,ping_avg,ping_max,
+    team,score,frags,kills,deaths,suicides,
+    team_kills,efficiency,time_on_server,
+    ttl,spree_1,spree_2,spree_3,spree_4,
+    spree_5,spree_best,first_blood,multi_1,
+    multi_2,multi_3,multi_4,multi_best,headshots,
     item_amp,item_belt,item_boots,item_body,item_pads,item_invis,item_shp 
     FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
 
     const damageData = await getMatchDamage(id);
 
     const result = await simpleQuery(query, [id]);
+
+
 
     for(let i = 0; i < result.length; i++){
 
@@ -918,7 +925,7 @@ export async function getBasicMatchJSON(id){
     const winner = getWinner({"basic": data});
 
     const obj = {
-        "matchId": data.id,
+        "id": data.id,
         "date": data.date,
         "hash": data.hash,
         "server": data.server_name,
@@ -993,8 +1000,6 @@ export async function getMatchKillsBasicJSON(id){
             teamKills.push(current);
         }
     }
-
-    
 
     return {players, kills, teamKills};
 }
@@ -1111,7 +1116,9 @@ async function _createPlayerWeaponKillsJSON(matchId){
 export async function getPlayerStatsJSON(matchId){
 
     if(matchId.length === 32){
+
         matchId = await getMatchIdFromHash(matchId);
+
         if(matchId === null){
             throw new Error(`not a valid match hash`);
         }
@@ -1129,7 +1136,7 @@ export async function getPlayerStatsJSON(matchId){
         return r.player_id;
     }))]
 
-    const playerNames = await getPlayerNamesByIds(playerIds);
+    const playerNames = await getNamesAndHashesById(playerIds);
 
     const data = [];
 
@@ -1139,8 +1146,9 @@ export async function getPlayerStatsJSON(matchId){
 
         const p = {};
 
-        p.name = playerNames[r.player_id] ?? "Not Found";
-
+        p.name = playerNames?.[r.player_id]?.name ?? "Not Found";
+        p.hash = playerNames?.[r.player_id]?.hash ?? "";
+        p.id = r.player_id;
         p.spectator = r.spectator === 1;
         p.bot = r.bot === 1;
         p.ping = r.ping;

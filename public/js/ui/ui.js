@@ -1429,6 +1429,31 @@ function UITr(){
     return document.createElement("tr");
 }
 
+function UICodeTab(){
+
+    const elem = document.createElement("div");
+
+    elem.className = "code-tab";
+
+    return elem;
+}
+
+function UICodeLine(input, tabs){
+
+    if(tabs === undefined) tabs = 0;
+
+    const elem = document.createElement("div");
+    elem.className = "code-line";
+
+    input = [input];
+
+    for(let i = 0; i < tabs; i++){
+        input.unshift(UICodeTab());
+    }
+    elem.append(...input);
+
+    return elem;
+}
 
 
 class UITable{
