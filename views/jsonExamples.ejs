@@ -13,6 +13,26 @@
 </div>
 
 <%
+
+function renderExample(title, linkId, info, data, url, id, hash){
+
+  return `<div class="json-example">
+        <h3 id="${linkId}">
+          	${title}
+        </h3>
+        <div class="json-info">
+          	${info} 
+        </div>
+        <div class="json-link-example">
+           https://example.com/api/json/${url}${id}
+        </div>
+        <div class="json-link-example">
+            https://example.com/api/json/${url}${hash}
+        </div>
+        <code>${data}</code>
+    </div>`;
+}
+
 const basicMatch =  `{
     "id": 187,
     "date": "2026-03-03T14:53:55.000Z",
@@ -152,9 +172,245 @@ const matchKillsDetailed = `{
   ],
   "teamKills": []
 }`;
+
+
+const playersFullData = `
+//ctf match
+[{
+    "name": "Player",
+    "hash": "8806517a2f1e4aa699fff2f09b067a92",
+    "id": 17,
+    "spectator": false,
+    "bot": false,
+    "country": "de",
+    "playtime": 1199.74,
+    "team": "Red",
+    "matchResult": "Winner",
+    "weaponStats": {
+      "Shock Rifle": {
+        "kills": 46,
+        "deaths": 41
+      },
+      "Translocator": {
+        "kills": 1,
+        "deaths": 8
+      },
+      "Rocket Launcher": {
+        "kills": 6,
+        "deaths": 5
+      },
+      "Sniper Rifle": {
+        "kills": 2,
+        "deaths": 2
+      },
+      "Enforcer": {
+        "kills": 0,
+        "deaths": 1
+      },
+      "Flak Cannon": {
+        "kills": 1,
+        "deaths": 1
+      }
+    },
+    "frags": {
+      "score": 164,
+      "frags": 53,
+      "kills": 56,
+      "headshots": 1,
+      "deaths": 58,
+      "suicides": 3,
+      "teamKills": 0,
+      "efficiency": 47.8632,
+      "net": -2
+    },
+    "special": {
+      "multis": {
+        "double": 6,
+        "multi": 0,
+        "ultra": 0,
+        "monster": 0,
+        "best": 2
+      },
+      "sprees": {
+        "spree": 1,
+        "rampage": 0,
+        "dominating": 0,
+        "unstoppable": 0,
+        "godlike": 0,
+        "best": 6
+      },
+      "firstBlood": true
+    },
+    "items": {
+      "amp": 0,
+      "belt": 1,
+      "boots": 0,
+      "body": 15,
+      "pads": 3,
+      "invis": 0,
+      "shp": 0
+    },
+    "ctf": {
+      "taken": 0,
+      "pickup": 2,
+      "drop": 2,
+      "assist": 0,
+      "cover": 0,
+      "seal": 3,
+      "cap": 0,
+      "kill": 21,
+      "return": 21,
+      "returnTypes": {
+        "base": 19,
+        "mid": 1,
+        "enemyBase": 1,
+        "save": 0
+      }
+    }
+},... rest of players in match]
+
+//domination match
+
+[
+{
+    "name": "Ooper",
+    "hash": "f789d64fdb64f0eb3db2100edde4e9aa",
+    "id": 27,
+    "spectator": false,
+    "bot": false,
+    "country": "",
+    "playtime": 1212.1,
+    "team": "Red",
+    "matchResult": "Winner",
+    "weaponStats": {
+      "Enhanced Shock Rifle": {
+        "kills": 629,
+        "deaths": 32
+      },
+      "None": {
+        "kills": 13,
+        "deaths": 0
+      }
+    },
+    "frags": {
+      "score": 808,
+      "frags": 642,
+      "kills": 642,
+      "headshots": 0,
+      "deaths": 32,
+      "suicides": 0,
+      "teamKills": 0,
+      "efficiency": 95.2522,
+      "net": 610
+    },
+    "special": {
+      "multis": {
+        "double": 21,
+        "multi": 9,
+        "ultra": 11,
+        "monster": 39,
+        "best": 27
+      },
+      "sprees": {
+        "spree": 7,
+        "rampage": 1,
+        "dominating": 1,
+        "unstoppable": 2,
+        "godlike": 11,
+        "best": 91
+      },
+      "firstBlood": false
+    },
+    "items": {
+      "amp": 0,
+      "belt": 0,
+      "boots": 0,
+      "body": 0,
+      "pads": 0,
+      "invis": 0,
+      "shp": 0
+    },
+    "dom": {
+      "All": {
+        "pointId": 0,
+        "caps": {
+          "total": 69
+        },
+        "controlTime": {
+          "total": 893.982,
+          "longest": 62.2545,
+          "shortest": 0.218182
+        },
+        "controlPercent": 25.0481,
+        "points": {
+          "total": 168.8,
+          "max": 12.2,
+          "stolen": 10.4
+        },
+        "scoreTime": 794.473
+      },
+      "Arturo's": {
+        "pointId": 1,
+        "caps": {
+          "total": 19
+        },
+        "controlTime": {
+          "total": 216.718,
+          "longest": 44.2455,
+          "shortest": 0.263636
+        },
+        "controlPercent": 18.1813,
+        "points": {
+          "total": 40.4,
+          "max": 8.4,
+          "stolen": 3.2
+        },
+        "scoreTime": 198.536
+      },
+      "Rooftop": {
+        "pointId": 2,
+        "caps": {
+          "total": 21
+        },
+        "controlTime": {
+          "total": 140.845,
+          "longest": 20.4909,
+          "shortest": 0.218182
+        },
+        "controlPercent": 11.8209,
+        "points": {
+          "total": 24.6,
+          "max": 4,
+          "stolen": 3.4
+        },
+        "scoreTime": 107.273
+      },
+      "Garage": {
+        "pointId": 3,
+        "caps": {
+          "total": 29
+        },
+        "controlTime": {
+          "total": 536.418,
+          "longest": 62.2545,
+          "shortest": 0.327273
+        },
+        "controlPercent": 45.2451,
+        "points": {
+          "total": 103.8,
+          "max": 12.2,
+          "stolen": 3.8
+        },
+        "scoreTime": 488.664
+      }
+    }
+  }]
+`;
+
 %>
 <div id="root">
-    <div class="info">
+
+	<div class="info">
         View examples of the various JSON API commands.
     </div>
     <div class="header-wrapper" id="match">
@@ -163,54 +419,51 @@ const matchKillsDetailed = `{
     <div class="info">
         When fetching match data you can use either the match id, or the match perma link hash.
     </div>
-    <div class="json-example">
-        <h3 id="match-basic">
-            Basic
-        </h3>
-        <div class="json-info">
-            Returns data about the match such as server, gametype, map, total players, total teams, winners.
-            
-        </div>
-        <div class="json-link-example">
-            https://example.com/api/json/match/basic/?id=1050
-        </div>
-        <div class="json-link-example">
-            https://example.com/api/json/match/basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be
-        </div>
-        <code><%- basicMatch %></code>
-    </div>
+  	<%- 
+		renderExample(
+			"Basic",
+			"match-basic", 
+			"Returns data about the match such as server, gametype, map, total players, total teams, winners.",
+			basicMatch, 
+			`match/basic/?id=`, 
+			187, 
+			"ca5eda2e6a2e49c3a4707aac1c7d19be"
+		); 
+	%> 
+	<%-
+	renderExample(
+			"Players Full",
+			"match-players-full", 
+			"Returns detailed data for every player(spectators are ignored), this includes CTF stats and Domination stats if applicable.",
+			playersFullData, 
+			`match/players-full/?id=`, 
+			187, 
+			"ca5eda2e6a2e49c3a4707aac1c7d19be"
+		); 
+	%>
+	<%-
+	renderExample(
+			"Kills Basic",
+			"match-kills-basic", 
+			"Returns player list, every kill, and team kill.",
+			matchKillsBasic, 
+			`match/kills-basic/?id=`, 
+			187, 
+			"ca5eda2e6a2e49c3a4707aac1c7d19be"
+		); 
+	%>
 
-    <div class="json-example">
-        <h3 id="match-kills-basic">
-            Kills Basic
-        </h3>
-        <div class="json-info">
-            Info
-        </div>
-        <div class="json-link-example">
-            https://example.com/api/json/match/kills-basic/?id=1050
-        </div>
-        <div class="json-link-example">
-            https://example.com/api/json/match/kills-basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be
-        </div>
-        <code><%- matchKillsBasic %></code>
-    </div>
-
-    <div class="json-example">
-        <h3 id="match-kills-detailed">
-            Kills Detailed
-        </h3>
-        <div class="json-info">
-            Info
-        </div>
-        <div class="json-link-example">
-            https://example.com/api/json/match/kills-detailed/?id=1050
-        </div>
-        <div class="json-link-example">
-            https://example.com/api/json/match/kills-detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be
-        </div>
-        <code><%- matchKillsDetailed %></code>
-    </div>
+	<%-
+	renderExample(
+			"Kills Detailed",
+			"match-kills-detailed", 
+			"Returns player list, every kill, and team kill, including what weapon both players had at the time.",
+			matchKillsDetailed, 
+			`match/kills-detailed/?id=`, 
+			187, 
+			"ca5eda2e6a2e49c3a4707aac1c7d19be"
+		); 
+	%>
 </div>
 
 <%- include("footer.ejs") -%>

@@ -272,7 +272,8 @@ async function getPlayerMatchData(id){
     ttl,spree_1,spree_2,spree_3,spree_4,
     spree_5,spree_best,first_blood,multi_1,
     multi_2,multi_3,multi_4,multi_best,headshots,
-    item_amp,item_belt,item_boots,item_body,item_pads,item_invis,item_shp 
+    item_amp,item_belt,item_boots,item_body,item_pads,item_invis,item_shp,
+    match_result 
     FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
 
     const damageData = await getMatchDamage(id);
@@ -1144,6 +1145,8 @@ export async function getPlayerStatsJSON(matchId){
 
         const r = result[i];
 
+        if(r.spectator) continue;
+
         const p = {};
 
         p.name = playerNames?.[r.player_id]?.name ?? "Not Found";
@@ -1153,36 +1156,48 @@ export async function getPlayerStatsJSON(matchId){
         p.bot = r.bot === 1;
         p.ping = r.ping;
         p.country = r.country;
+        p.playtime = r.time_on_server;
+        p.team = getTeamName(r.team);
+
+        p.matchResult = "Lost";
+
+        if(r.match_result === "w"){
+            p.matchResult = "Winner";
+        }else if(r.match_result === "d"){
+            p.matchResult = "Draw";
+        }
 
         p.weaponStats = (weaponStats[r.player_id] !== undefined) ? weaponStats[r.player_id] : {};
 
-        p.general = {
+        p.frags = {
             "score": r.score,
             "frags": r.frags,
             "kills": r.kills,
+            "headshots": r.headshots,
             "deaths": r.deaths,
             "suicides": r.suicides,
             "teamKills": r.team_kills,
             "efficiency": r.efficiency,
             "playtime": r.playtime,
+            "net": r.kills - r.deaths
         };
 
         p.special = {
-            "multis": [
-                r.multi_1,
-                r.multi_2,
-                r.multi_3,
-                r.multi_4,
-            ],
-            "multiBest": r.multi_best,
-            "sprees": [
-                r.spree_1,
-                r.spree_2,
-                r.spree_3,
-                r.spree_4,
-                r.spree_5,
-            ],
-            "spreeBest": r.spree_best,
+            "multis": {
+                "double": r.multi_1,
+                "multi": r.multi_2,
+                "ultra": r.multi_3,
+                "monster": r.multi_4,
+                "best": r.multi_best
+            },
+            "sprees": {
+                "spree": r.spree_1,
+                "rampage": r.spree_2,
+                "dominating": r.spree_3,
+                "unstoppable": r.spree_4,
+                "godlike": r.spree_5,
+                "best": r.spree_best
+            },
             "firstBlood": r.first_blood === 1
         };
 
