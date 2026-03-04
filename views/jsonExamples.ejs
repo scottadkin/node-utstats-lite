@@ -1,0 +1,216 @@
+<%- include("header.ejs", {
+        "mode": "", 
+        meta,
+        host,
+        userSession
+    });
+-%>
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/matches.js"></script>
+<script src="../js/ui/maps.js"></script>
+<div class="header-wrapper">
+    JSON API Examples
+</div>
+
+<%
+const basicMatch =  `{
+    "id": 187,
+    "date": "2026-03-03T14:53:55.000Z",
+    "hash": "ca5eda2e6a2e49c3a4707aac1c7d19be",
+    "server": "Horse Noise 60tr",
+    "gametype": "Tournament Team Game",
+    "map": "DM-SpaceNoxx",
+    "playtime": 59.1727,
+    "players": 32,
+    "winners": [
+        "Red"
+    ],
+    "bInstagib": false,
+    "teams": 2,
+    "redTeamScore": 19,
+    "blueTeamScore": 2,
+    "greenTeamScore": 0,
+    "yellowTeamScore": 0
+}`; 
+
+const matchKillsBasic = `{
+  "players": {
+    "27": {
+      "name": "Ooper",
+      "hash": "f789d64fdb64f0eb3db2100edde4e9aa"
+    },
+    "40": {
+      "name": "Cali",
+      "hash": "e3bed28b347f26bfb1d0c9b9bda2712b"
+    },
+    "81": {
+      "name": "Illana",
+      "hash": "4e6f38154b8cf9b1fc00fc497feb0ddc"
+    },
+    "84": {
+      "name": "Sarena",
+      "hash": "82f1d6311fcce730f6d77f1665f80be0"
+    }
+  },
+  "kills": [
+    {
+      "timestamp": 19.5,
+      "killer": "Sarena",
+      "victim": "Ooper"
+    },
+    {
+      "timestamp": 25.6455,
+      "killer": "Sarena",
+      "victim": "Illana"
+    },
+    {
+      "timestamp": 27.5273,
+      "killer": "Sarena",
+      "victim": "Cali"
+    },
+    {
+      "timestamp": 30.6818,
+      "killer": "Sarena",
+      "victim": "Cali"
+    },
+    {
+      "timestamp": 31.7091,
+      "killer": "Ooper",
+      "victim": "Sarena"
+    },
+    {
+      "timestamp": 37.4273,
+      "killer": "Sarena",
+      "victim": "Ooper"
+    }
+  ],
+  "teamKills": []
+}`;
+
+const matchKillsDetailed = `{
+  "players": {
+    "27": {
+      "name": "Ooper",
+      "hash": "f789d64fdb64f0eb3db2100edde4e9aa"
+    },
+    "40": {
+      "name": "Cali",
+      "hash": "e3bed28b347f26bfb1d0c9b9bda2712b"
+    },
+    "81": {
+      "name": "Illana",
+      "hash": "4e6f38154b8cf9b1fc00fc497feb0ddc"
+    },
+    "84": {
+      "name": "Sarena",
+      "hash": "82f1d6311fcce730f6d77f1665f80be0"
+    }
+  },
+  "kills": [
+    {
+      "timestamp": 19.5,
+      "killer": "Sarena",
+      "victim": "Ooper",
+      "killerWeapon": "Enforcer",
+      "victimWeapon": "Enforcer"
+    },
+    {
+      "timestamp": 25.6455,
+      "killer": "Sarena",
+      "victim": "Illana",
+      "killerWeapon": "Pulse Gun",
+      "victimWeapon": "Rocket Launcher"
+    },
+    {
+      "timestamp": 27.5273,
+      "killer": "Sarena",
+      "victim": "Cali",
+      "killerWeapon": "Pulse Gun",
+      "victimWeapon": "Minigun"
+    },
+    {
+      "timestamp": 30.6818,
+      "killer": "Sarena",
+      "victim": "Cali",
+      "killerWeapon": "Minigun",
+      "victimWeapon": "Enforcer"
+    },
+    {
+      "timestamp": 31.7091,
+      "killer": "Ooper",
+      "victim": "Sarena",
+      "killerWeapon": "Enforcer",
+      "victimWeapon": "Minigun"
+    },
+    {
+      "timestamp": 37.4273,
+      "killer": "Sarena",
+      "victim": "Ooper",
+      "killerWeapon": "Minigun",
+      "victimWeapon": "Minigun"
+    }
+  ],
+  "teamKills": []
+}`;
+%>
+<div id="root">
+    <div class="info">
+        View examples of the various JSON API commands.
+    </div>
+    <div class="header-wrapper" id="match">
+        Match Examples
+    </div>
+    <div class="info">
+        When fetching match data you can use either the match id, or the match perma link hash.
+    </div>
+    <div class="json-example">
+        <h3 id="match-basic">
+            Basic
+        </h3>
+        <div class="json-info">
+            Returns data about the match such as server, gametype, map, total players, total teams, winners.
+            
+        </div>
+        <div class="json-link-example">
+            https://example.com/api/json/match/basic/?id=1050
+        </div>
+        <div class="json-link-example">
+            https://example.com/api/json/match/basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be
+        </div>
+        <code><%- basicMatch %></code>
+    </div>
+
+    <div class="json-example">
+        <h3 id="match-kills-basic">
+            Kills Basic
+        </h3>
+        <div class="json-info">
+            Info
+        </div>
+        <div class="json-link-example">
+            https://example.com/api/json/match/kills-basic/?id=1050
+        </div>
+        <div class="json-link-example">
+            https://example.com/api/json/match/kills-basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be
+        </div>
+        <code><%- matchKillsBasic %></code>
+    </div>
+
+    <div class="json-example">
+        <h3 id="match-kills-detailed">
+            Kills Detailed
+        </h3>
+        <div class="json-info">
+            Info
+        </div>
+        <div class="json-link-example">
+            https://example.com/api/json/match/kills-detailed/?id=1050
+        </div>
+        <div class="json-link-example">
+            https://example.com/api/json/match/kills-detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be
+        </div>
+        <code><%- matchKillsDetailed %></code>
+    </div>
+</div>
+
+<%- include("footer.ejs") -%>

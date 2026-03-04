@@ -40,6 +40,7 @@ const upload = multer({ dest: 'uploads/' })
 //import MySQLStore from 'express-mysql-session'
 import { mysqlSettings } from './config.mjs';
 import ApiJSON from './src/json/apiJSON.mjs';
+import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
 
 const MySQLStore = __MySQLStore(session);
 
@@ -144,6 +145,13 @@ app.get("/map/:id", async (req, res) =>{
 app.get("/watchlist", async (req, res) =>{
 	const userSession = await getSessionInfo(req, sessionStore);
 	renderWatchlistPage(req, res, userSession);
+});
+
+app.get("/jsonexamples", async (req, res) =>{
+
+	const userSession = await getSessionInfo(req, sessionStore);
+
+	renderJSONExamples(req, res, userSession);
 });
 
 app.get("/matchshot/:id", async (req, res) =>{
