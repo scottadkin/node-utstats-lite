@@ -157,9 +157,15 @@ function UITableColumn(params){
 
     if(params.id !== undefined) elem.id = params.id;
 
-    if(params.parse != undefined){
+    if(params.parse !== undefined && Array.isArray(content)){
+        throw new Error(`You can not use parse for an array`);
+    }
+
+    if(params.parse !== undefined && !Array.isArray(content)){
 
         const parse = params.parse;
+
+
 
         if(parse.indexOf("playtime") !== -1){
             content = toPlaytime(content);
@@ -181,10 +187,9 @@ function UITableColumn(params){
 
             content = `${content}${getOrdinal(content)}`;
         }
+        
     }
 
-
-    const text = document.createTextNode(content);
 
     if(params.url !== undefined){
 
@@ -192,16 +197,17 @@ function UITableColumn(params){
         url.href = params.url;
 
         if(params.urlTarget !== undefined) url.target = params.urlTarget;
-        url.append(text);
+        url.append(content);
         elem.append(url);
 
     }else{
 
-        if(contentType != "object"){
-            elem.append(text);
-        }else{
+        if(!Array.isArray(content)){
             elem.append(content);
+        }else{
+            elem.append(...content);
         }
+        
     }
     
     return elem;
@@ -1540,4 +1546,32 @@ class UITable{
         }
     }
 
+}
+
+
+/**
+ * 
+ * @param {*} content set to null to just display url
+ * @param {*} url 
+ * @param {*} target 
+ * @returns 
+ */
+function UIA(content, url, target){
+
+    if(content === null) content = url;
+
+    const a = document.createElement("a");
+    a.href = url;
+
+    if(target !== undefined){
+        a.target = target;
+    }
+
+    if(Array.isArray(content)){
+        a.append(...content);
+    }else{
+        a.append(content);
+    }
+
+    return a;
 }
