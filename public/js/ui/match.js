@@ -2284,36 +2284,43 @@ class MatchJSONApiInfo{
         const urlBase = `/api/json/match/`;
         const data = [
             [
-                {"content": "Basic", "className": "text-left"}, 
-                {"content": UIA(null, `${urlBase}basic/?id=${this.matchHash}`, "_blank")}  
+                {"content": "Basic Match Data", "className": "text-left"}, 
+                {"content": UIA(null, `${urlBase}basic/?id=${this.matchHash}`, "_blank")} ,
+                {"content": UIA("View Example", `/jsonexamples/?mode=match#basic`, "_blank")} 
             ],
             [
-                {"content": "Players Basic", "className": "text-left"}, 
-                {"content": UIA(null, `${urlBase}players-basic/?id=${this.matchHash}`, "_blank")}        
+                {"content": "Basic Players Data", "className": "text-left"}, 
+                {"content": UIA(null, `${urlBase}players-basic/?id=${this.matchHash}`, "_blank")}    ,
+                {"content": UIA("View Example", `/jsonexamples/?mode=match#players-basic`, "_blank")}     
             ],
             [
-                {"content": "Players Full", "className": "text-left"}, 
-                {"content": UIA(null, `${urlBase}players-full/?id=${this.matchHash}`, "_blank")}        
+                {"content": "Players Detailed Data", "className": "text-left"}, 
+                {"content": UIA(null, `${urlBase}players-full/?id=${this.matchHash}`, "_blank")}   ,
+                {"content": UIA("View Example", `/jsonexamples/?mode=match#players-full`, "_blank")}      
             ],
             [
-                {"content": "Kills Detailed", "className": "text-left"}, 
+                {"content": "Kills Detailed Data", "className": "text-left"}, 
                 {"content": UIA(null, `${urlBase}kills-detailed/?id=${this.matchHash}`, "_blank")}  
+                ,
+                {"content": UIA("View Example", `/jsonexamples/?mode=match#kills-detailed`, "_blank")} 
             ],
             [
-                {"content": "Kills Basic", "className": "text-left"}, 
-                {"content": UIA(null, `${urlBase}kills-basic/?id=${this.matchHash}`, "_blank")}  
+                {"content": "Kills Basic Data", "className": "text-left"}, 
+                {"content": UIA(null, `${urlBase}kills-basic/?id=${this.matchHash}`, "_blank")} ,
+                {"content": UIA("View Example", `/jsonexamples/?mode=match#kills-basic`, "_blank")}  
             ],
             [
                 {"content": "Help", "className": "text-left"}, 
-                {"content": UIA(null, `${urlBase}help/?id=0`, "_blank")}  
+                {"content": UIA(null, `/jsonexamples/?mode=match`, "_blank")},
+                "N/A"  
             ]
         ];
         
         new UITable(
             this.wrapper,
             {
-                "width": 4,
-                "headers": ["Data", "URL"]
+                "width": 1,
+                "headers": ["Name", "URL", "Example Data"]
             },
             data
         );
