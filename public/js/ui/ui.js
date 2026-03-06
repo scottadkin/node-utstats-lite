@@ -109,16 +109,13 @@ function UIPlayerLink(params){
     if(!bTableElem && className !== "") elem.className = className;
 
     elem.href = `/player/${playerId}`;
-    const text = document.createTextNode(name ?? "Not Found");
-    elem.appendChild(UICountryFlag(country));
-    elem.appendChild(text);
-
+    elem.append(UICountryFlag(country), name);
 
     if(!bTableElem) return elem;
 
     const wrapper = document.createElement((bHeaderElem) ? "th" : "td");
     if(className !== "") wrapper.className = className;
-    wrapper.appendChild(elem);
+    wrapper.append(elem);
     return wrapper;
 }
 

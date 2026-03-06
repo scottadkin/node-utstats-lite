@@ -1106,18 +1106,18 @@ class CTFCaps{
         this.title = document.createElement("div");
         this.title.className = "header-wrapper";
         this.title.innerHTML = "Capture The Flag Caps";
-        this.wrapper.appendChild(this.title);
+        this.wrapper.append(this.title);
 
         this.content = document.createElement("div");
-        this.content.className = "ctf-caps";
+        this.content.className = "ctf-cap";
 
-        this.wrapper.appendChild(this.content);
+        this.wrapper.append(this.content);
 
         this.createButtonWrapper();
        
         this.createCapWrapper();
 
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
         this.render();
     }
@@ -1127,21 +1127,21 @@ class CTFCaps{
         this.buttonsWrapper = document.createElement("div");
         this.buttonsWrapper.className = "ctf-cap-buttons";
 
-        this.content.appendChild(this.buttonsWrapper);
+        this.content.append(this.buttonsWrapper);
 
         this.pageInfo = document.createElement("div");
-        this.buttonsWrapper.appendChild(this.pageInfo);
+        this.buttonsWrapper.append(this.pageInfo);
 
 
         const buttons = document.createElement("div");
         buttons.className = "duo";
 
-        this.buttonsWrapper.appendChild(buttons);
+        this.buttonsWrapper.append(buttons);
 
         const previous = document.createElement("button");
         previous.innerHTML = "Previous Cap";
         previous.className = "big-button";
-        buttons.appendChild(previous);
+        buttons.append(previous);
 
         previous.addEventListener("click", () =>{
 
@@ -1160,13 +1160,13 @@ class CTFCaps{
             this.render();
         })
 
-        buttons.appendChild(next);
+        buttons.append(next);
     }
 
     createCapWrapper(){
 
         this.capWrapper = document.createElement("div");
-        this.capWrapper.className = "ctf-cap"; //set team color to current team cap
+        //this.capWrapper.className = "ctf-cap"; //set team color to current team cap
 
         this.teamScores = document.createElement("div");
         this.teamScores.className = "basic-team-scores duo";
@@ -1174,29 +1174,30 @@ class CTFCaps{
         this.redScore = document.createElement("div");
         this.redScore.className = "team-red basic-team-score text-center";
         //this.redScore.innerHTML = this.currentScores[0];
-        this.teamScores.appendChild(this.redScore);
+        this.teamScores.append(this.redScore);
 
         this.blueScore = document.createElement("div");
         this.blueScore.className = "team-blue basic-team-score text-center";
         //this.blueScore.innerHTML = this.currentScores[1];
-        this.teamScores.appendChild(this.blueScore);
+        this.teamScores.append(this.blueScore);
 
         this.cappedBy = document.createElement("div");
         this.cappedBy.className = "padding-1";
 
-        this.capWrapper.appendChild(this.teamScores);
-        this.capWrapper.appendChild(this.cappedBy);
+        this.capWrapper.append(this.teamScores);
+        this.capWrapper.append(this.cappedBy);
 
         this.capInfo = document.createElement("div");
         this.capInfo.className = "cap-info text-center";
-        this.capWrapper.appendChild(this.capInfo);
-        this.wrapper.appendChild(this.capWrapper);
+        this.capWrapper.append(this.capInfo);
+        this.content.append(this.capWrapper);
 
         this.killsElem = document.createElement("div");
         this.suicidesElem = document.createElement("div");
 
-        this.capWrapper.appendChild(this.killsElem);
-        this.capWrapper.appendChild(this.suicidesElem);
+        this.capWrapper.append(this.killsElem);
+        this.capWrapper.append(this.suicidesElem);
+
 
         
 
@@ -1338,24 +1339,22 @@ class CTFCaps{
         this.blueScore.innerHTML = currentScores[1];
 
         const capInfo = this.caps[this.currentCap - 1];
-
-        //this.cappedBy = "Capped by test";
-        this.cappedBy.className = `${getTeamColorClass(capInfo.capping_team)} text-center padding-1 margin-top-2 margin-bottom-2`;
+        this.cappedBy.className = ` text-center padding-1`;
 
         const capPlayer = getPlayer(this.players, capInfo.cap_player);
 
-        const capPlayerElem = UIPlayerLink({"playerId": capInfo.cap_player, "name": capPlayer.name, "country": capPlayer.country});
+        const capPlayerElem = UIPlayerLink({
+            "playerId": capInfo.cap_player, 
+            "name": UIB(capPlayer.name), 
+            "country": capPlayer.country
+        });
 
-        const textNode = document.createTextNode(` Capped the ${getTeamName(capInfo.flag_team)} Flag`);
         const capTime = document.createElement("span");
         capTime.className = "yellow-font";
-        capTime.appendChild(document.createTextNode(` ${toPlaytime(capInfo.cap_time, true)}`))
+        capTime.append(` ${toPlaytime(capInfo.cap_time, true)}`);
         this.cappedBy.innerHTML = "";
-        this.cappedBy.appendChild(capPlayerElem);
-        this.cappedBy.appendChild(textNode);
-        this.cappedBy.appendChild(capTime);
+        this.cappedBy.append(capPlayerElem, ` Capped the ${getTeamName(capInfo.flag_team)} Flag`, capTime);
 
-        
         const grabPlayer = getPlayer(this.players, capInfo.taken_player);
 
         this.capInfo.innerHTML = "";
@@ -1363,7 +1362,14 @@ class CTFCaps{
         let capString = `Taken By: ${grabPlayer.name} @ ${MMSS(capInfo.taken_timestamp)}`;
         capString += `, Capped By: ${capPlayer.name} @ ${MMSS(capInfo.cap_timestamp)}\n`;
 
-        this.capInfo.appendChild(document.createTextNode(capString));
+        this.capInfo.append(
+            `Taken By: `, UIB(grabPlayer.name), 
+            ` @ `,
+            UIB(MMSS(capInfo.taken_timestamp)),
+            ` Capped By: `,
+            UIB(capPlayer.name),` @ `,
+            UIB(MMSS(capInfo.cap_timestamp))
+        );
 
         
         this.renderCarryTimes(capInfo);
@@ -2287,6 +2293,11 @@ class MatchJSONApiInfo{
                 {"content": "Basic Match Data", "className": "text-left"}, 
                 {"content": UIA(null, `${urlBase}basic/?id=${this.matchHash}`, "_blank")} ,
                 {"content": UIA("View Example", `/jsonexamples/?mode=match#basic`, "_blank")} 
+            ],
+            [
+                {"content": "Detailed Match Data", "className": "text-left"}, 
+                {"content": UIA(null, `${urlBase}detailed/?id=${this.matchHash}`, "_blank")} ,
+                {"content": UIA("View Example", `/jsonexamples/?mode=match#detailed`, "_blank")} 
             ],
             [
                 {"content": "Basic Players Data", "className": "text-left"}, 
