@@ -36,13 +36,44 @@ const basicMatch =  `{
     "winners": [
         "Red"
     ],
+    "winnerScore": 19,
     "bInstagib": false,
     "teams": 2,
-    "redTeamScore": 19,
-    "blueTeamScore": 2,
-    "greenTeamScore": 0,
-    "yellowTeamScore": 0
+    "teamScores": {
+      "red": 19,
+      "blue": 2
+    }
 }`; 
+
+const matchDetailed = `{
+  "id": 187,
+  "hash": "ca5eda2e6a2e49c3a4707aac1c7d19be",
+  "server": "Horse Noise 60tr",
+  "gametype": "Tournament Team Game",
+  "map": "DM-SpaceNoxx",
+  "gamespeed": 100,
+  "bHardcore": true,
+  "realGamespeed": 110,
+  "bTournamentMode": true,
+  "bInsta": false,
+  "date": "2026-03-03T14:53:55.000Z",
+  "playtime": 59.1727,
+  "timeLimit": 1,
+  "targetScore": 0,
+  "matchStart": 40.8182,
+  "matchEnd": 99.9909,
+  "players": 32,
+  "teams": 2,
+  "mutators": "SmartStockBots",
+  "winners": [
+    "Red"
+  ],
+  "winnerScore": 19,
+  "teamScores": {
+    "red": 19,
+    "blue": 2
+  }
+}`;
 
 const matchKillsBasic = `{
   "players": {
@@ -542,6 +573,18 @@ const matchPlayersBasic = `[
 					[
 						"match/basic/?id=187", 
 						"match/basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+					]
+				),
+        new JSONExample(
+					this.parent, 
+					"match", 
+					"Detailed", 
+					"detailed", 
+					"Returns full data about the match, includes mutators, gamespeed, and bHardcore.", 
+					matchDetailed, 
+					[
+						"match/detailed/?id=187", 
+						"match/detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
 					]
 				),
 				new JSONExample(

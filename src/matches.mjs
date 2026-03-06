@@ -909,6 +909,107 @@ export async function getMatchJSON(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
 }
 
 
+export async function getDetailedMatchJSON(id){
+
+    const query = `SELECT
+    nstats_matches.id,
+    nstats_matches.server_id,
+    nstats_matches.gametype_id,
+    nstats_matches.map_id,
+    nstats_matches.hardcore,
+    nstats_matches.tournament_mode,
+    nstats_matches.gamespeed,
+    nstats_matches.gamespeed_real,
+    nstats_matches.insta,
+    nstats_matches.date,
+    nstats_matches.playtime,
+    nstats_matches.match_start,
+    nstats_matches.match_end,
+    nstats_matches.players,
+    nstats_matches.total_teams,
+    nstats_matches.team_0_score,
+    nstats_matches.team_1_score,
+    nstats_matches.team_2_score, 
+    nstats_matches.team_3_score,
+    nstats_matches.solo_winner,
+    nstats_matches.solo_winner_score,
+    nstats_matches.target_score,
+    nstats_matches.time_limit, 
+    nstats_matches.mutators,
+    nstats_matches.hash,
+    nstats_servers.name as server_name,
+    nstats_gametypes.name as gametype_name,
+    nstats_maps.name as map_name,
+    IF(nstats_matches.solo_winner > 0, nstats_matches.solo_winner,"") as solo_winner
+    FROM nstats_matches
+    LEFT JOIN nstats_servers ON nstats_servers.id = nstats_matches.server_id
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_matches.gametype_id
+    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_matches.map_id
+    WHERE nstats_matches.id=?    
+    `;
+
+    const result = await simpleQuery(query, [id]);
+
+    if(result.length === 0) return {"error": "Match doesn't exist"};
+
+    const r = result[0];
+
+    const data = {
+        "id": r.id,
+        "hash": r.hash,
+        "server": r.server_name ?? "Not Found",
+        "gametype": r.gametype_name ?? "Not Found",
+        "map": r.map_name ?? "Not Found",
+        "gamespeed": r.gamespeed,
+        "bHardcore": r.hardcore === 1,
+        "realGamespeed": r.gamespeed_real,
+        "bTournamentMode": r.tournament_mode === 1,
+        "bInsta": r.insta === 1,
+        "date": r.date,
+        "playtime": r.playtime,
+        "timeLimit": r.time_limit,
+        "targetScore": r.target_score,
+        "matchStart": r.match_start,
+        "matchEnd": r.match_end,
+        "players": r.players,
+        "teams": r.total_teams,
+        "mutators": r.mutators,
+        "winners": [],
+        "winnerScore": 0
+    };
+
+    if(r.total_teams > 1){
+
+        data.teamScores = {};
+
+        data.teamScores.red = r.team_0_score;
+        data.teamScores.blue = r.team_1_score;
+        if(r.total_teams > 2) data.teamScores.green = r.team_2_score;
+        if(r.total_teams > 3) data.teamScores.yellow = r.team_3_score;
+
+        const winner = getWinner({"basic": r});
+
+        data.winners.push(...winner.winners.map((w) =>{
+            data.winnerScore = r[`team_${w}_score`];
+            return getTeamName(w);
+        }));
+    }
+
+    if(parseInt(r.solo_winner) !== 0){
+
+        const winningPlayer  = await getBasicPlayerInfo([r.solo_winner]);
+
+        if(winningPlayer[r.solo_winner] !== undefined){
+
+            data.winners.push(winningPlayer[r.solo_winner].name);
+
+            data.winnerScore = r.solo_winner_score;
+        }
+    }
+
+    return data;
+}
+
 
 export async function getBasicMatchJSON(id){
 
@@ -941,10 +1042,16 @@ export async function getBasicMatchJSON(id){
     if(data.total_teams > 0){
 
         obj.teams = data.total_teams;
-        obj.redTeamScore = data.team_0_score;
-        obj.blueTeamScore = data.team_1_score;
-        obj.greenTeamScore = data.team_2_score;
-        obj.yellowTeamScore = data.team_3_score;
+        obj.teamScores = {};
+        obj.teamScores.red = data.team_0_score;
+        obj.teamScores.blue = data.team_1_score;
+
+        if(data.total_teams > 2){
+            obj.teamScores.green = data.team_2_score;
+        }
+        if(data.total_teams > 3){
+            obj.teamScores.yellow = data.team_3_score;
+        }
 
         for(let i = 0; i < winner.winners.length; i++){
 
