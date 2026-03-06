@@ -13,7 +13,7 @@ import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData, getDOMMatchPlayersAPIJSON } from "./domination.mjs";
 import md5 from "md5";
-import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, getMapImageName, getHeatmapDates } from "./generic.mjs";
+import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, getMapImageName, getHeatmapDates, toMatchResultString } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
 import { getValidGametypes, getValidMaps, deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
@@ -1114,7 +1114,42 @@ async function _createPlayerWeaponKillsJSON(matchId){
     return data;
 }
 
-export async function getPlayerStatsJSON(matchId){
+export async function getMatchBasicPlayersJSON(matchId){
+
+    const query = `SELECT nstats_match_players.player_id as id,
+    nstats_match_players.spectator,
+    nstats_match_players.country,
+    nstats_match_players.bot,
+    nstats_match_players.match_result as matchResult,
+    nstats_match_players.team,
+    nstats_match_players.score,
+    nstats_match_players.frags,
+    nstats_match_players.kills,
+    nstats_match_players.deaths,
+    nstats_match_players.time_on_server as playtime,
+    IFNULL(nstats_players.name, "Not Found") as name,
+    IFNULL(nstats_players.hash, "Not Found") as hash
+    FROM nstats_match_players
+    LEFT JOIN nstats_players on nstats_players.id = nstats_match_players.player_id
+    WHERE nstats_match_players.match_id = ? ORDER BY nstats_match_players.score DESC
+    `;
+
+    const result = await simpleQuery(query, [matchId]);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        r.team = getTeamName(r.team);
+        r.spectator = r.spectator === 1;
+        r.bot = r.bot === 1;
+
+        r.matchResult = toMatchResultString(r.matchResult); 
+    }
+
+    return result;
+}
+
+export async function getMatchFullPlayerStatsJSON(matchId){
 
     if(matchId.length === 32){
 
@@ -1159,13 +1194,7 @@ export async function getPlayerStatsJSON(matchId){
         p.playtime = r.time_on_server;
         p.team = getTeamName(r.team);
 
-        p.matchResult = "Lost";
-
-        if(r.match_result === "w"){
-            p.matchResult = "Winner";
-        }else if(r.match_result === "d"){
-            p.matchResult = "Draw";
-        }
+        p.matchResult = toMatchResultString(r.match_result);
 
         p.weaponStats = (weaponStats[r.player_id] !== undefined) ? weaponStats[r.player_id] : {};
 

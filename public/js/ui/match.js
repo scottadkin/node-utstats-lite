@@ -2288,6 +2288,10 @@ class MatchJSONApiInfo{
                 {"content": UIA(null, `${urlBase}basic/?id=${this.matchHash}`, "_blank")}  
             ],
             [
+                {"content": "Players Basic", "className": "text-left"}, 
+                {"content": UIA(null, `${urlBase}players-basic/?id=${this.matchHash}`, "_blank")}        
+            ],
+            [
                 {"content": "Players Full", "className": "text-left"}, 
                 {"content": UIA(null, `${urlBase}players-full/?id=${this.matchHash}`, "_blank")}        
             ],

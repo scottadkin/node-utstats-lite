@@ -1,4 +1,10 @@
-import { getBasicMatchJSON, getMatchIdFromHash, getMatchKillsBasicJSON, getMatchKillsDetailedJSON, getPlayerStatsJSON as getPlayerMatchStats } from "../matches.mjs";
+import { 
+    getBasicMatchJSON, getMatchIdFromHash, getMatchKillsBasicJSON, 
+    getMatchKillsDetailedJSON, getMatchFullPlayerStatsJSON,
+    getMatchBasicPlayersJSON
+
+} from "../matches.mjs";
+
 export default class ApiJSON{
 
     constructor(req, res){
@@ -41,8 +47,11 @@ export default class ApiJSON{
 
         }else if(cat === "players-full"){
 
-            return await getPlayerMatchStats(id);
+            return await getMatchFullPlayerStatsJSON(id);
 
+        }else if(cat === "players-basic"){
+            return await getMatchBasicPlayersJSON(id);
+            
         }else if(cat === "kills-basic"){
 
             return await getMatchKillsBasicJSON(id);

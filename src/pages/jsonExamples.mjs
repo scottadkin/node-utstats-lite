@@ -6,6 +6,8 @@ export async function renderJSONExamples(req, res, userSession){
 
     try{
 
+        let mode = req.query?.mode?.toLowerCase() ?? "match";
+
         const brandingSettings = await getCategorySettings("Branding");
 
         const description = brandingSettings?.["Description"] ?? "JSON examples";
@@ -18,6 +20,7 @@ export async function renderJSONExamples(req, res, userSession){
                 "image": "images/maps/default.jpg"
             },
             "host": req.headers.host,
+            mode,
             userSession
         });
     }catch(err){

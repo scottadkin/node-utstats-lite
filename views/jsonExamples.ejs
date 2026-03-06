@@ -9,29 +9,20 @@
 <div class="header-wrapper">
     JSON API Examples
 </div>
+<div id="root">
 
+	<div class="info">
+        View examples of the various JSON API commands.
+    </div>
+    <div class="header-wrapper" id="match">
+        Match Examples
+    </div>
+    <div class="info">
+        When fetching match data you can use either the match id, or the match perma link hash.
+    </div>
+</div>
 
-
-<%
-
-function renderExample(title, linkId, info, data, url, id, hash){
-
-  return `<div class="json-example">
-        <h3 id="${linkId}">
-          	${title}
-        </h3>
-        <div class="json-info">
-          	${info} 
-        </div>
-        <div class="json-link-example">
-           https://example.com/api/json/${url}${id}
-        </div>
-        <div class="json-link-example">
-            https://example.com/api/json/${url}${hash}
-        </div>
-        <code>${data}</code>
-    </div>`;
-}
+<script>
 
 const basicMatch =  `{
     "id": 187,
@@ -173,10 +164,10 @@ const matchKillsDetailed = `{
   "teamKills": []
 }`;
 
-
 const playersFullData = `
 //ctf match
-[{
+[
+  {
     "name": "Player",
     "hash": "8806517a2f1e4aa699fff2f09b067a92",
     "id": 17,
@@ -213,33 +204,33 @@ const playersFullData = `
       }
     },
     "frags": {
-      "score": 164,
-      "frags": 53,
-      "kills": 56,
-      "headshots": 1,
-      "deaths": 58,
-      "suicides": 3,
-      "teamKills": 0,
-      "efficiency": 47.8632,
-      "net": -2
+    "score": 164,
+    "frags": 53,
+    "kills": 56,
+    "headshots": 1,
+    "deaths": 58,
+    "suicides": 3,
+    "teamKills": 0,
+    "efficiency": 47.8632,
+    "net": -2
     },
     "special": {
-      "multis": {
-        "double": 6,
-        "multi": 0,
-        "ultra": 0,
-        "monster": 0,
-        "best": 2
-      },
-      "sprees": {
-        "spree": 1,
-        "rampage": 0,
-        "dominating": 0,
-        "unstoppable": 0,
-        "godlike": 0,
-        "best": 6
-      },
-      "firstBlood": true
+    "multis": {
+      "double": 6,
+      "multi": 0,
+      "ultra": 0,
+      "monster": 0,
+      "best": 2
+    },
+    "sprees": {
+      "spree": 1,
+      "rampage": 0,
+      "dominating": 0,
+      "unstoppable": 0,
+      "godlike": 0,
+      "best": 6
+    },
+    "firstBlood": true
     },
     "items": {
       "amp": 0,
@@ -267,12 +258,13 @@ const playersFullData = `
         "save": 0
       }
     }
-},... rest of players in match]
+  },... rest of players in match
+]
 
-//domination match
+  //domination match
 
 [
-{
+  {
     "name": "Ooper",
     "hash": "f789d64fdb64f0eb3db2100edde4e9aa",
     "id": 27,
@@ -293,33 +285,33 @@ const playersFullData = `
       }
     },
     "frags": {
-      "score": 808,
-      "frags": 642,
-      "kills": 642,
-      "headshots": 0,
-      "deaths": 32,
-      "suicides": 0,
-      "teamKills": 0,
-      "efficiency": 95.2522,
-      "net": 610
+    "score": 808,
+    "frags": 642,
+    "kills": 642,
+    "headshots": 0,
+    "deaths": 32,
+    "suicides": 0,
+    "teamKills": 0,
+    "efficiency": 95.2522,
+    "net": 610
     },
     "special": {
-      "multis": {
-        "double": 21,
-        "multi": 9,
-        "ultra": 11,
-        "monster": 39,
-        "best": 27
-      },
-      "sprees": {
-        "spree": 7,
-        "rampage": 1,
-        "dominating": 1,
-        "unstoppable": 2,
-        "godlike": 11,
-        "best": 91
-      },
-      "firstBlood": false
+    "multis": {
+      "double": 21,
+      "multi": 9,
+      "ultra": 11,
+      "monster": 39,
+      "best": 27
+    },
+    "sprees": {
+      "spree": 7,
+      "rampage": 1,
+      "dominating": 1,
+      "unstoppable": 2,
+      "godlike": 11,
+      "best": 91
+    },
+    "firstBlood": false
     },
     "items": {
       "amp": 0,
@@ -404,74 +396,75 @@ const playersFullData = `
         "scoreTime": 488.664
       }
     }
-  }]
+  },... rest of players in match
+]
 `;
 
-%>
-<div id="root">
+const matchPlayersBasic = `[
+  {
+    "id": 84,
+    "spectator": false,
+    "country": "",
+    "bot": true,
+    "matchResult": "Won",
+    "team": "Green",
+    "score": 5,
+    "frags": 5,
+    "kills": 5,
+    "deaths": 1,
+    "playtime": 19.4364,
+    "name": "Sarena",
+    "hash": "82f1d6311fcce730f6d77f1665f80be0"
+  },
+  {
+    "id": 27,
+    "spectator": false,
+    "country": "",
+    "bot": false,
+    "matchResult": "Lost",
+    "team": "Red",
+    "score": 1,
+    "frags": 1,
+    "kills": 1,
+    "deaths": 2,
+    "playtime": 19.5364,
+    "name": "Ooper",
+    "hash": "f789d64fdb64f0eb3db2100edde4e9aa"
+  },
+  {
+    "id": 81,
+    "spectator": false,
+    "country": "",
+    "bot": true,
+    "matchResult": "Lost",
+    "team": "Blue",
+    "score": 0,
+    "frags": 0,
+    "kills": 0,
+    "deaths": 1,
+    "playtime": 19.5364,
+    "name": "Not Found",
+    "hash": "Not Found"
+  },
+  {
+    "id": 40,
+    "spectator": false,
+    "country": "",
+    "bot": true,
+    "matchResult": "Lost",
+    "team": "Gold",
+    "score": 0,
+    "frags": 0,
+    "kills": 0,
+    "deaths": 2,
+    "playtime": 18.4455,
+    "name": "Cali",
+    "hash": "e3bed28b347f26bfb1d0c9b9bda2712b"
+  }
+]`;
 
-	<div class="info">
-        View examples of the various JSON API commands.
-    </div>
-    <div class="header-wrapper" id="match">
-        Match Examples
-    </div>
-    <div class="info">
-        When fetching match data you can use either the match id, or the match perma link hash.
-    </div>
-  	<%- 
-		renderExample(
-			"Basic",
-			"match-basic", 
-			"Returns data about the match such as server, gametype, map, total players, total teams, winners.",
-			basicMatch, 
-			`match/basic/?id=`, 
-			187, 
-			"ca5eda2e6a2e49c3a4707aac1c7d19be"
-		); 
-	%> 
-	<%-
-	renderExample(
-			"Players Full",
-			"match-players-full", 
-			"Returns detailed data for every player(spectators are ignored), this includes CTF stats and Domination stats if applicable.",
-			playersFullData, 
-			`match/players-full/?id=`, 
-			187, 
-			"ca5eda2e6a2e49c3a4707aac1c7d19be"
-		); 
-	%>
-	<%-
-	renderExample(
-			"Kills Basic",
-			"match-kills-basic", 
-			"Returns player list, every kill, and team kill.",
-			matchKillsBasic, 
-			`match/kills-basic/?id=`, 
-			187, 
-			"ca5eda2e6a2e49c3a4707aac1c7d19be"
-		); 
-	%>
+    class JSONExample{
 
-	<%-
-	renderExample(
-			"Kills Detailed",
-			"match-kills-detailed", 
-			"Returns player list, every kill, and team kill, including what weapon both players had at the time.",
-			matchKillsDetailed, 
-			`match/kills-detailed/?id=`, 
-			187, 
-			"ca5eda2e6a2e49c3a4707aac1c7d19be"
-		); 
-	%>
-</div>
-
-<script>
-
-
-	class JSONExample{
-
-		//title, linkId, info, data, url, id, hash
 		constructor(parent, category, title, linkId, info, data, exampleLinks){
 
 			this.parent = parent;
@@ -482,13 +475,14 @@ const playersFullData = `
 			this.data = data;
 			this.exampleLinks = exampleLinks;
 
-			this.wrapper = UIDiv("json-example");
+			this.wrapper = UIDiv("hidden");
 
 			this.parent.append(this.wrapper);
-			this.render();
+			this.create();
+			this.render(this.category);
 		}
 
-		render(){
+		create(){
 
 			const header = document.createElement("h3");
 			header.id = this.linkId;
@@ -513,62 +507,122 @@ const playersFullData = `
 			exampleOutput.append(this.data);
 
 			this.wrapper.append(exampleOutput);
-			
-			return;
-		this.wrapper.innerHTML = `
-			
-				
-				<div class="json-link-example">
-				https://example.com/api/json/urlid
-				</div>
-				<div class="json-link-example">
-					https://example.com/api/json/urlhash
-				</div>
-				<code>ghfhfghgfghf</code>`;
-		}
-	}
-
-	class ExampleManager{
-
-		constructor(){
-
-			this.parent = document.querySelector("#root");
-			this.mode = "match";
-
-			UIHeader(this.parent, "JSON Examples");
-			this.createTabs();
-
-			new JSONExample(this.parent, "test", "TITLE", "LINKID", "test info", `{
-    "id": 187,
-    "date": "2026-03-03T14:53:55.000Z",
-    "hash": "ca5eda2e6a2e49c3a4707aac1c7d19be",
-    "server": "Horse Noise 60tr",
-    "gametype": "Tournament Team Game",
-    "map": "DM-SpaceNoxx",
-    "playtime": 59.1727,
-    "players": 32,
-    "winners": [
-        "Red"
-    ],
-    "bInstagib": false,
-    "teams": 2,
-    "redTeamScore": 19,
-    "blueTeamScore": 2,
-    "greenTeamScore": 0,
-    "yellowTeamScore": 0
-}`, ["match/basic/?id=187", "match/basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"]);
 		}
 
-		createTabs(){
+		render(newMode){
+
+			console.log(this.category, newMode);
+
+			if(this.category === newMode){
+				this.wrapper.className = "json-example";
+			}else{
+				this.wrapper.className = "hidden";
+			}
+		}
+    }
+
+    class ExampleManager{
+
+        constructor(){
+
+            this.parent = document.querySelector("#root");
+            this.mode = "<%= mode %>";
+
+            UIHeader(this.parent, "JSON Examples");
+            this.createTabs();
+
+			this.examples = [
+				new JSONExample(
+					this.parent, 
+					"match", 
+					"Basic", 
+					"#", 
+					"Returns data about the match such as server, gametype, map, total players, total teams, winners.", 
+					basicMatch, 
+					[
+						"match/basic/?id=187", 
+						"match/basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+					]
+				),
+				new JSONExample(
+					this.parent, 
+					"match", 
+					"Players Basic", 
+					"#", 
+					"Returns all players in match, includes: id, hash, name, team, playtime, score, kills, frags, deaths, match result.", 
+					matchPlayersBasic, 
+					[
+						"match/players-basic/?id=187", 
+						"match/players-basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+					]
+				),
+				new JSONExample(
+					this.parent, 
+					"match", 
+					"Players Full", 
+					"#", 
+					"Returns detailed data for every player(spectators are ignored), this includes CTF stats and Domination stats if applicable.", 
+					playersFullData, 
+					[
+						"match/players-full/?id=187", 
+						"match/players-full/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+					]
+				),
+				new JSONExample(
+					this.parent, 
+					"match", 
+					"Kills Detailed", 
+					"#", 
+					"Returns player list, every kill, and team kill, including what weapon both players had at the time.", 
+					matchKillsDetailed, 
+					[
+						"match/kills-detailed/?id=187", 
+						"match/kills-detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+					]
+				),
+				new JSONExample(
+					this.parent, 
+					"match", 
+					"Kills Basic", 
+					"#", 
+					"Returns player list, every kill, and team kill.", 
+					matchKillsBasic, 
+					[
+						"match/kills-basic/?id=187", 
+						"match/kills-basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+					]
+				)
+			];
+
+			this.render();
+        }
+
+    	createTabs(){
 
 			const options = [
 				{"display": "Match", "value": "match"},
 				{"display": "testttt", "value": "t"},
 			];
 
-			this.tabs = new UITabs(this.parent, options, this.mode, (e) =>{
-				console.log(e);
+			this.tabs = new UITabs(this.parent, options, this.mode);
+
+			this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+				history.pushState(null, "", `/jsonexamples/?mode=${e.detail.newTab}`);
+				this.mode = e.detail.newTab;
+				this.render();
 			});
+		}
+
+
+		render(){
+
+			for(let i = 0; i < this.examples.length; i++){
+				
+				const e = this.examples[i];
+
+				e.render(this.mode);
+			}
 		}
 	}
 

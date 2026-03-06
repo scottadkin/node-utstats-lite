@@ -36,6 +36,29 @@ export function getTeamName(id){
 
     return "None";
 }
+/**
+ * 
+ * @param {*} value w,d,l,s 
+ * @returns won, lost, draw, spectator
+ */
+export function toMatchResultString(value){
+
+    value = value.toLowerCase();
+
+    if(value === "w"){
+        value = "Won";
+    }else if(value === "l"){
+        value = "Lost";
+    }else if(value === "d"){
+        value = "Draw";
+    }else if(value === "s"){
+        value = "Spectator";
+    }else{
+        value = "Unknown";
+    }   
+
+    return value;
+}
 
 export function MMSS(timestamp){
 
