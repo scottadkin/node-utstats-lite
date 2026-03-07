@@ -16,6 +16,7 @@ export default class ctfFlag{
         this.lastPickupTimestamp = null;
         this.droppedTimestamp = null;
         this.takenBy = null;
+        this.totalTimeDropped = 0;
 
         //keep track of kills while a flag is taken
         this.kills = {};
@@ -24,7 +25,7 @@ export default class ctfFlag{
         this.covers = [];
         this.drops = [];
 
-        this.returned();
+        this.reset();
     }
 
     reset(){
@@ -40,19 +41,20 @@ export default class ctfFlag{
         this.covers = [];
         this.drops = [];
         this.kills = {};
+        this.totalTimeDropped = 0;
     }
 
-    calcCarryDropTime(timestamp){
+    calcCarryTime(timestamp){
 
         let carryTime = 0;
-        let dropTime = 0;
 
         const totalTime = timestamp - this.takenTimestamp;
 
         if(this.drops.length === 0){
-            return {"carryTime": totalTime, dropTime, totalTime};
+            return {"carryTime": totalTime, totalTime};
         }
 
+        
         for(let i = 0; i < this.drops.length; i++){
 
             const d = this.drops[i];
@@ -60,14 +62,13 @@ export default class ctfFlag{
         }
 
 
-        dropTime = totalTime - carryTime;
 
-        return {carryTime, dropTime, totalTime}
+        return {carryTime, totalTime}
     }
 
     returned(timestamp, playerId){
 
-        const {carryTime, dropTime, totalTime} = this.calcCarryDropTime(timestamp);
+        const {carryTime, totalTime} = this.calcCarryTime(timestamp);
 
         this.returns.push({
             "timestamp": timestamp, 
@@ -76,7 +77,7 @@ export default class ctfFlag{
             "drops": [...this.drops],
             "playerId": playerId,
             "carryTime": carryTime,
-            "dropTime": dropTime,
+            "dropTime": this.totalTimeDropped,
             "totalTime": totalTime
         });
 
@@ -90,9 +91,9 @@ export default class ctfFlag{
 
     captured(playerManager, killsManager, timestamp, playerId, cappingTeam){
 
-        const {carryTime, dropTime, totalTime} = this.calcCarryDropTime(timestamp);
-
         this.updateLastCarrier(timestamp);
+
+        const {carryTime, totalTime} = this.calcCarryTime(timestamp);
 
         const uniqueCarriers = [...new Set(this.carriers.map((c) =>{
             return c.playerId;
@@ -117,7 +118,7 @@ export default class ctfFlag{
             "playerId": playerId,
             "cappingTeam": cappingTeam,     
             "carryTime": carryTime,
-            "dropTime": dropTime,
+            "dropTime": this.totalTimeDropped,
             "totalTime": totalTime,
             "takenBy": this.takenBy,
             "takenTimestamp": this.takenTimestamp,
@@ -138,6 +139,11 @@ export default class ctfFlag{
         }
 
         this.enemyTeam = enemyTeam;
+
+        if(!bTakenFromBase){
+
+            this.totalTimeDropped += timestamp - this.droppedTimestamp;
+        }
 
         this.bDropped = false;
 
@@ -162,6 +168,7 @@ export default class ctfFlag{
         this.updateLastCarrier(timestamp);
 
         const lastCarrier = this.carriers[this.carriers.length - 1];
+
 
         this.drops.push({"timestamp": timestamp, "playerId": playerId, "carryTime": lastCarrier.carryTime});
 

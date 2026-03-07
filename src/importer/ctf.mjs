@@ -311,6 +311,10 @@ export class CTF{
             //teamId is dependent on event type, taken/pickedup is the flag team id
             const {type, playerId, timestamp, teamId } = this.events[i];
 
+            if(type === "dropped"){
+              //  console.log(type, timestamp);
+            }
+
             const correctedTimestamp = timestamp//scalePlaytime(timestamp, bHardcore);
 
             const flag = this.flags[teamId];

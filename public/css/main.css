@@ -699,7 +699,6 @@ option{
 	text-align: center;
 	color:var(--font-color-1);
 	background-color:var(--bg-color-2);
-	border:2px solid var(--border-color-5);
 	margin-bottom:var(--margin-1);
 	max-width:var(--max-table-width-3);
 	margin-left:auto;

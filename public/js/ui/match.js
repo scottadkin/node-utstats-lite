@@ -1089,22 +1089,25 @@ function renderCTFSummary(parent, totalTeams, data, players){
 
 class CTFCaps{
 
-    constructor(parent, totalTeams, data, players){
+    constructor(parent, totalTeams, data, players, startTimestamp){
 
         if(data.playerData.length === 0) return;
 
         this.parent = document.querySelector(parent);
         this.totalTeams = totalTeams;
         this.caps = data.caps;
+
+        this.matchStart = startTimestamp;
+        console.log(this.matchStart);
+        console.log(this.caps);
         this.players = players;
 
         this.currentCap = 1;
         this.currentScores = [0,0];
 
-        this.wrapper = document.createElement("div");
+        this.wrapper = UIDiv();
 
-        this.title = document.createElement("div");
-        this.title.className = "header-wrapper";
+        this.title = UIDiv("header-wrapper");
         this.title.innerHTML = "Capture The Flag Caps";
         this.wrapper.append(this.title);
 
@@ -1121,6 +1124,7 @@ class CTFCaps{
 
         this.render();
     }
+
 
     createButtonWrapper(){
 
@@ -1253,6 +1257,7 @@ class CTFCaps{
 
 
         const elems = [
+            UIB("Display all who dropped flag and when"),
             UIB(` ${capInfo.total_drops} ${plural(capInfo.total_drops, "time")}`, "blue-font"),
             ` for a total of `,
             UIB(toPlaytime(capInfo.drop_time, true))
@@ -1355,10 +1360,14 @@ class CTFCaps{
         });
 
         const capTime = document.createElement("span");
-        capTime.append(UIB(`${toPlaytime(capInfo.cap_time, true)}`), MMSS(capInfo.taken_timestamp),"    " , MMSS(capInfo.cap_timestamp));
+        capTime.append(
+            UIB(`${toPlaytime(capInfo.cap_time, true)}`), 
+            MMSS(capInfo.taken_timestamp - this.matchStart),
+            "    " , 
+            MMSS(capInfo.cap_timestamp - this.matchStart)
+        );
 
         console.log(capInfo);
-        //this.cappedBy.append(MMSS(capInfo.cap_timestamp), ` `, capPlayerElem, ` Capped the ${getTeamName(capInfo.flag_team)} Flag `/*, capTime*/);
 
         const grabPlayer = getPlayer(this.players, capInfo.taken_player);
 
@@ -1374,7 +1383,7 @@ class CTFCaps{
         const takenContent = [
             grabPlayerElem,
             ` at `,
-            UIB(MMSS(capInfo.taken_timestamp))
+            UIB(MMSS(capInfo.taken_timestamp - this.matchStart))
         ];
 
 
@@ -1388,11 +1397,19 @@ class CTFCaps{
         this.renderDrops(capInfo);
 
         this.capInfo.append(
-            this.createCapElem("Travel Time", [capTime])
+            this.createCapElem("Travel Time", ["Not caluclated correctly?",capTime])
         );
 
         this.capInfo.append(
-            this.createCapElem("Capped By", [MMSS(capInfo.cap_timestamp), ` `, capPlayerElem, ` Capped the ${getTeamName(capInfo.flag_team)} Flag`])
+            this.createCapElem(
+                "Capped By", 
+                [
+                    UIB(MMSS(capInfo.cap_timestamp - this.matchStart)), 
+                    ` `, 
+                    capPlayerElem, 
+                    ` Capped the ${getTeamName(capInfo.flag_team)} Flag`
+                ]
+            )
         );
 
         this.renderTeamFrags(capInfo);
