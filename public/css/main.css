@@ -695,7 +695,6 @@ option{
 
 
 
-
 .ctf-cap{
 	text-align: center;
 	color:var(--font-color-1);
@@ -705,21 +704,35 @@ option{
 	max-width:var(--max-table-width-3);
 	margin-left:auto;
 	margin-right:auto;
+	font-weight:500;
 }
 
-.ctf-cap-buttons{
-	color:var(--font-color-1);
-	background-color:var(--bg-color-2);
-	max-width:var(--max-table-width-3);
-	margin-left:auto;
-	margin-right:auto;
+.ctf-cap-button{
+	font-size:var(--font-size-1);
+	background-color:var(--bg-color-3);
+	padding:var(--padding-1);
+	user-select: none;
+	border:1px solid var(--border-color-1);
+	color:white;
+	text-align: center;
+}
+
+.ctf-cap-button:hover{
+	cursor: pointer;
+	background-color:var(--bg-color-1);
+	color:yellow;
+}
+
+.ctf-cap-viewing{
+	font-size:var(--font-size-small);
+	padding:var(--padding-1);
 }
 
 .cap-info{
-	font-size:var(--font-size-5);
+	font-size:var(--font-size-4);
 	color:var(--font-color-2);
 	padding:var(--padding-1);
-	line-height:var(--line-height-3);
+	line-height:var(--line-height-1);
 	border-top:2px solid var(--border-color-5);
 	border-bottom:2px solid var(--border-color-5);
 	background-color:rgba(0,0,0,0.25);
@@ -736,22 +749,6 @@ option{
 	margin-top:-1px;
 }
 
-
-.big-button{
-	font-size:var(--font-size-1);
-	background-color:var(--bg-color-3);
-	padding:var(--padding-1);
-	user-select: none;
-	border:1px solid var(--border-color-1);
-	color:white;
-	text-align: center;
-}
-
-.big-button:hover{
-	cursor: pointer;
-	background-color:var(--bg-color-1);
-	color:yellow;
-}
 
 .box{
 	text-align:center;
@@ -1146,3 +1143,4 @@ code{
 	color:var(--font-color-blue);
 	padding:5px 0px;
 }
+

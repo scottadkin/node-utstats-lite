@@ -1129,18 +1129,19 @@ class CTFCaps{
 
         this.content.append(this.buttonsWrapper);
 
-        this.pageInfo = document.createElement("div");
-        this.buttonsWrapper.append(this.pageInfo);
+        
 
 
         const buttons = document.createElement("div");
         buttons.className = "duo";
 
         this.buttonsWrapper.append(buttons);
+        this.pageInfo = document.createElement("div");
+        this.buttonsWrapper.append(this.pageInfo);
 
         const previous = document.createElement("button");
         previous.innerHTML = "Previous Cap";
-        previous.className = "big-button";
+        previous.className = "ctf-cap-button";
         buttons.append(previous);
 
         previous.addEventListener("click", () =>{
@@ -1152,7 +1153,7 @@ class CTFCaps{
 
         const next = document.createElement("button");
         next.innerHTML = "Next Cap";
-        next.className = "big-button";
+        next.className = "ctf-cap-button";
 
         next.addEventListener("click", () =>{
             if(this.currentCap > this.caps.length - 1) return;
@@ -1166,46 +1167,32 @@ class CTFCaps{
     createCapWrapper(){
 
         this.capWrapper = document.createElement("div");
-        //this.capWrapper.className = "ctf-cap"; //set team color to current team cap
+ 
+        this.teamScores = UIDiv("basic-team-scores duo");
 
-        this.teamScores = document.createElement("div");
-        this.teamScores.className = "basic-team-scores duo";
+        this.redScore = UIDiv("team-red basic-team-score text-center");
+        this.blueScore = UIDiv("team-blue basic-team-score text-center");
 
-        this.redScore = document.createElement("div");
-        this.redScore.className = "team-red basic-team-score text-center";
-        //this.redScore.innerHTML = this.currentScores[0];
-        this.teamScores.append(this.redScore);
+        this.teamScores.append(this.redScore, this.blueScore);
 
-        this.blueScore = document.createElement("div");
-        this.blueScore.className = "team-blue basic-team-score text-center";
-        //this.blueScore.innerHTML = this.currentScores[1];
-        this.teamScores.append(this.blueScore);
+        this.cappedBy = UIDiv("padding-1");
 
-        this.cappedBy = document.createElement("div");
-        this.cappedBy.className = "padding-1";
+        this.capWrapper.append(this.teamScores, this.cappedBy);
 
-        this.capWrapper.append(this.teamScores);
-        this.capWrapper.append(this.cappedBy);
-
-        this.capInfo = document.createElement("div");
-        this.capInfo.className = "cap-info text-center";
+        this.capInfo = UIDiv("cap-info text-center");
         this.capWrapper.append(this.capInfo);
         this.content.append(this.capWrapper);
 
-        this.killsElem = document.createElement("div");
-        this.suicidesElem = document.createElement("div");
+        this.killsElem = UIDiv();
+        this.suicidesElem = UIDiv();
 
-        this.capWrapper.append(this.killsElem);
-        this.capWrapper.append(this.suicidesElem);
-
-
-        
+        this.capWrapper.append(this.killsElem, this.suicidesElem);
 
     }
 
     renderButtons(){
 
-        this.pageInfo.className = `font-small padding-1`;
+        this.pageInfo.className = `ctf-cap-viewing`;
         this.pageInfo.innerHTML = `Viewing Cap ${this.currentCap} of ${this.caps.length}`;     
     }
 
@@ -1213,22 +1200,29 @@ class CTFCaps{
 
         if(capInfo.carryTimes.length <= 1) return;
 
-        this.capInfo.appendChild(document.createElement("br"));
+        this.capInfo.append(UIBr());
         let carriedByString = "Carried By: ";
+
+        const elems = [
+            `Carried By: `
+        ];
 
         for(let i = 0; i < capInfo.carryTimes.length; i++){
 
             const c = capInfo.carryTimes[i];
 
             const p = getPlayer(this.players, c.player_id);
-            carriedByString += `${p.name} ${toPlaytime(c.carry_time, true)}`;
+
+            elems.push(UIB(`${p.name} `, "blue-font"), UIB(toPlaytime(c.carry_time, true)));
 
             if(i < capInfo.carryTimes.length - 1){
+
+                elems.push(`, `);
                 carriedByString += `, `;
             }
         }
 
-        this.capInfo.appendChild(document.createTextNode(carriedByString));
+        this.capInfo.append(...elems);
     
     }
 
@@ -1237,35 +1231,40 @@ class CTFCaps{
 
         if(capInfo.covers.length === 0) return;
 
-        let string = "Covered By: ";
+        const elems = ["Covered By: "];
 
-        this.capInfo.appendChild(document.createElement("br"));
-
+        this.capInfo.append(UIBr());
 
         let players = 0;
 
         for(const [playerId, covers] of Object.entries(capInfo.covers)){
 
-            if(players > 0) string += `, `;
-
             const player = getPlayer(this.players, playerId);
 
-            string += `${player.name} (${covers.length})` 
+            if(elems.length > 1) elems.push(", ");
+            elems.push(UIB(player.name, "blue-font"), `(${(covers.length)})`);
 
             players++;
         }
 
-        this.capInfo.appendChild(document.createTextNode(string));
+        this.capInfo.append(...elems);
     }
 
     renderDrops(capInfo){
 
         if(capInfo.total_drops === 0) return;
 
-        this.capInfo.appendChild(document.createElement("br"));
+        this.capInfo.append(UIBr());
 
-        const text = `Dropped ${capInfo.total_drops} time${(capInfo.total_drops === 1) ? "" : "s"} for a total of ${capInfo.drop_time} Seconds`;
-        this.capInfo.appendChild(document.createTextNode(text));
+        const elems = [
+            `Dropped`,
+            UIB(` ${capInfo.total_drops} ${plural(capInfo.total_drops, "time")}`, "blue-font"),
+            ` for a total of `,
+            UIB(toPlaytime(capInfo.drop_time, true))
+        ];
+
+        const text = `Dropped ${capInfo.total_drops} Time${(capInfo.total_drops === 1) ? "" : "s"} for a total of ${capInfo.drop_time} Seconds`;
+        this.capInfo.append(...elems);
     }
 
     renderTeamFrags(capInfo){
@@ -1345,13 +1344,12 @@ class CTFCaps{
 
         const capPlayerElem = UIPlayerLink({
             "playerId": capInfo.cap_player, 
-            "name": UIB(capPlayer.name), 
+            "name": UIB(capPlayer.name, "blue-font"), 
             "country": capPlayer.country
         });
 
         const capTime = document.createElement("span");
-        capTime.className = "yellow-font";
-        capTime.append(` ${toPlaytime(capInfo.cap_time, true)}`);
+        capTime.append(UIB(` ${toPlaytime(capInfo.cap_time, true)}`));
         this.cappedBy.innerHTML = "";
         this.cappedBy.append(capPlayerElem, ` Capped the ${getTeamName(capInfo.flag_team)} Flag`, capTime);
 
@@ -1359,15 +1357,13 @@ class CTFCaps{
 
         this.capInfo.innerHTML = "";
 
-        let capString = `Taken By: ${grabPlayer.name} @ ${MMSS(capInfo.taken_timestamp)}`;
-        capString += `, Capped By: ${capPlayer.name} @ ${MMSS(capInfo.cap_timestamp)}\n`;
-
         this.capInfo.append(
-            `Taken By: `, UIB(grabPlayer.name), 
-            ` @ `,
+            `Taken By: `, UIB(grabPlayer.name, "blue-font"), 
+            ` at `,
             UIB(MMSS(capInfo.taken_timestamp)),
+            UIBr(),
             ` Capped By: `,
-            UIB(capPlayer.name),` @ `,
+            UIB(capPlayer.name, "blue-font"),` at `,
             UIB(MMSS(capInfo.cap_timestamp))
         );
 

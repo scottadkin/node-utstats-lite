@@ -437,9 +437,10 @@ function UIBr(){
 /**
  * bold elem
  */
-function UIB(text){
+function UIB(text, className){
     
     const elem = document.createElement("b");
+    if(className !== undefined) elem.className = className;
     elem.append(text);
     return elem;
 }
