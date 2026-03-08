@@ -1102,6 +1102,7 @@ class CTFCaps{
 
         this.currentCap = 1;
         this.currentScores = [0,0];
+        this.mode = "detailed";
 
         this.wrapper = UIDiv();
 
@@ -1109,20 +1110,43 @@ class CTFCaps{
         this.title.innerHTML = "Capture The Flag Caps";
         this.wrapper.append(this.title);
 
+        this.createTabs();
+
         this.content = document.createElement("div");
         this.content.className = "ctf-cap";
 
         this.wrapper.append(this.content);
-
-        this.createButtonWrapper();
-       
-        this.createCapWrapper();
 
         this.parent.append(this.wrapper);
 
         this.render();
     }
 
+
+    createTabs(){
+
+        const options = [
+            {"display": "Basic", "value": "basic"},
+            {"display": "Detailed", "value": "detailed"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.render();
+        })
+    }
+
+
+    MMSSElem(value){
+
+        const elem = UIDiv("ctf-event-timestamp");
+        value = MMSS(value);
+        elem.append(value);
+
+        return elem;
+    }
 
     createButtonWrapper(){
 
@@ -1222,24 +1246,36 @@ class CTFCaps{
 
             const coverPlayer = getPlayer(this.players, covers[x].id);
 
-            elems.push(
-                `${MMSS(covers[x].timestamp)} `,
+            this.addEventElem(elems,[
+                this.MMSSElem(covers[x].timestamp),
                 UIPlayerLink({
-                    "name": UIB(coverPlayer.name, "blue-font"), 
+                    "name": UISpan(coverPlayer.name, this.getTeamFont(coverPlayer.team)), 
                     "playerId": covers[x].id, 
                     "country": coverPlayer.country
                 }), 
                 " Covered ",
                 UIPlayerLink({
-                    "name": UIB(carryPlayer.name, "blue-font"), 
+                    "name": UISpan(carryPlayer.name, this.getTeamFont(carryPlayer.team)), 
                     "playerId": carryPlayer.id, 
                     "country": carryPlayer.country
                 }), 
                 UIBr()
-            );
+            ]);
         }
 
         return elems;
+    }
+
+    getTeamFont(teamId){
+        return `team-${getTeamName(teamId).toLowerCase()}-font`;
+    }
+
+    addEventElem(elems, content){
+
+        const wrapper = UIDiv("ctf-event");
+
+        wrapper.append(...content);
+        elems.push(wrapper);
     }
 
     renderEvents(capInfo){
@@ -1260,31 +1296,45 @@ class CTFCaps{
 
             const p = getPlayer(this.players, c.player_id);
 
+            let currentPlayerTeamFont = this.getTeamFont(p.team);
+
             const start = c.start_timestamp - this.matchStart;
+
+            let lastPlayerTeamFont = "font-color-1";
+
+            if(lastPlayer !== null){
+                lastPlayerTeamFont = this.getTeamFont(lastPlayer.team);
+            }
 
             if(i > 0){
 
-                elems.push(
-                    `${MMSS(lastDropTime)} `,
+     
+                this.addEventElem(elems, [
+                    this.MMSSElem(lastDropTime),
                     UIPlayerLink({
                         "playerId": lastPlayer.id, 
-                        "name": UIB(lastPlayer.name, "blue-font"), 
+                        "name": UISpan(lastPlayer.name, lastPlayerTeamFont), 
                         "country": lastPlayer.country
                     }),
-                    ` Dropped The Flag. `,
-                    UISpan(`Carry Time ${toPlaytime(lastCarryTime, true)}`, "green-font"),
+                    ` Dropped The ${getTeamName(capInfo.flag_team)} Flag `,
+                    UISpan(`Carry Time ${toPlaytime(lastCarryTime, true)}`, "monospace yellow-font"),
                     UIBr()
-                );
+                ]);
             }
 
             let takenString = ` Picked Up The ${flagTeam} Flag`;
             if(i === 0) takenString = ` Grabbed The ${flagTeam} Flag`;
 
-            elems.push(
-                `${MMSS(start)} `,
-                UIPlayerLink({"playerId":c.player_id, "country":p.country, "name": UIB(p.name, "blue-font")}), 
-                takenString,
-                UIBr()
+            this.addEventElem(elems, [
+                this.MMSSElem(start),
+                    UIPlayerLink({
+                        "playerId":c.player_id, 
+                        "country":p.country, 
+                        "name": UISpan(p.name, currentPlayerTeamFont)
+                    }), 
+                    takenString,
+                    UIBr()
+                ]
             );
 
             const end = c.end_timestamp - this.matchStart;
@@ -1301,54 +1351,22 @@ class CTFCaps{
 
         const capPlayer = getPlayer(this.players, capInfo.cap_player);
 
-        elems.push(
-            MMSS(capInfo.cap_timestamp - this.matchStart), 
-            ` `, 
+        this.addEventElem(elems, [
+            this.MMSSElem(capInfo.cap_timestamp - this.matchStart),
             UIPlayerLink({
                 "playerId": capInfo.cap_player,
-                "name": UIB(capPlayer.name, "blue-font"),
+                "name": UISpan(capPlayer.name, this.getTeamFont(capPlayer.team)),
                 "country": capPlayer.country
             }), 
-            ` Capped the ${flagTeam} Flag. `,
-            UISpan(`Carry Time ${toPlaytime(lastCarryTime, true)}`, "green-font")
-        );
+            ` Captured The ${flagTeam} Flag `,
+            UISpan(`Carry Time ${toPlaytime(lastCarryTime, true)}`, "monospace yellow-font")
+        ]);
 
         const elem = this.createCapElem("Events", elems);
 
         this.capInfo.append(elem);
     
     }
-
-
-    /*renderCovers(capInfo){
-
-        if(capInfo.covers.length === 0) return;
-
-        const elems = [];
-
-        let players = 0;
-
-        for(const [playerId, covers] of Object.entries(capInfo.covers)){
-
-            const player = getPlayer(this.players, playerId);
-
-            if(elems.length > 1) elems.push(", ");
-
-            console.log(covers);
-            elems.push(
-                UIPlayerLink({
-                    "name": UIB(player.name, "blue-font"), 
-                    "playerId": player.id, 
-                    "country": player.country
-                }), 
-                `(${(covers.length)})`
-            );
-
-            players++;
-        }
-
-        //this.capInfo.append(this.createCapElem("Covered By", elems));
-    }*/
 
     renderDrops(capInfo){
 
@@ -1433,31 +1451,22 @@ class CTFCaps{
         return wrapper;
     }
 
-    renderCap(){
+    renderDetailedCap(){
 
-        
         const currentScores = [0,0];
 
         for(let i = 0; i < this.currentCap; i++){
 
             const c = this.caps[i];
-
             currentScores[c.capping_team]++;
         }
-
+        
         this.redScore.innerHTML = currentScores[0];
         this.blueScore.innerHTML = currentScores[1];
 
         const capInfo = this.caps[this.currentCap - 1];
 
-        const capPlayer = getPlayer(this.players, capInfo.cap_player);
-
-        const capPlayerElem = UIPlayerLink({
-            "playerId": capInfo.cap_player, 
-            "name": UIB(capPlayer.name, "blue-font"), 
-            "country": capPlayer.country
-        });
-
+        console.log(capInfo);
 
         const capTime = document.createElement("span");
 
@@ -1468,65 +1477,60 @@ class CTFCaps{
             MMSS(capInfo.cap_timestamp - this.matchStart)
         );
 
-        const grabPlayer = getPlayer(this.players, capInfo.taken_player);
-
-        const grabPlayerElem = UIPlayerLink({
-            "playerId": capInfo.taken_player, 
-            "name": UIB(grabPlayer.name, "blue-font"), 
-            "country": grabPlayer.country
-        });
-
         this.capInfo.innerHTML = "";
 
-        /*const takenContent = [
-            
-            UIB(MMSS(capInfo.taken_timestamp - this.matchStart)),
-            " ",
-            grabPlayerElem,
-            `Grabbed the ${getTeamName(capInfo.flag_team)} Flag`,
-            /*UIBr(),
-            UIB(MMSS(capInfo.cap_timestamp - this.matchStart)), 
-            " ",
-            UIPlayerLink({
-                "playerId": capInfo.cap_player, 
-                "name": UIB(capPlayer.name, "blue-font"), 
-                "country": capPlayer.country
-            }),
-            ` Capped the ${getTeamName(capInfo.flag_team)} Flag`*/
-        /*];
+        const elems = [];
+
+        this.addEventElem(elems, [UIB(`Capture Took: `), toPlaytime(capInfo.cap_time, true)]);
+
+        if(capInfo.total_drops > 0){
+            this.addEventElem(elems, [
+                UIB(`Times Dropped: `), capInfo.total_drops
+            ])
+            this.addEventElem(elems, [UIB(`Total Carry Time: `), toPlaytime(capInfo.carry_time, true)]);
+            this.addEventElem(elems, [UIB(`Total Time Dropped: `), toPlaytime(capInfo.drop_time, true)]);
+        }
+
+        if(capInfo.total_covers > 0){
+            this.addEventElem(elems, [
+                UIB(`Total Covers: `), capInfo.total_covers
+            ])
+        }
 
 
-        this.capInfo.append(
-            this.createCapElem("Taken By", takenContent)
-        );*/
 
-        /*this.capInfo.append(
-            this.createCapElem(
-                "Capped By", 
-                [
-                    UIB(MMSS(capInfo.cap_timestamp - this.matchStart)), 
-                    ` `, 
-                    capPlayerElem, 
-                    ` Capped the ${getTeamName(capInfo.flag_team)} Flag`
-                ]
-            )
-        );*/
-        this.renderEvents(capInfo);
-        //this.renderCovers(capInfo);
-        //this.renderDrops(capInfo);
+        this.addEventElem(elems, [
+            UIB("Unique Flag Carriers: "), capInfo.unique_carriers
+        ])
 
-        //this.capInfo.append(
-        //    this.createCapElem("Travel Time", [capTime])
-        //);
+        const elem = this.createCapElem(
+            `${getTeamName(capInfo.capping_team)} Team Captured The ${getTeamName(capInfo.flag_team)} Flag`, 
+            elems
+        );
 
         
 
+        this.capInfo.append(elem);
+
+        this.renderEvents(capInfo);
         this.renderTeamFrags(capInfo);
     }
 
     render(){
-        this.renderButtons();
-        this.renderCap();
+
+        this.content.innerHTML = "";
+        
+
+        if(this.mode === "detailed"){
+
+            this.createButtonWrapper();
+            this.createCapWrapper();
+            this.renderButtons();
+            this.renderDetailedCap();
+
+        }else if(this.mode === "basic"){
+
+        }
     }
 }
 

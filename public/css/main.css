@@ -86,12 +86,29 @@ main{
 }
 
 .green-font{
-	color:green;
+	color:rgb(44,119,44);
 }
 
 .yellow-font{
 	color:yellow;
 }
+
+.team-red-font{
+	color:rgb(177,0,0);
+}
+
+.team-blue-font{
+	color:var(--font-color-blue);
+}
+
+.team-green-font{
+	color:rgb(44,119,44);
+}
+
+.team-yellow-font{
+	color:yellow;
+}
+
 .font-color-1{
 	color:var(--font-color-1);
 }
@@ -107,6 +124,9 @@ main{
 
 .team-yellow{
 	background-color:var(--team-color-yellow);
+}
+.monospace{
+	font-family: monospace;
 }
 
 body{ 
@@ -714,6 +734,26 @@ option{
 	border:1px solid var(--border-color-1);
 	color:white;
 	text-align: center;
+}
+
+.ctf-event{
+	padding-left:var(--padding-1);
+}
+
+.ctf-event:hover{
+	background-color:rgba(255,255,255,0.1);
+	transition: var(--transition-1);
+}
+
+
+.ctf-event-timestamp{
+	display:inline-block;
+	font-family: monospace;
+	padding-right:5px;
+}
+
+.ctf-event-timestamp::after{
+	content:" - ";
 }
 
 .ctf-cap-button:hover{

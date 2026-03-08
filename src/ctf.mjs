@@ -606,7 +606,7 @@ async function getMatchCapKills(matchId){
 
 async function getMatchCapSuicides(matchId){
 
-    const query = `SELECT cap_id,player_id,player_team FROM nstats_ctf_cap_suicides WHERE match_id=? ORDER BY timestamp ASC`;
+    const query = `SELECT timestamp,cap_id,player_id,player_team FROM nstats_ctf_cap_suicides WHERE match_id=? ORDER BY timestamp ASC`;
 
     const result = await simpleQuery(query, [matchId]);
 
