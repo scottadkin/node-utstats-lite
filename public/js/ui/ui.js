@@ -92,6 +92,7 @@ function UICountryFlag(country){
 
 function UIPlayerLink(params){
 
+
     let {playerId, className, country, bTableElem, name, bHeaderElem} = params;
 
     if(className === undefined) className = "";
@@ -109,6 +110,7 @@ function UIPlayerLink(params){
     if(!bTableElem && className !== "") elem.className = className;
 
     elem.href = `/player/${playerId}`;
+
     elem.append(UICountryFlag(country), name);
 
     if(!bTableElem) return elem;
@@ -117,6 +119,8 @@ function UIPlayerLink(params){
     if(className !== "") wrapper.className = className;
     wrapper.append(elem);
     return wrapper;
+
+    
 }
 
 function UITableHeaderColumn(params){
@@ -451,7 +455,7 @@ function UISpan(text, className){
     const elem = document.createElement("span");
 
     if(className !== undefined) elem.className = className;
-    elem.appendChild(document.createTextNode(text));
+    elem.append(text);
 
     return elem;
 }
