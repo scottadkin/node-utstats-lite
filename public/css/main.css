@@ -35,11 +35,7 @@
 	--padding-2:5px;
 	--padding-3:3px;
 	--font-size-1:13px;
-	--line-height-1:24px;
-	--line-height-2:32px;
-	--line-height-3:20px;
-	--line-height-5:19px;
-	--line-height-6:22px;
+	--line-height-1:1.5;
 	--font-size-2:16px;
 	--font-size-3:18px;
 	--font-size-4:13px;
@@ -142,7 +138,7 @@ footer{
 	color:var(--font-color-2);
 	text-align:center;
 	font-size:var(--font-size-small);
-	line-height:var(--line-height-5);
+	line-height:var(--line-height-1);
 	border-top:2px solid var(--border-color-5);
 	font-weight:500;
 }
@@ -181,14 +177,6 @@ a{
 	font-weight:bold;
 }
 
-label{
-	text-align:right;
-	padding-right:var(--padding-1);
-	color:var(--font-color-1);
-	line-height:var(--line-height-2);
-	font-size:var(--font-size-4);
-	font-weight:500;
-}
 
 .form{
 	text-align: center;
@@ -209,13 +197,14 @@ label{
 	margin-bottom:var(--margin-3);
 }
 
-.form-label, .form-read-only{
+label, .form-label, .form-read-only{
 	padding-right:var(--padding-1);
 	color:var(--font-color-1);
 	font-size:var(--font-size-1);
 	line-height: var(--line-height-1);
 	padding:var(--padding-2);
 	font-weight:500;
+	text-align:right;
 }
 
 .form-label{
@@ -328,7 +317,7 @@ th:hover{
 
 td{
 	border:2px solid var(--border-color-4);
-	padding:1px 5px;
+	padding:2px 5px;
 	font-size:var(--font-size-4);
 	line-height:var(--line-height-1);
 	font-weight:500;
@@ -491,7 +480,7 @@ option{
 	padding:var(--padding-1) 20%;
 	margin-bottom:var(--margin-1);
 	font-size:var(--font-size-1);
-	line-height: var(--line-height-3);
+	line-height: var(--line-height-1);
 	border-top:2px solid var(--border-color-5);
 	border-bottom:2px solid var(--border-color-5);
 }
@@ -660,7 +649,7 @@ option{
 
 .rich-info{
     font-size:var(--font-size-5);
-	line-height: var(--line-height-5);
+	line-height: var(--line-height-1);
     text-overflow: ellipsis;
 	padding:8px 5px;
 	font-weight:500;
@@ -770,7 +759,7 @@ option{
 .cap-info{
 	font-size:var(--font-size-1);
 	color:var(--font-color-2);
-	line-height:var(--line-height-3);
+	line-height:var(--line-height-1);
 }
 
 .ctf-cap-row{
@@ -912,7 +901,7 @@ nav a:hover{
 	padding-top:5px;
 	font-size: var(--font-size-6);
 	font-weight: 500;
-	line-height: var(--line-height-6);
+	line-height: var(--line-height-1);
 }
 
 
@@ -1191,7 +1180,7 @@ code{
 
 .json-info{
 	font-size:var(--font-size-1);
-	line-height: var(--line-height-3);
+	line-height: var(--line-height-1);
 	margin-bottom:5px;
 
 }

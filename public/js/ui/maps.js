@@ -100,7 +100,6 @@ class MapsSearchForm{
         displayRow.append(displayLabel);
 
         const displayElem = document.createElement("select");
-        displayElem.className = "default-select";
         displayElem.name = "display";
         displayElem.id = "display";
 

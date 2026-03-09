@@ -75,7 +75,6 @@ class RecordsSearchForm{
         gametypeRow.append(gLable);
 
         const gSelect = document.createElement("select");
-        gSelect.className = "default-select";
         gSelect.id = "g";
         gSelect.name = "g";
 

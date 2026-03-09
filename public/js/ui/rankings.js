@@ -49,13 +49,10 @@ class RankingsSearchForm{
 
         const row = document.createElement("div");
         row.className = `form-row`;
-        const label = document.createElement("label");
-        label.htmlFor = type;
-        label.innerHTML = display;
-        row.append(label);
+
+        row.append(UILabel(display));
 
         const select = document.createElement("select");
-        select.className = "default-select";
         select.name = type;
         select.id = type;
         
@@ -64,7 +61,7 @@ class RankingsSearchForm{
             const {name, value} = options[i];
 
             const option = document.createElement("option");
-            option.append(document.createTextNode(name));
+            option.append(name);
             if(value == selected) option.selected = true;
             option.value = value;
             select.append(option);
@@ -108,7 +105,7 @@ class RankingsSearchForm{
 
         const row = UIDiv("form-row");
         row.id = "last-active-row";
-        row.append(UILabel("Active In Previous", "tf"));
+        row.append(UILabel("Active In Previous"));
         const la = new UILastActiveSelect(row, this.selectedTimeRange, "tf");
         row.append(la.elem.select);
 
@@ -120,7 +117,7 @@ class RankingsSearchForm{
         this.wrapper.append(row);
 
         const perPageRow = UIDiv("form-row");
-        perPageRow.append(UILabel("Results Per Page", "pp"));
+        perPageRow.append(UILabel("Results Per Page"));
 
         const pp = new UIPerPageSelect(perPageRow, this.selectedPerPage, "pp");
 

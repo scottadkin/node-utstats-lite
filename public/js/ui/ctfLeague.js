@@ -56,6 +56,7 @@ class CTFLeagueFilterForm{
         const label = document.createElement("label");
         label.htmlFor = (type === "gametypes") ? "gametype" : "map";
         label.innerHTML =  (type === "gametypes") ? "Gametype" : "Map";
+        label.className = "form-label";
         row.append(label);
         this.wrapper.append(row);
 
@@ -96,7 +97,6 @@ class CTFLeagueFilterForm{
         }
 
         select.name = select.id;
-        select.className = "default-select";
 
         const names = (type === "gametypes") ? this.gametypeNames : this.mapNames;
 

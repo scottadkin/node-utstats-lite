@@ -74,8 +74,6 @@ class PlayerRecentMatches{
     createSelect(type){
 
         const select = document.createElement("select");
-        select.className = "default-select";
-
         if(type === "gametype"){
             select.id = `recent-match-gametype`;
         }else{
