@@ -800,7 +800,7 @@ option{
 	background-color:var(--header-bg-color);
 	border:1px solid var(--border-color-5);
 	font-weight: 600;
-	padding:5px;
+	padding:var(--padding-2);
 }
 
 .ctf-cap-value{

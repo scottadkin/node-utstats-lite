@@ -1089,6 +1089,7 @@ function renderCTFSummary(parent, totalTeams, data, players){
 
 class CTFCaps{
 
+
     constructor(parent, totalTeams, data, players, startTimestamp){
 
         if(data.playerData.length === 0) return;
@@ -1159,8 +1160,6 @@ class CTFCaps{
         buttons.className = "duo";
 
         this.buttonsWrapper.append(buttons);
-        this.pageInfo = document.createElement("div");
-        this.buttonsWrapper.append(this.pageInfo);
 
         const previous = document.createElement("button");
         previous.innerHTML = "Previous Cap";
@@ -1211,11 +1210,6 @@ class CTFCaps{
 
     }
 
-    renderButtons(){
-
-        this.pageInfo.className = `ctf-cap-viewing`;
-        this.pageInfo.innerHTML = `Viewing Cap ${this.currentCap} of ${this.caps.length}`;     
-    }
 
     toSortedCovers(capInfo){
 
@@ -1371,7 +1365,107 @@ class CTFCaps{
     
     }
 
+    getCapStatByPlayerTotal(mode, data, targetTeam){
+
+        const totals = {};
+
+        let playerIdKey = "";
+        let playerTeamKey = "";
+
+        if(mode === "suicides"){
+
+            playerIdKey = "playerId";
+            playerTeamKey = "playerTeam";
+
+        }else if(mode === "kills"){
+
+            playerIdKey = "killerId";
+            playerTeamKey = "killerTeam";
+        }
+
+        for(let i = 0; i < data.length; i++){
+
+            const d = data[i];
+
+            const playerId = d[playerIdKey];
+            const playerTeam = d[playerTeamKey];
+
+            if(playerTeam != targetTeam) continue;
+
+            if(totals[playerId] === undefined){
+                totals[playerId] = 0;
+            }
+
+            totals[playerId]++;
+        }
+
+        const finalData = [];
+
+        for(const [playerId, playerTotal] of Object.entries(totals)){
+
+            finalData.push({playerId, "total": parseInt(playerTotal)});
+        }
+
+        finalData.sort((a, b) =>{
+
+            return b.total - a.total;
+        });
+
+        return finalData;
+    }
+
     renderTeamFrags(capInfo){
+
+        
+        const elems = [];
+
+        for(let i = 0; i < this.totalTeams; i++){
+
+            const teamName = getTeamName(i);
+            const fontColor = getTeamFont(i);
+
+            const suicides = capInfo[`${teamName.toLowerCase()}_suicides`] ?? 0;
+            
+            const killElems = [];
+
+            const killTotals = this.getCapStatByPlayerTotal("kills", capInfo.kills, i);
+            const suicideTotals = this.getCapStatByPlayerTotal("suicides", capInfo.suicides, i);
+
+            console.log(suicideTotals);
+
+            for(let x = 0; x < killTotals.length; x++){
+
+                const k = killTotals[x];
+
+                const killer = getPlayer(this.players, k.playerId);
+
+                killElems.push(UIPlayerLink({
+                    "playerId": k.playerId, 
+                    "country": killer.country, 
+                    "name": UISpan(killer.name, fontColor)
+                }));
+
+                killElems.push(UISpan(`(${k.total})`, "monospace"));
+
+                if(x < killTotals.length - 1){
+                    killElems.push(", ");
+                }
+            }
+         
+           
+
+            elems.push(this.createLabelValueRow(`${teamName} Kills`, killElems));
+
+            if(suicides > 0){
+                elems.push(this.createLabelValueRow(`${teamName} Suicides`, [
+                    UISpan(suicides, "monospace")
+                ]));
+            }
+        }
+
+        this.capInfo.append(this.createCapElem("Frags", elems));
+
+        return;
 
         let className = `solo`;
 
@@ -1456,13 +1550,14 @@ class CTFCaps{
     renderDetailedSummary(capInfo){
 
         const wrapper = UIDiv("ctf-cap-wrapper");
+        const content = UIDiv("ctf-cap-value");
         const titleElem = UIDiv("ctf-cap-title");
 
         titleElem.append(`${getTeamName(capInfo.capping_team)} Team Captured The ${getTeamName(capInfo.flag_team)} Flag`);
-        wrapper.append(titleElem);
+        wrapper.append(titleElem, content);
         const grabPlayer = getPlayer(this.players, capInfo.taken_player);
 
-        wrapper.append(this.createLabelValueRow(`Flag Taken By `, [
+        content.append(this.createLabelValueRow(`Flag Taken By `, [
             UIPlayerLink({
                 "playerId": capInfo.taken_player, 
                 "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
@@ -1474,7 +1569,7 @@ class CTFCaps{
 
         const capPlayer = getPlayer(this.players, capInfo.cap_player);
     
-        wrapper.append(this.createLabelValueRow(`Flag Captured By `, [
+        content.append(this.createLabelValueRow(`Flag Captured By `, [
             UIPlayerLink({
                 "playerId": capInfo.cap_player, 
                 "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
@@ -1484,15 +1579,15 @@ class CTFCaps{
             UIMMSS(capInfo.cap_timestamp - this.matchStart)
         ]));
 
-        wrapper.append(this.createLabelValueRow(`Capture Time`, [UISpan(toPlaytime(capInfo.cap_time, true), "monospace")]));
+        content.append(this.createLabelValueRow(`Capture Time`, [UISpan(toPlaytime(capInfo.cap_time, true), "monospace")]));
 
          if(capInfo.total_drops > 0){
 
-            wrapper.append(this.createLabelValueRow(`Carry Time`, [UISpan(toPlaytime(capInfo.carry_time, true), "monospace")]));
+            content.append(this.createLabelValueRow(`Carry Time`, [UISpan(toPlaytime(capInfo.carry_time, true), "monospace")]));
 
-            wrapper.append(this.createLabelValueRow(`Time Dropped`, [UISpan(toPlaytime(capInfo.drop_time, true), "monospace")]));
+            content.append(this.createLabelValueRow(`Time Dropped`, [UISpan(toPlaytime(capInfo.drop_time, true), "monospace")]));
 
-            wrapper.append(this.createLabelValueRow(`Flag Drops`, [capInfo.total_drops]));
+            content.append(this.createLabelValueRow(`Flag Drops`, [capInfo.total_drops]));
 
         }
         
@@ -1520,7 +1615,7 @@ class CTFCaps{
                 currentIndex++;
             }
 
-            wrapper.append(this.createLabelValueRow("Covers", coverElems));
+            content.append(this.createLabelValueRow("Covers", coverElems));
         }
 
         const usedCarryIds = [];
@@ -1549,7 +1644,7 @@ class CTFCaps{
 
         }
 
-        wrapper.append(this.createLabelValueRow("Unique Flag Carriers", carryElems));
+        content.append(this.createLabelValueRow("Unique Flag Carriers", carryElems));
 
         return wrapper;
 
@@ -1584,9 +1679,9 @@ class CTFCaps{
         this.capInfo.innerHTML = "";
 
         this.capInfo.append(this.renderDetailedSummary(capInfo));
-
-        this.renderEvents(capInfo);
         this.renderTeamFrags(capInfo);
+        this.renderEvents(capInfo);
+        
     }
 
     render(){
@@ -1598,7 +1693,6 @@ class CTFCaps{
 
             this.createButtonWrapper();
             this.createCapWrapper();
-            this.renderButtons();
             this.renderDetailedCap();
 
         }else if(this.mode === "basic"){
