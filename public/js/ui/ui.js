@@ -478,6 +478,16 @@ function UILabel(label, htmlFor){
     return elem;
 }
 
+function UIMMSS(value){
+
+    return UISpan(
+        MMSS(value),
+        "mmss"
+    );
+
+
+}
+
 function UIInput(type, name, initialValue, placeholder, callback){
 
     type = type.toLowerCase();

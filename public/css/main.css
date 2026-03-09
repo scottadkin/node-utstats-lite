@@ -90,7 +90,7 @@ main{
 }
 
 .team-red-font{
-	color:rgb(177,0,0);
+	color:rgb(217,0,0);
 }
 
 .team-blue-font{
@@ -727,6 +727,8 @@ option{
 
 .ctf-event{
 	padding-left:var(--padding-1);
+	font-size:var(--font-size-5);
+	display:flex;
 }
 
 .ctf-event:hover{
@@ -734,16 +736,18 @@ option{
 	transition: var(--transition-1);
 }
 
+.ctf-event-mmss{
+	flex: 0 0 100px;
+}
 
-.ctf-event-timestamp{
+
+.mmss{
 	display:inline-block;
 	font-family: monospace;
 	padding-right:5px;
 }
 
-.ctf-event-timestamp::after{
-	content:" - ";
-}
+
 
 .ctf-cap-button:hover{
 	cursor: pointer;
@@ -754,6 +758,22 @@ option{
 .ctf-cap-viewing{
 	font-size:var(--tiny-font-size);
 	padding:var(--padding-1);
+}
+
+.ctf-summary-row{
+	display:flex;
+	font-size:var(--font-size-5);
+}
+.ctf-summary-label{
+	flex:0 0 150px;
+	text-align:left;
+	padding-left:10px;
+	font-weight:600;
+}
+
+.ctf-summary-data{
+	flex:1 1 auto;
+	text-align: left;
 }
 
 .cap-info{
