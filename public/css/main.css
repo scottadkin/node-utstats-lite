@@ -737,7 +737,15 @@ option{
 }
 
 .ctf-event-mmss{
-	flex: 0 0 100px;
+	flex: 0 0 50px;
+	padding-right:5px;
+	text-align: left;
+	font-family: monospace;
+}
+
+.ctf-event-data{
+	flex: auto;
+	text-align:left;
 }
 
 

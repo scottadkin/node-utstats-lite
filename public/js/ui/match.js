@@ -1235,6 +1235,22 @@ class CTFCaps{
         });
     }
 
+    addEventElem(mmss, content){
+
+        const wrapper = UIDiv("ctf-event");
+
+        const time = UIDiv("ctf-event-mmss");
+        time.append(MMSS(mmss));
+
+        const data = UIDiv("ctf-event-data");
+        data.append(...content);
+
+        wrapper.append(
+            time
+        , data);
+        return wrapper;
+    }
+
     renderCovers(start, end, covers, carryPlayer){
 
         const elems = [];
@@ -1246,8 +1262,7 @@ class CTFCaps{
 
             const coverPlayer = getPlayer(this.players, covers[x].id);
 
-            this.addEventElem(elems,[
-                UIMMSS(covers[x].timestamp),
+            elems.push(this.addEventElem(covers[x].timestamp,[
                 UIPlayerLink({
                     "name": UISpan(coverPlayer.name, this.getTeamFont(coverPlayer.team)), 
                     "playerId": covers[x].id, 
@@ -1259,8 +1274,7 @@ class CTFCaps{
                     "playerId": carryPlayer.id, 
                     "country": carryPlayer.country
                 }), 
-                UIBr()
-            ]);
+            ]));
         }
 
         return elems;
@@ -1268,14 +1282,6 @@ class CTFCaps{
 
     getTeamFont(teamId){
         return `team-${getTeamName(teamId).toLowerCase()}-font`;
-    }
-
-    addEventElem(elems, content){
-
-        const wrapper = UIDiv("ctf-event");
-
-        wrapper.append(...content);
-        elems.push(wrapper);
     }
 
     renderEvents(capInfo){
@@ -1289,6 +1295,7 @@ class CTFCaps{
         //last player that had the flag
         let lastPlayer = null;
         let lastCarryTime = 0;
+
 
         for(let i = 0; i < capInfo.carryTimes.length; i++){
 
@@ -1309,33 +1316,32 @@ class CTFCaps{
             if(i > 0){
 
      
-                this.addEventElem(elems, [
-                    UIMMSS(lastDropTime),
+                elems.push(this.addEventElem(lastDropTime, [
                     UIPlayerLink({
                         "playerId": lastPlayer.id, 
                         "name": UISpan(lastPlayer.name, lastPlayerTeamFont), 
                         "country": lastPlayer.country
                     }),
-                    ` Dropped The ${getTeamName(capInfo.flag_team)} Flag `,
-                    UISpan(`Carry Time ${toPlaytime(lastCarryTime, true)}`, "monospace yellow-font"),
-                    UIBr()
-                ]);
+                    ` Dropped The `,
+                    UISpan(`${getTeamName(capInfo.flag_team)} Flag `, this.getTeamFont(capInfo.flag_team)),
+                    UISpan(`(Carry Time ${toPlaytime(lastCarryTime, true)})`, "monospace"),
+                ]));
             }
 
-            let takenString = ` Picked Up The ${flagTeam} Flag`;
-            if(i === 0) takenString = ` Grabbed The ${flagTeam} Flag`;
+            let takenString = ` Picked Up The `;
+            if(i === 0) takenString = ` Grabbed The `;
 
-            this.addEventElem(elems, [
-               UIMMSS(start),
+            elems.push(this.addEventElem(start, [
                     UIPlayerLink({
                         "playerId":c.player_id, 
                         "country":p.country, 
                         "name": UISpan(p.name, currentPlayerTeamFont)
                     }), 
                     takenString,
-                    UIBr()
+                    UISpan(`${flagTeam} Flag`, this.getTeamFont(capInfo.flag_team))
                 ]
-            );
+            ));
+
 
             const end = c.end_timestamp - this.matchStart;
 
@@ -1351,36 +1357,21 @@ class CTFCaps{
 
         const capPlayer = getPlayer(this.players, capInfo.cap_player);
 
-        this.addEventElem(elems, [
-            UIMMSS(capInfo.cap_timestamp - this.matchStart),
+        elems.push(this.addEventElem(capInfo.cap_timestamp - this.matchStart, [
             UIPlayerLink({
                 "playerId": capInfo.cap_player,
                 "name": UISpan(capPlayer.name, this.getTeamFont(capPlayer.team)),
                 "country": capPlayer.country
             }), 
-            ` Captured The ${flagTeam} Flag `,
-            UISpan(`Carry Time ${toPlaytime(lastCarryTime, true)}`, "monospace yellow-font")
-        ]);
+            ` Captured The `,
+            UISpan(`${flagTeam} Flag `, this.getTeamFont(capInfo.flag_team)),
+            UISpan(`(Carry Time ${toPlaytime(lastCarryTime, true)})`, "monospace")
+        ]));
 
         const elem = this.createCapElem("Events", elems);
 
         this.capInfo.append(elem);
     
-    }
-
-    renderDrops(capInfo){
-
-        if(capInfo.total_drops === 0) return;
-
-
-        const elems = [
-            UIB("Display all who dropped flag and when"),
-            UIB(` ${capInfo.total_drops} ${plural(capInfo.total_drops, "time")}`, "blue-font"),
-            ` for a total of `,
-            UIB(toPlaytime(capInfo.drop_time, true))
-        ];
-
-        this.capInfo.append(this.createCapElem("Dropped", elems));
     }
 
     renderTeamFrags(capInfo){
@@ -1469,9 +1460,9 @@ class CTFCaps{
 
         const wrapper = UIDiv("ctf-cap-wrapper");
         const titleElem = UIDiv("ctf-cap-title");
-        
-        titleElem.append(`${getTeamName(capInfo.capping_team)} Team Captured The ${getTeamName(capInfo.flag_team)} Flag`);
 
+        titleElem.append(`${getTeamName(capInfo.capping_team)} Team Captured The ${getTeamName(capInfo.flag_team)} Flag`);
+        wrapper.append(titleElem);
         const grabPlayer = getPlayer(this.players, capInfo.taken_player);
 
         wrapper.append(this.createLabelValueRow(`Flag Taken By `, [
@@ -1560,7 +1551,6 @@ class CTFCaps{
             usedCarryIds.push(c.player_id);
 
         }
-
 
         wrapper.append(this.createLabelValueRow("Unique Flag Carriers", carryElems));
 
