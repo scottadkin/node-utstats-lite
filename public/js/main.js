@@ -1,51 +1,63 @@
+const TEAM_IDS_TO_NAMES = {
+    "0": "red",
+    "1": "blue",
+    "2": "green",
+    "3": "yellow",
+};
+
 function getTeamColorClass(value){
 
-    value = parseInt(value);
+    const output = TEAM_IDS_TO_NAMES?.[value] ?? "none";
 
-    if(value === 0) return "team-red";
-    if(value === 1) return "team-blue";
-    if(value === 2) return "team-green";
-    if(value === 3) return "team-yellow";
-
-    return "team-none";
+    return `team-${output}`;
 }
 
 
 function getTeamIcon(value){
 
-    value = parseInt(value);
+    const valid = {
+        "0": "red.png",
+        "1": "blue.png",
+        "2": "green.png",
+        "3": "yellow.png",
+    };
 
-    if(value === 0) return "red.png";
-    if(value === 1) return "blue.png";
-    if(value === 2) return "green.png";
-    if(value === 3) return "yellow.png";
-
-    return "controlpoint.png"
+    return valid?.[value] ?? "controlpoint.png";
 }
 
 function getTeamName(id){
 
-    id = parseInt(id);
+    const valid = {
+        "0": "Red",
+        "1": "Blue",
+        "2": "Green",
+        "3": "Gold",
+    };
 
-    if(id === 0) return "Red";
-    if(id === 1) return "Blue";
-    if(id === 2) return "Green";
-    if(id === 3) return "Gold";
+    return valid?.[id] ?? "None";
+}
 
-    return "None";
+function getTeamFont(id){
+
+    const output = TEAM_IDS_TO_NAMES?.[id] ?? "white";
+
+    return `team-${output}-font`;
 }
 
 function getDayName(day){
 
-    switch(day){
-        case 0: {   return 'Sunday'; }
-        case 1: {   return 'Monday'; }
-        case 2: {   return 'Tuesday'; }
-        case 3: {   return 'Wednesday'; }
-        case 4: {   return 'Thursday'; }
-        case 5: {   return 'Friday'; }
-        case 6: {   return 'Saturday'; }
-    }
+    const valid = {
+        "0": "Sunday",
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday",
+    };
+
+    return valid?.[day] ?? "Not a valid day";
+
 }
 
 

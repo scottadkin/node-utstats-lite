@@ -1264,13 +1264,13 @@ class CTFCaps{
 
             elems.push(this.addEventElem(covers[x].timestamp,[
                 UIPlayerLink({
-                    "name": UISpan(coverPlayer.name, this.getTeamFont(coverPlayer.team)), 
+                    "name": UISpan(coverPlayer.name, getTeamFont(coverPlayer.team)), 
                     "playerId": covers[x].id, 
                     "country": coverPlayer.country
                 }), 
                 " Covered ",
                 UIPlayerLink({
-                    "name": UISpan(carryPlayer.name, this.getTeamFont(carryPlayer.team)), 
+                    "name": UISpan(carryPlayer.name, getTeamFont(carryPlayer.team)), 
                     "playerId": carryPlayer.id, 
                     "country": carryPlayer.country
                 }), 
@@ -1280,9 +1280,6 @@ class CTFCaps{
         return elems;
     }
 
-    getTeamFont(teamId){
-        return `team-${getTeamName(teamId).toLowerCase()}-font`;
-    }
 
     renderEvents(capInfo){
 
@@ -1303,14 +1300,14 @@ class CTFCaps{
 
             const p = getPlayer(this.players, c.player_id);
 
-            let currentPlayerTeamFont = this.getTeamFont(p.team);
+            let currentPlayerTeamFont = getTeamFont(p.team);
 
             const start = c.start_timestamp - this.matchStart;
 
             let lastPlayerTeamFont = "font-color-1";
 
             if(lastPlayer !== null){
-                lastPlayerTeamFont = this.getTeamFont(lastPlayer.team);
+                lastPlayerTeamFont = getTeamFont(lastPlayer.team);
             }
 
             if(i > 0){
@@ -1323,7 +1320,7 @@ class CTFCaps{
                         "country": lastPlayer.country
                     }),
                     ` Dropped The `,
-                    UISpan(`${getTeamName(capInfo.flag_team)} Flag `, this.getTeamFont(capInfo.flag_team)),
+                    UISpan(`${getTeamName(capInfo.flag_team)} Flag `, getTeamFont(capInfo.flag_team)),
                     UISpan(`(Carry Time ${toPlaytime(lastCarryTime, true)})`, "monospace"),
                 ]));
             }
@@ -1338,7 +1335,7 @@ class CTFCaps{
                         "name": UISpan(p.name, currentPlayerTeamFont)
                     }), 
                     takenString,
-                    UISpan(`${flagTeam} Flag`, this.getTeamFont(capInfo.flag_team))
+                    UISpan(`${flagTeam} Flag`, getTeamFont(capInfo.flag_team))
                 ]
             ));
 
@@ -1360,11 +1357,11 @@ class CTFCaps{
         elems.push(this.addEventElem(capInfo.cap_timestamp - this.matchStart, [
             UIPlayerLink({
                 "playerId": capInfo.cap_player,
-                "name": UISpan(capPlayer.name, this.getTeamFont(capPlayer.team)),
+                "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)),
                 "country": capPlayer.country
             }), 
             ` Captured The `,
-            UISpan(`${flagTeam} Flag `, this.getTeamFont(capInfo.flag_team)),
+            UISpan(`${flagTeam} Flag `, getTeamFont(capInfo.flag_team)),
             UISpan(`(Carry Time ${toPlaytime(lastCarryTime, true)})`, "monospace")
         ]));
 
@@ -1468,7 +1465,7 @@ class CTFCaps{
         wrapper.append(this.createLabelValueRow(`Flag Taken By `, [
             UIPlayerLink({
                 "playerId": capInfo.taken_player, 
-                "name": UISpan(grabPlayer.name, this.getTeamFont(grabPlayer.team)), 
+                "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
                 "country": grabPlayer.country
             }),
             " at ",
@@ -1480,7 +1477,7 @@ class CTFCaps{
         wrapper.append(this.createLabelValueRow(`Flag Captured By `, [
             UIPlayerLink({
                 "playerId": capInfo.cap_player, 
-                "name": UISpan(capPlayer.name, this.getTeamFont(capPlayer.team)), 
+                "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
                 "country": capPlayer.country
             }),
             " at ",
@@ -1513,7 +1510,7 @@ class CTFCaps{
 
                 coverElems.push(UIPlayerLink({
                     "playerId": playerId, 
-                    "name": UISpan(player.name, this.getTeamFont(player.team)), 
+                    "name": UISpan(player.name, getTeamFont(player.team)), 
                     "country": player.country
                 }), UISpan(`(${cover.length})`, "monospace"));
 
@@ -1539,7 +1536,7 @@ class CTFCaps{
 
             carryElems.push(UIPlayerLink({
                 "playerId": c.player_id, 
-                "name": UISpan(p.name, this.getTeamFont(p.team)), 
+                "name": UISpan(p.name, getTeamFont(p.team)), 
                 "country": p.country
             }));
 
