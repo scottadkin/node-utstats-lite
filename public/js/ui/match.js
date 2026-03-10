@@ -1414,6 +1414,36 @@ class CTFCaps{
         return finalData;
     }
 
+
+    createFragElems(mode, capInfo, targetTeam){
+
+        const fontColor = getTeamFont(targetTeam);
+        const totals = this.getCapStatByPlayerTotal(mode, capInfo[mode], targetTeam);
+
+        const elems = [];
+
+        for(let i = 0; i < totals.length; i++){
+
+            const t = totals[i];
+
+            const player = getPlayer(this.players, t.playerId);
+
+            elems.push(UIPlayerLink({
+                "playerId": t.playerId, 
+                "country": player.country, 
+                "name": UISpan(player.name, fontColor)
+            }));
+
+            elems.push(UISpan(`(${t.total})`, "monospace"));
+
+            if(i < totals.length - 1){
+                elems.push(", ");
+            }
+        }
+
+        return elems;
+    }
+
     renderTeamFrags(capInfo){
 
         
@@ -1422,44 +1452,17 @@ class CTFCaps{
         for(let i = 0; i < this.totalTeams; i++){
 
             const teamName = getTeamName(i);
-            const fontColor = getTeamFont(i);
-
-            const suicides = capInfo[`${teamName.toLowerCase()}_suicides`] ?? 0;
             
-            const killElems = [];
+            const suicides = capInfo[`${teamName.toLowerCase()}_suicides`] ?? 0;
 
-            const killTotals = this.getCapStatByPlayerTotal("kills", capInfo.kills, i);
-            const suicideTotals = this.getCapStatByPlayerTotal("suicides", capInfo.suicides, i);
-
-            console.log(suicideTotals);
-
-            for(let x = 0; x < killTotals.length; x++){
-
-                const k = killTotals[x];
-
-                const killer = getPlayer(this.players, k.playerId);
-
-                killElems.push(UIPlayerLink({
-                    "playerId": k.playerId, 
-                    "country": killer.country, 
-                    "name": UISpan(killer.name, fontColor)
-                }));
-
-                killElems.push(UISpan(`(${k.total})`, "monospace"));
-
-                if(x < killTotals.length - 1){
-                    killElems.push(", ");
-                }
-            }
+            const killElems = this.createFragElems("kills", capInfo, i);
          
-           
-
             elems.push(this.createLabelValueRow(`${teamName} Kills`, killElems));
 
             if(suicides > 0){
-                elems.push(this.createLabelValueRow(`${teamName} Suicides`, [
-                    UISpan(suicides, "monospace")
-                ]));
+
+                const suicideElems = this.createFragElems("suicides", capInfo, i);
+                elems.push(this.createLabelValueRow(`${teamName} Suicides`, suicideElems));
             }
         }
 

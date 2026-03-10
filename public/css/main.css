@@ -716,12 +716,6 @@ option{
 }
 
 .ctf-cap-button{
-	font-size:var(--font-size-1);
-	background-color:var(--bg-color-3);
-	padding:var(--padding-1);
-	user-select: none;
-	border:1px solid var(--border-color-1);
-	color:white;
 	text-align: center;
 }
 
