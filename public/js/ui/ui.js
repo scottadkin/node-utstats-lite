@@ -1587,3 +1587,64 @@ function UIA(content, url, target){
 
     return a;
 }
+
+
+class UIPreviousNextButtons{
+
+    constructor(parent, options, previousEvent, nextEvent, totalPages){
+
+        this.parent = parent;
+        this.options = options;
+
+        this.previousEvent = previousEvent;
+        this.nextEvent = nextEvent;
+
+        this.totalPages = parseInt(totalPages);
+        this.currentPage = 1;
+
+        this.wrapper = UIDiv("previous-next-buttons");
+
+        this.createButtons();
+
+        this.parent.append(this.wrapper);
+
+        return this.wrapper;
+    }
+
+    updateInfo(){
+        this.info.innerHTML = "";
+        this.info.append(`${this.options?.itemName ?? "Item" } ${this.currentPage} of ${this.totalPages}`);
+    }
+
+    createButtons(){
+
+        this.previous = document.createElement("button");
+        this.previous.append(this.options?.previousText ?? "Previous");
+        this.previous.addEventListener("click", () =>{
+            
+            if(this.currentPage - 1 < 1) return;
+            this.currentPage--;
+            this.previousEvent(this.currentPage);
+            this.updateInfo();
+        });
+
+        this.info = UIDiv("previous-next-buttons-info");
+        this.updateInfo();
+
+
+        this.next = document.createElement("button");
+        this.next.append(this.options?.nextText ?? "Next");
+
+        this.next.addEventListener("click", () =>{
+            
+            if(this.currentPage + 1 > this.totalPages) return;
+            this.currentPage++;
+            this.nextEvent(this.currentPage);
+            this.updateInfo();
+        });
+
+        this.previous.className = this.next.className = "small-button";
+
+        this.wrapper.append(this.previous, this.info, this.next);
+    }
+}

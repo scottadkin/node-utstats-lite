@@ -1116,6 +1116,7 @@ class CTFCaps{
         this.content = document.createElement("div");
         this.content.className = "ctf-cap";
 
+        this.createButtonWrapper();
         this.wrapper.append(this.content);
 
         this.parent.append(this.wrapper);
@@ -1151,49 +1152,31 @@ class CTFCaps{
 
     createButtonWrapper(){
 
-        this.buttonsWrapper = document.createElement("div");
-        this.buttonsWrapper.className = "ctf-cap-buttons";
+        this.buttonsWrapper = new UIPreviousNextButtons(
+            this.wrapper, {
+                "previousText": "Previous Cap",
+                "nextText": "Next Cap",
+                "itemName": "Cap"
+            }, (newPage) =>{
+                this.currentCap = newPage;
+                this.render();
+            }, (newPage) =>{
+                this.currentCap = newPage;
+                this.render();
+            },
+            this.caps.length
+        );
 
-        this.content.append(this.buttonsWrapper);
-
-        const buttons = document.createElement("div");
-        buttons.className = "duo";
-
-        this.buttonsWrapper.append(buttons);
-
-        const previous = document.createElement("button");
-        previous.innerHTML = "Previous Cap";
-        previous.className = "ctf-cap-button";
-        buttons.append(previous);
-
-        previous.addEventListener("click", () =>{
-
-            if(this.currentCap < 2) return;
-            this.currentCap--;
-            this.render();
-        });
-
-        const next = document.createElement("button");
-        next.innerHTML = "Next Cap";
-        next.className = "ctf-cap-button";
-
-        next.addEventListener("click", () =>{
-            if(this.currentCap > this.caps.length - 1) return;
-            this.currentCap++;
-            this.render();
-        })
-
-        buttons.append(next);
     }
 
     createCapWrapper(){
 
         this.capWrapper = document.createElement("div");
  
-        this.teamScores = UIDiv("basic-team-scores duo");
+        this.teamScores = UIDiv("ctf-cap-team-scores duo");
 
-        this.redScore = UIDiv("team-red basic-team-score text-center");
-        this.blueScore = UIDiv("team-blue basic-team-score text-center");
+        this.redScore = UIDiv("team-red text-center");
+        this.blueScore = UIDiv("team-blue text-center");
         
         this.teamScores.append(this.redScore, this.blueScore);
 
@@ -1445,8 +1428,7 @@ class CTFCaps{
     }
 
     renderTeamFrags(capInfo){
-
-        
+  
         const elems = [];
 
         for(let i = 0; i < this.totalTeams; i++){
@@ -1459,66 +1441,14 @@ class CTFCaps{
          
             elems.push(this.createLabelValueRow(`${teamName} Kills`, killElems));
 
-            if(suicides > 0){
-
-                const suicideElems = this.createFragElems("suicides", capInfo, i);
-                elems.push(this.createLabelValueRow(`${teamName} Suicides`, suicideElems));
-            }
+            if(suicides === 0) continue;
+    
+            const suicideElems = this.createFragElems("suicides", capInfo, i);
+            elems.push(this.createLabelValueRow(`${teamName} Suicides`, suicideElems));
+        
         }
 
         this.capInfo.append(this.createCapElem("Frags", elems));
-
-        return;
-
-        let className = `solo`;
-
-        if(this.totalTeams === 2) className = "duo";
-        if(this.totalTeams === 3) className = "trio";
-        if(this.totalTeams === 4) className = "quad";
-
-        this.killsElem.className = `${className} text-center`;
-        this.suicidesElem.className = `${className} text-center`;
-        this.killsElem.innerHTML = ``;
-        this.suicidesElem.innerHTML = ``;
-
-        const kills = [];
-        const suicides = [];
-
-        for(let i = 0; i < this.totalTeams; i++){
-
-            if(i === 0){
-                kills.push(capInfo.red_kills);
-                suicides.push(capInfo.red_suicides);
-            }
-
-            if(i === 1){
-                kills.push(capInfo.blue_kills);
-                suicides.push(capInfo.red_suicides);
-            }
-
-            if(i === 2){
-                kills.push(capInfo.green_kills);
-                suicides.push(capInfo.red_suicides);
-            }
-
-            if(i === 3){
-                kills.push(capInfo.yellow_kills);
-                suicides.push(capInfo.red_suicides);
-            }
-        }
-        
-        for(let i = 0; i < this.totalTeams; i++){
-
-            const currentKills = document.createElement("div");
-            currentKills.className = `${getTeamColorClass(i)} ctf-cap-frags`;
-            currentKills.innerHTML = `${kills[i]} Kill${(kills[i] === 1) ? "" : "s"}`;
-            this.killsElem.append(currentKills);
-
-            const currentSuicides = document.createElement("div");
-            currentSuicides.className = `${getTeamColorClass(i)} ctf-cap-frags`;
-            currentSuicides.innerHTML = `${suicides[i]} Suicide${(suicides[i] === 1) ? "" : "s"}`;
-            this.suicidesElem.append(currentSuicides);
-        } 
     }
 
 
@@ -1668,9 +1598,7 @@ class CTFCaps{
 
         const capInfo = this.caps[this.currentCap - 1];
 
-        console.log(capInfo);
-
-        const capTime = document.createElement("span");
+        const capTime = UISpan();
 
         capTime.append(
             UIB(`${toPlaytime(capInfo.cap_time, true)}`), 
@@ -1687,14 +1615,22 @@ class CTFCaps{
         
     }
 
+    updateButtonsWrapper(){
+
+        if(this.mode !== "detailed"){
+            this.buttonsWrapper.className = "hidden";
+        }else{
+            this.buttonsWrapper.className = "previous-next-buttons";
+        }
+    }
+
     render(){
 
         this.content.innerHTML = "";
-        
+        this.updateButtonsWrapper();
 
         if(this.mode === "detailed"){
 
-            this.createButtonWrapper();
             this.createCapWrapper();
             this.renderDetailedCap();
 

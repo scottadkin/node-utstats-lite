@@ -42,6 +42,7 @@
 	--font-size-5:12px;
 	--font-size-6:14px;
 	--tiny-font-size:10px;
+	--transition-all:all 0.5s;
 	--transition-1:background-color 0.5s;
 	--width-1:90%;
 	--width-2:75%;
@@ -237,7 +238,7 @@ label, .form-label, .form-read-only{
 	color:var(--font-color-1);
 	border:2px solid var(--border-color-5);
 	font-size:var(--font-size-3);
-	transition:var(--transition-1)
+	transition:var(--transition-all);
 }
 
 .warning-button{
@@ -247,7 +248,7 @@ label, .form-label, .form-read-only{
 	color:var(--font-color-1);
 	border:1px solid var(--border-color-1);
 	font-size:var(--font-size-3);
-	transition:var(--transition-1)
+	transition:var(--transition-all);
 }
 
 .submit-button:hover{
@@ -344,6 +345,7 @@ tr:hover{
 	min-width:175px;
 	width:175px;
 	text-align:left;
+	text-wrap: nowrap;
 }
 
 .t-width-1{
@@ -418,21 +420,6 @@ option{
 	font-weight: 500;
 }
 
-.small-button{
-	display:inline-block;
-	background-color:var(--bg-color-3);
-	color:var(--font-color-1);
-	font-size:var(--font-size-small);
-	padding:var(--padding-2);
-	border:1px solid var(--border-color-2);
-	user-select: none;
-	margin-right:5px;
-}
-
-.small-button:hover{
-	cursor: pointer;
-	color:yellow;
-}
 
 .true, .false{
 	padding:var(--padding-2);
@@ -703,20 +690,77 @@ option{
 }
 
 
+.small-button{
+	display:inline-block;
+	background-color:var(--bg-color-3);
+	color:var(--font-color-1);
+	font-size:var(--font-size-small);
+	padding:var(--padding-2);
+	border:2px solid var(--border-color-5);
+	user-select: none;
+	transition: var(--transition-all)
+}
+
+
+.small-button:hover{
+	cursor: pointer;
+	background-color:var(--bg-color-4);
+	
+}
+
+.previous-next-buttons{
+	display:flex;
+	justify-content: center;
+	font-size:var(--tiny-font-size);
+	height:30px;
+	line-height: 30px;
+	flex-wrap: wrap;
+	column-gap: var(--margin-2);
+	margin-bottom:var(--margin-2);
+	user-select: none;
+	
+	
+}
+
+.previous-next-buttons button{
+	flex: 0 1 auto;
+	font-weight:500;
+
+}
+
+.previous-next-buttons-info{
+	flex: 0 1 auto;
+	line-height:30px;
+	text-align:center;
+	color:var(--font-color-1);
+}
+
+
+
 
 .ctf-cap{
 	text-align: center;
 	color:var(--font-color-1);
 	background-color:var(--bg-color-2);
 	margin-bottom:var(--margin-1);
-	max-width:var(--max-table-width-3);
+	max-width:var(--max-table-width-4);
 	margin-left:auto;
 	margin-right:auto;
 	font-weight:500;
+	border:2px solid var(--border-color-5);
 }
 
-.ctf-cap-button{
-	text-align: center;
+.ctf-cap-team-scores{
+	font-size:var(--font-size-1);
+
+}
+
+.ctf-cap-team-scores div{
+	padding:5px;
+}
+
+.ctf-cap-buttons{
+	margin-bottom:var(--margin-1);
 }
 
 .ctf-event{
@@ -749,13 +793,6 @@ option{
 	padding-right:5px;
 }
 
-
-
-.ctf-cap-button:hover{
-	cursor: pointer;
-	background-color:var(--bg-color-1);
-	color:yellow;
-}
 
 .ctf-cap-viewing{
 	font-size:var(--tiny-font-size);
@@ -792,9 +829,10 @@ option{
 
 .ctf-cap-title{
 	background-color:var(--header-bg-color);
-	border:1px solid var(--border-color-5);
 	font-weight: 600;
 	padding:var(--padding-2);
+	border-top:2px solid var(--border-color-5);
+	border-bottom:2px solid var(--border-color-5);
 }
 
 .ctf-cap-value{
