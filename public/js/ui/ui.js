@@ -146,14 +146,28 @@ function UITableHeaderColumn(params){
     return elem;
 }
 
-function UITableColumn(params){
+/**
+ * 
+ * @param {*} params 
+ * Primitive value, HTML DOM, an Object with a key named content, or an Array of HTMLDoms.
+ * @returns HTMLTableCell
+ */
+function UITableCell(params){
 
     const contentType = typeof params.content;
 
     let content = params.content ?? "";
+
     let className = params.className ?? "";
 
     const elem = document.createElement("td");
+
+    if(Array.isArray(content)){
+
+        elem.append(...content);
+        return elem;
+    }
+
     if(className !== "") elem.className = className;
 
     if(params.id !== undefined) elem.id = params.id;
@@ -162,14 +176,16 @@ function UITableColumn(params){
         throw new Error(`You can not use parse for an array`);
     }
 
-    if(params.parse !== undefined && !Array.isArray(content)){
+    if(params.parse !== undefined){
 
         const parse = params.parse;
 
-
-
         if(parse.indexOf("playtime") !== -1){
             content = toPlaytime(content);
+        }
+
+        if(parse.indexOf("playtime2") !== -1){
+            content = toPlaytime(content, true);
         }
 
         if(parse.indexOf("ignore0") !== -1){
@@ -203,14 +219,16 @@ function UITableColumn(params){
 
     }else{
 
-        if(!Array.isArray(content)){
-            elem.append(content);
-        }else{
-            elem.append(...content);
+        if(contentType === "object"){
+
+            if(content.content !== undefined){
+                elem.append(content.content);
+                return elem;
+            }
         }
-        
-    }
-    
+
+        elem.append(content);
+    } 
     return elem;
 }
 
@@ -1480,12 +1498,12 @@ class UITable{
 
         this.optionKeys = Object.keys(options);
 
-        const required = [];
+        /*const required = [];
 
         for(let i = 0; i < required.length; i++){
 
             if(this.optionKeys.indexOf(required[i]) === -1) throw new Error(`Missing required key ${required[i]}`);
-        }
+        }*/
 
         this.parent = parent;
         this.options = options;
@@ -1546,12 +1564,14 @@ class UITable{
             const row = UITr();
 
             for(let x = 0; x < d.length; x++){
-
-                if(typeof d[x] === "object"){
-                    row.append(UITableColumn(d[x]));
-                }else{
-                    row.append(UITableColumn({"content": d[x]}));
+       
+                if(typeof d[x] === "object" && d[x].content !== undefined){
+                    row.append(UITableCell(d[x]));
+                    continue;
                 }
+
+                row.append(UITableCell({"content": d[x]}));
+                
             }
 
             this.elem.append(row);

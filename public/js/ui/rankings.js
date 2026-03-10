@@ -158,17 +158,17 @@ class RankingsSearchForm{
 
             const row = document.createElement("tr");
 
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": (this.selectedPerPage * (this.currentPage - 1)) + i + 1,
                 "parse": ["ordinal"], 
                 "className": "ordinal"
             }));
 
             row.append(UIPlayerLink({"playerId": d.player_id, "country": d.country, "name": d.name, "bTableElem": true}));
-            row.append(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
-            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
-            row.append(UITableColumn({"content": d.matches}));
-            row.append(UITableColumn({"content": d.score.toFixed(2)}));
+            row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
+            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+            row.append(UITableCell({"content": d.matches}));
+            row.append(UITableCell({"content": d.score.toFixed(2)}));
 
             this.table.append(row);
         }
@@ -260,7 +260,7 @@ class RankingsExplain{
 
             const row = document.createElement("tr");
 
-            row.append(UITableColumn({"content": s.displayName, "className": "text-left"}));
+            row.append(UITableCell({"content": s.displayName, "className": "text-left"}));
 
             let currentValue = s.points;
 
@@ -268,7 +268,7 @@ class RankingsExplain{
                 currentValue = `Final Score * ${currentValue.toFixed(2)}`;
             }
 
-            row.append(UITableColumn({"content": currentValue, "className": "text-center"}));
+            row.append(UITableCell({"content": currentValue, "className": "text-center"}));
             table.append(row);
         }
 

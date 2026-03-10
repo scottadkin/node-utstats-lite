@@ -130,11 +130,11 @@ function renderServerList(parent, servers){
 
         const url = `/matches/?s=${s.id}`;
 
-        tableRow.appendChild(UITableColumn({"content": s.name, "className": "text-left", url}));
-        tableRow.appendChild(UITableColumn({"content": toDateString(s.first_match, true), "className": "date", url}));
-        tableRow.appendChild(UITableColumn({"content": toDateString(s.last_match, true), "className": "date", url}));
-        tableRow.appendChild(UITableColumn({"content": toPlaytime(s.playtime), "className": "date", url}));
-        tableRow.appendChild(UITableColumn({"content": s.matches, url}));
+        tableRow.appendChild(UITableCell({"content": s.name, "className": "text-left", url}));
+        tableRow.appendChild(UITableCell({"content": toDateString(s.first_match, true), "className": "date", url}));
+        tableRow.appendChild(UITableCell({"content": toDateString(s.last_match, true), "className": "date", url}));
+        tableRow.appendChild(UITableCell({"content": toPlaytime(s.playtime), "className": "date", url}));
+        tableRow.appendChild(UITableCell({"content": s.matches, url}));
 
         table.appendChild(tableRow);
     }
@@ -186,11 +186,11 @@ function homeRenderMostPlayedGametypes(parent, data){
 
         const url = `/matches/?g=${d.id}`;
 
-        row.append(UITableColumn({"content": d.name, "className": "text-left", url}));
-        row.append(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date", url}));
-        row.append(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date", url}));
-        row.append(UITableColumn({"content": d.matches, url}));
-        row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
+        row.append(UITableCell({"content": d.name, "className": "text-left", url}));
+        row.append(UITableCell({"content": d.first_match, "parse": ["date"], "className": "date", url}));
+        row.append(UITableCell({"content": d.last_match, "parse": ["date"], "className": "date", url}));
+        row.append(UITableCell({"content": d.matches, url}));
+        row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
         table.append(row);
     }
 
@@ -233,11 +233,11 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
             const row = document.createElement("tr");
             const url = `/map/${d.id}`;
 
-            row.append(UITableColumn({"content": d.name, "className": "text-left", url}));
-            row.append(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date", url}));
-            row.append(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date", url}));
-            row.append(UITableColumn({"content": d.matches, url}));
-            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
+            row.append(UITableCell({"content": d.name, "className": "text-left", url}));
+            row.append(UITableCell({"content": d.first_match, "parse": ["date"], "className": "date", url}));
+            row.append(UITableCell({"content": d.last_match, "parse": ["date"], "className": "date", url}));
+            row.append(UITableCell({"content": d.matches, url}));
+            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
             wrapper.append(row);
         }
     }
@@ -283,10 +283,10 @@ function homeRenderMostActivePlayers(parent, data){
             "bTableElem": true
         }));
 
-        row.append(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
-        row.append(UITableColumn({"content": d.total_matches}));
-        row.append(UITableColumn({"content": d.wins, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+        row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
+        row.append(UITableCell({"content": d.total_matches}));
+        row.append(UITableCell({"content": d.wins, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
         table.append(row);
     }
 

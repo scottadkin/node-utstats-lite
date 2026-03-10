@@ -183,10 +183,10 @@ class AdminFTPManager{
             const s = this.ftpServers[i];
 
             const row = document.createElement("tr");
-            row.appendChild(UITableColumn({"content": s.name}));
-            row.appendChild(UITableColumn({"content": `${s.host}:${s.port}`}));
-            row.appendChild(UITableColumn({"content": s.user}));
-            row.appendChild(UITableColumn({"content": s.target_folder}));
+            row.appendChild(UITableCell({"content": s.name}));
+            row.appendChild(UITableCell({"content": `${s.host}:${s.port}`}));
+            row.appendChild(UITableCell({"content": s.user}));
+            row.appendChild(UITableCell({"content": s.target_folder}));
 
             const ignoreWrapper = document.createElement("div");
             ignoreWrapper.className = "text-left";
@@ -195,7 +195,7 @@ class AdminFTPManager{
             ignoreWrapper.appendChild(document.createElement("br"));
             ignoreWrapper.appendChild(document.createTextNode(`Ignore Duplicates: ${(s.ignore_duplicates) ? "True": "False"}`));
            
-            row.appendChild(UITableColumn({"content": ignoreWrapper}));
+            row.appendChild(UITableCell({"content": ignoreWrapper}));
 
             const minWrapper = document.createElement("div");
             minWrapper.className = "text-left";
@@ -204,7 +204,7 @@ class AdminFTPManager{
             minWrapper.appendChild(document.createElement("br"));
             minWrapper.appendChild(document.createTextNode(`Minimum Playtime: ${s.min_playtime} Seconds`));
 
-            row.appendChild(UITableColumn({"content":minWrapper}));
+            row.appendChild(UITableCell({"content":minWrapper}));
 
             const totalWrapper = document.createElement("div");
             totalWrapper.className = "text-left";
@@ -213,7 +213,7 @@ class AdminFTPManager{
             totalWrapper.appendChild(document.createElement("br"));
             totalWrapper.appendChild(document.createTextNode(`Total Logs Imported: ${s.total_logs_imported}`));
 
-            row.appendChild(UITableColumn({"content": totalWrapper}));
+            row.appendChild(UITableCell({"content": totalWrapper}));
 
             row.appendChild(UIStaticTrueFalse(s.sftp, true));
             row.appendChild(UIStaticTrueFalse(s.enabled, true));
@@ -1061,10 +1061,10 @@ class AdminMapsManager{
 
             const row = document.createElement("tr");
 
-            row.append(UITableColumn({"content": m.name, "className": "text-left"}));
-            row.append(UITableColumn({"content": m.last_match, "parse": ["date"], "className": "date"}));
-            row.append(UITableColumn({"content": m.playtime, "parse": ["playtime"], "className": "playtime"}));
-            row.append(UITableColumn({"content": m.targetImage}));
+            row.append(UITableCell({"content": m.name, "className": "text-left"}));
+            row.append(UITableCell({"content": m.last_match, "parse": ["date"], "className": "date"}));
+            row.append(UITableCell({"content": m.playtime, "parse": ["playtime"], "className": "playtime"}));
+            row.append(UITableCell({"content": m.targetImage}));
 
             const imageStatus = this.getImageStatus(m.targetImage);
 
@@ -1077,7 +1077,7 @@ class AdminMapsManager{
             }
 
             // form.id = targetFileName;
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": imageStatus, 
                 "className": `dummy-map-name ${statusClass}`, 
                 "id": stripFileExtension(m.targetImage),
@@ -1087,7 +1087,7 @@ class AdminMapsManager{
 
             const form = this.createUploadForm(m.targetImage);
 
-            row.append(UITableColumn({"content": form}));
+            row.append(UITableCell({"content": form}));
             table.append(row);
         }
 
@@ -2848,12 +2848,12 @@ class AdminMatchesManager{
             const url = `/match/${d.id}`;
             const urlTarget = `_blank`;
 
-            row.append(UITableColumn({"content": d.date, "parse": ["date"], "className": "date", url, urlTarget}));
-            row.append(UITableColumn({"content": d.server_name, url, urlTarget, "className": "font-small" }));
-            row.append(UITableColumn({"content": d.gametype_name, url, urlTarget, "className": "font-small"}));
-            row.append(UITableColumn({"content": d.map_name, url, urlTarget, "className": "font-small"}));
-            row.append(UITableColumn({"content": d.players, url, urlTarget}));
-            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url, urlTarget}));
+            row.append(UITableCell({"content": d.date, "parse": ["date"], "className": "date", url, urlTarget}));
+            row.append(UITableCell({"content": d.server_name, url, urlTarget, "className": "font-small" }));
+            row.append(UITableCell({"content": d.gametype_name, url, urlTarget, "className": "font-small"}));
+            row.append(UITableCell({"content": d.map_name, url, urlTarget, "className": "font-small"}));
+            row.append(UITableCell({"content": d.players, url, urlTarget}));
+            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url, urlTarget}));
 
             const deleteButton = document.createElement("button");
             deleteButton.innerHTML = "Delete Match";
@@ -2867,7 +2867,7 @@ class AdminMatchesManager{
                 this.addToDelete(d.id);
             });
 
-            const actionTd = UITableColumn({"content": deleteButton});
+            const actionTd = UITableCell({"content": deleteButton});
             actionTd.id = `match-action-${d.id}`;
             row.append(actionTd);
             table.append(row);
@@ -2944,11 +2944,11 @@ class AdminMatchesManager{
             const url = `/match/${d.latest_id}`;
             const urlTarget = "_blank";
             
-            row.append(UITableColumn({"content": d.latest_date, "parse": ["date"], "className": "date", url, urlTarget}));
-            row.append(UITableColumn({"content": d.server_name, "className": "font-small", url, urlTarget}));
-            row.append(UITableColumn({"content": d.gametype_name, "className": "font-small", url, urlTarget}));
-            row.append(UITableColumn({"content": d.map_name, "className": "font-small", url, urlTarget}));
-            row.append(UITableColumn({"content": d.total_matches - 1, url, urlTarget}));
+            row.append(UITableCell({"content": d.latest_date, "parse": ["date"], "className": "date", url, urlTarget}));
+            row.append(UITableCell({"content": d.server_name, "className": "font-small", url, urlTarget}));
+            row.append(UITableCell({"content": d.gametype_name, "className": "font-small", url, urlTarget}));
+            row.append(UITableCell({"content": d.map_name, "className": "font-small", url, urlTarget}));
+            row.append(UITableCell({"content": d.total_matches - 1, url, urlTarget}));
 
             table.append(row);
         }
@@ -2956,7 +2956,7 @@ class AdminMatchesManager{
         if(this.data.length === 0){
 
             const row = document.createElement("tr");
-            const col = UITableColumn({"content": "None Found"});
+            const col = UITableCell({"content": "None Found"});
             col.colSpan = 5;
             row.append(col);
             table.append(row);

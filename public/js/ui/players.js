@@ -42,7 +42,7 @@ class PlayersSearchList{
         if(this.totalPlayers === 0){
 
             const row = document.createElement("tr");
-            const col = UITableColumn({"content": "No players matching your search terms"});
+            const col = UITableCell({"content": "No players matching your search terms"});
             col.colSpan = 10;
             row.append(col);
             this.table.append(row);
@@ -198,15 +198,15 @@ class PlayersSearchForm{
             "className": "text-left"
         }));
 
-        row.append(UITableColumn({"content": toDateString(player.last_active, true), "className": "date"}));
-        row.append(UITableColumn({"content": player.score, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.frags, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.kills, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.deaths, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.suicides, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": `${player.efficiency.toFixed(2)}%` }));
-        row.append(UITableColumn({"content": player.total_matches, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": player.playtime, "parse": ["playtime"], "className": "playtime"}));
+        row.append(UITableCell({"content": toDateString(player.last_active, true), "className": "date"}));
+        row.append(UITableCell({"content": player.score, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": player.frags, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": player.kills, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": player.deaths, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": player.suicides, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": `${player.efficiency.toFixed(2)}%` }));
+        row.append(UITableCell({"content": player.total_matches, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": player.playtime, "parse": ["playtime"], "className": "playtime"}));
 
         return row;
     }
@@ -249,7 +249,7 @@ class PlayersSearchForm{
         if(this.data.totalPlayers === 0){
 
             const row = document.createElement("tr");
-            const col = UITableColumn({"content": "No players matching your search terms"});
+            const col = UITableCell({"content": "No players matching your search terms"});
             col.colSpan = 10;
             row.append(col);
             this.table.append(row);

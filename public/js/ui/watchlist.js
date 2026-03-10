@@ -93,17 +93,17 @@ class UIWatchlistMatches{
 
             const url = `/match/${m.hash}`;
 
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": m.date, 
                 "parse": ["date"], 
                 "className": "date",
                 url
             }));
 
-            row.append(UITableColumn({"content": m.gametype_name, url}));
-            row.append(UITableColumn({"content": m.map_name, url}));
-            row.append(UITableColumn({"content": m.players, "parse": ["ignore0"], url}));
-            row.append(UITableColumn({
+            row.append(UITableCell({"content": m.gametype_name, url}));
+            row.append(UITableCell({"content": m.map_name, url}));
+            row.append(UITableCell({"content": m.players, "parse": ["ignore0"], url}));
+            row.append(UITableCell({
                 "content": m.playtime, 
                 "parse": ["playtime"], 
                 "className": 
@@ -240,9 +240,9 @@ class UIWatchlistPlayers{
             const row = document.createElement("tr");
 
             row.append(UIPlayerLink({"playerId": p.hash, "name": p.name, "country": p.country, "bTableElem": true}));
-            row.append(UITableColumn({"content": p.last_active, "parse": ["date"], "className": "date"}));
-            row.append(UITableColumn({"content": p.total_matches, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": p.playtime, "parse": ["playtime"], "className":"playtime"}));
+            row.append(UITableCell({"content": p.last_active, "parse": ["date"], "className": "date"}));
+            row.append(UITableCell({"content": p.total_matches, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": p.playtime, "parse": ["playtime"], "className":"playtime"}));
 
             const remove = document.createElement("td");
             remove.className = "team-red hover no-user-select";

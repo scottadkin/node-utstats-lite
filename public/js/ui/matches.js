@@ -45,13 +45,13 @@ function renderMatchesTable(parent, data, bMapsPage){
         const url = `/match/${m.id}`;
 
         if(!bMapsPage){
-            row.append(UITableColumn({"content": m.map_name, "className": "text-left", url}));
+            row.append(UITableCell({"content": m.map_name, "className": "text-left", url}));
         }
-        row.append(UITableColumn({"content": m.gametype_name, "className": "font-small", url}));
-        row.append(UITableColumn({"content": m.server_name, "className": "font-small", url}));
-        row.append(UITableColumn({"content": m.date, "parse": ["date"], "className": "playtime", url}));
-        row.append(UITableColumn({"content": m.players, "parse": ["ignore0"], url}));
-        row.append(UITableColumn({"content": m.playtime, "parse": ["playtime"], "className": "playtime", url}));
+        row.append(UITableCell({"content": m.gametype_name, "className": "font-small", url}));
+        row.append(UITableCell({"content": m.server_name, "className": "font-small", url}));
+        row.append(UITableCell({"content": m.date, "parse": ["date"], "className": "playtime", url}));
+        row.append(UITableCell({"content": m.players, "parse": ["ignore0"], url}));
+        row.append(UITableCell({"content": m.playtime, "parse": ["playtime"], "className": "playtime", url}));
 
         const a = document.createElement("td");
         UIMatchScoreBox(a, m, true, false);

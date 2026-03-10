@@ -84,25 +84,25 @@ function createFragTableRow(p, totalTeams, bTotals){
             }
         ));
     }else{
-        cols.push(UITableColumn({"content": "Totals", "className": "team-none"}));
+        cols.push(UITableCell({"content": "Totals", "className": "team-none"}));
     }
 
 
-    cols.push(UITableColumn({"content": p.time_on_server, "className": "playtime", "parse": ["playtime"]}));
-    cols.push(UITableColumn({"content": p.score, "parse": ["ignore0"]}));
-    cols.push(UITableColumn({"content": p.frags, "parse": ["ignore0"]}));
-    cols.push(UITableColumn({"content": p.kills, "parse": ["ignore0"]}));
-    cols.push(UITableColumn({"content": p.deaths, "parse": ["ignore0"]}));
+    cols.push(UITableCell({"content": p.time_on_server, "className": "playtime", "parse": ["playtime"]}));
+    cols.push(UITableCell({"content": p.score, "parse": ["ignore0"]}));
+    cols.push(UITableCell({"content": p.frags, "parse": ["ignore0"]}));
+    cols.push(UITableCell({"content": p.kills, "parse": ["ignore0"]}));
+    cols.push(UITableCell({"content": p.deaths, "parse": ["ignore0"]}));
 
     let net = p.kills - p.deaths;
     if(net > 0) net = `+${net}`;
-    cols.push(UITableColumn({"content": net}));
+    cols.push(UITableCell({"content": net}));
 
-    cols.push(UITableColumn({"content": p.suicides, "parse": ["ignore0"]}));
-    cols.push(UITableColumn({"content": p.team_kills, "parse": ["ignore0"]}));
-    cols.push(UITableColumn({"content": p.headshots, "parse": ["ignore0"]}));
-    cols.push(UITableColumn({"content": `${p.efficiency.toFixed(2)}%`}));
-    cols.push(UITableColumn({"content": p.ttl, "className": "playtime", "parse": ["mmss"]}));
+    cols.push(UITableCell({"content": p.suicides, "parse": ["ignore0"]}));
+    cols.push(UITableCell({"content": p.team_kills, "parse": ["ignore0"]}));
+    cols.push(UITableCell({"content": p.headshots, "parse": ["ignore0"]}));
+    cols.push(UITableCell({"content": `${p.efficiency.toFixed(2)}%`}));
+    cols.push(UITableCell({"content": p.ttl, "className": "playtime", "parse": ["mmss"]}));
 
 
     for(let x = 0; x < cols.length; x++){
@@ -258,10 +258,10 @@ function createSpreeRow(player, totalTeams){
     }));
 
     for(let i = 1; i < 6; i++){
-        row.appendChild(UITableColumn({"content": player[`spree_${i}`], "parse": ["ignore0"]}));
+        row.appendChild(UITableCell({"content": player[`spree_${i}`], "parse": ["ignore0"]}));
     }
 
-    row.appendChild(UITableColumn({"content": player["spree_best"], "parse": ["ignore0"]}));
+    row.appendChild(UITableCell({"content": player["spree_best"], "parse": ["ignore0"]}));
 
     return row;
 }
@@ -281,10 +281,10 @@ function createMultiRow(player, totalTeams){
     }));
 
     for(let i = 1; i < 5; i++){
-        row.appendChild(UITableColumn({"content": player[`multi_${i}`], "parse": ["ignore0"]}));
+        row.appendChild(UITableCell({"content": player[`multi_${i}`], "parse": ["ignore0"]}));
     }
 
-    row.appendChild(UITableColumn({"content": player["multi_best"], "parse": ["ignore0"]}));
+    row.appendChild(UITableCell({"content": player["multi_best"], "parse": ["ignore0"]}));
 
     return row;
 }
@@ -324,7 +324,7 @@ function renderSpecialEvents(parent, totalTeams, players){
     const firstBlood = document.createElement("table");
 
     const firstBloodRow = document.createElement("tr");
-    firstBloodRow.appendChild(UITableColumn({"content": "First Blood"}));
+    firstBloodRow.appendChild(UITableCell({"content": "First Blood"}));
 
     const firstBloodPlayer = getFirstBloodPlayer(players);
 
@@ -653,31 +653,31 @@ class MatchDominationSummary{
 
             const row = document.createElement("tr");
      
-            row.append(UITableColumn({"content": `${getTeamName(i)} Team`, "className": `${getTeamColorClass(i)} text-left`}));
-            row.append(UITableColumn({"content": d[`team_${i}_caps`], "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": `${getTeamName(i)} Team`, "className": `${getTeamColorClass(i)} text-left`}));
+            row.append(UITableCell({"content": d[`team_${i}_caps`], "parse": ["ignore0"]}));
             
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": d[`team_${i}_control_time`], 
                 "className": "playtime", 
                 "parse": "mmss"}
             ));
 
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": `${d[`team_${i}_control_percent`]}%`}
             ));
 
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": d[`team_${i}_score_time`], "className": "playtime", "parse": ["mmss"]}
             ));
 
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": d[`team_${i}_stolen_caps`], "parse": ["ignore0"]}
             ));
 
-             row.append(UITableColumn({"content": d[`team_${i}_stolen_points`].toFixed(2)}));
+             row.append(UITableCell({"content": d[`team_${i}_stolen_points`].toFixed(2)}));
 
-            row.append(UITableColumn({"content": d[`team_${i}_importer_score`].toFixed(2)}));
-            row.append(UITableColumn({"content": d[`team_${i}_real_score`].toFixed(2)}));
+            row.append(UITableCell({"content": d[`team_${i}_importer_score`].toFixed(2)}));
+            row.append(UITableCell({"content": d[`team_${i}_real_score`].toFixed(2)}));
             
 
             table.append(row);
@@ -849,7 +849,7 @@ class MatchDominationSummary{
                         }
                     }
 
-                    const col = UITableColumn({
+                    const col = UITableCell({
                         "content": content    
                     });
 
@@ -863,7 +863,7 @@ class MatchDominationSummary{
 
             const totalRow = document.createElement("tr");
 
-            totalRow.append(UITableColumn({
+            totalRow.append(UITableCell({
                 "content": "Combined", "className": "team-none"
             }));
 
@@ -872,7 +872,7 @@ class MatchDominationSummary{
 
                 const {content, className, currentValue} = this.getContent(totals[pointId], true);
 
-                const col = UITableColumn({content});
+                const col = UITableCell({content});
 
                 if(className !== "") col.className = className;
 
@@ -940,9 +940,9 @@ function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKe
                 totals[dataKeys[z]] += p[dataKeys[z]];
 
                 if(playtimeTypes.indexOf(dataKeys[z]) === -1){
-                    row.appendChild(UITableColumn({"content":  p[dataKeys[z]], "parse": "ignore0"}));
+                    row.appendChild(UITableCell({"content":  p[dataKeys[z]], "parse": "ignore0"}));
                 }else{
-                    row.appendChild(UITableColumn({"content":  p[dataKeys[z]], "className": "playtime", "parse": ["playtime"]}));
+                    row.appendChild(UITableCell({"content":  p[dataKeys[z]], "className": "playtime", "parse": ["playtime"]}));
                 }
             }
 
@@ -951,14 +951,14 @@ function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKe
 
         const totalsRow = document.createElement("tr");
 
-        totalsRow.appendChild(UITableColumn({"content":  "Totals", "className": "team-none"}));
+        totalsRow.appendChild(UITableCell({"content":  "Totals", "className": "team-none"}));
 
         for(let z = 0; z < dataKeys.length; z++){
 
             if(playtimeTypes.indexOf(dataKeys[z]) === -1){
-                totalsRow.appendChild(UITableColumn({"content":  totals[dataKeys[z]], "parse": "ignore0"}));
+                totalsRow.appendChild(UITableCell({"content":  totals[dataKeys[z]], "parse": "ignore0"}));
             }else{
-                totalsRow.appendChild(UITableColumn({"content":  totals[dataKeys[z]], "className": "playtime", "parse": ["playtime"]}));
+                totalsRow.appendChild(UITableCell({"content":  totals[dataKeys[z]], "className": "playtime", "parse": ["playtime"]}));
             }
         }
 
@@ -1103,7 +1103,7 @@ class CTFCaps{
 
         this.currentCap = 1;
         this.currentScores = [0,0];
-        this.mode = "detailed";
+        this.mode = "basic";
 
         this.wrapper = UIDiv();
 
@@ -1624,6 +1624,55 @@ class CTFCaps{
         }
     }
 
+
+    renderBasicCaps(){
+
+        const tableOptions = {
+            "width": 1,
+            "headers": [
+                "Taken", "Taken By", "Capped By", 
+                "Cap", "Travel Time", "Score"
+            ]
+        };
+
+        const data = [];
+
+        let teamScores = [0,0];
+
+        for(let i = 0; i < this.caps.length; i++){
+
+            const c = this.caps[i];
+
+            const grabPlayer = getPlayer(this.players, c.taken_player);
+            const capPlayer = getPlayer(this.players, c.cap_player);
+
+            if(c.capping_team < 2){
+                teamScores[c.capping_team]++;
+            }
+            
+            data.push([
+                
+                UIMMSS(c.taken_timestamp - this.matchStart), 
+                UIPlayerLink({
+                    "playerId": c.taken_player, 
+                    "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
+                    "country": grabPlayer.country
+                }), 
+                UIPlayerLink({
+                    "playerId": c.cap_player, 
+                    "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
+                    "country": capPlayer.country
+                }), 
+                UIMMSS(c.cap_timestamp - this.matchStart),
+                {"content": c.cap_time, "parse": ["playtime2"], "className": "playtime"},
+                `${teamScores[0]} - ${teamScores[1]}`
+            ]);
+        }
+
+        const table = new UITable(this.content, tableOptions, data);
+
+    }
+
     render(){
 
         this.content.innerHTML = "";
@@ -1631,11 +1680,14 @@ class CTFCaps{
 
         if(this.mode === "detailed"){
 
+            this.content.className = "ctf-cap";
             this.createCapWrapper();
             this.renderDetailedCap();
 
         }else if(this.mode === "basic"){
 
+            this.content.className = "";
+            this.renderBasicCaps();
         }
     }
 }
@@ -1770,7 +1822,7 @@ class MatchWeaponSummary{
             for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
                 if(weaponName === "All") continue;
-                row.appendChild(UITableColumn({"content": this.getPlayerWeaponStat(this.currentMode, playerId, weaponId), "parse": ["ignore0"]}));
+                row.appendChild(UITableCell({"content": this.getPlayerWeaponStat(this.currentMode, playerId, weaponId), "parse": ["ignore0"]}));
             }
 
             this.table.appendChild(row);
@@ -1829,16 +1881,16 @@ class MatchWeaponSummary{
             if(weaponName === "All") continue;
 
             const row = document.createElement("tr");
-            row.appendChild(UITableColumn({"content": weaponName, "className": "text-left"}));
+            row.appendChild(UITableCell({"content": weaponName, "className": "text-left"}));
 
 
             const wStats = this.getWeaponTotalStats(weaponId);
 
-            row.appendChild(UITableColumn({"content": wStats.teamKills, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": wStats.suicides, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": wStats.deaths, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": wStats.kills, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": wStats.kpm.toFixed(2)}));
+            row.appendChild(UITableCell({"content": wStats.teamKills, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": wStats.suicides, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": wStats.deaths, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": wStats.kills, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": wStats.kpm.toFixed(2)}));
             this.table.appendChild(row);
         }
 
@@ -1940,12 +1992,12 @@ class MatchClassicWeaponStats{
             }));
 
 
-            row.appendChild(UITableColumn({"content": d.kills, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.deaths, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.shots, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": d.hits, "parse": ["ignore0"]}));
-            row.appendChild(UITableColumn({"content": `${d.accuracy.toFixed(2)}%` }));
-            row.appendChild(UITableColumn({"content": d.damage, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": d.kills, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": d.deaths, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": d.shots, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": d.hits, "parse": ["ignore0"]}));
+            row.appendChild(UITableCell({"content": `${d.accuracy.toFixed(2)}%` }));
+            row.appendChild(UITableCell({"content": d.damage, "parse": ["ignore0"]}));
 
             this.table.appendChild(row);
         }
@@ -1982,9 +2034,9 @@ function renderMatchPings(parent, players, totalTeams){
             "className": (totalTeams >= 2) ? getTeamColorClass(p.team) : "team-none"
         }));
 
-        row.appendChild(UITableColumn({"content":p.ping_min}));
-        row.appendChild(UITableColumn({"content":p.ping_avg}));
-        row.appendChild(UITableColumn({"content":p.ping_max}));
+        row.appendChild(UITableCell({"content":p.ping_min}));
+        row.appendChild(UITableCell({"content":p.ping_avg}));
+        row.appendChild(UITableCell({"content":p.ping_max}));
 
         table.appendChild(row);
     }
@@ -2094,7 +2146,7 @@ class MatchKillsMatchUp{
 
             for(let x = 0; x < this.players.length; x++){
 
-                row.appendChild(UITableColumn({
+                row.appendChild(UITableCell({
                     "content": this.getTotalKills(p.id, this.players[x].id), 
                     "parse": ["ignore0"],
                     "className": (p.id === this.players[x].id) ? "team-none" : ""
@@ -2198,7 +2250,7 @@ class MatchItemsSummary{
 
                 if(columnName === "player") continue;
 
-                row.appendChild(UITableColumn({
+                row.appendChild(UITableCell({
                     "content": p[`item_${columnName}`], 
                     "parse": ["ignore0"]
                 }));
@@ -2254,39 +2306,39 @@ class MatchDamageSummary{
         }));
 
 
-        row.appendChild(UITableColumn({
+        row.appendChild(UITableCell({
             "content": player.damage.fallDamage,
             "parse": ["ignore0"]
         }));
 
-        row.appendChild(UITableColumn({
+        row.appendChild(UITableCell({
             "content": player.damage.drownDamage,
             "parse": ["ignore0"]
         }));
 
-        row.appendChild(UITableColumn({
+        row.appendChild(UITableCell({
             "content": player.damage.selfDamage,
             "parse": ["ignore0"]
         }));
 
-        row.appendChild(UITableColumn({
+        row.appendChild(UITableCell({
             "content": player.damage.damageTaken,
             "parse": ["ignore0"]
         }));
 
-        row.appendChild(UITableColumn({
+        row.appendChild(UITableCell({
             "content": player.damage.damageDelt,
             "parse": ["ignore0"]
         }));
 
         if(this.bAnyTeamDamage()){
 
-            row.appendChild(UITableColumn({
+            row.appendChild(UITableCell({
                 "content": player.damage.teamDamageTaken,
                 "parse": ["ignore0"]
             }));
 
-            row.appendChild(UITableColumn({
+            row.appendChild(UITableCell({
                 "content": player.damage.teamDamageDelt,
                 "parse": ["ignore0"]
             }));

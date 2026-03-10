@@ -207,17 +207,17 @@ class CTFLeagueTable{
 
             pos = i + 1 + (this.perPage * (this.currentPage - 1));
 
-            row.append(UITableColumn({"content": pos, "parse": ["ordinal"], "className": "ordinal"}));
+            row.append(UITableCell({"content": pos, "parse": ["ordinal"], "className": "ordinal"}));
             row.append(UIPlayerLink({"playerId": d.player.id, "name": d.player.name, "country": d.player.country, "bTableElem": true}));
 
-            row.append(UITableColumn({"content": d.total_matches}));
-            row.append(UITableColumn({"content": d.wins, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.draws, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.losses, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.cap_for, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.cap_against, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.cap_offset, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.points, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.total_matches}));
+            row.append(UITableCell({"content": d.wins, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.draws, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.losses, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.cap_for, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.cap_against, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.cap_offset, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.points, "parse": ["ignore0"]}));
 
             this.table.append(row);
         }

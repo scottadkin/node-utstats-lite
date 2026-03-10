@@ -180,11 +180,11 @@ class RecordsDataDisplay{
 
             const place = i + 1 + (this.perPage * (this.currentPage - 1));
 
-            row.append(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
+            row.append(UITableCell({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
             row.append(UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}));
-            row.append(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
-            row.append(UITableColumn({"content": this.getGametypeName(d.gametype_id)}));
-            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+            row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
+            row.append(UITableCell({"content": this.getGametypeName(d.gametype_id)}));
+            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
 
             let valueOptions = {"content": d.record_value};
 
@@ -193,7 +193,7 @@ class RecordsDataDisplay{
                 valueOptions.className = "playtime";
             }
 
-            row.append(UITableColumn(valueOptions));
+            row.append(UITableCell(valueOptions));
 
             this.table.append(row);
         }
@@ -221,12 +221,12 @@ class RecordsDataDisplay{
             const row = document.createElement("tr");
             const place = i + 1 + (this.perPage * (this.currentPage - 1));
 
-            row.append(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
+            row.append(UITableCell({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
             row.append(UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}));
-            row.append(UITableColumn({"content": d.match_date, "parse": ["date"], "className": "date"}));
-            row.append(UITableColumn({"content": d.time_on_server, "parse": ["playtime"], "className": "playtime"}));
-            row.append(UITableColumn({"content": d.gametype_name}));
-            row.append(UITableColumn({"content": d.map_name}));
+            row.append(UITableCell({"content": d.match_date, "parse": ["date"], "className": "date"}));
+            row.append(UITableCell({"content": d.time_on_server, "parse": ["playtime"], "className": "playtime"}));
+            row.append(UITableCell({"content": d.gametype_name}));
+            row.append(UITableCell({"content": d.map_name}));
 
             let valueOptions = {"content": d.record_type};
 
@@ -234,7 +234,7 @@ class RecordsDataDisplay{
                 valueOptions.parse = ["playtime"];
                 valueOptions.className = "playtime";
             }
-            row.append(UITableColumn(valueOptions));
+            row.append(UITableCell(valueOptions));
 
             this.table.append(row);
         }

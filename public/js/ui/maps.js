@@ -189,11 +189,11 @@ class MapListDisplay{
 
             const url = `/map/${d.id}`;
 
-            row.append(UITableColumn({"content": d.name, "className": "text-left", url}));
-            row.append(UITableColumn({"content": d.first_match, "parse": ["date"], "className": "date", url}));
-            row.append(UITableColumn({"content": d.last_match, "parse": ["date"], "className": "date", url}));
-            row.append(UITableColumn({"content": d.matches, url}));
-            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
+            row.append(UITableCell({"content": d.name, "className": "text-left", url}));
+            row.append(UITableCell({"content": d.first_match, "parse": ["date"], "className": "date", url}));
+            row.append(UITableCell({"content": d.last_match, "parse": ["date"], "className": "date", url}));
+            row.append(UITableCell({"content": d.matches, url}));
+            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
 
             table.append(row);
 
@@ -259,10 +259,10 @@ function UIMapBasicSummary(parent, data){
 
     const row = document.createElement("tr");
 
-    row.append(UITableColumn({"content": data.first_match, "parse": ["date"], "className": "date"}));
-    row.append(UITableColumn({"content": data.last_match, "parse": ["date"], "className": "date"}));
-    row.append(UITableColumn({"content": data.matches}));
-    row.append(UITableColumn({"content": data.playtime, "parse": ["playtime"], "className": "playtime"}));
+    row.append(UITableCell({"content": data.first_match, "parse": ["date"], "className": "date"}));
+    row.append(UITableCell({"content": data.last_match, "parse": ["date"], "className": "date"}));
+    row.append(UITableCell({"content": data.matches}));
+    row.append(UITableCell({"content": data.playtime, "parse": ["playtime"], "className": "playtime"}));
 
     table.append(row);
     parent.append(table);
@@ -380,13 +380,13 @@ function UIMapWeaponsSummary(parent, data){
 
         const row = document.createElement("tr");
 
-        row.append(UITableColumn({"content": d.name, "className": "text-left"}));
-        row.append(UITableColumn({"content": d.deaths, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": d.suicides, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": d.team_kills, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": d.kills, "parse": ["ignore0"]}));
-        row.append(UITableColumn({"content": `${killsPercent.toFixed(2)}%`}));
-        row.append(UITableColumn({"content": d.kills_per_min.toFixed(3)}));
+        row.append(UITableCell({"content": d.name, "className": "text-left"}));
+        row.append(UITableCell({"content": d.deaths, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": d.suicides, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": d.team_kills, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": d.kills, "parse": ["ignore0"]}));
+        row.append(UITableCell({"content": `${killsPercent.toFixed(2)}%`}));
+        row.append(UITableCell({"content": d.kills_per_min.toFixed(3)}));
 
         table.append(row);
 
@@ -481,12 +481,12 @@ class UIMapPlayerRankings{
 
             const place = i + 1 + this.perPage * (this.page - 1);
 
-            row.append(UITableColumn({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
+            row.append(UITableCell({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
             row.append(UIPlayerLink({"playerId": d.player_id, "name": d.name, "country": d.country, "bTableElem": true}));
-            row.append(UITableColumn({"content": d.last_active, "parse": ["date"], "className": "date"}));
-            row.append(UITableColumn({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
-            row.append(UITableColumn({"content": d.matches}));
-            row.append(UITableColumn({"content": d.score.toFixed(2)}));
+            row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
+            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
+            row.append(UITableCell({"content": d.matches}));
+            row.append(UITableCell({"content": d.score.toFixed(2)}));
 
             this.table.append(row);
         }
@@ -620,7 +620,7 @@ class UIMapPlayerAverages{
 
             const row = document.createElement("tr");
 
-            const ordinal = UITableColumn({
+            const ordinal = UITableCell({
                 "content": i + 1 + (this.perPage * (this.page - 1)), 
                 "parse": ["ordinal"], 
                 "className": "ordinal"}
@@ -636,7 +636,7 @@ class UIMapPlayerAverages{
                 "className": "text-left"
             }));
 
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": d.total_playtime, 
                 "parse": ["playtime"], 
                 "className": "playtime"
@@ -645,7 +645,7 @@ class UIMapPlayerAverages{
 
             const typeSettings = this.getTypeSettings();
   
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": d.target_value.toFixed(3), 
                 "className": typeSettings?.className ?? null
             }));
@@ -862,7 +862,7 @@ class UIMapCTFLeague{
 
             const row = document.createElement("tr");
             
-            row.append(UITableColumn({
+            row.append(UITableCell({
                 "content": i + 1 + (this.perPage * (this.page - 1)), 
                 "parse": ["ordinal"],
                 "className": "ordinal"
@@ -876,14 +876,14 @@ class UIMapCTFLeague{
             }));
             
 
-            row.append(UITableColumn({"content": d.total_matches}));
-            row.append(UITableColumn({"content": d.wins, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.draws, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.losses, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.cap_for, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.cap_against, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": (d.cap_offset > 0) ? `+${d.cap_offset}` : d.cap_offset, "parse": ["ignore0"]}));
-            row.append(UITableColumn({"content": d.points, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.total_matches}));
+            row.append(UITableCell({"content": d.wins, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.draws, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.losses, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.cap_for, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.cap_against, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": (d.cap_offset > 0) ? `+${d.cap_offset}` : d.cap_offset, "parse": ["ignore0"]}));
+            row.append(UITableCell({"content": d.points, "parse": ["ignore0"]}));
 
             this.table.append(row);
         }
