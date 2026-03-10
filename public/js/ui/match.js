@@ -1630,7 +1630,8 @@ class CTFCaps{
         const tableOptions = {
             "width": 1,
             "headers": [
-                "Taken", "Taken By", "Capped By", 
+                "Taken", "Taken By", "Drops", "Covers", 
+                "Kills", "Suicides", "Capped By", 
                 "Cap", "Travel Time", "Score"
             ]
         };
@@ -1649,6 +1650,10 @@ class CTFCaps{
             if(c.capping_team < 2){
                 teamScores[c.capping_team]++;
             }
+
+            const scores = UIBasicTeamScore(teamScores[0], teamScores[1]);
+            const kills = UIBasicTeamScore(c.red_kills, c.blue_kills);
+            const suicides = UIBasicTeamScore(c.red_suicides, c.blue_suicides);
             
             data.push([
                 
@@ -1658,6 +1663,10 @@ class CTFCaps{
                     "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
                     "country": grabPlayer.country
                 }), 
+                ignore0(c.total_drops),
+                ignore0(c.total_covers),
+                kills,
+                suicides,
                 UIPlayerLink({
                     "playerId": c.cap_player, 
                     "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
@@ -1665,7 +1674,7 @@ class CTFCaps{
                 }), 
                 UIMMSS(c.cap_timestamp - this.matchStart),
                 {"content": c.cap_time, "parse": ["playtime2"], "className": "playtime"},
-                `${teamScores[0]} - ${teamScores[1]}`
+                scores
             ]);
         }
 

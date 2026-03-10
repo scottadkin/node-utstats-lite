@@ -77,6 +77,21 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
     parent.append(wrapper);
 }
 
+function UIBasicTeamScore(redValue, blueValue){
+
+    const scoreWrapper = UIDiv("duo basic-team-scores");
+
+    const redScoreElem = UIDiv("team-red");
+    redScoreElem.append(redValue);
+
+    const blueScoreElem = UIDiv("team-blue");
+    blueScoreElem.append(blueValue);
+
+    scoreWrapper.append(redScoreElem, blueScoreElem);
+
+    return scoreWrapper;
+}
+
 function UICountryFlag(country){
 
     if(country === "") country = "xx";

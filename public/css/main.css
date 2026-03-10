@@ -845,6 +845,10 @@ option{
 	font-weight: bold;
 }
 
+.basic-team-scores div{
+	padding:0px 2px;
+}
+
 .basic-team-score{
 	padding:var(--padding-1);
 }
