@@ -8,12 +8,19 @@ import {
     setPlayerMapAverages, getPlayerIdsInMatch, updatePlayerTotals,
     getNamesAndHashesById
  } from "./players.mjs";
-import { getMatchWeaponStats, getWeaponNames, calcMapWeaponsTotals as weaponCalcMapWeaponsTotals, updatePlayerTotals as weaponUpdatePlayerTotals } from "./weapons.mjs";
+import { 
+    getMatchWeaponStats, getWeaponNames, 
+    calcMapWeaponsTotals as weaponCalcMapWeaponsTotals, 
+    updatePlayerTotals as weaponUpdatePlayerTotals 
+} from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
 import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData, getDOMMatchPlayersAPIJSON } from "./domination.mjs";
 import md5 from "md5";
-import { getWinner, getTeamName, sanitizePagePerPage, mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, getMapImageName, getHeatmapDates, toMatchResultString } from "./generic.mjs";
+import { getWinner, getTeamName, sanitizePagePerPage, 
+    mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, 
+    getHeatmapDates, toMatchResultString, getPlayer
+ } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
 import { getValidGametypes, getValidMaps, deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
@@ -1113,7 +1120,7 @@ export async function getMatchKillsBasicJSON(id){
 }
 
 
-function updateKillskillsMatchUp(totals, killer, victim){
+function updateKillsMatchUp(totals, killer, victim){
 
     if(totals[killer] === undefined){
         totals[killer] = {};
@@ -1124,6 +1131,20 @@ function updateKillskillsMatchUp(totals, killer, victim){
     }
 
     totals[killer][victim]++;
+}
+
+function updateKillsTotalsJSON(totals, killer, killType){
+
+    if(totals[killer] === undefined){
+        totals[killer] = {
+            "kills": 0,
+            "teamKills": 0
+        };
+    }
+
+    const key = (killType === 0) ? "kills" : "teamKills";
+
+    totals[killer][key]++;
 }
 
 export async function getMatchKillsDetailedJSON(id){
@@ -1151,23 +1172,28 @@ export async function getMatchKillsDetailedJSON(id){
 
     //killer => victim => totalKills
     const killsMatchUp = {};
+    const killTotals = {};
+
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
-        const killer = players[d.killer_id]?.name ?? "Not Found";
-        const victim = players[d.victim_id]?.name ?? "Not Found";
-        const killerWeapon = weapons[d.killer_weapon] ?? "Not Found";
-        const victimWeapon = weapons[d.victim_weapon] ?? "Not Found";
+        const killer = getPlayer(players, d.killer_id);
+        const victim = getPlayer(players, d.victim_id);
+
+
+        const killerWeapon = weapons[d.killer_weapon];
+        const victimWeapon = weapons[d.victim_weapon];
 
         const current = {
             "timestamp":d.timestamp, 
-            killer, 
-            victim, 
+            "killer": killer.name, 
+            "victim": victim.name, 
             killerWeapon, 
             victimWeapon
         };
+
 
         if(d.kill_type === 1){
             teamKills.push(current);
@@ -1175,11 +1201,11 @@ export async function getMatchKillsDetailedJSON(id){
             kills.push(current);
         }
 
-        updateKillskillsMatchUp(killsMatchUp, killer, victim);
+        updateKillsTotalsJSON(killTotals, killer.name, d.kill_type);
+        updateKillsMatchUp(killsMatchUp, killer.name, victim.name);
     }
 
-
-    return {players, killsMatchUp, kills, teamKills};
+    return {players, killsMatchUp, killTotals, kills, teamKills};
 }
 
 async function _createPlayerWeaponKillsJSON(matchId){
