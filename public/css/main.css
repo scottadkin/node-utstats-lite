@@ -20,7 +20,7 @@
 	--border-color-4:rgba(0,0,0,0.25);
 	--border-color-5:rgba(0,0,0,0.5);
 	--max-width-1:90%;
-	--team-color-none:rgb(0,0,0);
+	--team-color-none:rgb(20,20,20);
 	--team-color-red:rgb(79,0,0);
 	--team-color-blue:rgb(10,51,106);
 	--team-color-green:rgb(0,56,0);
@@ -319,7 +319,7 @@ th:hover{
 td{
 	border:2px solid var(--border-color-4);
 	padding:2px 5px;
-	font-size:var(--font-size-4);
+	font-size:var(--font-size-5);
 	line-height:var(--line-height-1);
 	font-weight:500;
 }
@@ -342,29 +342,30 @@ tr:hover{
 }
 
 .player-name-td{
-	min-width:175px;
-	width:175px;
+	min-width:150px;
+	width:150px;
 	text-align:left;
 	text-wrap: nowrap;
+	overflow:hidden;
 }
 
 .t-width-1{
-	width:var(--width-1);
+	width:var(--width-3);
 	max-width:var(--max-table-width-1);
 }
 
 .t-width-2{
-	width:var(--width-1);
+	width:var(--width-3);
 	max-width:var(--max-table-width-2);
 }
 
 .t-width-3{
-	width:var(--width-1);
+	width:var(--width-3);
 	max-width:var(--max-table-width-3);
 }
 
 .t-width-4{
-	width:var(--width-1);
+	width:var(--width-3);
 	max-width:var(--max-table-width-4);
 }
 
@@ -735,9 +736,6 @@ option{
 	color:var(--font-color-1);
 }
 
-
-
-
 .ctf-cap{
 	text-align: center;
 	color:var(--font-color-1);
@@ -748,6 +746,7 @@ option{
 	margin-right:auto;
 	font-weight:500;
 	border:2px solid var(--border-color-5);
+	box-shadow: var(--box-shadow-1);
 }
 
 .ctf-cap-team-scores{

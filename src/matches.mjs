@@ -1113,6 +1113,19 @@ export async function getMatchKillsBasicJSON(id){
 }
 
 
+function updateKillskillsMatchUp(totals, killer, victim){
+
+    if(totals[killer] === undefined){
+        totals[killer] = {};
+    }
+
+    if(totals[killer][victim] === undefined){
+        totals[killer][victim] = 0;
+    }
+
+    totals[killer][victim]++;
+}
+
 export async function getMatchKillsDetailedJSON(id){
 
     const data = await getMatchKills(id);
@@ -1131,15 +1144,13 @@ export async function getMatchKillsDetailedJSON(id){
         playerIds.add(d.victim_id);
         weaponIds.add(d.killer_weapon);
         weaponIds.add(d.victim_weapon);
-       // kills.push([d.timestamp, d.killer_id, d.victim_id, d.killer_weapon, d.victim_weapon]);
     }
 
-
     const players = await getNamesAndHashesById([...playerIds]);
-
     const weapons = await getWeaponNames([...weaponIds]);
 
-    const headToHead = {}
+    //killer => victim => totalKills
+    const killsMatchUp = {};
 
     for(let i = 0; i < data.length; i++){
 
@@ -1163,9 +1174,12 @@ export async function getMatchKillsDetailedJSON(id){
         }else if(d.kill_type === 0){
             kills.push(current);
         }
+
+        updateKillskillsMatchUp(killsMatchUp, killer, victim);
     }
 
-    return {players, kills, teamKills};
+
+    return {players, killsMatchUp, kills, teamKills};
 }
 
 async function _createPlayerWeaponKillsJSON(matchId){

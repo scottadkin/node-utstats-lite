@@ -139,13 +139,19 @@ const matchKillsDetailed = `{
       "name": "Cali",
       "hash": "e3bed28b347f26bfb1d0c9b9bda2712b"
     },
-    "81": {
-      "name": "Illana",
-      "hash": "4e6f38154b8cf9b1fc00fc497feb0ddc"
-    },
     "84": {
       "name": "Sarena",
       "hash": "82f1d6311fcce730f6d77f1665f80be0"
+    }
+  },
+  "killsMatchUp": {
+    "Sarena": {
+      "Ooper": 2,
+      "Illana": 1,
+      "Cali": 2
+    },
+    "Ooper": {
+      "Sarena": 1
     }
   },
   "kills": [
@@ -616,7 +622,7 @@ const matchPlayersBasic = `[
 					"match", 
 					"Kills Detailed", 
 					"kills-detailed", 
-					"Returns player list, every kill, and team kill, including what weapon both players had at the time.", 
+					"Returns player list, player kills match up, every kill, and team kill, including what weapon both players had at the time.", 
 					matchKillsDetailed, 
 					[
 						"match/kills-detailed/?id=187", 
