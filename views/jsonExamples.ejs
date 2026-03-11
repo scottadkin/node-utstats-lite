@@ -131,37 +131,38 @@ const matchKillsBasic = `{
 
 const matchKillsDetailed = `{
   "players": {
-    "27": {
-      "name": "Ooper",
-      "hash": "f789d64fdb64f0eb3db2100edde4e9aa"
+    "Ooper": {
+      "id": "27",
+      "hash": "f789d64fdb64f0eb3db2100edde4e9aa",
+      "kills": 1,
+      "deathsByKill": 2,
+      "teamKills": 0,
+      "deathsByTeamKill": 0
     },
-    "40": {
-      "name": "Cali",
-      "hash": "e3bed28b347f26bfb1d0c9b9bda2712b"
+    "Cali": {
+      "id": "40",
+      "hash": "e3bed28b347f26bfb1d0c9b9bda2712b",
+      "kills": 0,
+      "deathsByKill": 2,
+      "teamKills": 0,
+      "deathsByTeamKill": 0
     },
-    "84": {
-      "name": "Sarena",
-      "hash": "82f1d6311fcce730f6d77f1665f80be0"
+    "Sarena": {
+      "id": "84",
+      "hash": "82f1d6311fcce730f6d77f1665f80be0",
+      "kills": 5,
+      "deathsByKill": 1,
+      "teamKills": 0,
+      "deathsByTeamKill": 0
     }
   },
   "killsMatchUp": {
     "Sarena": {
       "Ooper": 2,
-      "Not Found": 1,
       "Cali": 2
     },
     "Ooper": {
       "Sarena": 1
-    }
-  },
-  "killTotals": {
-    "Sarena": {
-      "kills": 5,
-      "teamKills": 0
-    },
-    "Ooper": {
-      "kills": 1,
-      "teamKills": 0
     }
   },
   "kills": [
@@ -171,13 +172,6 @@ const matchKillsDetailed = `{
       "victim": "Ooper",
       "killerWeapon": "Enforcer",
       "victimWeapon": "Enforcer"
-    },
-    {
-      "timestamp": 25.6455,
-      "killer": "Sarena",
-      "victim": "Not Found",
-      "killerWeapon": "Pulse Gun",
-      "victimWeapon": "Rocket Launcher"
     },
     {
       "timestamp": 27.5273,

@@ -1308,7 +1308,7 @@ export async function getMostActivePlayers(limit){
 }
 
 
-export async function getNamesAndHashesById(playerIds){
+export async function getNamesAndHashesById(playerIds, bUseNameAsKeys){
 
     if(playerIds.length === 0) return {};
 
@@ -1322,7 +1322,11 @@ export async function getNamesAndHashesById(playerIds){
 
         const {id, hash, name} = result[i];
 
-        data[id] = {name, hash}
+        if(!bUseNameAsKeys){
+            data[id] = {name, hash}
+        }else{
+            data[name] = {id, hash};
+        }
     }
 
     return data;

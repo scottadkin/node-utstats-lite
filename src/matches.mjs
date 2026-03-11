@@ -1133,20 +1133,6 @@ function updateKillsMatchUp(totals, killer, victim){
     totals[killer][victim]++;
 }
 
-function updateKillsTotalsJSON(totals, killer, killType){
-
-    if(totals[killer] === undefined){
-        totals[killer] = {
-            "kills": 0,
-            "teamKills": 0
-        };
-    }
-
-    const key = (killType === 0) ? "kills" : "teamKills";
-
-    totals[killer][key]++;
-}
-
 export async function getMatchKillsDetailedJSON(id){
 
     const data = await getMatchKills(id);
@@ -1167,20 +1153,26 @@ export async function getMatchKillsDetailedJSON(id){
         weaponIds.add(d.victim_weapon);
     }
 
-    const players = await getNamesAndHashesById([...playerIds]);
+    const playersInfo = await getNamesAndHashesById([...playerIds]);
     const weapons = await getWeaponNames([...weaponIds]);
+
+    for(const playerInfo of Object.values(playersInfo)){
+
+        playerInfo.kills = 0;
+        playerInfo.deathsByKill = 0;     
+        playerInfo.teamKills = 0;
+        playerInfo.deathsByTeamKill = 0;
+    }
 
     //killer => victim => totalKills
     const killsMatchUp = {};
-    const killTotals = {};
-
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
-        const killer = getPlayer(players, d.killer_id);
-        const victim = getPlayer(players, d.victim_id);
+        const killer = getPlayer(playersInfo, d.killer_id);
+        const victim = getPlayer(playersInfo, d.victim_id);
 
 
         const killerWeapon = weapons[d.killer_weapon];
@@ -1197,15 +1189,31 @@ export async function getMatchKillsDetailedJSON(id){
 
         if(d.kill_type === 1){
             teamKills.push(current);
+            killer.teamKills++;
+            victim.deathsByTeamKill++;
         }else if(d.kill_type === 0){
             kills.push(current);
+            killer.kills++;
+            victim.deathsByKill++;
         }
 
-        updateKillsTotalsJSON(killTotals, killer.name, d.kill_type);
+    
         updateKillsMatchUp(killsMatchUp, killer.name, victim.name);
     }
 
-    return {players, killsMatchUp, killTotals, kills, teamKills};
+    const players = {};
+
+    for(const [id, pData] of Object.entries(playersInfo)){
+
+        players[pData.name] = {
+            id,
+            ...pData
+        }
+
+        delete players[pData.name].name;
+
+    }
+    return {players, killsMatchUp, kills, teamKills};
 }
 
 async function _createPlayerWeaponKillsJSON(matchId){
