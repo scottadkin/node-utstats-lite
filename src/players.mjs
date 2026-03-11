@@ -1308,7 +1308,7 @@ export async function getMostActivePlayers(limit){
 }
 
 
-export async function getNamesAndHashesById(playerIds, bUseNameAsKeys){
+export async function getNamesAndHashesById(playerIds){
 
     if(playerIds.length === 0) return {};
 
@@ -1318,15 +1318,26 @@ export async function getNamesAndHashesById(playerIds, bUseNameAsKeys){
 
     const data = {};
 
+    const missing = [...playerIds];
+
     for(let i = 0; i < result.length; i++){
 
         const {id, hash, name} = result[i];
 
-        if(!bUseNameAsKeys){
-            data[id] = {name, hash}
-        }else{
-            data[name] = {id, hash};
-        }
+        const index = missing.indexOf(id);
+
+        if(index !== -1) missing.splice(index, 1);
+
+        data[id] = {id, name, hash}
+   
+    }
+
+    for(let i = 0; i < missing.length; i++){
+
+        const id = missing[i];
+
+        data[id] = {"name": "Not Found", "hash": ""}
+        
     }
 
     return data;

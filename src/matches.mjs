@@ -1098,14 +1098,14 @@ export async function getMatchKillsBasicJSON(id){
         playerIds.add(d.victim_id);
     }
 
-    const players = await getNamesAndHashesById([...playerIds]);
+    const playersInfo = await getNamesAndHashesById([...playerIds]);
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
-        const killer = players[d.killer_id]?.name ?? "Not Found";
-        const victim = players[d.victim_id]?.name ?? "Not Found";
+        const killer = playersInfo[d.killer_id]?.name ?? "Not Found";
+        const victim = playersInfo[d.victim_id]?.name ?? "Not Found";
 
         const current = {"timestamp": d.timestamp, killer, victim};
 
@@ -1113,6 +1113,16 @@ export async function getMatchKillsBasicJSON(id){
             kills.push(current); 
         }else if(d.kill_type === 1){
             teamKills.push(current);
+        }
+    }
+
+    const players = {};
+
+    for(const [id, pInfo] of Object.entries(playersInfo)){
+
+        players[pInfo.name] = {
+            id,
+            "hash": pInfo.hash
         }
     }
 
@@ -1165,7 +1175,7 @@ export async function getMatchKillsDetailedJSON(id){
     }
 
     //killer => victim => totalKills
-    const killsMatchUp = {};
+    const killsMatchUpData = {};
 
     for(let i = 0; i < data.length; i++){
 
@@ -1198,21 +1208,43 @@ export async function getMatchKillsDetailedJSON(id){
         }
 
     
-        updateKillsMatchUp(killsMatchUp, killer.name, victim.name);
+        updateKillsMatchUp(killsMatchUpData, killer.id, victim.id);
     }
 
-    const players = {};
+    const players = [];
 
     for(const [id, pData] of Object.entries(playersInfo)){
 
-        players[pData.name] = {
+        players.push({
             id,
             ...pData
+        });
+    }
+
+
+    const killsMatchUp = [];
+
+    for(const [killer, victimData] of Object.entries(killsMatchUpData)){
+
+        const current = {
+            "killer": getPlayer(playersInfo, killer).name,
+            "victims": []
+        };
+
+        for(const [victim, totalKills] of Object.entries(victimData)){
+
+            current.victims.push(
+                {
+                    "name": getPlayer(playersInfo, victim).name,
+                    "kills": totalKills
+                }
+            );
         }
 
-        delete players[pData.name].name;
-
+        killsMatchUp.push(current);
     }
+
+
     return {players, killsMatchUp, kills, teamKills};
 }
 
