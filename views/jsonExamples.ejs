@@ -75,55 +75,88 @@ const matchDetailed = `{
   }
 }`;
 
+const matchKillsBasicInfo = [
+  UIUnorderedList([
+    [
+      UIB("players object: ", "blue-font"),
+      `each key is a player id containing the following data:`,
+      UISpan(` name, hash, kill total, team kill total, deaths by kill, and deaths by team kill.`, "monospace")
+    ], 
+    [
+      UIB("kills & teamKills arrays: ", "blue-font"),
+      `every element is a kill, every kill is an array with the following data: `, 
+      UISpan(`[Timestamp, KillerId, victimId]`,"monospace")
+    ]
+  ]),
+]
+
 const matchKillsBasic = `{
   "players": {
-    "Ooper": {
-      "id": "27",
-      "hash": "f789d64fdb64f0eb3db2100edde4e9aa"
+    "27": {
+      "name": "Ooper",
+      "hash": "f789d64fdb64f0eb3db2100edde4e9aa",
+      "kills": 1,
+      "deathsByKill": 2,
+      "teamKills": 0,
+      "deathsByTeamKill": 0
     },
-    "Cali": {
-      "id": "40",
-      "hash": "e3bed28b347f26bfb1d0c9b9bda2712b"
+    "40": {
+      "name": "Cali",
+      "hash": "e3bed28b347f26bfb1d0c9b9bda2712b",
+      "kills": 0,
+      "deathsByKill": 2,
+      "teamKills": 0,
+      "deathsByTeamKill": 0
     },
-    "Sarena": {
-      "id": "84",
-      "hash": "82f1d6311fcce730f6d77f1665f80be0"
+    "81": {
+      "name": "Not Found",
+      "hash": "",
+      "kills": 0,
+      "deathsByKill": 1,
+      "teamKills": 0,
+      "deathsByTeamKill": 0
+    },
+    "84": {
+      "name": "Sarena",
+      "hash": "82f1d6311fcce730f6d77f1665f80be0",
+      "kills": 5,
+      "deathsByKill": 1,
+      "teamKills": 0,
+      "deathsByTeamKill": 0
     }
   },
   "kills": [
-    {
-      "timestamp": 19.5,
-      "killer": "Sarena",
-      "victim": "Ooper"
-    },
-    {
-      "timestamp": 25.6455,
-      "killer": "Sarena",
-      "victim": "Not Found"
-    },
-    {
-      "timestamp": 27.5273,
-      "killer": "Sarena",
-      "victim": "Cali"
-    },
-    {
-      "timestamp": 30.6818,
-      "killer": "Sarena",
-      "victim": "Cali"
-    },
-    {
-      "timestamp": 31.7091,
-      "killer": "Ooper",
-      "victim": "Sarena"
-    },
-    {
-      "timestamp": 37.4273,
-      "killer": "Sarena",
-      "victim": "Ooper"
-    }
+    [19.5, 84, 27],
+    [25.6455, 84, 81],
+    [27.5273, 84, 40],
+    [30.6818, 84, 40],
+    [31.7091, 27, 84],
+    [37.4273, 84, 27]
   ],
   "teamKills": []
 }`;
+
+const matchKillsDetailedInfo = [
+  UIUnorderedList([
+    [
+      UIB("players object: ", "blue-font"),
+      `each key is a player id containing the following data:`,
+      UISpan(` name, hash, kill total, team kill total, deaths by kill, and deaths by team kill.`, "monospace")
+    ], 
+    [
+      UIB("weapons object: ", "blue-font"),  
+      `each key is a weapon id paired to the name of the weapon(only includes weapons used in team/kill events).`
+    ],
+    [
+      UIB("killsMatchUp object: ", "blue-font"),
+      `each key is the killerId, killerId contains an object of victim ids, each victimId is the total times they were killed by killerId.`
+    ],
+    [
+      UIB("kills & teamKills arrays: ", "blue-font"),
+      `every element is a kill, every kill is an array with the following data: `, UISpan(`[Timestamp, KillerId, KillerWeaponId, victimId, victimWeaponId]`,"monospace")
+    ]
+  ]),
+]
 
 const matchKillsDetailed = `{
   "players": {
@@ -614,31 +647,7 @@ const matchPlayersBasic = `[
 					"match", 
 					"Kills Detailed", 
 					"kills-detailed", 
-					[
-            UIUnorderedList([
-              [
-                UIB("players "),
-                `each key is a player id containing the following data:`,
-                UISpan(` name, hash, kill total, team kill total, deaths by kill, and deaths by team kill.`, "monospace")
-              ], 
-              [
-                UIB("weapons "),  
-                `each key is a weapon id paired to the name of the weapon(only includes weapons used in team/kill events).`
-              ],
-              [
-                UIB("killsMatchUp "),
-                `each key is the killerId, killerId contains an object of victim ids, each victimId is the total times they were killed by killerId.`
-              ],
-              [
-                UIB("kills "),
-                `an array of kill events, every element is a single event with the following data: `, UISpan(`Timestamp, KillerId, KillerWeaponId, victimId, victimWeaponId`,"monospace")
-              ],
-              [
-                UIB("teamKills "),
-                `an array of team kill events, every element is a single event with the following data: `, UISpan(`Timestamp, KillerId, KillerWeaponId, victimId, victimWeaponId`,"monospace")
-              ]
-            ]),
-          ],
+					matchKillsDetailedInfo,
 					matchKillsDetailed, 
 					[
 						"match/kills-detailed/?id=187", 
@@ -650,7 +659,7 @@ const matchPlayersBasic = `[
 					"match", 
 					"Kills Basic", 
 					"kills-basic", 
-					"Returns player list, every kill, and team kill.", 
+					matchKillsBasicInfo,
 					matchKillsBasic, 
 					[
 						"match/kills-basic/?id=187", 
