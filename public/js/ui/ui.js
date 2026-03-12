@@ -1683,3 +1683,27 @@ class UIPreviousNextButtons{
         this.wrapper.append(this.previous, this.info, this.next);
     }
 }
+
+
+function UIUnorderedList(data){
+
+    if(!Array.isArray(data)){
+        throw new Error(`UIUlList requires an array of items`);
+    }
+    const parent = document.createElement("ul");
+
+    for(let i = 0; i < data.length; i++){
+
+        const item = document.createElement("li");
+        if(!Array.isArray(data[i])){
+            item.append(data[i]);
+        }else{
+            item.append(...data[i]);
+        }
+        parent.append(item);
+    }
+
+
+
+    return parent;
+}

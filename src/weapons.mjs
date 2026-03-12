@@ -52,13 +52,17 @@ export async function bulkInsertMatchWeaponStats(data, matchId, gametypeId, mapI
 
 }
 
-export async function getWeaponNames(ids){
+export async function getWeaponNames(ids, bReturnArray){
 
     if(ids.length === 0) return {};
 
     const query = `SELECT id,name FROM nstats_weapons WHERE id IN(?)`;
 
     const result = await simpleQuery(query, [ids]);
+
+    if(bReturnArray){
+        return [{"id":0,"name": "All"},...result]
+    }
 
     const data = {
         "0": "All"

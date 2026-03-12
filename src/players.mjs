@@ -1328,7 +1328,7 @@ export async function getNamesAndHashesById(playerIds){
 
         if(index !== -1) missing.splice(index, 1);
 
-        data[id] = {id, name, hash}
+        data[id] = {name, hash}
    
     }
 
