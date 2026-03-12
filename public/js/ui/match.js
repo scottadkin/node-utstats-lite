@@ -2607,14 +2607,19 @@ class MatchJSONApiInfo{
         const urlBase = `/api/json/match/`;
         const data = [
             [
-                {"content": "Basic Match Data", "className": "text-left"}, 
+                {"content": "Basic Match Info", "className": "text-left"}, 
                 {"content": UIA(null, `${urlBase}basic/?id=${this.matchHash}`, "_blank")} ,
                 {"content": UIA("View Example", `/jsonexamples/?mode=match#basic`, "_blank")} 
             ],
             [
-                {"content": "Detailed Match Data", "className": "text-left"}, 
+                {"content": "Detailed Match Info", "className": "text-left"}, 
                 {"content": UIA(null, `${urlBase}detailed/?id=${this.matchHash}`, "_blank")} ,
                 {"content": UIA("View Example", `/jsonexamples/?mode=match#detailed`, "_blank")} 
+            ],
+            [
+                {"content": "CTF Data", "className": "text-left"}, 
+                {"content": UIA(null, `${urlBase}ctf/?id=${this.matchHash}`, "_blank")}   ,
+                {"content": UIA("View Example", `/jsonexamples/?mode=match#ctf`, "_blank")}      
             ],
             [
                 {"content": "Basic Players Data", "className": "text-left"}, 
@@ -2622,18 +2627,17 @@ class MatchJSONApiInfo{
                 {"content": UIA("View Example", `/jsonexamples/?mode=match#players-basic`, "_blank")}     
             ],
             [
-                {"content": "Players Detailed Data", "className": "text-left"}, 
+                {"content": "Detailed Players Data", "className": "text-left"}, 
                 {"content": UIA(null, `${urlBase}players-full/?id=${this.matchHash}`, "_blank")}   ,
                 {"content": UIA("View Example", `/jsonexamples/?mode=match#players-full`, "_blank")}      
             ],
             [
-                {"content": "Kills Detailed Data", "className": "text-left"}, 
-                {"content": UIA(null, `${urlBase}kills-detailed/?id=${this.matchHash}`, "_blank")}  
-                ,
+                {"content": "Detailed Kills Data", "className": "text-left"}, 
+                {"content": UIA(null, `${urlBase}kills-detailed/?id=${this.matchHash}`, "_blank")},
                 {"content": UIA("View Example", `/jsonexamples/?mode=match#kills-detailed`, "_blank")} 
             ],
             [
-                {"content": "Kills Basic Data", "className": "text-left"}, 
+                {"content": "Basic Kills Data", "className": "text-left"}, 
                 {"content": UIA(null, `${urlBase}kills-basic/?id=${this.matchHash}`, "_blank")} ,
                 {"content": UIA("View Example", `/jsonexamples/?mode=match#kills-basic`, "_blank")}  
             ],

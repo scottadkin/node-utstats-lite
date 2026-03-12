@@ -2,7 +2,8 @@ import {
     getBasicMatchJSON, getMatchIdFromHash, getMatchKillsBasicJSON, 
     getMatchKillsDetailedJSON, getMatchFullPlayerStatsJSON,
     getMatchBasicPlayersJSON,
-    getDetailedMatchJSON
+    getDetailedMatchJSON,
+    getMatchCTFJSON
 
 } from "../matches.mjs";
 
@@ -49,6 +50,10 @@ export default class ApiJSON{
         }else if(cat === "detailed"){
             
             return await getDetailedMatchJSON(id);
+            
+        }else if(cat === "ctf"){
+
+            return await getMatchCTFJSON(id);
             
         }else if(cat === "players-full"){
 

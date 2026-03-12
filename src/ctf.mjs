@@ -1,4 +1,4 @@
-import { simpleQuery, bulkInsert } from "./database.mjs";
+import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray } from "./database.mjs";
 import { getMatchesGametype } from "./matches.mjs";
 import Message from "./message.mjs";
 
@@ -877,4 +877,40 @@ export async function getCTFGametypes(){
     const result = await simpleQuery(query);
 
     return result.map((r) => r.gametype_id);
+}
+
+
+export async function getMatchPlayersCTFJSON(id){
+
+    const columns = [
+        "player_id", "flag_taken",
+        "flag_pickup", "flag_drop",
+        "flag_assist", "flag_cover",
+        "flag_seal", "flag_cap",
+        "flag_kill", "flag_return",
+        "flag_return_base", "flag_return_mid",
+        "flag_return_enemy_base", "flag_return_save",
+        "flag_carry_time", "flag_carry_time_min",
+        "flag_carry_time_max"
+    ];
+
+    const table = "nstats_match_ctf";
+
+    let query = `SELECT `;
+
+    for(let i = 0; i < columns.length; i++){
+
+        const c = columns[i];
+        query += `${table}.${c},`;      
+    }
+
+    query += `nstats_players.name as playerName
+    FROM ${table}
+    LEFT JOIN nstats_players ON nstats_players.id = nstats_match_ctf.player_id 
+    WHERE ${table}.match_id=?`;
+
+  
+    const result = await simpleQuery(query, [id]);
+
+    console.log(result);
 }

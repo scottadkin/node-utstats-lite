@@ -14,7 +14,7 @@ import {
     updatePlayerTotals as weaponUpdatePlayerTotals 
 } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
-import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
+import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch, getMatchPlayersCTFJSON } from "./ctf.mjs";
 import { getMatchData as domGetMatchData, getDOMMatchPlayersAPIJSON } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, 
@@ -1092,7 +1092,7 @@ function addJSONKillKeys(players){
     }
 }
 
-function updateJSONKillsStats(killType, killer, victim, kills, teamKills, killData){
+function updateJSONKillStats(killType, killer, victim, kills, teamKills, killData){
 
     if(killType === 1){
 
@@ -1142,7 +1142,7 @@ export async function getMatchKillsBasicJSON(id){
         const victim = getPlayer(players, d.victim_id);
 
 
-        updateJSONKillsStats(
+        updateJSONKillStats(
             d.kill_type, killer, victim, 
             kills, teamKills, currentData
         );
@@ -1204,7 +1204,7 @@ export async function getMatchKillsDetailedJSON(id){
             d.timestamp, d.killer_id, d.killer_weapon, d.victim_id, d.victim_weapon
         ];
 
-        updateJSONKillsStats(
+        updateJSONKillStats(
             d.kill_type, killer, victim, 
             kills, teamKills, currentData
         );
@@ -1410,6 +1410,12 @@ export async function getMatchFullPlayerStatsJSON(matchId){
     }
 
     return data;
+}
+
+
+export async function getMatchCTFJSON(id){
+
+    const players = await getMatchPlayersCTFJSON(id);
 }
 
 export async function getPlayersWeaponStatsJSON(id){
