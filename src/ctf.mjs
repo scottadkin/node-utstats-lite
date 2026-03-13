@@ -1,4 +1,5 @@
 import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray } from "./database.mjs";
+import { getTeamName, toJSONAPIKeyNames } from "./generic.mjs";
 import { getMatchesGametype } from "./matches.mjs";
 import Message from "./message.mjs";
 
@@ -904,13 +905,26 @@ export async function getMatchPlayersCTFJSON(id){
         query += `${table}.${c},`;      
     }
 
-    query += `nstats_players.name as playerName
+    query += `nstats_players.name as name,
+    nstats_players.country as country,
+    nstats_match_players.team as team
     FROM ${table}
     LEFT JOIN nstats_players ON nstats_players.id = nstats_match_ctf.player_id 
+    LEFT JOIN nstats_match_players ON nstats_match_players.player_id = nstats_match_ctf.player_id AND nstats_match_players.match_id=?
     WHERE ${table}.match_id=?`;
 
-  
-    const result = await simpleQuery(query, [id]);
+    const result = await simpleQuery(query, [id, id]);
 
-    console.log(result);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        r.team = getTeamName(r.team);
+
+        toJSONAPIKeyNames(r);
+
+    }
+
+    return result;
 }

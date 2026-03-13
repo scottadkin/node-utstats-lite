@@ -1416,6 +1416,9 @@ export async function getMatchFullPlayerStatsJSON(matchId){
 export async function getMatchCTFJSON(id){
 
     const players = await getMatchPlayersCTFJSON(id);
+
+
+    return {players};
 }
 
 export async function getPlayersWeaponStatsJSON(id){
