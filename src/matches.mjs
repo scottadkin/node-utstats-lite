@@ -24,6 +24,7 @@ import { getWinner, getTeamName, sanitizePagePerPage,
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
 import { getValidGametypes, getValidMaps, deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
+import { toJSONAPIKeyNames } from "./json.mjs";
 
 
 const MATCH_TABLE_COLUMNS_VERBOSE = `nstats_matches.id,
@@ -1399,7 +1400,8 @@ export async function getMatchFullPlayerStatsJSON(matchId){
         };
 
         if(ctfStats[r.player_id] !== undefined){
-            p.ctf = ctfStats[r.player_id] 
+            toJSONAPIKeyNames(ctfStats[r.player_id]);
+            p.ctf = ctfStats[r.player_id]; 
         }
 
         if(domStats[r.player_id] !== undefined){

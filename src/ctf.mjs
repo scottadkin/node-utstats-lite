@@ -1,6 +1,7 @@
 import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray } from "./database.mjs";
-import { getTeamName, toJSONAPIKeyNames } from "./generic.mjs";
+import { getTeamName } from "./generic.mjs";
 import { getMatchesGametype } from "./matches.mjs";
+import { toJSONAPIKeyNames } from "./json.mjs";
 import Message from "./message.mjs";
 
 
@@ -31,9 +32,23 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
     await bulkInsert(query, insertVars);
 }
 
-export async function getMatchData(matchId, bReturnJSON){
+/**
+ * 
+ * @param {*} playerStats mysql row from nstats_match_ctf
+ */
+function setAverageCarryTime(playerStats){
 
-    if(bReturnJSON === undefined) bReturnJSON = false;
+    playerStats.flag_carry_time_avg = 0;
+
+    playerStats.times_held = playerStats.flag_pickup + playerStats.flag_taken;
+
+    if(playerStats.times_held > 0 && playerStats.flag_carry_time > 0){
+        playerStats.flag_carry_time_avg = playerStats.flag_carry_time / playerStats.times_held;
+    }
+
+}
+
+export async function getMatchData(matchId, bReturnJSON){
 
     const query = `SELECT player_id,flag_taken,flag_pickup,flag_drop,flag_assist,flag_cover,
     flag_seal,flag_cap,flag_kill,flag_return,flag_return_base,flag_return_mid,flag_return_enemy_base,
@@ -45,14 +60,7 @@ export async function getMatchData(matchId, bReturnJSON){
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
-        r.flag_carry_time_avg = 0;
-
-        r.times_held = r.flag_pickup + r.flag_taken;
-
-        if(r.times_held > 0 && r.flag_carry_time > 0){
-
-            r.flag_carry_time_avg = r.flag_carry_time / r.times_held;
-        }
+        setAverageCarryTime(r);
     }
 
 
@@ -68,23 +76,8 @@ export async function getMatchData(matchId, bReturnJSON){
 
         const r = result[i];
 
-        obj[r.player_id] = {
-            "taken": r.flag_taken,
-            "pickup": r.flag_pickup,
-            "drop": r.flag_drop,
-            "assist": r.flag_assist,
-            "cover": r.flag_cover,
-            "seal": r.flag_seal,
-            "cap": r.flag_cap,
-            "kill": r.flag_kill,
-            "return": r.flag_return,
-            "returnTypes": {
-                "base": r.flag_return_base,
-                "mid": r.flag_return_mid,
-                "enemyBase": r.flag_return_enemy_base,
-                "save": r.flag_return_save
-            }
-        };
+        obj[r.player_id] = {...r};
+        delete obj[r.player_id].player_id;
     }
 
     return obj;
@@ -921,6 +914,7 @@ export async function getMatchPlayersCTFJSON(id){
         const r = result[i];
 
         r.team = getTeamName(r.team);
+        setAverageCarryTime(r);
 
         toJSONAPIKeyNames(r);
 
