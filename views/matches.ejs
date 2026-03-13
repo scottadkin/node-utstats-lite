@@ -21,19 +21,18 @@
     );
 </script>
 
-<div id="matches"></div>
 <script>
     const matchData = <%- JSON.stringify(matches)%>;  
 
     <% if(displayMode !== "default"){ %>
-        renderMatchesTable("#matches", matchData);
+        renderMatchesTable("#root", matchData);
     <%}else{ %>
-        new MatchesRichView("#matches", matchData);
+        new MatchesRichView("#root", matchData);
     <% }
     %>
 
     renderMatchesPagination(
-        document.querySelector("#matches"), 
+        document.querySelector("#root"), 
         <%= selectedServer %>, 
         <%= selectedGametype %>, 
         <%= selectedMap %>, 

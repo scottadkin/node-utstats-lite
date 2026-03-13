@@ -3,14 +3,10 @@ function renderBasicInfo(parent, data, players){
 
     parent = document.querySelector(parent);
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "match-basic-info-wrapper center";
+    const wrapper = UIDiv("match-basic-info-wrapper center");
 
-    const header = document.createElement("div");
-    header.className= "header-wrapper";
+    const header = UIDiv("header-wrapper");
     header.innerHTML = data.map_name;
-
-    const content = document.createElement("div");
 
     if(data.solo_winner !== 0){
 
@@ -19,17 +15,26 @@ function renderBasicInfo(parent, data, players){
     
     }
  
-    UIMatchScoreBox(content, data, false, false, players);
+    UIMatchScoreBox(wrapper, data, false, false, players);
   
     parent.appendChild(header);
 
-    const info = document.createElement("div");
+    const info = UIDiv("match-basic-info-wrapper-info");
 
-    info.className = "match-basic-info-wrapper-info";
-    info.append(`${toDateString(data.date, false, false)}`, UIBr());
-    info.append(UISpan(data.gametype_name, "blue-font"), " on ", UISpan(data.map_name, "blue-font"), UIBr());
-    info.append(`${data.players} ${plural(data.players, "Player")}`, UIBr());
-    info.append(UISpan("Match Length", "blue-font"), ` ${toPlaytime(data.playtime)}`, UIBr());
+    info.append(
+        `${toDateString(data.date, false, false)}`, 
+        UIBr(), 
+        UISpan(data.gametype_name, "blue-font"), 
+        " on ", 
+        UISpan(data.map_name, "blue-font"), 
+        UIBr(),
+        `${data.players} ${plural(data.players, "Player")}`,
+        UIBr(),
+        UISpan("Match Length", "blue-font"), 
+        ` ${toPlaytime(data.playtime)}`, 
+        UIBr()
+    );
+
     if(data.target_score !== 0){
         info.append(UISpan("Target Score ", "blue-font"), data.target_score, UIBr());
     }
@@ -40,23 +45,30 @@ function renderBasicInfo(parent, data, players){
             UIBr()
         );
     }
-    info.append(UISpan("Gamespeed", "blue-font"), ` ${data.gamespeed_real}%`, UIBr());
-    info.append(UISpan("Tournament Mode", "blue-font"), ` ${(data.tournament_mode === 1) ? "True" : "False"}`, UIBr());
     
-    info.append(UISpan("Server", "blue-font"), ` ${data.server_name}`, UIBr());
-    info.append(UISpan("Mutators ", "blue-font"), UISpan(data.mutators, "font-small"), UIBr());
+    info.append(
+        UISpan("Gamespeed", "blue-font"), 
+        ` ${data.gamespeed_real}%`, 
+        UIBr(),
+        UISpan("Tournament Mode", "blue-font"), 
+        ` ${(data.tournament_mode === 1) ? "True" : "False"}`, 
+        UIBr(),
+        UISpan("Server", "blue-font"), 
+        ` ${data.server_name}`, 
+        UIBr(),
+        UISpan("Mutators ", "blue-font"), 
+        UISpan(data.mutators, "font-small"), 
+        UIBr()
+    );
 
-    
 
-    content.appendChild(info);
+    wrapper.append(info);
 
     new UIWatchlistButton(info, "matches", data.hash);
 
     new UICopyURLToClipboard(info, "Copy Match Perma Link To Clipboard", `/match/${data.hash}`);
 
-    wrapper.appendChild(content);
-
-    parent.appendChild(wrapper);
+    parent.append(wrapper);
 
 }
 

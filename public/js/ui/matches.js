@@ -14,8 +14,7 @@ function renderMatchesTable(parent, data, bMapsPage){
 
     if(bMapsPage === undefined) bMapsPage = false;
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "center text-center";
+    const wrapper = UIDiv("center text-center");
 
     const table = document.createElement("table");
     table.className = "t-width-1";
@@ -92,10 +91,10 @@ class MatchRichViewBox{
         const gametype = document.createElement("div");
         gametype.className = "white";
 
-        gametype.append(UIB(document.createTextNode(d.gametype_name)));
+        gametype.append(UIB(d.gametype_name));
         info.append(gametype);
 
-        info.append(document.createTextNode(toDateString(d.date, true)));
+        info.append(toDateString(d.date, true));
 
         const players = document.createElement("div");
         players.className = "white";
