@@ -75,6 +75,167 @@ const matchDetailed = `{
   }
 }`;
 
+
+const matchCTFInfo = [
+  UIUnorderedList([
+    [
+      UIB("teams object: ", "blue-font"),
+      `The CTF totals for each team.`
+    ], 
+    [
+      UIB("caps array: ", "blue-font"),
+      `Basic data about each cap.`
+    ], 
+    [
+      UIB("players array: ", "blue-font"),
+      `CTF stats for each player.`
+    ], 
+  ]),
+];
+
+const matchCTF = `{
+  "teams": {
+    "red": {
+      "flagTaken": 40,
+      "flagPickup": 10,
+      "flagDrop": 44,
+      "flagAssist": 1,
+      "flagCover": 23,
+      "flagSeal": 6,
+      "flagCapture": 5,
+      "flagKill": 60,
+      "flagReturn": 46,
+      "returnTypes": {
+        "base": 35,
+        "mid": 9,
+        "enemyBase": 2,
+        "closeSave": 0
+      },
+      "flagCarryTime": {
+        "total": 557.28155,
+        "min": 0.109091,
+        "max": 53.7727,
+        "average": 111.45631
+      },
+      "flagTotalTimesHeld": 50,
+      "totalPlayers": 5
+    },
+    "blue": {
+      "flagTaken": 50,
+      "flagPickup": 16,
+      "flagDrop": 62,
+      "flagAssist": 4,
+      "flagCover": 17,
+      "flagSeal": 4,
+      "flagCapture": 3,
+      "flagKill": 40,
+      "flagReturn": 34,
+      "returnTypes": {
+        "base": 24,
+        "mid": 6,
+        "enemyBase": 2,
+        "closeSave": 2
+      },
+      "flagCarryTime": {
+        "total": 468.46356,
+        "min": 0.0181818,
+        "max": 37.2909,
+        "average": 93.692712
+      },
+      "flagTotalTimesHeld": 66,
+      "totalPlayers": 5
+    }
+  },
+  "caps": [
+    {
+      "id": 6,
+      "capType": "Solo",
+      "flagTeam": "blue",
+      "takenTimestamp": 359.373,
+      "cappedTimestamp": 376.603,
+      "takenPlayer": "blackmane",
+      "capPlayer": "blackmane",
+      "capTime": 17.2273,
+      "carryTime": 17.2273,
+      "capTeam": "red",
+      "droppedTime": 0,
+      "drops": 0,
+      "covers": 1,
+      "uniqueCarriers": 1,
+      "kills": {
+        "red": 7,
+        "blue": 2,
+        "green": 0,
+        "yellow": 0
+      },
+      "suicides": {
+        "red": 0,
+        "blue": 1,
+        "green": 0,
+        "yellow": 0
+      }
+    },
+    {
+      "id": 7,
+      "capType": "Assisted",
+      "flagTeam": "red",
+      "takenTimestamp": 379.703,
+      "cappedTimestamp": 431.773,
+      "takenPlayer": "{DnF}MAG^^",
+      "capPlayer": "[4F]aM1Go",
+      "capTime": 52.0727,
+      "carryTime": 36.3545,
+      "capTeam": "blue",
+      "droppedTime": 15.7182,
+      "drops": 6,
+      "covers": 4,
+      "uniqueCarriers": 4,
+      "kills": {
+        "red": 15,
+        "blue": 13,
+        "green": 0,
+        "yellow": 0
+      },
+      "suicides": {
+        "red": 0,
+        "blue": 1,
+        "green": 0,
+        "yellow": 0
+      }
+    } //...rest of caps   
+  ],
+  "players": [
+    {
+      "name": "CoD|AVII",
+      "country": "de",
+      "team": "Red",
+      "id": 17,
+      "flagTaken": 0,
+      "flagPickup": 2,
+      "flagDrop": 2,
+      "flagAssist": 0,
+      "flagCover": 0,
+      "flagSeal": 3,
+      "flagCapture": 0,
+      "flagKill": 21,
+      "flagReturn": 21,
+      "returnTypes": {
+        "base": 35,
+        "mid": 9,
+        "enemyBase": 2,
+        "closeSave": 0
+      },
+      "flagCarryTime": {
+        "total": 557.28155,
+        "min": 0.109091,
+        "max": 53.7727,
+        "average": 111.45631
+      },
+      "flagTotalTimesHeld": 2
+    }//rest of player data   
+  ]
+}`;
+
 const matchKillsBasicInfo = [
   UIUnorderedList([
     [
@@ -88,7 +249,7 @@ const matchKillsBasicInfo = [
       UISpan(`[Timestamp, KillerId, victimId]`,"monospace")
     ]
   ]),
-]
+];
 
 const matchKillsBasic = `{
   "players": {
@@ -622,6 +783,18 @@ const matchPlayersBasic = `[
 					[
 						"match/detailed/?id=187", 
 						"match/detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+					]
+				),
+        new JSONExample(
+					this.parent, 
+					"match", 
+					"CTF", 
+					"ctf", 
+					matchCTFInfo,
+					matchCTF, 
+					[
+						"match/ctf/?id=187", 
+						"match/ctf/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
 					]
 				),
 				new JSONExample(

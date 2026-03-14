@@ -1,8 +1,9 @@
 import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray } from "./database.mjs";
 import { getTeamName } from "./generic.mjs";
-import { getMatchesGametype } from "./matches.mjs";
+import { getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
 import Message from "./message.mjs";
+import { getPlayersById } from "./players.mjs";
 
 
 export async function insertPlayerMatchData(players, matchId, gametypeId, mapId){
@@ -952,6 +953,47 @@ function createTeamTotalsMatchCTFJSON(players){
     return teams;
 }
 
+/**
+ * 
+ * @param {number} id 
+ * @param {object} players id: name 
+ * @returns 
+ */
+async function getMatchCTFCapsJSON(id, players){
+
+    const query = `SELECT id,cap_type,flag_team,
+    taken_timestamp,cap_timestamp,taken_player,cap_player,cap_time,carry_time,capping_team,
+    drop_time,total_drops,total_covers,unique_carriers,red_kills,
+    blue_kills,green_kills,yellow_kills,red_suicides,blue_suicides,green_suicides,yellow_suicides
+    FROM nstats_ctf_caps
+    WHERE match_id=? ORDER BY cap_timestamp ASC`;
+
+    const result = await simpleQuery(query, [id]);
+
+    if(result.length === 0) return [];
+
+    const matchStart = await getMatchStartTimestamp(id);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        r.cap_type = (r.cap_type === 1) ? "Solo" : "Assisted";
+
+        r.cap_player = players?.[r.cap_player] ?? "Not Found";
+        r.taken_player = players?.[r.taken_player] ?? "Not Found";
+
+        r.taken_timestamp = r.taken_timestamp - matchStart;
+        r.cap_timestamp = r.cap_timestamp - matchStart;
+
+        r.flag_team = getTeamName(r.flag_team).toLowerCase();
+        r.capping_team = getTeamName(r.capping_team).toLowerCase();
+        toJSONAPIKeyNames(r);
+    }
+  
+    return result;
+}
+
 
 export async function getMatchCTFJSON(id){
 
@@ -991,10 +1033,15 @@ export async function getMatchCTFJSON(id){
         return {"error": "Not a CTF Match."};
     }
 
+    const players = {};
 
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
+
+        if(players[r.player_id] === undefined){
+            players[r.player_id] = r.name;
+        }
 
         r.team = getTeamName(r.team);
         setAverageCarryTime(r);
@@ -1005,5 +1052,7 @@ export async function getMatchCTFJSON(id){
 
     const teams = createTeamTotalsMatchCTFJSON(result);
 
-    return {teams, "players": result};
+    const caps = await getMatchCTFCapsJSON(id, players);
+
+    return {teams, caps, "players": result};
 }

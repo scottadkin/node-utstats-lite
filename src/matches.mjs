@@ -1973,3 +1973,15 @@ export async function deleteAllDuplicateMatches(){
         }
     }
 }
+
+
+export async function getMatchStartTimestamp(id){
+
+    const result = await simpleQuery(`SELECT match_start FROM nstats_matches WHERE id=?`, [id]);
+
+    if(result.length === 0){
+        return 0;
+    }
+
+    return result[0].match_start;
+}

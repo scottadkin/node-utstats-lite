@@ -911,12 +911,12 @@ option{
 
 .header-wrapper{
     text-align:center;
-    padding:8px;
+    padding:var(--padding-1);
     color:var(--font-color-1);
     background-color:var(--header-bg-color);
     font-weight:500;
     margin-bottom:var(--margin-2);
-    font-size:var(--font-size-6);
+    font-size:var(--font-size-2);
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 	border-top:2px solid var(--border-color-4);
 	border-bottom:2px solid var(--border-color-4);
