@@ -695,7 +695,7 @@ option{
 .welcome-message{
 	text-align:center;
 	color:var(--font-color-1);
-	margin-bottom:var(--margin-1);
+	margin-bottom:var(--margin-2);
 	font-size:var(--font-size-1);
 }
 
@@ -1061,26 +1061,27 @@ canvas{
 
 .calendar-heatmap{
 	background-color:var(--bg-color-2);
-	margin-bottom:var(--margin-1);
+	margin-bottom:var(--margin-2);
 	color:white;
 	display:inline-block;
+	border:2px solid var(--border-color-5);
 	
 }
 
 .calendar-heatmap-buttons{
-	display:grid;
-	grid-template-columns: 1fr 1fr;
+	display:flex;
 }
 
 .calendar-heatmap-buttons button{
 	background-color:var(--bg-color-2);
-	border:0px solid var(--bg-color-1);
 	color:white;
 	padding:5px;
 	font-weight: 500;
 	transition: all 0.5s;
 	font-size:12px;
 	user-select: none;
+	border:none;
+	flex:2;
 }
 
 .calendar-heatmap-buttons button:hover{
@@ -1091,7 +1092,7 @@ canvas{
 
 .calendar-heatmap-title{
 	padding:var(--padding-2);
-	font-size:14px;
+	font-size:var(--font-size-6);
 	border-top:1px solid rgba(255,255,255,0.125);
 	border-bottom:1px solid rgba(255,255,255,0.125);
 }
@@ -1102,8 +1103,8 @@ canvas{
 }
 
 .calendar-heatmap-day{
-	font-size:14px;
-	padding:10px;
+	font-size:var(--font-size-small);
+	padding:var(--padding-1);
 	border:1px solid var(--border-color-3);
 	margin-left:-1px;
 	margin-top:-1px;

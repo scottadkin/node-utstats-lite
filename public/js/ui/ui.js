@@ -1220,10 +1220,9 @@ class UICalendarHeatMap{
 
         this.title = UIDiv("calendar-heatmap-title");
         this.updateTitle();
-        this.wrapper.append(this.title);
 
         this.content = UIDiv("calendar-heatmap-content");
-        this.wrapper.append(this.content);
+        this.wrapper.append(this.title, this.content);
 
     }
 
@@ -1375,27 +1374,30 @@ class UICalendarHeatMap{
 
         this.content.append(this.createHeaderColumns());
 
-        let currentRow = UIDiv("calendar-heatmap-week");
+        let currentElems = [];
 
         //need to add missing days to keep format
         for(let x = 0; x < dayOfWeek; x++){
 
             const elem = UIDiv("calendar-heatmap-day empty-date");
-            currentRow.append(elem);
+            currentElems.push(elem);
         }
 
         while(i <= this.lastDayOfMonth){
 
             const elem = this.createDayElem(i, dayOfWeek, stats);
-
-            currentRow.append(elem);
+            currentElems.push(elem);
             i++;
 
             dayOfWeek++;
 
             if(dayOfWeek > 6){
                 dayOfWeek = 0;
-                this.content.append(currentRow);
+                const weekElem = UIDiv("calendar-heatmap-week");
+                weekElem.append(...currentElems);
+                this.content.append(weekElem);
+
+                currentElems = [];
             }    
         }
 
@@ -1403,9 +1405,12 @@ class UICalendarHeatMap{
 
             for(let i = dayOfWeek; i < 7; i++){
                 const elem = UIDiv("calendar-heatmap-day empty-date");
-                currentRow.append(elem);
+                currentElems.push(elem);
             }
-            this.content.append(currentRow);
+
+            const weekElem = UIDiv("calendar-heatmap-week");
+            weekElem.append(...currentElems);
+            this.content.append(weekElem);
         }
     }
 }
@@ -1702,8 +1707,5 @@ function UIUnorderedList(data){
         }
         parent.append(item);
     }
-
-
-
     return parent;
 }
