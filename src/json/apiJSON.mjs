@@ -2,10 +2,11 @@ import {
     getBasicMatchJSON, getMatchIdFromHash, getMatchKillsBasicJSON, 
     getMatchKillsDetailedJSON, getMatchFullPlayerStatsJSON,
     getMatchBasicPlayersJSON,
-    getDetailedMatchJSON,
-    getMatchCTFJSON
+    getDetailedMatchJSON
 
 } from "../matches.mjs";
+
+import { getMatchCTFJSON } from "../ctf.mjs";
 
 export default class ApiJSON{
 

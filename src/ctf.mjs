@@ -873,8 +873,87 @@ export async function getCTFGametypes(){
     return result.map((r) => r.gametype_id);
 }
 
+function createTeamTotalsMatchCTFJSON(players){
 
-export async function getMatchPlayersCTFJSON(id){
+    const teams = {};
+
+    for(let i = 0; i < players.length; i++){
+
+        const p = players[i];
+
+        const teamName = p.team.toLowerCase();
+
+        if(teams[teamName] === undefined){
+
+            teams[teamName] = {...p};
+            teams[teamName].totalPlayers = 1;
+
+            delete teams[teamName].name;
+            delete teams[teamName].id;
+            delete teams[teamName].country;
+            delete teams[teamName].team;
+            continue;
+        }
+
+        const team = teams[teamName];
+
+        team.totalPlayers++;
+
+        for(const key of Object.keys(team)){
+
+            if(key === "totalPlayers") continue;
+
+            if(key === "returnTypes"){
+
+                for(const rKey of Object.keys(team[key])){
+                    team[key][rKey] += p[key][rKey];
+                }
+
+                continue;
+
+            }else if(key === "flagCarryTime"){
+
+                for(const fKey of Object.keys(team[key])){
+
+                    const playerValue = p[key][fKey];
+                    const teamValue = team[key][fKey];
+                    const teamPlayerCount = team.totalPlayers;
+
+                    if(fKey === "total"){
+
+                        team[key][fKey] += playerValue;
+
+                        if(team[key][fKey] > 0){
+
+                            team[key].average = team[key][fKey] / teamPlayerCount;
+                        }
+
+                    }else if(fKey === "min"){
+
+                        if(teamValue > playerValue && playerValue >= 0){
+                            team[key][fKey] = playerValue;
+                        }
+
+                    }else if(fKey === "max"){
+
+                        if(teamValue < playerValue){
+                            team[key][fKey] = playerValue;
+                        }
+                    }
+                }
+
+                continue;
+            }
+            //anything else
+            team[key] += p[key];
+        }
+    }
+
+    return teams;
+}
+
+
+export async function getMatchCTFJSON(id){
 
     const columns = [
         "player_id", "flag_taken",
@@ -908,6 +987,10 @@ export async function getMatchPlayersCTFJSON(id){
 
     const result = await simpleQuery(query, [id, id]);
 
+    if(result.length === 0){
+        return {"error": "Not a CTF Match."};
+    }
+
 
     for(let i = 0; i < result.length; i++){
 
@@ -920,5 +1003,7 @@ export async function getMatchPlayersCTFJSON(id){
 
     }
 
-    return result;
+    const teams = createTeamTotalsMatchCTFJSON(result);
+
+    return {teams, "players": result};
 }

@@ -14,7 +14,7 @@ import {
     updatePlayerTotals as weaponUpdatePlayerTotals 
 } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
-import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch, getMatchPlayersCTFJSON } from "./ctf.mjs";
+import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
 import { getMatchData as domGetMatchData, getDOMMatchPlayersAPIJSON } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, 
@@ -1412,15 +1412,6 @@ export async function getMatchFullPlayerStatsJSON(matchId){
     }
 
     return data;
-}
-
-
-export async function getMatchCTFJSON(id){
-
-    const players = await getMatchPlayersCTFJSON(id);
-
-
-    return {players};
 }
 
 export async function getPlayersWeaponStatsJSON(id){
