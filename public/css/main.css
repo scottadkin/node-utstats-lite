@@ -1250,9 +1250,6 @@ code{
 
 
 .json-api-links-wrapper{
-	max-width:var(--max-width-1);
-	margin-left:auto;
-	margin-right: auto;
 	margin-bottom:var(--margin-2);
 	
 
@@ -1260,28 +1257,50 @@ code{
 
 .json-api-link{
 	background-color: var(--bg-color-2);
-	width:100%;
+	max-width:var(--max-table-width-2);
+	width:var(--max-width-1);
+	margin-left:auto;
+	margin-right:auto;
 	display:grid;
-	grid-template-columns: 25% auto 20%;
-	padding:5px;
+	grid-template-columns: 20% auto 100px;
+	font-size:var(--font-size-6);
+	color:var(--font-color-1);
+	border:2px solid var(--border-color-5);
+	margin-bottom: var(--margin-2);
+	transition: all 0.5s;
 
+}
+.json-api-link a{
+	
+	color:var(--font-color-blue);
+}
+
+
+.json-api-link:hover{
+	background-color: var(--bg-color-3);
 }
 
 .json-api-link-title{
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	font-weight: 500;
 }
 
+
+
 .json-api-link-content{
-	background-color:green;
+	font-size:var(--font-size-5);
+	background-color:rgba(0,0,0,0.25);
+	padding:5px;
 }
 
 .json-api-link-example{
-	background-color:orange;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	
+	font-size:var(--font-size-small);	
 }
+
+
