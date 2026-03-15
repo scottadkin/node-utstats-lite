@@ -687,7 +687,7 @@ const matchPlayersBasic = `[
   }
 ]`;
 
-    class JSONExample{
+class JSONExample{
 
 		constructor(parent, category, title, linkId, info, data, exampleLinks){
 
@@ -740,14 +740,14 @@ const matchPlayersBasic = `[
 
 		render(newMode){
 
-			console.log(this.category, newMode);
+        console.log(this.category, newMode);
 
-			if(this.category === newMode){
-				this.wrapper.className = "json-example";
-			}else{
-				this.wrapper.className = "hidden";
-			}
-		}
+        if(this.category === newMode){
+          this.wrapper.className = "json-example";
+        }else{
+          this.wrapper.className = "hidden";
+        }
+      }
     }
 
     class ExampleManager{
@@ -760,94 +760,94 @@ const matchPlayersBasic = `[
             UIHeader(this.parent, "JSON Examples");
             this.createTabs();
 
-			this.examples = [
-				new JSONExample(
-					this.parent, 
-					"match", 
-					"Basic", 
-					"basic", 
-					"Returns data about the match such as server, gametype, map, total players, total teams, winners.", 
-					basicMatch, 
-					[
-						"match/basic/?id=187", 
-						"match/basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
-					]
-				),
-        new JSONExample(
-					this.parent, 
-					"match", 
-					"Detailed", 
-					"detailed", 
-					"Returns more detailed data about the match, includes mutators, gamespeed, and bHardcore.", 
-					matchDetailed, 
-					[
-						"match/detailed/?id=187", 
-						"match/detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
-					]
-				),
-        new JSONExample(
-					this.parent, 
-					"match", 
-					"CTF", 
-					"ctf", 
-					matchCTFInfo,
-					matchCTF, 
-					[
-						"match/ctf/?id=187", 
-						"match/ctf/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
-					]
-				),
-				new JSONExample(
-					this.parent, 
-					"match", 
-					"Players Basic", 
-					"players-basic", 
-					"Returns all players in match, includes: id, hash, name, team, playtime, score, kills, frags, deaths, match result.", 
-					matchPlayersBasic, 
-					[
-						"match/players-basic/?id=187", 
-						"match/players-basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
-					]
-				),
-				new JSONExample(
-					this.parent, 
-					"match", 
-					"Players Full", 
-					"players-full", 
-					"Returns detailed data for every player(spectators are ignored), this includes CTF stats and Domination stats if applicable.", 
-					playersFullData, 
-					[
-						"match/players-full/?id=187", 
-						"match/players-full/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
-					]
-				),
-				new JSONExample(
-					this.parent, 
-					"match", 
-					"Kills Detailed", 
-					"kills-detailed", 
-					matchKillsDetailedInfo,
-					matchKillsDetailed, 
-					[
-						"match/kills-detailed/?id=187", 
-						"match/kills-detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
-					]
-				),
-				new JSONExample(
-					this.parent, 
-					"match", 
-					"Kills Basic", 
-					"kills-basic", 
-					matchKillsBasicInfo,
-					matchKillsBasic, 
-					[
-						"match/kills-basic/?id=187", 
-						"match/kills-basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
-					]
-				)
-			];
+          this.examples = [
+            new JSONExample(
+              this.parent, 
+              "match", 
+              "Basic", 
+              "basic", 
+              "Returns data about the match such as server, gametype, map, total players, total teams, winners.", 
+              basicMatch, 
+              [
+                "match/basic/?id=187", 
+                "match/basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+              ]
+            ),
+            new JSONExample(
+              this.parent, 
+              "match", 
+              "Detailed", 
+              "detailed", 
+              "Returns more detailed data about the match, includes mutators, gamespeed, and bHardcore.", 
+              matchDetailed, 
+              [
+                "match/detailed/?id=187", 
+                "match/detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+              ]
+            ),
+            new JSONExample(
+              this.parent, 
+              "match", 
+              "CTF", 
+              "ctf", 
+              matchCTFInfo,
+              matchCTF, 
+              [
+                "match/ctf/?id=187", 
+                "match/ctf/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+              ]
+            ),
+            new JSONExample(
+              this.parent, 
+              "match", 
+              "Players Basic", 
+              "players-basic", 
+              "Returns all players in match, includes: id, hash, name, team, playtime, score, kills, frags, deaths, match result.", 
+              matchPlayersBasic, 
+              [
+                "match/players-basic/?id=187", 
+                "match/players-basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+              ]
+            ),
+            new JSONExample(
+              this.parent, 
+              "match", 
+              "Players Full", 
+              "players-full", 
+              "Returns detailed data for every player(spectators are ignored), this includes CTF stats and Domination stats if applicable.", 
+              playersFullData, 
+              [
+                "match/players-full/?id=187", 
+                "match/players-full/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+              ]
+            ),
+            new JSONExample(
+              this.parent, 
+              "match", 
+              "Kills Detailed", 
+              "kills-detailed", 
+              matchKillsDetailedInfo,
+              matchKillsDetailed, 
+              [
+                "match/kills-detailed/?id=187", 
+                "match/kills-detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+              ]
+            ),
+            new JSONExample(
+              this.parent, 
+              "match", 
+              "Kills Basic", 
+              "kills-basic", 
+              matchKillsBasicInfo,
+              matchKillsBasic, 
+              [
+                "match/kills-basic/?id=187", 
+                "match/kills-basic/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+              ]
+            )
+          ];
 
-			this.render();
+          this.render();
         }
 
     	createTabs(){

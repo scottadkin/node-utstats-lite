@@ -1248,3 +1248,40 @@ code{
 	padding:5px 0px;
 }
 
+
+.json-api-links-wrapper{
+	max-width:var(--max-width-1);
+	margin-left:auto;
+	margin-right: auto;
+	margin-bottom:var(--margin-2);
+	
+
+}
+
+.json-api-link{
+	background-color: var(--bg-color-2);
+	width:100%;
+	display:grid;
+	grid-template-columns: 25% auto 20%;
+	padding:5px;
+
+}
+
+.json-api-link-title{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.json-api-link-content{
+	background-color:green;
+}
+
+.json-api-link-example{
+	background-color:orange;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	
+}

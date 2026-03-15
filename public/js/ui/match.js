@@ -2598,6 +2598,23 @@ class MatchKillsGraph{
     }
 }
 
+function matchAPILink(title, content, exampleUrl){
+
+    const elem = UIDiv("json-api-link");
+
+    const titleElem = UIDiv("json-api-link-title");
+    titleElem.append(title);
+
+    const contentWrapper = UIDiv("json-api-link-content");
+    contentWrapper.append(...content);
+
+    const example = UIA(`View Example`, exampleUrl, "_blank");
+
+    example.className = "json-api-link-example";
+
+    elem.append(titleElem, contentWrapper, example);
+    return elem;
+}
 
 class MatchJSONApiInfo{
 
@@ -2659,6 +2676,35 @@ class MatchJSONApiInfo{
                 "N/A"  
             ]
         ];
+
+        const test = UIDiv("json-api-links-wrapper");
+        this.wrapper.append(test);
+        test.append(
+            matchAPILink(
+                UIA("Basic Match Info", `${urlBase}basic/?id=${this.matchHash}`, "_blank"),
+                [ 
+                    `Fetch basic data such as server, gametype, map names, playtime, total players, total teams, match date, hash, and match result.`,
+                    UIA(null, `${urlBase}basic/?id=${this.matchHash}`, "_blank")
+                ],
+                `/jsonexamples/?mode=match#basic`
+            )
+        );
+
+        test.append(
+            matchAPILink(
+                UIA("Detailed Match Info", `${urlBase}detailed/?id=${this.matchHash}`, "_blank"),
+                [ 
+                    `Same as Basic Match Info, but includes more info about the match such as mutators, 
+                    gamespeed, real gamespeed, bTournamentMode, bHardcore, time limit, target score, 
+                    match start, and match end timestamps. `,
+                    UIA(null, `${urlBase}detailed/?id=${this.matchHash}`, "_blank")
+                ],
+                `/jsonexamples/?mode=match#detailed`
+            )
+        );
+
+
+        return;
         
         new UITable(
             this.wrapper,
