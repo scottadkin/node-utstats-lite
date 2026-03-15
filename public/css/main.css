@@ -29,7 +29,7 @@
 	--margin-1:25px;
 	--margin-2:10px;
 	--margin-3:5px;
-	--tiny-font-size:8px;
+	--tiny-font-size:10px;
 	--font-size-small:12px;
 	--padding-1:10px;
 	--padding-2:5px;
@@ -41,7 +41,6 @@
 	--font-size-4:13px;
 	--font-size-5:12px;
 	--font-size-6:14px;
-	--tiny-font-size:10px;
 	--transition-all:all 0.5s;
 	--transition-1:background-color 0.5s;
 	--width-1:90%;
@@ -534,14 +533,17 @@ option{
 	cursor: pointer;
 }
 
+.perma-links{
+	margin-bottom:var(--margin-2);
+}
 
 .fav, .perma-link{
 	display:inline-block;
-	margin-bottom: var(--margin-3);
+	margin-top: var(--margin-3);
 	color:var(--font-color-1);
 	border:2px solid var(--border-color-5);
 	padding:var(--padding-3) var(--padding-1);
-	font-size:var(--font-size-1);
+	font-size:var(--font-size-5);
 	font-weight:500;
 }
 
@@ -551,17 +553,18 @@ option{
 	color:yellow;
 }
 
-.fav-add{
+.fav-add, .perma-link{
 	background-color:var(--team-color-green);
+}
+
+.perma-link{
+	margin-left:var(--margin-2);
 }
 
 .fav-del{
 	background-color:var(--team-color-red);
 }
 
-.perma-link{
-	background-color:var(--purple);
-}
 
 .map-sshot{
 	margin-left:auto;
@@ -591,24 +594,25 @@ option{
     display:inline-block;
     padding:var(--padding-1) var(--padding-1);
     user-select: none;
-	border:1px solid rgba(0,0,0,0.125);
 	border-bottom:2px solid rgba(0,0,0,0.25);
 	background-color: rgba(0,0,0,0.125);
-
 	margin-bottom:-2px;
-	font-weight:600;
+	font-weight:500;
+	transition: var(--transition-all);
 }
 
 .tab:hover{
     cursor:pointer;
     user-select:none;
     color:yellow;
+	background-color:rgba(0,0,0,0.25);
 }
 
 
 .tab-selected{
 	color:yellow;
 	border-bottom:2px solid yellow;
+	background-color:rgba(0,0,0,0.25);
 }
 
 .white{
@@ -956,10 +960,11 @@ ul{
 
 .match-basic-info-wrapper-info{
 	padding-top:5px;
-	font-size: var(--font-size-4);
+	font-size: var(--font-size-5);
 	font-weight: 500;
 	line-height: var(--line-height-1);
 }
+
 
 .match-scorebox-wrapper{
 	font-size:var(--font-size-4);

@@ -15,7 +15,7 @@
         <img class="header-country-flag" src="/images/flags/<%= basicPlayerInfo.country %>.svg" alt="flag"/>
         <%= basicPlayerInfo.name %> Player Profile
     </div>
-    <div id="perma-links" class="text-center"></div>
+    <div class="perma-links text-center"></div>
 </div>
 
 <script>
@@ -23,7 +23,7 @@
     const gametypeTotals = <%- JSON.stringify(gametypeTotals) %>;
     const gametypeNames = <%- JSON.stringify(gametypeNames) %>;
     const weaponTotals = <%-  JSON.stringify(weaponTotals) %>;
-    playerPermaLinks("#perma-links", "<%= basicPlayerInfo.hash %>");
+    playerPermaLinks(".perma-links", "<%= basicPlayerInfo.hash %>");
     <% 
     for(let i = 0; i < pageLayout.length; i++){
 

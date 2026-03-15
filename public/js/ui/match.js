@@ -45,6 +45,7 @@ function renderBasicInfo(parent, data, players){
             UIBr()
         );
     }
+
     
     info.append(
         UISpan("Gamespeed", "blue-font"), 
@@ -57,17 +58,19 @@ function renderBasicInfo(parent, data, players){
         ` ${data.server_name}`, 
         UIBr(),
         UISpan("Mutators ", "blue-font"), 
-        UISpan(data.mutators, "font-small"), 
+        UISpan(data.mutators, "tiny-font"),
         UIBr()
     );
 
 
     wrapper.append(info);
 
-    new UIWatchlistButton(info, "matches", data.hash);
+    const pLinks = UIDiv("perma-links");
 
-    new UICopyURLToClipboard(info, "Copy Match Perma Link To Clipboard", `/match/${data.hash}`);
+    new UIWatchlistButton(pLinks, "matches", data.hash);
 
+    new UICopyURLToClipboard(pLinks, "Copy Match Perma Link To Clipboard", `/match/${data.hash}`);
+    wrapper.append(pLinks);
     parent.append(wrapper);
 
 }

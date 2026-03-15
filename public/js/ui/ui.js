@@ -797,7 +797,7 @@ function UICopyURLToClipboard(parent, text, url){
 
         await navigator.clipboard.writeText(`${window.location.host}${url}`);
     });
-    parent.append(UIBr(), button);
+    parent.append(button);
 }
 
 class UISelect{
