@@ -1,3 +1,4 @@
+import { simpleQuery } from "./database.mjs";
 
 /**
  * 
@@ -103,4 +104,25 @@ export function toJSONAPIKeyNames(data){
     }
 
     return data;
+}
+
+
+export async function loadAllJSONSettings(){
+
+    const query = `SELECT * FROM nstats_json_api ORDER BY category ASC, setting_name ASC`;
+
+    const result = await simpleQuery(query);
+
+    const settings = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(settings[r.category] === undefined) settings[r.category] = [];
+
+        settings[r.category].push(r);
+    }
+
+    return settings;
 }

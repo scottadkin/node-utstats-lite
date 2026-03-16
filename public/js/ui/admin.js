@@ -3405,3 +3405,75 @@ class AdminServersManager{
         }
     }
 }
+
+
+class AdminJSONManager{
+
+    constructor(parent){
+
+        this.parent = document.querySelector(parent);
+
+        this.settings = {};
+
+        UIHeader(this.parent, "JSON API Manager");
+
+        this.wrapper = UIDiv();
+
+        this.form = UIDiv("form");
+        
+        this.form.append("Enable or disable the JSON API.");
+        this.wrapper.append(this.form);
+
+        this.mode = "match";
+
+        this.createTabs();
+        
+        this.parent.append(this.wrapper);
+
+        this.loadData();
+
+    }
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-json-settings"})
+            });
+
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.settings = res;
+
+            this.render();
+            
+        }catch(err){
+
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
+    }
+
+    createTabs(){
+
+        const options = [
+            {"display": "Match", "value": "match"},
+        ];
+
+        this.tabs = new UITabs(this.parent, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.render();
+        });
+    }
+
+    render(){
+
+    }
+}

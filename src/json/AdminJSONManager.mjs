@@ -20,6 +20,7 @@ import {
     renameServer  
 } from "../servers.mjs";
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
+import { loadAllJSONSettings } from "../json.mjs";
 
 
 
@@ -258,8 +259,11 @@ export default class AdminJSONManager{
                 }
 
                 return this.res.json(await renameServer(this.req.body.id, this.req.body.newName));
-            }
 
+            }else if(this.mode === "load-json-settings"){
+
+                return this.res.json(await loadAllJSONSettings());
+            }
 
 
 

@@ -701,7 +701,15 @@ const queries = [
         importer_team_1_score float NOT NULL,
         importer_team_2_score float NOT NULL,
         importer_team_3_score float NOT NULL,
-        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_json_api(
+        id INT NOT NULL AUTO_INCREMENT,
+        category varchar(255) NOT NULL,
+        setting_name varchar(255) NOT NULL,
+        setting_type varchar(255) NOT NULL,
+        setting_value varchar(255) NOT NULL,
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 ];
 
@@ -901,6 +909,34 @@ async function insertCTFLeagueSettings(){
 }
 
 
+async function bJSONSettingExist(name, category){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_json_api WHERE setting_name=? AND category=?`;
+
+    const result = await simpleQuery(query, [name, category]);
+
+    return result[0].total_rows > 0;
+}
+
+
+async function updateJSONApiSettings(){
+
+    const settings = [{"category": "match", "name": "Enable Match JSON API", "type": "bool", "value": 1}];
+
+
+    const query = `INSERT INTO nstats_json_api VALUES(NULL,?,?,?,?)`;
+
+    for(let i = 0; i < settings.length; i++){
+
+        const {category, name, type, value} = settings[i];
+
+        if(!await bJSONSettingExist(name, category)){
+
+            await simpleQuery(query, [category, name, type, value]);
+        }
+    }
+}
+
 async function updateMatchesTable(){
 
     await addColumn("nstats_matches", "tournament_mode", "int DEFAULT 100 AFTER hardcore");
@@ -981,6 +1017,9 @@ async function updateMatchesTable(){
         await setAllMapTotals();
 
         await damageSetMatchMapGametypeIds();
+
+
+        await updateJSONApiSettings();
 
         new Message(`Refreshing player ctf league Map tables.`,"note");
         await refreshAllTables(true, "maps");

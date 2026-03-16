@@ -35,6 +35,11 @@ const modes = [
         "display": "Server Manager",
         "value": "servers",
         "description": "Merge Servers, Rename Servers"
+    },
+    {
+        "display": "JSON API Manager",
+        "value": "json",
+        "description": "Enable or Disable JSON API"
     }
 ];
 
@@ -115,6 +120,8 @@ function renderCategory(mode){
         %><script>new AdminMatchesManager("#root");</script><%
     }else if(mode === "servers"){
         %><script>new AdminServersManager("#root");</script><%
+    }else if(mode === "json"){
+        %><script>new AdminJSONManager("#root")</script><%
     }
 }
 
