@@ -1,15 +1,17 @@
 
-function rbiTest(name, value){
+function UIMBInfo(name, value){
 
-    const elem = UIDiv("mbi-flex");
-    const nElem = UIDiv("mbi-name");
+    const wrapper = UIDiv("mb-info");
+
+    const nElem = UIDiv();
+    const vElem = UIDiv();
     nElem.append(name);
-
-    const vElem = UIDiv("mbi-value");
     vElem.append(value);
-    elem.append(nElem, vElem);
 
-    return elem;
+    wrapper.append(nElem, vElem);
+
+    return wrapper;
+
 }
 
 function renderBasicInfo(parent, data, players){
@@ -32,32 +34,28 @@ function renderBasicInfo(parent, data, players){
   
     parent.appendChild(header);
 
-    const mbi = UIDiv("match-basic-info-test-flex-cont");
-    mbi.append(rbiTest("Date", toDateString(data.date, false, false)));
-    mbi.append(rbiTest("Match Length", toPlaytime(data.playtime)));
-    mbi.append(rbiTest("Players", data.players));
 
+    const infoElems = UIDiv("match-basic-info-wrapper-info");
 
-    
-
+    infoElems.append(UIMBInfo("Date", toDateString(data.date, false, false)));
+    infoElems.append(UIMBInfo("Match Length", toPlaytime(data.playtime)));
+    infoElems.append(UIMBInfo("Players", data.players));
 
     if(data.target_score !== 0){
-        mbi.append(rbiTest("Target Score", data.target_score));
+        infoElems.append(UIMBInfo("Target Score", data.target_score));
     }
+
     if(data.time_limit !== 0){
-
-        mbi.append(rbiTest("Time Limit", data.time_limit));
-
+        infoElems.append(UIMBInfo("Time Limit", data.time_limit));
     }
 
 
-    mbi.append(rbiTest("Gamespeed", `${data.gamespeed_real}%`));
-    mbi.append(rbiTest("Tournament Mode", `${(data.tournament_mode === 1) ? "True" : "False"}`));
-    mbi.append(rbiTest("Server", data.server_name));
-    mbi.append(rbiTest("Mutators", data.mutators));
-    
+    infoElems.append(UIMBInfo("Gamespeed", `${data.gamespeed_real}%`));
+    infoElems.append(UIMBInfo("Tournament Mode", `${(data.tournament_mode === 1) ? "True" : "False"}`));
+    infoElems.append(UIMBInfo("Server",  data.server_name));
+    infoElems.append(UIMBInfo("Mutators", data.mutators));
 
-    wrapper.append(mbi);
+    wrapper.append(infoElems);
 
     const pLinks = UIDiv("perma-links");
 
