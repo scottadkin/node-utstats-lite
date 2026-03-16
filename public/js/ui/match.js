@@ -1,4 +1,17 @@
 
+function rbiTest(name, value){
+
+    const elem = UIDiv("mbi-flex");
+    const nElem = UIDiv("mbi-name");
+    nElem.append(name);
+
+    const vElem = UIDiv("mbi-value");
+    vElem.append(value);
+    elem.append(nElem, vElem);
+
+    return elem;
+}
+
 function renderBasicInfo(parent, data, players){
 
     parent = document.querySelector(parent);
@@ -6,7 +19,7 @@ function renderBasicInfo(parent, data, players){
     const wrapper = UIDiv("match-basic-info-wrapper center");
 
     const header = UIDiv("header-wrapper");
-    header.innerHTML = data.map_name;
+    header.innerHTML = `${data.gametype_name} on ${data.map_name}`;
 
     if(data.solo_winner !== 0){
 
@@ -19,51 +32,32 @@ function renderBasicInfo(parent, data, players){
   
     parent.appendChild(header);
 
-    const info = UIDiv("match-basic-info-wrapper-info");
+    const mbi = UIDiv("match-basic-info-test-flex-cont");
+    mbi.append(rbiTest("Date", toDateString(data.date, false, false)));
+    mbi.append(rbiTest("Match Length", toPlaytime(data.playtime)));
+    mbi.append(rbiTest("Players", data.players));
 
-    info.append(
-        `${toDateString(data.date, false, false)}`, 
-        UIBr(), 
-        UISpan(data.gametype_name, "blue-font"), 
-        " on ", 
-        UISpan(data.map_name, "blue-font"), 
-        UIBr(),
-        `${data.players} ${plural(data.players, "Player")}`,
-        UIBr(),
-        UISpan("Match Length", "blue-font"), 
-        ` ${toPlaytime(data.playtime)}`, 
-        UIBr()
-    );
-
-    if(data.target_score !== 0){
-        info.append(UISpan("Target Score ", "blue-font"), data.target_score, UIBr());
-    }
-    if(data.time_limit !== 0){
-        info.append(
-            UISpan("Time Limit ", "blue-font"), 
-            `${data.time_limit} ${plural(data.time_limit, "Minute")}`, 
-            UIBr()
-        );
-    }
 
     
-    info.append(
-        UISpan("Gamespeed", "blue-font"), 
-        ` ${data.gamespeed_real}%`, 
-        UIBr(),
-        UISpan("Tournament Mode", "blue-font"), 
-        ` ${(data.tournament_mode === 1) ? "True" : "False"}`, 
-        UIBr(),
-        UISpan("Server", "blue-font"), 
-        ` ${data.server_name}`, 
-        UIBr(),
-        UISpan("Mutators ", "blue-font"), 
-        UISpan(data.mutators, "tiny-font"),
-        UIBr()
-    );
 
 
-    wrapper.append(info);
+    if(data.target_score !== 0){
+        mbi.append(rbiTest("Target Score", data.target_score));
+    }
+    if(data.time_limit !== 0){
+
+        mbi.append(rbiTest("Time Limit", data.time_limit));
+
+    }
+
+
+    mbi.append(rbiTest("Gamespeed", `${data.gamespeed_real}%`));
+    mbi.append(rbiTest("Tournament Mode", `${(data.tournament_mode === 1) ? "True" : "False"}`));
+    mbi.append(rbiTest("Server", data.server_name));
+    mbi.append(rbiTest("Mutators", data.mutators));
+    
+
+    wrapper.append(mbi);
 
     const pLinks = UIDiv("perma-links");
 
