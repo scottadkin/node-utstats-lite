@@ -105,9 +105,13 @@
                 %>renderMatchPings("#root", playerData, basic.total_teams);<%
 
             } break;
+
+            case "Display JSON Links": {
+                %>new MatchJSONApiInfo("#root", basic.hash);<%
+            }
         }
     }
-    %>new MatchJSONApiInfo("#root", basic.hash);<%
+    
     _%>
 </script>
 <%- include("footer.ejs") -%>

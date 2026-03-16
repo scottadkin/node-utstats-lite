@@ -211,20 +211,20 @@ a{
 	padding:var(--padding-1);
 	border-top:2px solid var(--border-color-5);
 	border-bottom:2px solid var(--border-color-5);
+	color:var(--font-color-1);
+	font-size:var(--font-size-1);
 }
 
 .form-row{
 	display:grid;
-	grid-template-columns: 50% 50%;
+	grid-template-columns: 1fr 1fr;
 	max-width:1000px;
 	margin-left:auto;
 	margin-right:auto;
-	font-size:20px;
 	margin-bottom:var(--margin-3);
 }
 
 label, .form-label, .form-read-only{
-	padding-right:var(--padding-1);
 	color:var(--font-color-1);
 	font-size:var(--font-size-1);
 	line-height: var(--line-height-1);
@@ -244,7 +244,7 @@ label, .form-label, .form-read-only{
 	text-align: center;
 	font-size:var(--font-size-1);
 	color:var(--font-color-1);
-	margin-bottom:var(--margin-2);
+	margin-bottom:var(--margin-1);
 }
 
 .textbox{

@@ -1344,7 +1344,7 @@ class AdminSiteSettingsManager{
         const form = document.createElement("form");
         form.className = "form";
 
-        const info = UIDiv("info");
+        const info = UIDiv("form-info");
         info.append("Change what components are displayed on each page, and how many of certain items are displayed.");
         form.append(info);
 
