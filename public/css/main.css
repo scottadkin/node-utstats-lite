@@ -145,6 +145,7 @@ nav a{
     padding:8px 10px;
 	font-weight:500;
 	transition: color 0.5s;
+	border-bottom:2px solid transparent;
 	
 }
 

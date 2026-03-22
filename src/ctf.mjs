@@ -972,11 +972,21 @@ async function getMatchCTFCapsJSON(id, players){
 
     if(result.length === 0) return [];
 
+    const playerCapIds = {};
+
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
+        if(playerCapIds[r.cap_player] === undefined){
+            playerCapIds[r.cap_player] = new Set();
+        }
+        
+        playerCapIds[r.cap_player].add(r.id);
+
         r.cap_type = (r.cap_type === 1) ? "Solo" : "Assisted";
+        r.cap_player_id = r.cap_player;
+        r.taken_player_id = r.taken_player;
 
         r.cap_player = players?.[r.cap_player] ?? "Not Found";
         r.taken_player = players?.[r.taken_player] ?? "Not Found";
@@ -989,7 +999,7 @@ async function getMatchCTFCapsJSON(id, players){
         toJSONAPIKeyNames(r);
     }
   
-    return result;
+    return {"caps": result, playerCapIds};
 }
 
 
@@ -1036,6 +1046,7 @@ export async function getMatchCTFJSON(id){
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
+        r.capIds = [];
 
         if(players[r.player_id] === undefined){
             players[r.player_id] = r.name;
@@ -1050,7 +1061,20 @@ export async function getMatchCTFJSON(id){
 
     const teams = createTeamTotalsMatchCTFJSON(result);
 
-    const caps = await getMatchCTFCapsJSON(id, players);
+    const {caps, playerCapIds} = await getMatchCTFCapsJSON(id, players);
+
+    for(const [playerId, capIds] of Object.entries(playerCapIds)){
+
+        for(let i = 0; i < result.length; i++){
+
+            const r = result[i];
+
+            if(r.id == playerId){
+                r.capIds = [...capIds];
+                break;
+            }
+        }
+    }
 
     return {teams, caps, "players": result};
 }

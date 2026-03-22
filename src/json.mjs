@@ -46,6 +46,8 @@ export function toJSONAPIKeyNames(data){
         "flag_carry_time_max": ["flagCarryTime", "max"],
         "flag_carry_time_avg": ["flagCarryTime", "average"],
         "flag_team": "flagTeam",
+        "taken_player_id": "takenPlayerId",
+        "cap_player_id": "capPlayerId",
         "capping_team": "capTeam",
         "cap_type": "capType",
         "taken_timestamp": "takenTimestamp",
