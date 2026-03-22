@@ -440,24 +440,18 @@ export class MatchParser{
 
             if(timestampResult === null) continue;
 
-        
-           // process.exit();
-            const origianlStringTimestamp = timestampResult[1].replace(".", "");
-            const originalTimestampInt = parseInt(origianlStringTimestamp);
 
             const originalTimestamp = parseFloat(timestampResult[1]);
 
-            const timestamp = scalePlaytime(parseFloat(timestampResult[1]), this.gametype.gameSpeed);
+            const rawTimestamp = scalePlaytime(parseFloat(timestampResult[1]), this.gametype.gameSpeed);
 
+            const timestamp = rawTimestamp - this.matchStart;
 
-            //process.exit();
-
-           // process.exit();
             const subString = timestampResult[2];
 
-            if(classWeaponStatReg.test(timestampResult[2])){
-                this.classicWeaponStats.addLine(timestamp, timestampResult[2]);
-                this.weapons.parseLine(timestampResult[2]);
+            if(classWeaponStatReg.test(subString)){
+                this.classicWeaponStats.addLine(timestamp, subString);
+                this.weapons.parseLine(subString);
                 continue;
             }
 
@@ -503,7 +497,7 @@ export class MatchParser{
 
 
             //ignore these events before realstart
-            if(timestamp < this.matchStart) continue;
+            if(rawTimestamp < this.matchStart) continue;
 
             if(headshotReg.test(subString)){
 
@@ -542,7 +536,6 @@ export class MatchParser{
 
             if(ctfFlagReg.test(subString)){
                 //ignore events in warm up
-                if(timestamp < this.matchStart) continue;
                 this.ctf.parseLine(timestamp, subString);
                 continue;
             }
@@ -565,24 +558,26 @@ export class MatchParser{
 
                 const scoreResult = domTeamScoreReg.exec(subString);
 
-                if(scoreResult !== null){
-
-                    const tScore = originalTimestamp.toFixed(2);
+                if(scoreResult === null) continue;
 
 
-                    if(this.dom.teamScoreTimestamps[tScore] === undefined){
-                        this.dom.teamScoreTimestamps[tScore] = [];
-                    }
 
-                    this.dom.teamScoreTimestamps[tScore].push({
-                         
-                        timestamp,
-                        originalTimestamp,
-                        "teamId": scoreResult[1],
-                        "score": scoreResult[2]
-                    });
-                    
+                const tScore = originalTimestamp.toFixed(2);
+
+
+                if(this.dom.teamScoreTimestamps[tScore] === undefined){
+                    this.dom.teamScoreTimestamps[tScore] = [];
                 }
+
+                this.dom.teamScoreTimestamps[tScore].push({
+                        
+                    timestamp,
+                    originalTimestamp,
+                    "teamId": scoreResult[1],
+                    "score": scoreResult[2]
+                });
+                
+                
             }
 
 

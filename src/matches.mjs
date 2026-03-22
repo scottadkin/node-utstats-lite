@@ -1113,6 +1113,7 @@ function updateJSONKillStats(killType, killer, victim, kills, teamKills, killDat
 export async function getMatchKillsBasicJSON(id){
 
     const data = await getMatchKillsBasic(id);
+    const startTimestamp = await getMatchStartTimestamp(id);
 
     const playerIds = new Set();
 
@@ -1136,7 +1137,9 @@ export async function getMatchKillsBasicJSON(id){
         const d = data[i];
 
         const currentData = [
-            d.timestamp, d.killer_id, d.victim_id
+            parseFloat((d.timestamp - startTimestamp).toFixed(2)), 
+            d.killer_id, 
+            d.victim_id
         ];
 
         const killer = getPlayer(players, d.killer_id);
@@ -1169,6 +1172,7 @@ function updateKillsMatchUp(totals, killer, victim){
 export async function getMatchKillsDetailedJSON(id){
 
     const data = await getMatchKills(id);
+    const startTimestamp = await getMatchStartTimestamp(id);
 
     const playerIds = new Set();
     const weaponIds = new Set();
@@ -1197,6 +1201,8 @@ export async function getMatchKillsDetailedJSON(id){
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
+
+        d.timestamp = parseFloat((d.timestamp - startTimestamp).toFixed(2));
 
         const killer = getPlayer(playersInfo, d.killer_id);
         const victim = getPlayer(playersInfo, d.victim_id);

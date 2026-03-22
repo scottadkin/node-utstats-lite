@@ -972,8 +972,6 @@ async function getMatchCTFCapsJSON(id, players){
 
     if(result.length === 0) return [];
 
-    const matchStart = await getMatchStartTimestamp(id);
-
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
@@ -983,8 +981,8 @@ async function getMatchCTFCapsJSON(id, players){
         r.cap_player = players?.[r.cap_player] ?? "Not Found";
         r.taken_player = players?.[r.taken_player] ?? "Not Found";
 
-        r.taken_timestamp = r.taken_timestamp - matchStart;
-        r.cap_timestamp = r.cap_timestamp - matchStart;
+        r.taken_timestamp = r.taken_timestamp;
+        r.cap_timestamp = r.cap_timestamp;
 
         r.flag_team = getTeamName(r.flag_team).toLowerCase();
         r.capping_team = getTeamName(r.capping_team).toLowerCase();

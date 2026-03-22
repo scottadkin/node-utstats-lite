@@ -1209,8 +1209,7 @@ class CTFCaps{
 
             for(let i = 0; i < timestamps.length; i++){
 
-                const t = timestamps[i] - this.matchStart;
-                covers.push({"id": id, "timestamp": t});
+                covers.push({"id": id, "timestamp": timestamps[i]});
             }
         }
 
@@ -1235,13 +1234,12 @@ class CTFCaps{
         return wrapper;
     }
 
-    renderCovers(start, end, covers, carryPlayer){
+    renderCovers(end, covers, carryPlayer){
 
         const elems = [];
 
         for(let x = 0; x < covers.length; x++){
 
-            if(covers[x].timestamp < start) continue;
             if(covers[x].timestamp > end) continue;
 
             const coverPlayer = getPlayer(this.players, covers[x].id);
@@ -1286,7 +1284,7 @@ class CTFCaps{
 
             let currentPlayerTeamFont = getTeamFont(p.team);
 
-            const start = c.start_timestamp - this.matchStart;
+            const start = c.start_timestamp;
 
             let lastPlayerTeamFont = "font-color-1";
 
@@ -1312,7 +1310,8 @@ class CTFCaps{
             let takenString = ` Picked Up The `;
             if(i === 0) takenString = ` Grabbed The `;
 
-            elems.push(this.addEventElem(start, [
+            elems.push(this.addEventElem(start, 
+                [
                     UIPlayerLink({
                         "playerId":c.player_id, 
                         "country":p.country, 
@@ -1324,10 +1323,10 @@ class CTFCaps{
             ));
 
 
-            const end = c.end_timestamp - this.matchStart;
+            const end = c.end_timestamp;
 
             if(covers.length > 0){
-                elems.push(...this.renderCovers(start, end, covers, p));
+                elems.push(...this.renderCovers(end, covers, p));
             }
 
             lastPlayer = p;
@@ -1338,7 +1337,7 @@ class CTFCaps{
 
         const capPlayer = getPlayer(this.players, capInfo.cap_player);
 
-        elems.push(this.addEventElem(capInfo.cap_timestamp - this.matchStart, [
+        elems.push(this.addEventElem(capInfo.cap_timestamp, [
             UIPlayerLink({
                 "playerId": capInfo.cap_player,
                 "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)),
@@ -1504,7 +1503,7 @@ class CTFCaps{
                 "country": grabPlayer.country
             }),
             " at ",
-            UIMMSS(capInfo.taken_timestamp - this.matchStart)
+            UIMMSS(capInfo.taken_timestamp)
         ]));
 
         const capPlayer = getPlayer(this.players, capInfo.cap_player);
@@ -1516,7 +1515,7 @@ class CTFCaps{
                 "country": capPlayer.country
             }),
             " at ",
-            UIMMSS(capInfo.cap_timestamp - this.matchStart)
+            UIMMSS(capInfo.cap_timestamp)
         ]));
 
         content.append(this.createLabelValueRow(`Capture Time`, [UISpan(toPlaytime(capInfo.cap_time, true), "monospace")]));
@@ -1609,9 +1608,9 @@ class CTFCaps{
 
         capTime.append(
             UIB(`${toPlaytime(capInfo.cap_time, true)}`), 
-            MMSS(capInfo.taken_timestamp - this.matchStart),
+            MMSS(capInfo.taken_timestamp),
             "    " , 
-            MMSS(capInfo.cap_timestamp - this.matchStart)
+            MMSS(capInfo.cap_timestamp)
         );
 
         this.capInfo.innerHTML = "";
@@ -1664,7 +1663,7 @@ class CTFCaps{
             
             data.push([
                 
-                UIMMSS(c.taken_timestamp - this.matchStart), 
+                UIMMSS(c.taken_timestamp), 
                 UIPlayerLink({
                     "playerId": c.taken_player, 
                     "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
@@ -1679,7 +1678,7 @@ class CTFCaps{
                     "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
                     "country": capPlayer.country
                 }), 
-                UIMMSS(c.cap_timestamp - this.matchStart),
+                UIMMSS(c.cap_timestamp),
                 {"content": c.cap_time, "parse": ["playtime2"], "className": "playtime"},
                 scores
             ]);
