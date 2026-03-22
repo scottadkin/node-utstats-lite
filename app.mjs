@@ -315,7 +315,7 @@ app.get("/api/json/:mode/:cat", async (req, res) =>{
 		await j.init();
 
 	}catch(err){
-		res.send(err.toString());
+		res.send({"error": err.toString()});
 	}
 
 });

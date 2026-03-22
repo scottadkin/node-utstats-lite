@@ -5,6 +5,7 @@ import {
     getDetailedMatchJSON
 
 } from "../matches.mjs";
+import { bJSONApiEnabled } from "../json.mjs";
 
 import { getMatchCTFJSON } from "../ctf.mjs";
 
@@ -99,6 +100,10 @@ export default class ApiJSON{
         };
 
         if(mode === "match"){
+            if(!await bJSONApiEnabled("match")){
+
+                return this.res.json({"error": "Disabled By Admin"});
+            }
             json = await this.processMatchRequests(cat);
         }
 

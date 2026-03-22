@@ -151,5 +151,17 @@ export async function saveJSONAPIChanges(changes){
         console.trace(err);
         return {"error": "err.toString()"};
     }
+}
 
+export async function bJSONApiEnabled(category){
+
+    const query = `SELECT setting_value FROM nstats_json_api WHERE setting_name="Enable JSON API" AND category=?`;
+
+    const result = await simpleQuery(query, [category]);
+
+    if(result.length === 0){
+        throw new Error(`You are missing a setting for the JSON api, JSON api is disabled until that setting is restored.`);
+    }
+
+    return result[0].setting_value === "1";
 }

@@ -921,7 +921,7 @@ async function bJSONSettingExist(name, category){
 
 async function updateJSONApiSettings(){
 
-    const settings = [{"category": "match", "name": "Enable Match JSON API", "type": "bool", "value": 1}];
+    const settings = [{"category": "match", "name": "Enable JSON API", "type": "bool", "value": 1}];
 
 
     const query = `INSERT INTO nstats_json_api VALUES(NULL,?,?,?,?)`;
