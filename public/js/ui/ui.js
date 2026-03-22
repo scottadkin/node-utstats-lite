@@ -619,8 +619,6 @@ class UITrueFalse{
     constructor(initialValue, name, bTableElem, callback){
 
         if(bTableElem === undefined) bTableElem = false;
-
-
         this.value = initialValue;
 
         this.wrapper = document.createElement((bTableElem) ? "td" : "div");
@@ -634,16 +632,17 @@ class UITrueFalse{
             this.render();
         });
 
-        this.wrapper.appendChild(this.elem);
+        this.wrapper.append(this.elem);
 
         this.hidden = document.createElement("input");
         this.hidden.type = "hidden";
         this.hidden.name = this.hidden.id = name;
         this.hidden.value = initialValue;
 
-        this.wrapper.appendChild(this.hidden);
+        this.wrapper.append(this.hidden);
 
         this.render();
+        
     }
 
     render(){

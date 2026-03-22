@@ -20,7 +20,7 @@ import {
     renameServer  
 } from "../servers.mjs";
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
-import { loadAllJSONSettings } from "../json.mjs";
+import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 
 
 
@@ -263,6 +263,10 @@ export default class AdminJSONManager{
             }else if(this.mode === "load-json-settings"){
 
                 return this.res.json(await loadAllJSONSettings());
+
+            }else if(this.mode === "save-json-api-settings"){
+
+                return this.res.json(await saveJSONAPIChanges(this.req.body.changes));
             }
 
 

@@ -111,7 +111,7 @@ export async function loadAllJSONSettings(){
 
     const query = `SELECT * FROM nstats_json_api ORDER BY category ASC, setting_name ASC`;
 
-    const result = await simpleQuery(query);
+    return await simpleQuery(query);
 
     const settings = {};
 
@@ -125,4 +125,31 @@ export async function loadAllJSONSettings(){
     }
 
     return settings;
+}
+
+
+export async function saveJSONAPIChanges(changes){
+
+    if(changes.length === 0) return;
+
+    const query = `UPDATE nstats_json_api SET setting_value=? WHERE id=?`;
+
+    const queries = [];
+
+    for(let i = 0; i < changes.length; i++){
+
+        const {id, value} = changes[i];
+        queries.push(await simpleQuery(query, [value, id]));     
+    }
+
+    try{
+
+        await Promise.all(queries);
+        return {"message": "passed"};
+
+    }catch(err){
+        console.trace(err);
+        return {"error": "err.toString()"};
+    }
+
 }

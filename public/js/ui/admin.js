@@ -3407,6 +3407,16 @@ class AdminServersManager{
 }
 
 
+class UIAdminFormRow{
+
+    constructor(parent){
+
+        this.parent = parent;
+
+    }
+}
+
+
 class AdminJSONManager{
 
     constructor(parent){
@@ -3414,17 +3424,22 @@ class AdminJSONManager{
         this.parent = document.querySelector(parent);
 
         this.settings = {};
+        this.savedSettings = {};
 
         UIHeader(this.parent, "JSON API Manager");
 
-        this.wrapper = UIDiv();
-
-        this.form = UIDiv("form");
+        this.warning = UIDiv("hidden");
+        this.warning.append("You have unsaved changes.");
+        this.wrapper = UIDiv("form");
         
-        this.form.append("Enable or disable the JSON API.");
-        this.wrapper.append(this.form);
+        this.parent.append(this.warning, this.wrapper);
+        
+        this.bCreatedElems = false;
+        this.formElems = [];
+       // this.form.append("Enable or disable the JSON API.");
 
         this.mode = "match";
+        this.bSavingInProgress = false;
 
         this.createTabs();
         
@@ -3444,12 +3459,13 @@ class AdminJSONManager{
                 "body": JSON.stringify({"mode": "load-json-settings"})
             });
 
-
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
 
             this.settings = res;
+         
+            this.savedSettings = JSON.parse(JSON.stringify(res));
 
             this.render();
             
@@ -3463,6 +3479,7 @@ class AdminJSONManager{
 
         const options = [
             {"display": "Match", "value": "match"},
+            {"display": "test", "value": "test"},
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode);
@@ -3473,7 +3490,139 @@ class AdminJSONManager{
         });
     }
 
+    getUnsavedChanges(){
+
+        const changes = [];
+
+        for(let i = 0; i < this.settings.length; i++){
+
+            if(this.settings[i].setting_value !== this.savedSettings[i].setting_value){
+
+                changes.push(this.settings[i]);
+            }
+        }
+
+        return changes;
+    }
+
+    flagUnsavedChanges(){   
+
+        const changes = this.getUnsavedChanges();
+
+
+        if(changes.length === 0){
+            this.warning.className = "hidden";
+            this.saveChangesElem.className = "hidden";
+            return;
+        }
+            
+        this.warning.className = "warning";
+        this.warning.innerHTML = `You have ${changes.length} unsaved changes.`;
+        this.saveChangesElem.className = "submit-button";
+    }
+
+
+    async saveChanges(){
+
+        try{
+
+            if(this.bSavingInProgress){
+                new UINotification(this.parent, "note", "Please Wait", "Previous changes are still being applied.");
+                return;
+            }
+
+            this.bSavingInProgress = true;
+            
+            const changes = this.getUnsavedChanges();
+
+            const toSave = changes.map((c) =>{
+                return {"id": c.id, "value": c.setting_value};
+            });
+
+     
+            const req = await fetch("/admin/", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "save-json-api-settings", "changes": [...toSave]})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+
+            await this.loadData();
+            this.bSavingInProgress = false;
+            this.flagUnsavedChanges();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Save Changes", err.toString());
+        }
+    }
+    createElems(){
+
+        if(this.bCreatedElems) return;
+
+        for(let i = 0; i < this.settings.length; i++){
+
+            const s = this.settings[i];
+
+            if(this.formElems[s.category] === undefined){
+                this.formElems[s.category] = [];
+            }
+
+            const row = UIDiv("form-row");
+            const label = UILabel(s.setting_name);
+
+            let tInput = null;
+
+            if(s.setting_type === "bool"){
+
+                tInput = new UITrueFalse(this.settings[i].setting_value === "1", s.setting_name, false, (e) =>{
+                    this.settings[i].setting_value = (e === true) ? "1" : "0"; 
+                    this.flagUnsavedChanges();
+                });
+            }
+
+            row.append(label, tInput.wrapper);
+
+            this.formElems[s.category].push(row);
+            this.wrapper.append(row);
+        }
+
+        this.bCreatedElems = true;
+
+        this.saveChangesElem = document.createElement("button");
+        this.saveChangesElem.className = "hidden";
+        this.saveChangesElem.append("Save Changes");
+        
+        this.saveChangesElem.addEventListener("click", () =>{
+            this.saveChanges();
+        });
+
+        this.wrapper.append(this.saveChangesElem);
+        
+    }
+
     render(){
 
+        this.createElems();
+
+        const cats = Object.keys(this.formElems);
+
+        for(let i = 0; i < cats.length; i++){
+
+            for(let x = 0; x < this.formElems[cats[i]].length; x++){
+
+                const elem = this.formElems[cats[i]][x];
+
+                if(cats[i] === this.mode){
+                    elem.className = "form-row";
+                }else{
+                    elem.className = "hidden";
+                }
+            }
+        }
     }
 }

@@ -213,6 +213,7 @@ a{
 	border-bottom:2px solid var(--border-color-5);
 	color:var(--font-color-1);
 	font-size:var(--font-size-1);
+	font-weight:500;
 }
 
 .form-row{
@@ -495,6 +496,7 @@ option{
 	line-height: var(--line-height-1);
 	border-top:2px solid var(--border-color-5);
 	border-bottom:2px solid var(--border-color-5);
+	font-weight:500;
 }
 
 .info-basic{
