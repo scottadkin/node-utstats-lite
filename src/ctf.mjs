@@ -883,7 +883,7 @@ export async function getCTFGametypes(){
     return result.map((r) => r.gametype_id);
 }
 
-function createTeamTotalsMatchCTFJSON(players){
+function createTeamTotalsMatchCTFJSON(players, teamCapIds){
 
     const teams = {};
 
@@ -897,6 +897,7 @@ function createTeamTotalsMatchCTFJSON(players){
 
             teams[teamName] = {...p};
             teams[teamName].totalPlayers = 1;
+            teams[teamName].capIds = teamCapIds[teamName];
 
             delete teams[teamName].name;
             delete teams[teamName].id;
@@ -911,7 +912,7 @@ function createTeamTotalsMatchCTFJSON(players){
 
         for(const key of Object.keys(team)){
 
-            if(key === "totalPlayers") continue;
+            if(key === "totalPlayers" || key === "capIds") continue;
 
             if(key === "returnTypes"){
 
@@ -994,6 +995,7 @@ async function getMatchCTFCapsJSON(id, players){
     if(result.length === 0) return [];
 
     const playerCapIds = {};
+    const teamCapIds = {"red": [], "blue": [], "green": [], "yellow": []};
     const playerAssistIds = {};
 
     for(let i = 0; i < result.length; i++){
@@ -1003,6 +1005,8 @@ async function getMatchCTFCapsJSON(id, players){
         if(playerCapIds[r.cap_player] === undefined){
             playerCapIds[r.cap_player] = new Set();
         }
+
+        
         
         playerCapIds[r.cap_player].add(r.id);
 
@@ -1027,10 +1031,13 @@ async function getMatchCTFCapsJSON(id, players){
         r.cap_timestamp = r.cap_timestamp;
 
         r.flag_team = getTeamName(r.flag_team).toLowerCase();
-        r.capping_team = getTeamName(r.capping_team).toLowerCase();
+        const capTeamName = getTeamName(r.capping_team).toLowerCase();
+        r.capping_team = capTeamName;
+        teamCapIds[capTeamName].push(r.id);
         toJSONAPIKeyNames(r);
 
         for(let x = 0; x < r.carryInfo.length; x++){
+
             r.carryInfo[x].name = players[r.carryInfo[x].player_id] ?? "Not Found";
             delete r.carryInfo[x].player_id;
             toJSONAPIKeyNames(r.carryInfo[x]);
@@ -1040,7 +1047,7 @@ async function getMatchCTFCapsJSON(id, players){
         
     }
   
-    return {"caps": result, playerCapIds};
+    return {"caps": result, playerCapIds, teamCapIds};
 }
 
 
@@ -1100,9 +1107,9 @@ export async function getMatchCTFJSON(id){
 
     }
 
-    const teams = createTeamTotalsMatchCTFJSON(result);
+    const {caps, playerCapIds, teamCapIds} = await getMatchCTFCapsJSON(id, players);
 
-    const {caps, playerCapIds} = await getMatchCTFCapsJSON(id, players);
+    const teams = createTeamTotalsMatchCTFJSON(result, teamCapIds);
 
     for(const [playerId, capIds] of Object.entries(playerCapIds)){
 
