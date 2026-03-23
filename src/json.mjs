@@ -23,7 +23,7 @@ function JSONSetSubKey(data, key, bLast, value){
  * @param {*} data JSON
  * @returns replaces all mysql column name keys with the JSONAPI ones
  */
-export function toJSONAPIKeyNames(data){
+export function toJSONAPIKeyNames(data, overrideDefaults){
 
     const toChange = {
         "player_id": "id",
@@ -60,6 +60,8 @@ export function toJSONAPIKeyNames(data){
         "total_drops": "drops",
         "total_covers": "covers",
         "unique_carriers": "uniqueCarriers",
+        "start_timestamp": "startTimestamp",
+        "end_timestamp": "endTimestamp",
         "red_kills": ["kills", "red"],
         "blue_kills": ["kills", "blue"],
         "green_kills": ["kills", "green"],
@@ -69,6 +71,14 @@ export function toJSONAPIKeyNames(data){
         "green_suicides": ["suicides", "green"],
         "yellow_suicides": ["suicides", "yellow"],
     };
+
+    if(overrideDefaults !== undefined){
+
+        for(const [key, value] of Object.entries(overrideDefaults)){
+
+            toChange[key] = value;
+        }
+    }
 
 
     for(const key of Object.keys(data)){

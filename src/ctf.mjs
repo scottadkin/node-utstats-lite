@@ -573,7 +573,12 @@ async function getMatchCarryTimes(matchId){
 
         if(data[r.cap_id] === undefined) data[r.cap_id] = [];
 
-        data[r.cap_id].push(r);
+        data[r.cap_id].push({
+            "player_id": r.player_id,
+            "start_timestamp": r.start_timestamp,
+            "end_timestamp": r.end_timestamp,
+            "carry_time": r.carry_time
+        });
     }
 
     return data;
@@ -957,6 +962,15 @@ function createTeamTotalsMatchCTFJSON(players){
     return teams;
 }
 
+async function getCapAssistPlayers(matchId){
+
+    const query = `SELECT cap_id,player_id,carry_time FROM nstats_ctf_carry_times WHERE match_id=? ORDER BY cap_id ASC, start_timestamp ASC`;
+
+    const  result = await simpleQuery(query, [matchId]);
+
+    console.log(result);
+}
+
 /**
  * 
  * @param {number} id 
@@ -975,7 +989,7 @@ async function getMatchCTFCapsJSON(id, players){
     const result = await simpleQuery(query, [id]);
 
     const covers = await getMatchCovers(id);
-
+    const carryTimes = await getMatchCarryTimes(id);
 
     if(result.length === 0) return [];
 
@@ -1000,6 +1014,7 @@ async function getMatchCTFCapsJSON(id, players){
             });
         }
 
+        r.carryInfo = carryTimes[r.id];
 
         r.cap_type = (r.cap_type === 1) ? "Solo" : "Assisted";
         r.cap_player_id = r.cap_player;
@@ -1014,6 +1029,15 @@ async function getMatchCTFCapsJSON(id, players){
         r.flag_team = getTeamName(r.flag_team).toLowerCase();
         r.capping_team = getTeamName(r.capping_team).toLowerCase();
         toJSONAPIKeyNames(r);
+
+        for(let x = 0; x < r.carryInfo.length; x++){
+            r.carryInfo[x].name = players[r.carryInfo[x].player_id] ?? "Not Found";
+            delete r.carryInfo[x].player_id;
+            toJSONAPIKeyNames(r.carryInfo[x]);
+            
+            
+        }
+        
     }
   
     return {"caps": result, playerCapIds};
