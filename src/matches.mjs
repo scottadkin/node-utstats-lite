@@ -313,7 +313,7 @@ async function getPlayerMatchScores(id){
 
 export async function getMatchIdFromHash(hash){
 
-    const query = `SELECT id FROM nstats_matches WHERE hash=?`;
+    const query = `SELECT id FROM nstats_matches WHERE hash=? ORDER BY id DESC LIMIT 1`;
 
     const result = await simpleQuery(query, [hash]);
 

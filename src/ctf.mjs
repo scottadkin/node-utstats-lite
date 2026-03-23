@@ -528,7 +528,11 @@ export async function insertCaps(playerManager, matchId, mapId, gametypeId, caps
     //await bulkInsert(query, insertVars);
 }
 
-
+/**
+ * 
+ * @param {Number} matchId 
+ * @returns {Promise<Object>} keys are capIds, subKeys are playerIds, values are timestamps
+ */
 async function getMatchCovers(matchId){
 
     const query = `SELECT * FROM nstats_ctf_covers WHERE match_id=? ORDER by timestamp ASC`;
@@ -970,9 +974,13 @@ async function getMatchCTFCapsJSON(id, players){
 
     const result = await simpleQuery(query, [id]);
 
+    const covers = await getMatchCovers(id);
+
+
     if(result.length === 0) return [];
 
     const playerCapIds = {};
+    const playerAssistIds = {};
 
     for(let i = 0; i < result.length; i++){
 
@@ -983,6 +991,15 @@ async function getMatchCTFCapsJSON(id, players){
         }
         
         playerCapIds[r.cap_player].add(r.id);
+
+        r.coverPlayers = [];
+
+        if(covers[r.id] !== undefined){
+            r.coverPlayers = Object.keys(covers[r.id]).map((p) =>{
+                return {"name": players?.[p] ?? "Not Found", "totalCovers": covers[r.id][p].length, "timestamps": [...covers[r.id][p]]};
+            });
+        }
+
 
         r.cap_type = (r.cap_type === 1) ? "Solo" : "Assisted";
         r.cap_player_id = r.cap_player;
