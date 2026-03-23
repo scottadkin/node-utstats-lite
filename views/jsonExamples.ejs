@@ -228,148 +228,115 @@ const matchCTF = `{
 
 const matchKillsBasicInfo = [
   UIUnorderedList([
-    [
-      UIB("players object: ", "blue-font"),
-      `each key is a player id containing the following data:`,
+      UIB("players array: ", "blue-font"),
+      `each element is a player kill/death totals summary:`,
       UISpan(` name, hash, kill total, team kill total, deaths by kill, and deaths by team kill.`, "monospace")
     ], 
     [
       UIB("kills & teamKills arrays: ", "blue-font"),
-      `every element is a kill, every kill is an array with the following data: `, 
-      UISpan(`[Timestamp, KillerId, victimId]`,"monospace")
-    ]
-  ]),
+      `every element is a kill, every kill is an object containing the timestamp, killer, and victim names. `,
+    ]),
 ];
 
 const matchKillsBasic = `{
-  "players": {
-    "27": {
-      "name": "Ooper",
-      "hash": "f789d64fdb64f0eb3db2100edde4e9aa",
-      "kills": 1,
-      "deathsByKill": 2,
+  "players": [
+    {
+      "id": 1,
+      "name": "SMK",
+      "hash": "ea2aeb7169e63571748b56953d8341c5",
+      "kills": 55,
+      "deathsByKill": 41,
       "teamKills": 0,
       "deathsByTeamKill": 0
-    },
-    "40": {
-      "name": "Cali",
-      "hash": "e3bed28b347f26bfb1d0c9b9bda2712b",
-      "kills": 0,
-      "deathsByKill": 2,
-      "teamKills": 0,
-      "deathsByTeamKill": 0
-    },
-    "81": {
-      "name": "Not Found",
-      "hash": "",
-      "kills": 0,
-      "deathsByKill": 1,
-      "teamKills": 0,
-      "deathsByTeamKill": 0
-    },
-    "84": {
-      "name": "Sarena",
-      "hash": "82f1d6311fcce730f6d77f1665f80be0",
-      "kills": 5,
-      "deathsByKill": 1,
-      "teamKills": 0,
-      "deathsByTeamKill": 0
-    }
-  },
-  "kills": [
-    [19.5, 84, 27],
-    [25.6455, 84, 81],
-    [27.5273, 84, 40],
-    [30.6818, 84, 40],
-    [31.7091, 27, 84],
-    [37.4273, 84, 27]
+    },...rest of players
   ],
-  "teamKills": []
+  "kills": [
+    {
+      "timestamp": 6.51818,
+      "killer": "GigaChad",
+      "victim": "z"
+    },...rest of kills
+  ],
+  "teamKills": [
+    {
+      "timestamp": 3.2,
+      "killer": "GigaChad",
+      "victim": "z"
+    },...rest of teamKills
+  ]
 }`;
 
 const matchKillsDetailedInfo = [
   UIUnorderedList([
     [
-      UIB("players object: ", "blue-font"),
-      `each key is a player id containing the following data:`,
+      UIB("players array: ", "blue-font"),
+      `each element is a player kill/death totals summary:`,
       UISpan(` name, hash, kill total, team kill total, deaths by kill, and deaths by team kill.`, "monospace")
     ], 
     [
-      UIB("weapons object: ", "blue-font"),  
-      `each key is a weapon id paired to the name of the weapon(only includes weapons used in team/kill events).`
-    ],
-    [
       UIB("killsMatchUp object: ", "blue-font"),
-      `each key is the killerId, killerId contains an object of victim ids, each victimId is the total times they were killed by killerId.`
+      `each key is the killer, every killer contains an object of victims, each victim's value is the total times they were killed by killer.`
     ],
     [
       UIB("kills & teamKills arrays: ", "blue-font"),
-      `every element is a kill, every kill is an array with the following data: `, UISpan(`[Timestamp, KillerId, KillerWeaponId, victimId, victimWeaponId]`,"monospace")
+      `every element is a kill, every kill is an object containing the timestamp, killer, victim, and weapon names. `,
     ]
   ]),
 ]
 
-const matchKillsDetailed = `{
-  "players": {
-    "27": {
-      "name": "Ooper",
-      "hash": "f789d64fdb64f0eb3db2100edde4e9aa",
-      "kills": 1,
-      "deathsByKill": 2,
+const matchKillsDetailed = `
+{
+  "players": [
+    {
+      "id": 1,
+      "name": "SMK",
+      "hash": "ea2aeb7169e63571748b56953d8341c5",
+      "kills": 55,
+      "deathsByKill": 41,
       "teamKills": 0,
       "deathsByTeamKill": 0
-    },
-    "40": {
-      "name": "Cali",
-      "hash": "e3bed28b347f26bfb1d0c9b9bda2712b",
-      "kills": 0,
-      "deathsByKill": 2,
-      "teamKills": 0,
-      "deathsByTeamKill": 0
-    },
-    "81": {
-      "name": "Not Found",
-      "hash": "",
-      "kills": 0,
-      "deathsByKill": 1,
-      "teamKills": 0,
-      "deathsByTeamKill": 0
-    },
-    "84": {
-      "name": "Sarena",
-      "hash": "82f1d6311fcce730f6d77f1665f80be0",
-      "kills": 5,
-      "deathsByKill": 1,
-      "teamKills": 0,
-      "deathsByTeamKill": 0
-    }
-  },
-  "weapons": {
-    "0": "All",
-    "4": "Rocket Launcher",
-    "5": "Pulse Gun",
-    "10": "Enforcer",
-    "13": "Minigun"
-  },
+    },...rest of players
+  ],
   "killsMatchUp": {
-    "27": {
-      "84": 1
+    "GigaChad": {
+      "z": 12,
+      "Ut4_Pro": 9,
+      "cartman": 14,
+      "~*Nc*~Jun10r-M1n7h-": 4,
+      "UTA&f.Ulv": 2
     },
-    "84": {
-      "27": 2,
-      "40": 2,
-      "81": 1
-    }
+    "z": {
+      "subz\`": 8,
+      "GigaChad": 17,
+      "SMK": 20,
+      "[-CC-].1mperium": 4,
+      "magik\`": 10
+    }...rest of kills match up
   },
   "kills": [
-    [19.5, 84, 10, 27, 10],
-    [25.6455, 84, 5, 81, 4],
-    [27.5273, 84, 5, 40, 13],
-    [30.6818, 84, 13, 40, 10],
-    [31.7091, 27, 10, 84, 13],
-    [37.4273, 84, 13, 27, 13]
+    {
+      "timestamp": 6.22,
+      "killer": "GigaChad",
+      "victim": "z",
+      "kWeapon": "Sniper Rifle",
+      "vWeapon": "Sniper Rifle"
+    },
+    {
+      "timestamp": 20.22,
+      "killer": "z",
+      "victim": "subz\`",
+      "kWeapon": "Shock Rifle",
+      "vWeapon": "Shock Rifle"
+    },...rest of kills data
   ],
-  "teamKills": []
+  "teamKills": [
+    {
+      "timestamp": 46.22,
+      "killer": "Player1",
+      "victim": "Player2",
+      "kWeapon": "Sniper Rifle",
+      "vWeapon": "Goldfish"
+    },
 }`;
 
 const playersFullData = `

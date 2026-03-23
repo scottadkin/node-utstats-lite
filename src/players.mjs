@@ -1307,7 +1307,11 @@ export async function getMostActivePlayers(limit){
 
 }
 
-
+/**
+ * 
+ * @param {array<Integer>} playerIds 
+ * @returns {Promise<Object>} keys are playerIds, if player is missing create not found data
+ */
 export async function getNamesAndHashesById(playerIds){
 
     if(playerIds.length === 0) return {};
@@ -1328,7 +1332,7 @@ export async function getNamesAndHashesById(playerIds){
 
         if(index !== -1) missing.splice(index, 1);
 
-        data[id] = {name, hash}
+        data[id] = {id, name, hash}
    
     }
 
@@ -1336,7 +1340,7 @@ export async function getNamesAndHashesById(playerIds){
 
         const id = missing[i];
 
-        data[id] = {"name": "Not Found", "hash": ""}
+        data[id] = {"id": -1, "name": "Not Found", "hash": ""}
         
     }
 
