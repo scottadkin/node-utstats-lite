@@ -887,6 +887,8 @@ function createTeamTotalsMatchCTFJSON(players, teamCapIds){
 
     const teams = {};
 
+    const ignore = ["totalPlayers", "capIds", "assistIds"];
+
     for(let i = 0; i < players.length; i++){
 
         const p = players[i];
@@ -903,6 +905,7 @@ function createTeamTotalsMatchCTFJSON(players, teamCapIds){
             delete teams[teamName].id;
             delete teams[teamName].country;
             delete teams[teamName].team;
+            delete teams[teamName].assistIds;
             continue;
         }
 
@@ -912,7 +915,7 @@ function createTeamTotalsMatchCTFJSON(players, teamCapIds){
 
         for(const key of Object.keys(team)){
 
-            if(key === "totalPlayers" || key === "capIds") continue;
+            if(ignore.indexOf(key) !== -1) continue;
 
             if(key === "returnTypes"){
 
@@ -974,6 +977,28 @@ async function getCapAssistPlayers(matchId){
 
 /**
  * 
+ * @param {Array<Object>} carryTimes 
+ * @param {*} ignorePlayer player to ignore from list normally the player that capped the flag
+ * @returns 
+ */
+function getAssistPlayersFromCarryTimes(carryTimes, ignorePlayer){
+
+    const assists = new Set();
+
+    for(let i = 0; i < carryTimes.length; i++){
+
+        if(carryTimes[i].player_id === ignorePlayer) continue;
+
+        assists.add(carryTimes[i].player_id);
+    }
+
+    return [...assists];
+}
+
+
+
+/**
+ * 
  * @param {number} id 
  * @param {object} players id: name 
  * @returns 
@@ -1003,12 +1028,10 @@ async function getMatchCTFCapsJSON(id, players){
         const r = result[i];
 
         if(playerCapIds[r.cap_player] === undefined){
-            playerCapIds[r.cap_player] = new Set();
+            playerCapIds[r.cap_player] = [];
         }
 
-        
-        
-        playerCapIds[r.cap_player].add(r.id);
+        playerCapIds[r.cap_player].push(r.id);
 
         r.coverPlayers = [];
 
@@ -1034,20 +1057,31 @@ async function getMatchCTFCapsJSON(id, players){
         const capTeamName = getTeamName(r.capping_team).toLowerCase();
         r.capping_team = capTeamName;
         teamCapIds[capTeamName].push(r.id);
+
+        r.assistsBy = [];
+
+        if(r.unique_carriers > 1){
+
+            const assists = getAssistPlayersFromCarryTimes(carryTimes[r.id], r.cap_player_id);  
+
+            playerAssistIds[r.id] = assists;
+
+            r.assistsBy = assists.map((pId) =>{
+                return players[pId] ?? "Not Found";
+            });
+        }
+
         toJSONAPIKeyNames(r);
 
         for(let x = 0; x < r.carryInfo.length; x++){
 
             r.carryInfo[x].name = players[r.carryInfo[x].player_id] ?? "Not Found";
             delete r.carryInfo[x].player_id;
-            toJSONAPIKeyNames(r.carryInfo[x]);
-            
-            
-        }
-        
+            toJSONAPIKeyNames(r.carryInfo[x]);   
+        }    
     }
-  
-    return {"caps": result, playerCapIds, teamCapIds};
+
+    return {"caps": result, playerCapIds, teamCapIds, playerAssistIds};
 }
 
 
@@ -1095,6 +1129,7 @@ export async function getMatchCTFJSON(id){
 
         const r = result[i];
         r.capIds = [];
+        r.assistIds = [];
 
         if(players[r.player_id] === undefined){
             players[r.player_id] = r.name;
@@ -1107,7 +1142,7 @@ export async function getMatchCTFJSON(id){
 
     }
 
-    const {caps, playerCapIds, teamCapIds} = await getMatchCTFCapsJSON(id, players);
+    const {caps, playerCapIds, teamCapIds, playerAssistIds} = await getMatchCTFCapsJSON(id, players);
 
     const teams = createTeamTotalsMatchCTFJSON(result, teamCapIds);
 
@@ -1120,6 +1155,18 @@ export async function getMatchCTFJSON(id){
             if(r.id == playerId){
                 r.capIds = [...capIds];
                 break;
+            }
+        }
+    }
+
+    for(const [capId, assistPlayers] of Object.entries(playerAssistIds)){
+
+        for(let i = 0; i < result.length; i++){
+
+            const r = result[i];
+            
+            if(assistPlayers.indexOf(r.id) !== -1){
+                r.assistIds.push(parseInt(capId));
             }
         }
     }
