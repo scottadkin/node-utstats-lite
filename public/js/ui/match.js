@@ -2592,26 +2592,87 @@ class MatchKillsGraph{
     }
 }
 
-function matchAPILink(title, url, content, exampleUrl){
+
+
+function matchJSONCopyToClipboard(url, copyElems){
+
+    const cssClass = "json-api-link-clipboard";
+
+    let bLoadingData = false;
+    let data = null;
+
+    const elem = UIDiv(cssClass);
+    elem.append("Copy To Clipboard");
+
+    function resetAll(){
+
+        for(let i = 0; i < copyElems.length; i++){
+            copyElems[i].className = "json-api-link-clipboard";
+            copyElems[i].innerHTML = "Copy To Clipboard";
+            
+        }
+    }
+    
+    elem.addEventListener("click", async () =>{
+
+        try{
+
+            if(bLoadingData){
+                console.log(`already loading data`);
+                return;
+            }
+
+            resetAll();
+
+
+            //dont want to fetch every time we click
+            if(data !== null){
+                elem.className = `${cssClass} team-green`;
+                elem.innerHTML = "Copied";
+                return;
+            }
+
+            
+
+            bLoadingData = true;
+
+            elem.className = `${cssClass} team-yellow`;
+            elem.innerHTML = `Fetching Data`;
+
+
+            const req = await fetch(url);
+            const res = await req.json();
+
+            data = JSON.stringify(res);
+            await navigator.clipboard.writeText(data);
+
+            elem.className = `${cssClass} team-green`;
+            elem.innerHTML = "Copied";
+
+        }catch(err){
+
+            elem.className = `${cssClass} team-red`;
+            elem.innerHTML = "Failed To Copy Data";
+            console.trace(err);
+        }finally{
+            bLoadingData = false;
+        }
+    });
+
+    return elem;
+}
+
+function matchAPILink(title, url, content, copyElem){
 
     const elem = UIDiv("json-api-link");
 
     const titleLink = UIA(title, url, "_blank");
     titleLink.className = "json-api-link-title";
 
-    //const titleElem = UIDiv("json-api-link-title");
-    //titleElem.append(title);
-
-
-
     const contentWrapper = UIDiv("json-api-link-content");
     contentWrapper.append(...content);
-
-    const example = UIA(`View Example`, exampleUrl, "_blank");
-
-    example.className = "json-api-link-example";
-
-    elem.append(titleLink, contentWrapper, example);
+    
+    elem.append(titleLink, contentWrapper, copyElem);
     return elem;
 }
 
@@ -2626,8 +2687,31 @@ class MatchJSONApiInfo{
         UIHeader(this.parent, "Match JSON API Links");
         this.parent.append(this.wrapper);
 
+        this.lastCopiedDataURL = null;
+
+        this.copyElems = [];
 
         this.render();
+    }
+
+    createElem(urlBase, displayUrlBase, command, title, info){
+
+        const url = `${urlBase}${command}?id=${this.matchHash}`
+        const displayUrl = `${displayUrlBase}${command}?id=${this.matchHash}`
+        info.push(UIBr());
+        info.push(UIA(displayUrl, url, "_blank"));
+
+        const copyElem = matchJSONCopyToClipboard(url, this.copyElems);
+
+        const elem = matchAPILink(
+            title, 
+            url,
+            info,
+            copyElem,
+        );
+        
+        this.wrapper.append(elem);
+        this.copyElems.push(copyElem);
     }
 
     render(){
@@ -2635,122 +2719,93 @@ class MatchJSONApiInfo{
         const urlBase = `/api/json/match/`;
         const displayBase = `${window.location.host}${urlBase}`;
 
-        this.wrapper.append(
-            matchAPILink(
-                "Basic Match Info",
-                `${urlBase}basic/?id=${this.matchHash}`,
-                [ 
-                    `Fetch basic data such as server, gametype, map names, playtime, total players, total teams, match date, hash, and match result.`,
-                    UIBr(),
-                    UIA(`${displayBase}basic/?id=${this.matchHash}`, `${urlBase}basic/?id=${this.matchHash}`, "_blank")
-                ],
-                `/jsonexamples/?mode=match#basic`
-            )
+    
+        this.createElem(
+            urlBase,
+            displayBase,
+            "basic",
+            "Basic Match Info",    
+            [ 
+                `Fetch basic data such as server, gametype, map names, playtime, total players, total teams, match date, hash, and match result.`,
+            ]
         );
 
-        this.wrapper.append(
-            matchAPILink(
-                "Detailed Match Info", 
-                `${urlBase}detailed/?id=${this.matchHash}`,
-                
-                [ 
-                    `Same as Basic Match Info, but includes more info such as mutators, 
-                    gamespeed, real gamespeed, bTournamentMode, bHardcore, time limit, target score, 
-                    match start, and match end timestamps. `,
-                    UIBr(),
-                    UIA(`${displayBase}detailed/?id=${this.matchHash}`, `${urlBase}detailed/?id=${this.matchHash}`, "_blank")
-                ],
-                `/jsonexamples/?mode=match#detailed`
-            )
+        this.createElem(
+            urlBase,
+            displayBase,
+            "detailed",
+            "Detailed Match Info",    
+            [ 
+               `Same as Basic Match Info, but includes more info such as mutators, 
+                gamespeed, real gamespeed, bTournamentMode, bHardcore, time limit, target score, 
+                match start, and match end timestamps. `
+            ]
         );
 
-        this.wrapper.append(
-            matchAPILink(
-                "CTF Comp/Ladder", 
-                `${urlBase}ctf-ladder/?id=${this.matchHash}`,
-                
-                [ 
-                    `Basic Match info and player data that can be used for write ups.`,
-                    UIBr(),
-                    UIA(`${displayBase}ctf-ladder/?id=${this.matchHash}`, `${urlBase}ctf-ladder/?id=${this.matchHash}`, "_blank")
-                ],
-                `/jsonexamples/?mode=match#ctf`
-            )
+        this.createElem(
+            urlBase,
+            displayBase,
+            "ctf-ladder",
+            "CTF Comp/Ladder",
+            [ 
+                `Basic Match info and player data that can be used for write ups.`,
+            ]
+            
         );
 
-        this.wrapper.append(
-            matchAPILink(
-                "CTF Data", 
-                `${urlBase}ctf/?id=${this.matchHash}`,
-                
-                [ 
-                    `Returns flag captures, team ctf totals and player ctf totals.`,
-                    UIBr(),
-                    UIA(`${displayBase}ctf/?id=${this.matchHash}`, `${urlBase}ctf/?id=${this.matchHash}`, "_blank")
-                ],
-                `/jsonexamples/?mode=match#ctf`
-            )
+        this.createElem(
+            urlBase,
+            displayBase,
+            "ctf",
+            "CTF Data",
+            [ 
+                `Returns flag captures, team ctf totals and player ctf totals.`,
+            ]
+            
+        );
+        
+        this.createElem(
+            urlBase,
+            displayBase,
+            "players-basic",
+            "Players Basic",
+            [
+                `Returns player list with name, country, permaHash, score, frags, kills, and match result.`
+            ]
         );
 
-
-        this.wrapper.append(
-            matchAPILink(
-                "Players Basic", 
-                `${urlBase}players-basic/?id=${this.matchHash}`,
-                
-                [ 
-                    `Returns player list with name, country, permaHash, score, frags, kills, and match result.`,
-                    UIBr(),
-                    UIA(`${displayBase}players-basic/?id=${this.matchHash}`, `${urlBase}players-basic/?id=${this.matchHash}`, "_blank")
-                ],
-                `/jsonexamples/?mode=match#players-basic`
-            )
+        this.createElem(
+            urlBase,
+            displayBase,
+            "players-full",
+            "Players Full",
+            [
+                `Returns player list with full stats for frags, special events, weapon stats, item stats, damage stats, and ctf/domination if applicable.`
+            ]
         );
 
-        this.wrapper.append(
-            matchAPILink(
-                "Players Full", 
-                `${urlBase}players-full/?id=${this.matchHash}`,
-                
-                [ 
-                    `Returns player list with full stats for frags, special events, weapon stats, item stats, damage stats, and ctf/domination if applicable.`,
-                    UIBr(),
-                    UIA(`${displayBase}players-full/?id=${this.matchHash}`, `${urlBase}players-full/?id=${this.matchHash}`, "_blank")
-                ],
-                `/jsonexamples/?mode=match#players-full`
-            )
+        this.createElem(
+            urlBase,
+            displayBase,
+            "kills-basic",
+            "Basic Kills",
+            [
+                `Returns player list with full stats for frags, special events, weapon stats, item stats, damage stats, and ctf/domination if applicable.`
+            ]
         );
 
-        this.wrapper.append(
-            matchAPILink(
-                "Basic Kills", 
-                `${urlBase}kills-basic/?id=${this.matchHash}`,
-                
-                [ 
-                    `Returns an array of every kill and team kill event, players also have totals for kills, teamKills, deathByKills, deathByTeamKills.`,
-                    UIBr(),
-                    UIA(`${displayBase}kills-basic/?id=${this.matchHash}`, `${urlBase}kills-basic/?id=${this.matchHash}`, "_blank")
-                ],
-                `/jsonexamples/?mode=match#kills-basic`
-            )
-        );
-
-        this.wrapper.append(
-            matchAPILink(
-                "Detailed Kills", 
-                `${urlBase}kills-detailed/?id=${this.matchHash}`,
-                
-                [ 
-                    `Returns an array of every kill and team kill event but includes the weapons the killer and victim had at the time.`,
-                    UIBr(), 
-                    `Returns a killsMatchUp object that list every killer -> victim stats.`,
-                    UIBr(), 
-                    `Players totals(same as kills-basic).`,
-                    UIBr(),
-                    UIA(`${displayBase}kills-detailed/?id=${this.matchHash}`, `${urlBase}kills-detailed/?id=${this.matchHash}`, "_blank")
-                ],
-                `/jsonexamples/?mode=match#kills-detailed`
-            )
+        this.createElem(
+            urlBase,
+            displayBase,
+            "kills-detailed",
+            "Detailed Kills",
+            [
+                `Returns an array of every kill and team kill event but includes the weapons the killer and victim had at the time.`,
+                UIBr(), 
+                `Returns a killsMatchUp object that list every killer -> victim stats.`,
+                UIBr(), 
+                `Players totals(same as kills-basic).`
+             ]
         );
     }
 }

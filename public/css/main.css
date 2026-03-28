@@ -1290,7 +1290,7 @@ code{
 	margin-left:auto;
 	margin-right:auto;
 	display:grid;
-	grid-template-columns: 20% auto 100px;
+	grid-template-columns: 20% auto 20%;
 	font-size:var(--font-size-6);
 	color:var(--font-color-1);
 	border:2px solid var(--border-color-5);
@@ -1323,12 +1323,18 @@ code{
 	padding:5px;
 }
 
-.json-api-link-example{
+.json-api-link-clipboard{
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	font-size:var(--font-size-small);	
+	transition: var(--transition-all);
+	user-select: none;
 }
 
+.json-api-link-clipboard:hover{
+	cursor: pointer;
+	color:yellow;
+}
 
