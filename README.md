@@ -55,6 +55,7 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 - Extract the contents of the archive into a folder.
 - Open a terminal in the folder you extracted to.
 - Run the command **npm install** to install all dependencies.
+- Rename **config.example.mjs** to **config.mjs** 
 - Open **config.mjs** and change the settings to connect to your mysql server.
 - If you are using an **ARM OS** you will have to follow this(https://github.com/Automattic/node-canvas?tab=readme-ov-file#compiling) additional step to get the canvas package to install otherwise you will get an error message
 - Run the command **node install.mjs** to create the database and other settings.
