@@ -1,6 +1,6 @@
 import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray } from "./database.mjs";
-import { getTeamName } from "./generic.mjs";
-import { getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
+import { getTeamName, toMatchResultString } from "./generic.mjs";
+import { getMatchBasicTeamGame, getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
 import Message from "./message.mjs";
 import { getPlayersById } from "./players.mjs";
@@ -1172,4 +1172,51 @@ export async function getMatchCTFJSON(id){
     }
 
     return {teams, caps, "players": result};
+}
+
+
+export async function getMatchLadderJSON(id){
+
+    const match = await getMatchBasicTeamGame(id);
+
+    if(match === null){
+        throw new Error("Match doesn't exist");
+    }
+
+    const mt = "nstats_match_ctf";
+    const pmt = "nstats_match_players";
+    const pt = "nstats_players";
+
+    const query = `SELECT 
+    ${mt}.player_id,
+    ${mt}.flag_taken,
+    ${mt}.flag_pickup,
+    ${mt}.flag_drop,
+    ${mt}.flag_assist,
+    ${mt}.flag_cover,
+    ${mt}.flag_seal,
+    ${mt}.flag_cap,
+    ${mt}.flag_kill,
+    ${mt}.flag_return,
+    ${pmt}.country,
+    ${pmt}.team,
+    ${pmt}.match_result,
+    ${pt}.name
+    FROM nstats_match_ctf
+    LEFT JOIN ${pmt} ON ${pmt}.player_id = ${mt}.player_id AND ${pmt}.match_id = ?
+    LEFT JOIN nstats_players ON nstats_players.id = ${mt}.player_id
+    WHERE ${mt}.match_id=? AND ${pmt}.bot=0 AND ${pmt}.spectator=0`;
+
+    const result = await simpleQuery(query, [id, id]);
+
+    const players = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        players.push(toJSONAPIKeyNames(result[i]));
+        result[i].team = getTeamName(result[i].team);
+        result[i].matchResult = toMatchResultString(result[i].matchResult);
+    }
+
+    return {...match, players};
 }

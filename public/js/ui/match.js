@@ -2666,6 +2666,20 @@ class MatchJSONApiInfo{
 
         this.wrapper.append(
             matchAPILink(
+                "CTF Comp/Ladder", 
+                `${urlBase}ctf-ladder/?id=${this.matchHash}`,
+                
+                [ 
+                    `Basic Match info and player data that can be used for write ups.`,
+                    UIBr(),
+                    UIA(`${displayBase}ctf-ladder/?id=${this.matchHash}`, `${urlBase}ctf-ladder/?id=${this.matchHash}`, "_blank")
+                ],
+                `/jsonexamples/?mode=match#ctf`
+            )
+        );
+
+        this.wrapper.append(
+            matchAPILink(
                 "CTF Data", 
                 `${urlBase}ctf/?id=${this.matchHash}`,
                 

@@ -506,6 +506,44 @@ export async function setMatchHash(id, hash){
     return await simpleQuery(query, [hash, id]);
 }
 
+
+/**
+ * 
+ * @param {*} id 
+ * @returns {Promise<Object>} id,hash,server,gametype,map names,date,playtime,total_teams
+ */
+export async function getMatchBasicTeamGame(id){
+
+    const query = `SELECT nstats_matches.id,
+    nstats_matches.hash,
+    nstats_matches.date,
+    nstats_matches.playtime,
+    nstats_matches.total_teams,
+    nstats_matches.team_0_score,
+    nstats_matches.team_1_score,
+    nstats_matches.team_2_score,
+    nstats_matches.team_3_score,
+    nstats_servers.name as serverName,
+    nstats_gametypes.name as gametypeName,
+    nstats_maps.name as mapName
+    FROM nstats_matches
+    LEFT JOIN nstats_servers ON nstats_servers.id = nstats_matches.server_id
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_matches.gametype_id
+    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_matches.map_id    
+    WHERE nstats_matches.id=?`;
+
+    const result = await simpleQuery(query, [id]);
+
+    if(result.length === 0) return null;
+
+    if(result[0].total_teams <= 2){
+        delete result[0].team_2_score;
+        delete result[0].team_3_score;
+    }
+
+    return toJSONAPIKeyNames(result[0]);
+}
+
 export async function getBasicMatchesInfo(matchIds){
 
     if(matchIds.length === 0) return {};

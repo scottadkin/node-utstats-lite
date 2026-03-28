@@ -70,6 +70,12 @@ export function toJSONAPIKeyNames(data, overrideDefaults){
         "blue_suicides": ["suicides", "blue"],
         "green_suicides": ["suicides", "green"],
         "yellow_suicides": ["suicides", "yellow"],
+        "match_result": "matchResult",
+        "team_0_score": "redTeamScore",
+        "team_1_score": "blueTeamScore",
+        "team_2_score": "greenTeamScore",
+        "team_3_score": "yellowTeamScore",
+        "total_teams": "totalTeams"
     };
 
     if(overrideDefaults !== undefined){

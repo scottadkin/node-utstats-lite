@@ -7,7 +7,7 @@ import {
 } from "../matches.mjs";
 import { bJSONApiEnabled } from "../json.mjs";
 
-import { getMatchCTFJSON } from "../ctf.mjs";
+import { getMatchCTFJSON, getMatchLadderJSON } from "../ctf.mjs";
 
 export default class ApiJSON{
 
@@ -53,6 +53,10 @@ export default class ApiJSON{
             
             return await getDetailedMatchJSON(id);
             
+        }else if(cat === "ctf-ladder"){
+            
+            return getMatchLadderJSON(id);
+
         }else if(cat === "ctf"){
 
             return await getMatchCTFJSON(id);
