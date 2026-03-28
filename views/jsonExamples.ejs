@@ -76,6 +76,51 @@ const matchDetailed = `{
 }`;
 
 
+const matchCTFLadderInfo = [
+  UIUnorderedList([
+    [
+      UIB("Main object: ", "blue-font"),
+      `Date, id, hash, server name, gametype name, map name, playtime, total teams, team scores, players.`
+    ], 
+    [
+      UIB("players array: ", "blue-font"),
+      `name, id, hash team, country, flagTaken, flagPickup,flagDrop,flagAssist,flagCover,flagSeal,flagCapture,flagKill,flagReturn,matchResult`
+    ], 
+  ]),
+];
+
+const matchCTFLadder = `{
+  "id": 258,
+  "hash": "d2e24f7eb910c2c6c6a8483a52a7d1a5",
+  "date": "2023-02-16T20:25:31.000Z",
+  "playtime": 1204.66,
+  "serverName": "UTCTF.pug Server #02 [DE] [469c] [RimuHosting]",
+  "gametypeName": "New Capture the Flag",
+  "mapName": "CTF-Archa-wip3",
+  "totalTeams": 2,
+  "redTeamScore": 4,
+  "blueTeamScore": 1,
+  "players": [
+    {
+      "country": "de",
+      "team": "Red",
+      "name": "SMK",
+      "id": 1,
+      "flagTaken": 1,
+      "flagPickup": 1,
+      "flagDrop": 2,
+      "flagAssist": 0,
+      "flagCover": 4,
+      "flagSeal": 4,
+      "flagCapture": 0,
+      "flagKill": 23,
+      "flagReturn": 16,
+      "matchResult": "Won"
+    },...
+  ]
+}`;
+
+
 const matchCTFInfo = [
   UIUnorderedList([
     [
@@ -743,6 +788,18 @@ class JSONExample{
               [
                 "match/detailed/?id=187", 
                 "match/detailed/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
+              ]
+            ),
+            new JSONExample(
+              this.parent, 
+              "match", 
+              "CTF Comp/Ladder", 
+              "ctf-comp-ladder", 
+              matchCTFLadderInfo,
+              matchCTFLadder, 
+              [
+                "match/ctf-ladder/?id=187", 
+                "match/ctf-ladder/?id=ca5eda2e6a2e49c3a4707aac1c7d19be"
               ]
             ),
             new JSONExample(

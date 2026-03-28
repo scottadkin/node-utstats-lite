@@ -1201,7 +1201,8 @@ export async function getMatchLadderJSON(id){
     ${pmt}.country,
     ${pmt}.team,
     ${pmt}.match_result,
-    ${pt}.name
+    ${pt}.name,
+    ${pt}.hash
     FROM nstats_match_ctf
     LEFT JOIN ${pmt} ON ${pmt}.player_id = ${mt}.player_id AND ${pmt}.match_id = ?
     LEFT JOIN nstats_players ON nstats_players.id = ${mt}.player_id
