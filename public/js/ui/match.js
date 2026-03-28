@@ -2807,6 +2807,11 @@ class MatchJSONApiInfo{
                 `Players totals(same as kills-basic).`
              ]
         );
+
+
+        const examples = UIDiv("info");
+        examples.append(UIA("JSON API Examples", `/jsonexamples/?mode=match`,"_blank"));
+        this.wrapper.append(examples);
     }
 }
 
