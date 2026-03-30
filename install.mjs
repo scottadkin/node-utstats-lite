@@ -944,6 +944,79 @@ async function updateMatchesTable(){
     await addColumn("nstats_matches", "gamespeed_real", "int DEFAULT 100 AFTER gamespeed");
 }
 
+
+async function removeStartOffset(matchId, start){
+
+    const queries = [
+        {"query": "UPDATE nstats_ctf_cap_kills SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+        {"query": "UPDATE nstats_ctf_cap_suicides SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+        {"query": "UPDATE nstats_ctf_cap_kills SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+        {"query": "UPDATE nstats_ctf_caps SET taken_timestamp=taken_timestamp-?,cap_timestamp=cap_timestamp-? WHERE match_id=?", "vars": [start, start, matchId]},
+        {"query": "UPDATE nstats_ctf_carry_times SET start_timestamp=start_timestamp-?,end_timestamp=end_timestamp-? WHERE match_id=?", "vars": [start, start, matchId]},
+        {"query": "UPDATE nstats_ctf_covers SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+        {"query": "UPDATE nstats_kills SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+    ];
+
+    for(let i = 0; i < queries.length; i++){
+
+        const q = queries[i];
+
+        await simpleQuery(q.query, q.vars);
+    }
+
+}
+
+async function removeStartOffsets(){
+
+    const query = `SELECT id,playtime,match_start FROM nstats_matches`;
+    const result = await simpleQuery(query);
+
+    const matchLengths = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        matchLengths[r.id] = {"playtime":r.playtime, "start": r.match_start};
+
+    }
+
+
+    const maxQuery = `SELECT match_id,MAX(timestamp) as timestamp FROM nstats_kills GROUP BY match_id`
+
+    const max = await simpleQuery(maxQuery);
+
+    const matchesToFix = [];
+
+    for(let i = 0; i < max.length; i++){
+
+        const {"match_id": matchId, timestamp} = max[i];
+
+        if(matchLengths[matchId] === undefined) continue;
+
+        const startTime = matchLengths[matchId].start;
+        const playtime = matchLengths[matchId].playtime;
+
+        if(timestamp > playtime ){
+            matchesToFix.push({"id": matchId, "start": startTime});
+        }
+    }
+
+    if(matchesToFix.length === 0){
+        new Message(`No match events need timestamps adjusted`, "note");
+        return;
+    }
+
+    
+ 
+    for(let i = 0; i < matchesToFix.length; i++){
+
+        new Message(`Fixing match event timestamps for matchId ${matchesToFix[i].id}. (${i+1}/${matchesToFix.length})`, "note");
+        await removeStartOffset(matchesToFix[i].id, matchesToFix[i].start);
+    }
+
+
+}
+
 (async () =>{
  
     try{
@@ -1020,6 +1093,8 @@ async function updateMatchesTable(){
 
 
         await updateJSONApiSettings();
+
+        await removeStartOffsets();
 
         new Message(`Refreshing player ctf league Map tables.`,"note");
         await refreshAllTables(true, "maps");
