@@ -950,7 +950,6 @@ async function removeStartOffset(matchId, start){
     const queries = [
         {"query": "UPDATE nstats_ctf_cap_kills SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
         {"query": "UPDATE nstats_ctf_cap_suicides SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
-        {"query": "UPDATE nstats_ctf_cap_kills SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
         {"query": "UPDATE nstats_ctf_caps SET taken_timestamp=taken_timestamp-?,cap_timestamp=cap_timestamp-? WHERE match_id=?", "vars": [start, start, matchId]},
         {"query": "UPDATE nstats_ctf_carry_times SET start_timestamp=start_timestamp-?,end_timestamp=end_timestamp-? WHERE match_id=?", "vars": [start, start, matchId]},
         {"query": "UPDATE nstats_ctf_covers SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},

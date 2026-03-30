@@ -1,6 +1,6 @@
 {
   "name": "node-ustats-lite",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "UTStats built using node.js",
   "repository": {
     "type": "git",
@@ -21,19 +21,19 @@
   "dependencies": {
     "basic-ftp": "^5.2.0",
     "body-parser": "^2.2.2",
-    "canvas": "^3.2.1",
+    "canvas": "^3.2.2",
     "cookie-parser": "^1.4.7",
-    "ejs": "^4.0.1",
+    "ejs": "^5.0.1",
     "encoding-japanese": "^2.2.0",
     "express": "^5.2.1",
     "express-mysql-session": "^3.0.3",
     "express-session": "^1.19.0",
-    "geoip-lite": "^2.0.0",
+    "geoip-lite": "^2.0.1",
     "jimp": "^1.6.0",
     "js-sha256": "^0.11.1",
     "md5": "^2.3.0",
-    "multer": "^2.0.2",
-    "mysql2": "^3.18.0",
-    "ssh2-sftp-client": "^12.0.1"
+    "multer": "^2.1.1",
+    "mysql2": "^3.20.0",
+    "ssh2-sftp-client": "^12.1.1"
   }
 }
