@@ -956,12 +956,16 @@ async function removeStartOffset(matchId, start){
         {"query": "UPDATE nstats_kills SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
     ];
 
+    const promises = [];
+
     for(let i = 0; i < queries.length; i++){
 
         const q = queries[i];
-
-        await simpleQuery(q.query, q.vars);
+        promises.push(simpleQuery(q.query, q.vars));
     }
+
+
+    return Promise.all(promises);
 
 }
 
@@ -979,7 +983,6 @@ async function removeStartOffsets(){
 
     }
 
-
     const maxQuery = `SELECT match_id,MAX(timestamp) as timestamp FROM nstats_kills GROUP BY match_id`
 
     const max = await simpleQuery(maxQuery);
@@ -995,7 +998,7 @@ async function removeStartOffsets(){
         const startTime = matchLengths[matchId].start;
         const playtime = matchLengths[matchId].playtime;
 
-        if(timestamp > playtime ){
+        if(timestamp > playtime){
             matchesToFix.push({"id": matchId, "start": startTime});
         }
     }
@@ -1010,10 +1013,13 @@ async function removeStartOffsets(){
     for(let i = 0; i < matchesToFix.length; i++){
 
         new Message(`Fixing match event timestamps for matchId ${matchesToFix[i].id}. (${i+1}/${matchesToFix.length})`, "note");
-        await removeStartOffset(matchesToFix[i].id, matchesToFix[i].start);
+
+        await removeStartOffset(matchesToFix[i].id, matchesToFix[i].start).then(() =>{
+            new Message(`Fixed match event id = ${matchesToFix[i].id}. (${i+1}/${matchesToFix.length})`, "pass");
+        }).catch((err) =>{
+            new Message(`Failed to update match event timestamps id =${matchesToFix[i].id}, ${err.toString()}`,"error");
+        });
     }
-
-
 }
 
 (async () =>{
