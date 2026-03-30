@@ -2603,19 +2603,31 @@ function matchJSONCopyToClipboard(url, copyElems){
 
     const elem = UIDiv(cssClass);
     elem.append("Copy To Clipboard");
+    let abortController = new AbortController();
 
     function resetAll(){
 
         for(let i = 0; i < copyElems.length; i++){
-            copyElems[i].className = "json-api-link-clipboard";
-            copyElems[i].innerHTML = "Copy To Clipboard";
+
+            const e = copyElems[i];
+                e.elem.className = "json-api-link-clipboard";
+                e.elem.innerHTML = "Copy To Clipboard";
+                e.abortDownload();
+           
             
         }
     }
     
     elem.addEventListener("click", async () =>{
+        
 
         try{
+
+            if(!abortController){
+                abortController = new AbortController();
+            }else{
+                abortController.abort("Cancelled");
+            }
 
             if(bLoadingData){
                 console.log(`already loading data`);
@@ -2632,15 +2644,13 @@ function matchJSONCopyToClipboard(url, copyElems){
                 return;
             }
 
-            
 
             bLoadingData = true;
 
             elem.className = `${cssClass} team-yellow`;
             elem.innerHTML = `Fetching Data`;
 
-
-            const req = await fetch(url);
+            const req = await fetch(url, {"signal": abortController.signal});
             const res = await req.json();
 
             data = JSON.stringify(res);
@@ -2651,15 +2661,26 @@ function matchJSONCopyToClipboard(url, copyElems){
 
         }catch(err){
 
-            elem.className = `${cssClass} team-red`;
-            elem.innerHTML = "Failed To Copy Data";
-            console.trace(err);
+            if(err.name !== "AbortError"){
+                elem.className = `${cssClass} team-red`;
+                elem.innerHTML = "Failed To Copy Data";
+                console.trace(err);
+            }
+
+            abortController = new AbortController();
         }finally{
             bLoadingData = false;
         }
     });
 
-    return elem;
+    return {
+        elem,
+        bLoadingData,
+        "abortDownload": () =>{
+            abortController.abort();
+            abortController = new AbortController();
+        }
+    };
 }
 
 function matchAPILink(title, url, content, copyElem){
@@ -2707,7 +2728,7 @@ class MatchJSONApiInfo{
             title, 
             url,
             info,
-            copyElem,
+            copyElem.elem,
         );
         
         this.wrapper.append(elem);
