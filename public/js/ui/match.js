@@ -2699,10 +2699,11 @@ function matchAPILink(title, url, content, copyElem){
 
 class MatchJSONApiInfo{
 
-    constructor(parent, matchHash){
+    constructor(parent, matchHash, bCTF){
 
         this.parent = document.querySelector(parent);
         this.matchHash = matchHash;
+        this.bCTF = bCTF;
 
         this.wrapper = UIDiv("json-api-links-wrapper");
         UIHeader(this.parent, "Match JSON API Links");
@@ -2763,27 +2764,29 @@ class MatchJSONApiInfo{
             ]
         );
 
-        this.createElem(
-            urlBase,
-            displayBase,
-            "ctf-ladder",
-            "CTF Comp/Ladder",
-            [ 
-                `Basic Match info and player data that can be used for write ups.`,
-            ]
-            
-        );
+        if(this.bCTF){
+            this.createElem(
+                urlBase,
+                displayBase,
+                "ctf-ladder",
+                "CTF Comp/Ladder",
+                [ 
+                    `Basic Match info and player data that can be used for write ups.`,
+                ]
+                
+            );
 
-        this.createElem(
-            urlBase,
-            displayBase,
-            "ctf",
-            "CTF Data",
-            [ 
-                `Returns flag captures, team ctf totals and player ctf totals.`,
-            ]
-            
-        );
+            this.createElem(
+                urlBase,
+                displayBase,
+                "ctf",
+                "CTF Data",
+                [ 
+                    `Returns flag captures, team ctf totals and player ctf totals.`,
+                ]
+                
+            );
+        }
         
         this.createElem(
             urlBase,

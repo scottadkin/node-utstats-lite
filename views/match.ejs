@@ -16,6 +16,8 @@
     const basicPlayers = parsedData.basicPlayers;
     const classicWeaponData = <%- JSON.stringify(classicWeaponStats) -%>;
     <%
+
+    
     for(let i = 0; i < pageLayout.length; i++){
 
         const pageKey = pageLayout[i];
@@ -107,7 +109,7 @@
             } break;
 
             case "Display JSON Links": {
-                %>new MatchJSONApiInfo("#root", basic.hash);<%
+                %>new MatchJSONApiInfo("#root", basic.hash,  <%- data.ctf.playerData.length > 0 %>);<%
             }
         }
     }
