@@ -1234,12 +1234,13 @@ class CTFCaps{
         return wrapper;
     }
 
-    renderCovers(end, covers, carryPlayer){
+    renderCovers(start, end, covers, carryPlayer){
 
         const elems = [];
 
         for(let x = 0; x < covers.length; x++){
 
+            if(covers[x].timestamp < start) continue;
             if(covers[x].timestamp > end) continue;
 
             const coverPlayer = getPlayer(this.players, covers[x].id);
@@ -1255,7 +1256,7 @@ class CTFCaps{
                     "name": UISpan(carryPlayer.name, getTeamFont(carryPlayer.team)), 
                     "playerId": carryPlayer.id, 
                     "country": carryPlayer.country
-                }), 
+                })
             ]));
         }
 
@@ -1268,6 +1269,7 @@ class CTFCaps{
         const elems = [];
 
         const covers = this.toSortedCovers(capInfo);
+        
         const flagTeam = getTeamName(capInfo.flag_team);
 
         let lastDropTime = 0;
@@ -1294,7 +1296,6 @@ class CTFCaps{
 
             if(i > 0){
 
-     
                 elems.push(this.addEventElem(lastDropTime, [
                     UIPlayerLink({
                         "playerId": lastPlayer.id, 
@@ -1326,7 +1327,7 @@ class CTFCaps{
             const end = c.end_timestamp;
 
             if(covers.length > 0){
-                elems.push(...this.renderCovers(end, covers, p));
+                elems.push(...this.renderCovers(start, end, covers, p));
             }
 
             lastPlayer = p;
