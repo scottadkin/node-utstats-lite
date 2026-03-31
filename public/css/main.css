@@ -1285,12 +1285,12 @@ code{
 
 .json-api-link{
 	background-color: var(--bg-color-2);
-	max-width:var(--max-table-width-2);
 	width:var(--max-width-1);
+	max-width: var(--max-table-width-2);
 	margin-left:auto;
 	margin-right:auto;
 	display:grid;
-	grid-template-columns: 20% auto 20%;
+	grid-template-columns: 150px auto 150px 150px;
 	font-size:var(--font-size-6);
 	color:var(--font-color-1);
 	border:2px solid var(--border-color-5);
@@ -1325,11 +1325,11 @@ code{
 
 .json-api-link-clipboard{
 	display: flex;
-	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	font-size:var(--font-size-small);	
 	transition: var(--transition-all);
+	text-align: center;
 	user-select: none;
 }
 

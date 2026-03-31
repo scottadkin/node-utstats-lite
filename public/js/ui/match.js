@@ -2603,7 +2603,7 @@ function matchJSONCopyToClipboard(url, copyElems){
     let data = null;
 
     const elem = UIDiv(cssClass);
-    elem.append("Copy To Clipboard");
+    elem.append("Copy JSON To Clipboard");
     let abortController = new AbortController();
 
     function resetAll(){
@@ -2612,7 +2612,7 @@ function matchJSONCopyToClipboard(url, copyElems){
 
             const e = copyElems[i];
                 e.elem.className = "json-api-link-clipboard";
-                e.elem.innerHTML = "Copy To Clipboard";
+                e.elem.innerHTML = "Copy JSON to Clipboard";
                 e.abortDownload();
            
             
@@ -2664,7 +2664,7 @@ function matchJSONCopyToClipboard(url, copyElems){
 
             if(err.name !== "AbortError"){
                 elem.className = `${cssClass} team-red`;
-                elem.innerHTML = "Failed To Copy Data";
+                elem.innerHTML = "Failed to Copy Data";
                 console.trace(err);
             }
 
@@ -2684,7 +2684,7 @@ function matchJSONCopyToClipboard(url, copyElems){
     };
 }
 
-function matchAPILink(title, url, content, copyElem){
+function matchAPILink(title, url, content, copyElem, displayUrl){
 
     const elem = UIDiv("json-api-link");
 
@@ -2693,8 +2693,20 @@ function matchAPILink(title, url, content, copyElem){
 
     const contentWrapper = UIDiv("json-api-link-content");
     contentWrapper.append(...content);
+
+    const linkElem = UIDiv();
+    linkElem.className = "json-api-link-clipboard";
+    linkElem.addEventListener("click", async () =>{
+
+        try{
+            await navigator.clipboard.writeText(displayUrl);
+        }catch(err){
+            console.trace(err);
+        }
+    });
+    linkElem.append("Copy URL to Clipboard");
     
-    elem.append(titleLink, contentWrapper, copyElem);
+    elem.append(titleLink, contentWrapper, linkElem, copyElem);
     return elem;
 }
 
@@ -2731,10 +2743,13 @@ class MatchJSONApiInfo{
             url,
             info,
             copyElem.elem,
+            displayUrl
         );
         
         this.wrapper.append(elem);
+
         this.copyElems.push(copyElem);
+        
     }
 
     render(){
