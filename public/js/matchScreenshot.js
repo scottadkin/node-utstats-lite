@@ -1143,6 +1143,8 @@ class MatchScreenshot{
 
     bDom(){
 
+        if(this.data.dom === null) return false;
+        
         return this.data.dom.data.length > 0;
     }
 

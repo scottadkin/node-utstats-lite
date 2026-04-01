@@ -338,16 +338,9 @@ export async function bMatchExists(id){
     return false;
 }
 
-export async function getMatchData(id, bIgnoreKills, bIgnoreWeaponStats, bIgnorePlayers, bIgnoreBasic){
+export async function getMatchData(id){
 
     try{
-
-        if(bIgnoreKills === undefined) bIgnoreKills = false;
-        if(bIgnoreWeaponStats === undefined) bIgnoreWeaponStats = false;
-        if(bIgnorePlayers === undefined) bIgnorePlayers = false;
-        if(bIgnoreBasic === undefined) bIgnoreBasic = false;
-
-        if(bIgnoreBasic && bIgnoreKills && bIgnorePlayers && bIgnoreWeaponStats) return {"error": "Everything is set to ignore"};
 
         if(id.length !== 32){
 
@@ -368,44 +361,45 @@ export async function getMatchData(id, bIgnoreKills, bIgnoreWeaponStats, bIgnore
         let playerNames = {};
         let basicPlayers = {};
 
-        if(!bIgnorePlayers){
 
-            playerData = await getPlayerMatchData(id);
+        playerData = await getPlayerMatchData(id);
 
-            const uniquePlayers = [...new Set(playerData.map((p) =>{
-                return p.player_id;
-            }))]
+        const uniquePlayers = [...new Set(playerData.map((p) =>{
+            return p.player_id;
+        }))]
 
-            playerNames = await getPlayersById(uniquePlayers);
+        playerNames = await getPlayersById(uniquePlayers);
 
-            for(let i = 0; i < playerData.length; i++){
+        for(let i = 0; i < playerData.length; i++){
 
-                const p = playerData[i];
+            const p = playerData[i];
 
-                p.name = playerNames[p.player_id] ?? "Not Found";
-            }
-
-
-            for(let i = 0; i < playerData.length; i++){
-
-                const p = playerData[i];
-
-                basicPlayers[p.player_id] = {
-                    "name": p.name,
-                    "country": p.country,
-                    "team": p.team,
-                    "bSpectator": p.spectator
-                };
-            }
-
+            p.name = playerNames[p.player_id] ?? "Not Found";
         }
 
-        const weaponStats = (bIgnoreWeaponStats) ? null : await getMatchWeaponStats(id);
+
+        for(let i = 0; i < playerData.length; i++){
+
+            const p = playerData[i];
+
+            basicPlayers[p.player_id] = {
+                "name": p.name,
+                "country": p.country,
+                "team": p.team,
+                "bSpectator": p.spectator
+            };
+        }
+
+        
+
+        const weaponStats = await getMatchWeaponStats(id);
    
-        const kills = (bIgnoreKills) ? [] : await getMatchKills(id);
+        const kills = await getMatchKills(id);
 
         const ctf = await ctfGetMatchData(id);
+        
         const dom = await domGetMatchData(id);
+        
 
         return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom};
         

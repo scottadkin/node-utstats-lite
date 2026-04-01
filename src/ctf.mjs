@@ -50,6 +50,7 @@ function setAverageCarryTime(playerStats){
 }
 
 export async function getMatchData(matchId, bReturnJSON){
+    
 
     const query = `SELECT player_id,flag_taken,flag_pickup,flag_drop,flag_assist,flag_cover,
     flag_seal,flag_cap,flag_kill,flag_return,flag_return_base,flag_return_mid,flag_return_enemy_base,
@@ -58,12 +59,16 @@ export async function getMatchData(matchId, bReturnJSON){
 
     const result = await simpleQuery(query, [matchId]);
 
+    if(result.length === 0){
+
+        return (bReturnJSON) ? {} : [];
+    }
+
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
         setAverageCarryTime(r);
     }
-
 
     const caps = await getMatchCaps(matchId);
 
@@ -639,10 +644,17 @@ export async function getMatchCaps(matchId){
 
     const result = await simpleQuery(query, [matchId]);
 
-    const covers = await getMatchCovers(matchId);
-    const carryTimes = await getMatchCarryTimes(matchId);
-    const kills = await getMatchCapKills(matchId);
-    const suicides = await getMatchCapSuicides(matchId);
+    if(result.length === 0) return [];
+
+    const promises = [
+        getMatchCovers(matchId),
+        getMatchCarryTimes(matchId),
+        getMatchCapKills(matchId),
+        getMatchCapSuicides(matchId)
+    ];
+
+    const [covers, carryTimes, kills, suicides] = await Promise.all(promises);
+
 
     for(let i = 0; i < result.length; i++){
 

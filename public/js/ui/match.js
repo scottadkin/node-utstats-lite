@@ -415,7 +415,7 @@ class MatchDominationSummary{
 
     constructor(parent, totalTeams, data){
 
-        if(data.dom.data.length === 0) return;
+        if(data.dom === null || data.dom.data.length === 0) return;
 
         if(totalTeams < 2) return;
 

@@ -14,7 +14,10 @@ export async function renderMatchPage(req, res, userSession){
 
         let desc = `Match Doesn't Exist - Node UTStats Lite`;
 
-        const data = await getMatchData(matchId, false, false, false, false);
+        const start = performance.now();
+        const data = await getMatchData(matchId);
+        const end = performance.now();
+        console.log((end - start) * 0.001);
 
         if(data.error !== undefined) throw new Error(data.error);
 

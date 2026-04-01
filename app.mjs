@@ -38,7 +38,6 @@ import multer from 'multer';
 const upload = multer({ dest: 'uploads/' })
 
 //import MySQLStore from 'express-mysql-session'
-import { mysqlSettings } from './config.mjs';
 import ApiJSON from './src/json/apiJSON.mjs';
 import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
 

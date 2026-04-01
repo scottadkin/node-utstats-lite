@@ -4,6 +4,9 @@ export const mysqlSettings = {
     "user": "root",
     "password": "",
     "database": "node_utstats_lite",
+
+    //note: The importer will also have the same limit,
+    //if both are running that's double this value
     "connectionLimit": 10
 };
 

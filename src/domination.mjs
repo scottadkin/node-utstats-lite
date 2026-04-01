@@ -167,6 +167,8 @@ export async function getMatchData(matchId){
 
     const result = await simpleQuery(query, [matchId]);
 
+    if(result.length === 0) return null;
+
     const pointIds = [...new Set(result.map((r) =>{
         return r.point_id;
     }))];
