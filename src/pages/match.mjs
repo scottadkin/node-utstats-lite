@@ -27,11 +27,18 @@ export async function renderMatchPage(req, res, userSession){
         
         desc = `Match report for ${b.map_name} (${b.gametype_name}), ${dateString}, ${b.players} ${plural(b.players, "player")}, match length ${toPlaytime(b.playtime)}, server ${b.server_name}.`;
 
-        const classicWeaponStats = await getClassicStatsData(matchId);
+        const results = await Promise.all([
+            getClassicStatsData(matchId), 
+            getCategorySettings("Branding"), 
+            getCategorySettings("Match"), 
+            getPageLayout("Match")
+        ]);
 
-        const brandingSettings = await getCategorySettings("Branding");
-        const pageSettings = await getCategorySettings("Match");
-        const pageLayout = await getPageLayout("Match");
+        const classicWeaponStats = results[0];
+        const brandingSettings = results[1];
+        const pageSettings = results[2];
+        const pageLayout = results[3];
+
 
         res.render('match.ejs', {
             "title": `${b.map_name} - ${dateString} Match Report - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`,
