@@ -51,7 +51,6 @@ function setAverageCarryTime(playerStats){
 
 export async function getMatchData(matchId, bReturnJSON){
     
-
     const query = `SELECT player_id,flag_taken,flag_pickup,flag_drop,flag_assist,flag_cover,
     flag_seal,flag_cap,flag_kill,flag_return,flag_return_base,flag_return_mid,flag_return_enemy_base,
     flag_return_save,flag_carry_time,flag_carry_time_min,flag_carry_time_max
@@ -69,6 +68,7 @@ export async function getMatchData(matchId, bReturnJSON){
         const r = result[i];
         setAverageCarryTime(r);
     }
+    
 
     const caps = await getMatchCaps(matchId);
 

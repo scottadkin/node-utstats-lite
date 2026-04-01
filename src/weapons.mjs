@@ -86,14 +86,11 @@ export async function getMatchWeaponStats(matchId){
         return r.weapon_id;
     }))];
 
-    const names = await getWeaponNames(uniqueWeapons);
-
-    const images = await getAllImages();
+    const [names, images] = await Promise.all([getWeaponNames(uniqueWeapons), getAllImages()]);
 
     const namesToImages = {};
-    for(const [id, name] of Object.entries(names)){
+    for(const name of Object.keys(names)){
     
-        //console.log(bWeaponImageExist(images, name));
         namesToImages[name] = getWeaponImage(images, name);
     }
    

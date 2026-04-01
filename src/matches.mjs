@@ -272,23 +272,56 @@ export async function getMatch(id){
 
 async function getPlayerMatchData(id){
 
+    const m = "nstats_match_players";
+    const p = "nstats_players";
 
-    const query = `SELECT id,player_id,spectator,
-    country,bot,ping_min,ping_avg,ping_max,
-    team,score,frags,kills,deaths,suicides,
-    team_kills,efficiency,time_on_server,
-    ttl,spree_1,spree_2,spree_3,spree_4,
-    spree_5,spree_best,first_blood,multi_1,
-    multi_2,multi_3,multi_4,multi_best,headshots,
-    item_amp,item_belt,item_boots,item_body,item_pads,item_invis,item_shp,
-    match_result 
-    FROM nstats_match_players WHERE match_id=? ORDER BY score DESC`;
+    const query = `SELECT 
+    ${m}.player_id,
+    ${m}.spectator,
+    ${m}.country,
+    ${m}.bot,
+    ${m}.ping_min,
+    ${m}.ping_avg,
+    ${m}.ping_max,
+    ${m}.team,
+    ${m}.score,
+    ${m}.frags,
+    ${m}.kills,
+    ${m}.deaths,
+    ${m}.suicides,
+    ${m}.team_kills,
+    ${m}.efficiency,
+    ${m}.time_on_server,
+    ${m}.ttl,
+    ${m}.spree_1,
+    ${m}.spree_2,
+    ${m}.spree_3,
+    ${m}.spree_4,
+    ${m}.spree_5,
+    ${m}.spree_best,
+    ${m}.first_blood,
+    ${m}.multi_1,
+    ${m}.multi_2,
+    ${m}.multi_3,
+    ${m}.multi_4,
+    ${m}.multi_best,
+    ${m}.headshots,
+    ${m}.item_amp,
+    ${m}.item_belt,
+    ${m}.item_boots,
+    ${m}.item_body,
+    ${m}.item_pads,
+    ${m}.item_invis,
+    ${m}.item_shp,
+    ${m}.match_result,
+    ${p}.name as name
+    FROM ${m} 
+    LEFT JOIN ${p} ON ${p}.id = ${m}.player_id
+    WHERE ${m}.match_id=? ORDER BY score DESC`;
 
     const damageData = await getMatchDamage(id);
 
     const result = await simpleQuery(query, [id]);
-
-
 
     for(let i = 0; i < result.length; i++){
 
@@ -357,30 +390,27 @@ export async function getMatchData(id){
         const basic = await getMatch(id);
         if(basic === null) throw new Error(`Match doesnt exist`);
 
-        let playerData = null;
         let playerNames = {};
         let basicPlayers = {};
 
 
-        playerData = await getPlayerMatchData(id);
-
-        const uniquePlayers = [...new Set(playerData.map((p) =>{
-            return p.player_id;
-        }))]
-
-        playerNames = await getPlayersById(uniquePlayers);
+        const playerData = await getPlayerMatchData(id);
 
         for(let i = 0; i < playerData.length; i++){
 
             const p = playerData[i];
 
-            p.name = playerNames[p.player_id] ?? "Not Found";
+            if(p.name === null){
+                p.name = "Not Found";
+            }
         }
 
 
         for(let i = 0; i < playerData.length; i++){
 
             const p = playerData[i];
+
+            playerNames[p.player_id] = p.name;
 
             basicPlayers[p.player_id] = {
                 "name": p.name,
@@ -390,15 +420,13 @@ export async function getMatchData(id){
             };
         }
 
-        
 
-        const weaponStats = await getMatchWeaponStats(id);
-   
-        const kills = await getMatchKills(id);
-
-        const ctf = await ctfGetMatchData(id);
-        
-        const dom = await domGetMatchData(id);
+        const [weaponStats, kills, ctf, dom] = await Promise.all([
+            getMatchWeaponStats(id), 
+            getMatchKills(id), 
+            ctfGetMatchData(id), 
+            domGetMatchData(id)
+        ]);
         
 
         return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom};
