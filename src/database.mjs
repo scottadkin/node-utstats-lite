@@ -5,11 +5,14 @@ const pool = mysql.createPool({
     "host": mysqlSettings.host,
     "user": mysqlSettings.user,
     "password": mysqlSettings.password,
-    "database": mysqlSettings.database
+    "database": mysqlSettings.database,
+    "connectionLimit": mysqlSettings.connectionLimit
 });
 
+export const mysqlPool = pool;
 
 export async function simpleQuery(query, vars){
+
 
     if(query === undefined) throw new Error("No query specified.");
     

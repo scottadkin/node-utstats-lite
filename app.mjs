@@ -44,13 +44,7 @@ import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
 
 const MySQLStore = __MySQLStore(session);
 
-const pool = mysql.createPool({
-	"host": mysqlSettings.host,
-	"user": mysqlSettings.user,
-	"password": mysqlSettings.password,
-	"database": mysqlSettings.database
-});
-
+import { mysqlPool } from './src/database.mjs';
 
 const sessionStore = new MySQLStore({
 	"createDatabaseTable": false,
@@ -62,7 +56,7 @@ const sessionStore = new MySQLStore({
 			"data": "data",
 		}
 	}
-}, pool)
+}, mysqlPool);
 
 app.use(session({
 	"secret": SESSION_SECRET,

@@ -3,7 +3,8 @@ export const mysqlSettings = {
     "port": 3306,
     "user": "root",
     "password": "",
-    "database": "node_utstats_lite"
+    "database": "node_utstats_lite",
+    "connectionLimit": 10
 };
 
 export const logFilePrefix = "unreal.nglog.";
