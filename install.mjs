@@ -238,7 +238,8 @@ const queries = [
             killer_id int(11) NOT NULL,
             killer_weapon int(11) NOT NULL,
             victim_id int(11) NOT NULL,
-            victim_weapon int(11) NOT NULL
+            victim_weapon int(11) NOT NULL,
+            INDEX match_idx(match_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_ctf (
@@ -1022,6 +1023,41 @@ async function removeStartOffsets(){
     }
 }
 
+
+async function bIndexExists(table, indexName){
+
+    const result = await simpleQuery(`SHOW INDEXES FROM ${table}`);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const keyName = r.Key_name;
+
+        if(keyName === indexName){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+async function addTableIndxes(){
+
+    const targets = [
+        {"table": "nstats_kills", "column": "match_id", "index": "match_idx"},
+    ];
+
+    for(let i = 0; i < targets.length; i++){
+
+        const {table, index, column} = targets[i];
+
+        if(await bIndexExists(table, index)) continue;
+        new Message(`Adding index to table ${table}, for column ${column} as ${index}`,"note");
+        await simpleQuery(`CREATE INDEX ${index} ON ${table}(${column})`);
+    }
+}
+
 (async () =>{
  
     try{
@@ -1058,6 +1094,7 @@ async function removeStartOffsets(){
 
         await insertCTFLeagueSettings();
 
+        await addTableIndxes();
 
         await updateDominationTables();
 
@@ -1095,6 +1132,7 @@ async function removeStartOffsets(){
         await setAllMapTotals();
 
         await damageSetMatchMapGametypeIds();
+
 
 
         await updateJSONApiSettings();
