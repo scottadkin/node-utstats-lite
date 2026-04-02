@@ -1,12 +1,13 @@
 import mysql from "mysql2/promise";
 import { mysqlSettings} from "../config.mjs"
 
+
 const pool = mysql.createPool({
     "host": mysqlSettings.host,
     "user": mysqlSettings.user,
     "password": mysqlSettings.password,
     "database": mysqlSettings.database,
-    "connectionLimit": mysqlSettings.connectionLimit
+    "connectionLimit": mysqlSettings.connectionLimit ?? 10
 });
 
 export const mysqlPool = pool;

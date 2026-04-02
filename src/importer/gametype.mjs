@@ -1,4 +1,6 @@
 import { updateBasicTotals, updateGametype } from "../gametypes.mjs";
+import { bImportRandomizeNames } from "../../config.mjs";
+import { createRandomString } from "../generic.mjs";
 
 export class Gametype{
 
@@ -95,6 +97,11 @@ export class Gametype{
 
 
     updateName(){
+
+
+        if(bImportRandomizeNames){
+            this.name = createRandomString(20);
+        }
 
         if(this.bInsta === 0) return;
 

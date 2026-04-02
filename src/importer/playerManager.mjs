@@ -3,7 +3,8 @@ import Message from "../message.mjs";
 import { getPlayerMasterId, createMasterPlayer, updateMasterPlayers, 
     updatePlayerTotals, bulkInsertPlayerMatchData, updateMapAverages } from "../players.mjs";
 import geoip from "geoip-lite";
-import { scalePlaytime } from "../generic.mjs";
+import { createRandomString, scalePlaytime } from "../generic.mjs";
+import { bImportRandomizeNames } from "../../config.mjs";
 
 
 export class PlayerManager{
@@ -205,10 +206,17 @@ export class PlayerManager{
         }
 
 
-       for(let i = 0; i < this.players.length; i++){
- 
-            this.players[i].disconnect(matchEnd, matchStart, null);
-       }
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+    
+            p.disconnect(matchEnd, matchStart, null);
+
+            if(bImportRandomizeNames){
+                p.name = createRandomString(20);
+            }
+        }
+
     }
 
     parseLine(timestamp, subString){

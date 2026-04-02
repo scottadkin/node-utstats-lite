@@ -14,6 +14,7 @@ import Items from "./importer/items.mjs";
 import {calculateRankings} from "./rankings.mjs";
 import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
+import { bImportRandomizeNames } from "../config.mjs";
 
 
 export class MatchParser{

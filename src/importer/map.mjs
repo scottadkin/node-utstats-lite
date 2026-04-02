@@ -1,5 +1,6 @@
-import { removeUNR } from "../generic.mjs";
+import { createRandomString, removeUNR } from "../generic.mjs";
 import { updateMap, updateTotals } from "../maps.mjs";
+import { bImportRandomizeNames } from "../../config.mjs";
 
 export class Map{
 
@@ -26,6 +27,10 @@ export class Map{
 
     async setId(){
 
+        if(bImportRandomizeNames){
+            this.name = createRandomString(20);
+        }
+        
         this.id = await updateMap(this.name);
     }
 

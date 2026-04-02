@@ -45,3 +45,12 @@ We also save our calculated domination scores at the same time.
 Setting this value to 1 will mean every 5 in game seconds data will be saved, 3 = every 15 seconds
 */
 export const dominationScoreSaveInterval = 3;
+
+
+/*
+    Do not change this to true unless you know what you are doing,
+    this is only used if you want to create a large database with
+    a small amount of logs, this will randomize player, gametypes, 
+    maps, servers, weapons names in the import process.
+*/
+export const bImportRandomizeNames = false;
