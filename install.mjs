@@ -222,7 +222,8 @@ const queries = [
             kills int(11) NOT NULL,
             deaths int(11) NOT NULL,
             team_kills int(11) NOT NULL,
-            suicides int(11) NOT NULL
+            suicides int(11) NOT NULL,
+            INDEX match_idx (match_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_weapons (
@@ -239,7 +240,7 @@ const queries = [
             killer_weapon int(11) NOT NULL,
             victim_id int(11) NOT NULL,
             victim_weapon int(11) NOT NULL,
-            INDEX match_idx(match_id)
+            INDEX match_idx (match_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_ctf (
@@ -562,6 +563,7 @@ const queries = [
         timestamp float NOT NULL,
         killer_id int NOT NULL,
         killer_team int NOT NULL,
+        INDEX match_idx (match_id),
         PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
         `CREATE TABLE IF NOT EXISTS nstats_ctf_cap_suicides (
@@ -1046,7 +1048,11 @@ async function addTableIndxes(){
 
     const targets = [
         {"table": "nstats_kills", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_ctf_cap_kills", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_match_weapon_stats", "column": "match_id", "index": "match_idx"},
     ];
+
+    //nstats_match_weapon_stats
 
     for(let i = 0; i < targets.length; i++){
 
