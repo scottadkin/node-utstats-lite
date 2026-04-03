@@ -1055,6 +1055,8 @@ class MatchScreenshot{
     }
 
     bCTF(){
+
+        if(this.data.ctf === null) return false;
         return this.data.ctf.playerData.length > 0;
     }
 

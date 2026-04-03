@@ -131,7 +131,8 @@ const queries = [
             team_0_stolen_caps int NOT NULL,
             team_1_stolen_caps int NOT NULL,
             team_2_stolen_caps int NOT NULL,
-            team_3_stolen_caps int NOT NULL
+            team_3_stolen_caps int NOT NULL,
+            INDEX match_idx (match_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
         `CREATE TABLE IF NOT EXISTS nstats_servers (
             id int(11) NOT NULL AUTO_INCREMENT,
@@ -291,7 +292,8 @@ const queries = [
             total_score_time float NOT NULL,
             max_total_score_time float NOT NULL,
             stolen_points float NOT NULL,
-            stolen_caps int NOT NULL
+            stolen_caps int NOT NULL,
+            INDEX match_idx(match_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals (     
@@ -488,6 +490,7 @@ const queries = [
             fall_damage int NOT NULL,
             drown_damage int NOT NULL,
             cannon_damage int NOT NULL,
+            INDEX match_idx (match_id),
             PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals_damage (
@@ -711,6 +714,7 @@ const queries = [
         importer_team_1_score float NOT NULL,
         importer_team_2_score float NOT NULL,
         importer_team_3_score float NOT NULL,
+        INDEX match_idx(match_id),
         PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
         `CREATE TABLE IF NOT EXISTS nstats_json_api(
@@ -1064,6 +1068,11 @@ async function addTableIndxes(){
         {"table": "nstats_ctf_caps", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_ctf_cap_suicides", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_classic_weapon_match_stats", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_match_dom_team_score_history", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_match_dom", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_matches_dom", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx"},
+
     ];
 
     for(let i = 0; i < targets.length; i++){
