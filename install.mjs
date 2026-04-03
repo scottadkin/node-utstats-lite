@@ -209,7 +209,8 @@ const queries = [
             item_body int NOT NULL,
             item_pads int NOT NULL,
             item_invis int NOT NULL,
-            item_shp int NOT NULL
+            item_shp int NOT NULL,
+            INDEX match_idx (match_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
@@ -264,7 +265,8 @@ const queries = [
             flag_return_save int NOT NULL,
             flag_carry_time FLOAT NOT NULL,
             flag_carry_time_min FLOAT NOT NULL,
-            flag_carry_time_max FLOAT NOT NULL
+            flag_carry_time_max FLOAT NOT NULL,
+            INDEX match_idx (match_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_dom_control_points (
@@ -531,6 +533,7 @@ const queries = [
         blue_suicides int NOT NULL,
         green_suicides int NOT NULL,
         yellow_suicides int NOT NULL,
+        INDEX match_idx(match_id),
         PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 
@@ -540,6 +543,7 @@ const queries = [
     cap_id int NOT NULL,
     timestamp float NOT NULL,
     player_id int NOT NULL,
+    INDEX match_idx(match_id),
     PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
     
@@ -553,6 +557,7 @@ const queries = [
         start_timestamp float NOT NULL,
         end_timestamp float NOT NULL,
         carry_time float NOT NULL,
+        INDEX match_idx(match_id),
         PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 
@@ -573,6 +578,7 @@ const queries = [
         timestamp float NOT NULL,
         player_id int NOT NULL,
         player_team int NOT NULL,
+        INDEX match_idx(match_id),
         PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 
@@ -653,7 +659,8 @@ const queries = [
             shots int NOT NULL,
             hits int NOT NULL,
             accuracy float NOT NULL,
-            damage int NOT NULL
+            damage int NOT NULL,
+            INDEX match_idx (match_id)
             ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_ctf_league (
@@ -1050,9 +1057,14 @@ async function addTableIndxes(){
         {"table": "nstats_kills", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_ctf_cap_kills", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_match_weapon_stats", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_match_players", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_match_ctf", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_ctf_carry_times", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_ctf_covers", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_ctf_caps", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_ctf_cap_suicides", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_classic_weapon_match_stats", "column": "match_id", "index": "match_idx"},
     ];
-
-    //nstats_match_weapon_stats
 
     for(let i = 0; i < targets.length; i++){
 
@@ -1134,6 +1146,7 @@ async function addTableIndxes(){
         new Message("Calculating Player Map Averages", "note");
         await setAllPlayerMapAverages();
 
+        
         new Message("Calculating Map Totals", "note");
         await setAllMapTotals();
 

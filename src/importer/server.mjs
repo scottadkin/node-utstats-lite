@@ -14,7 +14,7 @@ export class Server{
     async setId(){
 
         if(bImportRandomizeNames){
-            this.name = createRandomString(20);
+            this.name = `${createRandomString(1)}${this.name}`;
         }
         this.id = await updateServer(this.name, this.ip, this.port);
     }

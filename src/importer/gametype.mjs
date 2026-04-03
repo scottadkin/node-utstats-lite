@@ -100,7 +100,7 @@ export class Gametype{
 
 
         if(bImportRandomizeNames){
-            this.name = createRandomString(20);
+            this.name = createRandomString(1) + this.name;
         }
 
         if(this.bInsta === 0) return;
