@@ -383,7 +383,8 @@ const queries = [
             flag_return_enemy_base int NOT NULL,
             max_flag_return_enemy_base int NOT NULL,
             flag_return_save int NOT NULL,
-            max_flag_return_save int NOT NULL
+            max_flag_return_save int NOT NULL,
+            INDEX pgm_idx (player_id, gametype_id, map_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_users (
@@ -1076,6 +1077,7 @@ async function addTableIndxes(){
         {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx"},
         {"table": "nstats_player_totals", "column": "player_id,gametype_id,map_id", "index": "pgm_idx"},
+        {"table": "nstats_player_totals_ctf", "column": "player_id,gametype_id,map_id", "index": "pgm_idx"},
 
     ];
 
