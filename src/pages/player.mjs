@@ -39,7 +39,7 @@ function setTypeName(type, data, names){
 export async function renderPlayerPage(req, res, userSession){
 
     try{
-        //getPlayerRecentMatches(playerId, gametype, map, page, perPage)
+
         let id = req?.params?.id ?? "";
 
         const basicPlayerInfo = await getPlayerProfileInfo(id);

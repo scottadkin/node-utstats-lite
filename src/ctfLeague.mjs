@@ -452,10 +452,12 @@ export async function getPlayerMapsPosition(playerId, targetData){
     ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset DESC`;
 
     for(let i = 0; i < targetData.length; i++){
+
         const t = targetData[i];
         const pos = await simpleQuery(query, [t.gametype_id, t.map_id, t.points]);
         if(pos.length > 0) t.pos = pos[0].pos;
     }
+
 }
 
 

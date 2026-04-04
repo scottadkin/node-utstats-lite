@@ -682,7 +682,8 @@ const queries = [
         cap_for int NOT NULL,
         cap_against int NOT NULL,
         cap_offset int NOT NULL,
-        points int NOT NULL
+        points int NOT NULL,
+        INDEX mgp_idx (map_id, gametype_id, player_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
         `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
@@ -1072,6 +1073,7 @@ async function addTableIndxes(){
         {"table": "nstats_match_dom", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_matches_dom", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx"},
 
     ];
 
