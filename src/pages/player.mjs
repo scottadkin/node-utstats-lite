@@ -84,7 +84,7 @@ export async function renderPlayerPage(req, res, userSession){
         let weaponTotals = [];
 
         if(pageSettings["Display Weapons"] === "1"){
-            weaponTotals = await getPlayerWeaponTotals(playerId);
+            weaponTotals = await getPlayerWeaponTotals(playerId);    
         }
 
         const month = 60 * 60 * 24 * 28;

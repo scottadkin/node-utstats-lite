@@ -349,7 +349,8 @@ const queries = [
             deaths int(11) NOT NULL,
             suicides int(11) NOT NULL,
             team_kills int(11) NOT NULL,
-            eff float NOT NULL
+            eff float NOT NULL,
+            INDEX pgw_idx (player_id, gametype_id, weapon_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals_ctf (
@@ -1076,8 +1077,9 @@ async function addTableIndxes(){
         {"table": "nstats_matches_dom", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx"},
-        {"table": "nstats_player_totals", "column": "player_id,gametype_id,map_id", "index": "pgm_idx"},
-        {"table": "nstats_player_totals_ctf", "column": "player_id,gametype_id,map_id", "index": "pgm_idx"},
+        {"table": "nstats_player_totals", "column": "player_id, gametype_id, map_id", "index": "pgm_idx"},
+        {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx"},
+        {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx"},
 
     ];
 
