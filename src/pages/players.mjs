@@ -38,7 +38,10 @@ export async function renderPlayersPage(req, res, userSession){
 
         description += `, sorted by ${sortBy} in ${order} order`;
 
+
+
         const players = await searchPlayers(searchName, sortBy, order, page, perPage);
+
 
         
         const brandingSettings = await getCategorySettings("Branding");

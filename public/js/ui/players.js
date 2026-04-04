@@ -110,7 +110,7 @@ class PlayersSearchForm{
 
         try{
 
-            let slug = `?name=${this.searchName}&sortBy=${this.sortBy}`;
+            let slug = `?name=${encodeURIComponent(this.searchName)}&sortBy=${this.sortBy}`;
             slug += `&order=${this.order}&perPage=${this.perPage}&page=${this.page}`;
             const req = await fetch(`/json/player-search/${slug}`);
 

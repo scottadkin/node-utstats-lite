@@ -44,7 +44,9 @@ class MapsSearchForm{
 
         try{
 
-            const req = await fetch(`/json/map-search/?name=${this.nameSearch}&page=${this.page}&perPage=${this.perPage}`);
+            const name = encodeURIComponent(this.nameSearch);
+
+            const req = await fetch(`/json/map-search/?name=${name}&page=${this.page}&perPage=${this.perPage}`);
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);

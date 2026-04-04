@@ -50,6 +50,7 @@ export default class JSONManager{
 
     throwErrorIfQueryMissingKey(key){
 
+
         if(this.req.query[key] === undefined){
             throw new Error(`There is no ${key} key in query object`);
         }

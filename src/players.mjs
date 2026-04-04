@@ -391,8 +391,16 @@ export async function searchPlayers(name, sortBy, order, page, perPage){
     ORDER BY ${sortByTable}.${sortBy} ${order} LIMIT ?, ?`;
     // FROM nstats_players WHERE name LIKE ? ORDER BY ${validSortBys[sortIndex]} ${order} LIMIT ?, ?`;
 
-    const totalPlayers = await getTotalPlayers(name);
-    const result = await simpleQuery(query, [`%${name}%`, start, perPage]);
+    const a = performance.now();
+
+    const promises = [getTotalPlayers(name), simpleQuery(query, [`%${name}%`, start, perPage])];
+
+    const [totalPlayers, result] = await Promise.all(promises);
+
+
+
+    const b = performance.now();
+    console.log((b - a) * 0.001);
 
     return {"players": result, "totalPlayers": totalPlayers};
 }
