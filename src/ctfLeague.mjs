@@ -352,9 +352,17 @@ export async function getValidMaps(){
     });
 }
 
-export async function refreshAllTables(bOverrideTimeLimit, type){
+async function bAnyData(){
 
-    if(bOverrideTimeLimit === undefined) bOverrideTimeLimit = false;
+    const query = `SELECT id FROM nstats_player_ctf_league LIMIT 1`;
+
+    const result = await simpleQuery(query);
+
+    return result.length > 0;
+}
+
+export async function refreshAllTables(type){
+
 
     if(type === undefined) throw new Error(`Refresh all tables requires a type`);
 
@@ -367,14 +375,13 @@ export async function refreshAllTables(bOverrideTimeLimit, type){
         return;
     }
 
-
     const lastImport = Math.floor(new Date(settings["Last Whole League Refresh"].value));
 
-    const now = new Date(Date.now());
+    const now = Date.now();
 
     const timeSinceLastRefresh = now - lastImport;
 
-    if(!bOverrideTimeLimit && timeSinceLastRefresh < DAY){
+    if(await bAnyData() && timeSinceLastRefresh < DAY){
         new Message(`Less than 24 hours have passed since last CTF ${type} league refresh, skipping.`,"note");
         return;
     }

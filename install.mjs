@@ -1181,9 +1181,9 @@ async function addTableIndexes(){
         await removeStartOffsets();
 
         new Message(`Refreshing player ctf league Map tables.`,"note");
-        await refreshAllTables(true, "maps");
+        await refreshAllTables("maps");
         new Message(`Refreshing player ctf league Gametype tables.`,"note");
-        await refreshAllTables(true, "gametypes");
+        await refreshAllTables("gametypes");
         process.exit();
 
     }catch(err){

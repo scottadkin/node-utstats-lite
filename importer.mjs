@@ -314,17 +314,17 @@ async function startImport(){
 
     if(ctfLeagueSettings.maps["Update Whole League End Of Import"].value === "true"){
 
-        await refreshAllTables(false, "maps");
+        await refreshAllTables("maps");
     }
 
     if(ctfLeagueSettings.gametypes["Update Whole League End Of Import"].value === "true"){
 
-        await refreshAllTables(false, "gametypes");
+        await refreshAllTables("gametypes");
     }
 
     if(ctfLeagueSettings.combined["Update Whole League End Of Import"].value === "true"){
 
-        await refreshAllTables(false, "combined");
+        await refreshAllTables("combined");
     }
 }
 
