@@ -211,7 +211,8 @@ const queries = [
             item_pads int NOT NULL,
             item_invis int NOT NULL,
             item_shp int NOT NULL,
-            INDEX match_idx (match_id)
+            INDEX match_idx (match_id),
+            INDEX player_idx (player_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
@@ -1066,6 +1067,8 @@ async function addTableIndxes(){
         {"table": "nstats_ctf_cap_kills", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_match_weapon_stats", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_match_players", "column": "match_id", "index": "match_idx"},
+        //doing 2 different indexes improves player profile page load without making match page querys slower
+        {"table": "nstats_match_players", "column": "player_id", "index": "player_idx"},
         {"table": "nstats_match_ctf", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_ctf_carry_times", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_ctf_covers", "column": "match_id", "index": "match_idx"},

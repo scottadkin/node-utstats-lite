@@ -94,8 +94,10 @@ export async function renderPlayerPage(req, res, userSession){
         let rankings = null;
 
         if(pageSettings["Display Rankings"] === "1"){
+            //no real speed diffs with indexes
             rankings = await getPlayerRankings(playerId, minDate);
             rankings.minDate = minDate;
+        
         }
         
         let ctfLeagueData = [];
