@@ -7,7 +7,7 @@ import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./w
 import { getPlayerMapTotals, deleteCurrentPlayerMapAverages, updateCurrentPlayerMapAverages, getUniquePlayerIdsOnMap, getAllMapIds} from "./maps.mjs";
 import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
-
+import Message from "./message.mjs";
 
 const PLAYER_TOTALS_COLUMNS_MATCHES = `player_id,
 gametype_id,
@@ -1143,9 +1143,26 @@ async function deleteMapMinuteAverages(mapId){
     await simpleQuery(query, [mapId]);
 }
 
-//used for upgrade for earlier version
+async function bAnyMapAverageData(){
+
+    const query = `SELECT id FROM nstats_player_map_minute_averages LIMIT 1`;
+
+    const result = await simpleQuery(query);
+    
+    if(result.length === 0) return false;
+
+    return true;
+}
+//used for upgrade from earlier version
 export async function setAllPlayerMapAverages(){
 
+    if(await bAnyMapAverageData()){ 
+
+        new Message(`Player Map Average data already exists, skipping.`, "note");
+        
+        return;
+    }
+    
     const mapIds = await getAllMapIds();
 
     for(let i = 0; i < mapIds.length; i++){

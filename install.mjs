@@ -9,7 +9,7 @@ import { restoreDefaultSettings } from "./src/siteSettings.mjs";
 import { restoreDefaultLayouts } from "./src/pageLayout.mjs";
 import { setMatchMapGametypeIds } from "./src/players.mjs";
 import { setAllPlayerMapAverages } from "./src/players.mjs";
-import { setAllMapTotals } from "./src/weapons.mjs";
+import { setAllMapTotals as setAllMapWeaponTotals } from "./src/weapons.mjs";
 import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./src/damage.mjs";
 import { refreshAllTables } from "./src/ctfLeague.mjs";
 
@@ -1060,7 +1060,7 @@ async function bIndexExists(table, indexName){
     return false;
 }
 
-async function addTableIndxes(){
+async function addTableIndexes(){
 
     const targets = [
         {"table": "nstats_kills", "column": "match_id", "index": "match_idx"},
@@ -1132,7 +1132,7 @@ async function addTableIndxes(){
 
         await insertCTFLeagueSettings();
 
-        await addTableIndxes();
+        await addTableIndexes();
 
         await updateDominationTables();
 
@@ -1167,15 +1167,17 @@ async function addTableIndxes(){
         await setAllPlayerMapAverages();
 
         
-        new Message("Calculating Map Totals", "note");
-        await setAllMapTotals();
+        new Message("Calculating Map Weapon Totals", "note");
+        await setAllMapWeaponTotals();
 
+        new Message("Setting damage match map & gametypeIds.", "note");
         await damageSetMatchMapGametypeIds();
 
 
-
+        new Message("Updating JSON API settings.", "note");
         await updateJSONApiSettings();
 
+        new Message(`Removing start offset from event timestamps.`,"note");
         await removeStartOffsets();
 
         new Message(`Refreshing player ctf league Map tables.`,"note");

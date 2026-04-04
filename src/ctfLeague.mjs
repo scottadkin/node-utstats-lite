@@ -369,6 +369,7 @@ export async function refreshAllTables(bOverrideTimeLimit, type){
 
 
     const lastImport = Math.floor(new Date(settings["Last Whole League Refresh"].value));
+
     const now = new Date(Date.now());
 
     const timeSinceLastRefresh = now - lastImport;

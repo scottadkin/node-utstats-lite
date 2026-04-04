@@ -537,7 +537,23 @@ async function bulkInsertMapTotals(totals){
     await bulkInsert(query, insertVars);
 }
 
+
+async function bAnyWeaponTotalsData(){
+
+    const query = `SELECT id FROM nstats_map_weapon_totals LIMIT 1`;
+
+    const result = await simpleQuery(query);
+    
+    return result.length > 0;
+}
+
 export async function setAllMapTotals(){
+
+    if(await bAnyWeaponTotalsData()){
+
+        new Message(`Map weapon totals data already exists, skipping.`,"note");
+        return;
+    }
 
     const mapIds = await getAllMapIds();
 

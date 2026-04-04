@@ -239,6 +239,11 @@ export async function setMatchMapGametypeIds(){
 
     const result = await simpleQuery(query);
 
+    if(result.length === 0){
+        new Message(`nstats_damage_match data already exists, skipping.`,"note");
+        return;
+    }
+
     const matchIds = result.map((r) =>{ 
         return r.match_id;
     });
