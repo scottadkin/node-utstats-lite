@@ -428,7 +428,7 @@ export async function refreshAllTables(type){
 
     const newData = {};
     
-    newData[type] = {"Last Whole League Refresh": {"value": now.toISOString(), "category": type}};
+    newData[type] = {"Last Whole League Refresh": {"value": new Date(now).toISOString(), "category": type}};
     await updateSettings(newData);
 }
 

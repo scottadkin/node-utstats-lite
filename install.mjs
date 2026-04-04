@@ -62,7 +62,9 @@ const queries = [
             id int(11) NOT NULL AUTO_INCREMENT,
             name varchar(32) NOT NULL,
             country varchar(3) NOT NULL,
-            hash varchar(32) NOT NULL
+            hash varchar(32) NOT NULL,
+            INDEX name_idx (name),
+            INDEX hash_idx (hash)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_matches (
@@ -1083,6 +1085,8 @@ async function addTableIndexes(){
         {"table": "nstats_player_totals", "column": "player_id, gametype_id, map_id", "index": "pgm_idx"},
         {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx"},
         {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx"},
+        {"table": "nstats_players", "column": "name", "index": "name_idx"},
+        {"table": "nstats_players", "column": "name", "hash": "hash_idx"},
 
     ];
 
