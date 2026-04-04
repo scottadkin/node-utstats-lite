@@ -229,21 +229,35 @@ export async function getPlayerByHash(hash){
 
 /**
  * 
- * @param {*} id interger or hash auto
+ * @param {(Number|String)} playerId 
+ * @returns {Promise<Object|null>}
  */
-export async function getPlayerByAuto(id){
+export async function getPlayerProfileInfo(playerId){
 
-    if(id.length === 32){
-        return await getPlayerByHash(id);
+    let column = "id";
+
+    if(playerId.length === 32){
+        column = "hash";
     }
 
-    id = parseInt(id);
+    const query = `SELECT 
+    nstats_players.id,
+    nstats_players.name,
+    nstats_players.country,
+    nstats_players.hash,
+    nstats_player_totals.last_active,
+    nstats_player_totals.playtime 
+    FROM nstats_players 
+    LEFT JOIN nstats_player_totals ON nstats_players.id = nstats_player_totals.player_id
+    WHERE nstats_players.${column}=?`;
 
-    if(id !== id) return null;
+    const result = await simpleQuery(query, [playerId]);
 
-    return await getPlayerById(id);
-     
+    if(result.length === 0) return null;
+    return result[0];
+
 }
+
 
 export async function getPlayerNamesByIds(playerIds){
      

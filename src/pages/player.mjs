@@ -1,7 +1,7 @@
 import { convertTimestamp, toPlaytime } from "../generic.mjs";
 import { 
-    getPlayerByAuto,
     getPlayerGametypeTotals,
+    getPlayerProfileInfo,
     getUniquePlayedType
  } from "../players.mjs";
 import { getPlayerCTFTotals } from "../ctf.mjs";
@@ -42,12 +42,17 @@ export async function renderPlayerPage(req, res, userSession){
         //getPlayerRecentMatches(playerId, gametype, map, page, perPage)
         let id = req?.params?.id ?? "";
 
-        const basicPlayerInfo = await getPlayerByAuto(id);
+        const basicPlayerInfo = await getPlayerProfileInfo(id);
 
         if(basicPlayerInfo === null) throw new Error(`Player does not exist!`);
 
         let title = `${basicPlayerInfo.name} - Player Profile`;
-        let description = `View the player profile of ${basicPlayerInfo.name}, they were last seen ${convertTimestamp(basicPlayerInfo.last_active,true, false, true)}, and have played for a total of ${toPlaytime(basicPlayerInfo.playtime)}`;
+
+        const lastSeenString = convertTimestamp(basicPlayerInfo.last_active,true, false, true);
+        const playtimeString = toPlaytime(basicPlayerInfo.playtime);
+
+        let description = `View the player profile of ${basicPlayerInfo.name}, `;
+        description += `they were last seen ${lastSeenString}, and have played for a total of ${playtimeString}`;
 
         const playerId = basicPlayerInfo.id;
 
@@ -62,8 +67,6 @@ export async function renderPlayerPage(req, res, userSession){
             getUniquePlayedType("gametypes", playerId),
             getUniquePlayedType("maps", playerId)]
         );
-
-
 
         let gametypeTotals = [];
         
