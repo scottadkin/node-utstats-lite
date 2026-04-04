@@ -1,12 +1,9 @@
 import { convertTimestamp, toPlaytime } from "../generic.mjs";
 import { 
-    getPlayerByAuto,  
-    getUniquePlayedGametypes, 
-    getUniquePlayedMaps,
-    getPlayerGametypeTotals
+    getPlayerByAuto,
+    getPlayerGametypeTotals,
+    getUniquePlayedType
  } from "../players.mjs";
-import { getNamesByIds as getMapNamesByIds } from "../maps.mjs";
-import { getGametypeNames } from "../gametypes.mjs";
 import { getPlayerCTFTotals } from "../ctf.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "../weapons.mjs";
 import { getPlayerRankings } from "../rankings.mjs";
@@ -56,16 +53,17 @@ export async function renderPlayerPage(req, res, userSession){
 
         if(basicPlayerInfo.country === "") basicPlayerInfo.country = "xx";
 
-        const pageSettings = await getCategorySettings("Player");
-        const pageLayout = await getPageLayout("Player");
+        const start = performance.now();
+
+        const [pageSettings, pageLayout, brandingSettings, gametypeNames, mapNames] = await Promise.all([
+            getCategorySettings("Player"),
+            getPageLayout("Player"),
+            getCategorySettings("Branding"),
+            getUniquePlayedType("gametypes", playerId),
+            getUniquePlayedType("maps", playerId)]
+        );
 
 
-        const uniquePlayedGametypes = await getUniquePlayedGametypes(playerId);
-        const uniquePlayedMaps = await getUniquePlayedMaps(playerId);
-
-        
-        const mapNames = await getMapNamesByIds(uniquePlayedMaps);
-        const gametypeNames = await getGametypeNames(uniquePlayedGametypes, true);
 
         let gametypeTotals = [];
         
@@ -109,8 +107,12 @@ export async function renderPlayerPage(req, res, userSession){
         setTypeName("maps", ctfLeagueData, mapNames);
         setTypeName("maps", ctfTotals, mapNames);
 
-        const brandingSettings = await getCategorySettings("Branding");
+        
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+
+        const end = performance.now();
+
+        console.log((end - start) * 0.001);
 
         res.render("player.ejs", {
             "meta": {description, "image": "images/maps/default.jpg"},

@@ -1199,29 +1199,54 @@ export async function getPlayedMaps(playerId){
     return await simpleQuery(query, [playerId]);
 }
 
-async function getUniquePlayedType(playerId, type){
+
+export async function getUniquePlayedType(type, playerId){
 
     type = type.toLowerCase();
 
-    if(type !== "gametypes" && type !== "maps") throw new Error(`Not a valid getUniquePlayedType`);
-    
-    const query = `SELECT DISTINCT ${(type === "gametypes") ? "gametype_id" : "map_id"} as target_id FROM nstats_match_players WHERE player_id=?`;
+    const validTypes = ["gametypes", "maps"];
+
+    if(validTypes.indexOf(type) === -1){
+        throw new Error(`Not a valid type from Players.getUniquePlayedType`);
+    }
+
+    let idColumn = "";
+    let nameTable = "";
+
+
+    if(type === "gametypes"){
+
+        idColumn = "nstats_match_players.gametype_id";
+        nameTable = "nstats_gametypes";
+
+    }else if(type === "maps"){
+
+        idColumn = "nstats_match_players.map_id";
+        nameTable = "nstats_maps";
+    }
+
+    const query = `SELECT DISTINCT ${idColumn} as id,${nameTable}.name 
+    FROM nstats_match_players 
+    LEFT JOIN ${nameTable} ON ${idColumn}=${nameTable}.id
+    WHERE nstats_match_players.player_id=?
+    `;
 
     const result = await simpleQuery(query, [playerId]);
 
-    return result.map((r) =>{
-        return r.target_id;
-    });
+    const obj = {};
 
+    for(let i = 0; i < result.length; i++){
+
+        if(result[i].name === null){
+            result[i].name = "Not Found";
+        }
+
+        obj[result[i].id] = result[i].name;
+    }
+
+    return obj;
 }
 
-export async function getUniquePlayedGametypes(playerId){
-    return await getUniquePlayedType(playerId, "gametypes");
-}
-
-export async function getUniquePlayedMaps(playerId){
-    return await getUniquePlayedType(playerId, "maps");
-}
 
 export async function getPlayerActivityHeatmapData(playerId, gametypeId, mapId, year, month){
 
@@ -1312,6 +1337,7 @@ export async function getMostActivePlayers(limit){
  * @param {array<Integer>} playerIds 
  * @returns {Promise<Object>} keys are playerIds, if player is missing create not found data
  */
+
 export async function getNamesAndHashesById(playerIds){
 
     if(playerIds.length === 0) return {};
