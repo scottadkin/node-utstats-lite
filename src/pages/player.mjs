@@ -71,6 +71,7 @@ export async function renderPlayerPage(req, res, userSession){
         let gametypeTotals = [];
         
         if(pageSettings["Display Gametype Totals"] === "1"){
+
             gametypeTotals = await getPlayerGametypeTotals(playerId);
         }
 

@@ -335,7 +335,8 @@ const queries = [
             item_body int NOT NULL,
             item_pads int NOT NULL,
             item_invis int NOT NULL,
-            item_shp int NOT NULL
+            item_shp int NOT NULL,
+            INDEX pgm_idx (player_id,gametype_id,map_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals_weapons (
@@ -1074,6 +1075,7 @@ async function addTableIndxes(){
         {"table": "nstats_matches_dom", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx"},
         {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx"},
+        {"table": "nstats_player_totals", "column": "player_id,gametype_id,map_id", "index": "pgm_idx"},
 
     ];
 
