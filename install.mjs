@@ -626,6 +626,7 @@ const queries = [
         flag_return_enemy_base float NOT NULL,
         flag_return_save float NOT NULL,
         dom_caps float NOT NULL,
+        INDEX pmg_idx (player_id,map_id,gametype_id),
         PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 
@@ -1087,7 +1088,8 @@ async function addTableIndexes(){
         {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx"},
         {"table": "nstats_players", "column": "name", "index": "name_idx"},
         {"table": "nstats_players", "column": "hash", "index": "hash_idx"},
-
+        {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx"},
+        
     ];
 
     for(let i = 0; i < targets.length; i++){

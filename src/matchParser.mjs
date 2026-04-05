@@ -142,10 +142,9 @@ export class MatchParser{
         this.kills.setPlayerSpecialEvents(this.players);
         this.items.setPlayerStats(this.players);
 
+  
         this.damageManager.setPlayerDamage(this.players);
-
         await this.weapons.setWeaponIds();
-
         this.classicWeaponStats.setPlayerStats(this.weapons, this.players);
         
         this.players.setPlayerPingStats();
@@ -168,10 +167,17 @@ export class MatchParser{
             this.soloWinnerScore = soloStats.score;
         }
 
-        await this.server.setId();
-        await this.gametype.setId(this.totalTeams, totalPlayers, this.bAppendTeamSizes);
-        await this.map.setId();
 
+        
+
+
+        await Promise.all([
+            this.server.setId(),
+            this.gametype.setId(this.totalTeams, totalPlayers, this.bAppendTeamSizes),
+            this.map.setId(),
+        ]);
+
+       
 
         this.matchId = await createMatch(
             this.server.id, 
@@ -199,13 +205,14 @@ export class MatchParser{
             this.gametype.mutators
         );
 
+       
+
         if(this.matchId === null){
             new Message(`Failed to create match id.`,"error")
             return;
         }
 
-        await this.server.updateTotals();
-        await this.gametype.updateTotals();
+        await Promise.all([this.server.updateTotals(), this.gametype.updateTotals()]);
 
         //set player to w, d, or l
         this.players.setMatchResult(
@@ -217,21 +224,26 @@ export class MatchParser{
             ],
             this.soloWinner
         );
-        await this.players.insertPlayerMatchData(this.matchId, this.match.date, this.gametype.id, this.map.id);
 
-        //TODO add gametype & map ids to weapons, CTF AND DOM TABLES
-        await this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
-        
+        await Promise.all([
+            this.players.insertPlayerMatchData(this.matchId, this.match.date, this.gametype.id, this.map.id),
+            this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id)
+        ]);
+ 
+
         if(this.dom.bAnyData){
-            await this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id);
-            await this.dom.insertMatchResult(this.matchId);
-            await this.dom.saveScoreIntervals(this.matchId);
+
+            await Promise.all([
+                this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id),
+                this.dom.insertMatchResult(this.matchId),
+                this.dom.saveScoreIntervals(this.matchId),
+            ]);
+            
         }
        // await this.weapons.setWeaponIds();
         this.kills.setWeaponIds(this.weapons);
         this.kills.setPlayerIds(this.players);
         await this.kills.insertKills(this.matchId);
-        
         // this.players.debugListAllPlayers();
 
         this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides);
@@ -239,11 +251,10 @@ export class MatchParser{
         await this.weapons.updatePlayerTotals(this.players.players);
 
 
-        await this.players.updatePlayerTotals(this.match.date, this.gametype.id, this.map.id);
-        //await this.players.updatePlayerFullTotals();
-
-        await this.ctf.updatePlayerTotals(this.players.players);
-
+        await Promise.all([
+            this.players.updatePlayerTotals(this.match.date, this.gametype.id, this.map.id),
+            this.ctf.updatePlayerTotals(this.players.players)
+        ]);
 
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
         await this.map.updateTotals();
@@ -254,7 +265,6 @@ export class MatchParser{
         await calculateRankings(this.gametype.id, uniquePlayerIds);
         await calculateRankings(this.map.id, uniquePlayerIds, "map");
         
-
         const hashVars = [this.map.name, 
             this.gametype.name, 
             this.server.name, 
@@ -272,15 +282,13 @@ export class MatchParser{
         ];
 
 
-
         await setMatchHash(this.matchId, hashVars.toString());
-
 
         await this.damageManager.insertMatchData(this.players.players, this.matchId, this.map.id, this.gametype.id);
         await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
 
-
         await this.players.updateMapAverages(this.gametype.id, this.map.id);
+
        
         //await calcPlayersMapResults(this.map.id, this.gametype.id);
 

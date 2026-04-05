@@ -71,7 +71,6 @@ export class Gametype{
         if(bIncludeTeamSize && totalTeams > 1){
 
 
-
             //don't want 1.5 v 1.5 ect, only append name if all teams are equal in size
             if(totalPlayers > 0 && totalPlayers % totalTeams === 0){
 
