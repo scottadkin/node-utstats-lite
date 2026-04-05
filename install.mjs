@@ -1086,7 +1086,7 @@ async function addTableIndexes(){
         {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx"},
         {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx"},
         {"table": "nstats_players", "column": "name", "index": "name_idx"},
-        {"table": "nstats_players", "column": "name", "hash": "hash_idx"},
+        {"table": "nstats_players", "column": "hash", "index": "hash_idx"},
 
     ];
 
