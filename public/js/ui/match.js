@@ -189,12 +189,14 @@ function renderFragsTables(parent, totalTeams, playerData){
     for(let i = 0; i < playerData.length; i++){
 
         const p = playerData[i];
+
         if(p.spectator) continue;
+        if(totalTeams >= 2 && p.team === 255) continue;
 
         const row = createFragTableRow(p, totalTeams, false);
 
         let team = (totalTeams < 2) ? 0 : p.team;
-       
+
         totals[team].time_on_server += p.time_on_server;
         totals[team].score += p.score;
         totals[team].frags += p.frags;
