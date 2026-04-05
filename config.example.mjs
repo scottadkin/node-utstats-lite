@@ -16,7 +16,8 @@ export const importedLogsFolder = "./Logs";
 
 // set this value to 0 if you only want to run the importer once,
 // any other value is in seconds, e.g 60 would mean the impoter will run every 1 Minute
-export const importInterval = 0;
+// 300 is every 5 minutes, 3600 once an hour, 86400 once a day
+export const importInterval = 300;
 
 export const multiKillTimeLimit = 3;
 
