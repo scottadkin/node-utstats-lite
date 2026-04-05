@@ -95,28 +95,30 @@ async function updateCTFLeague(m, ctfLeagueSettings){
 
         if(settings["Enable League"].value === undefined){
             new Message(`${t.toUpperCase()} CTFLeague settings missing, please install using install.mjs.`,"error");
-        }else{
-
-            const bEnabledMapCTF = settings["Enable League"]?.value ?? "false";
-            const maxMatches = setInt(settings["Maximum Matches Per Player"]?.value, 5);
-            const maxDays = setInt(settings["Maximum Match Age In Days"]?.value, 180);
-
-
-            if(bEnabledMapCTF === "true"){
-
-                //we only want to do all time once
-                if(i === 0){
-                    await leagueCalcPlayerMapResults(0, 0, maxMatches, maxDays);
-                }
-                //map gametype
-                await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays);
-                //map all time
-                await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, 0, maxMatches, maxDays);
-
-            }else{
-                new Message(`CTF ${t.toUpperCase()} league is disabled, skipping.`,"note");
-            }
+            continue;
         }
+
+
+        const bEnabledMapCTF = settings["Enable League"]?.value ?? "false";
+        const maxMatches = setInt(settings["Maximum Matches Per Player"]?.value, 5);
+        const maxDays = setInt(settings["Maximum Match Age In Days"]?.value, 180);
+
+
+        if(bEnabledMapCTF === "true"){
+
+            //we only want to do all time once
+            if(i === 0){
+                await leagueCalcPlayerMapResults(0, 0, maxMatches, maxDays);
+            }
+            //map gametype
+            await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays);
+            //map all time
+            await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, 0, maxMatches, maxDays);
+
+        }else{
+            new Message(`CTF ${t.toUpperCase()} league is disabled, skipping.`,"note");
+        }
+        
     } 
 }
 

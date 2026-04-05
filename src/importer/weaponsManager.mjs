@@ -62,18 +62,24 @@ export class WeaponsManager{
 
     async setWeaponIds(){
 
+        const promises = [];
+
         for(let i = 0; i < this.tempNames.length; i++){
 
             let name = this.tempNames[i];
 
-            let id = await getWeaponId(name);
+            promises.push(getWeaponId(name, true));
 
-            if(id === null){
-                id = await createWeapon(name);
-            }
-
-            this.weapons[id] = name;
         }
+
+        const weapons = await Promise.all(promises);
+
+        for(let i = 0 ; i < weapons.length; i++){
+
+            this.weapons[weapons[i].id] = weapons[i].name;
+        }
+
+
     }
 
     getPlayerWeaponStats(playerId, weaponId){
