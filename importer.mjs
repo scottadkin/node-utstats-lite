@@ -8,7 +8,7 @@ import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
 import { bLogAlreadyImported } from "./src/importer.mjs";
-import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, refreshAllTables } from "./src/ctfLeague.mjs";
+import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, getMultipleLeagueCategorySettings, refreshAllTables } from "./src/ctfLeague.mjs";
 import { setInt } from "./src/generic.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
@@ -125,7 +125,6 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
     try{
 
         const start = performance.now();
-        new Message(`Starting parsing of log ${file}`,"note");
 
         if(bIgnoreDuplicates){
 
@@ -158,6 +157,8 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await m.main();
 
+        new Message(`MatchId is ${m.matchId}`,"note");
+
         if(m.ctf.bMatchCTF){
             await updateCTFLeague(m, ctfLeagueSettings);
         }
@@ -188,6 +189,8 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
     }
 }
 
+
+
 //serverId is -1 if logs are from the websites /Logs folder
 async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings){
 
@@ -195,15 +198,18 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
     const files = await readdir(importedLogsFolder);
 
+    const logs = files.filter((f) => f.toLowerCase().startsWith(logFilePrefix));
+
     let imported = 0;
     let failed = 0;
 
-    for(let i = 0; i < files.length; i++){
+    for(let i = 0; i < logs.length; i++){
 
-        const f = files[i];
+        const f = logs[i];
         
         if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
 
+        new Message(`Log ${i+1}/${logs.length}, Starting parsing of ${f}`,"note");
         if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, ctfLeagueSettings)){
             imported++;
         }else{
@@ -304,9 +310,8 @@ async function main(ctfLeagueSettings){
 
 async function startImport(){
 
-    const maps = await getLeagueCategorySettings("maps");
-    const gametypes = await getLeagueCategorySettings("gametypes");
-    const combined = await getLeagueCategorySettings("combined");
+
+    const {maps, gametypes, combined} = await getMultipleLeagueCategorySettings(["maps", "gametypes", "combined"]);
 
     const ctfLeagueSettings = {maps, gametypes, combined};
 

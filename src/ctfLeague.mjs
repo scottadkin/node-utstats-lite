@@ -285,10 +285,37 @@ export async function getLeagueSiteSettings(){
     return settings;
 }
 
+/**
+ * 
+ * @param {Array<Number>} cats 
+ * @returns {Promise<Object>} category => settings
+ */
+export async function getMultipleLeagueCategorySettings(cats){
+
+    const query = `SELECT category,name,type,value FROM nstats_ctf_league_settings WHERE category IN (?)`;
+
+    const result = await simpleQuery(query, [cats]);
+
+    const settings = {};
+
+    for(let i = 0; i < cats.length; i++){
+
+        settings[cats[i].toLowerCase()] = {};
+    }
+
+    for(let i = 0; i < result.length; i++){
+
+        const {category, name, type, value} = result[i];
+
+        settings[category.toLowerCase()][name] = {type, value};
+    }
+
+    return settings;
+}
 
 export async function getLeagueCategorySettings(cat){
 
-    const query = `SELECT category,name,type,value FROM nstats_ctf_league_settings WHERE category=?`;
+    const query = `SELECT name,type,value FROM nstats_ctf_league_settings WHERE category=?`;
     const result = await simpleQuery(query, [cat]);
 
     const settings = {};
