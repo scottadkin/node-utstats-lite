@@ -55,7 +55,7 @@ async function getPlayerTotals(type, targetId, playerIds, minMatches){
 
     const query = `SELECT ${PLAYER_MATCHES_TOTALS_COLUMNS}
     FROM nstats_match_players 
-    LEFT JOIN nstats_match_ctf ON nstats_match_ctf.match_id = nstats_match_players.match_id AND nstats_match_ctf.player_id = nstats_match_players.match_id
+    LEFT JOIN nstats_match_ctf ON nstats_match_ctf.match_id = nstats_match_players.match_id AND nstats_match_ctf.player_id = nstats_match_players.player_id
     WHERE nstats_match_players.${column}=? AND nstats_match_players.player_id IN(?) AND nstats_match_players.spectator=0
     GROUP BY nstats_match_players.player_id HAVING total_matches>=?`;
 
@@ -108,21 +108,29 @@ async function deletePlayerMapRankings(mapId, playerIds){
     return await simpleQuery(query, [mapId, playerIds]);
 }
 
-
 async function bulkInsertRankings(targetId, data, type){
 
+
+    let t = "nstats_rankings";
 
     let query = `INSERT INTO nstats_rankings (
         player_id, gametype_id, matches, playtime,
         score, last_active
-    ) VALUES ?`;
+    ) VALUES ? as new ON DUPLICATE KEY UPDATE
+     ${t}.matches = new.matches
+     
+    `;
 
     if(type === "map"){
+        t = "nstats_map_rankings";
         query = `INSERT INTO nstats_map_rankings (
             player_id, map_id, matches, playtime,
             score, last_active
-        ) VALUES ?`;
+        ) VALUES ? as new ON DUPLICATE KEY UPDATE
+     ${t}.matches = new.matches`;
     }
+
+
 
     const insertVars = [];
 
@@ -193,6 +201,12 @@ function _applyTimePenalty(playerData, settings, minutesPlayed){
     playerData.ranking_points *= penalty;
 }
 
+function bPlayerHaveCTFEvents(playerData){
+
+    if(playerData.flag_taken === null) return false;
+    return true;
+}
+
 function _setRankingPoints(settings, playerData){
 
     const t = playerData;
@@ -201,21 +215,17 @@ function _setRankingPoints(settings, playerData){
 
     for(const category of Object.keys(settings)){
 
+        //don't apply penalty until get full total
+        if(category === "penalty") continue;
+
+        if(category === "ctf" && !bPlayerHaveCTFEvents(playerData)){
+            continue;
+        }
+
         for(const [type, typeData] of Object.entries(settings[category])){
 
-            //don't apply penalty until get full total
-            if(category === "penalty") continue;
-                
-            if(playerData[type] !== undefined){
-
-                //no ctf data of this type skip, will always be null for players with no ctf matches
-                if(category === "ctf" && playerData[type] === null){    
-                    playerData[type] = 0;
-                    continue;
-                }
-
-                currentPoints += playerData[type] * typeData;
-            }
+            if(playerData[type] === null) continue;
+            currentPoints += playerData[type] * typeData;
         }
     }
 
@@ -266,14 +276,9 @@ export async function calculateRankings(targetId, playerIds, type){
     for(const playerData of Object.values(totals)){
         _setRankingPoints(settings, playerData);
     }
+ 
 
-    if(type === "gametype"){
-        await deletePlayerRankings(targetId, playerIds);
-    }else{
-        await deletePlayerMapRankings(targetId, playerIds);
-    }
-
-    await bulkInsertRankings(targetId, Object.values(totals), type);
+    return await bulkInsertRankings(targetId, Object.values(totals), type);
 }
 
 
