@@ -518,21 +518,17 @@ export async function insertCaps(playerManager, matchId, mapId, gametypeId, caps
     });
 
 
-    /*const query = `INSERT INTO nstats_ctf_caps (match_id,map_id,gametype_id,cap_type,flag_team,
-    capping_team,taken_timestamp,taken_player,cap_timestamp,cap_player, cap_time, carry_time, drop_time,
-    total_drops, total_covers, unique_carriers) 
-    VALUES ?`;
-
-    const insertVars = [];*/
+    const promises = [];
 
     for(let i = 0; i < caps.length; i++){
 
         const c = caps[i];
 
-        await insertCap(playerManager, matchId, mapId, gametypeId, c);
+        promises.push(insertCap(playerManager, matchId, mapId, gametypeId, c));
     }
 
-    //await bulkInsert(query, insertVars);
+    return await Promise.all(promises);
+
 }
 
 /**

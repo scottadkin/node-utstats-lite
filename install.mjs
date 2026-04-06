@@ -1046,8 +1046,18 @@ async function removeStartOffsets(){
     }
 }
 
+async function dropIndex(table, indexName){
 
-async function bIndexExists(table, indexName){
+    const query = `ALTER TABLE ${table} DROP INDEX ${indexName}`;
+
+    new Message(`Dropping INDEX ${indexName} from ${table}, Non_unique has been changed.`,"note");
+    return await simpleQuery(query);
+}
+
+//MAKE SURE TO ADD CHECK IF UNIQUE OR NOT
+async function bIndexExists(table, indexName, bUnique){
+
+    if(bUnique === undefined) bUnique = false;
 
     const result = await simpleQuery(`SHOW INDEXES FROM ${table}`);
 
@@ -1058,6 +1068,13 @@ async function bIndexExists(table, indexName){
         const keyName = r.Key_name;
 
         if(keyName === indexName){
+
+            const bCurrentUnique = r.Non_unique === 0;
+
+            if(bCurrentUnique !== bUnique){
+                await dropIndex(r.Table, r.Key_name);
+                return false;
+            }
             return true;
         }
     }
@@ -1068,28 +1085,28 @@ async function bIndexExists(table, indexName){
 async function addTableIndexes(){
 
     const targets = [
-        {"table": "nstats_kills", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_ctf_cap_kills", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_match_weapon_stats", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_match_players", "column": "match_id", "index": "match_idx"},
+        {"table": "nstats_kills", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_cap_kills", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_match_weapon_stats", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_match_players", "column": "match_id", "index": "match_idx","bUnique": false},
         //doing 2 different indexes improves player profile page load without making match page querys slower
-        {"table": "nstats_match_players", "column": "player_id", "index": "player_idx"},
-        {"table": "nstats_match_ctf", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_ctf_carry_times", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_ctf_covers", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_ctf_caps", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_ctf_cap_suicides", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_classic_weapon_match_stats", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_match_dom_team_score_history", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_match_dom", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_matches_dom", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx"},
-        {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx"},
-        {"table": "nstats_player_totals", "column": "player_id, gametype_id, map_id", "index": "pgm_idx"},
-        {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx"},
-        {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx"},
-        {"table": "nstats_players", "column": "name", "index": "name_idx"},
-        {"table": "nstats_players", "column": "hash", "index": "hash_idx"},
+        {"table": "nstats_match_players", "column": "player_id", "index": "player_idx","bUnique": false},
+        {"table": "nstats_match_ctf", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_carry_times", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_covers", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_caps", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_cap_suicides", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_classic_weapon_match_stats", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_match_dom_team_score_history", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_match_dom", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_matches_dom", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx","bUnique": false},
+        {"table": "nstats_player_totals", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": false},
+        {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": true},
+        {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx","bUnique": false},
+        {"table": "nstats_players", "column": "name", "index": "name_idx","bUnique": false},
+        {"table": "nstats_players", "column": "hash", "index": "hash_idx","bUnique": false},
         {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},
         {"table": "nstats_rankings", "column": "player_id,gametype_id", "index": "pg_idx", "bUnique": true},
         {"table": "nstats_map_rankings", "column": "player_id,map_id", "index": "pm_idx", "bUnique": true},
@@ -1100,7 +1117,7 @@ async function addTableIndexes(){
 
         const {table, index, column, bUnique} = targets[i];
 
-        if(await bIndexExists(table, index)) continue;
+        if(await bIndexExists(table, index, bUnique)) continue;
         new Message(`Adding index to table ${table}, for column ${column} as ${index}`,"note");
         await simpleQuery(`CREATE ${(bUnique) ? "UNIQUE" : "" } INDEX ${index} ON ${table}(${column})`);
     }
