@@ -464,7 +464,8 @@ const queries = [
             matches int NOT NULL,
             playtime float NOT NULL,
             score float NOT NULL,
-            last_active datetime NOT NULL
+            last_active datetime NOT NULL,
+            UNIQUE INDEX pg_idx (player_id, gametype_id)
             ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_ranking_settings (
@@ -653,7 +654,8 @@ const queries = [
             matches int NOT NULL,
             playtime float NOT NULL,
             score float NOT NULL,
-            last_active datetime NOT NULL
+            last_active datetime NOT NULL,
+            UNIQUE INDEX pm_idx (player_id, map_id)
             ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
 
@@ -1089,6 +1091,8 @@ async function addTableIndexes(){
         {"table": "nstats_players", "column": "name", "index": "name_idx"},
         {"table": "nstats_players", "column": "hash", "index": "hash_idx"},
         {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},
+        {"table": "nstats_rankings", "column": "player_id,gametype_id", "index": "pg_idx", "bUnique": true},
+        {"table": "nstats_map_rankings", "column": "player_id,map_id", "index": "pm_idx", "bUnique": true},
         
     ];
 

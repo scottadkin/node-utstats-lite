@@ -110,27 +110,17 @@ async function deletePlayerMapRankings(mapId, playerIds){
 
 async function bulkInsertRankings(targetId, data, type){
 
+    const t = (type === "map") ? "nstats_map_rankings" : "nstats_rankings";
+    const idColumn = (type === "map") ? "map_id" : "gametype_id";
 
-    let t = "nstats_rankings";
-
-    let query = `INSERT INTO nstats_rankings (
-        player_id, gametype_id, matches, playtime,
+    const query = `INSERT INTO ${t} (
+        player_id, ${idColumn}, matches, playtime,
         score, last_active
     ) VALUES ? as new ON DUPLICATE KEY UPDATE
-     ${t}.matches = new.matches
-     
-    `;
-
-    if(type === "map"){
-        t = "nstats_map_rankings";
-        query = `INSERT INTO nstats_map_rankings (
-            player_id, map_id, matches, playtime,
-            score, last_active
-        ) VALUES ? as new ON DUPLICATE KEY UPDATE
-     ${t}.matches = new.matches`;
-    }
-
-
+     ${t}.matches = new.matches,
+     ${t}.playtime = new.playtime,
+     ${t}.score = new.score,
+     ${t}.last_active = new.last_active`;
 
     const insertVars = [];
 
