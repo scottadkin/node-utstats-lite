@@ -42,8 +42,7 @@ export async function bulkInsert(query, vars, maxPerInsert){
     let startIndex = 0;
 
     if(vars.length < maxPerInsert){
-        await pool.query(query, [vars]);
-        return;
+        return await pool.query(query, [vars]);
     }
 
     while(startIndex < vars.length){
@@ -57,6 +56,15 @@ export async function bulkInsert(query, vars, maxPerInsert){
     return;
 }
 
+
+export async function onDuplicateUpdate(query, vars){
+
+    if(vars.length === 0){
+        return await pool.query(query);
+    }
+
+    return await pool.query(query, [vars]);
+}
 
 
 export async function mysqlGetColumnsAsArray(tableName, bPrefixTableName){

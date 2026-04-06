@@ -1,4 +1,4 @@
-import { bulkInsert, simpleQuery } from "./database.mjs";
+import { bulkInsert, onDuplicateUpdate, simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName, 
     mysqlSetTotalsByDate, sanitizePagePerPage
@@ -532,7 +532,7 @@ export async function deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapI
     }
 
 
-    await Promise.all(promises);
+    return await Promise.all(promises);
 }
 
 export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId){
@@ -594,11 +594,9 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
     ${t}.flag_return_mid = new.flag_return_mid,
     ${t}.flag_return_enemy_base = new.flag_return_enemy_base,
     ${t}.flag_return_save = new.flag_return_save,
-    ${t}.dom_caps = new.dom_caps
-    
-    `;
-    // ${t}. = new.,
-    await bulkInsert(query, insertVars);
+    ${t}.dom_caps = new.dom_caps`;
+
+    return await simpleQuery(query, [insertVars]);
 }
 
 

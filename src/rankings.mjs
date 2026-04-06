@@ -40,9 +40,12 @@ function bValidRankingType(type){
     return VALID_RANKING_TYPES.indexOf(type) !== -1;
 }
 
-async function getPlayerTotals(type, targetId, playerIds){
+async function getPlayerTotals(type, targetId, playerIds, minMatches){
 
     type = type.toLowerCase();
+
+    minMatches = parseInt(minMatches);
+    if(minMatches !== minMatches) minMatches = 0;
 
     if(type !== "gametype" && type !== "map") throw new Error(`Not a valid getPlayerTotals type`);
 
@@ -54,9 +57,9 @@ async function getPlayerTotals(type, targetId, playerIds){
     FROM nstats_match_players 
     LEFT JOIN nstats_match_ctf ON nstats_match_ctf.match_id = nstats_match_players.match_id AND nstats_match_ctf.player_id = nstats_match_players.match_id
     WHERE nstats_match_players.${column}=? AND nstats_match_players.player_id IN(?) AND nstats_match_players.spectator=0
-    GROUP BY nstats_match_players.player_id`;
+    GROUP BY nstats_match_players.player_id HAVING total_matches>=?`;
 
-    return await simpleQuery(query, [targetId, playerIds]);
+    return await simpleQuery(query, [targetId, playerIds, minMatches]);
 
 }
 
@@ -239,20 +242,6 @@ function _setRankingPoints(settings, playerData){
 }
 
 
-function _removePlayersUnderMatchLimit(data, minMatches){
-
-    const players = {};
-
-    for(const player of Object.values(data)){
-
-        if(player.total_matches >= minMatches){
-            players[player.player_id] = player;
-        }
-    }
-
-
-    return players;
-}
 
 export async function calculateRankings(targetId, playerIds, type){
 
@@ -264,33 +253,24 @@ export async function calculateRankings(targetId, playerIds, type){
 
     if(!bValidRankingType(type)) throw new Error(`Not a valid type for calculateRankings`);
 
-    let totals =  await getPlayerTotals(type, targetId, playerIds)
-
     const settings = await getRankingSettings();
 
     if(settings.penalty === undefined) throw new Error("Penalty settings are missing");
+
+    const minKey = (type === "gametype") ? "min_matches" : "map_min_matches"
+
+    const minMatches = settings.penalty?.[minKey] ?? 0;
+
+    const totals = await getPlayerTotals(type, targetId, playerIds, minMatches);
 
     for(const playerData of Object.values(totals)){
         _setRankingPoints(settings, playerData);
     }
 
-
     if(type === "gametype"){
         await deletePlayerRankings(targetId, playerIds);
     }else{
-
         await deletePlayerMapRankings(targetId, playerIds);
-    }
-
-    let minMatches = settings.penalty?.min_matches ?? null;
-
-    if(type === "map"){
-
-        minMatches = settings.penalty?.map_min_matches ?? null;
-    }
-    
-    if(minMatches !== null){
-        totals = _removePlayersUnderMatchLimit(totals, minMatches);
     }
 
     await bulkInsertRankings(targetId, Object.values(totals), type);
