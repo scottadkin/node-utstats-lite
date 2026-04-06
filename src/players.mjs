@@ -810,7 +810,7 @@ export async function getPlayerRecentMatches(playerId, gametype, map, page, perP
 
 export async function getAllGametypeIds(gametypeId){
 
-    const query = `SELECT player_id FROM nstats_player_totals WHERE gametype_id=?`;
+    const query = `SELECT player_id FROM nstats_player_totals WHERE gametype_id=? AND map_id=0`;
 
     const result = await simpleQuery(query, [gametypeId]);
 

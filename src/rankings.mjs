@@ -388,32 +388,39 @@ async function deleteAllMapRankings(){
     await simpleQuery(query);
 }
 
+
+
 export async function recalculateAllRankings(){
 
+    //should probably limit max amount of promises at a time pug communities 
+    // should be ok with limited amount of gametype and maps
     const gametypeIds = await getAllGametypeIds();
+
+    const gametypePromises = [];
+
+    for(let i = 0; i < gametypeIds.length; i++){
+
+        gametypePromises.push(recalculateGametype(gametypeIds[i]));
+    }
 
     await deleteAllPlayerRankings();
 
-    for(let i = 0; i < gametypeIds.length; i++){
-        
-        const g = gametypeIds[i];
-
-        const playerIds = await getAllPlayerGametypeIds(g);
-
-        await calculateRankings(g, playerIds);
-    }
+    await Promise.all(gametypePromises);
 
     await deleteAllMapRankings();
 
     const mapIds = await getAllMapIds();
 
+    const mapPromises = [];
+
     for(let i = 0; i < mapIds.length; i++){
 
         const m = mapIds[i];
 
-        await recalculateMap(m);
+        mapPromises.push(recalculateMap(m));
     }
 
+    await Promise.all(mapPromises);
 
     return `Recalculated ${gametypeIds.length} gametype rankings, and ${mapIds.length} map rankings`;
 }
