@@ -626,7 +626,7 @@ const queries = [
         flag_return_enemy_base float NOT NULL,
         flag_return_save float NOT NULL,
         dom_caps float NOT NULL,
-        INDEX pmg_idx (player_id,map_id,gametype_id),
+        UNIQUE INDEX pmg_idx (player_id,map_id,gametype_id),
         PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
 
@@ -1088,17 +1088,17 @@ async function addTableIndexes(){
         {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx"},
         {"table": "nstats_players", "column": "name", "index": "name_idx"},
         {"table": "nstats_players", "column": "hash", "index": "hash_idx"},
-        {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx"},
+        {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},
         
     ];
 
     for(let i = 0; i < targets.length; i++){
 
-        const {table, index, column} = targets[i];
+        const {table, index, column, bUnique} = targets[i];
 
         if(await bIndexExists(table, index)) continue;
         new Message(`Adding index to table ${table}, for column ${column} as ${index}`,"note");
-        await simpleQuery(`CREATE INDEX ${index} ON ${table}(${column})`);
+        await simpleQuery(`CREATE ${(bUnique) ? "UNIQUE" : "" } INDEX ${index} ON ${table}(${column})`);
     }
 }
 

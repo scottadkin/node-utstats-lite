@@ -288,8 +288,6 @@ export class MatchParser{
         await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
 
         await this.players.updateMapAverages(this.gametype.id, this.map.id);
-
-       
         //await calcPlayersMapResults(this.map.id, this.gametype.id);
 
         await this.weapons.updateMapTotals(this.map.id);

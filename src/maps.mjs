@@ -535,7 +535,6 @@ export async function deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapI
     await Promise.all(promises);
 }
 
-
 export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId){
 
     if(players.length === 0) return;
@@ -551,10 +550,12 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
             p.headshots, p.item_amp,p.item_belt,p.item_boots,p.item_body,p.item_pads,p.item_invis,p.item_shp,
             p?.flag_taken ?? 0, p?.flag_pickup ?? 0, p?.flag_drop ?? 0, p?.flag_assist ?? 0, p?.flag_cover ?? 0,
             p?.flag_seal ?? 0, p?.flag_cap ?? 0, p?.flag_kill ?? 0, p?.flag_return ?? 0, p?.flag_return_base ?? 0,
-            p?.flag_return_mid ?? 0, p?.flag_return_enemy_base ?? 0, p?.flag_return_save ?? 0, p?.dom_caps ?? 0
+            p?.flag_return_mid ?? 0, p?.flag_return_enemy_base ?? 0, p?.flag_return_save ?? 0, p?.dom_caps ?? 0,
+
         ]);
     }
 
+    const t = "nstats_player_map_minute_averages";
 
     const query = `INSERT INTO nstats_player_map_minute_averages 
     (player_id, map_id, gametype_id, total_playtime, total_matches, score, frags, kills, deaths, suicides, team_kills,
@@ -562,8 +563,41 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
     flag_taken, flag_pickup, flag_drop, flag_assist, flag_cover, flag_seal, flag_cap, flag_kills, flag_return, flag_return_base, 
     flag_return_mid, flag_return_enemy_base, flag_return_save, dom_caps
 
-    ) VALUES ?`;
-
+    ) VALUES ? AS new ON DUPLICATE KEY UPDATE 
+     
+    ${t}.total_playtime = new.total_playtime,
+    ${t}.total_matches = new.total_matches,
+    ${t}.score = new.score,
+    ${t}.frags = new.frags,
+    ${t}.kills = new.kills,
+    ${t}.deaths = new.deaths,
+    ${t}.suicides = new.suicides,
+    ${t}.team_kills = new.team_kills,
+    ${t}.headshots = new.headshots,
+    ${t}.item_amp = new.item_amp,
+    ${t}.item_belt = new.item_belt,
+    ${t}.item_boots = new.item_boots,
+    ${t}.item_body = new.item_body,
+    ${t}.item_pads = new.item_pads,
+    ${t}.item_invis = new.item_invis,
+    ${t}.item_shp = new.item_shp,
+    ${t}.flag_taken = new.flag_taken,
+    ${t}.flag_pickup = new.flag_pickup,
+    ${t}.flag_drop = new.flag_drop,
+    ${t}.flag_assist = new.flag_assist,
+    ${t}.flag_cover = new.flag_cover,
+    ${t}.flag_seal = new.flag_seal,
+    ${t}.flag_cap = new.flag_cap,
+    ${t}.flag_kills = new.flag_kills,
+    ${t}.flag_return = new.flag_return,
+    ${t}.flag_return_base = new.flag_return_base,
+    ${t}.flag_return_mid = new.flag_return_mid,
+    ${t}.flag_return_enemy_base = new.flag_return_enemy_base,
+    ${t}.flag_return_save = new.flag_return_save,
+    ${t}.dom_caps = new.dom_caps
+    
+    `;
+    // ${t}. = new.,
     await bulkInsert(query, insertVars);
 }
 

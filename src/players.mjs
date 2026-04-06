@@ -1098,7 +1098,7 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
         }
 
 
-        await deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapId);
+        //await deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapId);
         await updateCurrentPlayerMapAverages(data, gametypeId, mapId, bFoundCTF);
     }
 }
