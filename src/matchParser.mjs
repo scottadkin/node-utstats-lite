@@ -60,6 +60,7 @@ export class MatchParser{
         this.teamScores = [0,0,0,0];
         this.soloWinner = 0;
         this.soloWinnerScore = 0;
+        this.bLogHaveLiteDamageStats = false;
 
 
         //check if utstats-lite log because stat_player behaves differently(merges player stats into one for multiple reconnects) 
@@ -110,7 +111,7 @@ export class MatchParser{
         this.players.bIgnoreBots = this.bIgnoreBots;
 
         await this.players.setPlayerMasterIds(this.match.date);
-
+        
 
         this.kills.setAllDeaths();
         //append (insta) if game is instagib
@@ -143,9 +144,18 @@ export class MatchParser{
         this.items.setPlayerStats(this.players);
 
   
-        this.damageManager.setPlayerDamage(this.players);
+        if(this.bLogHaveLiteDamageStats){
+            this.damageManager.setPlayerDamage(this.players);
+        }
+
         await this.weapons.setWeaponIds();
-        this.classicWeaponStats.setPlayerStats(this.weapons, this.players);
+       
+        if(this.classicWeaponStats.lines.length > 0){
+            
+            this.classicWeaponStats.setPlayerStats(this.weapons, this.players);
+            
+        }
+        
         
         this.players.setPlayerPingStats();
 
@@ -170,13 +180,11 @@ export class MatchParser{
 
         
 
-
         await Promise.all([
             this.server.setId(),
             this.gametype.setId(this.totalTeams, totalPlayers, this.bAppendTeamSizes),
             this.map.setId(),
         ]);
-
        
 
         this.matchId = await createMatch(
@@ -213,6 +221,7 @@ export class MatchParser{
         }
 
         await Promise.all([this.server.updateTotals(), this.gametype.updateTotals()]);
+        
 
         //set player to w, d, or l
         this.players.setMatchResult(
@@ -229,7 +238,8 @@ export class MatchParser{
             this.players.insertPlayerMatchData(this.matchId, this.match.date, this.gametype.id, this.map.id),
             this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id)
         ]);
- 
+
+
 
         if(this.dom.bAnyData){
 
@@ -240,30 +250,35 @@ export class MatchParser{
             ]);
             
         }
+        
+        
        // await this.weapons.setWeaponIds();
         this.kills.setWeaponIds(this.weapons);
         this.kills.setPlayerIds(this.players);
         await this.kills.insertKills(this.matchId);
         // this.players.debugListAllPlayers();
-
+    
+        
         this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides);
         await this.weapons.insertPlayerMatchStats(this.matchId, this.gametype.id, this.map.id);
+        
         await this.weapons.updatePlayerTotals(this.players.players);
-
-
+  
+        
         await Promise.all([
             this.players.updatePlayerTotals(this.match.date, this.gametype.id, this.map.id),
             this.ctf.updatePlayerTotals(this.players.players)
         ]);
 
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
+     
         await this.map.updateTotals();
-
+       
         const uniquePlayerIds = this.players.getUniquePlayerIds();
-
 
         await calculateRankings(this.gametype.id, uniquePlayerIds);
         await calculateRankings(this.map.id, uniquePlayerIds, "map");
+   
         
         const hashVars = [this.map.name, 
             this.gametype.name, 
@@ -284,16 +299,21 @@ export class MatchParser{
 
         await setMatchHash(this.matchId, hashVars.toString());
 
-        await this.damageManager.insertMatchData(this.players.players, this.matchId, this.map.id, this.gametype.id);
-        await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
+        if(this.bLogHaveLiteDamageStats){
+            await this.damageManager.insertMatchData(this.players.players, this.matchId, this.map.id, this.gametype.id);
+            await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
+        }
+        
+
 
         await this.players.updateMapAverages(this.gametype.id, this.map.id);
         //await calcPlayersMapResults(this.map.id, this.gametype.id);
 
         await this.weapons.updateMapTotals(this.map.id);
 
-        await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
-
+        if(this.classicWeaponStats.lines.length > 0){
+            await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
+        }
 
         //this.players.debugListAllPlayers();
     }
@@ -601,6 +621,7 @@ export class MatchParser{
 
 
             if(this.damageManager.parseString(subString)){
+                this.bLogHaveLiteDamageStats = true;
                 continue;
             }   
         }
