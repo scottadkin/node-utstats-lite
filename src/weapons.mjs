@@ -235,12 +235,20 @@ async function bulkInsertPlayerTotals(totals){
         }
     }
 
-    await deleteMultiplePlayerTotals([...playerIds]);
+    //await deleteMultiplePlayerTotals([...playerIds]);
+
+    const t = "nstats_player_totals_weapons";
 
     const query = `INSERT INTO nstats_player_totals_weapons (
         player_id, gametype_id, weapon_id,
         total_matches, kills, deaths, suicides, team_kills, eff
-    ) VALUES ?`;
+    ) VALUES ? as new ON DUPLICATE KEY UPDATE
+    ${t}.total_matches = new.total_matches,
+    ${t}.kills = new.kills,
+    ${t}.deaths = new.deaths,
+    ${t}.suicides = new.suicides,
+    ${t}.team_kills = new.team_kills,
+    ${t}.eff = new.eff`;
 
     await bulkInsert(query, insertVars);
 }
@@ -252,7 +260,7 @@ export async function updatePlayerTotals(playerIds){
     const data = await getAllPlayerMatchData(playerIds);
 
     const totals = {};
-
+    
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];

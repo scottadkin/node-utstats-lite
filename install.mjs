@@ -693,7 +693,8 @@ const queries = [
         cap_against int NOT NULL,
         cap_offset int NOT NULL,
         points int NOT NULL,
-        INDEX mgp_idx (map_id, gametype_id, player_id)
+        INDEX mgp_idx (map_id, gametype_id, player_id),
+        UNIQUE INDEX pgm_idx (player_id,gametype_id,map_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
         `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
@@ -1106,7 +1107,7 @@ async function addTableIndexes(){
         {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx","bUnique": false},
         {"table": "nstats_player_totals", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": false},
         {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": true},
-        {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx","bUnique": false},
+        {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx","bUnique": true},
         {"table": "nstats_players", "column": "name", "index": "name_idx","bUnique": false},
         {"table": "nstats_players", "column": "hash", "index": "hash_idx","bUnique": false},
         {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},

@@ -162,6 +162,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
         new Message(`MatchId: ${m.matchId}, Server: ${m.server.name}, Gametype: ${m.gametype.name}, Map: ${m.map.name}`,"note");
 
         if(m.ctf.bMatchCTF){
+            new Message(`Updating CTF League`,"note");
             await updateCTFLeague(m, ctfLeagueSettings);
         }
 
