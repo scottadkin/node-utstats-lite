@@ -580,7 +580,7 @@ export class PlayerManager{
 
     getSoloWinner(totalTeams){
 
-        if(totalTeams >= 2) return {"id": 0, "score": 0};
+        if(totalTeams >= 2) return null;
 
         const basicPlayers = [];
 
@@ -743,11 +743,11 @@ export class PlayerManager{
     }
 
 
-    async updateMapAverages(gametypeId, mapId){
+    async updateMapAverages(gametypeId, mapId, bCTF, bDom){
 
         const playerIds = this.getUniquePlayerIds();
 
-        await updateMapAverages(playerIds, gametypeId, mapId);
+        await updateMapAverages(playerIds, gametypeId, mapId, bCTF, bDom);
     }
 
 

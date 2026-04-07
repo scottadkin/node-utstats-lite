@@ -453,65 +453,53 @@ export async function getAllMatchIds(id){
 }
 
 
-export async function getPlayerMapTotals(playerIds, mapId){
+export async function getPlayerMapTotals(playerIds, mapId, bCTF, bDom){
 
-    if(playerIds.length === 0) return {"data": [], "bFoundCTF": false, "bFoundDom": false};
+    if(playerIds.length === 0) return [];
 
+    const playerT = "nstats_match_players";
+    const ctfT = "nstats_match_ctf";
+    const domT = "nstats_match_dom";
 
-    const query = `SELECT player_id, COUNT(*) as total_matches, SUM(time_on_server) as playtime, SUM(score) as score,SUM(frags) as frags,
-    SUM(kills) as kills, SUM(deaths) as deaths, SUM(suicides) as suicides, SUM(team_kills) as team_kills,
-    SUM(headshots) as headshots,
+    const query = `SELECT 
+    ${playerT}.player_id, 
+    COUNT(*) as total_matches, 
+    SUM(time_on_server) as playtime, 
+    SUM(score) as score,
+    SUM(frags) as frags,
+    SUM(kills) as kills, 
+    SUM(deaths) as deaths, 
+    SUM(suicides) as suicides, 
+    SUM(team_kills) as team_kills,
+    SUM( headshots) as headshots,
     SUM(item_amp) as item_amp,
-    SUM(item_belt) as item_belt,
+    SUM( item_belt) as item_belt,
     SUM(item_boots) as item_boots,
-    SUM(item_body) as item_body,
+    SUM( item_body) as item_body,
     SUM(item_pads) as item_pads,
     SUM(item_invis) as item_invis,
-    SUM(item_shp) as item_shp
-    FROM nstats_match_players WHERE player_id IN (?) AND map_id=? GROUP BY player_id`;
-
-    const data = await simpleQuery(query, [playerIds, mapId]);
-
-    const ctfData = await getPlayerCTFMapTotals(playerIds, mapId);
-    const domData = await getPlayerDOMMapTotals(playerIds, mapId);
-
-    let bFoundCTF = false;
-    let bFoundDOM = false;
-
-    if(Object.keys(ctfData).length > 0){
-
-        bFoundCTF = true;
-    }
-
-    if(Object.keys(domData).length > 0){
-
-        bFoundDOM = true;
-    }
-        
-    for(let i = 0; i < data.length; i++){
-
-        const d = data[i];
-
-        const ctf = ctfData[d.player_id];
-        const dom = domData[d.player_id];
+    SUM(item_shp) as item_shp,
+    SUM(flag_taken) as flag_taken,
+    SUM(flag_pickup) as flag_pickup, 
+    SUM(flag_drop) as flag_drop, 
+    SUM(flag_assist) as flag_assist, 
+    SUM(flag_cover) as flag_cover,
+    SUM(flag_seal) as flag_seal, 
+    SUM(flag_cap) as flag_cap, 
+    SUM(flag_kill) as flag_kill, 
+    SUM(flag_return) as flag_return, 
+    SUM(flag_return_base) as flag_return_base, 
+    SUM(flag_return_mid) as flag_return_mid, 
+    SUM(flag_return_enemy_base) as flag_return_enemy_base, 
+    SUM(flag_return_save) as flag_return_save,
+    SUM(${domT}.total_caps) as dom_caps 
+    FROM ${playerT} 
+    LEFT JOIN ${ctfT} ON ${playerT}.player_id=${ctfT}.player_id AND ${playerT}.match_id=${ctfT}.match_id
+    LEFT JOIN ${domT} ON ${playerT}.player_id=${domT}.player_id AND ${playerT}.match_id=${domT}.match_id
+    WHERE ${playerT}.player_id IN (?) AND ${playerT}.map_id=? GROUP BY ${playerT}.player_id`;
 
 
-        if(ctf !== undefined){
-
-            data[i] = {...data[i], ...ctf};
-        }
-
-        if(dom !== undefined){
-            data[i] = {...data[i], ...dom};    
-        }
-
-    }
-    
-    
-    //get dom totals
-
-
-    return {data, bFoundCTF, bFoundDOM};
+    return await simpleQuery(query, [playerIds, mapId]);
 
 }
 

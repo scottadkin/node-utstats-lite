@@ -73,13 +73,16 @@ export class MatchParser{
     async main(){
 
         
-
+        
         //set matchStart, matchEnd, hardcore, skip parsing log in some conditions
         this.preliminaryChecks();
+        
 
         this.players.createPlayers(this.lines, this.matchStart, this.matchEnd, this.gametype.gameSpeed);
  
+        
         this.parseLines();
+        
 
         if(this.bMapChangeEnd){
             new Message(`Match end type was map change, skipping log parsing.`,"error");
@@ -112,6 +115,7 @@ export class MatchParser{
 
         await this.players.setPlayerMasterIds(this.match.date);
         
+        
 
         this.kills.setAllDeaths();
         //append (insta) if game is instagib
@@ -121,7 +125,9 @@ export class MatchParser{
         this.ctf.setPlayerStats(this.players, this.kills);
 
         
+        
         this.ctf.bAnyCTFEvents(this.players.players);
+
 
         if(this.dom.bAnyData){
 
@@ -141,7 +147,11 @@ export class MatchParser{
         }
         
         this.kills.setPlayerSpecialEvents(this.players);
+        
+        
         this.items.setPlayerStats(this.players);
+       
+                
 
   
         if(this.bLogHaveLiteDamageStats){
@@ -162,7 +172,11 @@ export class MatchParser{
         this.players.setCountries();
         this.players.matchEnded(this.matchStart, this.matchEnd);
 
+        
+
         const totalPlayers = this.players.getTotalUniquePlayers(this.totalTeams);
+
+        
 
         if(totalPlayers < this.minPlayers){
             new Message(`Match has less then the minimum players limit (found ${totalPlayers} out of a target of ${this.minPlayers}).`,"error");
@@ -177,15 +191,13 @@ export class MatchParser{
             this.soloWinnerScore = soloStats.score;
         }
 
-
-        
-
         await Promise.all([
             this.server.setId(),
             this.gametype.setId(this.totalTeams, totalPlayers, this.bAppendTeamSizes),
             this.map.setId(),
         ]);
        
+        
 
         this.matchId = await createMatch(
             this.server.id, 
@@ -234,12 +246,14 @@ export class MatchParser{
             this.soloWinner
         );
 
+        
+
         await Promise.all([
             this.players.insertPlayerMatchData(this.matchId, this.match.date, this.gametype.id, this.map.id),
             this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id)
         ]);
 
-
+        
 
         if(this.dom.bAnyData){
 
@@ -251,19 +265,21 @@ export class MatchParser{
             
         }
         
-        
-       // await this.weapons.setWeaponIds();
+
+       
         this.kills.setWeaponIds(this.weapons);
+
         this.kills.setPlayerIds(this.players);
+  
         await this.kills.insertKills(this.matchId);
-        // this.players.debugListAllPlayers();
     
-        
         this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides);
+
+        
         await this.weapons.insertPlayerMatchStats(this.matchId, this.gametype.id, this.map.id);
         
         await this.weapons.updatePlayerTotals(this.players.players);
-  
+        
         
         await Promise.all([
             this.players.updatePlayerTotals(this.match.date, this.gametype.id, this.map.id),
@@ -304,12 +320,10 @@ export class MatchParser{
             await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
         }
         
-
-
-        await this.players.updateMapAverages(this.gametype.id, this.map.id);
-        //await calcPlayersMapResults(this.map.id, this.gametype.id);
-
+        await this.players.updateMapAverages(this.gametype.id, this.map.id, this.ctf.bMatchCTF, this.dom.bAnyData);
+  
         await this.weapons.updateMapTotals(this.map.id);
+
 
         if(this.classicWeaponStats.lines.length > 0){
             await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
