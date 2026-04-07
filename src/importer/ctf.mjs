@@ -239,20 +239,20 @@ export class CTF{
 
     async updatePlayerTotals(players){
 
-        if(this.bMatchCTF){
+        if(!this.bMatchCTF) return;
 
-            const playerIds = [];
+        const playerIds = [];
 
-            for(let i = 0; i < players.length; i++){
+        for(let i = 0; i < players.length; i++){
 
-                const p = players[i];
+            const p = players[i];
 
-                if(p.playtime === 0) continue;
-                playerIds.push(p.masterId);
-            }
-
-            await updatePlayerTotals(playerIds);
+            if(p.playtime === 0) continue;
+            playerIds.push(p.masterId);
         }
+
+        await updatePlayerTotals(playerIds);
+       
     }
 
 

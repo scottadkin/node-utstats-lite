@@ -1109,7 +1109,8 @@ async function addTableIndexes(){
         {"table": "nstats_players", "column": "hash", "index": "hash_idx","bUnique": false},
         {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},
         {"table": "nstats_rankings", "column": "player_id,gametype_id", "index": "pg_idx", "bUnique": true},
-        {"table": "nstats_map_rankings", "column": "player_id,map_id", "index": "pm_idx", "bUnique": true},
+        {"table": "nstats_map_rankings", "column": "player_id,map_id", "index": "pm_idx", "bUnique": true},   
+        {"table": "nstats_map_weapon_totals", "column": "map_id,weapon_id", "index": "mw_idx","bUnique": true},
         
     ];
 
