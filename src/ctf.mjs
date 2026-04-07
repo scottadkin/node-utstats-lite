@@ -1208,6 +1208,7 @@ export async function getMatchLadderJSON(id){
     ${mt}.flag_cap,
     ${mt}.flag_kill,
     ${mt}.flag_return,
+    ${mt}.flag_return_save,
     ${pmt}.country,
     ${pmt}.team,
     ${pmt}.match_result,
@@ -1224,7 +1225,7 @@ export async function getMatchLadderJSON(id){
 
     for(let i = 0; i < result.length; i++){
 
-        players.push(toJSONAPIKeyNames(result[i]));
+        players.push(toJSONAPIKeyNames(result[i], {"flag_return_save": "flagSave"}));
         result[i].team = getTeamName(result[i].team);
         result[i].matchResult = toMatchResultString(result[i].matchResult);
     }
