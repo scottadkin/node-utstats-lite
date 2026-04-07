@@ -137,8 +137,24 @@ async function bulkInsertEntries(mapId, gametypeId, tableData){
         ]);
     }
 
-    const query = `INSERT INTO nstats_player_ctf_league (player_id,gametype_id,map_id,first_match,last_match,
-    total_matches,playtime,wins,draws,losses,winrate,cap_for,cap_against,cap_offset,points) VALUES ?`;
+    const t = "nstats_player_ctf_league";
+
+    const query = `INSERT INTO ${t} (player_id,gametype_id,map_id,first_match,last_match,
+    total_matches,playtime,wins,draws,losses,winrate,cap_for,cap_against,cap_offset,points) VALUES ? as new
+    ON DUPLICATE KEY UPDATE
+    ${t}.first_match = new.first_match,
+    ${t}.last_match = new.last_match,
+    ${t}.total_matches = new.total_matches,
+    ${t}.playtime = new.playtime,
+    ${t}.wins = new.wins,
+    ${t}.draws = new.draws,
+    ${t}.losses = new.losses,
+    ${t}.winrate = new.winrate,
+    ${t}.cap_for = new.cap_for,
+    ${t}.cap_against = new.cap_against,
+    ${t}.cap_offset = new.cap_offset,
+    ${t}.points = new.points
+    `;
 
     await bulkInsert(query, insertVars);
 }
@@ -151,7 +167,9 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
     const ctfGametypes = await getCTFGametypes();
 
     const history = await getPlayerHistory(mapId, gametypeId, maxDays, ctfGametypes);
+
     const matchResults = await getMatchesTeamResults(history.matchIds);
+
     const table = {};
 
     for(let [matchId, d] of Object.entries(history.matchesToPlayers)){
@@ -187,7 +205,8 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
     }
 
 
-    await deleteAllEntries(mapId, gametypeId);
+    //await deleteAllEntries(mapId, gametypeId);
+
     await bulkInsertEntries(mapId, gametypeId, table);
 }
 

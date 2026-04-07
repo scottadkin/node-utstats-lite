@@ -644,7 +644,8 @@ const queries = [
             kills_per_min FLOAT NOT NULL,
             deaths_per_min FLOAT NOT NULL,
             team_kills_per_min FLOAT NOT NULL,
-            suicides_per_min FLOAT NOT NULL
+            suicides_per_min FLOAT NOT NULL, 
+            UNIQUE INDEX mw_idx (map_id,weapon_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
@@ -1101,6 +1102,7 @@ async function addTableIndexes(){
         {"table": "nstats_match_dom", "column": "match_id", "index": "match_idx","bUnique": false},
         {"table": "nstats_matches_dom", "column": "match_id", "index": "match_idx","bUnique": false},
         {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx","bUnique": false},
+        //faster player profile loading
         {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx","bUnique": false},
         {"table": "nstats_player_totals", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": false},
         {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": true},
@@ -1111,6 +1113,8 @@ async function addTableIndexes(){
         {"table": "nstats_rankings", "column": "player_id,gametype_id", "index": "pg_idx", "bUnique": true},
         {"table": "nstats_map_rankings", "column": "player_id,map_id", "index": "pm_idx", "bUnique": true},   
         {"table": "nstats_map_weapon_totals", "column": "map_id,weapon_id", "index": "mw_idx","bUnique": true},
+        //faster ctf league calculating
+        {"table": "nstats_player_ctf_league", "column": "player_id,gametype_id,map_id", "index": "pgm_idx","bUnique": true},
         
     ];
 
