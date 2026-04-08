@@ -72,23 +72,15 @@ export class MatchParser{
 
     async main(){
 
-        
-        
         //set matchStart, matchEnd, hardcore, skip parsing log in some conditions
         this.preliminaryChecks();
-        
-
         this.players.createPlayers(this.lines, this.matchStart, this.matchEnd, this.gametype.gameSpeed);
- 
-        
         this.parseLines();
         
-
         if(this.bMapChangeEnd){
             new Message(`Match end type was map change, skipping log parsing.`,"error");
             throw new Error("MAP CHANGE END");
         }
-
 
         if(this.matchStart === -1){
             new Message(`There was no match start event in this log.`, "error");
@@ -105,29 +97,20 @@ export class MatchParser{
 
 
         if(this.matchLength < this.minPlaytime){
-
             new Message(`Match length is shorter than minPlaytime (${this.minPlaytime} seconds).`,"error");
             throw new Error("MIN PLAYTIME");
         }   
 
-
         this.players.bIgnoreBots = this.bIgnoreBots;
-
         await this.players.setPlayerMasterIds(this.match.date);
-        
-        
+
 
         this.kills.setAllDeaths();
         //append (insta) if game is instagib
         this.gametype.updateName();
 
-        //console.log(this.ctf.flags);
         this.ctf.setPlayerStats(this.players, this.kills);
-
-        
-        
         this.ctf.bAnyCTFEvents(this.players.players);
-
 
         if(this.dom.bAnyData){
 
@@ -147,36 +130,23 @@ export class MatchParser{
         }
         
         this.kills.setPlayerSpecialEvents(this.players);
-        
-        
         this.items.setPlayerStats(this.players);
-       
-                
 
-  
         if(this.bLogHaveLiteDamageStats){
             this.damageManager.setPlayerDamage(this.players);
         }
 
         await this.weapons.setWeaponIds();
        
-        if(this.classicWeaponStats.lines.length > 0){
-            
-            this.classicWeaponStats.setPlayerStats(this.weapons, this.players);
-            
-        }
-        
+        if(this.classicWeaponStats.lines.length > 0){          
+            this.classicWeaponStats.setPlayerStats(this.weapons, this.players);        
+        } 
         
         this.players.setPlayerPingStats();
-
         this.players.setCountries();
         this.players.matchEnded(this.matchStart, this.matchEnd);
 
-        
-
         const totalPlayers = this.players.getTotalUniquePlayers(this.totalTeams);
-
-        
 
         if(totalPlayers < this.minPlayers){
             new Message(`Match has less then the minimum players limit (found ${totalPlayers} out of a target of ${this.minPlayers}).`,"error");
@@ -186,7 +156,6 @@ export class MatchParser{
         const soloStats = this.players.getSoloWinner(this.totalTeams);
 
         if(soloStats !== null){
-
             this.soloWinner = soloStats.id;
             this.soloWinnerScore = soloStats.score;
         }
@@ -196,8 +165,6 @@ export class MatchParser{
             this.gametype.setId(this.totalTeams, totalPlayers, this.bAppendTeamSizes),
             this.map.setId(),
         ]);
-       
-        
 
         this.matchId = await createMatch(
             this.server.id, 
@@ -223,9 +190,7 @@ export class MatchParser{
             this.gametype.targetScore,
             this.gametype.timeLimit,
             this.gametype.mutators
-        );
-
-       
+        ); 
 
         if(this.matchId === null){
             new Message(`Failed to create match id.`,"error")
@@ -234,7 +199,6 @@ export class MatchParser{
 
         await Promise.all([this.server.updateTotals(), this.gametype.updateTotals()]);
         
-
         //set player to w, d, or l
         this.players.setMatchResult(
             [
@@ -246,14 +210,10 @@ export class MatchParser{
             this.soloWinner
         );
 
-        
-
         await Promise.all([
             this.players.insertPlayerMatchData(this.matchId, this.match.date, this.gametype.id, this.map.id),
             this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id)
-        ]);
-
-        
+        ]);   
 
         if(this.dom.bAnyData){
 
@@ -261,23 +221,15 @@ export class MatchParser{
                 this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id),
                 this.dom.insertMatchResult(this.matchId),
                 this.dom.saveScoreIntervals(this.matchId),
-            ]);
-            
+            ]);        
         }
-        
-
-       
+          
         this.kills.setWeaponIds(this.weapons);
-
         this.kills.setPlayerIds(this.players);
-  
         await this.kills.insertKills(this.matchId);
     
-        this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides);
-
-        
-        await this.weapons.insertPlayerMatchStats(this.matchId, this.gametype.id, this.map.id);
-        
+        this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides); 
+        await this.weapons.insertPlayerMatchStats(this.matchId, this.gametype.id, this.map.id);  
         await this.weapons.updatePlayerTotals(this.players.players);
         
         
@@ -287,15 +239,13 @@ export class MatchParser{
         ]);
 
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
-     
         await this.map.updateTotals();
        
         const uniquePlayerIds = this.players.getUniquePlayerIds();
 
         await calculateRankings(this.gametype.id, uniquePlayerIds);
         await calculateRankings(this.map.id, uniquePlayerIds, "map");
-   
-        
+       
         const hashVars = [this.map.name, 
             this.gametype.name, 
             this.server.name, 
@@ -323,7 +273,6 @@ export class MatchParser{
         await this.players.updateMapAverages(this.gametype.id, this.map.id, this.ctf.bMatchCTF, this.dom.bAnyData);
   
         await this.weapons.updateMapTotals(this.map.id);
-
 
         if(this.classicWeaponStats.lines.length > 0){
             await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
@@ -414,13 +363,8 @@ export class MatchParser{
         this.gametype.bTournamentMode = false;
 
         if(tournamentResult !== null){
-
             this.gametype.bTournamentMode = tournamentResult[1].toLowerCase() === "true";
         }
-
-
-
-
     }
 
 

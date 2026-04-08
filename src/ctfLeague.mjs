@@ -34,7 +34,7 @@ async function getPlayerHistory(mapId, gametypeId, maxAgeDays, ctfGametypes){
         vars.push(ctfGametypes);
     }
 
-    const result = await simpleQuery(`${query}${where}`, vars);
+    const result = await simpleQuery(`${query}${where} ORDER BY match_date DESC`, vars);
 
     const matchIds = new Set();
     const matchesToPlayers = {};
@@ -172,9 +172,10 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
 
     const table = {};
 
-    for(let [matchId, d] of Object.entries(history.matchesToPlayers)){
+    for(let x = 0; x < history.matchIds.length; x++){
 
-        matchId = parseInt(matchId);
+        const matchId = history.matchIds[x];
+        const d = history.matchesToPlayers[matchId];
 
         for(let i = 0; i < d.length; i++){
 
@@ -203,6 +204,7 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
             }
         }  
     }
+
 
 
     //await deleteAllEntries(mapId, gametypeId);
