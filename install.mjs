@@ -353,7 +353,7 @@ const queries = [
             suicides int(11) NOT NULL,
             team_kills int(11) NOT NULL,
             eff float NOT NULL,
-            INDEX pgw_idx (player_id, gametype_id, weapon_id)
+            UNIQUE INDEX pgw_idx (player_id, gametype_id, weapon_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals_ctf (
@@ -388,7 +388,7 @@ const queries = [
             max_flag_return_enemy_base int NOT NULL,
             flag_return_save int NOT NULL,
             max_flag_return_save int NOT NULL,
-            INDEX pgm_idx (player_id, gametype_id, map_id)
+            UNIQUE INDEX pgm_idx (player_id, gametype_id, map_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_users (
