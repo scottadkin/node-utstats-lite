@@ -89,6 +89,46 @@ export async function createMasterPlayer(name, ip, hwid, mac1, mac2, matchDate){
     return result.insertId;
 }
 
+export async function getMultiplePlayersMasterId(names){
+
+    if(names.length === 0) return {};
+
+    const query = `SELECT id,name FROM nstats_players WHERE name IN (?)`;
+    const result = await simpleQuery(query, [names]);
+
+    const promises = [];
+
+    const players = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const {name, id} = result[i];
+
+        players.push({name, id});
+        const index = names.indexOf(name);
+        names.splice(index, 1);
+    }
+
+
+    if(names.length === 0) return players;
+
+    for(let i = 0; i < names.length; i++){
+
+        const current = createMasterPlayer(names[i]).then((id) =>{
+            players.push({id, "name": names[i]});
+        });
+
+        promises.push(current);
+    }
+
+
+    await Promise.all(promises);
+
+    return players;
+
+
+}
+
 
 export async function updateMasterPlayer(playerId, country){
 

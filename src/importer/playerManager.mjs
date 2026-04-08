@@ -1,7 +1,8 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
-import { getPlayerMasterId, createMasterPlayer, updateMasterPlayers, 
-    updatePlayerTotals, bulkInsertPlayerMatchData, updateMapAverages } from "../players.mjs";
+import { updateMasterPlayers, 
+    updatePlayerTotals, bulkInsertPlayerMatchData, updateMapAverages, 
+    getMultiplePlayersMasterId} from "../players.mjs";
 import geoip from "geoip-lite";
 import { createRandomString, scalePlaytime } from "../generic.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
@@ -17,6 +18,7 @@ export class PlayerManager{
 
         this.idsToNames = {};
         this.namesToIds = {};
+        this.playerNames = [];
     }
 
 
@@ -165,10 +167,6 @@ export class PlayerManager{
             }
         }
 
-
-
-
-
         for(let [playerId, playerName] of Object.entries(idsToNames)){
       
             playerId = parseInt(playerId);
@@ -210,6 +208,7 @@ export class PlayerManager{
 
             const p = this.players[i];
     
+            this.playerNames.push(p.name);
             p.disconnect(matchEnd, matchStart, null);
 
             if(bImportRandomizeNames){
@@ -491,27 +490,20 @@ export class PlayerManager{
 
     async setPlayerMasterIds(matchDate){
 
+        const masterIds = await getMultiplePlayersMasterId(this.playerNames);
+
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
 
-            //console.log(p.name);
+            for(let x = 0; x < masterIds.length; x++){
 
-            let masterId = await getPlayerMasterId(p.name);
-
-            if(masterId === null){
-
-                masterId = await createMasterPlayer(p.name);
-
+                if(masterIds[x].name === p.name){
+                    p.masterId = masterIds[x].id;
+                    break;
+                }
             }
-
-            masterId = parseInt(masterId);
-            if(masterId !== masterId) throw new Error(`Player masterId is not a valid integer`);
-
-            p.masterId = masterId;
-
-        }
-        
+        } 
     }
 
 
@@ -647,8 +639,7 @@ export class PlayerManager{
 
             if(lookup !== null && lookup.country !== undefined){
                 p.country = lookup.country.toLowerCase();
-            }
-            
+            }   
         }
     }
 
