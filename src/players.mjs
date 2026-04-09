@@ -106,6 +106,7 @@ export async function getMultiplePlayersMasterId(names){
 
         players.push({name, id});
         const index = names.indexOf(name);
+        if(index === -1) continue;
         names.splice(index, 1);
     }
 

@@ -339,7 +339,7 @@ const queries = [
             item_pads int NOT NULL,
             item_invis int NOT NULL,
             item_shp int NOT NULL,
-            INDEX pgm_idx (player_id,gametype_id,map_id)
+            UNIQUE INDEX pgm_idx (player_id,gametype_id,map_id)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals_weapons (

@@ -5,6 +5,12 @@ import { toJSONAPIKeyNames } from "./json.mjs";
 import Message from "./message.mjs";
 import { getPlayersById } from "./players.mjs";
 
+const CTF_TOTAL_KEYS = [
+    "flag_taken", "flag_pickup", "flag_drop", "flag_assist",
+    "flag_cover", "flag_seal", "flag_cap", "flag_kill",
+    "flag_return", "flag_return_base", "flag_return_mid",
+    "flag_return_enemy_base", "flag_return_save"
+];
 
 export async function insertPlayerMatchData(players, matchId, gametypeId, mapId){
 
@@ -29,6 +35,8 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
             s.returnSave, s.flagCarryTime.total, s.flagCarryTime.min, s.flagCarryTime.max 
         ]);
     }
+
+    //console.log(insertVars);
 
     await bulkInsert(query, insertVars);
 }
@@ -91,58 +99,101 @@ export async function getMatchData(matchId, bReturnJSON){
     return obj;
 }
 
-function _updatePlayerTotals(totals, gametypeId, mapId, matchData){
+
+function createEmptyTotal(){
+
+    const current = {
+        "matches": 0
+    };
+
+    for(let i = 0; i < CTF_TOTAL_KEYS.length; i++){
+
+        const k = CTF_TOTAL_KEYS[i];
+
+        current[k] = 0;
+        current[`max_${k}`] = 0;
+    }
+
+    return current;
+}
+
+function createPlayerTotal(totals, matchData){
 
     const playerId = matchData.player_id;
+    const gametypeId = matchData.gametype_id;
+    const mapId = matchData.map_id;
 
-    if(totals[playerId] === undefined) totals[playerId] = {};
+    if(totals?.[playerId]?.[gametypeId]?.mapId !== undefined) return;
+    //create all time totals if none
+    if(totals[playerId] === undefined){
+        totals[playerId] = {
+            "0": {
+                "0": createEmptyTotal()
+            }
+        };
+    }
+
+
+    //map all time totals
+    if(totals[playerId][0][mapId] === undefined){
+        totals[playerId][0][mapId] = createEmptyTotal();
+    }   
 
     if(totals[playerId][gametypeId] === undefined){
-        totals[playerId][gametypeId] = {};
+        totals[playerId][gametypeId] = {
+            "0": createEmptyTotal()
+        };
     }
-    
 
-    const keys = [
-        "flag_taken", "flag_pickup", "flag_drop", "flag_assist",
-        "flag_cover", "flag_seal", "flag_cap", "flag_kill",
-        "flag_return", "flag_return_base", "flag_return_mid",
-        "flag_return_enemy_base", "flag_return_save"
+    //gametype totals
+    if(totals[playerId][gametypeId][0] === undefined){
+        totals[playerId][gametypeId][0] = createEmptyTotal();
+    }
+
+    //map gametype totals
+    if(totals[playerId][gametypeId][mapId] === undefined){
+        totals[playerId][gametypeId][mapId] = createEmptyTotal();
+    }
+
+}
+
+function _updatePlayerTotals(totals, matchData){
+
+    const playerId = matchData.player_id;
+    const gametypeId = matchData.gametype_id;
+    const mapId = matchData.map_id;
+
+
+    //need to create totals for all, gametype, map, gametype+map
+    createPlayerTotal(totals, matchData);
+
+
+    const pTotals = [
+        totals[playerId][gametypeId][mapId],
+        totals[playerId][gametypeId][0],
+        totals[playerId][0][mapId],
+        totals[playerId][0][0],
     ];
 
-    if(totals[playerId][gametypeId][mapId] === undefined){
+    for(let x = 0; x < pTotals.length; x++){
 
-        const current = {
-            "matches": matchData.total_matches
-        };
+        const t = pTotals[x];
+        t.matches += matchData.total_matches;
 
-        for(let i = 0; i < keys.length; i++){
+        for(let i = 0; i < CTF_TOTAL_KEYS.length; i++){
 
-            const k = keys[i];
+            const k = CTF_TOTAL_KEYS[i];
+            const mk = `max_${k}`;
 
-            current[k] = parseInt(matchData[k]);
-            current[`max_${k}`] = parseInt(matchData[`max_${k}`]);
-        }
+            t[k] += parseInt(matchData[k]);
 
-        totals[playerId][gametypeId][mapId] = current;
-
-        return;
-    }
-
-    const t = totals[playerId][gametypeId][mapId];
-
-    t.matches += matchData.total_matches;
-
-    for(let i = 0; i < keys.length; i++){
-
-        const k = keys[i];
-        const mk = `max_${k}`;
-
-        t[k] += parseInt(matchData[k]);
-
-        if(matchData[mk] > t[mk]){
-            t[mk] = matchData[mk];
+            if(matchData[mk] > t[mk]){
+                t[mk] = matchData[mk];
+            }      
         }
     }
+
+
 }
 
 async function getPlayersMatchesData(playerIds){
@@ -192,16 +243,16 @@ async function calcPlayerTotals(playerIds){
         const r = result[i];
 
         //all time totals
-        _updatePlayerTotals(totals, 0, 0, r);
+        _updatePlayerTotals(totals, r);
 
         //gametype totals
-        _updatePlayerTotals(totals, r.gametype_id, 0, r);
+        //_updatePlayerTotals(totals, r.gametype_id, 0, r);
 
         //map totals
-        _updatePlayerTotals(totals, 0, r.map_id, r);
+        //_updatePlayerTotals(totals, 0, r.map_id, r);
 
         //map gametype totals
-        _updatePlayerTotals(totals, r.gametype_id, r.map_id, r);
+        //_updatePlayerTotals(totals, r.gametype_id, r.map_id, r);
     }
 
     return totals;
@@ -220,6 +271,8 @@ async function deleteMultiplePlayerTotals(playerIds){
 
 async function insertPlayerTotals(insertVars){
 
+    const t = "nstats_player_totals_ctf";
+
     const query = `INSERT INTO nstats_player_totals_ctf (
         player_id, gametype_id, map_id, total_matches, flag_taken,
         max_flag_taken, flag_pickup, max_flag_pickup, flag_drop,
@@ -229,9 +282,38 @@ async function insertPlayerTotals(insertVars){
         flag_return_base, max_flag_return_base, flag_return_mid,
         max_flag_return_mid, flag_return_enemy_base, max_flag_return_enemy_base,
         flag_return_save, max_flag_return_save
-    ) VALUES ?`;
+    ) VALUES ? as new ON DUPLICATE KEY UPDATE
+    ${t}.total_matches=new.total_matches,
+    ${t}.flag_taken=new.flag_taken,
+    ${t}.max_flag_taken=new.max_flag_taken,
+    ${t}.flag_pickup=new.flag_pickup,
+    ${t}.max_flag_pickup=new.max_flag_pickup,
+    ${t}.flag_drop=new.flag_drop,
+    ${t}.max_flag_drop=new.max_flag_drop,
+    ${t}.flag_assist=new.flag_assist,
+    ${t}.max_flag_assist=new.max_flag_assist,
+    ${t}.flag_cover=new.flag_cover,
+    ${t}.max_flag_cover=new.max_flag_cover,
+    ${t}.flag_seal=new.flag_seal,
+    ${t}.max_flag_seal=new.max_flag_seal,
+    ${t}.flag_cap=new.flag_cap,
+    ${t}.max_flag_cap=new.max_flag_cap,
+    ${t}.flag_kill=new.flag_kill,
+    ${t}.max_flag_kill=new.max_flag_kill,
+    ${t}.flag_return=new.flag_return,
+    ${t}.max_flag_return=new.max_flag_return,
 
-    await bulkInsert(query, insertVars);
+
+    ${t}.flag_return_base=new.flag_return_base,
+    ${t}.max_flag_return_base=new.max_flag_return_base,
+    ${t}.flag_return_mid=new.flag_return_mid,
+    ${t}.max_flag_return_mid=new.max_flag_return_mid,
+    ${t}.flag_return_enemy_base=new.flag_return_enemy_base,
+    ${t}.max_flag_return_enemy_base=new.max_flag_return_enemy_base,
+    ${t}.flag_return_save=new.flag_return_save,
+    ${t}.max_flag_return_save=new.max_flag_return_save`;
+
+    return await bulkInsert(query, insertVars);
 }
 
 export async function updatePlayerTotals(playerIds){
@@ -267,8 +349,8 @@ export async function updatePlayerTotals(playerIds){
             }
         }
     }
-    await deleteMultiplePlayerTotals(playerIds);
-    await insertPlayerTotals(insertVars);
+
+    await insertPlayerTotals(insertVars);  
     
 }
 
