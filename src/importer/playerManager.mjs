@@ -488,7 +488,7 @@ export class PlayerManager{
         player.stats[key] = value;
     }
 
-    async setPlayerMasterIds(matchDate){
+    async setPlayerMasterIds(){
 
         const masterIds = await getMultiplePlayersMasterId(this.playerNames);
 
@@ -643,7 +643,7 @@ export class PlayerManager{
         }
     }
 
-    async updatePlayerTotals(date, gametypeId, mapId){
+    async updatePlayerTotals(){
 
         const masterIds = [];
         const idsToCountries = {};
@@ -658,7 +658,8 @@ export class PlayerManager{
             }
         }
 
-        await updateMasterPlayers(masterIds, idsToCountries, date);
+        await updateMasterPlayers(masterIds, idsToCountries);
+        
 
         await updatePlayerTotals(masterIds);
         

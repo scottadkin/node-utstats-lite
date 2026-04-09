@@ -139,13 +139,17 @@ export async function updateMasterPlayer(playerId, country){
     await simpleQuery(query, [country, playerId]);
 }
 
-export async function updateMasterPlayers(playerIds, idsToCountries, date){
+export async function updateMasterPlayers(playerIds, idsToCountries){
+
+    const promises = [];
 
     for(let i = 0; i < playerIds.length; i++){
 
         const p = playerIds[i];
-        await updateMasterPlayer(p, idsToCountries[p] ?? "xx");
+        promises.push(updateMasterPlayer(p, idsToCountries[p] ?? "xx"));
     }
+
+    return await Promise.all(promises);
 }
 
 
@@ -749,16 +753,47 @@ async function insertPlayerGametypeTotals(data){
         }
     }
 
-    await deleteMultiplePlayerTotals([...playerIds]);
+    //await deleteMultiplePlayerTotals([...playerIds]);
 
-    const query = `INSERT INTO nstats_player_totals (player_id,gametype_id,map_id,last_active,playtime,total_matches,
-            wins,draws,losses,winrate,score,
-            frags,kills,deaths,suicides,team_kills,
-            efficiency,ttl, first_blood, spree_1,spree_2,
-            spree_3,spree_4, spree_5, spree_best, multi_1,
-            multi_2,multi_3,multi_4,multi_best,headshots,
-            item_amp, item_belt, item_boots, item_body, item_pads,
-            item_invis, item_shp ) VALUES ?`;
+    const t = `nstats_player_totals`
+
+    const query = `INSERT INTO ${t} (player_id,gametype_id,map_id,last_active,playtime,total_matches,
+    wins,draws,losses,winrate,score,
+    frags,kills,deaths,suicides,team_kills,
+    efficiency,ttl, first_blood, spree_1,spree_2,
+    spree_3,spree_4, spree_5, spree_best, multi_1,
+    multi_2,multi_3,multi_4,multi_best,headshots,
+    item_amp, item_belt, item_boots, item_body, item_pads,
+    item_invis, item_shp ) VALUES ? as new ON DUPLICATE KEY UPDATE
+    ${t}.last_active=new.last_active,
+    ${t}.playtime=new.playtime,
+    ${t}.total_matches=new.total_matches,
+    ${t}.frags=new.frags,
+    ${t}.kills=new.kills,
+    ${t}.deaths=new.deaths,
+    ${t}.suicides=new.suicides,
+    ${t}.efficiency=new.efficiency,
+    ${t}.ttl=new.ttl,
+    ${t}.first_blood=new.first_blood,
+    ${t}.spree_1=new.spree_1,
+    ${t}.spree_2=new.spree_2,
+    ${t}.spree_3=new.spree_3,
+    ${t}.spree_4=new.spree_4,
+    ${t}.spree_5=new.spree_5,
+    ${t}.spree_best=new.spree_best,
+    ${t}.multi_1=new.multi_1,
+    ${t}.multi_2=new.multi_2,
+    ${t}.multi_3=new.multi_3,
+    ${t}.multi_4=new.multi_4,
+    ${t}.multi_best=new.multi_best,
+    ${t}.headshots=new.headshots,
+    ${t}.item_amp=new.item_amp,
+    ${t}.item_belt=new.item_belt,
+    ${t}.item_boots=new.item_boots,
+    ${t}.item_body=new.item_body,
+    ${t}.item_pads=new.item_pads,
+    ${t}.item_invis=new.item_invis,
+    ${t}.item_shp=new.item_shp`;
 
     await bulkInsert(query, insertVars);
 }
@@ -768,7 +803,7 @@ export async function updatePlayerTotals(playerIds){
 
     const totals = await calcPlayerTotals(playerIds);
 
-    await insertPlayerGametypeTotals(totals);
+    return await insertPlayerGametypeTotals(totals);
 }
 
 
