@@ -510,6 +510,11 @@ async function getPlayersAllMatchData(playerIds, gametypeId, mapId){
 
 function _createNewTotals(totals, playerId, gametypeId, mapId){
 
+    if(totals[playerId]?.[gametypeId]?.[mapId] !== undefined) return;
+
+    if(totals[playerId] === undefined) totals[playerId] = {};
+    if(totals[playerId][gametypeId] === undefined) totals[playerId][gametypeId] = {};
+
     totals[playerId][gametypeId][mapId] = {
         "matches": 0,
         "playtime": 0,
@@ -521,7 +526,6 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
         "losses": 0,
         "draws": 0,
         "winRate": 0,
-        "lastActive": null,
         "score": 0,
         "frags": 0,
         "kills": 0,
@@ -551,19 +555,29 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
     };
 }
 
-function _updateTotals(totals, playerData, gametypeId, mapId){
+function _updateTotals(totals, playerData){
 
-    if(totals[playerData.player_id] === undefined){
-        totals[playerData.player_id] = {};
+    const gametypeId = playerData.gametype_id;
+    const mapId = playerData.map_id;
+    const playerId = playerData.player_id;
+
+    if(totals[playerId] === undefined){
+        totals[playerId] = {};
     }
 
-    if(totals[playerData.player_id][gametypeId] === undefined){
-        totals[playerData.player_id][gametypeId] = {};
-    }
+    //gametype map
+    _createNewTotals(totals, playerId, gametypeId, mapId);
+    //gametype totals
+    _createNewTotals(totals, playerId, gametypeId, 0);
+    //map totals
+    _createNewTotals(totals, playerId, 0, mapId);
+    //all time totals
+    _createNewTotals(totals, playerId, 0, 0);
 
-    if(totals[playerData.player_id][gametypeId][mapId] === undefined){
-        _createNewTotals(totals, playerData.player_id, gametypeId, mapId);
-    }
+    const allTimeTotals = totals[playerId][0][0];
+    const gametypeTotals = totals[playerId][gametypeId][0];
+    const mapTotals = totals[playerId][0][mapId];
+    const mapGametypeTotals = totals[playerId][gametypeId][mapId];
 
     const mergeTypes = [
       "score",
@@ -607,18 +621,29 @@ function _updateTotals(totals, playerData, gametypeId, mapId){
 
     const floatTypes = ["playtime"];
 
-    const t = totals[playerData.player_id][gametypeId][mapId];
+   const pTotals = [
+        allTimeTotals,
+        gametypeTotals,
+        mapTotals,
+        mapGametypeTotals
+    ];
 
-    t.matches += playerData.total_matches;
+
+    for(let x = 0; x < pTotals.length; x++){
+
+        pTotals[x].matches += playerData.total_matches;
+    }
 
     for(let i = 0; i < mergeTypes.length; i++){
 
         const m = mergeTypes[i];
 
-        if(floatTypes.indexOf(m) === -1){
-            t[m] = parseInt(t[m]) + parseInt(playerData[m]);
-        }else{
-            t[m] += playerData[m];
+        for(let x = 0; x < pTotals.length; x++){
+            if(floatTypes.indexOf(m) === -1){
+                pTotals[x][m] = parseInt(pTotals[x][m]) + parseInt(playerData[m]);
+            }else{
+                pTotals[x][m] += playerData[m];
+            }
         }
     }
 
@@ -626,34 +651,42 @@ function _updateTotals(totals, playerData, gametypeId, mapId){
 
         const h = higherBetter[i];
 
-        if(t[h] < playerData[h]){
-            t[h] = playerData[h];
+        for(let x = 0; x < pTotals.length; x++){
+            
+            if(pTotals[x][h] < playerData[h]){
+                pTotals[x][h] = playerData[h];
+            }
         }
     }
 
-    t.totalTtl += playerData.ttl;
+    for(let x = 0; x < pTotals.length; x++){
 
-    if(t.totalTtl !== 0){
-        t.ttl = t.totalTtl / t.matches;
-    }
+        const t = pTotals[x];
 
-    if(t.kills > 0){
+        t.totalTtl += playerData.ttl;
 
-        if(t.deaths === 0){
-            t.eff = 100;
-        }else{
-            t.eff = (t.kills / (t.kills + t.deaths)) * 100;
+        if(t.totalTtl !== 0){
+            t.ttl = t.totalTtl / t.matches;
         }
-    }
 
-    if(playerData.last_active > t.last_active){
-        t.last_active = playerData.last_active;
-    }
+        if(t.kills > 0){
 
-    t.playtime += parseFloat(playerData.time_on_server);
+            if(t.deaths === 0){
+                t.eff = 100;
+            }else{
+                t.eff = (t.kills / (t.kills + t.deaths)) * 100;
+            }
+        }
 
-    if(t.wins > 0){
-        t.winRate = t.wins / t.matches * 100;
+        if(playerData.last_active > t.last_active){
+            t.last_active = playerData.last_active;
+        }
+
+        t.playtime += parseFloat(playerData.time_on_server);
+
+        if(t.wins > 0){
+            t.winRate = t.wins / t.matches * 100;
+        }
     }
 }
 
@@ -667,15 +700,14 @@ function createPlayerTotalsFromData(result){
         const r = result[i];
 
         //gametype map combos
-        _updateTotals(totals, r, r.gametype_id, r.map_id);
+        _updateTotals(totals, r);
         //gametype totals
-        _updateTotals(totals, r, r.gametype_id, 0);
+       /* _updateTotals(totals, r, r.gametype_id, 0);
         //map totals
         _updateTotals(totals, r, 0, r.map_id);
         //all time totals
-        _updateTotals(totals, r, 0, 0);
+        _updateTotals(totals, r, 0, 0);*/
     }
-
 
     return totals;
 }
@@ -768,6 +800,11 @@ async function insertPlayerGametypeTotals(data){
     ${t}.last_active=new.last_active,
     ${t}.playtime=new.playtime,
     ${t}.total_matches=new.total_matches,
+    ${t}.wins=new.wins,
+    ${t}.draws=new.draws,
+    ${t}.losses=new.losses,
+    ${t}.winrate=new.winrate,
+    ${t}.score=new.score,
     ${t}.frags=new.frags,
     ${t}.kills=new.kills,
     ${t}.deaths=new.deaths,
