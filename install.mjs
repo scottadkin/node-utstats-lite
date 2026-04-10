@@ -413,11 +413,19 @@ const queries = [
             data mediumtext NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,*/
 
-        `CREATE TABLE IF NOT EXISTS nstats_logs (
+        `CREATE TABLE IF NOT EXISTS nstats_logs_downloads (
             id int NOT NULL AUTO_INCREMENT,
             file_name varchar(255) NOT NULL,
             date datetime NOT NULL,
             importer_id int NOT NULL,
+            ftp_ip varchar(39) NOT NULL,
+            file_size int(9) NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_logs (
+            id int NOT NULL AUTO_INCREMENT,
+            file_name varchar(255) NOT NULL,
+            date datetime NOT NULL,
             match_id int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
@@ -425,7 +433,6 @@ const queries = [
             id int NOT NULL AUTO_INCREMENT,
             file_name varchar(255) NOT NULL,
             date datetime NOT NULL,
-            importer_id int NOT NULL,
             reason varchar(255) NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
@@ -869,6 +876,15 @@ async function addColumn(table, name, type){
     }
 }
 
+async function deleteColumn(table, name){
+
+    if(!await bColumnExist(table, name)) return;
+
+    const query = `ALTER TABLE ${table} DROP COLUMN ${name}`;
+
+    return await simpleQuery(query);
+}
+
 async function addPageLayouts(){
 
     await restoreDefaultLayouts();
@@ -1129,6 +1145,19 @@ async function addTableIndexes(){
     }
 }
 
+//rempoved in 2.3.0
+async function removeLogTablesImporterIdColumns(){
+
+    const tables = ["nstats_logs", "nstats_logs_rejected"];
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        await deleteColumn(t, "importer_id");
+    }
+}
+
 (async () =>{
  
     try{
@@ -1154,6 +1183,8 @@ async function addTableIndexes(){
         }
 
         connection.end();
+
+        await removeLogTablesImporterIdColumns();
 
         if(!await bLogsSettingsExist()){
             await simpleQuery(`INSERT INTO nstats_logs_folder VALUES(NULL, "1999-11-30 00:00:00","1999-11-30 00:00:00",0,0,0,0,0,0,0)`);

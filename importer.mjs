@@ -15,24 +15,24 @@ new Message('Node UTStats 2 Importer module started.','note');
 
 
 
-async function InsertLogHistory(fileName, serverId, matchId){
+async function InsertLogHistory(fileName, matchId){
 
     fileName = fileName.toLowerCase();
 
     const date = new Date();
 
-    const query = `INSERT INTO nstats_logs VALUES(NULL,?,?,?,?)`;
-    return await simpleQuery(query, [fileName, date, serverId, matchId]);
+    const query = `INSERT INTO nstats_logs VALUES(NULL,?,?,?)`;
+    return await simpleQuery(query, [fileName, date, matchId]);
 }
 
-async function insertRejectedHistory(serverId, fileName, reason){
+async function insertRejectedHistory(fileName, reason){
 
     fileName = fileName.toLowerCase();
 
-    const query = `INSERT INTO nstats_logs_rejected VALUES(NULL,?,?,?,?)`;
+    const query = `INSERT INTO nstats_logs_rejected VALUES(NULL,?,?,?)`;
     const date = new Date();
 
-    return await simpleQuery(query, [fileName, date, serverId, reason]);
+    return await simpleQuery(query, [fileName, date, reason]);
 }
 
 async function updateFTPStats(serverId, totalImports){
@@ -166,7 +166,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
             await updateCTFLeague(m, ctfLeagueSettings);
         }
 
-        await InsertLogHistory(file, serverId, m.matchId);
+        await InsertLogHistory(file, m.matchId);
 
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
         
@@ -179,7 +179,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
     }catch(err){
 
         await rename(`./Logs/${file}`, `./Logs/rejected/${file}`);
-        await insertRejectedHistory(serverId, file, err.toString());
+        await insertRejectedHistory(file, err.toString());
 
         const ignoreMessages = [
             "MIN PLAYERS", "MIN PLAYTIME", "NO START", "NO END", "MAP CHANGE END"
@@ -194,6 +194,8 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
 
 
+
+
 //serverId is -1 if logs are from the websites /Logs folder
 async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings){
 
@@ -202,6 +204,17 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
     const files = await readdir(importedLogsFolder);
 
     const logs = files.filter((f) => f.toLowerCase().startsWith(logFilePrefix));
+
+
+    if(serverId === -1 && logs.length > 0){
+
+        console.log(logs);
+        const test1 = `SELECT file_name,importer_id FROM nstats_logs WHERE file_name IN(?)`;
+        const a = await simpleQuery(test1, [logs]);
+        console.log(a);
+        console.log("test");
+        process.exit();
+    }
 
     let imported = 0;
     let failed = 0;
@@ -250,6 +263,8 @@ async function main(ctfLeagueSettings){
     const ls = logsFolderSettings;
     await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime, ls.append_team_sizes, ctfLeagueSettings);
     new Message(`Completed parsing Leftover logs completed`,"pass");
+
+    process.exit();
 
     const query = "SELECT * FROM nstats_ftp ORDER BY id ASC";
     const result = await simpleQuery(query);
