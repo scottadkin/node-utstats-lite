@@ -2015,7 +2015,7 @@ export async function getActivtyHeatMapData(gametypeId, mapId, year, month){
         const r = result[i];
         const currentDate = new Date(r.date);
 
-        const index = currentDate.getDate();
+        const index = currentDate.getDate() - 1;
         data[index].matches++;
         data[index].playtime += r.playtime;
         data[index].players += r.players;

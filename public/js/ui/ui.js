@@ -1171,6 +1171,7 @@ class UICalendarHeatMap{
 
             if(res.error !== undefined) throw new Error(res.error);
 
+
             this.data[dateKey] = res.data;
        
             this.render();
@@ -1332,6 +1333,7 @@ class UICalendarHeatMap{
                 currentValue = `${currentValue} ${plural(currentValue, "loss")}`;
             }else if(this.selectedMode === "winrate"){
 
+                
                 if(currentValue === 0){
                     currentValue = "No matches played";
                 }else{
