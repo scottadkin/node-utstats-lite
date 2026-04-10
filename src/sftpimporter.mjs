@@ -1,15 +1,17 @@
 import Client from "ssh2-sftp-client";
 import Message from "./message.mjs";
 import { logFilePrefix, importedLogsFolder, minTmpFileLifetime } from "../config.mjs";
-import { bLogAlreadyImported } from "./importer.mjs";
+import { bLogAlreadyImported, insertLogDownloadHistory } from "./importer.mjs";
 import { createWriteStream } from "fs";
 import { bTMPFileOldEnough } from "./generic.mjs";
 import path from "path";
+import fs from "node:fs/promises";
 
 export class SFTPImporter{
 
-    constructor(host, port, user, password, secure, targetFolder, bIgnoreDuplicates, bDeleteAfterImport, bDeleteTmpFiles){
+    constructor(importerId, host, port, user, password, secure, targetFolder, bIgnoreDuplicates, bDeleteAfterImport, bDeleteTmpFiles){
 
+        this.importerId = importerId;
         this.host = host;
         this.port = port;
         this.user = user;
@@ -121,6 +123,13 @@ export class SFTPImporter{
                     const targetFile = path.join(this.logsFolder, f.name);
                     await this.client.get(targetFile, dst);
                     new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass"); 
+
+                    const fileStats = await fs.stat(`${importedLogsFolder}/${f.name}`).catch((err) =>{
+                        console.trace(err);
+                        return {"size": 0}
+                    });
+
+                    await insertLogDownloadHistory(this.host, this.importerId, f.name, fileStats.size);
                 }
 
                 if(this.bDeleteAfterImport === 1){

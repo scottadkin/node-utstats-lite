@@ -1,13 +1,15 @@
 import { Client } from "basic-ftp"; 
 import Message from "./message.mjs";
 import { logFilePrefix, importedLogsFolder, minTmpFileLifetime } from "../config.mjs";
-import { bLogAlreadyImported } from "./importer.mjs";
+import { bLogAlreadyImported, insertLogDownloadHistory } from "./importer.mjs";
 import { bTMPFileOldEnough } from "./generic.mjs";
+import fs from "node:fs/promises";
 
 export class FTPImporter{
 
-    constructor(host, port, user, password, secure, targetFolder, bIgnoreDuplicates, bDeleteAfterImport, bDeleteTmpFiles){
+    constructor(importerId, host, port, user, password, secure, targetFolder, bIgnoreDuplicates, bDeleteAfterImport, bDeleteTmpFiles){
 
+        this.importerId = importerId;
         this.host = host;
         this.port = port;
         this.user = user;
@@ -98,13 +100,20 @@ export class FTPImporter{
 
                 if(!f.name.toLowerCase().startsWith(lowerPrefix)) continue;
 
-
                 if(this.bIgnoreDuplicates && await bLogAlreadyImported(f.name)){
                     new Message(`${f.name} has already been imported, skipping.`, "note");
                 
                 }else{
 
                     await this.client.downloadTo(`${importedLogsFolder}/${f.name}`, `${this.targetFolder}/Logs/${f.name}`);
+
+                    const fileStats = await fs.stat(`${importedLogsFolder}/${f.name}`).catch((err) =>{
+                        console.trace(err);
+                        return {"size": 0}
+                    });
+
+                    await insertLogDownloadHistory(this.host, this.importerId, f.name, fileStats.size);
+                    
                     new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass"); 
                 }
 

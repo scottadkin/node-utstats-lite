@@ -192,10 +192,6 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
     }
 }
 
-
-
-
-
 //serverId is -1 if logs are from the websites /Logs folder
 async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings){
 
@@ -206,7 +202,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
     const logs = files.filter((f) => f.toLowerCase().startsWith(logFilePrefix));
 
 
-    if(serverId === -1 && logs.length > 0){
+    /*if(serverId === -1 && logs.length > 0){
 
         console.log(logs);
         const test1 = `SELECT file_name,importer_id FROM nstats_logs WHERE file_name IN(?)`;
@@ -214,7 +210,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
         console.log(a);
         console.log("test");
         process.exit();
-    }
+    }*/
 
     let imported = 0;
     let failed = 0;
@@ -224,6 +220,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
         const f = logs[i];
         
         if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
+
 
         new Message(`Log ${i+1}/${logs.length}, Starting parsing of ${f}`,"note");
         if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, ctfLeagueSettings)){
@@ -264,8 +261,6 @@ async function main(ctfLeagueSettings){
     await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime, ls.append_team_sizes, ctfLeagueSettings);
     new Message(`Completed parsing Leftover logs completed`,"pass");
 
-    process.exit();
-
     const query = "SELECT * FROM nstats_ftp ORDER BY id ASC";
     const result = await simpleQuery(query);
 
@@ -275,13 +270,14 @@ async function main(ctfLeagueSettings){
 
         if(!r.enabled) continue;
 
-        new Message(`Attempting to connect to ${r.host}:${r.user}`,"note");
+        new Message(`Attempting to connect to ${r.host}:${r.port}${r.user}`,"note");
 
         let ftp = null;
 
         if(r.sftp){
 
             ftp = new SFTPImporter(
+                r.id,
                 r.host, 
                 r.port, 
                 r.user, 
@@ -295,6 +291,7 @@ async function main(ctfLeagueSettings){
         }else{
 
             ftp = new FTPImporter(
+                r.id,
                 r.host, 
                 r.port, 
                 r.user, 

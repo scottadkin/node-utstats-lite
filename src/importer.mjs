@@ -30,6 +30,13 @@ async function getTotalImportHistoryCount(){
     return result[0].total_rows;
 }
 
+
+export async function insertLogDownloadHistory(host, importerId, name, fileSize){
+
+    const query = `INSERT INTO nstats_logs_downloads VALUES(NULL,?,?,?,?,?)`;
+    await simpleQuery(query, [name, new Date(Date.now()), importerId, host, fileSize]);
+}
+
 export async function getHistory(page, perPage){
 
     const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
