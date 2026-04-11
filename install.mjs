@@ -419,7 +419,8 @@ const queries = [
             date datetime NOT NULL,
             importer_id int NOT NULL,
             ftp_ip varchar(39) NOT NULL,
-            file_size int(9) NOT NULL
+            file_size int(9) NOT NULL, 
+            UNIQUE INDEX name_idx(file_name)
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_logs (

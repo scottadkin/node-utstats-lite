@@ -141,3 +141,31 @@ export async function deleteFTPServer(serverId){
 
     return await simpleQuery(query, [serverId]);
 }
+
+
+/**
+ * 
+ * @param {Array<Number>} targetIds 
+ * @returns {Promise}
+ */
+export async function getMultipleFTPServerSettings(targetIds){
+
+    if(targetIds.length === 0) return {};
+
+    const query = `SELECT id,name,ignore_bots,ignore_duplicates,min_players,min_playtime,append_team_sizes FROM nstats_ftp WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [targetIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        data[r.id] = {
+            ...r
+        };
+        delete data[r.id].id;
+    }
+
+    return data;
+}

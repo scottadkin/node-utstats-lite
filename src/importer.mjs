@@ -33,7 +33,15 @@ async function getTotalImportHistoryCount(){
 
 export async function insertLogDownloadHistory(host, importerId, name, fileSize){
 
-    const query = `INSERT INTO nstats_logs_downloads VALUES(NULL,?,?,?,?,?)`;
+    const t = `nstats_logs_downloads`;
+
+    const query = `INSERT INTO ${t} VALUES(NULL,?,?,?,?,?) as new 
+        ON DUPLICATE KEY UPDATE
+        ${t}.date = new.date,
+        ${t}.importer_id = new.importer_id,
+        ${t}.ftp_ip = new.ftp_ip,
+        ${t}.file_size = new.file_size
+    `;
     await simpleQuery(query, [name, new Date(Date.now()), importerId, host, fileSize]);
 }
 
@@ -99,10 +107,12 @@ export async function bLogAlreadyImported(fileName){
 
     fileName = fileName.toLowerCase();
 
-    const query = `SELECT COUNT(*) as total_logs FROM nstats_logs WHERE file_name=?`;
+    const start = performance.now();
+
+    const query = `SELECT id FROM nstats_logs WHERE file_name=? LIMIT 1`;
     const result = await simpleQuery(query, [fileName]);
 
-    if(result[0].total_logs > 0) return true;
+    if(result.length > 0) return true;
 
     return false;
 }

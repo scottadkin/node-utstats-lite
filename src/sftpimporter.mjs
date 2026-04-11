@@ -51,7 +51,7 @@ export class SFTPImporter{
         .catch(err => {
             console.error(err.message);
         }).finally(() =>{
-            new Message(`Disconnected from ${this.host}(SFTP)`,"note");
+            new Message(`Disconnected from ${this.host}(SFTP)`,"progress");
         });
 
         

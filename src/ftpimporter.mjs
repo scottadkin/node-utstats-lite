@@ -48,7 +48,7 @@ export class FTPImporter{
         }
 
         this.client.close();
-        new Message(`Disconnected from ${this.host}`,"note");
+        new Message(`Disconnected from ${this.host}`,"progress");
     }
 
     async deleteTmpFile(file){

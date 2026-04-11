@@ -10,6 +10,7 @@ import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.m
 import { bLogAlreadyImported } from "./src/importer.mjs";
 import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, getMultipleLeagueCategorySettings, refreshAllTables } from "./src/ctfLeague.mjs";
 import { setInt } from "./src/generic.mjs";
+import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 
 new Message('Node UTStats 2 Importer module started.','note');
 
@@ -122,7 +123,7 @@ async function updateCTFLeague(m, ctfLeagueSettings){
     } 
 }
 
-async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, ctfLeagueSettings){
+async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings){
 
     try{
 
@@ -173,7 +174,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
         const end = performance.now();
 
         new Message(`Finished parsing log ${file}`,"pass");
-        new Message(`Log imported in ${(end - start) * 0.001} seconds`,"pass");
+        new Message(`Log imported in ${(end - start) * 0.001} seconds`,"progress");
         return true;
 
     }catch(err){
@@ -192,7 +193,45 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
     }
 }
 
+async function getDownloadedFrom(fileName){
+
+    const query = `SELECT importer_id,ftp_ip FROM nstats_logs_downloads WHERE file_name=? ORDER BY id DESC LIMIT 1`;
+
+    const result = await simpleQuery(query, [fileName]);
+
+    if(result.length === 0) return null;
+
+    return {"id": result[0].importer_id, "ip": result[0].ftp_ip};
+}
+
+
+async function getMultipleDownloadedFrom(fileNames){
+
+    if(fileNames.length === 0) return {"logs": {}, "uniqueImporterIds": []};
+
+    const query = `SELECT file_name,importer_id,ftp_ip FROM nstats_logs_downloads WHERE file_name IN (?)`;
+
+    const result = await simpleQuery(query, [fileNames]);
+
+    const data = {};
+    const uniqueIds = new Set();
+
+    for(let i = 0; i < fileNames.length; i++){
+        data[fileNames[i]] = null;
+    }
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        uniqueIds.add(r.importer_id);
+        data[r.file_name] = {"id": r.importer_id, "ip": r.ftp_ip}
+    }
+
+    return {"logs":data, "uniqueImporterIds": [...uniqueIds]};
+}
+
 //serverId is -1 if logs are from the websites /Logs folder
+//if serverId is -1(leftover logs) look for download data and use the ftp settings from importer_id if exists.
 async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings){
 
     const start = performance.now();
@@ -201,16 +240,13 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
     const logs = files.filter((f) => f.toLowerCase().startsWith(logFilePrefix));
 
+    let downloadHistory = null;
+    let settings = null;
 
-    /*if(serverId === -1 && logs.length > 0){
-
-        console.log(logs);
-        const test1 = `SELECT file_name,importer_id FROM nstats_logs WHERE file_name IN(?)`;
-        const a = await simpleQuery(test1, [logs]);
-        console.log(a);
-        console.log("test");
-        process.exit();
-    }*/
+    if(serverId !== -1){
+        downloadHistory = await getMultipleDownloadedFrom(logs);
+        settings = await getMultipleFTPServerSettings(downloadHistory.uniqueImporterIds);
+    }
 
     let imported = 0;
     let failed = 0;
@@ -221,13 +257,62 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
         
         if(!f.toLowerCase().startsWith(logFilePrefix)) continue;
 
-
         new Message(`Log ${i+1}/${logs.length}, Starting parsing of ${f}`,"note");
-        if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, serverId, bAppendTeamSizes, ctfLeagueSettings)){
+
+        if(serverId !== -1){
+            if(await parseLog(
+                f, 
+                 bIgnoreBots, bIgnoreDuplicates, 
+                 minPlayers, minPlaytime, bAppendTeamSizes, 
+                ctfLeagueSettings
+            )){
+                imported++;
+            }else{
+                failed++;
+            }
+            continue;
+        }
+
+        const history = downloadHistory.logs[f];
+
+        if(history === null){
+            new Message(`Could not find download information for ${f}, using logs folder importer settings instead.`,"note");
+            if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings)){
+                imported++;
+            }else{
+                failed++;
+            }
+
+            continue;
+        }
+
+        const logSettings = settings[history.id] ?? null;
+
+        if(logSettings === null){
+            new Message(`Failed to find importer settings for ftpServer with id ${history.id}`,"error");
+            failed++;
+            continue;
+        }
+       
+        new Message(`Found download information for ${f}, using importer settings from ftp server ${logSettings.name}.`, "note");
+        
+
+        if(await parseLog(
+            f, 
+            logSettings.ignore_bots, 
+            logSettings.ignore_duplicates, 
+            logSettings.min_players, 
+            logSettings.min_playtime,
+            logSettings.append_team_sizes, 
+            ctfLeagueSettings
+        )){
             imported++;
         }else{
             failed++;
         }
+        
+        continue;
+
     }
 
     const end = performance.now();
@@ -243,11 +328,16 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
         await updateLogsFolderStats(imported);
     }  
+
+
+    return {"passed": imported,failed,"totalLogs": imported + failed};
 }
 
 
 async function main(ctfLeagueSettings){
 
+
+    const start = performance.now();
 
     const logsFolderSettings = await getLogsFolderSettings();
 
@@ -256,13 +346,30 @@ async function main(ctfLeagueSettings){
         return;
     }
 
-    new Message(`Checking for leftover logs...`,"progress");
-    const ls = logsFolderSettings;
-    await parseLogs(-1, ls.ignore_bots, ls.ignore_duplicates, ls.min_players, ls.min_playtime, ls.append_team_sizes, ctfLeagueSettings);
-    new Message(`Completed parsing Leftover logs completed`,"pass");
+    
 
+    new Message(`Checking for leftover logs...`,"progress");
+    const leftOverStart = performance.now();
+    const ls = logsFolderSettings;
+
+    const leftOverStats = await parseLogs(
+        -1, ls.ignore_bots, ls.ignore_duplicates, 
+        ls.min_players, ls.min_playtime, 
+        ls.append_team_sizes, ctfLeagueSettings
+    );
+    const leftOverEnd = performance.now();
+
+    const totals = {...leftOverStats};
+
+    const leftOverString = `Completed Leftover logs parsing in ${((leftOverEnd - leftOverStart) * 0.001).toFixed(3)} seconds.`;
+
+    new Message(leftOverString ,"progress");
+  
     const query = "SELECT * FROM nstats_ftp ORDER BY id ASC";
     const result = await simpleQuery(query);
+
+
+    
 
     for(let i = 0; i < result.length; i++){
 
@@ -270,7 +377,7 @@ async function main(ctfLeagueSettings){
 
         if(!r.enabled) continue;
 
-        new Message(`Attempting to connect to ${r.host}:${r.port}${r.user}`,"note");
+        new Message(`Attempting to connect to ${r.host}:${r.port}${r.user}`,"progress");
 
         let ftp = null;
 
@@ -306,8 +413,7 @@ async function main(ctfLeagueSettings){
 
         await ftp.connect();
 
-
-        await parseLogs(
+        const {passed, failed, totalLogs} = await parseLogs(
             r.id,
             r.ignore_bots,
             r.ignore_duplicates,
@@ -316,9 +422,19 @@ async function main(ctfLeagueSettings){
             r.append_team_sizes,
             ctfLeagueSettings
         );
+
+        totals.passed += passed;
+        totals.failed += failed;
+        totals.totalLogs += totalLogs;
     }  
 
-    new Message(`Import Completed`,"progress");
+    const end = performance.now();
+
+
+    const totalTime = (end - start) * 0.001;
+
+    new Message(`Import completed in ${totalTime} seconds, ${totals.passed} imported, ${totals.failed} failed out of ${totals.totalLogs} logs.`,"progress");
+    
 
 }
 
