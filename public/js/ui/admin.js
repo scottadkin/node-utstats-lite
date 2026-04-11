@@ -112,19 +112,26 @@ class AdminFTPManager{
 
         UIHeader(this.content, "Current Logs Folder Settings");
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "info";
+        const wrapper = UIDiv("info");
 
-        const line1 = `These are the settings that are used if you manually place 
-        logs into the websites /Logs folder.`;
-        const line2 = `These are also the fallback settings if the import has an 
-        issue and stops and there are remaining logs in the /Logs folder.`;
 
-        wrapper.appendChild(document.createTextNode(line1));
-        wrapper.appendChild(document.createElement("br"));
-        wrapper.appendChild(document.createTextNode(line2));
-        wrapper.appendChild(document.createElement("br"));
-        wrapper.appendChild(document.createElement("br"));
+        const infoList = UIUnorderedList([
+            [
+                `These are the settings that are used if you manually place logs into the website's `, 
+                UIB("/Logs"), 
+                ` folder.`
+            ],
+            
+            `If the importer is stopped mid-process or has an issue the next "leftover log" 
+            check will try to find a logs download history and fetch the correct settings.`
+            ,
+            `If the importer can not find download history for a log these settings are also used.`
+        ]);
+
+        wrapper.append(
+            infoList, UIBr()
+        );
+
         //wrapper.appendChild(UIFormInputRow("Ttest", "test", "number", "", "Farts"));
 
         const logs = this.logsFolderSettings;
@@ -724,15 +731,17 @@ class AdminFTPManager{
         
         const info = UIDiv("info-basic");
 
-        const line1 = `These are the settings the importer will use if you manually 
-        place logs into the website's /Logs folder.`
+    
+        const infoList = UIUnorderedList([
+            [`These are the settings that are used if you manually place logs into the website's `, UIB("/Logs"), ` folder.`],
+            [`If the importer is stopped mid-process or has an issue the next "leftover log" check will try to find a logs download history and fetch the correct settings.`],
+            `If the importer can not find download history for a log these settings are also used.`
+        ]);
 
-        info.appendChild(document.createTextNode(line1));
-        info.appendChild(document.createElement("br"));
-        const line2 = `If the importer encounters a problem or is turned off mid 
-        import these settings are also used by the importer next time you start the importer process.`;
+        info.append(
+            infoList, UIBr()
+        );
 
-        info.appendChild(document.createTextNode(line2));
         form.appendChild(info);
 
         const settings = this.logsFolderSettings;
@@ -994,11 +1003,13 @@ class AdminMapsManager{
 
         infoWrapper.append(info);
 
-        info.append(`- This is where you can upload map screenshots that are used in various areas of the site.`);
-        info.append(UIBr());
-        info.append(`- File names are automatically assigned to match the selected map so the website can recognize the image.`);
-        info.append(UIBr());
-        info.append(`- Images are automatically converted to .jpg format, you can upload the following image types: `);
+        info.append(
+            `- This is where you can upload map screenshots that are used in various areas of the site.`,
+            UIBr(),
+            `- File names are automatically assigned to match the selected map so the website can recognize the image.`,
+            UIBr(),
+            `- Images are automatically converted to .jpg format, you can upload the following image types: `
+        );
 
         for(let i = 0; i < this.validScreenshotTypes.length; i++){
 
@@ -1014,24 +1025,37 @@ class AdminMapsManager{
             info.append(item);
         }
 
-        info.append(UIBr());
-        info.append(`- You can manually place images into the site's `, UIB("/images/maps/"), " folder, but they must be a .jpg image");
-        info.append(UIBr(), `- The naming convention for images is the map name with the gametype prefix removed, `)
-        info.append(`all lowercase, and shouldn't include the following characters: `);
+        info.append(
+            UIBr(),
+            `- You can manually place images into the site's `, 
+            UIB("/images/maps/"), 
+            " folder, but they must be a .jpg image",
+            UIBr(), 
+            `- The naming convention for images is the map name with the gametype prefix removed, `,
+            `all lowercase, and shouldn't include the following characters: `
+        );
 
         for(let i = 0; i < this.badImageChars.length; i++){
             const b = this.badImageChars[i];
             info.append(UIB(b));
             if(i < this.badImageChars.length - 1) info.append(" ");
         }
-        info.append(UIBr(), "An example: ", UIB("DM-Deck16]["), " will require the image to be called ", UIB("deck16.jpg"), UIBr());
-        info.append("- The website also does partial matches, ");
-        info.append("if you have multiple version of a map like ", UIB("CTF-FaceLE01, "), UIB("CTF-FaceCE, "), UIB("CTF4-FaceV201"));
-        info.append(" you can place an image into the ",UIB("/images/maps/"), " folder called ", UIB("face.jpg"));
-        info.append(" and every map with a name containg ",UIB("face")," will use that image if there isn't an exact match for a map.");
 
-        info.append(UIBr(), `- For best results use an aspect ratio of 16:9.`, UIBr());
-        info.append(``);
+        info.append(
+            UIBr(), 
+            "An example: ", 
+            UIB("DM-Deck16]["), 
+            " will require the image to be called ", 
+            UIB("deck16.jpg"), UIBr(),
+            "- The website also does partial matches, ",
+            "if you have multiple version of a map like ", 
+            UIB("CTF-FaceLE01, "), UIB("CTF-FaceCE, "), UIB("CTF4-FaceV201"),
+            " you can place an image into the ",
+            UIB("/images/maps/"), " folder called ", 
+            UIB("face.jpg")," and every map with a name containg ",
+            UIB("face")," will use that image if there isn't an exact match for a map.",
+            UIBr(), `- For best results use an aspect ratio of 16:9.`, UIBr()
+        );
 
 
         this.wrapper.append(infoWrapper);
