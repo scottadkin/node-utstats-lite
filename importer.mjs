@@ -259,21 +259,24 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 
         new Message(`Log ${i+1}/${logs.length}, Starting parsing of ${f}`,"note");
 
+        //if not logs folder leftovers
         if(serverId !== -1){
+
             if(await parseLog(
                 f, 
-                 bIgnoreBots, bIgnoreDuplicates, 
-                 minPlayers, minPlaytime, bAppendTeamSizes, 
+                bIgnoreBots, bIgnoreDuplicates, 
+                minPlayers, minPlaytime, bAppendTeamSizes, 
                 ctfLeagueSettings
             )){
                 imported++;
             }else{
                 failed++;
             }
+
             continue;
         }
 
-        const history = downloadHistory.logs[f];
+        const history = downloadHistory?.logs[f] ?? null;
 
         if(history === null){
             new Message(`Could not find download information for ${f}, using logs folder importer settings instead.`,"note");

@@ -405,13 +405,6 @@ const queries = [
         data mediumtext COLLATE utf8mb4_bin,
         PRIMARY KEY (session_id)
         ) ENGINE=InnoDB`,
-       /* `CREATE TABLE IF NOT EXISTS nstats_sessions (
-            id int NOT NULL AUTO_INCREMENT,
-            session_id varchar(128) NOT NULL,
-            user_id int NOT NULL,
-            expires datetime NOT NULL,
-            data mediumtext NOT NULL
-        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,*/
 
         `CREATE TABLE IF NOT EXISTS nstats_logs_downloads (
             id int NOT NULL AUTO_INCREMENT,
@@ -435,15 +428,6 @@ const queries = [
             file_name varchar(255) NOT NULL,
             date datetime NOT NULL,
             reason varchar(255) NOT NULL
-        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_logs_history (
-            id int NOT NULL AUTO_INCREMENT,
-            importer_id int NOT NULL,
-            date datetime NOT NULL,
-            logs_found int NOT NULL,
-            imported int NOT NULL,
-            failed int NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_site_settings (
@@ -1159,6 +1143,7 @@ async function removeLogTablesImporterIdColumns(){
     }
 }
 
+
 (async () =>{
  
     try{
@@ -1200,7 +1185,6 @@ async function removeLogTablesImporterIdColumns(){
         await addTableIndexes();
 
         await updateDominationTables();
-
 
         await updateMatchesTable();
 
