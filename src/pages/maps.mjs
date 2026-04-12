@@ -1,7 +1,7 @@
 import { search } from "../maps.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
 
-export async function renderMapsPage(req, res, userSession){
+export async function renderMapsPage(req, res, userSession, imageCache){
 
     try{
 
@@ -37,7 +37,8 @@ export async function renderMapsPage(req, res, userSession){
         const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
-        const {totalMatches, maps} = await search(nameSearch, page, perPage);
+        const {totalMatches, maps} = await search(nameSearch, page, perPage, imageCache);
+
 
         res.render("maps.ejs",{
             "host": req.headers.host,
