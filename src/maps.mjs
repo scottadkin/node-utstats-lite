@@ -105,19 +105,17 @@ export function getMapImageName(name){
 
 function getPartialNameMatchImage(images, targetName){
 
-    //const strExt = /^(.+)\..+$/i;
-
-    //console.log(targetName, images);
+    const strExt = /^(.+)\..+$/i;
 
     for(let i = 0; i < images.length; i++){
 
         const img = images[i];
 
-        //const result = strExt.exec(img);
+        const result = strExt.exec(img);
 
-        //if(result === null) continue;
+        if(result === null) continue;
 
-        if(targetName.indexOf(img) !== -1){
+        if(targetName.indexOf(result[1]) !== -1){
             return img;
         }
     }
@@ -125,10 +123,7 @@ function getPartialNameMatchImage(images, targetName){
     return null;
 }
 
-
-export async function getMapImages(names, imageCache){
-
-    throw new Error("use image cache instead");
+export async function getMapImages(names){
 
     if(names.length === 0) return {};
 
@@ -140,8 +135,7 @@ export async function getMapImages(names, imageCache){
         namesToImageNames[name.toLowerCase()] = getMapImageName(name);
     }
 
-    const files = imageCache//[]//0//await test();
-
+    const files = await readdir("./public/images/maps/");
 
     for(const [name, imageName] of Object.entries(namesToImageNames)){
 
@@ -782,7 +776,7 @@ async function getTotalPossibleMatches(nameSearch){
     return result[0].total_rows;
 }
 
-export async function search(name, dirtyPage, dirtyPerPage, imageCache){
+export async function search(name, dirtyPage, dirtyPerPage){
 
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
@@ -804,15 +798,16 @@ export async function search(name, dirtyPage, dirtyPerPage, imageCache){
 
     }
 
+    const mapImages = await getMapImages([...images]);
+
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
-        r.image = imageCache?.[r.name.toLowerCase()] ?? "default";
-        r.image = `${r.image}.jpg`;
+        r.image = mapImages?.[r.name.toLowerCase()] ?? "default.jpg";
     }
 
     const totalMatches = await getTotalPossibleMatches(name);
-  
+
     return {totalMatches, "maps": result};
 }
 
@@ -822,40 +817,4 @@ export async function getAllMaps(){
     const query = `SELECT * FROM nstats_maps ORDER BY name ASC`;
 
     return await simpleQuery(query);
-}
-
-
-export async function getAllNamesToImages(imageCache){
-
-    const query = `SELECT name FROM nstats_maps ORDER BY name DESC`;
-
-    const result = await simpleQuery(query);
-
-    const names = result.map((r) =>{
-        return r.name.toLowerCase();
-    });
-
-    const maps = {};
-
-    for(let i = 0; i < names.length; i++){
-
-        const n = names[i];
-        const test = getMapImageName(n);
-
-        const index = imageCache.indexOf(test);
-
-        if(index !== -1){
-            maps[n] = imageCache[index];
-            continue;
-        }
-
-        const partial = getPartialNameMatchImage(imageCache, test)
-
-        //don't save map names to default images to save resources 
-        if(partial === null) continue;
-        maps[n] = partial;
-
-    }
-
-    return maps;
 }

@@ -24,7 +24,7 @@ export async function renderHomePage(req, res, userSession){
         let screenshotData = null;
 
         if(pageSettings["Display Latest Screenshot"] === "1" && recentMatches.total > 0){
-            screenshotData = await getMatchData(recentMatches.data[0].id, true, true, false, false);
+            screenshotData = await getMatchData(recentMatches.data[0].id);
         }
 
         let serversList = [];

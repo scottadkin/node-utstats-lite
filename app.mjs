@@ -1,5 +1,6 @@
 import express from 'express';
 import ejs from "ejs";
+import mysql from "mysql2/promise";
 import { websitePort } from './config.mjs';
 const app = express();
 app.use(express.static('public'));
@@ -43,7 +44,6 @@ import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
 const MySQLStore = __MySQLStore(session);
 
 import { mysqlPool } from './src/database.mjs';
-import { updateImageFolderCache, getImageFolderCache, setMapsToImages, cacheGetMapNamesToImages } from './src/imagesCache.mjs';
 
 const sessionStore = new MySQLStore({
 	"createDatabaseTable": false,
@@ -72,15 +72,8 @@ app.use(session({
 
 app.use(cookieParser());
 
+
 app.engine('.html', ejs.__express);
-
-
-(async () =>{
-	await updateImageFolderCache("./public/images/maps", "maps");
-	await setMapsToImages();
-})();
-
-
 
 app.get('/', async (req, res) => {
 
@@ -127,10 +120,8 @@ app.get("/records", async (req, res) =>{
 });
 
 app.get("/maps", async (req, res) =>{
-
 	const userSession = await getSessionInfo(req, sessionStore);
-	const mapImages = cacheGetMapNamesToImages();
-	renderMapsPage(req, res, userSession, mapImages);
+	renderMapsPage(req, res, userSession);
 });
 
 app.get("/player/:id", async (req, res) =>{

@@ -31,9 +31,9 @@ export async function renderMatchesPage(req, res, userSession){
 
         let displayMode = req?.query?.display ?? pageSettings?.["Default Display Mode"] ?? "default"; 
         displayMode = displayMode.toLowerCase();
-        const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap);
 
-        
+        const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap);
+  
         const brandingSettings = await getCategorySettings("Branding");
         const title = `Recent Matches - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
