@@ -58,8 +58,6 @@ export async function renderPlayerPage(req, res, userSession){
 
         if(basicPlayerInfo.country === "") basicPlayerInfo.country = "xx";
 
-        const start = performance.now();
-
         const [pageSettings, pageLayout, brandingSettings, gametypeNames, mapNames] = await Promise.all([
             getCategorySettings("Player"),
             getPageLayout("Player"),
@@ -115,10 +113,6 @@ export async function renderPlayerPage(req, res, userSession){
 
         
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
-
-        const end = performance.now();
-
-        console.log((end - start) * 0.001);
 
         res.render("player.ejs", {
             "meta": {description, "image": "images/maps/default.jpg"},

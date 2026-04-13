@@ -107,8 +107,6 @@ export async function bLogAlreadyImported(fileName){
 
     fileName = fileName.toLowerCase();
 
-    const start = performance.now();
-
     const query = `SELECT id FROM nstats_logs WHERE file_name=? LIMIT 1`;
     const result = await simpleQuery(query, [fileName]);
 
