@@ -9,7 +9,7 @@ import { mapScreenshotQuality } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
 import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
-import { clearAllDataTables, getAllDatabaseTableInfo } from "../admin.mjs";
+import { clearAllDataTables, createDatabaseBackup, getAllDatabaseTableInfo } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
@@ -271,6 +271,10 @@ export default class AdminJSONManager{
             }else if(this.mode === "load-database-backup-data"){
 
                 return this.res.json(await getAllDatabaseTableInfo());
+
+            }else if(this.mode === "create-database-backup"){
+
+                return this.res.json(await createDatabaseBackup());
             }
 
 

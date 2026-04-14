@@ -3661,9 +3661,13 @@ class AdminMYSQLBackupManager{
 
         UIHeader(this.wrapper, "Database Backup Manager");
 
-        this.mode = "stats";
+        this.mode = "create";
+        this.content = UIDiv();
 
         this.createTabs();
+        this.info = UIDiv("info");
+
+        this.wrapper.append(this.info, this.content);
 
         this.parent.append(this.wrapper);
 
@@ -3675,10 +3679,16 @@ class AdminMYSQLBackupManager{
     createTabs(){
 
         const options = [
-            {"display": "Table Stats", "value": "stats"}
+            {"display": "Table Stats", "value": "stats"},
+            {"display": "Create Backup", "value": "create"},
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.render();
+        });
     }
 
     async loadData(){
@@ -3716,15 +3726,10 @@ class AdminMYSQLBackupManager{
 
     renderInfo(){
 
-        if(this.info === undefined){
-
-            this.info = UIDiv("info");
-            this.wrapper.append(this.info);
-            //this.info.append("Create a backup of your database.");
-        }
-
         if(this.mode === "stats"){
             this.info.innerHTML = `Current stats of your database tables.`;
+        }else if(this.mode === "create"){
+            this.info.innerHTML = `Create a backup of your database.`;
         }
     }
 
@@ -3769,7 +3774,7 @@ class AdminMYSQLBackupManager{
             {"content": this.toByteString(totals.size), "className": "team-none"},
         ]);
 
-        this.table = new UITable(this.wrapper, {
+        this.table = new UITable(this.content, {
             "width": 4,
             "headers": ["Table", "Total Rows", "Total Size"]
         }, tableData);
@@ -3779,6 +3784,7 @@ class AdminMYSQLBackupManager{
 
         this.renderInfo();
 
+        this.content.innerHTML = ``;
         this.renderStats();
         
     }

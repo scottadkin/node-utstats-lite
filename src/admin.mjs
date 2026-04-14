@@ -1,5 +1,7 @@
-import { simpleQuery } from "./database.mjs";
+import { mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
 import { mysqlSettings } from "../config.mjs";
+import { mkdir, writeFile } from "node:fs/promises";
+import Message from "./message.mjs";
 
 export async function clearAllDataTables(){
 
@@ -57,8 +59,71 @@ export async function getAllDatabaseTableInfo(){
     const query = `SELECT table_name,table_rows,data_length,index_length 
     FROM information_schema.tables WHERE table_schema='${mysqlSettings.database}'`;
 
-    return await simpleQuery(query);
-    
+    return await simpleQuery(query); 
+}
 
+export async function getAllTableNames(){
+
+    const query = `SELECT table_name FROM information_schema.tables WHERE table_schema='${mysqlSettings.database}'`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) =>{
+        return r.TABLE_NAME;
+    });
+}
+
+async function getFullTable(tableName){
+
+
+    const columns = await mysqlGetColumnsAsArray(tableName);
+
+    const query = `SELECT * FROM ${tableName}`;
+
+    const result = await simpleQuery(query);
+
+    const rows = result.map((r) =>{
+        return Object.values(r);
+    });
+
+
+    return {rows, columns}
+}
+
+export async function createDatabaseBackup(){
+
+    const now = new Date(Date.now());
+
+    const year = now.getFullYear();
+    let month = now.getMonth() + 1;
     
+    let date = now.getDate();
+    let hours = now.getHours();
+    let minutes = now.getMinutes();
+    let seconds = now.getSeconds();
+
+    if(month < 10) month = `0${month}`;
+    if(date < 10) date = `0${date}`;
+    if(hours < 10) hours = `0${hours}`;
+    if(minutes < 10) minutes = `0${minutes}`;
+    if(seconds < 10) seconds = `0${seconds}`;
+
+    const tables = await getAllTableNames();
+
+    const dir = `./backups/${year}-${month}-${date}-${hours}-${minutes}-${seconds}`;
+
+    await mkdir(dir);
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        const data = await getFullTable(t);
+
+        new Message(`Creating backup of table ${t} as ${dir}/${t}.json`,"note");
+        await writeFile(`${dir}/${t}.json`, JSON.stringify(data));
+    }
+
+
+    return {"folder": dir};
 }
