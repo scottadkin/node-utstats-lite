@@ -1472,12 +1472,12 @@ function UIMatchScreenshot(parent, matchData, bLatest){
     parent.append(wrapper);
 }
 
-function UILoading(parent){
+function UILoading(){
 
     const img = document.createElement("img");
     img.className = "loading";
     img.src = `/images/loading.png`;
-    parent.append(img);
+    return img;
 }
 
 

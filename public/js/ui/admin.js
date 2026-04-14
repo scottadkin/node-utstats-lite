@@ -2887,7 +2887,7 @@ class AdminMatchesManager{
                 const elem = document.querySelector(`#match-action-${d.id}`);
                 //put loading thing here
                 elem.innerHTML = ``;
-                UILoading(elem, "test");
+                elem.append(UILoading("test"));
                 this.addToDelete(d.id);
             });
 
@@ -3661,7 +3661,7 @@ class AdminMYSQLBackupManager{
 
         UIHeader(this.wrapper, "Database Backup Manager");
 
-        this.mode = "create";
+        this.mode = "create-uncompressed";
         this.content = UIDiv();
 
         this.createTabs();
@@ -3670,6 +3670,8 @@ class AdminMYSQLBackupManager{
         this.wrapper.append(this.info, this.content);
 
         this.parent.append(this.wrapper);
+
+        this.bBackupInProgress = false;
 
 
         this.loadData();
@@ -3680,12 +3682,15 @@ class AdminMYSQLBackupManager{
 
         const options = [
             {"display": "Table Stats", "value": "stats"},
-            {"display": "Create Backup", "value": "create"},
+            {"display": "Create Uncompressed Backup", "value": "create-uncompressed"},
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            if(this.bBackupInProgress) return;
+
             this.mode = e.detail.newTab;
             this.render();
         });
@@ -3728,8 +3733,8 @@ class AdminMYSQLBackupManager{
 
         if(this.mode === "stats"){
             this.info.innerHTML = `Current stats of your database tables.`;
-        }else if(this.mode === "create"){
-            this.info.innerHTML = `Create a backup of your database.`;
+        }else if(this.mode === "create-uncompressed"){
+            this.info.innerHTML = `Create an uncompressed backup of your database, each table will be exported to a json file with the table name as the file name.`;
         }
     }
 
@@ -3780,12 +3785,82 @@ class AdminMYSQLBackupManager{
         }, tableData);
     }
 
+
+    async createUncompressedBackUp(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "create-database-backup"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+                throw new Error(res.error);
+            }
+
+            new UINotification(this.parent, "pass", "Backup Created", `Backup created as ${res.folder}`);
+
+        }catch(err){
+
+            new UINotification(this.parent, "error", "Failed To Create Backup", err.toString());
+            console.trace(err);
+        }finally{
+            this.bBackupInProgress = false;
+            this.loading.className = "hidden";
+        }
+    }
+
+    renderUncompressedBackup(){
+        
+        if(this.mode !== "create-uncompressed") return;
+
+        
+        const form = UIDiv("form");
+
+
+        form.append(
+            "The backup will be created in your website's ", 
+            UIB("/backup"), 
+            " folder, each table will make a json file with the column names and rows.",
+            UIBr(),
+            UIBr()
+        );
+
+        this.button = document.createElement("button");
+        this.button.className = "submit-button";
+        this.button.append("Create Backup");
+        form.append(this.button);
+
+
+        this.button.addEventListener("click", async () =>{
+
+            if(this.bBackupInProgress) return;
+
+            this.bBackupInProgress = true;
+
+            this.button.className = "hidden";
+            this.loading = UILoading();
+            form.append(this.loading);
+
+            await this.createUncompressedBackUp();
+            this.button.className = "submit-button";
+        });
+
+        this.content.append(form);
+
+    }
+
     render(){
 
         this.renderInfo();
 
         this.content.innerHTML = ``;
         this.renderStats();
+        this.renderUncompressedBackup();
         
     }
 }
