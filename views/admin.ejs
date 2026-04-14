@@ -40,6 +40,11 @@ const modes = [
         "display": "JSON API Manager",
         "value": "json",
         "description": "Enable or Disable JSON API"
+    },
+    {
+        "display": "Database Backup Manager",
+        "value": "database-backup",
+        "description": "Create A Backup Of MYSQL Database"
     }
 ];
 
@@ -122,6 +127,8 @@ function renderCategory(mode){
         %><script>new AdminServersManager("#root");</script><%
     }else if(mode === "json"){
         %><script>new AdminJSONManager("#root")</script><%
+    }else if(mode === "database-backup"){
+        %><script>new AdminMYSQLBackupManager("#root");</script><%
     }
 }
 

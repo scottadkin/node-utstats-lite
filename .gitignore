@@ -3,3 +3,5 @@ secret.mjs
 clearall.mjs
 config.mjs
 test.mjs
+backups/*
+!backups/delete.me

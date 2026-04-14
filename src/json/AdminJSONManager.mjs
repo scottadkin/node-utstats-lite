@@ -9,7 +9,7 @@ import { mapScreenshotQuality } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
 import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
-import { clearAllDataTables } from "../admin.mjs";
+import { clearAllDataTables, getAllDatabaseTableInfo } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
@@ -267,9 +267,15 @@ export default class AdminJSONManager{
             }else if(this.mode === "save-json-api-settings"){
 
                 return this.res.json(await saveJSONAPIChanges(this.req.body.changes));
+
+            }else if(this.mode === "load-database-backup-data"){
+
+                return this.res.json(await getAllDatabaseTableInfo());
             }
 
 
+
+            
 
             this.res.json({"error": "Unknown Request"});
 

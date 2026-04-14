@@ -3650,3 +3650,136 @@ class AdminJSONManager{
         }
     }
 }
+
+class AdminMYSQLBackupManager{
+
+    constructor(parent){
+
+        this.parent = document.querySelector(parent);
+
+        this.wrapper = UIDiv();
+
+        UIHeader(this.wrapper, "Database Backup Manager");
+
+        this.mode = "stats";
+
+        this.createTabs();
+
+        this.parent.append(this.wrapper);
+
+
+        this.loadData();
+
+    }
+
+    createTabs(){
+
+        const options = [
+            {"display": "Table Stats", "value": "stats"}
+        ];
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+    }
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch("/admin/", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-database-backup-data"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            console.log(res);
+
+            if(res.length === 0){
+                throw new Error("Could not fetch information_schema info.");
+            }
+
+            this.tableStats = res;
+
+
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }finally{
+
+            this.render();
+        }
+    }
+
+    renderInfo(){
+
+        if(this.info === undefined){
+
+            this.info = UIDiv("info");
+            this.wrapper.append(this.info);
+            //this.info.append("Create a backup of your database.");
+        }
+
+        if(this.mode === "stats"){
+            this.info.innerHTML = `Current stats of your database tables.`;
+        }
+    }
+
+    toByteString(size){
+
+        if(size > 1024 * 1024){
+            size = `${(size / (1024 * 1024)).toFixed(2)} MiB`;
+        }else if(size > 1024){
+            size = `${size / 1024} KiB`;
+        }else{
+            size = `${size} Bytes`;
+        }
+
+        return size;
+    }
+
+
+    renderStats(){
+
+        if(this.mode !== "stats") return;
+
+        const totals = {
+            "rows": 0,
+            "size": 0
+        };
+
+        const tableData = this.tableStats.map((s) =>{
+
+            let size = s.DATA_LENGTH + s.INDEX_LENGTH;
+
+            totals.rows += s.TABLE_ROWS;
+            totals.size += size;
+
+            size = this.toByteString(size);
+
+            return [{"content":s.TABLE_NAME, "className": "text-left"}, s.TABLE_ROWS, size];
+        });
+
+        tableData.push([
+            {"content": "All Table Totals", "className": "text-left team-none"},
+            {"content": totals.rows, "className": "team-none"},
+            {"content": this.toByteString(totals.size), "className": "team-none"},
+        ]);
+
+        this.table = new UITable(this.wrapper, {
+            "width": 4,
+            "headers": ["Table", "Total Rows", "Total Size"]
+        }, tableData);
+    }
+
+    render(){
+
+        this.renderInfo();
+
+        this.renderStats();
+        
+    }
+}

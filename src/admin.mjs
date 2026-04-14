@@ -1,4 +1,5 @@
 import { simpleQuery } from "./database.mjs";
+import { mysqlSettings } from "../config.mjs";
 
 export async function clearAllDataTables(){
 
@@ -15,8 +16,8 @@ export async function clearAllDataTables(){
         "importer_history",
         "kills",
         "logs",
-        "logs_history",
         "logs_rejected",     
+        "logs_downloads",     
         "maps",
         "map_rankings",
         "map_weapon_totals",
@@ -48,5 +49,16 @@ export async function clearAllDataTables(){
 
         await simpleQuery(query);
     }
+    
+}
+
+export async function getAllDatabaseTableInfo(){
+
+    const query = `SELECT table_name,table_rows,data_length,index_length 
+    FROM information_schema.tables WHERE table_schema='${mysqlSettings.database}'`;
+
+    return await simpleQuery(query);
+    
+
     
 }
