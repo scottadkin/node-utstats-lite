@@ -3660,7 +3660,7 @@ class AdminMYSQLBackupManager{
 
         UIHeader(this.wrapper, "Database Backup Manager");
 
-        this.mode = "create-uncompressed";
+        this.mode = "create-compressed";
         this.content = UIDiv();
 
         this.createTabs();
@@ -3681,6 +3681,7 @@ class AdminMYSQLBackupManager{
 
         const options = [
             {"display": "Table Stats", "value": "stats"},
+            {"display": "Create Compressed Backup", "value": "create-compressed"},
             {"display": "Create Uncompressed Backup", "value": "create-uncompressed"},
         ];
 
@@ -3688,7 +3689,10 @@ class AdminMYSQLBackupManager{
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
-            if(this.bBackupInProgress) return;
+            if(this.bBackupInProgress){
+                this.tabs.setMode(this.mode);
+                return;
+            }
 
             this.mode = e.detail.newTab;
             this.render();
@@ -3709,14 +3713,11 @@ class AdminMYSQLBackupManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            console.log(res);
-
             if(res.length === 0){
                 throw new Error("Could not fetch information_schema info.");
             }
 
             this.tableStats = res;
-
 
 
         }catch(err){
@@ -3732,6 +3733,8 @@ class AdminMYSQLBackupManager{
 
         if(this.mode === "stats"){
             this.info.innerHTML = `Current stats of your database tables.`;
+        }else if(this.mode === "create-compressed"){
+            this.info.innerHTML = `Create a compressed backup of your database.`;
         }else if(this.mode === "create-uncompressed"){
             this.info.innerHTML = `Create an uncompressed backup of your database, each table will be exported to a json file with the table name as the file name.`;
         }
@@ -3813,6 +3816,34 @@ class AdminMYSQLBackupManager{
         }
     }
 
+    async createCompressedBackUp(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "create-archived-database-backup"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+                throw new Error(res.error);
+            }
+
+            new UINotification(this.parent, "pass", "Backup Created", `Backup created as ${res.fileName}`);
+
+        }catch(err){
+
+            new UINotification(this.parent, "error", "Failed To Create Backup", err.toString());
+            console.trace(err);
+        }finally{
+            this.bBackupInProgress = false;
+            this.loading.className = "hidden";
+        }
+    }
+
     renderUncompressedBackup(){
         
         if(this.mode !== "create-uncompressed") return;
@@ -3853,6 +3884,44 @@ class AdminMYSQLBackupManager{
 
     }
 
+    renderCompressedBackup(){
+        
+        if(this.mode !== "create-compressed") return;
+
+        const form = UIDiv("form");
+
+        form.append(
+            "The backup will be created in your website's ", 
+            UIB("/backup"), 
+            " folder, as year-month-day-hour-minutes-seconds.zip",
+            UIBr(),
+            UIBr()
+        );
+
+        this.button = document.createElement("button");
+        this.button.className = "submit-button";
+        this.button.append("Create Backup");
+        form.append(this.button);
+
+
+        this.button.addEventListener("click", async () =>{
+
+            if(this.bBackupInProgress) return;
+
+            this.bBackupInProgress = true;
+
+            this.button.className = "hidden";
+            this.loading = UILoading();
+            form.append(this.loading);
+
+            await this.createCompressedBackUp();
+            this.button.className = "submit-button";
+        });
+
+        this.content.append(form);
+
+    }
+
     render(){
 
         this.renderInfo();
@@ -3860,6 +3929,7 @@ class AdminMYSQLBackupManager{
         this.content.innerHTML = ``;
         this.renderStats();
         this.renderUncompressedBackup();
+        this.renderCompressedBackup();
         
     }
 }
