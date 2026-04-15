@@ -132,7 +132,6 @@ class AdminFTPManager{
             infoList, UIBr()
         );
 
-        //wrapper.appendChild(UIFormInputRow("Ttest", "test", "number", "", "Farts"));
 
         const logs = this.logsFolderSettings;
 

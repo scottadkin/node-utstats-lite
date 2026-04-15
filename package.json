@@ -19,6 +19,7 @@
   "author": "Scott Adkin",
   "license": "ISC",
   "dependencies": {
+    "archiver": "^7.0.1",
     "basic-ftp": "^5.2.2",
     "body-parser": "^2.2.2",
     "canvas": "^3.2.3",

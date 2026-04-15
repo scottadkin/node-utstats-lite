@@ -2,6 +2,8 @@ import { mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
 import { mysqlSettings } from "../config.mjs";
 import { mkdir, writeFile } from "node:fs/promises";
 import Message from "./message.mjs";
+import archiver from "archiver";
+import fs from "fs";
 
 export async function clearAllDataTables(){
 
@@ -90,7 +92,7 @@ async function getFullTable(tableName){
     return {rows, columns}
 }
 
-export async function createDatabaseBackup(){
+function createBackupDirName(){
 
     const now = new Date(Date.now());
 
@@ -108,9 +110,18 @@ export async function createDatabaseBackup(){
     if(minutes < 10) minutes = `0${minutes}`;
     if(seconds < 10) seconds = `0${seconds}`;
 
+
+    return `${year}-${month}-${date}-${hours}-${minutes}-${seconds}`;
+}
+
+export async function createDatabaseBackup(){
+
+
+    const backupDirName = createBackupDirName();
+
     const tables = await getAllTableNames();
 
-    const dir = `./backups/${year}-${month}-${date}-${hours}-${minutes}-${seconds}`;
+    const dir = `./backups/${backupDirName}`;
 
     await mkdir(dir);
 
@@ -126,4 +137,67 @@ export async function createDatabaseBackup(){
 
 
     return {"folder": dir};
+}
+
+
+
+export async function createArchivedBackup(callback){
+
+    const backupDirName = createBackupDirName();
+    const tables = await getAllTableNames();
+
+    const dir = `./backups/`;
+
+    const output = fs.createWriteStream(dir + `${backupDirName}.zip`);
+    const archive = archiver("zip", {
+        zlib: { level: 9 }, // Sets the compression level.
+    });
+
+
+    // listen for all archive data to be written
+    // 'close' event is fired only when a file descriptor is involved
+    output.on("close", function () {
+        console.log(archive.pointer() + " total bytes");
+        console.log(
+            "archiver has been finalized and the output file descriptor has closed.",
+        );
+        callback(dir + `${backupDirName}.zip`);
+    });
+
+    output.on("end", function () {
+        console.log("Data has been drained");
+    });
+
+    // good practice to catch warnings (ie stat failures and other non-blocking errors)
+    archive.on("warning", function (err) {
+        if (err.code === "ENOENT") {
+            // log warning
+        } else {
+            // throw error
+            throw err;
+        }
+    });
+
+    // good practice to catch this error explicitly
+    archive.on("error", function (err) {
+        throw err;
+    });
+
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        const data = await getFullTable(t);
+
+        archive.append(JSON.stringify(data), {"name": `${t}.json`});
+        new Message(`Creating backup of table ${t} as ${t}.json`,"note");
+    }
+
+    // pipe archive data to the file
+    archive.pipe(output);
+
+    archive.finalize();
+
+
 }
