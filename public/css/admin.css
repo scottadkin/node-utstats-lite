@@ -61,8 +61,8 @@
 }
 
 .admin-cat-title{
-	padding:var(--padding-1);
-	font-size:var(--font-size-2);
+	padding:var(--padding-3);
+	font-size:14px;
 	text-align: center;
 	color:var(--font-color-blue);
 	font-weight:600;
@@ -70,9 +70,9 @@
 }
 
 .admin-cat-info{
-	font-size:var(--font-size-1);
+	font-size:12px;
 	padding:0px 10px 10px 10px;
-	line-height:20px;
+	line-height:1.6em;
 	margin-left:auto;
 	margin-right:auto;
 	color:rgb(200,200,200);

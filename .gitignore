@@ -5,3 +5,5 @@ config.mjs
 test.mjs
 backups/*
 !backups/delete.me
+restore-from/*
+!restore-from/delete.me

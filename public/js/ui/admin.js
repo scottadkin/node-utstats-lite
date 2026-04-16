@@ -3713,11 +3713,13 @@ class AdminMYSQLBackupManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            if(res.length === 0){
+            if(res.tableStats.length === 0){
                 throw new Error("Could not fetch information_schema info.");
             }
+            console.log(res);
 
-            this.tableStats = res;
+            this.tableStats = res.tableStats;
+            this.backupStats = res.backupStats;
 
 
         }catch(err){

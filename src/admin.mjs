@@ -1,6 +1,6 @@
 import { mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
 import { mysqlSettings } from "../config.mjs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import Message from "./message.mjs";
 import archiver from "archiver";
 import fs from "fs";
@@ -54,6 +54,64 @@ export async function clearAllDataTables(){
         await simpleQuery(query);
     }
     
+}
+
+
+export async function getAllBackupsInfo(){
+
+    const dir = "./backups/";
+
+    const files = await readdir(dir);
+
+    const backupReg = /^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}(|\.zip)$/i;
+    const jsonReg = /^(.+)\.json$/i;
+
+    const zips = [];
+    const folders = [];
+
+    for(let i = 0; i < files.length; i++){
+
+        const result = backupReg.exec(files[i]);
+        if(result === null) continue;
+
+        if(result[1] === ""){
+
+            const subDir = await readdir(`${dir}${files[i]}`);
+
+            const currentFiles = [];
+            let folderSize = 0;
+
+            for(const file of subDir){
+
+                if(!jsonReg.test(file)) continue;
+
+                const stats = await stat(`${dir}${files[i]}/${file}`);
+    
+                currentFiles.push({
+                    "name": file, 
+                    "size": stats.size,
+                    "modified": stats.mtimeMs
+                });
+
+                folderSize += stats.size;
+            }
+
+            folders.push({
+                "name": files[i],
+                "files": currentFiles,
+                "size": folderSize
+            });
+
+        
+    
+        }else{
+
+            const stats = await stat(`${dir}${files[i]}`);
+            zips.push({"name": files[i], "size": stats.size, "modified": stats.mtimeMs});
+        }
+    }
+
+    return {folders, zips}
 }
 
 export async function getAllDatabaseTableInfo(){
