@@ -3660,7 +3660,7 @@ class AdminMYSQLBackupManager{
 
         UIHeader(this.wrapper, "Database Backup Manager");
 
-        this.mode = "create-compressed";
+        this.mode = "backup-stats";
         this.content = UIDiv();
 
         this.createTabs();
@@ -3681,6 +3681,7 @@ class AdminMYSQLBackupManager{
 
         const options = [
             {"display": "Table Stats", "value": "stats"},
+            {"display": "Backup Stats", "value": "backup-stats"},
             {"display": "Create Compressed Backup", "value": "create-compressed"},
             {"display": "Create Uncompressed Backup", "value": "create-uncompressed"},
         ];
@@ -3698,6 +3699,8 @@ class AdminMYSQLBackupManager{
             this.render();
         });
     }
+
+
 
     async loadData(){
 
@@ -3739,6 +3742,8 @@ class AdminMYSQLBackupManager{
             this.info.innerHTML = `Create a compressed backup of your database.`;
         }else if(this.mode === "create-uncompressed"){
             this.info.innerHTML = `Create an uncompressed backup of your database, each table will be exported to a json file with the table name as the file name.`;
+        }else if(this.mode === "backup-stats"){
+            this.info.innerHTML = `These are the current backups located in the website's backup folder.`;
         }
     }
 
@@ -3849,10 +3854,8 @@ class AdminMYSQLBackupManager{
     renderUncompressedBackup(){
         
         if(this.mode !== "create-uncompressed") return;
-
-        
+ 
         const form = UIDiv("form");
-
 
         form.append(
             "The backup will be created in your website's ", 
@@ -3924,6 +3927,45 @@ class AdminMYSQLBackupManager{
 
     }
 
+
+    renderBackups(){
+
+        if(this.mode !== "backup-stats") return;
+
+        const options = {"width": 1, "headers": ["Name", "Type", "Size", "Last Modified"]};
+
+        const data = [];
+
+        let totalSize = 0;
+
+        for(let i = 0; i < this.backupStats.length; i++){
+
+            const f = this.backupStats[i];
+
+            data.push([
+                f.name, 
+                (f.files !== undefined) ? "Folder" : "Archive", 
+                this.toByteString(f.size), 
+                {
+                    "content": toDateString(f.modified, true), 
+                    "className": "date"
+                }]
+            );
+
+            totalSize += f.size;
+        }
+
+        data.push([
+            {"content":"Totals","className": "team-none"}, 
+            {"content":"-","className": "team-none"}, 
+             {"content":this.toByteString(totalSize),"className": "team-none"},
+            {"content":"-","className": "team-none"},
+        ]);
+
+        const table = new UITable(this.content, options, data);
+
+    }
+
     render(){
 
         this.renderInfo();
@@ -3932,6 +3974,7 @@ class AdminMYSQLBackupManager{
         this.renderStats();
         this.renderUncompressedBackup();
         this.renderCompressedBackup();
+        this.renderBackups();
         
     }
 }

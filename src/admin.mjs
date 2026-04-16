@@ -77,6 +77,7 @@ export async function getAllBackupsInfo(){
         if(result[1] === ""){
 
             const subDir = await readdir(`${dir}${files[i]}`);
+            const dirStats = await stat(`${dir}${files[i]}`);
 
             const currentFiles = [];
             let folderSize = 0;
@@ -94,12 +95,14 @@ export async function getAllBackupsInfo(){
                 });
 
                 folderSize += stats.size;
+       
             }
 
             folders.push({
                 "name": files[i],
                 "files": currentFiles,
-                "size": folderSize
+                "size": folderSize,
+                "modified": dirStats.mtimeMs
             });
 
         
@@ -111,7 +114,24 @@ export async function getAllBackupsInfo(){
         }
     }
 
-    return {folders, zips}
+
+    const backups = [...folders,...zips];
+
+
+    backups.sort((a, b) =>{
+
+        a = a.modified;
+        b = b.modified;
+
+        if(b > a){
+            return 1;
+        }else if(a > b){
+            return -1;
+        }
+        return 0;
+    });
+
+    return backups;
 }
 
 export async function getAllDatabaseTableInfo(){
