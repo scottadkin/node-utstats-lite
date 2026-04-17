@@ -3672,6 +3672,9 @@ class AdminMYSQLBackupManager{
 
         this.bBackupInProgress = false;
 
+        this.selectedBackup = "-1";
+        this.bRestoreInProgress = false;
+
 
         this.loadData();
 
@@ -3691,7 +3694,7 @@ class AdminMYSQLBackupManager{
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
-            if(this.bBackupInProgress){
+            if(this.bBackupInProgress || this.bRestoreInProgress){
                 this.tabs.setMode(this.mode);
                 return;
             }
@@ -3773,7 +3776,8 @@ class AdminMYSQLBackupManager{
             content.push(
                 `Restore your database to a previous backed up state.`,
                 UIBr(),
-                `Restore from `, UIB( "not replace "), "your website's salt.mjs, you will have to do this manually as it shouldn't be needed if you are restoring on the same install."
+                `Restore from `, UIB( "not replace "), `your website's salt.mjs, you will have to do this manually
+                 as it shouldn't be needed if you are restoring on the same install.`
             );
         }
 
@@ -4000,6 +4004,31 @@ class AdminMYSQLBackupManager{
 
     }
 
+    async restoreDatabase(){
+
+        try{
+
+            if(this.selectedBackup == -1) throw new Error("No backup selected");
+
+            if(this.bRestoreInProgress) throw new Error(`Already in progress`);
+
+            this.bRestoreInProgress = true;
+            this.restoreSubmit.className = "hidden";
+
+            const info = UIDiv("info");
+            info.append(
+                "Restore in progress, do not perform any other actions on the site while this action is being processed.",
+                UIBr(), UILoading()
+            );
+            this.content.append(info);
+            
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Restore Database", err.toString());
+        }
+    }
+
     renderRestoreFrom(){
 
         if(this.mode !== "restore-from") return;
@@ -4007,12 +4036,48 @@ class AdminMYSQLBackupManager{
         const warning = UIDiv("error");
 
         warning.append(
+            "You can not restore a different node-ustats-lite version to a newer or older version.",
+            UIBr(), UIBr(),
             "Performing this action will delete all data in the current database and replace them with the backup data.",
             UIBr(),
-            "Make sure you have created a backup of the current database if the existing data is important to you."
+            "Make sure you have created a backup of the current database if the existing data is important to you.",
+            UIBr(),
+            UIBr(),
+            "Make sure your importer process is also turned off before performing this action."
         );
 
         this.content.append(warning);
+
+
+        const form = UIDiv("form");
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Selected Backup"));
+
+        const options = [
+            {"display": "Please Select A Backup", "value": "-1"},
+            ...this.backupStats.map((b) =>{
+                return {"display": `${b.name} (${(b.files !== undefined) ? "Folder" : "Archive"})`, "value": b.name};
+            })
+        ];
+
+        const select = new UISelect(row, options, this.selectedBackup, (e) =>{
+            this.selectedBackup = e;
+        });
+
+        form.append(row);
+
+        this.restoreSubmit = document.createElement("button");
+        this.restoreSubmit.className = "submit-button";
+        this.restoreSubmit.append("Restore Database");
+
+        this.restoreSubmit.addEventListener("click", async () =>{
+
+            await this.restoreDatabase();
+        });
+        form.append(this.restoreSubmit);
+
+        this.content.append(form);
 
     }
 
