@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-	--bg-color-light:rgb(42,42,42);
-	--bg-color-mid:rgb(32,32,32);
-	--bg-color-dark:rgb(18,18,18);
+	--bg-color-light:rgb(45,45,45);
+	--bg-color-mid:rgb(36,36,36);
+	--bg-color-dark:rgb(24,24,24);
 	--button-hover-color:rgb(56,56,56);
-	--header-bg-color:rgb(25, 52, 71);
+	--header-bg-color:rgb(13, 38, 58);
 	--tab-bg-color:rgb(0,0,0);
 	--font-color-1:rgb(220,220,220);
 	--font-color-2:rgb(176,176,176);

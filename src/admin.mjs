@@ -1,6 +1,6 @@
 import { mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
 import { mysqlSettings } from "../config.mjs";
-import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import Message from "./message.mjs";
 import archiver from "archiver";
 import fs from "fs";
@@ -192,6 +192,7 @@ function createBackupDirName(){
     return `${year}-${month}-${date}-${hours}-${minutes}-${seconds}`;
 }
 
+
 export async function createDatabaseBackup(){
 
 
@@ -212,6 +213,9 @@ export async function createDatabaseBackup(){
         new Message(`Creating backup of table ${t} as ${dir}/${t}.json`,"note");
         await writeFile(`${dir}/${t}.json`, JSON.stringify(data));
     }
+
+    new Message(`Creating backup of salt.mjs`, "note");
+    await copyFile("./salt.mjs", `${dir}/salt.mjs`);
 
 
     return {"folder": dir};
@@ -272,6 +276,8 @@ export async function createArchivedBackup(callback){
         new Message(`Creating backup of table ${t} as ${t}.json`,"note");
     }
 
+    const salt = await readFile("./salt.mjs");
+    archive.append(salt, {"name": "salt.mjs"});
     // pipe archive data to the file
     archive.pipe(output);
 

@@ -52,7 +52,7 @@
 }
 
 .admin-cat-box{
-	background-color:var(--bg-color-mid);
+	background-color:var(--bg-color-light);
 	max-width:400px;
 	min-width:400px;
 	border:2px solid var(--border-color-5);

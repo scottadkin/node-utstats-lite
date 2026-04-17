@@ -3660,7 +3660,7 @@ class AdminMYSQLBackupManager{
 
         UIHeader(this.wrapper, "Database Backup Manager");
 
-        this.mode = "backup-stats";
+        this.mode = "restore-from";
         this.content = UIDiv();
 
         this.createTabs();
@@ -3684,6 +3684,7 @@ class AdminMYSQLBackupManager{
             {"display": "Backup Stats", "value": "backup-stats"},
             {"display": "Create Compressed Backup", "value": "create-compressed"},
             {"display": "Create Uncompressed Backup", "value": "create-uncompressed"},
+            {"display": "Restore From A Backup", "value": "restore-from"},
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
@@ -3736,15 +3737,48 @@ class AdminMYSQLBackupManager{
 
     renderInfo(){
 
+        //need to save password salt.js as well
+
+        this.info.innerHTML = ``;
+
+        const content = [];
+
         if(this.mode === "stats"){
-            this.info.innerHTML = `Current stats of your database tables.`;
+
+            content.push(`Current stats of your database tables.`);
+
         }else if(this.mode === "create-compressed"){
-            this.info.innerHTML = `Create a compressed backup of your database.`;
+
+            content.push(`Create a compressed backup of your database.`,
+                UIBr(),
+                `The database password salt is also saved as salt.mjs, this is to allow user passwords to work between different fresh installs.`
+            );
+
         }else if(this.mode === "create-uncompressed"){
-            this.info.innerHTML = `Create an uncompressed backup of your database, each table will be exported to a json file with the table name as the file name.`;
+
+            content.push(
+                `Create an uncompressed backup of your database, 
+                each table will be exported to a json file with the table name as the file name.`,
+                UIBr(),
+                `The database password salt is also saved as salt.mjs, this is to allow user passwords to work between different fresh installs.`
+            );
+
         }else if(this.mode === "backup-stats"){
-            this.info.innerHTML = `These are the current backups located in the website's backup folder.`;
+
+            content.push(`These are the current backups located in the website's backup folder.`);
+
+        }else if(this.mode === "restore-from"){
+
+            
+            content.push(
+                `Restore your database to a previous backed up state.`,
+                UIBr(),
+                `Restore from `, UIB( "not replace "), "your website's salt.mjs, you will have to do this manually as it shouldn't be needed if you are restoring on the same install."
+            );
         }
+
+
+        this.info.append(...content);
     }
 
     toByteString(size){
@@ -3958,11 +3992,27 @@ class AdminMYSQLBackupManager{
         data.push([
             {"content":"Totals","className": "team-none"}, 
             {"content":"-","className": "team-none"}, 
-             {"content":this.toByteString(totalSize),"className": "team-none"},
+            {"content":this.toByteString(totalSize),"className": "team-none"},
             {"content":"-","className": "team-none"},
         ]);
 
         const table = new UITable(this.content, options, data);
+
+    }
+
+    renderRestoreFrom(){
+
+        if(this.mode !== "restore-from") return;
+
+        const warning = UIDiv("error");
+
+        warning.append(
+            "Performing this action will delete all data in the current database and replace them with the backup data.",
+            UIBr(),
+            "Make sure you have created a backup of the current database if the existing data is important to you."
+        );
+
+        this.content.append(warning);
 
     }
 
@@ -3975,6 +4025,7 @@ class AdminMYSQLBackupManager{
         this.renderUncompressedBackup();
         this.renderCompressedBackup();
         this.renderBackups();
+        this.renderRestoreFrom();
         
     }
 }
