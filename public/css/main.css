@@ -129,11 +129,11 @@ body{
 	min-height: 100vh; 
 	display: grid;
 	grid-template-rows:auto 1fr auto;
-	background-color:rgb(48,48,48);
+	background-color:var(--bg-color-mid);
 }
 
 nav{
-    background-color:var(--bg-color-mid);
+    background-color:var(--bg-color-dark);
     text-align:center;
     font-size:14px;
 }
@@ -159,7 +159,7 @@ nav a:hover{
 
 footer{ 
 	padding:var(--padding-1);
-	background:var(--bg-color-mid); 
+	background:var(--bg-color-dark); 
 	color:var(--font-color-2);
 	text-align:center;
 	font-size:var(--font-size-small);
@@ -205,7 +205,7 @@ a{
 .form{
 	text-align: center;
 	margin-bottom:var(--margin-2);
-	background-color: var(--bg-color-mid);
+	background-color: var(--bg-color-light);
 	padding:var(--padding-1);
 	border-top:2px solid var(--border-color-5);
 	border-bottom:2px solid var(--border-color-5);
@@ -246,7 +246,7 @@ label, .form-label, .form-read-only{
 
 .textbox{
 	font-size:var(--font-size-1);
-	background-color:var(--bg-color-light);
+	background-color:var(--bg-color-mid);
 	border:1px solid var(--border-color-1);
 	padding:3px;
 }
@@ -315,7 +315,7 @@ table{
 
 th{
     padding:var(--padding-1) var(--padding-3);
-	background-color:var(--header-bg-color);
+	background-color:var(--bg-color-dark);
 	font-weight:500;
 	font-size:var(--font-size-4);
 	border: 2px solid var(--border-color-4);
@@ -426,7 +426,7 @@ tr:hover{
 }
 
 select{
-	background-color:var(--bg-color-light);
+	background-color:var(--bg-color-mid);
 	font-size:var(--font-size-1);
 	border:1px solid var(--border-color-1);
 	font-weight:500;
@@ -473,7 +473,7 @@ option{
 }
 
 .info{
-	background-color:var(--bg-color-mid);
+	background-color:var(--bg-color-light);
 	text-align: center;
 	padding-left:20%;
 	padding-right:20%;
@@ -571,7 +571,7 @@ option{
 }
 
 .tabs-wrapper{
-	background-color:var(--bg-color-mid);
+	background-color:var(--bg-color-light);
 	text-align:center;
 	margin-bottom:var(--margin-2);
 	font-size: var(--font-size-small);
@@ -622,7 +622,7 @@ option{
 }
 
 .rich-wrapper{
-	background-color:var(--bg-color-mid);
+	background-color:var(--bg-color-light);
 	width:var(--rich-box-width);
     border:1px solid var(--border-color-4);
     overflow: hidden;
@@ -657,7 +657,6 @@ option{
     text-overflow: ellipsis;
 	padding:5px;
 	font-weight:500;
-	color:var(--font-color-2);
 }
 
 .rich-info b{
@@ -990,17 +989,16 @@ ul{
     text-align: center;
     margin-top:var(--margin-1);
     margin-bottom:var(--margin-1);
-    background-color: var(--bg-color-mid);
+    background-color: var(--bg-color-light);
     padding-bottom:var(--padding-1);
 	border:2px solid var(--border-color-4);
 }
 
 .pagination-button{
     display:inline-block;
-    background-color:var(--bg-color-dark);
+    background-color:var(--bg-color-mid);
     border:2px solid var(--border-color-4);
     margin-right:5px;
-    
     user-select: none;
     font-size:16px;
     padding:12px 15px;
@@ -1020,7 +1018,6 @@ ul{
 
 .pagination-info{
     font-size:var(--font-size-5);
-    color:var(--font-color-blue);
     padding:var(--padding-2);
     line-height:20px;
 	font-weight:500;
