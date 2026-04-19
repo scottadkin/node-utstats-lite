@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-	--bg-color-light:rgb(45,45,45);
-	--bg-color-mid:rgb(36,36,36);
+	--bg-color-light:rgb(48,48,52);
+	--bg-color-mid:rgb(34,34,34);
 	--bg-color-dark:rgb(24,24,24);
 	--button-hover-color:rgb(56,56,56);
 	--header-bg-color:rgb(19, 40, 57);
 	--tab-bg-color:rgb(0,0,0);
-	--font-color-1:rgb(220,220,220);
-	--font-color-2:rgb(176,176,176);
+	--font-color-1:rgb(230,230,230);
+	--font-color-2:rgb(206,206,206);
 	--font-color-3:yellow;
 	--font-color-blue:rgb(0, 164, 215);
 	--active-font-color-1:yellow;
@@ -304,7 +304,7 @@ table{
     margin-right:auto;
     font-size:14px;
     text-align: center;
-    margin-bottom:var(--margin-2);
+    margin-bottom:var(--margin-1);
 	background-color: var(--bg-color-mid);
 	box-shadow:var(--box-shadow-1);
 }
@@ -347,7 +347,7 @@ tr:nth-child(odd){
 }
 
 tr:nth-child(even){
-	background-color:var(--bg-color-dark);
+	background-color:var(--bg-color-light);
 }
 
 tr:hover{
@@ -518,13 +518,12 @@ option{
 }
 
 .perma-links{
-	margin-bottom:var(--margin-2);
+	margin-bottom:var(--margin-1);
 }
 
 .fav, .perma-link{
 	display:inline-block;
 	margin-top: var(--margin-3);
-	
 	border:1px solid var(--border-color-5);
 	border-radius: var(--border-radius-1);
 	padding:var(--padding-2);
@@ -604,7 +603,7 @@ option{
 
 .rich-outter{
 	margin-top:var(--margin-2);
-	margin-bottom:var(--margin-2);
+	margin-bottom:var(--margin-1);
 	max-width:var(--max-width-1);
 	margin-left:auto;
 	margin-right:auto;
@@ -680,8 +679,7 @@ option{
 
 .welcome-message{
 	text-align:center;
-	
-	margin-bottom:var(--margin-2);
+	margin-bottom:var(--margin-1);
 	font-size:var(--font-size-1);
 }
 
@@ -898,13 +896,11 @@ option{
 .header-wrapper{
     text-align:center;
     padding:var(--padding-1);
-    background-color:var(--header-bg-color);
     font-weight:500;
-    margin-bottom:var(--margin-2);
-    font-size:var(--font-size-2);
+    margin-bottom:var(--margin-1);
+    font-size:var(--font-size-3);
+	background-color:var(--header-bg-color);
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
-	border-top:2px solid var(--border-color-4);
-	border-bottom:2px solid var(--border-color-4);
 }
 
 
@@ -1060,7 +1056,7 @@ canvas{
 
 .calendar-heatmap{
 	background-color:var(--bg-color-mid);
-	margin-bottom:var(--margin-2);
+	margin-bottom:var(--margin-1);
 	color:white;
 	display:inline-block;
 	border:1px solid var(--border-color-5);
