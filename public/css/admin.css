@@ -52,7 +52,7 @@
 }
 
 .admin-cat-box{
-	background-color:var(--bg-color-light);
+	background-color:var(--bg-color-mid);
 	max-width:400px;
 	min-width:400px;
 	border:2px solid var(--border-color-5);
@@ -104,4 +104,9 @@
 	border:2px solid var(--border-color-5);
 	padding:var(--padding-1);
 	font-weight:600;
+}
+
+
+.backup-info{
+	margin-top:var(--margin-1);
 }

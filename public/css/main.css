@@ -1,11 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-	--bg-color-light:rgb(48,48,52);
-	--bg-color-mid:rgb(34,34,34);
-	--bg-color-dark:rgb(24,24,24);
+	--bg-color-light:rgb(54,54,63);
+	--bg-color-mid:rgb(44,44,53);
+	--bg-color-dark:rgb(34,34,43);
 	--button-hover-color:rgb(56,56,56);
-	--header-bg-color:rgb(19, 40, 57);
 	--tab-bg-color:rgb(0,0,0);
 	--font-color-1:rgb(230,230,230);
 	--font-color-2:rgb(206,206,206);
@@ -20,7 +19,7 @@
 	--border-radius-1:5px;
 	--max-width-1:90%;
 	--team-color-none:rgb(20,20,20);
-	--team-color-red:rgb(79,0,0);
+	--team-color-red:rgb(79,20,20);
 	--team-color-blue:rgb(10,51,106);
 	--team-color-green:rgb(0,56,0);
 	--team-color-yellow:rgb(85,85,0);
@@ -164,7 +163,6 @@ footer{
 	text-align:center;
 	font-size:var(--font-size-small);
 	line-height:var(--line-height-1);
-	border-top:2px solid var(--border-color-5);
 	font-weight:500;
 }
 
@@ -312,10 +310,9 @@ table{
 
 th{
     padding:var(--padding-1) var(--padding-3);
-	background-color:var(--header-bg-color);
+	background-color:var(--bg-color-mid);
 	font-weight:500;
 	font-size:var(--font-size-4);
-	border: 2px solid var(--border-color-4);
 }
 
 th:hover{
@@ -479,6 +476,7 @@ option{
 	font-size:var(--font-size-1);
 	line-height: var(--line-height-1);
 	font-weight:500;
+	background-color: var(--bg-color-mid);
 }
 
 .info-basic{
@@ -835,11 +833,11 @@ option{
 }
 
 .ctf-cap-title{
-	background-color:var(--header-bg-color);
+	background-color:var(--bg-color-dark);
 	font-weight: 600;
 	padding:var(--padding-2);
-	border-top:2px solid var(--border-color-5);
-	border-bottom:2px solid var(--border-color-5);
+	border-top:1px solid var(--border-color-5);
+	border-bottom:1px solid var(--border-color-5);
 }
 
 .ctf-cap-value{
@@ -899,7 +897,7 @@ option{
     font-weight:500;
     margin-bottom:var(--margin-1);
     font-size:var(--font-size-3);
-	background-color:var(--header-bg-color);
+	background-color:var(--bg-color-mid);
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 }
 
@@ -1280,13 +1278,13 @@ code{
 	justify-content: center;
 	align-items: center;
 	font-weight: 500;
+	color:var(--font-color-1);
 }
 
 
 
 .json-api-link-content{
 	font-size:var(--font-size-5);
-	background-color:rgba(0,0,0,0.25);
 	padding:5px;
 }
 

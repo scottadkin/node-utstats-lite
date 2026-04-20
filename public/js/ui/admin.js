@@ -3723,8 +3723,7 @@ class AdminMYSQLBackupManager{
             if(res.tableStats.length === 0){
                 throw new Error("Could not fetch information_schema info.");
             }
-            console.log(res);
-
+            
             this.tableStats = res.tableStats;
             this.backupStats = res.backupStats;
 
@@ -4029,6 +4028,59 @@ class AdminMYSQLBackupManager{
         }
     }
 
+
+    renderSelectedInfo(){
+
+        this.selectedBackupInfo.innerHTML = ``;
+        this.selectedBackupInfo.className = "backup-info";
+        this.restoreSubmit.className = "hidden";
+
+        let info = null;
+
+        for(let i = 0; i < this.backupStats.length; i++){
+
+            const b = this.backupStats[i];
+
+            if(b.name === this.selectedBackup){
+                info = b;
+                break;
+            }
+        }
+
+        if(info === null && this.selectedBackup == -1){
+
+            this.selectedBackupInfo.append("Please select a backup to see more information.");
+            return;
+
+        }else if(info === null && this.selectedBackup != -1){
+
+            this.selectedBackupInfo.append(`Could not find any information about ${this.selectedBackup}`);
+            return;
+        }
+
+
+        this.restoreSubmit.className = "submit-button";
+
+        const tableOptions = {
+            "width": 4,
+        };
+
+        const tableRows = [
+            ["Backup Name", info.name],
+            ["Backup Type", (info.files !== undefined) ? "Uncompressed(Folder)" : "Archive"],
+            ["File Size", this.toByteString(info.size)],
+            [
+                "Last Modified", 
+                {"content": info.modified, "parse": ["date"], "className": "date"}
+            ]
+        ];
+
+        const table = new UITable(this.selectedBackupInfo, tableOptions, tableRows);
+       // get created data, total size ect and display in form
+
+        //this.selectedBackupInfo.append(this.selectedBackup);
+    }
+
     renderRestoreFrom(){
 
         if(this.mode !== "restore-from") return;
@@ -4036,7 +4088,8 @@ class AdminMYSQLBackupManager{
         const warning = UIDiv("error");
 
         warning.append(
-            "You can not restore a different node-ustats-lite version to a newer or older version.",
+            `You can only restore databases from version of node-utstats-lite that have the same database table structure, 
+            if you attempt to restore from an incompatible version you may get strange results or errors.`,
             UIBr(), UIBr(),
             "Performing this action will delete all data in the current database and replace them with the backup data.",
             UIBr(),
@@ -4057,15 +4110,21 @@ class AdminMYSQLBackupManager{
         const options = [
             {"display": "Please Select A Backup", "value": "-1"},
             ...this.backupStats.map((b) =>{
-                return {"display": `${b.name} (${(b.files !== undefined) ? "Folder" : "Archive"})`, "value": b.name};
+                return {"display": b.name, "value": b.name};
             })
         ];
 
         const select = new UISelect(row, options, this.selectedBackup, (e) =>{
             this.selectedBackup = e;
+            this.renderSelectedInfo();
         });
 
         form.append(row);
+
+        this.selectedBackupInfo = UIDiv("hidden");
+        form.append(this.selectedBackupInfo);
+
+        
 
         this.restoreSubmit = document.createElement("button");
         this.restoreSubmit.className = "submit-button";
@@ -4075,6 +4134,8 @@ class AdminMYSQLBackupManager{
 
             await this.restoreDatabase();
         });
+        this.renderSelectedInfo();
+        
         form.append(this.restoreSubmit);
 
         this.content.append(form);
