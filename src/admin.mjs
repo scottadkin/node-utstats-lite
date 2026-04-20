@@ -373,9 +373,22 @@ export async function restoreDatabase(backupTarget){
 
         }else{
 
-            //folder
-            //copy json files from backup folder to restore-from
-            //don't just move them we want to keep the backup files
+            const buFolder = await readdir(targetFile);
+
+            for(let i = 0; i < buFolder.length; i++){
+
+                const f = buFolder[i];
+
+                if(jsonReg.test(f)){
+       
+                    await copyFile(`${targetFile}/${f}`, `${restoreDir}${f}`);
+                    new Message(`Copied ${targetFile}/${f} to ${restoreDir}${f}`,"pass");
+
+                }else{
+
+                    new Message(`Skipping file ${f}`,"note");
+                }
+            }
         }
 
         const files = await readdir(restoreDir);
@@ -390,10 +403,8 @@ export async function restoreDatabase(backupTarget){
 
             if(jResult === null) continue;
             
-            
             new Message(`Truncate table ${jResult[1]}.`,"note");
             await truncateTable(jResult[1]);
-
             
             const totalRows = await restoreTable(jResult[1], `${restoreDir}${f}`);
 
