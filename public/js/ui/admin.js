@@ -3700,6 +3700,8 @@ class AdminMYSQLBackupManager{
             }
 
             this.mode = e.detail.newTab;
+            this.selectedBackupInfo.innerHTML = ``;
+            this.selectedBackupInfo.className = "hidden";
             this.render();
         });
     }
@@ -3775,7 +3777,7 @@ class AdminMYSQLBackupManager{
             content.push(
                 `Restore your database to a previous backed up state.`,
                 UIBr(),
-                `Restore from `, UIB( "not replace "), `your website's salt.mjs, you will have to do this manually
+                `Restore from `, UIB( "will not replace "), `your website's salt.mjs, you will have to do this manually
                  as it shouldn't be needed if you are restoring on the same install.`
             );
         }
@@ -3789,7 +3791,7 @@ class AdminMYSQLBackupManager{
         if(size > 1024 * 1024){
             size = `${(size / (1024 * 1024)).toFixed(2)} MiB`;
         }else if(size > 1024){
-            size = `${size / 1024} KiB`;
+            size = `${(size / 1024).toFixed(2)} KiB`;
         }else{
             size = `${size} Bytes`;
         }
@@ -4014,17 +4016,66 @@ class AdminMYSQLBackupManager{
             this.bRestoreInProgress = true;
             this.restoreSubmit.className = "hidden";
 
-            const info = UIDiv("info");
-            info.append(
+            this.restoreResultInfo.className = `info`;
+            this.restoreResultInfo.innerHTML = ``;
+
+            this.restoreResultInfo.append(
                 "Restore in progress, do not perform any other actions on the site while this action is being processed.",
                 UIBr(), UILoading()
             );
-            this.content.append(info);
+
+
+            const req = await fetch("/admin/", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "restore-database", "targetBackup": this.selectedBackup})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+                throw new Error(res.error);
+            }
+
+
+            this.restoreResultInfo.innerHTML = ``;
+            this.restoreResultInfo.className = "pass";
+
+            const title = UIDiv("pass-title");
+            title.append(`Restore Complete`);
+
+            this.restoreResultInfo.append(title);
+
+            
+            const tableRows = [];
+
+            for(let i = 0; i < res.length; i++){
+
+                const {table, rows} = res[i];
+
+                tableRows.push([{"content": UIB(table), "className": "text-left"}, rows]);
+                
+            }
+
+            const tableElem = new UITable(
+                this.restoreResultInfo, 
+                {"width": 4, "headers": ["Table", "Rows Inserted"]}, 
+                tableRows
+            );
             
 
         }catch(err){
+
             console.trace(err);
             new UINotification(this.parent, "error", "Failed To Restore Database", err.toString());
+
+        }finally{
+
+            this.bRestoreInProgress = false;
+            this.selectedBackup = "-1";
+            this.renderSelectedInfo();
+            this.backupSelect.changeSelected(this.selectedBackup); 
+
         }
     }
 
@@ -4097,6 +4148,9 @@ class AdminMYSQLBackupManager{
             UIBr(),
             UIBr(),
             "Make sure your importer process is also turned off before performing this action.", 
+            UIBr(),
+            UIBr(),
+            "It is likely that your current login session will be invalid once this process has completed."
         );
 
         this.content.append(warning);
@@ -4114,7 +4168,7 @@ class AdminMYSQLBackupManager{
             })
         ];
 
-        const select = new UISelect(row, options, this.selectedBackup, (e) =>{
+        this.backupSelect = new UISelect(row, options, this.selectedBackup, (e) =>{
             this.selectedBackup = e;
             this.renderSelectedInfo();
         });
@@ -4123,6 +4177,9 @@ class AdminMYSQLBackupManager{
 
         this.selectedBackupInfo = UIDiv("hidden");
         form.append(this.selectedBackupInfo);
+
+        
+        
 
         
 
@@ -4139,6 +4196,9 @@ class AdminMYSQLBackupManager{
         form.append(this.restoreSubmit);
 
         this.content.append(form);
+
+        this.restoreResultInfo = UIDiv("hidden");
+        this.content.append(this.restoreResultInfo);
 
     }
 

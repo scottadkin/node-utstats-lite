@@ -437,7 +437,7 @@ option{
 	border:1px solid var(--border-color-5);
 }
 
-.warning, .error{
+.warning, .error, .pass{
 	text-align:center;
 	padding:var(--padding-1);
 	margin-top:var(--margin-1);
@@ -453,7 +453,11 @@ option{
 	background-color:var(--team-color-yellow);
 }
 
-.warning-title, .error-title{
+.pass{
+	background-color:var(--team-color-green);
+}
+
+.warning-title, .error-title, .pass-title{
 	margin-bottom:var(--margin-1);
 	font-weight:500;
 }

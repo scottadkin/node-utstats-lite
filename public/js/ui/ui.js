@@ -820,6 +820,15 @@ class UISelect{
         this.parent.append(this.select);
     }
 
+    changeSelected(newValue){
+
+        for(let i = 0; i < this.select.length; i++){
+
+            this.select[i].selected = this.select[i].value === newValue;
+            
+        }
+    }
+
     createOptions(){
 
         for(let i = 0; i < this.options.length; i++){
