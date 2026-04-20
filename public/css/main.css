@@ -567,8 +567,6 @@ option{
 	text-align:center;
 	margin-bottom:var(--margin-2);
 	font-size: var(--font-size-small);
-	border-top:2px solid var(--border-color-4);
-	border-bottom:2px solid var(--border-color-4);
 }
 
 .tab{

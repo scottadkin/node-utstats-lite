@@ -3723,7 +3723,7 @@ class AdminMYSQLBackupManager{
             if(res.tableStats.length === 0){
                 throw new Error("Could not fetch information_schema info.");
             }
-            
+
             this.tableStats = res.tableStats;
             this.backupStats = res.backupStats;
 
@@ -4096,7 +4096,7 @@ class AdminMYSQLBackupManager{
             "Make sure you have created a backup of the current database if the existing data is important to you.",
             UIBr(),
             UIBr(),
-            "Make sure your importer process is also turned off before performing this action."
+            "Make sure your importer process is also turned off before performing this action.", 
         );
 
         this.content.append(warning);

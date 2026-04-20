@@ -1,9 +1,10 @@
 import { mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
 import { mysqlSettings } from "../config.mjs";
-import { copyFile, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import Message from "./message.mjs";
 import archiver from "archiver";
 import fs from "fs";
+import unzipper from "unzipper";
 
 export async function clearAllDataTables(){
 
@@ -195,7 +196,6 @@ function createBackupDirName(){
 
 export async function createDatabaseBackup(){
 
-
     const backupDirName = createBackupDirName();
 
     const tables = await getAllTableNames();
@@ -282,6 +282,70 @@ export async function createArchivedBackup(callback){
     archive.pipe(output);
 
     archive.finalize();
+}
+
+//Don't want to accidently mix backups or leave deleted tables data in the folder
+async function deleteOldRestoreJSONFiles(){
+
+    const dir = `./restore-from/`;
+
+    const files = await readdir(dir);
+
+    const reg = /^.+?\.json$/i;
+
+    for(let i = 0; i < files.length; i++){
+
+        const f = files[i];
+
+        if(!reg.test(f)) continue;
+
+        await rm(`${dir}${f}`);
+    }
+
+}
+
+export async function restoreDatabase(backupTarget){
+
+    try{
+
+        const backupDir = `./backups/`;
+        const restoreDir = `./restore-from/`;
+
+        const targetFile = `${backupDir}${backupTarget}`;
+
+        const archiveReg = /^.+?\.zip$/i;
+        const jsonReg = /^.+?\.json$/i;
+
+        let jsonFiles = [];
+
+        await deleteOldRestoreJSONFiles();
+
+        if(archiveReg.test(backupTarget)){
+
+            const zip = await unzipper.Open.file(targetFile);
+            await zip.extract({ path: './restore-from/' });
+
+        }else{
+
+            //folder
+            //copy json files from backup folder to restore-from
+            //don't just move them we want to keep the backup files
+        }
+
+        const files = await readdir(restoreDir);
+
+        for(let i = 0; i < files.length; i++){
+
+            const f = files[i];
+            
+            if(jsonReg.test(f)){
+                jsonFiles.push(f);
+            }
+        }
 
 
+    }catch(err){
+        console.trace(err);
+    }
+   
 }
