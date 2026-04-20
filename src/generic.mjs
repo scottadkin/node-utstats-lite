@@ -600,3 +600,22 @@ export function getHeatmapDates(month, year){
 
     return {start, end, lastDayOfMonth};
 }
+
+
+export function toMYSQLDateTime(date){
+
+    if(!date instanceof Date){
+        throw new Error(`Not a valid date object`);
+    }
+
+    const string = date.toISOString(date);
+
+    const reg = /^(\d{4}\-\d{2}\-\d{2}).(\d{2}\:\d{2}\:\d{2}).*$/i;
+    const result = reg.exec(string);
+
+    if(result === null){
+        throw new Error(`toMYSQLDateTime regular expression failed.`);
+    }
+
+    return `${result[1]} ${result[2]}`;
+}

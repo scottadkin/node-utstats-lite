@@ -1,10 +1,11 @@
-import { mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
+import { bulkInsert, mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
 import { mysqlSettings } from "../config.mjs";
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import Message from "./message.mjs";
 import archiver from "archiver";
 import fs from "fs";
 import unzipper from "unzipper";
+import {toMYSQLDateTime} from "./generic.mjs";
 
 export async function clearAllDataTables(){
 
@@ -163,8 +164,29 @@ async function getFullTable(tableName){
 
     const result = await simpleQuery(query);
 
+    const dateColumns = ["first", "last", "first_match", "last_match", "date", "match_date", "last_active"];
+
     const rows = result.map((r) =>{
-        return Object.values(r);
+
+        const current = [];
+        for(const [key, value] of Object.entries(r)){
+            //console.log(key, value);
+
+            if(dateColumns.indexOf(key) !== -1){
+
+                if(typeof value === "object" && value instanceof Date){
+   
+                    current.push(toMYSQLDateTime(value));
+                }else{
+                    current.push(value);
+                }
+            }else{
+                current.push(value);
+            }
+
+            //console.log(key === "last_active" typeof value);
+        }
+        return Object.values(current);
     });
 
 
@@ -304,6 +326,30 @@ async function deleteOldRestoreJSONFiles(){
 
 }
 
+async function truncateTable(tableName){
+
+    const query = `TRUNCATE ${tableName}`;
+
+    return await simpleQuery(query);
+}
+
+async function restoreTable(tableName, fileName){
+
+    new Message(`Attempting to restore ${tableName} from ${fileName}`,"note");
+
+    const buffer = await readFile(fileName);
+    const {columns, rows} = JSON.parse(buffer);
+
+    const query = `INSERT INTO ${tableName} (${columns.toString()}) VALUES ?`;
+
+    await bulkInsert(query, rows);
+
+    new Message(`Inserted ${rows.length} rows of data into table ${tableName}`,"pass");
+
+    return rows.length;
+
+}
+
 export async function restoreDatabase(backupTarget){
 
     try{
@@ -314,7 +360,7 @@ export async function restoreDatabase(backupTarget){
         const targetFile = `${backupDir}${backupTarget}`;
 
         const archiveReg = /^.+?\.zip$/i;
-        const jsonReg = /^.+?\.json$/i;
+        const jsonReg = /^(.+?)\.json$/i;
 
         let jsonFiles = [];
 
@@ -323,7 +369,7 @@ export async function restoreDatabase(backupTarget){
         if(archiveReg.test(backupTarget)){
 
             const zip = await unzipper.Open.file(targetFile);
-            await zip.extract({ path: './restore-from/' });
+            await zip.extract({ "path": restoreDir });
 
         }else{
 
@@ -334,18 +380,31 @@ export async function restoreDatabase(backupTarget){
 
         const files = await readdir(restoreDir);
 
+        let rowsInserted = [];
+
         for(let i = 0; i < files.length; i++){
 
             const f = files[i];
+
+            const jResult = jsonReg.exec(f);
+
+            if(jResult === null) continue;
             
-            if(jsonReg.test(f)){
-                jsonFiles.push(f);
-            }
+            
+            new Message(`Truncate table ${jResult[1]}.`,"note");
+            await truncateTable(jResult[1]);
+
+            
+            const totalRows = await restoreTable(jResult[1], `${restoreDir}${f}`);
+
+            rowsInserted.push({"table": jResult[1], "rows": totalRows});
         }
 
+        return rowsInserted;
 
     }catch(err){
         console.trace(err);
+        return err.toString();
     }
    
 }
