@@ -1212,9 +1212,9 @@ async function bulkInsertPlayerMapAverages(data, mapId){
 
     const insertVars = [];
 
-    for(let i = 0; i < data.data.length; i++){
+    for(let i = 0; i < data.length; i++){
 
-        const d = data.data[i];
+        const d = data[i];
 
         insertVars.push([
             d.player_id, mapId, 0, d.playtime, d.total_matches,

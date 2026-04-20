@@ -310,7 +310,7 @@ table{
 
 th{
     padding:var(--padding-1) var(--padding-3);
-	background-color:var(--bg-color-mid);
+	background-color:var(--bg-color-light);
 	font-weight:500;
 	font-size:var(--font-size-4);
 }
@@ -339,11 +339,11 @@ th a{
 	color:inherit;
 }
 
-tr:nth-child(odd){
+tr:nth-child(even){
 	background-color:var(--bg-color-mid);
 }
 
-tr:nth-child(even){
+tr:nth-child(odd){
 	background-color:var(--bg-color-light);
 }
 
