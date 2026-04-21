@@ -2,9 +2,8 @@
 import { sha256 } from 'js-sha256';
 import {salt} from "../salt.mjs";
 import {simpleQuery} from "./database.mjs";
-//import { cookies } from 'next/headers';
 import { createRandomString } from "./generic.mjs";
-import { maxLoginAttempts, maxLoginBanPeriod } from '../config.mjs';
+import { maxLoginAttempts, maxLoginBanPeriod, loginExpireTime } from '../config.mjs';
 
 async function getUserName(id){
 
@@ -31,24 +30,6 @@ async function bAccountActive(id){
 
     return false;
 }
-
-
-/*
-async function createSession(userId, hash, expires){
-
-    const query = `INSERT INTO nstats_sessions VALUES(NULL,?,?,?)`;
-
-    expires = Math.floor(expires * 0.001);
-    await simpleQuery(query, [ userId, hash, "0.0.0.0"]);
-}
-
-async function deleteSession(userId, sId){
-
-    const query = `DELETE FROM nstats_sessions WHERE user=? AND hash=?`;
-
-    return await simpleQuery(query, [userId, sId]);
-}*/
-
 
 async function bNameTaken(username){
 
@@ -153,32 +134,32 @@ async function setSessionUserId(sId, userId){
 }
 
 
-async function updateUserSession(res, sessionStore, sid, userId, username, expires){
+function updateExpireDates(res, sId, userId, userName, expires){
 
-    await sessionStore.set(sid, {"name": username, "user_id": userId, "session_id": sid}, async (err) =>{
+    res.cookie("nstats_name", userName, {expires, "httpOnly": true, "path": "/"});
+    res.cookie("nstats_userid", userId, {expires, "httpOnly": true, "path": "/"});
+    res.cookie("nstats_sid", sId, {expires, "httpOnly": true, "path": "/"});
+}
+
+async function updateUserSession(res, sessionStore, sId, userId, userName, expires){
+
+    return await sessionStore.set(sId, {"name": userName, "user_id": userId, "session_id": sId}, async (err) =>{
 
         if(err) throw new Error(err.message);
 
-        await setSessionUserId(sid, userId);
-        res.cookie("nstats_name", username, {expires, "httpOnly": true, "path": "/"});
-        res.cookie("nstats_userid", userId, {expires, "httpOnly": true, "path": "/"});
-        res.cookie("nstats_sid", sid, {expires, "httpOnly": true, "path": "/"});
+        await setSessionUserId(sId, userId);
+
+        updateExpireDates(res, sId, userId, userName, expires); 
     });
 }
 
 export async function bSessionExist(sessionStore, sId){
 
-    return new Promise(async (resolve, reject) =>{
+    const result = await sessionStore.get(sId);
 
-        await sessionStore.get(sId, (err, session) =>{
+    if(result === null) return false;
 
-            if(err) reject(err.message);
-
-            if(session !== null) resolve(true);
-            
-            resolve(false);
-        });   
-    });
+    return true;
     
 }
 
@@ -202,6 +183,13 @@ async function getFailedLoginAttempts(ip){
 
     return result[0].total_rows;
 
+}
+
+function getExpireDate(){
+
+    const hour = 60 * 60 * 1000;
+
+    return new Date(Date.now() + hour * loginExpireTime);
 }
 
 export async function login(req, res, sessionStore){
@@ -246,12 +234,13 @@ export async function login(req, res, sessionStore){
        // throw new Error("User account has not been activated.");
     }
 
-    const expires = new Date(Date.now() + 60 * 60 * 24 * 1000);
+    const expires = getExpireDate();
 
     const part1 = createRandomString(200);
     const sid = sha256(`${part1}`);
 
     await updateUserSession(res, sessionStore, sid, userId, username, expires);
+
     res.redirect("/?message=login");
     
     //return true;
@@ -276,7 +265,7 @@ export async function logout(req, res, sessionStore){
 
 }
 
-export async function getSessionInfo(req, sessionStore){
+export async function getSessionInfo(res, req, sessionStore){
 
 
     const userId = req.cookies?.nstats_userid ?? null;
@@ -293,68 +282,8 @@ export async function getSessionInfo(req, sessionStore){
 
     if(!bActive) return null; 
 
+    const expires = getExpireDate();
+    updateExpireDates(res, sessionId, userId, username, expires);
 
     return {username}
 }
-
-/*export async function bSessionValid(userId, sessionId){
-
-    const query = `SELECT COUNT(*) as total_sessions FROM nstats_sessions WHERE user=? AND hash=?`;
-
-    const result = await simpleQuery(query, [userId, sessionId]);
-
-    if(result.length > 0){
-
-        const r = result[0].total_sessions;
-        return r > 0;
-    }
-
-    return false;
-}
-
-
-export async function updateSession(){
-
-    try{
-
-        const cookieStore = await cookies();
-
-        const sId = cookieStore.get("nstats_sid");
-
-        if(sId === undefined) return null;
-
-        const userId = cookieStore.get("nstats_userid");
-        //const userName = cookieStore.get("nstats_name");
-
-        if(!await bSessionValid(userId.value, sId.value)){
-
-            await deleteSession(userId.value, sId.value);
-            cookieStore.delete("nstats_name");
-            cookieStore.delete("nstats_userid");
-            cookieStore.delete("nstats_sid");
-            
-            
-            return;
-            //throw new Error("Not a valid session");   
-        }
-
-        const expires = new Date(Date.now() + 60 * 60 * 24 * 1000);
-
-        const userName = await getUserName(userId.value);
-
-        if(userName === null){
-            throw new Error("There is no user account with that id");
-        }
-
-
-       cookieStore.set("nstats_name", userName, {expires, "httpOnly": true, "path": "/"});
-       cookieStore.set("nstats_userid", userId.value, {expires, "httpOnly": true, "path": "/"});
-       cookieStore.set("nstats_sid", sId.value, {expires, "httpOnly": true, "path": "/"});
-
-       return userName;
-
-    }catch(err){
-        console.trace(err);
-        return null;
-    }
-}*/

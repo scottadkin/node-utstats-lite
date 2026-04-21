@@ -2996,7 +2996,7 @@ class AdminMatchesManager{
         this.content.innerHTML = ``;
 
         if(this.selectedTab === "match-list"){
-            this.searchForm.className = "info";
+            this.searchForm.className = "margin-bottom-1";
             this.renderMatchList();
             return;
         }

@@ -42,7 +42,7 @@ export default class AdminJSONManager{
 
     async checkSession(){
 
-        this.userSession = await getSessionInfo(this.req, this.sessionStore);
+        this.userSession = await getSessionInfo(this.res, this.req, this.sessionStore);
 
         //this.userSession = null;
 
@@ -65,7 +65,7 @@ export default class AdminJSONManager{
         console.log(this.body);
         try{
 
-            this.userSession = await getSessionInfo(this.req, this.sessionStore);
+            this.userSession = await getSessionInfo(this.res, this.req, this.sessionStore);
 
             //this.userSession = null;
 

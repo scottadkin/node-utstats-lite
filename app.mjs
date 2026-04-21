@@ -37,7 +37,6 @@ import cookieParser from 'cookie-parser';
 import multer from 'multer';
 const upload = multer({ dest: 'uploads/' })
 
-//import MySQLStore from 'express-mysql-session'
 import ApiJSON from './src/json/apiJSON.mjs';
 import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
 
@@ -79,7 +78,7 @@ app.get('/', async (req, res) => {
 
 	try{
 	
-		const userSession =  await getSessionInfo(req, sessionStore);
+		const userSession =  await getSessionInfo(res, req, sessionStore);
 		renderHomePage(req, res, userSession);	
 		
 	}catch(err){
@@ -90,59 +89,59 @@ app.get('/', async (req, res) => {
 
 
 app.get('/match/:id', async (req, res) => {
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderMatchPage(req, res, userSession);
 });
 
 app.get("/matches", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderMatchesPage(req, res, userSession);
 });
 
 app.get("/players", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderPlayersPage(req, res, userSession);
 });
 
 app.get("/rankings", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderRankingsPage(req, res, userSession);
 });
 
 app.get("/ctfleague", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderCTFLeaguePage(req, res, userSession);
 });
 
 app.get("/records", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderRecordsPage(req, res, userSession);
 });
 
 app.get("/maps", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderMapsPage(req, res, userSession);
 });
 
 app.get("/player/:id", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderPlayerPage(req, res, userSession);
 });
 
 app.get("/map/:id", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderMapPage(req, res, userSession);
 });
 
 
 app.get("/watchlist", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderWatchlistPage(req, res, userSession);
 });
 
 app.get("/jsonexamples", async (req, res) =>{
 
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 
 	renderJSONExamples(req, res, userSession);
 });
@@ -171,7 +170,7 @@ app.get("/matchshot/:id", async (req, res) =>{
 
 app.get("/login", async (req, res) =>{
 
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderLoginPage(req, res, sessionStore, userSession);
 });
 
@@ -201,7 +200,7 @@ app.get("/logout", async (req, res) =>{
 
 
 app.get("/register", async (req, res) =>{
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	renderRegisterPage(req, res, userSession);
 });
 
@@ -220,7 +219,7 @@ app.post("/register", async (req, res) =>{
 
 app.get("/admin", async (req, res) =>{
 
-	const userSession = await getSessionInfo(req, sessionStore);
+	const userSession = await getSessionInfo(res, req, sessionStore);
 	if(userSession === null){
 		res.status(401).send("Access Denied");
 	}else{
@@ -262,21 +261,8 @@ app.post("/admin", checkUserIsAdmin, upload.any(), async (req, res, next) =>{
 	}
 });
 
-/*
-app.post('/test', upload.single('file'), function (req, res, next) {
-  // req.file is the `avatar` file
-  // req.body will hold the text fields, if there were any
-
-  //console.log(req);
-  console.log("req.body");
-  console.log(req.body);
-  console.log("req.file");
-  console.log(req.file);
-  res.send("test");
-})*/
 
 app.get("/json/:mode", async (req, res) =>{
-
 
 	try{
 		const j = new JSONManager(req, res, false);
@@ -285,7 +271,6 @@ app.get("/json/:mode", async (req, res) =>{
 	}catch(err){
 		res.send(err.toString());
 	}
-	//res.send("test");
 });
 
 app.post("/json/:mode", async (req, res) =>{
