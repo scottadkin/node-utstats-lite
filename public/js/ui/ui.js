@@ -171,11 +171,21 @@ function UITableCell(params){
 
     const contentType = typeof params.content;
 
+    const elem = document.createElement("td");
+    if(params.id !== undefined){
+        elem.id = params.id;
+    }
+
     let content = params.content ?? "";
 
     let className = params.className ?? "";
+    let colSpan = params.colSpan ?? "";
 
-    const elem = document.createElement("td");
+    if(colSpan !== ""){
+        colSpan = parseInt(colSpan);
+        if(colSpan !== colSpan) colSpan = "";
+        elem.colSpan = colSpan;
+    }
 
     if(Array.isArray(content)){
 
@@ -1589,9 +1599,17 @@ class UITable{
 
         for(let i = 0; i < this.data.length; i++){
 
-            const d = this.data[i];
+            let d = this.data[i];
 
             const row = UITr();
+
+            if(d.id !== undefined){
+                row.id = d.id;
+            }
+            
+            if(d.columns !== undefined){
+                d = d.columns;
+            }
 
             for(let x = 0; x < d.length; x++){
        

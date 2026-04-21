@@ -2577,6 +2577,8 @@ class AdminMatchesManager{
 
         this.selectedTab = "duplicate-matches";
 
+        this.deleteDupInfo = null;
+
         this.data = [];
         this.totalMatches = 0;
 
@@ -2723,11 +2725,8 @@ class AdminMatchesManager{
             body.perPage = this.perPage;
 
         }else if(this.selectedTab === "duplicate-matches"){
-
             body.mode = "get-duplicate-matches";
-
         }
-
 
         return body;
     }
@@ -2849,34 +2848,23 @@ class AdminMatchesManager{
         info.append(`Clicking a link opens the match in a new tab`);
         this.content.append(info);
 
-        const table = document.createElement("table");
-        table.className = "t-width-1";
-
-        const headers = ["Date", "Server", "Gametype", "Map", "Players", "Playtime", "Delete"];
-
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        table.append(headerRow);
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            const row = document.createElement("tr");
-            row.id = `match-row-${d.id}`;
             const url = `/match/${d.id}`;
             const urlTarget = `_blank`;
 
-            row.append(UITableCell({"content": d.date, "parse": ["date"], "className": "date", url, urlTarget}));
-            row.append(UITableCell({"content": d.server_name, url, urlTarget, "className": "font-small" }));
-            row.append(UITableCell({"content": d.gametype_name, url, urlTarget, "className": "font-small"}));
-            row.append(UITableCell({"content": d.map_name, url, urlTarget, "className": "font-small"}));
-            row.append(UITableCell({"content": d.players, url, urlTarget}));
-            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url, urlTarget}));
+            const row = {"id": `match-row-${d.id}`, "columns": [
+                {"content": d.date, "parse": ["date"], "className": "date", url, urlTarget},
+                {"content": d.server_name, url, urlTarget, "className": "font-small" },
+                {"content": d.gametype_name, url, urlTarget, "className": "font-small"},
+                {"content": d.map_name, url, urlTarget, "className": "font-small"},
+                {"content": d.players, url, urlTarget},
+                {"content": d.playtime, "parse": ["playtime"], "className": "playtime", url, urlTarget}
+            ]};
 
             const deleteButton = document.createElement("button");
             deleteButton.innerHTML = "Delete Match";
@@ -2890,13 +2878,16 @@ class AdminMatchesManager{
                 this.addToDelete(d.id);
             });
 
-            const actionTd = UITableCell({"content": deleteButton});
-            actionTd.id = `match-action-${d.id}`;
-            row.append(actionTd);
-            table.append(row);
+            const actionTd = {"content": deleteButton, "id": `match-action-${d.id}`};
+            row.columns.push(actionTd);
+            rows.push(row);
         }
 
-        this.content.append(table);
+        const table = new UITable(this.content, {
+            "headers": ["Date", "Server", "Gametype", "Map", "Players", "Playtime", "Delete"],
+            "width": 1
+        }, rows);
+
     }
 
     
@@ -2911,6 +2902,9 @@ class AdminMatchesManager{
 
             
             this.bDeleteDuplicatesInProgress = true;
+            this.deleteAllDupButton.className = "hidden";
+
+            this.deleteDupInfo.append(UILoading());
 
             const req = await fetch("/admin", {
                 "headers": {"Content-type": "application/json"},
@@ -2922,6 +2916,7 @@ class AdminMatchesManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
+            new UINotification(this.parent, "pass", "Duplicates Deleted", "Duplicate matches have successfully been deleted.");
             await this.loadData();
 
         }catch(err){
@@ -2930,74 +2925,69 @@ class AdminMatchesManager{
         }finally{
 
             this.bDeleteDuplicatesInProgress = false;
+            this.deleteAllDupButton.className = "delete-button";
         }
     }
 
     renderDuplicates(){
 
+        if(this.deleteDupInfo === null){
 
-        const info = UIDiv("info");
+            this.deleteDupInfo = UIDiv("info");
+        }else{
+            this.deleteDupInfo.innerHTML = ``;
+        }
 
-        info.append(`Delete all duplicate matches.`,  UIBr(),
+        this.deleteDupInfo.append(
+            `Delete all duplicate matches.`,  UIBr(),
             `Remove all duplicate matches leaving only their most recent import of each match.`,
             UIBr(),
             `This action also recalculates player totals, gametype totals, map totals, and player rankings.`
         );
-        this.content.append(info);
 
-        const table = document.createElement("table");
-        table.className = "t-width-1";
+        this.content.append(this.deleteDupInfo);        
 
-        const headers = ["Date", "Server", "Gametype", "Map", "Total Duplicates"];
-
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        table.append(headerRow);
+        const tRows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            const row = document.createElement("tr");
-
             const url = `/match/${d.latest_id}`;
             const urlTarget = "_blank";
             
-            row.append(UITableCell({"content": d.latest_date, "parse": ["date"], "className": "date", url, urlTarget}));
-            row.append(UITableCell({"content": d.server_name, "className": "font-small", url, urlTarget}));
-            row.append(UITableCell({"content": d.gametype_name, "className": "font-small", url, urlTarget}));
-            row.append(UITableCell({"content": d.map_name, "className": "font-small", url, urlTarget}));
-            row.append(UITableCell({"content": d.total_matches - 1, url, urlTarget}));
+            tRows.push([
+                {"content": d.latest_date, "parse": ["date"], "className": "date", url, urlTarget},
+                {"content": d.server_name, "className": "font-small", url, urlTarget},
+                {"content": d.gametype_name, "className": "font-small", url, urlTarget},
+                {"content": d.map_name, "className": "font-small", url, urlTarget},
+                {"content": d.total_matches - 1, url, urlTarget}
+            ]);
 
-            table.append(row);
         }
 
         if(this.data.length === 0){
 
-            const row = document.createElement("tr");
-            const col = UITableCell({"content": "None Found"});
-            col.colSpan = 5;
-            row.append(col);
-            table.append(row);
+            tRows.push([{"content": "None Found", "colSpan": 5}]);
         }
 
-        const deleteAllButton = document.createElement("button");
-        deleteAllButton.innerHTML = `Delete All Duplicate Matches`;
-        deleteAllButton.className = "delete-button";
+        const table = new UITable(this.content, {
+            "headers": ["Date", "Server", "Gametype", "Map", "Total Duplicates"],
+            "width": 1
+            },
+            tRows
+        );
 
-        deleteAllButton.addEventListener("click", () =>{
+
+        this.deleteAllDupButton = document.createElement("button");
+        this.deleteAllDupButton.innerHTML = `Delete All Duplicate Matches`;
+        this.deleteAllDupButton.className = "delete-button";
+
+        this.deleteAllDupButton.addEventListener("click", () =>{
             this.deleteAllDuplicates();
         });
 
-        info.append(UIBr(), deleteAllButton);
-
-        this.content.append(table);
-
-        
+        this.deleteDupInfo.append(UIBr(), this.deleteAllDupButton);
 
     }
 
