@@ -3841,6 +3841,7 @@ class AdminMYSQLBackupManager{
             }
 
             new UINotification(this.parent, "pass", "Backup Created", `Backup created as ${res.folder}`);
+            await this.loadData();
 
         }catch(err){
 
@@ -3869,6 +3870,7 @@ class AdminMYSQLBackupManager{
             }
 
             new UINotification(this.parent, "pass", "Backup Created", `Backup created as ${res.fileName}`);
+            await this.loadData();
 
         }catch(err){
 
@@ -4010,7 +4012,7 @@ class AdminMYSQLBackupManager{
             this.restoreResultInfo.innerHTML = ``;
 
             this.restoreResultInfo.append(
-                "Restore in progress, do not perform any other actions on the site while this action is being processed.",
+                "Restore in progress, do not perform any other actions while this is being processed.",
                 UIBr(), UILoading()
             );
 
@@ -4117,9 +4119,6 @@ class AdminMYSQLBackupManager{
         ];
 
         const table = new UITable(this.selectedBackupInfo, tableOptions, tableRows);
-       // get created data, total size ect and display in form
-
-        //this.selectedBackupInfo.append(this.selectedBackup);
     }
 
     renderRestoreFrom(){
@@ -4168,10 +4167,6 @@ class AdminMYSQLBackupManager{
         this.selectedBackupInfo = UIDiv("hidden");
         form.append(this.selectedBackupInfo);
 
-        
-        
-
-        
 
         this.restoreSubmit = document.createElement("button");
         this.restoreSubmit.className = "submit-button";

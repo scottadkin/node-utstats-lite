@@ -93,7 +93,8 @@ export async function getMatchWeaponStats(matchId){
     const [names, images] = await Promise.all([getWeaponNames(uniqueWeapons), getAllImages()]);
 
     const namesToImages = {};
-    for(const name of Object.keys(names)){
+
+    for(const name of Object.values(names)){
     
         namesToImages[name] = getWeaponImage(images, name);
     }
@@ -313,7 +314,6 @@ function toWeaponImageName(name){
 export function getWeaponImage(images, name){
 
     if(Object.keys(images).length === 0) return false;
-
     name = toWeaponImageName(name);
 
     for(const [key, value] of Object.entries(images)){

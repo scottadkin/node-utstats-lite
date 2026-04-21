@@ -1727,7 +1727,7 @@ class MatchWeaponSummary{
         const title = document.createElement("div");
         title.className = "header-wrapper";
         title.innerHTML = `Weapons Summary`;
-        this.parent.appendChild(title);
+        this.parent.append(title);
         this.currentMode = "kills";
 
         this.createTabs();
@@ -1791,18 +1791,18 @@ class MatchWeaponSummary{
 
         if(this.currentMode === "totals") return;
 
-       // this.table.style.cssText = ``;
-
         const headerRow = document.createElement("tr");
 
-        headerRow.appendChild(UITableHeaderColumn({"content": "Player"}));
+        headerRow.append(UITableHeaderColumn({"content": "Player"}));
 
         for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
             if(weaponName === "All") continue;
+
             const col = document.createElement("th");
             const weaponImage = this.getImage(weaponName);
-             col.className = "tiny-font white team-none";
+
+            col.className = "tiny-font white team-none";
 
             if(weaponImage !== "blank"){
 
@@ -1810,17 +1810,17 @@ class MatchWeaponSummary{
                 img.src = `/images/weapons/${weaponImage}.png`;
                 img.className = "weapon-icon"; 
                 img.title = weaponName;
-                col.appendChild(img);
+                col.append(img);
                 
             }else{
                
-                col.appendChild(document.createTextNode(weaponName.toUpperCase()));
+                col.append(weaponName.toUpperCase());
             }
             
-            headerRow.appendChild(col);
+            headerRow.append(col);
         }
 
-        this.table.appendChild(headerRow);
+        this.table.append(headerRow);
 
         
         for(const [playerId, player] of Object.entries(this.playerData)){

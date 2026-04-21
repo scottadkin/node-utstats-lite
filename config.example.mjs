@@ -55,3 +55,6 @@ export const dominationScoreSaveInterval = 3;
     maps, servers, weapons names in the import process.
 */
 export const bImportRandomizeNames = false;
+
+//How long a login session will last after last page load.(in hours)
+export const loginExpireTime = 24;
