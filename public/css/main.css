@@ -1,9 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-	--bg-color-light:rgb(54,54,63);
+	--bg-color-light:rgb(52,52,63);
 	--bg-color-mid:rgb(44,44,53);
 	--bg-color-dark:rgb(34,34,43);
+	--bg-header-color:rgb(45,66,82);
 	--button-hover-color:rgb(56,56,56);
 	--tab-bg-color:rgb(0,0,0);
 	--font-color-1:rgb(230,230,230);
@@ -133,6 +134,7 @@ body{
 
 nav{
     background-color:var(--bg-color-mid);
+	border-bottom: 1px solid var(--border-color-1);
     text-align:center;
     font-size:14px;
 }
@@ -164,6 +166,7 @@ footer{
 	font-size:var(--font-size-small);
 	line-height:var(--line-height-1);
 	font-weight:500;
+	border-top:1px solid var(--border-color-1);
 }
 
 a{
@@ -305,14 +308,15 @@ table{
     margin-bottom:var(--margin-1);
 	background-color: var(--bg-color-mid);
 	box-shadow:var(--box-shadow-1);
+	border:1px solid var(--border-color-1);
 }
 
 
 th{
     padding:var(--padding-1) var(--padding-3);
-	background-color:var(--bg-color-light);
 	font-weight:500;
 	font-size:var(--font-size-4);
+	background-color:var(--bg-header-color);
 }
 
 th:hover{
@@ -481,6 +485,7 @@ option{
 	line-height: var(--line-height-1);
 	font-weight:500;
 	background-color: var(--bg-color-mid);
+	border:1px solid var(--border-color-1);
 }
 
 .info-basic{
@@ -571,6 +576,8 @@ option{
 	text-align:center;
 	margin-bottom:var(--margin-2);
 	font-size: var(--font-size-small);
+	border-top: 1px solid var(--border-color-1);
+	border-bottom: 1px solid var(--border-color-1);
 }
 
 .tab{
@@ -618,7 +625,7 @@ option{
 .rich-wrapper{
 	background-color:var(--bg-color-mid);
 	width:var(--rich-box-width);
-    border:1px solid var(--border-color-4);
+    border:1px solid var(--border-color-1);
     overflow: hidden;
     white-space: nowrap;
 	font-size:var(--font-size-4);
@@ -899,8 +906,9 @@ option{
     font-weight:500;
     margin-bottom:var(--margin-1);
     font-size:var(--font-size-3);
-	background-color:var(--bg-color-mid);
+	background-color:var(--bg-header-color);
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
+	border:1px solid var(--border-color-1);
 }
 
 
@@ -1175,7 +1183,6 @@ canvas{
 
 .rankings-explained-table td{
 	min-width:100px;
-	padding:0px 10px;
 }
 
 
