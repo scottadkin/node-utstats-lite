@@ -244,46 +244,53 @@ function renderFragsTables(parent, totalTeams, playerData){
 
 function createSpreeRow(player, totalTeams){
 
-    const row = document.createElement("tr");
+    const row = [];
+    const teamColorClass = (totalTeams < 2) ? "team-none" : getTeamColorClass(player.team);
 
-    let teamColorClass = (totalTeams < 2) ? "team-none" : getTeamColorClass(player.team);
+    row.push(
+        {
+            "bSkipTd": true,
+            "content": UIPlayerLink({
+                "playerId": player.player_id, 
+                "className": `${teamColorClass} text-left`, 
+                "country": player.country, 
+                "bTableElem": true, 
+                "name": player.name
+            })
+        }
+    );
 
-    row.appendChild(UIPlayerLink({
-        "playerId": player.player_id, 
-        "className": `${teamColorClass} text-left`, 
-        "country": player.country, 
-        "bTableElem": true, 
-        "name": player.name
-    }));
 
     for(let i = 1; i < 6; i++){
-        row.appendChild(UITableCell({"content": player[`spree_${i}`], "parse": ["ignore0"]}));
+        row.push({"content": player[`spree_${i}`], "parse": ["ignore0"]});
     }
 
-    row.appendChild(UITableCell({"content": player["spree_best"], "parse": ["ignore0"]}));
+    row.push({"content": player["spree_best"], "parse": ["ignore0"]});
 
     return row;
 }
 
 function createMultiRow(player, totalTeams){
 
-    const row = document.createElement("tr");
-
-    let teamColorClass = (totalTeams < 2) ? "team-none" : getTeamColorClass(player.team);
-
-    row.appendChild(UIPlayerLink({
-        "playerId": player.player_id, 
-        "className": `${teamColorClass} text-left`, 
-        "country": player.country, 
-        "bTableElem": true, 
-        "name": player.name
-    }));
+    const teamColorClass = (totalTeams < 2) ? "team-none" : getTeamColorClass(player.team);
+    const row = [
+        
+        {
+            "bSkipTd": true,
+            "content": UIPlayerLink({
+                "playerId": player.player_id, 
+                "className": `${teamColorClass} text-left`, 
+                "country": player.country, 
+                "bTableElem": true, 
+                "name": player.name
+            })}
+    ];
 
     for(let i = 1; i < 5; i++){
-        row.appendChild(UITableCell({"content": player[`multi_${i}`], "parse": ["ignore0"]}));
+        row.push({"content": player[`multi_${i}`], "parse": ["ignore0"]});
     }
 
-    row.appendChild(UITableCell({"content": player["multi_best"], "parse": ["ignore0"]}));
+    row.push({"content": player["multi_best"], "parse": ["ignore0"]});
 
     return row;
 }
@@ -304,30 +311,37 @@ function renderSpecialEvents(parent, totalTeams, players){
 
     parent = document.querySelector(parent);
 
-    const wrapper = document.createElement("div");
-    const title = document.createElement("div");
-    title.className = "header-wrapper";
-    title.innerHTML = "Special Events";
+    const wrapper = UIDiv();
+    const title = UIDiv("header-wrapper")
+    title.append = "Special Events";
+    wrapper.append(title);
 
-    wrapper.appendChild(title);
+    const sprees = [];
 
-    const sprees = document.createElement("table");
-    sprees.className = "t-width-1";
+    const spreeTableOptions = {
+        "width": 1,
+        "headers": [
+            "Player", "Killing Spree", "Rampage", "Dominating", "Unstoppable", "Godlike", "Best Spree"
+        ]
+    };
 
-    const multis = document.createElement("table");
-    multis.className = "t-width-1";
+    const multis = [];
 
-    const spreeHeaders = document.createElement("tr");
-    const multiHeaders = document.createElement("tr");
+    const multiTableOptions = {
+        "width": 1,
+        "headers": [
+            "Player", "Double Kill", "Multi Kill", "Ultra Kill", "Monster Kill", "Best Multi Kill"
+        ]
+    };
 
     const firstBlood = document.createElement("table");
 
     const firstBloodRow = document.createElement("tr");
-    firstBloodRow.appendChild(UITableCell({"content": "First Blood"}));
+    firstBloodRow.append(UITableCell({"content": "First Blood"}));
 
     const firstBloodPlayer = getFirstBloodPlayer(players);
 
-    firstBloodRow.appendChild(UIPlayerLink({
+    firstBloodRow.append(UIPlayerLink({
         "playerId": firstBloodPlayer.player_id, 
         "name": firstBloodPlayer.name, 
         "country": firstBloodPlayer.country,
@@ -335,27 +349,8 @@ function renderSpecialEvents(parent, totalTeams, players){
         "bTableElem": true
     }));
 
-    firstBlood.appendChild(firstBloodRow);
-    wrapper.appendChild(firstBlood);
-
-    const spreeHeaderTitles = [
-        "Player", "Killing Spree", "Rampage", "Dominating", "Unstoppable", "Godlike", "Best Spree"
-    ];
-
-    const multiHeaderTitles = [
-        "Player", "Double Kill", "Multi Kill", "Ultra Kill", "Monster Kill", "Best Multi Kill"
-    ];
-
-    for(let i = 0; i < spreeHeaderTitles.length; i++){
-        spreeHeaders.appendChild(UITableHeaderColumn({"content": spreeHeaderTitles[i]}));
-    }
-
-     for(let i = 0; i < multiHeaderTitles.length; i++){
-        multiHeaders.appendChild(UITableHeaderColumn({"content": multiHeaderTitles[i]}));
-    }
-    
-    sprees.appendChild(spreeHeaders);
-    multis.appendChild(multiHeaders);
+    firstBlood.append(firstBloodRow);
+    wrapper.append(firstBlood);
 
     for(let i = 0; i < players.length; i++){
 
@@ -364,26 +359,25 @@ function renderSpecialEvents(parent, totalTeams, players){
         if(p.spectator) continue;
 
         if(p.spree_best >= 5){
-            sprees.appendChild(createSpreeRow(p, totalTeams));
+            sprees.push(createSpreeRow(p, totalTeams));
         }
 
         if(p.multi_best >= 2){
-            multis.appendChild(createMultiRow(p, totalTeams));
+            multis.push(createMultiRow(p, totalTeams));
         }
     }
 
  
-
-    if(sprees.children.length > 1){
-        wrapper.appendChild(sprees);
+    if(sprees.length > 1){
+        new UITable(wrapper, spreeTableOptions, sprees);
     }
 
-    if(multis.children.length > 1){
-        wrapper.appendChild(multis);
+    if(multis.length > 1){
+         new UITable(wrapper, multiTableOptions, multis);
     }
 
-    if(multis.children.length > 1 || sprees.children.length > 1){
-        parent.appendChild(wrapper);
+    if(multis.length > 1 || sprees.length > 1){
+        parent.append(wrapper);
     }
 
 }
@@ -419,19 +413,18 @@ class MatchDominationSummary{
 
         this.generalWrapper = UIDiv();
         this.generalTitle = UIDiv("header-wrapper");
-        this.generalTitle.innerHTML = `Domination Summary`;
+        this.generalTitle.append(`Domination Summary`);
         this.generalContent = UIDiv();
         this.generalWrapper.append(this.generalTitle, this.generalContent);
         this.parent.append(this.generalWrapper);
         this.renderGeneral();
 
-        this.playersWrapper = document.createElement("div");
+        this.playersWrapper = UIDiv();
 
         this.mode = "percent";
 
-        this.playersTitle = document.createElement("div");
-        this.playersTitle.className = "header-wrapper";
-        this.playersTitle.innerHTML = "Domination Players Summary";
+        this.playersTitle = UIDiv("header-wrapper");
+        this.playersTitle.append("Domination Players Summary");
         this.playersWrapper.append(this.playersTitle);
 
         this.createTabs();
@@ -460,9 +453,6 @@ class MatchDominationSummary{
             {"display": "Stolen Caps*", "value": "stolen-caps"},
         ];
 
-
-
-
         this.tabs = new UITabs(this.playersWrapper, tabOptions, this.mode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
@@ -477,7 +467,6 @@ class MatchDominationSummary{
         const headerRow = document.createElement("tr");
             
         headerRow.append(UITableHeaderColumn({"content": "Player"}));
-
 
         for(const [pointId, pointName] of Object.entries(controlPoints)){
             headerRow.append(UITableHeaderColumn({"content": pointName}));
@@ -554,8 +543,6 @@ class MatchDominationSummary{
 
         this.info.innerHTML = ``;
 
-
-
         if(this.mode === "percent"){
 
             this.info.append("Total control percent, based on first touch timestamp for each Control Point to match end.");
@@ -617,8 +604,6 @@ class MatchDominationSummary{
     }
 
     renderGeneral(){
-
-        //this.generalContent.innerHTML = ``;
 
         const table = document.createElement("table");
         table.className = "t-width-1";
