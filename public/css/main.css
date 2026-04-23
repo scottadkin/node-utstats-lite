@@ -4,7 +4,7 @@
 	--bg-color-light:rgb(52,52,63);
 	--bg-color-mid:rgb(44,44,53);
 	--bg-color-dark:rgb(34,34,43);
-	--bg-header-color:rgb(45,66,82);
+	--bg-header-color:rgb(27,45,59);
 	--button-hover-color:rgb(56,56,56);
 	--tab-bg-color:rgb(0,0,0);
 	--font-color-1:rgb(230,230,230);
@@ -1311,4 +1311,3 @@ code{
 	cursor: pointer;
 	color:yellow;
 }
-

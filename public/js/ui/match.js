@@ -32,14 +32,15 @@ function renderBasicInfo(parent, data, players){
  
     UIMatchScoreBox(wrapper, data, false, false, players);
   
-    parent.appendChild(header);
-
+    parent.append(header);
 
     const infoElems = UIDiv("match-basic-info-wrapper-info");
 
-    infoElems.append(UIMBInfo("Date", toDateString(data.date, false, false)));
-    infoElems.append(UIMBInfo("Match Length", toPlaytime(data.playtime)));
-    infoElems.append(UIMBInfo("Players", data.players));
+    infoElems.append(
+        UIMBInfo("Date", toDateString(data.date, false, false)),
+        UIMBInfo("Match Length", toPlaytime(data.playtime)),
+        UIMBInfo("Players", data.players)
+    );
 
     if(data.target_score !== 0){
         infoElems.append(UIMBInfo("Target Score", data.target_score));
@@ -50,10 +51,12 @@ function renderBasicInfo(parent, data, players){
     }
 
 
-    infoElems.append(UIMBInfo("Gamespeed", `${data.gamespeed_real}%`));
-    infoElems.append(UIMBInfo("Tournament Mode", `${(data.tournament_mode === 1) ? "True" : "False"}`));
-    infoElems.append(UIMBInfo("Server",  data.server_name));
-    infoElems.append(UIMBInfo("Mutators", data.mutators));
+    infoElems.append(
+        UIMBInfo("Gamespeed", `${data.gamespeed_real}%`),
+        UIMBInfo("Tournament Mode", `${(data.tournament_mode === 1) ? "True" : "False"}`),
+        UIMBInfo("Server",  data.server_name),
+        UIMBInfo("Mutators", data.mutators)
+    );
 
     wrapper.append(infoElems);
 
@@ -70,9 +73,8 @@ function renderBasicInfo(parent, data, players){
 
 function createFragTableRow(p, totalTeams, bTotals){
 
-    const row = document.createElement("tr");
-
-    const cols = [];
+    let net = p.kills - p.deaths;
+    if(net > 0) net = `+${net}`;
 
     let teamColorClass = "team-none";
 
@@ -80,8 +82,26 @@ function createFragTableRow(p, totalTeams, bTotals){
         teamColorClass = getTeamColorClass(p.team);
     }
 
+    const row = {
+        "className": teamColorClass,
+        "columns": [
+            {"content": p.time_on_server, "className": "playtime", "parse": ["playtime"]},
+            {"content": p.score, "parse": ["ignore0"]},
+            {"content": p.frags, "parse": ["ignore0"]}, 
+            {"content": p.kills, "parse": ["ignore0"]},
+            {"content": p.deaths, "parse": ["ignore0"]},
+            {"content": net},
+            {"content": p.suicides, "parse": ["ignore0"]},
+            {"content": p.team_kills, "parse": ["ignore0"]},
+            {"content": p.headshots, "parse": ["ignore0"]},
+            {"content": `${p.efficiency.toFixed(2)}%`},
+            {"content": p.ttl, "className": "playtime", "parse": ["mmss"]}
+        ]
+    };
+
     if(!bTotals){
-        cols.push(UIPlayerLink(
+
+        row.columns.unshift({"content": UIPlayerLink(
             {
                 "playerId": p.player_id, 
                 "name": p.name, 
@@ -89,62 +109,44 @@ function createFragTableRow(p, totalTeams, bTotals){
                 "bTableElem": true, 
                 "className": `text-left ${teamColorClass}`
             }
-        ));
+        ), "bSkipTd": true});
+        
     }else{
-        cols.push(UITableCell({"content": "Totals", "className": "team-none"}));
-    }
-
-
-    cols.push(UITableCell({"content": p.time_on_server, "className": "playtime", "parse": ["playtime"]}));
-    cols.push(UITableCell({"content": p.score, "parse": ["ignore0"]}));
-    cols.push(UITableCell({"content": p.frags, "parse": ["ignore0"]}));
-    cols.push(UITableCell({"content": p.kills, "parse": ["ignore0"]}));
-    cols.push(UITableCell({"content": p.deaths, "parse": ["ignore0"]}));
-
-    let net = p.kills - p.deaths;
-    if(net > 0) net = `+${net}`;
-    cols.push(UITableCell({"content": net}));
-
-    cols.push(UITableCell({"content": p.suicides, "parse": ["ignore0"]}));
-    cols.push(UITableCell({"content": p.team_kills, "parse": ["ignore0"]}));
-    cols.push(UITableCell({"content": p.headshots, "parse": ["ignore0"]}));
-    cols.push(UITableCell({"content": `${p.efficiency.toFixed(2)}%`}));
-    cols.push(UITableCell({"content": p.ttl, "className": "playtime", "parse": ["mmss"]}));
-
-
-    for(let x = 0; x < cols.length; x++){
-
-        row.appendChild(cols[x]);
+        row.columns.unshift({"content": "Totals", "className": "team-none"});
     }
 
     return row;
+
 }
 
 function renderFragsTables(parent, totalTeams, playerData){
 
     parent = document.querySelector(parent);
 
-    const wrapper = document.createElement("div");
+    const wrapper = UIDiv();
+    const title = UIDiv("header-wrapper");
 
-    const title = document.createElement("div");
-    title.className = "header-wrapper";
     title.innerHTML = "Frags Summary";
-    wrapper.appendChild(title);
 
-    const headers = [
-        "Player",
-        "Playtime",
-        "Score",
-        "Frags",
-        "Kills",
-        "Deaths",
-        "Net",
-        "Suicides",
-        "Team Kills",
-        "Headshots",
-        "Efficiency",
-        "TTL"
-    ];
+    wrapper.append(title);
+
+    const tableOptions = {
+        "width": 1, 
+        "headers": [
+            "Player",
+            "Playtime",
+            "Score",
+            "Frags",
+            "Kills",
+            "Deaths",
+            "Net",
+            "Suicides",
+            "Team Kills",
+            "Headshots",
+            "Efficiency",
+            "TTL"
+        ]
+    };
 
 
     const tables = [];
@@ -170,19 +172,7 @@ function renderFragsTables(parent, totalTeams, playerData){
             "players": 0
         };
 
-        const table = document.createElement("table");
-        table.className = "t-width-1";
-        const headerRow = document.createElement("tr");
-
-        for(let x = 0; x < headers.length; x++){
-
-            const col = document.createElement("th");
-            col.innerHTML = headers[x];
-            headerRow.appendChild(col);
-        }
-
-        table.appendChild(headerRow);
-        tables.push(table);
+        tables.push([]);
     }
 
 
@@ -227,28 +217,28 @@ function renderFragsTables(parent, totalTeams, playerData){
         }
 
         if(totalTeams >= 2 && team !== 255){
-            tables[team].appendChild(row);
+            tables[team].push(row);
         }else if(totalTeams < 2){
-            tables[0].appendChild(row);
+            tables[0].push(row);
         }
     }
 
     if(totalTeams < 2){
 
-        tables[0].appendChild(createFragTableRow(totals[0], totalTeams, true))
+        tables[0].push(createFragTableRow(totals[0], totalTeams, true))
 
     }else{
 
         for(let i = 0; i < totalTeams; i++){
-            tables[i].appendChild(createFragTableRow(totals[i], totalTeams, true));
+            tables[i].push(createFragTableRow(totals[i], totalTeams, true));
         }
     }
 
     for(let i = 0; i < tables.length; i++){
-        wrapper.appendChild(tables[i]);
+        new UITable(wrapper, tableOptions, tables[i]);
     }
 
-    parent.appendChild(wrapper);
+    parent.append(wrapper);
 }
 
 

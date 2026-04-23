@@ -1538,13 +1538,6 @@ class UITable{
 
         this.optionKeys = Object.keys(options);
 
-        /*const required = [];
-
-        for(let i = 0; i < required.length; i++){
-
-            if(this.optionKeys.indexOf(required[i]) === -1) throw new Error(`Missing required key ${required[i]}`);
-        }*/
-
         this.parent = parent;
         this.options = options;
         this.data = data;
@@ -1614,7 +1607,11 @@ class UITable{
             for(let x = 0; x < d.length; x++){
        
                 if(typeof d[x] === "object" && d[x].content !== undefined){
-                    row.append(UITableCell(d[x]));
+                    if(!d[x].bSkipTd){
+                        row.append(UITableCell(d[x]));
+                    }else{
+                        row.append(d[x].content);
+                    }
                     continue;
                 }
 
