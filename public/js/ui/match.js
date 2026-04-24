@@ -273,8 +273,8 @@ function createSpreeRow(player, totalTeams){
 function createMultiRow(player, totalTeams){
 
     const teamColorClass = (totalTeams < 2) ? "team-none" : getTeamColorClass(player.team);
-    const row = [
-        
+
+    const row = [   
         {
             "bSkipTd": true,
             "content": UIPlayerLink({
@@ -379,7 +379,6 @@ function renderSpecialEvents(parent, totalTeams, players){
     if(multis.length > 1 || sprees.length > 1){
         parent.append(wrapper);
     }
-
 }
 
 
@@ -396,7 +395,6 @@ function getPlayerDomPointCaps(playerId, pointId, capData){
 }
 
 
-
 class MatchDominationSummary{
 
     constructor(parent, totalTeams, data){
@@ -409,7 +407,6 @@ class MatchDominationSummary{
         this.data = data;
 
         this.parent = document.querySelector(parent);
-
 
         this.generalWrapper = UIDiv();
         this.generalTitle = UIDiv("header-wrapper");
@@ -484,7 +481,6 @@ class MatchDominationSummary{
 
         if(caps === null) return {className, content, currentValue}
 
-
         if(this.mode === "percent"){
 
             currentValue = (bTotals) ? caps : caps.control_percent;
@@ -532,8 +528,6 @@ class MatchDominationSummary{
             currentValue = (bTotals) ? caps : caps.stolen_caps;
             content = ignore0(currentValue);
         }
-        
-
 
         return {className, content, currentValue}
     }
@@ -605,69 +599,63 @@ class MatchDominationSummary{
 
     renderGeneral(){
 
-        const table = document.createElement("table");
-        table.className = "t-width-1";
+        const tableOptions = {
+            "width": 1,
+            "headers": [
+                "Team", 
+                "Total Captures", 
+                "Total Control Time", 
+                "Total Control Percent", 
+                "Total Score Time*",
+                "Stolen Caps*",
+                "Stolen Score*",
+                "Importer Score*",
+                "Final UT Score"
+            ]
+        };
 
-        const headers = [
-            "Team", 
-            "Total Captures", 
-            "Total Control Time", 
-            "Total Control Percent", 
-            "Total Score Time*",
-            "Stolen Caps*",
-            "Stolen Score*",
-            "Importer Score*",
-            "Final UT Score"
-        ];
-
-        const hRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-
-            const col = document.createElement("th");
-            col.append(headers[i]);
-            hRow.append(col);
-        }
-
-        table.append(hRow);
+        const rows = [];
 
         for(let i = 0; i < this.totalTeams; i++){
 
             const d = this.data.dom.detailedResult;
 
-            const row = document.createElement("tr");
-     
-            row.append(UITableCell({"content": `${getTeamName(i)} Team`, "className": `${getTeamColorClass(i)} text-left`}));
-            row.append(UITableCell({"content": d[`team_${i}_caps`], "parse": ["ignore0"]}));
-            
-            row.append(UITableCell({
-                "content": d[`team_${i}_control_time`], 
-                "className": "playtime", 
-                "parse": "mmss"}
-            ));
-
-            row.append(UITableCell({
-                "content": `${d[`team_${i}_control_percent`]}%`}
-            ));
-
-            row.append(UITableCell({
-                "content": d[`team_${i}_score_time`], "className": "playtime", "parse": ["mmss"]}
-            ));
-
-            row.append(UITableCell({
-                "content": d[`team_${i}_stolen_caps`], "parse": ["ignore0"]}
-            ));
-
-             row.append(UITableCell({"content": d[`team_${i}_stolen_points`].toFixed(2)}));
-
-            row.append(UITableCell({"content": d[`team_${i}_importer_score`].toFixed(2)}));
-            row.append(UITableCell({"content": d[`team_${i}_real_score`].toFixed(2)}));
-            
-
-            table.append(row);
+            rows.push([
+                {
+                    "content": `${getTeamName(i)} Team`, 
+                    "className": `${getTeamColorClass(i)} text-left`
+                },
+                {
+                    "content": d[`team_${i}_caps`], 
+                    "parse": ["ignore0"]
+                },
+                {
+                    "content": d[`team_${i}_control_time`], 
+                    "className": "playtime", 
+                    "parse": "mmss"
+                },
+                {
+                    "content": `${d[`team_${i}_control_percent`]}%`
+                },
+                {
+                    "content": d[`team_${i}_score_time`], "className": 
+                    "playtime", "parse": ["mmss"]
+                },
+                {
+                    "content": d[`team_${i}_stolen_caps`], "parse": ["ignore0"]
+                },
+                {
+                    "content": d[`team_${i}_stolen_points`].toFixed(2)
+                },
+                {
+                    "content": d[`team_${i}_importer_score`].toFixed(2)
+                },
+                {
+                    "content": d[`team_${i}_real_score`].toFixed(2)
+                }
+            ]);
 
         }
-
 
         const info = UIDiv("info");
 
@@ -679,8 +667,6 @@ class MatchDominationSummary{
             UIBr(),
             `The calculated scores are usually within a +-0.5% error range`
         );
-
-
 
         const canvas = document.createElement("canvas");
 
@@ -698,7 +684,6 @@ class MatchDominationSummary{
 
         for(let i = 0; i < this.data.basic.total_teams; i++){
 
-
             let currentName = `${getTeamName(i)} Team`;
             
             const currentReal = {
@@ -714,8 +699,7 @@ class MatchDominationSummary{
             const currentTotals = {"name": (i === 0) ? "Real Scores" : "Importer Scores", "values": []};
 
             for(let x = 0; x < this.data.dom.scoreHistory.length; x++){
-
-            
+  
                 const d = this.data.dom.scoreHistory[x];
 
                 if(i === 0) labels.push(MMSS(d.timestamp - this.data.basic.match_start));
@@ -744,13 +728,11 @@ class MatchDominationSummary{
             "labels": [labels, labels, labels]
         };
 
-      new Graph(canvas, new AbortController(), 1920, 1080, testTabs, false, testData);
+        new Graph(canvas, new AbortController(), 1920, 1080, testTabs, false, testData);
 
-        
-
-        
+ 
         this.generalContent.append(info);
-        this.generalContent.append(table);
+        new UITable(this.generalContent, tableOptions, rows);
 
         const graphWrapper = UIDiv("graph-wrapper");
         graphWrapper.append(canvas);
@@ -916,8 +898,6 @@ function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKe
                 "className": getTeamColorClass(i), 
                 "country": player.country, "bTableElem": "true", "name": player.name
             }));
-
-            
 
             for(let z = 0; z < dataKeys.length; z++){
 
