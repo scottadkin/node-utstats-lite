@@ -1,3 +1,48 @@
+function UIDiv(className){
+
+    const elem = document.createElement("div");
+    if(className !== undefined) elem.className = className;
+
+    return elem;
+}
+
+function UIBr(){
+    return document.createElement("br");
+}
+
+function UIB(text, className){
+    
+    const elem = document.createElement("b");
+    if(className !== undefined) elem.className = className;
+    elem.append(text);
+    return elem;
+}
+
+
+function UISpan(text, className){
+
+    const elem = document.createElement("span");
+
+    if(className !== undefined) elem.className = className;
+    elem.append(text);
+
+    return elem;
+}
+
+function UILabel(label, htmlFor){
+
+    const elem = document.createElement((htmlFor === undefined) ? "span" : "label");
+
+    if(htmlFor === undefined) elem.className = "form-label";
+
+    if(htmlFor !== undefined){
+        elem.htmlFor = htmlFor;
+    }
+    elem.innerHTML = label;
+
+    return elem;
+}
+
 function UIMatchScoreBox(parent, data, small, bTableElem){
 
     const wrapper = document.createElement((bTableElem) ? "td" : "div");
@@ -20,15 +65,14 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
                 image.alt = "image";
             }
 
-            const currentElem = document.createElement("div");
-            currentElem.className = getTeamColorClass(i);
+            const currentElem = UIDiv(getTeamColorClass(i));
 
             if(image !== null){
                 currentElem.append(image);
             }
 
 
-            const currentScoreElem = document.createElement("div");
+            const currentScoreElem = UIDiv();
             if(!small){
                 currentScoreElem.className = `match-scorebox-score`;
             }
@@ -50,15 +94,14 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
             image.alt = "image";
         }
 
-        const currentElem = document.createElement("div");
-        currentElem.className = getTeamColorClass(255);
+        const currentElem = UIDiv(getTeamColorClass(255));
 
         if(image !== null){
             currentElem.append(image);
         }
 
+        const currentScoreElem = UIDiv();
 
-        const currentScoreElem = document.createElement("div");
         if(!small){
             currentScoreElem.className = `match-scorebox-score`;
         }
@@ -143,17 +186,16 @@ function UITableHeaderColumn(params){
     let content = params.content ?? "";
 
     const elem = document.createElement("th");
-    const text = document.createTextNode(content);
 
     if(params.className !== undefined){
         elem.className = params.className;
     }
 
     if(params.url === undefined){
-        elem.appendChild(text);
+        elem.append(content);
     }else{
         const a = document.createElement("a");
-        a.append(text);
+        a.append(content);
         a.href = params.url;
         elem.append(a);
     }
@@ -267,16 +309,13 @@ function UIPaginationButton(page, currentPage, url, changePage){
         elem.href = `${url}${page}`;
         return elem;
     }else{
-       // url();
-        const elem = document.createElement("div");
-        elem.className = `pagination-button ${(page === currentPage) ? "pagination-active" : ""}`;
+
+        const elem = UIDiv(`pagination-button ${(page === currentPage) ? "pagination-active" : ""}`);
         elem.innerHTML = page;
         elem.addEventListener("click", () =>{
             url(page);
             changePage(page);
         });
-        //const dummy = document.createElement("div");
-        //return dummy;
 
         return elem;
     } 
@@ -298,7 +337,7 @@ class UIPagination{
 
         this.currentPage = parseInt(currentPage);
 
-        this.wrapper = document.createElement("div");
+        this.wrapper = UIDiv();
 
         this.render();
     }
@@ -329,48 +368,47 @@ class UIPagination{
  
         this.wrapper.className = "pagination-wrapper";
 
-        const info = document.createElement("div");
-        info.className = "pagination-info";
+        const info = UIDiv("pagination-info");
         info.innerHTML = `Displaying Page ${this.currentPage} of ${this.totalPages}<br>Total Results ${this.totalResults}`;
 
-        this.wrapper.appendChild(info);
+        this.wrapper.append(info);
 
-        const buttons = document.createElement("div");
+        const buttons = UIDiv();
 
         const changePage = (newPage) =>{
             this.currentPage = newPage;
             this.render();
         }
 
-        buttons.appendChild(UIPaginationButton(1, this.currentPage, this.url, changePage));
+        buttons.append(UIPaginationButton(1, this.currentPage, this.url, changePage));
         
         if(this.currentPage - 2 > 1){
-            buttons.appendChild(UIPaginationButton(this.currentPage - 2, this.currentPage, this.url,changePage));
+            buttons.append(UIPaginationButton(this.currentPage - 2, this.currentPage, this.url,changePage));
         }
 
         if(this.currentPage - 1 > 1){
-            buttons.appendChild(UIPaginationButton(this.currentPage - 1, this.currentPage, this.url,changePage));
+            buttons.append(UIPaginationButton(this.currentPage - 1, this.currentPage, this.url,changePage));
         }
 
         if(this.currentPage !== 1 && this.currentPage !== this.totalPages){
-            buttons.appendChild(UIPaginationButton(this.currentPage, this.currentPage, this.url,changePage));
+            buttons.append(UIPaginationButton(this.currentPage, this.currentPage, this.url,changePage));
         }
 
         if(this.currentPage + 1 < this.totalPages){
-            buttons.appendChild(UIPaginationButton(this.currentPage + 1, this.currentPage, this.url, changePage));
+            buttons.append(UIPaginationButton(this.currentPage + 1, this.currentPage, this.url, changePage));
         }
 
         if(this.currentPage + 2 < this.totalPages){
-            buttons.appendChild(UIPaginationButton(this.currentPage + 2, this.currentPage, this.url, changePage));
+            buttons.append(UIPaginationButton(this.currentPage + 2, this.currentPage, this.url, changePage));
         }
 
         if(this.totalPages > 1){
-            buttons.appendChild(UIPaginationButton(this.totalPages, this.currentPage, this.url, changePage));
+            buttons.append(UIPaginationButton(this.totalPages, this.currentPage, this.url, changePage));
         }
 
-        this.wrapper.appendChild(buttons);
+        this.wrapper.append(buttons);
 
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
     }
 }
@@ -384,11 +422,9 @@ class UITabs{
         this.options = options;
         this.mode = initialMode ?? options?.[0]?.value ?? null;
 
-        this.wrapper = document.createElement("div");
-        this.wrapper.className = "tabs-wrapper";
+        this.wrapper = UIDiv("tabs-wrapper");
 
-
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
         this.createTabs();
         this.render();
@@ -407,10 +443,9 @@ class UITabs{
 
             const {display, value} = this.options[i];
 
-            this.tabs[i] = document.createElement("div");
-            this.tabs[i].className = "tab";
-            const text = document.createTextNode(display);
-            this.tabs[i].appendChild(text);
+            this.tabs[i] = UIDiv("tab");
+
+            this.tabs[i].append(display);
 
             this.tabs[i].addEventListener("click", (e) =>{
 
@@ -424,7 +459,7 @@ class UITabs{
                 }));
             });
 
-            this.wrapper.appendChild(this.tabs[i]);
+            this.wrapper.append(this.tabs[i]);
         }
         
     }
@@ -450,8 +485,7 @@ function UIHeader(parent, text, id){
         parent = document.querySelector(parent);
     }
 
-    const elem = document.createElement("div");
-    elem.className = "header-wrapper";
+    const elem = UIDiv("header-wrapper");
 
     if(id !== undefined){
 
@@ -462,64 +496,12 @@ function UIHeader(parent, text, id){
         elem.append(a);
 
     }else{
-        elem.append(document.createTextNode(text));
+        elem.append(text);
     }
 
     parent.append(elem);
 }
 
-function UIDiv(className){
-
-    const elem = document.createElement("div");
-    if(className !== undefined) elem.className = className;
-
-    return elem;
-}
-
-
-function UIBr(){
-    return document.createElement("br");
-}
-
-/**
- * bold elem
- */
-function UIB(text, className){
-    
-    const elem = document.createElement("b");
-    if(className !== undefined) elem.className = className;
-    elem.append(text);
-    return elem;
-}
-
-
-function UISpan(text, className){
-
-    const elem = document.createElement("span");
-
-    if(className !== undefined) elem.className = className;
-    elem.append(text);
-
-    return elem;
-}
-
-function UITextNode(input){
-    return document.createTextNode(input);
-}
-
-function UILabel(label, htmlFor){
-
-    const elem = document.createElement((htmlFor === undefined) ? "span" : "label");
-
-    if(htmlFor === undefined) elem.className = "form-label";
-
-    if(htmlFor !== undefined){
-        elem.htmlFor = htmlFor;
-    }
-    elem.innerHTML = label;
-
-    return elem;
-}
 
 function UIMMSS(value){
 
@@ -568,14 +550,11 @@ function UIFormInputRow(labelString, id, type, value, placeholder, callback){
     if(value === undefined) value = "";
     if(placeholder === undefined) placeholder = "";
 
-    const row = document.createElement("div");
-    row.className = "form-row";
+    const row = UIDiv("form-row");
 
     const label = document.createElement("label");
     label.htmlFor = id;
     label.innerHTML = labelString;
-
-    row.appendChild(label);
 
     const input = document.createElement("input");
     input.type = type;
@@ -590,7 +569,7 @@ function UIFormInputRow(labelString, id, type, value, placeholder, callback){
         });
     }
 
-    row.appendChild(input);
+    row.append(label, input);
 
     return row;
 
@@ -719,10 +698,10 @@ class UINotification{
 
     render(){
 
-         if(typeof this.content !== "object"){
-            this.elem.appendChild(document.createTextNode(this.content));
+        if(typeof this.content !== "object"){
+            this.elem.append(this.content);
         }else{
-            this.elem.appendChild(this.content);
+            this.elem.append(this.content);
         }
 
         let className = `team-none`;
@@ -755,7 +734,7 @@ class UIWatchlistButton{
         this.hash = hash;
 
         this.elem = UIDiv();
-        this.parent.appendChild(this.elem);
+        this.parent.append(this.elem);
 
         this.createEvents();
         
@@ -1005,32 +984,30 @@ function UIMapRichBox(data){
     const link = document.createElement("a");
     link.href = `/map/${data.id}`;
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "rich-wrapper";
+    const wrapper = UIDiv("rich-wrapper");
 
-    const title = document.createElement("div");
-    title.className = "rich-title";
-    title.appendChild(document.createTextNode(data.name));
+    const title = UIDiv("rich-title");
+    title.append(data.name);
 
-    wrapper.appendChild(title);
+    wrapper.append(title);
 
     const image = document.createElement("img");
     image.className = "rich-image";
     image.src = `/images/maps/${data.image}`;
-    wrapper.appendChild(image);
+    wrapper.append(image);
 
-    const info = document.createElement("div");
-    info.className = "rich-info";
-    info.appendChild(document.createTextNode(`${data.matches} Match${(data.matches === 1) ? "" : "es"} Played`));
+    const info = UIDiv("rich-info");
+    info.append(
+        `${data.matches} Match${(data.matches === 1) ? "" : "es"} Played`,
+        UIBr(), 
+        `Playtime ${toPlaytime(data.playtime)}`,
+        UIBr(),
+        `Last Match ${toDateString(data.last_match, true)}`
+    )
 
-    info.appendChild(document.createElement("br"));
-    info.appendChild(document.createTextNode(`Playtime ${toPlaytime(data.playtime)}`));
-    info.appendChild(document.createElement("br"));
-    info.appendChild(document.createTextNode(`Last Match ${toDateString(data.last_match, true)}`));
+    wrapper.append(info);
 
-    wrapper.appendChild(info);
-
-    link.appendChild(wrapper);
+    link.append(wrapper);
     return link;
 }
 
@@ -1507,9 +1484,7 @@ function UITr(){
 
 function UICodeTab(){
 
-    const elem = document.createElement("div");
-
-    elem.className = "code-tab";
+    const elem = UIDiv("code-tab");
 
     return elem;
 }
@@ -1518,8 +1493,7 @@ function UICodeLine(input, tabs){
 
     if(tabs === undefined) tabs = 0;
 
-    const elem = document.createElement("div");
-    elem.className = "code-line";
+    const elem = UIDiv("code-line");
 
     input = [input];
 

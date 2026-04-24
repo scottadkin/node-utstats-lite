@@ -1008,12 +1008,11 @@ function renderCTFSummary(parent, totalTeams, data, players){
 
     if(data.playerData.length === 0) return;
 
-    const wrapper = document.createElement("div");
+    const wrapper = UIDiv();
 
-    const title = document.createElement("div");
-    title.className = "header-wrapper";
+    const title = UIDiv("header-wrapper");
     title.innerHTML = "Capture The Flag Summary";
-    wrapper.appendChild(title);
+    wrapper.append(title);
 
     const tabs = new UITabs(wrapper, [
         {"display": "General", "value": "general"},
@@ -1022,8 +1021,8 @@ function renderCTFSummary(parent, totalTeams, data, players){
     ]);
 
 
-    const content = document.createElement("div");
-    wrapper.appendChild(content);
+    const content = UIDiv();
+    wrapper.append(content);
 
     tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
@@ -1047,7 +1046,7 @@ function renderCTFSummary(parent, totalTeams, data, players){
     renderGeneralCTFTab(content, totalTeams, data, players);
 
 
-    parent.appendChild(wrapper);
+    parent.append(wrapper);
 }
 
 
@@ -1077,8 +1076,7 @@ class CTFCaps{
 
         this.createTabs();
 
-        this.content = document.createElement("div");
-        this.content.className = "ctf-cap";
+        this.content = UIDiv("ctf-cap");
 
         this.createButtonWrapper();
         this.wrapper.append(this.content);
@@ -1135,7 +1133,7 @@ class CTFCaps{
 
     createCapWrapper(){
 
-        this.capWrapper = document.createElement("div");
+        this.capWrapper = UIDiv();
  
         this.teamScores = UIDiv("ctf-cap-team-scores duo");
 
@@ -1676,11 +1674,9 @@ class MatchWeaponSummary{
         this.totalTeams = totalTeams;
         this.matchLength = matchLength;
 
-        this.wrapper = document.createElement("div");
-        this.wrapper.className = `scroll-x t-width-1 center`;
+        this.wrapper = UIDiv(`scroll-x t-width-1 center`);
 
-        const title = document.createElement("div");
-        title.className = "header-wrapper";
+        const title = UIDiv("header-wrapper");
         title.innerHTML = `Weapons Summary`;
         this.parent.append(title);
         this.currentMode = "kills";
@@ -2383,8 +2379,7 @@ class MatchKillsGraph{
         this.timeframe = 15;
         this.data = {"kills": {}, "teamKills": {}};
 
-        this.wrapper = document.createElement("div");
-        this.wrapper.className = "graph-wrapper";
+        this.wrapper = UIDiv("graph-wrapper");
         UIHeader(this.wrapper, "Match Frags Graph");
         this.parent.append(this.wrapper);
         this.loadData();
