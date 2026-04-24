@@ -17,7 +17,7 @@
     font-size:var(--font-size-1);
 	color:var(--font-color-1);
     font-weight: 600;
-	background-color: var(--header-bg-color);
+	background-color: var(--bg-header-color);
 }
 
 .page-layout-editor-options{

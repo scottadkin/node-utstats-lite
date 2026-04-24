@@ -1,23 +1,21 @@
 function UIAdminInfoRow(name, content){
 
-    const elem = document.createElement("div");
-    elem.className = "admin-info-row center";
+    const elem = UIDiv("admin-info-row center");
 
-    const label = document.createElement("div");
+    const label = UIDiv("admin-info-row-label");
     label.innerHTML = name;
-    label.className = "admin-info-row-label";
 
-    elem.appendChild(label);
+    elem.append(label);
 
-    const display = document.createElement("div");
+    const display = UIDiv();
 
     if(typeof content !== "object"){
         display.innerHTML = content;
     }else{
-        display.appendChild(content);
+        display.append(content);
     }
 
-    elem.appendChild(display);
+    elem.append(display);
     return elem;
 }
 
@@ -27,9 +25,9 @@ class AdminFTPManager{
 
         this.parent = document.querySelector(parent);
 
-        this.wrapper = document.createElement("div");
+        this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Importer Manager");
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
         this.mode = "current";
 
         this.selectedFTPServer = "";
@@ -72,8 +70,8 @@ class AdminFTPManager{
             await this.loadData();
 
             this.createTabs();
-            this.content = document.createElement("div");
-            this.wrapper.appendChild(this.content);
+            this.content = UIDiv();
+            this.wrapper.append(this.content);
 
             this.render();
 
@@ -135,19 +133,20 @@ class AdminFTPManager{
 
         const logs = this.logsFolderSettings;
 
-        wrapper.appendChild(UIAdminInfoRow("Total Imports", logs["total_imports"]));
-        wrapper.appendChild(UIAdminInfoRow("Total Logs Imported", logs["total_logs_imported"]));
-        wrapper.appendChild(UIAdminInfoRow("Latest Import",  toDateString(logs["last"])));
-        wrapper.appendChild(UIAdminInfoRow("First Import", toDateString(logs["first"])));
-
-        wrapper.appendChild(UIAdminInfoRow("Ignore Bots", UIStaticTrueFalse(logs["ignore_bots"])));
-        wrapper.appendChild(UIAdminInfoRow("Ignore Duplicate Logs", UIStaticTrueFalse(logs["ignore_duplicates"])));
-        wrapper.appendChild(UIAdminInfoRow("Minimum Match Length", logs["min_playtime"]));
-        wrapper.appendChild(UIAdminInfoRow("Minimum Players", logs["min_players"]));
-        wrapper.appendChild(UIAdminInfoRow("Append Team Sizes To Gametype Names", UIStaticTrueFalse(logs["append_team_sizes"])));
+        wrapper.append(
+            UIAdminInfoRow("Total Imports", logs["total_imports"]),
+            UIAdminInfoRow("Total Logs Imported", logs["total_logs_imported"]),
+            UIAdminInfoRow("Latest Import",  toDateString(logs["last"])),
+            UIAdminInfoRow("First Import", toDateString(logs["first"])),
+            UIAdminInfoRow("Ignore Bots", UIStaticTrueFalse(logs["ignore_bots"])),
+            UIAdminInfoRow("Ignore Duplicate Logs", UIStaticTrueFalse(logs["ignore_duplicates"])),
+            UIAdminInfoRow("Minimum Match Length", logs["min_playtime"])),
+            UIAdminInfoRow("Minimum Players", logs["min_players"]),
+            UIAdminInfoRow("Append Team Sizes To Gametype Names", UIStaticTrueFalse(logs["append_team_sizes"])
+        );
         
 
-        this.content.appendChild(wrapper);
+        this.content.append(wrapper);
     }
 
 
@@ -157,78 +156,71 @@ class AdminFTPManager{
 
         UIHeader(this.content, "Current FTP Servers");
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "info";
+        const wrapper = UIDiv("info");
 
         const line1 = `These are the current FTP servers that the importer will download log files from.`;
 
-        wrapper.appendChild(document.createTextNode(line1));
+        wrapper.append(line1);
 
-        const table = document.createElement("table");
-        table.className = `t-width-1`;
+        this.content.append(wrapper);
 
-        this.content.appendChild(wrapper);
+        const tableOptions = {
+            "width": 1,
+            "headers": [
+                "Name", "Address", "User", "Target Folder",
+                "Ignore Values", "Minimum Requirements",
+                "Total Imports", "SFTP", "Enabled"
+            ]
+        };
 
-        const headers = [
-            "Name", "Address", "User", "Target Folder",
-            "Ignore Values", "Minimum Requirements",
-            "Total Imports", "SFTP", "Enabled"
-
-        ];
-
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        table.appendChild(headerRow);
+        const rows = [];
 
         for(let i = 0; i < this.ftpServers.length; i++){
 
             const s = this.ftpServers[i];
 
-            const row = document.createElement("tr");
-            row.appendChild(UITableCell({"content": s.name}));
-            row.appendChild(UITableCell({"content": `${s.host}:${s.port}`}));
-            row.appendChild(UITableCell({"content": s.user}));
-            row.appendChild(UITableCell({"content": s.target_folder}));
+            const row =  [];
 
-            const ignoreWrapper = document.createElement("div");
-            ignoreWrapper.className = "text-left";
+            const ignoreWrapper = UIDiv("text-left");
 
-            ignoreWrapper.appendChild(document.createTextNode(`Ignore Bots: ${(s.ignore_bots) ? "True": "False"}`));
-            ignoreWrapper.appendChild(document.createElement("br"));
-            ignoreWrapper.appendChild(document.createTextNode(`Ignore Duplicates: ${(s.ignore_duplicates) ? "True": "False"}`));
+            ignoreWrapper.append(
+                `Ignore Bots: ${(s.ignore_bots) ? "True": "False"}`, 
+                UIBr(),
+                `Ignore Duplicates: ${(s.ignore_duplicates) ? "True": "False"}`
+            );
            
-            row.appendChild(UITableCell({"content": ignoreWrapper}));
+            const minWrapper = UIDiv("text-left");
 
-            const minWrapper = document.createElement("div");
-            minWrapper.className = "text-left";
+            minWrapper.append(
+                `Minimum Players: ${s.min_players} Players`, 
+                UIBr(),
+                `Minimum Playtime: ${s.min_playtime} Seconds`
+            );
 
-            minWrapper.appendChild(document.createTextNode(`Minimum Players: ${s.min_players} Players`));
-            minWrapper.appendChild(document.createElement("br"));
-            minWrapper.appendChild(document.createTextNode(`Minimum Playtime: ${s.min_playtime} Seconds`));
+            const totalWrapper = UIDiv("text-left");
 
-            row.appendChild(UITableCell({"content":minWrapper}));
+            totalWrapper.append(`Total Imports: ${s.total_imports}`, 
+                UIBr(),
+                `Total Logs Imported: ${s.total_logs_imported}`
+            );
 
-            const totalWrapper = document.createElement("div");
-            totalWrapper.className = "text-left";
-
-            totalWrapper.appendChild(document.createTextNode(`Total Imports: ${s.total_imports}`));
-            totalWrapper.appendChild(document.createElement("br"));
-            totalWrapper.appendChild(document.createTextNode(`Total Logs Imported: ${s.total_logs_imported}`));
-
-            row.appendChild(UITableCell({"content": totalWrapper}));
-
-            row.appendChild(UIStaticTrueFalse(s.sftp, true));
-            row.appendChild(UIStaticTrueFalse(s.enabled, true));
+            row.push(
+                {"content": s.name},
+                {"content": `${s.host}:${s.port}`},
+                {"content": s.user},
+                {"content": s.target_folder},
+                {"content": ignoreWrapper},
+                {"content": minWrapper},
+                {"content": totalWrapper},
+                {"content": UIStaticTrueFalse(s.sftp, true)},
+                {"content": UIStaticTrueFalse(s.enabled, true)},
+            );
             
 
-            table.appendChild(row);
+            rows.push(row);
         }
 
-        this.content.appendChild(table);
+        const table = new UITable(this.content, tableOptions, rows);
 
     }
 
@@ -244,16 +236,14 @@ class AdminFTPManager{
 
     renderSelectFTPServer(){
 
-        const selectArea = document.createElement("div");
-        selectArea.className = "form";
+        const selectArea = UIDiv("form");
 
-        const selectRow = document.createElement("div");
-        selectRow.className = "form-row";
+        const selectRow = UIDiv("form-row");
 
         const selectLabel = document.createElement("label");
         selectLabel.htmlFor = "selected-ftp-server";
-        selectLabel.innerHTML = "Selected Server";
-        selectRow.appendChild(selectLabel);
+        selectLabel.append = "Selected Server";
+        selectRow.append(selectLabel);
 
         const select = document.createElement("select");
         select.id = select.name = "selected-ftp-server";
@@ -268,7 +258,7 @@ class AdminFTPManager{
         const noneSelected = document.createElement("option");
         noneSelected.value = "";
         noneSelected.innerHTML = `- Please Select An FTP Server -`;
-        select.appendChild(noneSelected);
+        select.append(noneSelected);
 
         for(let i = 0; i < this.ftpServers.length; i++){
 
@@ -279,16 +269,16 @@ class AdminFTPManager{
 
             if(option.value == this.selectedFTPServer) option.selected = true;
 
-            option.appendChild(document.createTextNode(`${s.name} (${s.host}:${s.port})`));
-            select.appendChild(option);
+            option.append(`${s.name} (${s.host}:${s.port})`);
+            select.append(option);
         }
 
-        selectRow.appendChild(select); 
-        selectArea.appendChild(selectRow);
+        selectRow.append(select); 
+        selectArea.append(selectRow);
 
         this.fart = selectArea;
 
-        this.content.appendChild(this.fart);
+        this.content.append(this.fart);
     }
 
     async createFTPServer(){
@@ -332,8 +322,6 @@ class AdminFTPManager{
 
             await this.loadData();
             this.bActionInProgress = false;
-           // alert(`FTP Server Added succuessfully`);
-
 
         }catch(err){
             console.trace(err);
@@ -362,8 +350,7 @@ class AdminFTPManager{
         form.className = "form";
         form.id = `${(type === "add") ? "create" : "edit" }-ftp-server-form`;
         
-        const info = document.createElement("div");
-        info.className = "form-info";
+        const info = UIDiv("form-info");
 
         let infoString = `Add a (S)FTP server to add to the importer list.`;
 
@@ -410,102 +397,100 @@ class AdminFTPManager{
 
         }
 
-
-
         info.innerHTML = infoString;
-        form.appendChild(info);
+        form.append(info);
 
         const enableRow = UIDiv("form-row");
-        enableRow.appendChild(UILabel("Enabled"));
+        enableRow.append(UILabel("Enabled"));
         const enableButton = new UITrueFalse(enableValue, "server-enabled", false);
-        enableRow.appendChild(enableButton.wrapper);
-        form.appendChild(enableRow);
+        enableRow.append(enableButton.wrapper);
+        form.append(enableRow);
 
         const sftpRow = UIDiv("form-row");
-        sftpRow.appendChild(UILabel("Use SFTP Protocol"));
+        sftpRow.append(UILabel("Use SFTP Protocol"));
         const sftpButton = new UITrueFalse(sftpValue, "server-sftp", false);
-        sftpRow.appendChild(sftpButton.wrapper);
-        form.appendChild(sftpRow);
+        sftpRow.append(sftpButton.wrapper);
+        form.append(sftpRow);
 
         const nameRow = UIDiv("form-row");
 
-        nameRow.appendChild(UILabel("Server Name", "server-name"));
+        nameRow.append(UILabel("Server Name", "server-name"));
 
         const nameInput = UIInput("text", "server-name", nameValue, "Server Name....");
 
-        nameRow.appendChild(nameInput);
-        form.appendChild(nameRow);
+        nameRow.append(nameInput);
+        form.append(nameRow);
 
         const hostRow = UIDiv("form-row");
-        hostRow.appendChild(UILabel("Host", "server-host"));
-        hostRow.appendChild(UIInput("text", "server-host", hostValue, "Server Host..."));
-        form.appendChild(hostRow);
+        hostRow.append(UILabel("Host", "server-host"));
+        hostRow.append(UIInput("text", "server-host", hostValue, "Server Host..."));
+        form.append(hostRow);
 
         const portRow = UIDiv("form-row");
-        portRow.appendChild(UILabel("Port", "server-port"));
-        portRow.appendChild(UIInput("number", "server-port", portValue, "Server Port..."));
-        form.appendChild(portRow);
+        portRow.append(UILabel("Port", "server-port"));
+        portRow.append(UIInput("number", "server-port", portValue, "Server Port..."));
+        form.append(portRow);
 
 
         const userRow = UIDiv("form-row");
-        userRow.appendChild(UILabel("User", "server-user"));
-        userRow.appendChild(UIInput("text", "server-user", userValue, "FTP User..."));
-        form.appendChild(userRow);
+        userRow.append(UILabel("User", "server-user"));
+        userRow.append(UIInput("text", "server-user", userValue, "FTP User..."));
+        form.append(userRow);
 
 
         const passRow = UIDiv("form-row");
-        passRow.appendChild(UILabel("Password", "server-password"));
-        passRow.appendChild(UIInput("password", "server-password", passwordValue, "FTP Password..."));
-        form.appendChild(passRow);
+        passRow.append(UILabel("Password", "server-password"));
+        passRow.append(UIInput("password", "server-password", passwordValue, "FTP Password..."));
+        form.append(passRow);
 
         const folderRow = UIDiv("form-row");
-        folderRow.appendChild(UILabel("Target Folder", "server-folder"));
-        folderRow.appendChild(UIInput("text", "server-folder", folderValue, "FTP Target Folder..."));
-        form.appendChild(folderRow);
+        folderRow.append(UILabel("Target Folder", "server-folder"));
+        folderRow.append(UIInput("text", "server-folder", folderValue, "FTP Target Folder..."));
+        form.append(folderRow);
 
         const playersRow = UIDiv("form-row");
-        playersRow.appendChild(UILabel("Minimum Players", "server-players"));
-        playersRow.appendChild(UIInput("number", "server-players", minPlayersValue));
-        form.appendChild(playersRow);
+        playersRow.append(UILabel("Minimum Players", "server-players"));
+        playersRow.append(UIInput("number", "server-players", minPlayersValue));
+        form.append(playersRow);
 
         const playtimeRow = UIDiv("form-row");
-        playtimeRow.appendChild(UILabel("Minimum Playtime(Seconds)", "server-playtime"));
-        playtimeRow.appendChild(UIInput("number", "server-playtime", minPlaytimeValue));
-        form.appendChild(playtimeRow);
+        playtimeRow.append(UILabel("Minimum Playtime(Seconds)", "server-playtime"));
+        playtimeRow.append(UIInput("number", "server-playtime", minPlaytimeValue));
+        form.append(playtimeRow);
 
 
         const botsRow = UIDiv("form-row");
-        botsRow.appendChild(UILabel("Ignore Bots"));
+        botsRow.append(UILabel("Ignore Bots"));
         const botsButton = new UITrueFalse(ignoreBotsValue, "server-bots", false);
-        botsRow.appendChild(botsButton.wrapper);
-        form.appendChild(botsRow);
+        botsRow.append(botsButton.wrapper);
+        form.append(botsRow);
 
         const dupRow = UIDiv("form-row");
-        dupRow.appendChild(UILabel("Ignore Duplicate Logs"));
+        dupRow.append(UILabel("Ignore Duplicate Logs"));
         const dupButton = new UITrueFalse(ignoreDuplicatesValue, "server-duplicates", false);
-        dupRow.appendChild(dupButton.wrapper);
-        form.appendChild(dupRow);
+        dupRow.append(dupButton.wrapper);
+        form.append(dupRow);
 
 
         const teamRow = UIDiv("form-row");
-        teamRow.appendChild(UILabel("Append Team Sizes To Gametype Names"));
+        teamRow.append(UILabel("Append Team Sizes To Gametype Names"));
         const teamButton = new UITrueFalse(appendTeamSizesValue, "server-teams", false);
-        teamRow.appendChild(teamButton.wrapper);
-        form.appendChild(teamRow);
+        teamRow.append(teamButton.wrapper);
+        form.append(teamRow);
 
 
         const tmpRow = UIDiv("form-row");
-        tmpRow.appendChild(UILabel("Delete .tmp Files From UT Server ./Logs Folder"));
+        tmpRow.append(UILabel("Delete .tmp Files From UT Server ./Logs Folder"));
         const tmpButton = new UITrueFalse(deleteTmpFilesValue, "server-tmp", false);
-        tmpRow.appendChild(tmpButton.wrapper);
-        form.appendChild(tmpRow);
+        tmpRow.append(tmpButton.wrapper);
+        form.append(tmpRow);
 
 
         const deleteRow = UIDiv("form-row");
-        deleteRow.appendChild(UILabel("Delete Logs From UT-Server ./Logs Folder"));
+        deleteRow.append(UILabel("Delete Logs From UT-Server ./Logs Folder"));
         const deleteButton = new UITrueFalse(deleteLogsValue, "server-delete", false);
-        deleteRow.appendChild(deleteButton.wrapper);
-        form.appendChild(deleteRow);
+        deleteRow.append(deleteButton.wrapper);
+        form.append(deleteRow);
 
         const submit = document.createElement("input");
         submit.type = "submit";
@@ -513,7 +498,7 @@ class AdminFTPManager{
         submit.className = "submit-button";
 
 
-        form.appendChild(submit);
+        form.append(submit);
 
         return form;
     }
@@ -532,7 +517,7 @@ class AdminFTPManager{
         });
         
     
-        this.content.appendChild(form);
+        this.content.append(form);
     }
 
     async editFTPServer(form){
@@ -631,11 +616,10 @@ class AdminFTPManager{
         const wrapper = UIDiv("form");
         wrapper.className = "form";
 
-        const info = document.createElement("div");
-        info.className = "info";
+        const info = UIDiv("info");
         info.innerHTML = `Delete selected server from importer list.`;
 
-        wrapper.appendChild(info);
+        wrapper.append(info);
 
         const button = document.createElement("button");
         button.className = "button delete-button";
@@ -646,10 +630,10 @@ class AdminFTPManager{
             this.deleteFTPServer();
         });
 
-        wrapper.appendChild(button);
+        wrapper.append(button);
 
 
-        this.content.appendChild(wrapper);
+        this.content.append(wrapper);
     }
 
     renderEditFTPSettings(){
@@ -669,7 +653,7 @@ class AdminFTPManager{
                 this.editFTPServer(form);
             });
 
-            this.content.appendChild(form);
+            this.content.append(form);
 
             this.renderDeleteServer();
         }
@@ -741,40 +725,40 @@ class AdminFTPManager{
             infoList, UIBr()
         );
 
-        form.appendChild(info);
+        form.append(info);
 
         const settings = this.logsFolderSettings;
 
         const botsRow = UIDiv("form-row");
-        botsRow.appendChild(UILabel("Ignore Bots"));
-        botsRow.appendChild(new UITrueFalse(settings.ignore_bots, "ignore_bots", false).wrapper);
-        form.appendChild(botsRow);
+        botsRow.append(UILabel("Ignore Bots"));
+        botsRow.append(new UITrueFalse(settings.ignore_bots, "ignore_bots", false).wrapper);
+        form.append(botsRow);
 
         const dupRow = UIDiv("form-row");
-        dupRow.appendChild(UILabel("Ignore Duplicate Logs"));
-        dupRow.appendChild(new UITrueFalse(settings.ignore_duplicates, "ignore_duplicates", false).wrapper);
-        form.appendChild(dupRow);
+        dupRow.append(UILabel("Ignore Duplicate Logs"));
+        dupRow.append(new UITrueFalse(settings.ignore_duplicates, "ignore_duplicates", false).wrapper);
+        form.append(dupRow);
 
         const teamsRow = UIDiv("form-row");
-        teamsRow.appendChild(UILabel("Append Team Sizes To Gametype Names"));
-        teamsRow.appendChild(new UITrueFalse(settings.append_team_sizes, "append_team_sizes", false).wrapper);
-        form.appendChild(teamsRow);
+        teamsRow.append(UILabel("Append Team Sizes To Gametype Names"));
+        teamsRow.append(new UITrueFalse(settings.append_team_sizes, "append_team_sizes", false).wrapper);
+        form.append(teamsRow);
 
-        form.appendChild(UIFormInputRow("Minimum Players", "min_players", "number", settings.min_players));
-        form.appendChild(UIFormInputRow("Minimum Playtime(Seconds)", "min_playtime", "number", settings.min_playtime));
+        form.append(UIFormInputRow("Minimum Players", "min_players", "number", settings.min_players));
+        form.append(UIFormInputRow("Minimum Playtime(Seconds)", "min_playtime", "number", settings.min_playtime));
 
         const submitButton = document.createElement("input");
         submitButton.type = "submit";
         submitButton.className = "submit-button";
         submitButton.value = "Save Changes";
-        form.appendChild(submitButton);
+        form.append(submitButton);
 
         form.addEventListener("submit", (e) =>{
             e.preventDefault();
             this.editLogsFolderSettings(e.target);
         });
 
-        this.content.appendChild(form);
+        this.content.append(form);
     }
 
     render(){
