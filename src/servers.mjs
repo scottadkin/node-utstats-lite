@@ -16,7 +16,7 @@ async function bServerExist(name){
 
 async function createServer(name, ip, port){
 
-    const query = `INSERT INTO nstats_servers VALUES(NULL,?,?,?,0,0,"1999-11-30 00:00:00","1999-11-30 00:00:00")`;
+    const query = `INSERT INTO nstats_servers VALUES(NULL,?,?,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00')`;
 
     const result = await simpleQuery(query, [name, ip, port]);
 

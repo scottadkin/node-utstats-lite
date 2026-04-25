@@ -571,7 +571,17 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
         const result = await simpleQuery(query, vars);
 
-        const capId = result.insertId;
+        let capId = result.insertId;
+
+        if(result.insertId === undefined){
+
+            const test = await simpleQuery(`SELECT id FROM nstats_ctf_caps ORDER BY id DESC LIMIT 1`);
+
+            if(test.length !== 0){
+
+                capId = test[0].id;
+            }
+        }
 
         if(capId === undefined) throw new Error("cap id is null");
 

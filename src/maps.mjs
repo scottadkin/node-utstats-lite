@@ -53,11 +53,19 @@ async function getMapId(name){
 
 async function createMap(name){
 
-    const query = `INSERT INTO nstats_maps VALUES(NULL,?,0,0,"1999-11-30 00:00:00","1999-11-30 00:00:00")`;
+    const query = `INSERT INTO nstats_maps VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00')`;
 
     const result = await simpleQuery(query, [name]);
 
-    if(result.insertId !== undefined) return result.insertId;
+    if(result.insertId !== undefined){
+        return result.insertId;
+    }
+
+    const bu = await simpleQuery(`SELECT id FROM nstats_maps ORDER BY id DESC LIMIT 1`);
+
+    if(bu.length > 0){
+        return bu[0].id;
+    }
 
     return null;
 }

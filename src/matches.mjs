@@ -58,7 +58,7 @@ export async function createMatch(serverId, gametypeId, mapId, bHardcore, tourna
      players, totalTeams, team0Scores, team1Scores, 
     team2Scores, team3Score, soloWinner, soloWinnerScore, targetScore, timeLimit, mutators){
 
-    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,"")`;
+    const query = `INSERT INTO nstats_matches VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'')`;
 
     gameSpeed = parseInt(gameSpeed * 100);
     gameSpeedReal = parseInt(gameSpeedReal * 100);
@@ -71,6 +71,14 @@ export async function createMatch(serverId, gametypeId, mapId, bHardcore, tourna
     ];
 
     const result = await simpleQuery(query, vars);
+
+    if(result.insertId === undefined){
+
+        const test = await simpleQuery(`SELECT id FROM nstats_matches ORDER BY id DESC LIMIT 1`);
+
+        if(test.length === 0) return null;
+        return test[0].id;
+    }
 
     if(result.insertId !== undefined) return result.insertId;
 
@@ -1008,7 +1016,7 @@ export async function getDetailedMatchJSON(id){
     nstats_servers.name as server_name,
     nstats_gametypes.name as gametype_name,
     nstats_maps.name as map_name,
-    IF(nstats_matches.solo_winner > 0, nstats_matches.solo_winner,"") as solo_winner
+    IF(nstats_matches.solo_winner > 0, nstats_matches.solo_winner,'') as solo_winner
     FROM nstats_matches
     LEFT JOIN nstats_servers ON nstats_servers.id = nstats_matches.server_id
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_matches.gametype_id
@@ -1559,8 +1567,8 @@ export async function getMatchesByHashes(hashes){
     nstats_gametypes.name as gametype_name,
     nstats_maps.name as map_name,
     nstats_servers.name as server_name,
-    IF(nstats_matches.solo_winner > 0, nstats_players.name, "") as solo_winner_name,
-    IF(nstats_matches.solo_winner > 0, nstats_players.country, "") as solo_winner_country
+    IF(nstats_matches.solo_winner > 0, nstats_players.name, '') as solo_winner_name,
+    IF(nstats_matches.solo_winner > 0, nstats_players.country, ') as solo_winner_country
     FROM nstats_matches 
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_matches.gametype_id
     LEFT JOIN nstats_maps ON nstats_maps.id = nstats_matches.map_id
@@ -2035,7 +2043,7 @@ export async function getAllDuplicateMatches(bSkipNames){
     MAX(id) as latest_id,
     MAX(date) as latest_date
     FROM nstats_matches
-    WHERE hash!=""
+    WHERE hash!=''
     GROUP BY hash HAVING total_matches>1 ORDER BY total_matches DESC`;
 
     const result = await simpleQuery(query);

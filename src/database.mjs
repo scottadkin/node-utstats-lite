@@ -37,7 +37,7 @@ function sqliteConvertDates(vars){
 
 
 
-export function sqliteSimpleQuery(query, vars){
+async function sqliteSimpleQuery(query, vars){
 
     if(query === undefined) throw new Error("No query specified.");
 
@@ -136,7 +136,7 @@ export const mysqlPool = pool;
 
 export async function simpleQuery(query, vars){
 
-    if(DATABASE_MODE === "sqlite") return sqliteSimpleQuery(query, vars);
+    if(DATABASE_MODE === "sqlite") return await sqliteSimpleQuery(query, vars);
 
     if(query === undefined) throw new Error("No query specified.");
     
@@ -165,14 +165,25 @@ export async function bulkInsert(query, vars, maxPerInsert){
     let startIndex = 0;
 
     if(vars.length < maxPerInsert){
-        return await pool.query(query, [vars]);
+
+        if(DATABASE_MODE !== "sqlite"){
+            return await pool.query(query, [vars]);
+        }else{
+
+        }
     }
 
     while(startIndex < vars.length){
 
         const end = (startIndex + maxPerInsert > vars.length) ? vars.length : startIndex + maxPerInsert;
         const currentVars = vars.slice(startIndex, end);
-        await pool.query(query, [currentVars]);
+
+        if(DATABASE_MODE !== "sqlite"){
+            await pool.query(query, [currentVars]);
+        }else{
+
+        }
+
         startIndex += maxPerInsert;
     }
 

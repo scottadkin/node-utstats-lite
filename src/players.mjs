@@ -79,12 +79,21 @@ export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
 export async function createMasterPlayer(name, ip, hwid, mac1, mac2, matchDate){
 
-    const query = `INSERT INTO nstats_players VALUES(NULL,?,"",?)`;
+    const query = `INSERT INTO nstats_players VALUES(NULL,?,'',?)`;
 
     const hash = md5(name);
 
     //const result = await simpleQuery(query, [name, ip, hwid, mac1, mac2]);
     const result = await simpleQuery(query, [name, hash]);
+
+    if(result.insertId === undefined){
+
+        const bu = await simpleQuery(`SELECT id FROM nstats_players WHERE name=? LIMIT 1`, [name]);
+
+        if(bu.length > 0) return bu[0].id;
+
+        throw new Error(`Failed to get playerId(sqlite createMasterPlayerBackup)`);
+    }
 
     return result.insertId;
 }
