@@ -116,19 +116,6 @@ async function sqliteSimpleQuery(query, vars){
 }
 
 
-export function sqliteBulkInsert(){
-
-}
-
-export function sqliteGetColumnsAsArray(){
-
-}
-
-
-export function sqliteInsertReturnRowId(){
-
-}
-
 let pool = null;
 
 if(SQL_MODE !== "sqlite"){
@@ -177,10 +164,8 @@ export async function sqlInsertReturnRowId(query, vars){
 }
 
 
-export async function bulkInsert(query, vars, maxPerInsert){
+async function mysqlBulkInsert(query, vars, maxPerInsert){
 
-    if(vars.length === 0) return;
-    if(maxPerInsert === undefined) maxPerInsert = 100000;
 
     let startIndex = 0;
 
@@ -189,7 +174,7 @@ export async function bulkInsert(query, vars, maxPerInsert){
         if(SQL_MODE !== "sqlite"){
             return await pool.query(query, [vars]);
         }else{
-
+            throw new Error("bulkInsert not added to sqlite yet");
         }
     }
 
@@ -201,13 +186,60 @@ export async function bulkInsert(query, vars, maxPerInsert){
         if(SQL_MODE !== "sqlite"){
             await pool.query(query, [currentVars]);
         }else{
-
+            throw new Error("bulkInsert not added to sqlite yet");
         }
 
         startIndex += maxPerInsert;
     }
 
     return;
+}
+
+export async function bulkInsert(query, vars, maxPerInsert){
+
+    if(vars.length === 0) return;
+    if(maxPerInsert === undefined) maxPerInsert = 100000;
+
+    if(SQL_MODE !== "sqlite") return await mysqlBulkInsert(query, vars, maxPerInsert);
+
+    let placeholder = ``;
+
+    for(let i = 0; i < vars.length; i++){
+
+        const v = vars[i];
+
+        let subPlaceholders = ``;
+
+        for(let x = 0; x < v.length; x++){
+
+            subPlaceholders += `?`;
+
+            if(x < v.length - 1){
+                subPlaceholders += `,`
+            }
+        }
+
+        subPlaceholders = `(${subPlaceholders})`;
+
+
+        placeholder += subPlaceholders;
+
+        if(i < vars.length - 1){
+            placeholder += `,`;
+        }
+    }
+
+    const qM = query.indexOf("?");
+
+    if(qM === -1) throw new Error(`No values ? foundm bulkInsert`);
+
+    const aaaa = query.replace("?", placeholder);
+    
+    const sqliteQuery = createSqlLiteQuery(aaaa, vars);
+
+    const prepare = database.prepare(aaaa);
+    prepare.run(...sqliteQuery.vars);
+
 }
 
 
