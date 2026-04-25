@@ -1,10 +1,8 @@
 import mysql from "mysql2/promise";
-import { mysqlSettings} from "../config.mjs";
+import { mysqlSettings, SQL_MODE} from "../config.mjs";
 
 import { DatabaseSync } from 'node:sqlite';
 const database = new DatabaseSync('./test.db');
-
-const DATABASE_MODE = `sqlite`;
 
 
 function sqlitePlaceholderArray(values){
@@ -36,6 +34,59 @@ function sqliteConvertDates(vars){
 }
 
 
+function createSqlLiteQuery(originalQuery, originalVars){
+
+    const finalVars = [];
+
+    const qms = /\?/ig;
+
+    let query = ``;
+    const vars = [];
+
+    let prev = 0;
+
+    for(let i = 0; i < originalVars.length; i++){
+
+        const result = qms.exec(originalQuery);
+
+        if(result === null){
+
+            const part = originalQuery.slice(prev + 1);
+            query += part;
+
+            vars.push(originalVars[i]);
+
+        }else{
+
+            const part = originalQuery.slice(prev, result.index);
+
+            if(Array.isArray(originalVars[i])){
+
+                query += `${part}${sqlitePlaceholderArray(originalVars[i])}`;
+                vars.push(...originalVars[i]);
+
+            }else{
+                
+                query += `${part}?`;
+                vars.push(originalVars[i]);
+
+            }
+
+            prev = result.index + 1;
+        }
+    }
+
+    if(prev != originalQuery.length){
+        query += originalQuery.slice(prev);
+    }
+
+
+    const cleanVars = sqliteConvertDates(vars);
+
+    return {query, "vars": cleanVars};
+
+
+}
 
 async function sqliteSimpleQuery(query, vars){
 
@@ -55,56 +106,13 @@ async function sqliteSimpleQuery(query, vars){
  
         return prepare.all(vars);
     }
+
+    const sqliteQuery = createSqlLiteQuery(query, vars);
     
-    const finalVars = [];
-
-    const qms = /\?/ig;
-
-    let newQuery = ``;
-    const newVars = [];
-
-    let prev = 0;
-
-    for(let i = 0; i < vars.length; i++){
-
-        const result = qms.exec(query);
-
-        if(result === null){
-
-            const part = query.slice(prev + 1);
-            newQuery += part;
-
-            newVars.push(vars[i]);
-
-        }else{
-
-            const part = query.slice(prev, result.index);
-
-            if(Array.isArray(vars[i])){
-
-                newQuery += `${part}${sqlitePlaceholderArray(vars[i])}`;
-                newVars.push(...vars[i]);
-
-            }else{
-                
-                newQuery += `${part}?`;
-                newVars.push(vars[i]);
-
-            }
-
-            prev = result.index + 1;
-        }
-    }
-
-    if(prev != query.length){
-        newQuery += query.slice(prev);
-    }
-
-
-    const cleanVars = sqliteConvertDates(newVars);
-
-    const prepare = database.prepare(newQuery);
-    return prepare.all(...cleanVars);
+    
+    //console.log(sqliteQuery);
+    const prepare = database.prepare(sqliteQuery.query);
+    return prepare.all(...sqliteQuery.vars);
 }
 
 
@@ -123,7 +131,7 @@ export function sqliteInsertReturnRowId(){
 
 let pool = null;
 
-if(DATABASE_MODE !== "sqlite"){
+if(SQL_MODE !== "sqlite"){
     pool = mysql.createPool({
         "host": mysqlSettings.host,
         "user": mysqlSettings.user,
@@ -136,7 +144,7 @@ export const mysqlPool = pool;
 
 export async function simpleQuery(query, vars){
 
-    if(DATABASE_MODE === "sqlite") return await sqliteSimpleQuery(query, vars);
+    if(SQL_MODE === "sqlite") return await sqliteSimpleQuery(query, vars);
 
     if(query === undefined) throw new Error("No query specified.");
     
@@ -151,11 +159,23 @@ export async function simpleQuery(query, vars){
     return result;   
 }
 
-export async function mysqlInsertReturnRowId(query, vars){
 
-    const result = await simpleQuery(query, vars);
-    return result.insertId;
+export async function sqlInsertReturnRowId(query, vars){
+
+    if(SQL_MODE !== "sqlite"){
+        const result = await pool.query(query, vars);
+
+        return result.insertId;
+    }
+
+    const sqliteQuery = createSqlLiteQuery(query, vars);
+
+    const prepare = database.prepare(sqliteQuery.query);
+    const result = prepare.run(...sqliteQuery.vars);
+
+    return result.lastInsertRowid;
 }
+
 
 export async function bulkInsert(query, vars, maxPerInsert){
 
@@ -166,7 +186,7 @@ export async function bulkInsert(query, vars, maxPerInsert){
 
     if(vars.length < maxPerInsert){
 
-        if(DATABASE_MODE !== "sqlite"){
+        if(SQL_MODE !== "sqlite"){
             return await pool.query(query, [vars]);
         }else{
 
@@ -178,7 +198,7 @@ export async function bulkInsert(query, vars, maxPerInsert){
         const end = (startIndex + maxPerInsert > vars.length) ? vars.length : startIndex + maxPerInsert;
         const currentVars = vars.slice(startIndex, end);
 
-        if(DATABASE_MODE !== "sqlite"){
+        if(SQL_MODE !== "sqlite"){
             await pool.query(query, [currentVars]);
         }else{
 

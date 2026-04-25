@@ -1,4 +1,4 @@
-import { bulkInsert, simpleQuery } from "./database.mjs";
+import { bulkInsert, simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName, 
     mysqlSetTotalsByDate, sanitizePagePerPage
@@ -55,19 +55,10 @@ async function createMap(name){
 
     const query = `INSERT INTO nstats_maps VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00')`;
 
-    const result = await simpleQuery(query, [name]);
+    const result = await sqlInsertReturnRowId(query, [name]);
 
-    if(result.insertId !== undefined){
-        return result.insertId;
-    }
-
-    const bu = await simpleQuery(`SELECT id FROM nstats_maps ORDER BY id DESC LIMIT 1`);
-
-    if(bu.length > 0){
-        return bu[0].id;
-    }
-
-    return null;
+ 
+    return result;
 }
 
 

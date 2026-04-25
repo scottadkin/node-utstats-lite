@@ -7,3 +7,4 @@ backups/*
 !backups/delete.me
 restore-from/*
 !restore-from/delete.me
+test.db

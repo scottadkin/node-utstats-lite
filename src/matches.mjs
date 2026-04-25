@@ -1,4 +1,4 @@
-import {mysqlGetColumnsAsArray, simpleQuery} from "./database.mjs";
+import {mysqlGetColumnsAsArray, simpleQuery, sqlInsertReturnRowId} from "./database.mjs";
 import {getMapNames, getNameById} from "./maps.mjs";
 import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
 import { getAllNames, getServerNames } from "./servers.mjs";
@@ -70,19 +70,9 @@ export async function createMatch(serverId, gametypeId, mapId, bHardcore, tourna
         targetScore, timeLimit, mutators
     ];
 
-    const result = await simpleQuery(query, vars);
+    const matchId = await sqlInsertReturnRowId(query, vars);
 
-    if(result.insertId === undefined){
-
-        const test = await simpleQuery(`SELECT id FROM nstats_matches ORDER BY id DESC LIMIT 1`);
-
-        if(test.length === 0) return null;
-        return test[0].id;
-    }
-
-    if(result.insertId !== undefined) return result.insertId;
-
-    return null;
+    return matchId;
 }
 
 function _getUniqueTypeIds(matches){

@@ -1,4 +1,4 @@
-import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray } from "./database.mjs";
+import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray, sqlInsertReturnRowId } from "./database.mjs";
 import { getTeamName, toMatchResultString } from "./generic.mjs";
 import { getMatchBasicTeamGame, getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
@@ -569,19 +569,7 @@ async function insertCap(playerManager, matchId, mapId, gametypeId, cap){
 
     try{
 
-        const result = await simpleQuery(query, vars);
-
-        let capId = result.insertId;
-
-        if(result.insertId === undefined){
-
-            const test = await simpleQuery(`SELECT id FROM nstats_ctf_caps ORDER BY id DESC LIMIT 1`);
-
-            if(test.length !== 0){
-
-                capId = test[0].id;
-            }
-        }
+        const capId = await sqlInsertReturnRowId(query, vars);
 
         if(capId === undefined) throw new Error("cap id is null");
 

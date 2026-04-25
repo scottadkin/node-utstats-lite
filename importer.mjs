@@ -169,7 +169,8 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await InsertLogHistory(file, m.matchId);
 
-        await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
+        //REMOVE THIS AFTER TESTING
+        //await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
         
         const end = performance.now();
 
@@ -179,7 +180,8 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
     }catch(err){
 
-        await rename(`./Logs/${file}`, `./Logs/rejected/${file}`);
+        //REMOVE THIS AFTER TESTING
+        //await rename(`./Logs/${file}`, `./Logs/rejected/${file}`);
         await insertRejectedHistory(file, err.toString());
 
         const ignoreMessages = [

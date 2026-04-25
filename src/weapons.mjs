@@ -1,4 +1,4 @@
-import { bulkInsert, simpleQuery } from "./database.mjs";
+import { bulkInsert, simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
 import { getMatchesGametype, getMatchesPlaytime } from "./matches.mjs";
 import { getAllMapIds, getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
@@ -24,9 +24,9 @@ export async function createWeapon(name){
 
     const query = `INSERT INTO nstats_weapons VALUES(NULL,?)`;
 
-    const result = await simpleQuery(query, [name]);
+    const result = await sqlInsertReturnRowId(query, [name]);
 
-    return {"id": result.insertId, name};
+    return {"id": result, name};
 }
 
 

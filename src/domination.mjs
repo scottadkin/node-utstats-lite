@@ -1,4 +1,4 @@
-import { simpleQuery, bulkInsert } from "./database.mjs";
+import { simpleQuery, bulkInsert, sqlInsertReturnRowId } from "./database.mjs";
 
 export async function getPointsIds(names){
 
@@ -23,9 +23,9 @@ export async function createControlPoint(name){
 
     const query = `INSERT INTO nstats_dom_control_points VALUES(NULL,?)`;
 
-    const result = await simpleQuery(query, [name]);
+    const result = await sqlInsertReturnRowId(query, [name]);
 
-    return result.insertId;
+    return result;
 }
 
 export async function insertMatchResult(matchId, realScores, fakeScores){

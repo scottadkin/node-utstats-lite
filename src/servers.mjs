@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
 import Message from "./message.mjs";
 
 
@@ -18,9 +18,9 @@ async function createServer(name, ip, port){
 
     const query = `INSERT INTO nstats_servers VALUES(NULL,?,?,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00')`;
 
-    const result = await simpleQuery(query, [name, ip, port]);
+    const result = await sqlInsertReturnRowId(query, [name, ip, port]);
 
-    return result.insertId;
+    return result;
 }
 
 async function getServerId(name){

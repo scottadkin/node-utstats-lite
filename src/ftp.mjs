@@ -1,4 +1,4 @@
-import { simpleQuery, mysqlInsertReturnRowId } from "./database.mjs";
+import { simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
 
 export async function getLogsFolderSettings(){
 
@@ -68,7 +68,7 @@ export async function addFTPServer(settings){
         settings["server-teams"],//settings.appendTeamSizes
     ];
 
-    return await mysqlInsertReturnRowId(query, vars);
+    return await sqlInsertReturnRowId(query, vars);
 }
 
 export async function editFTPServer(settings){

@@ -1,4 +1,4 @@
-import {simpleQuery, bulkInsert} from "./database.mjs";
+import {simpleQuery, bulkInsert, sqlInsertReturnRowId} from "./database.mjs";
 import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
@@ -84,18 +84,9 @@ export async function createMasterPlayer(name, ip, hwid, mac1, mac2, matchDate){
     const hash = md5(name);
 
     //const result = await simpleQuery(query, [name, ip, hwid, mac1, mac2]);
-    const result = await simpleQuery(query, [name, hash]);
+    const result = await sqlInsertReturnRowId(query, [name, hash]);
 
-    if(result.insertId === undefined){
-
-        const bu = await simpleQuery(`SELECT id FROM nstats_players WHERE name=? LIMIT 1`, [name]);
-
-        if(bu.length > 0) return bu[0].id;
-
-        throw new Error(`Failed to get playerId(sqlite createMasterPlayerBackup)`);
-    }
-
-    return result.insertId;
+    return result;
 }
 
 export async function getMultiplePlayersMasterId(names){
