@@ -1,57 +1,142 @@
 import mysql from "mysql2/promise";
 import { mysqlSettings} from "../config.mjs";
 
-/*import { DatabaseSync } from 'node:sqlite';
+import { DatabaseSync } from 'node:sqlite';
 const database = new DatabaseSync('./test.db');
 
-export function simpleQuery(query, vars){
+const DATABASE_MODE = `sqlite`;
+
+
+function sqlitePlaceholderArray(values){
+
+    let string = ``;
+
+    for(let i = 0; i < values.length; i++){
+
+        string += `?`;
+        if(i < values.length - 1) string += `,`;
+    }
+
+    return string;
+}
+
+
+function sqliteConvertDates(vars){
+
+    return vars.map((v) =>{
+
+        if(typeof v !== "object") return v;
+
+        if(v instanceof Date){
+            return v.toISOString();
+        }else{
+            return v;
+        }
+    });
+}
+
+
+
+export function sqliteSimpleQuery(query, vars){
 
     if(query === undefined) throw new Error("No query specified.");
 
-    const prepare = database.prepare(query);
-    
     if(vars === undefined){
 
+        const prepare = database.prepare(query);
+ 
         return prepare.all([]);
+        
     }
 
-    if(Array.isArray(vars)){
-        return prepare.all(...vars);   
-    }else{
+    if(!Array.isArray(vars)){
+
+        const prepare = database.prepare(query);
+ 
         return prepare.all(vars);
     }
+    
+    const finalVars = [];
+
+    const qms = /\?/ig;
+
+    let newQuery = ``;
+    const newVars = [];
+
+    let prev = 0;
+
+    for(let i = 0; i < vars.length; i++){
+
+        const result = qms.exec(query);
+
+        if(result === null){
+
+            const part = query.slice(prev + 1);
+            newQuery += part;
+
+            newVars.push(vars[i]);
+
+        }else{
+
+            const part = query.slice(prev, result.index);
+
+            if(Array.isArray(vars[i])){
+
+                newQuery += `${part}${sqlitePlaceholderArray(vars[i])}`;
+                newVars.push(...vars[i]);
+
+            }else{
+                
+                newQuery += `${part}?`;
+                newVars.push(vars[i]);
+
+            }
+
+            prev = result.index + 1;
+        }
+    }
+
+    if(prev != query.length){
+        newQuery += query.slice(prev);
+    }
+
+
+    const cleanVars = sqliteConvertDates(newVars);
+
+    const prepare = database.prepare(newQuery);
+    return prepare.all(...cleanVars);
+}
+
+
+export function sqliteBulkInsert(){
+
+}
+
+export function sqliteGetColumnsAsArray(){
 
 }
 
 
-export function bulkInsert(){
+export function sqliteInsertReturnRowId(){
 
 }
 
-export function mysqlGetColumnsAsArray(){
+let pool = null;
 
+if(DATABASE_MODE !== "sqlite"){
+    pool = mysql.createPool({
+        "host": mysqlSettings.host,
+        "user": mysqlSettings.user,
+        "password": mysqlSettings.password,
+        "database": mysqlSettings.database,
+        "connectionLimit": mysqlSettings.connectionLimit ?? 10
+    });
 }
-
-
-export function mysqlInsertReturnRowId(){
-
-}
-
-export const mysqlPool = {};
-*/
-
-const pool = mysql.createPool({
-    "host": mysqlSettings.host,
-    "user": mysqlSettings.user,
-    "password": mysqlSettings.password,
-    "database": mysqlSettings.database,
-    "connectionLimit": mysqlSettings.connectionLimit ?? 10
-});
-
 export const mysqlPool = pool;
 
 export async function simpleQuery(query, vars){
 
+    if(DATABASE_MODE === "sqlite") return sqliteSimpleQuery(query, vars);
 
     if(query === undefined) throw new Error("No query specified.");
     
