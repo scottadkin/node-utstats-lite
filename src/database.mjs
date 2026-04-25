@@ -1,6 +1,44 @@
 import mysql from "mysql2/promise";
-import { mysqlSettings} from "../config.mjs"
+import { mysqlSettings} from "../config.mjs";
 
+/*import { DatabaseSync } from 'node:sqlite';
+const database = new DatabaseSync('./test.db');
+
+export function simpleQuery(query, vars){
+
+    if(query === undefined) throw new Error("No query specified.");
+
+    const prepare = database.prepare(query);
+    
+    if(vars === undefined){
+
+        return prepare.all([]);
+    }
+
+    if(Array.isArray(vars)){
+        return prepare.all(...vars);   
+    }else{
+        return prepare.all(vars);
+    }
+
+}
+
+
+export function bulkInsert(){
+
+}
+
+export function mysqlGetColumnsAsArray(){
+
+}
+
+
+export function mysqlInsertReturnRowId(){
+
+}
+
+export const mysqlPool = {};
+*/
 
 const pool = mysql.createPool({
     "host": mysqlSettings.host,
@@ -83,6 +121,5 @@ export async function mysqlGetColumnsAsArray(tableName, bPrefixTableName){
             return r.Field;
         }
     });
-
 
 }

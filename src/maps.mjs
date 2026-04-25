@@ -1,4 +1,4 @@
-import { bulkInsert, onDuplicateUpdate, simpleQuery } from "./database.mjs";
+import { bulkInsert, simpleQuery } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName, 
     mysqlSetTotalsByDate, sanitizePagePerPage
