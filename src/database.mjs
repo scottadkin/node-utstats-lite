@@ -242,40 +242,60 @@ export async function bulkInsert(query, vars, maxPerInsert){
 
 }
 
-
-/*
-const t = "nstats_player_totals_weapons";
-
-    const query = `INSERT INTO nstats_player_totals_weapons (
-        player_id, gametype_id, weapon_id,
-        total_matches, kills, deaths, suicides, team_kills, eff
-    ) VALUES ? as new ON DUPLICATE KEY UPDATE
-    ${t}.total_matches = new.total_matches,
-    ${t}.kills = new.kills,
-    ${t}.deaths = new.deaths,
-    ${t}.suicides = new.suicides,
-    ${t}.team_kills = new.team_kills,
-    ${t}.eff = new.eff`;
-
-*/
-
+/**
+ * 
+ * @param {String} tableName 
+ * @param {Array<String>} columns column names to update
+ * @param {Array<Any>} vars an array of values, or an array of arrays with values
+ * @param {Array<String>} conflict  sqlite needs the column names of the indexes not the name of the index itself
+ */
 function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
-    let test = `INSERT INTO ${tableName}(${columns.toString()}) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(${conflict.toString()}) DO UPDATE SET `;
+    if(conflict.length === 0) throw new Error(`OnDuplicateUpdate needs a conflict key`);
+
+    let placeholderString = ``;
+
+    if(Array.isArray(vars[0])){
+
+        for(let i = 0; i < vars.length; i++){
+
+            placeholderString += `(${sqlitePlaceholderArray(columns)})`;
+            if(i < vars.length - 1) placeholderString += `, `;
+        }
+    }else{
+        placeholderString = `(${sqlitePlaceholderArray(columns)})`
+    }
+
+    let query = `INSERT INTO ${tableName}(${columns.toString()}) VALUES ${placeholderString}
+    ON CONFLICT(${conflict.toString()}) DO UPDATE SET `;
 
     for(let i = 0; i < columns.length; i++){
 
-        test += `${columns[i]}=excluded.${columns[i]}`;
-        if(i < columns.length - 1) test += `, `;
+        query += `${columns[i]}=excluded.${columns[i]}`;
+
+        if(i < columns.length - 1){
+            query += `, `;
+        }
     }
 
-    console.log(test);
-    const prepare = database.prepare(test);
-    console.log(prepare.run(...vars[0]));
-    //await simpleQuery(test, vars[0]);
+    const prepare = database.prepare(query);
 
-    console.log(test);
-    process.exit();
+    if(!Array.isArray(vars[0])){
+
+         prepare.run(...vars);
+        
+    }else{
+
+        const fv = [];
+
+        for(let i = 0; i < vars.length; i++){
+
+            fv.push(...vars[i]);
+        }
+
+        prepare.run(...fv);
+    }
+
 }
 
 async function mysqlInsertOnDuplicateUpdate(tableName, columns, vars){
@@ -295,20 +315,14 @@ async function mysqlInsertOnDuplicateUpdate(tableName, columns, vars){
 export async function sqlInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
     //conflict not needed for mysql on duplicate key update
-    return mysqlInsertOnDuplicateUpdate(tableName, columns, vars);
+    
     if(SQL_MODE !== "sqlite"){
 
-       /* if(vars.length === 0){
-            return await pool.query(query);
-        }
+        return await mysqlInsertOnDuplicateUpdate(tableName, columns, vars);
 
-        return await pool.query(query, [vars]);*/
     }
 
     return sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict);
-
-    
-
 
 }
 
