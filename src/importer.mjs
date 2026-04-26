@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
 
 
@@ -42,7 +42,12 @@ export async function insertLogDownloadHistory(host, importerId, name, fileSize)
         ${t}.ftp_ip = new.ftp_ip,
         ${t}.file_size = new.file_size
     `;
-    await simpleQuery(query, [name, new Date(Date.now()), importerId, host, fileSize]);
+
+    const date = new Date(Date.now());
+
+    const columns = ["file_name", "date", "importer_id", "ftp_ip", "file_size"];
+    await sqlInsertOnDuplicateUpdate(t, columns, [name, date, importerId, host, fileSize], ["file_name"]);
+    //await simpleQuery(query, [name, new Date(Date.now()), importerId, host, fileSize]);
 }
 
 export async function getHistory(page, perPage){

@@ -272,7 +272,7 @@ async function insertPlayerTotals(insertVars){
 
     const t = "nstats_player_totals_ctf";
 
-    const query = `INSERT INTO nstats_player_totals_ctf (
+    /*const query = `INSERT INTO nstats_player_totals_ctf (
         player_id, gametype_id, map_id, total_matches, flag_taken,
         max_flag_taken, flag_pickup, max_flag_pickup, flag_drop,
         max_flag_drop, flag_assist, max_flag_assist, flag_cover,
@@ -310,7 +310,7 @@ async function insertPlayerTotals(insertVars){
     ${t}.flag_return_enemy_base=new.flag_return_enemy_base,
     ${t}.max_flag_return_enemy_base=new.max_flag_return_enemy_base,
     ${t}.flag_return_save=new.flag_return_save,
-    ${t}.max_flag_return_save=new.max_flag_return_save`;
+    ${t}.max_flag_return_save=new.max_flag_return_save`;*/
 
 
 
