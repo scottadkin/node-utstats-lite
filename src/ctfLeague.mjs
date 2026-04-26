@@ -1,5 +1,5 @@
 
-import { simpleQuery, bulkInsert } from "./database.mjs";
+import { simpleQuery, bulkInsert, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { getCTFGametypes, getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
 import { DAY, getPlayer, sanitizePagePerPage, setInt } from "./generic.mjs";
@@ -139,7 +139,7 @@ async function bulkInsertEntries(mapId, gametypeId, tableData){
 
     const t = "nstats_player_ctf_league";
 
-    const query = `INSERT INTO ${t} (player_id,gametype_id,map_id,first_match,last_match,
+    /*const query = `INSERT INTO ${t} (player_id,gametype_id,map_id,first_match,last_match,
     total_matches,playtime,wins,draws,losses,winrate,cap_for,cap_against,cap_offset,points) VALUES ? as new
     ON DUPLICATE KEY UPDATE
     ${t}.first_match = new.first_match,
@@ -154,9 +154,16 @@ async function bulkInsertEntries(mapId, gametypeId, tableData){
     ${t}.cap_against = new.cap_against,
     ${t}.cap_offset = new.cap_offset,
     ${t}.points = new.points
-    `;
+    `;*/
 
-    await bulkInsert(query, insertVars);
+    const columns = [
+        "player_id","gametype_id","map_id","first_match","last_match",
+        "total_matches","playtime","wins","draws","losses","winrate",
+        "cap_for","cap_against","cap_offset","points"
+    ];
+
+    return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","gametype_id","map_id"]);
+    //await bulkInsert(query, insertVars);
 }
 
 export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDays){

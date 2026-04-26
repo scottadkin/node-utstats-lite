@@ -1,4 +1,4 @@
-import { simpleQuery, bulkInsert } from "./database.mjs";
+import { simpleQuery, bulkInsert, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
 import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
 import { getAllGametypeIds as getAllPlayerGametypeIds, getAllPlayerMapIds, getBasicPlayerInfo } from "./players.mjs";
@@ -112,15 +112,16 @@ async function bulkInsertRankings(targetId, data, type){
 
     const t = (type === "map") ? "nstats_map_rankings" : "nstats_rankings";
     const idColumn = (type === "map") ? "map_id" : "gametype_id";
+    const conflicts = (type === "map") ? ["player_id", "map_id"]  : ["player_id", "gametype_id"];
 
-    const query = `INSERT INTO ${t} (
+    /*const query = `INSERT INTO ${t} (
         player_id, ${idColumn}, matches, playtime,
         score, last_active
     ) VALUES ? as new ON DUPLICATE KEY UPDATE
      ${t}.matches = new.matches,
      ${t}.playtime = new.playtime,
      ${t}.score = new.score,
-     ${t}.last_active = new.last_active`;
+     ${t}.last_active = new.last_active`;*/
 
     const insertVars = [];
 
@@ -136,8 +137,13 @@ async function bulkInsertRankings(targetId, data, type){
         ]);
     }
 
+    const columns = [
+        "player_id", idColumn, "matches", "playtime", "score", "last_active"
+    ];
 
-    await bulkInsert(query, insertVars);
+    return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, conflicts);
+
+    //await bulkInsert(query, insertVars);
 }
 
 

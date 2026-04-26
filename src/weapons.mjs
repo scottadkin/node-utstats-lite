@@ -243,7 +243,7 @@ async function bulkInsertPlayerTotals(totals){
 
     const t = "nstats_player_totals_weapons";
 
-    const query = `INSERT INTO nstats_player_totals_weapons (
+    /*const query = `INSERT INTO nstats_player_totals_weapons (
         player_id, gametype_id, weapon_id,
         total_matches, kills, deaths, suicides, team_kills, eff
     ) VALUES ? as new ON DUPLICATE KEY UPDATE
@@ -255,10 +255,10 @@ async function bulkInsertPlayerTotals(totals){
     ${t}.eff = new.eff`;
 
 
+    */
     const columns = [`player_id`, `gametype_id`, `weapon_id`,
-        `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, `eff`];
+    `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, `eff`];
 
-    const updateQuery = ``;
 
     await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","gametype_id","weapon_id"]);
     //await bulkInsert(query, insertVars);
@@ -385,7 +385,7 @@ async function deleteMapWeaponTotals(mapId){
 async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
 
     const t = `nstats_map_weapon_totals`;
-    const query = `INSERT INTO nstats_map_weapon_totals
+    /*const query = `INSERT INTO nstats_map_weapon_totals
     (map_id, total_matches, total_playtime, weapon_id, kills, deaths, suicides, team_kills, kills_per_min, deaths_per_min, team_kills_per_min, suicides_per_min) 
     VALUES ? as new
     ON DUPLICATE KEY UPDATE 
@@ -399,7 +399,7 @@ async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
     ${t}.deaths_per_min=new.deaths_per_min,
     ${t}.team_kills_per_min=new.team_kills_per_min,
     ${t}.suicides_per_min=new.suicides_per_min
-    `;
+    `;*/
 
     const insertVars = [];
 
@@ -421,7 +421,14 @@ async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
         ]);
     }
 
-    await bulkInsert(query, insertVars);
+    const columns = [
+        "map_id", "total_matches", "total_playtime", "weapon_id", "kills", 
+        "deaths", "suicides", "team_kills", "kills_per_min", "deaths_per_min", 
+        "team_kills_per_min", "suicides_per_min"
+    ];
+
+    return await sqlInsertOnDuplicateUpdate(t,columns, insertVars, ["map_id", "weapon_id"]);
+    //await bulkInsert(query, insertVars);
 }
 
 export async function calcMapWeaponsTotals(mapId){

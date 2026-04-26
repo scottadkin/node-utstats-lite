@@ -1,4 +1,4 @@
-import { bulkInsert, simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
+import { bulkInsert, simpleQuery, sqlInsertOnDuplicateUpdate, sqlInsertReturnRowId } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName, 
     mysqlSetTotalsByDate, sanitizePagePerPage
@@ -544,7 +544,7 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
 
     const t = "nstats_player_map_minute_averages";
 
-    const query = `INSERT INTO nstats_player_map_minute_averages 
+    /*const query = `INSERT INTO nstats_player_map_minute_averages 
     (player_id, map_id, gametype_id, total_playtime, total_matches, score, frags, kills, deaths, suicides, team_kills,
     headshots, item_amp, item_belt, item_boots, item_body, item_pads, item_invis, item_shp,
     flag_taken, flag_pickup, flag_drop, flag_assist, flag_cover, flag_seal, flag_cap, flag_kills, flag_return, flag_return_base, 
@@ -581,9 +581,18 @@ export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId)
     ${t}.flag_return_mid = new.flag_return_mid,
     ${t}.flag_return_enemy_base = new.flag_return_enemy_base,
     ${t}.flag_return_save = new.flag_return_save,
-    ${t}.dom_caps = new.dom_caps`;
+    ${t}.dom_caps = new.dom_caps`;*/
 
-    return await simpleQuery(query, [insertVars]);
+
+    const columns = [
+        "player_id", "map_id", "gametype_id", "total_playtime", "total_matches", "score", "frags", "kills", "deaths", "suicides", "team_kills",
+        "headshots", "item_amp", "item_belt", "item_boots", "item_body", "item_pads", "item_invis", "item_shp",
+        "flag_taken", "flag_pickup", "flag_drop", "flag_assist", "flag_cover", "flag_seal", "flag_cap", "flag_kills", "flag_return", "flag_return_base", 
+        "flag_return_mid", "flag_return_enemy_base", "flag_return_save", "dom_caps"
+    ];
+
+    return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","map_id","gametype_id"]);
+    //return await simpleQuery(query, [insertVars]);
 }
 
 

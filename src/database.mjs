@@ -282,7 +282,7 @@ function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
     if(!Array.isArray(vars[0])){
 
-         prepare.run(...vars);
+         prepare.run(...sqliteConvertDates(vars));
         
     }else{
 
@@ -290,7 +290,7 @@ function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
         for(let i = 0; i < vars.length; i++){
 
-            fv.push(...vars[i]);
+            fv.push(...sqliteConvertDates(vars[i]));
         }
 
         prepare.run(...fv);

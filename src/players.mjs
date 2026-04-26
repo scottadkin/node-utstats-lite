@@ -1,4 +1,4 @@
-import {simpleQuery, bulkInsert, sqlInsertReturnRowId} from "./database.mjs";
+import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate} from "./database.mjs";
 import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
@@ -833,7 +833,24 @@ async function insertPlayerGametypeTotals(data){
     ${t}.item_invis=new.item_invis,
     ${t}.item_shp=new.item_shp`;
 
-    await bulkInsert(query, insertVars);
+
+
+    const columns = [
+        "player_id","gametype_id","map_id","last_active","playtime","total_matches",
+        "wins","draws","losses","winrate","score",
+        "frags","kills","deaths","suicides","team_kills",
+        "efficiency","ttl", "first_blood", "spree_1","spree_2",
+        "spree_3","spree_4", "spree_5", "spree_best", "multi_1",
+        "multi_2","multi_3","multi_4","multi_best","headshots",
+        "item_amp", "item_belt", "item_boots", "item_body", "item_pads",
+        "item_invis", "item_shp"
+    ];
+
+
+
+    await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, ["player_id", "gametype_id", "map_id"]);
+
+    //await bulkInsert(query, insertVars);
 }
 
 

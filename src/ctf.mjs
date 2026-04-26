@@ -1,4 +1,4 @@
-import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray, sqlInsertReturnRowId } from "./database.mjs";
+import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { getTeamName, toMatchResultString } from "./generic.mjs";
 import { getMatchBasicTeamGame, getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
@@ -312,7 +312,21 @@ async function insertPlayerTotals(insertVars){
     ${t}.flag_return_save=new.flag_return_save,
     ${t}.max_flag_return_save=new.max_flag_return_save`;
 
-    return await bulkInsert(query, insertVars);
+
+
+    const columns = [
+        "player_id", "gametype_id", "map_id", "total_matches", "flag_taken",
+        "max_flag_taken", "flag_pickup", "max_flag_pickup", "flag_drop",
+        "max_flag_drop", "flag_assist", "max_flag_assist", "flag_cover",
+        "max_flag_cover", "flag_seal", "max_flag_seal", "flag_cap", "max_flag_cap",
+        "flag_kill", "max_flag_kill", "flag_return", "max_flag_return",
+        "flag_return_base", "max_flag_return_base", "flag_return_mid",
+        "max_flag_return_mid", "flag_return_enemy_base", "max_flag_return_enemy_base",
+        "flag_return_save", "max_flag_return_save"
+    ];
+
+    return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id", "gametype_id", "map_id"]);
+    //return await bulkInsert(query, insertVars);
 }
 
 export async function updatePlayerTotals(playerIds){
