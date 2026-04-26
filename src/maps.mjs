@@ -404,8 +404,8 @@ export async function getRecentMatches(mapId, page, perPage){
     nstats_matches.team_3_score,
     nstats_matches.solo_winner,
     nstats_matches.solo_winner_score,
-    IF(nstats_matches.solo_winner = 0, "", nstats_players.name) as solo_winner_name,
-    IF(nstats_matches.solo_winner = 0, "", nstats_players.country) as solo_winner_country,
+    IF(nstats_matches.solo_winner = 0, '', nstats_players.name) as solo_winner_name,
+    IF(nstats_matches.solo_winner = 0, '', nstats_players.country) as solo_winner_country,
     nstats_servers.name as server_name,
     nstats_gametypes.name as gametype_name,
     nstats_matches.hash 
@@ -413,7 +413,7 @@ export async function getRecentMatches(mapId, page, perPage){
     LEFT JOIN nstats_players ON nstats_players.id = nstats_matches.solo_winner
     LEFT JOIN nstats_servers ON nstats_servers.id = nstats_matches.server_id
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_matches.gametype_id
-    WHERE map_id=? ORDER BY date DESC, id DESC LIMIT ?, ?`;
+    WHERE nstats_matches.map_id=? ORDER BY nstats_matches.date DESC, nstats_matches.id DESC LIMIT ?, ?`;
 
 
     const result = await simpleQuery(query, [mapId, start, perPage]);

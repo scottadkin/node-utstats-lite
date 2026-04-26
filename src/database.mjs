@@ -90,29 +90,35 @@ function createSqlLiteQuery(originalQuery, originalVars){
 
 async function sqliteSimpleQuery(query, vars){
 
-    if(query === undefined) throw new Error("No query specified.");
+    try{
+        if(query === undefined) throw new Error("No query specified.");
 
-    if(vars === undefined){
+        if(vars === undefined){
 
-        const prepare = database.prepare(query);
- 
-        return prepare.all([]);
+            const prepare = database.prepare(query);
+    
+            return prepare.all([]);
+            
+        }
+
+        if(!Array.isArray(vars)){
+
+            const prepare = database.prepare(query);
+    
+            return prepare.all(vars);
+        }
+
+        const sqliteQuery = createSqlLiteQuery(query, vars);
         
+        
+        const prepare = database.prepare(sqliteQuery.query);
+        return prepare.all(...sqliteQuery.vars);
+
+    }catch(err){
+        console.trace(err);
+
+        throw new Error(err);
     }
-
-    if(!Array.isArray(vars)){
-
-        const prepare = database.prepare(query);
- 
-        return prepare.all(vars);
-    }
-
-    const sqliteQuery = createSqlLiteQuery(query, vars);
-    
-    
-    //console.log(sqliteQuery);
-    const prepare = database.prepare(sqliteQuery.query);
-    return prepare.all(...sqliteQuery.vars);
 }
 
 
@@ -134,17 +140,24 @@ export async function simpleQuery(query, vars){
 
     if(SQL_MODE === "sqlite") return await sqliteSimpleQuery(query, vars);
 
-    if(query === undefined) throw new Error("No query specified.");
-    
-    if(vars === undefined){
+    try{
 
-        const [result] = await pool.query(query);
-        return result;
+        if(query === undefined) throw new Error("No query specified.");
+        
+        if(vars === undefined){
+
+            const [result] = await pool.query(query);
+            return result;
+        }
+
+        const [result] = await pool.query(query, vars);   
+
+        return result;  
+         
+    }catch(err){
+        console.trace(err);
+        throw new Error(err);
     }
-
-    const [result] = await pool.query(query, vars);   
-
-    return result;   
 }
 
 

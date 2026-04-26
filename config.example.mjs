@@ -1,3 +1,5 @@
+export const SQL_MODE = "mysql";
+
 export const mysqlSettings = {
     "host": "localhost",
     "port": 3306,
