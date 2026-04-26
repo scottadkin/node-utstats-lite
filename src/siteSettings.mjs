@@ -156,19 +156,21 @@ export async function insertSetting(category, type, name, value){
 
 export async function getCategorySettings(category){
 
-    const query = `SELECT setting_name,setting_value FROM nstats_site_settings WHERE category=?`;
+    const query = `SELECT setting_name,setting_value,setting_type FROM nstats_site_settings WHERE category=?`;
 
     const result = await simpleQuery(query, [category]);
 
     const data = {};
 
+    const displayReg = /^Display .+$/;
 
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
-        data[r.setting_name] = r.setting_value;
+        data[r.setting_name] = (r.setting_type === "bool") ? parseInt(r.setting_value) : r.setting_value;
     }
+
 
     return data;
 }

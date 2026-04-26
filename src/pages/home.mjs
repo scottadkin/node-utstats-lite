@@ -23,7 +23,7 @@ export async function renderHomePage(req, res, userSession){
 
         let screenshotData = null;
 
-        if(parseInt(pageSettings["Display Latest Screenshot"]) === 1 && recentMatches.total > 0){
+        if(pageSettings["Display Latest Screenshot"] === 1 && recentMatches.total > 0){
             screenshotData = await getMatchData(recentMatches.data[0].id);
         }
 
@@ -35,19 +35,19 @@ export async function renderHomePage(req, res, userSession){
 
         let mostPlayedGametypes = [];
 
-        if(pageSettings["Display Most Played Gametypes"] === "1"){
+        if(pageSettings["Display Most Played Gametypes"] === 1){
             mostPlayedGametypes = await getMostPlayedGametypes(pageSettings["Total Most Played Gametypes"]);
         }
 
         let mostPlayedMaps = [];
 
-        if(pageSettings["Display Most Played Maps"] === "1"){
+        if(pageSettings["Display Most Played Maps"] === 1){
             mostPlayedMaps = await getMostPlayedMaps(pageSettings["Total Most Played Maps"]);
         }
 
         let mostActivePlayers = [];
 
-        if(pageSettings["Display Most Active Players"] === "1"){
+        if(pageSettings["Display Most Active Players"] === 1){
             mostActivePlayers = await getMostActivePlayers(pageSettings["Total Most Active Players"]);
         }
 

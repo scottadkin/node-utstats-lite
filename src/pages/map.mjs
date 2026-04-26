@@ -23,13 +23,13 @@ export async function renderMapPage(req, res, userSession){
 
         let ctfLeagueSettings = {};
 
-        if(pageSettings["Display CTF League"] === "1"){
+        if(pageSettings["Display CTF League"] === 1){
             ctfLeagueSettings = await getLeagueCategorySettings("maps");
         }
 
         let weaponStats = null;
 
-        if(pageSettings["Display Weapon Statistics"] === "1"){
+        if(pageSettings["Display Weapon Statistics"] === 1){
             weaponStats = await getMapWeaponStats(basic.id);
         }
 
