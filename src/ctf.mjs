@@ -36,7 +36,6 @@ export async function insertPlayerMatchData(players, matchId, gametypeId, mapId)
         ]);
     }
 
-    //console.log(insertVars);
 
     await bulkInsert(query, insertVars);
 }

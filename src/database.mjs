@@ -152,7 +152,7 @@ export async function sqlInsertReturnRowId(query, vars){
     if(SQL_MODE !== "sqlite"){
         const result = await pool.query(query, vars);
 
-        return result.insertId;
+        return result[0].insertId;
     }
 
     const sqliteQuery = createSqlLiteQuery(query, vars);
