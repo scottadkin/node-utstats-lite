@@ -870,7 +870,7 @@ async function deleteColumn(table, name){
     return await simpleQuery(query);
 }
 
-async function addPageLayouts(){
+export async function addPageLayouts(){
 
     await restoreDefaultLayouts();
 }

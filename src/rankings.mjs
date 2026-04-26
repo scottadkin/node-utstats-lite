@@ -610,7 +610,7 @@ export async function getMinMatchesSetting(type){
 
     const targetName = (type === "gametype") ? "min_matches" : "map_min_matches";
 
-    const query = `SELECT points FROM nstats_ranking_settings WHERE category="penalty" AND name=?`;
+    const query = `SELECT points FROM nstats_ranking_settings WHERE category='penalty' AND name=?`;
 
     const result = await simpleQuery(query, [targetName]);
 

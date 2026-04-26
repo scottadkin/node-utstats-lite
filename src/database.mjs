@@ -130,6 +130,7 @@ if(SQL_MODE !== "sqlite"){
 export const mysqlPool = pool;
 
 export async function simpleQuery(query, vars){
+    
 
     if(SQL_MODE === "sqlite") return await sqliteSimpleQuery(query, vars);
 
