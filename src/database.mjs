@@ -243,13 +243,73 @@ export async function bulkInsert(query, vars, maxPerInsert){
 }
 
 
-export async function onDuplicateUpdate(query, vars){
+/*
+const t = "nstats_player_totals_weapons";
 
-    if(vars.length === 0){
-        return await pool.query(query);
+    const query = `INSERT INTO nstats_player_totals_weapons (
+        player_id, gametype_id, weapon_id,
+        total_matches, kills, deaths, suicides, team_kills, eff
+    ) VALUES ? as new ON DUPLICATE KEY UPDATE
+    ${t}.total_matches = new.total_matches,
+    ${t}.kills = new.kills,
+    ${t}.deaths = new.deaths,
+    ${t}.suicides = new.suicides,
+    ${t}.team_kills = new.team_kills,
+    ${t}.eff = new.eff`;
+
+*/
+
+function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
+
+    let test = `INSERT INTO ${tableName}(${columns.toString()}) VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(${conflict.toString()}) DO UPDATE SET `;
+
+    for(let i = 0; i < columns.length; i++){
+
+        test += `${columns[i]}=excluded.${columns[i]}`;
+        if(i < columns.length - 1) test += `, `;
     }
 
-    return await pool.query(query, [vars]);
+    console.log(test);
+    const prepare = database.prepare(test);
+    console.log(prepare.run(...vars[0]));
+    //await simpleQuery(test, vars[0]);
+
+    console.log(test);
+    process.exit();
+}
+
+async function mysqlInsertOnDuplicateUpdate(tableName, columns, vars){
+
+    let query = `INSERT INTO ${tableName}(${columns.toString()}) VALUES ? as excluded ON DUPLICATE KEY UPDATE  `;
+
+    for(let i = 0; i < columns.length; i++){
+
+        query += `${tableName}.${columns[i]}=excluded.${columns[i]}`;
+        if(i < columns.length - 1) query += `, `;
+    }
+
+    return await bulkInsert(query, vars);
+
+}
+
+export async function sqlInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
+
+    //conflict not needed for mysql on duplicate key update
+    return mysqlInsertOnDuplicateUpdate(tableName, columns, vars);
+    if(SQL_MODE !== "sqlite"){
+
+       /* if(vars.length === 0){
+            return await pool.query(query);
+        }
+
+        return await pool.query(query, [vars]);*/
+    }
+
+    return sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict);
+
+    
+
+
 }
 
 

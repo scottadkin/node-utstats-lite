@@ -1,4 +1,4 @@
-import { bulkInsert, simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
+import { bulkInsert, simpleQuery, sqlInsertOnDuplicateUpdate, sqlInsertReturnRowId } from "./database.mjs";
 import { getMatchesGametype, getMatchesPlaytime } from "./matches.mjs";
 import { getAllMapIds, getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
@@ -238,6 +238,9 @@ async function bulkInsertPlayerTotals(totals){
 
     //await deleteMultiplePlayerTotals([...playerIds]);
 
+
+    //sqlite has upsert instead of on duplicate key update
+
     const t = "nstats_player_totals_weapons";
 
     const query = `INSERT INTO nstats_player_totals_weapons (
@@ -251,7 +254,14 @@ async function bulkInsertPlayerTotals(totals){
     ${t}.team_kills = new.team_kills,
     ${t}.eff = new.eff`;
 
-    await bulkInsert(query, insertVars);
+
+    const columns = [`player_id`, `gametype_id`, `weapon_id`,
+        `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, `eff`];
+
+    const updateQuery = ``;
+
+    await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","gametype_id","weapon_id"]);
+    //await bulkInsert(query, insertVars);
 }
 
 export async function updatePlayerTotals(playerIds){
@@ -259,6 +269,7 @@ export async function updatePlayerTotals(playerIds){
     if(playerIds.length === 0) return null;
 
     const data = await getAllPlayerMatchData(playerIds);
+
 
     const totals = {};
     
