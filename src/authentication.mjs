@@ -1,7 +1,7 @@
 "use server"
 import { sha256 } from 'js-sha256';
 import {salt} from "../salt.mjs";
-import {simpleQuery} from "./database.mjs";
+import {simpleQuery, sqlInsertOnDuplicateUpdate, sqlSingleUpdateReturnChanged} from "./database.mjs";
 import { createRandomString } from "./generic.mjs";
 import { maxLoginAttempts, maxLoginBanPeriod, loginExpireTime } from '../config.mjs';
 
@@ -141,25 +141,55 @@ function updateExpireDates(res, sId, userId, userName, expires){
     res.cookie("nstats_sid", sId, {expires, "httpOnly": true, "path": "/"});
 }
 
-async function updateUserSession(res, sessionStore, sId, userId, userName, expires){
+async function updateUserSession(res, sessionStore, sId, userId, userIp, userName, expires){
 
-    return await sessionStore.set(sId, {"name": userName, "user_id": userId, "session_id": sId}, async (err) =>{
+    const columns = ["session_id", "created", "expires", "user_id", "user_ip", "session_data"];
+
+    const updateTest = await sqlSingleUpdateReturnChanged("UPDATE nstats_sessions SET expires=? WHERE session_id=? AND user_id=?", [expires, sId, userId]);
+
+    let rowsChanged = 0;
+
+    if(updateTest === "sqlite"){
+
+        const a = `SELECT id FROM nstats_sessions WHERE session_id=? AND user_id=? AND expires=? LIMIT 1`;
+        const b = await simpleQuery(a, [sId, userId, expires]);
+
+        rowsChanged = b.length;
+    }else{
+        rowsChanged = updateTest;
+    }
+
+    if(rowsChanged === 0){
+
+        await simpleQuery("INSERT INTO nstats_sessions VALUES(NULL,?,?,?,?,?,?)", [sId, expires, expires, userId, userIp, "{}"]);
+
+    }
+
+    updateExpireDates(res, sId, userId, userName, expires);
+
+    //const update = await simpleQuery("UPDATE nstats_sessions SET expires=? WHERE session_id=?", [expires, sId]);
+    //console.log(update);
+
+    /*return await sessionStore.set(sId, {"name": userName, "user_id": userId, "session_id": sId}, async (err) =>{
 
         if(err) throw new Error(err.message);
 
         await setSessionUserId(sId, userId);
 
         updateExpireDates(res, sId, userId, userName, expires); 
-    });
+    });*/
 }
 
 export async function bSessionExist(sessionStore, sId){
 
-    const result = await sessionStore.get(sId);
+
+    return await testBSessionExists(sId);
+
+    /*const result = await sessionStore.get(sId);
 
     if(result === null) return false;
 
-    return true;
+    return true;*/
     
 }
 
@@ -239,7 +269,7 @@ export async function login(req, res, sessionStore){
     const part1 = createRandomString(200);
     const sid = sha256(`${part1}`);
 
-    await updateUserSession(res, sessionStore, sid, userId, username, expires);
+    await updateUserSession(res, sessionStore, sid, userId, req.ip, username, expires);
 
     res.redirect("/?message=login");
     
@@ -265,17 +295,29 @@ export async function logout(req, res, sessionStore){
 
 }
 
+
+async function testBSessionExists(sessionId){
+
+    const result = await simpleQuery(`SELECT session_id FROM nstats_sessions WHERE session_id=? LIMIT 1`, [sessionId]);
+
+    return result.length > 0;
+}
+
 export async function getSessionInfo(res, req, sessionStore){
 
 
     const userId = req.cookies?.nstats_userid ?? null;
     const sessionId = req.cookies?.nstats_sid ?? null;
 
+
     if(userId === null || sessionId === null) return null; 
 
-    if(!await bSessionExist(sessionStore, sessionId)){
-        return null;
-    }
+    if(!await bSessionExist(sessionStore, sessionId)) return null;
+
+
+   // if(!await bSessionExist(sessionStore, sessionId)){
+    //    return null;
+    //}
 
     const bActive = await bAccountActive(userId);
     const username = await getUserName(userId);
@@ -283,6 +325,7 @@ export async function getSessionInfo(res, req, sessionStore){
     if(!bActive) return null; 
 
     const expires = getExpireDate();
+    await updateUserSession(res, sessionStore, sessionId, userId, req.ip, username, expires);
     updateExpireDates(res, sessionId, userId, username, expires);
 
     return {username}

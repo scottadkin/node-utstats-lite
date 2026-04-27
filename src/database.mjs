@@ -1,6 +1,5 @@
 import mysql from "mysql2/promise";
 import { mysqlSettings, SQL_MODE} from "../config.mjs";
-
 import { DatabaseSync } from 'node:sqlite';
 const database = new DatabaseSync('./test.db');
 
@@ -97,8 +96,7 @@ async function sqliteSimpleQuery(query, vars){
 
             const prepare = database.prepare(query);
     
-            return prepare.all([]);
-            
+            return prepare.all([]);         
         }
 
         if(!Array.isArray(vars)){
@@ -109,14 +107,12 @@ async function sqliteSimpleQuery(query, vars){
         }
 
         const sqliteQuery = createSqlLiteQuery(query, vars);
-        
-        
+          
         const prepare = database.prepare(sqliteQuery.query);
         return prepare.all(...sqliteQuery.vars);
 
     }catch(err){
         console.trace(err);
-
         throw new Error(err);
     }
 }
@@ -125,6 +121,7 @@ async function sqliteSimpleQuery(query, vars){
 let pool = null;
 
 if(SQL_MODE !== "sqlite"){
+
     pool = mysql.createPool({
         "host": mysqlSettings.host,
         "user": mysqlSettings.user,
@@ -133,10 +130,10 @@ if(SQL_MODE !== "sqlite"){
         "connectionLimit": mysqlSettings.connectionLimit ?? 10
     });
 }
+
 export const mysqlPool = pool;
 
-export async function simpleQuery(query, vars){
-    
+export async function simpleQuery(query, vars){   
 
     if(SQL_MODE === "sqlite") return await sqliteSimpleQuery(query, vars);
 
@@ -360,4 +357,28 @@ export async function mysqlGetColumnsAsArray(tableName, bPrefixTableName){
         }
     });
 
+}
+
+
+export async function sqlSingleUpdateReturnChanged(query, vars){
+
+    if(vars === undefined || vars.length === 0) throw new Error(`sqlSingleUpdateReturnChanged vars is required`);
+
+    if(SQL_MODE === "sqlite"){
+
+        const test = database.prepare(`${query}`);
+
+        vars = sqliteConvertDates(vars);
+        test.run(...vars);
+
+        return "sqlite";
+
+
+    }else{
+
+        const [result] = await pool.query(query, vars);
+
+        return result.changedRows;
+    }
+    
 }

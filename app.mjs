@@ -27,8 +27,6 @@ import { renderAdminPage } from './src/pages/admin.mjs';
 import { renderMapPage } from './src/pages/map.mjs';
 import { renderWatchlistPage } from './src/pages/watchlist.mjs';
 import Message from './src/message.mjs';
-
-//import helmet from "helmet";
 import { renderMapsPage } from './src/pages/maps.mjs';
 import { createRandomString } from './src/generic.mjs';
 

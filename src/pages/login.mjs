@@ -30,6 +30,7 @@ export async function renderLoginPage(req, res, sessionStore, userSession){
         });
 
     }catch(err){
+        console.trace(err);
         res.send(`Error: ${err.toString()}`);
     }
     
