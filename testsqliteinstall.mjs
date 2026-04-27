@@ -8,6 +8,12 @@ import { addPageLayouts } from "./install.mjs";
 //process.exit();
 
 const queries = [
+    `CREATE TABLE IF NOT EXISTS nstats_sessions(
+        session_id TEXT PRIMARY KEY UNIQUE NOT NULL,
+        expires TEXT NOT NULL,
+        user_id INTEGER NOT NULL,
+        session_data TEXT DEFAULT '{}'
+    ) STRICT`,
   	`CREATE TABLE IF NOT EXISTS nstats_ftp (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT ,
