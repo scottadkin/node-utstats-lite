@@ -1,7 +1,7 @@
 import express from 'express';
 import ejs from "ejs";
 import mysql from "mysql2/promise";
-import { websitePort } from './config.mjs';
+import { websitePort, SQL_MODE } from './config.mjs';
 const app = express();
 app.use(express.static('public'));
 app.use(express.json()) // for parsing application/json
@@ -26,6 +26,7 @@ import {SESSION_SECRET} from "./secret.mjs";
 import { renderAdminPage } from './src/pages/admin.mjs';
 import { renderMapPage } from './src/pages/map.mjs';
 import { renderWatchlistPage } from './src/pages/watchlist.mjs';
+import Message from './src/message.mjs';
 
 //import helmet from "helmet";
 import { renderMapsPage } from './src/pages/maps.mjs';
@@ -39,6 +40,8 @@ const upload = multer({ dest: 'uploads/' })
 
 import ApiJSON from './src/json/apiJSON.mjs';
 import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
+
+new Message("Attempting To Start Node UTStats Lite Website","progress");
 
 const MySQLStore = __MySQLStore(session);
 
@@ -74,12 +77,20 @@ app.use(cookieParser());
 
 app.engine('.html', ejs.__express);
 
+async function setUserSession(req, res, next){
+
+	const userSession = await getSessionInfo(res, req, sessionStore);
+	req.userSession = userSession;
+	next();
+}
+
+app.use(setUserSession);
+
 app.get('/', async (req, res) => {
 
 	try{
-	
-		const userSession =  await getSessionInfo(res, req, sessionStore);
-		renderHomePage(req, res, userSession);	
+
+		renderHomePage(req, res, req.userSession);	
 		
 	}catch(err){
 		console.trace(err);
@@ -89,61 +100,51 @@ app.get('/', async (req, res) => {
 
 
 app.get('/match/:id', async (req, res) => {
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderMatchPage(req, res, userSession);
+	
+	renderMatchPage(req, res, req.userSession);
 });
 
 app.get("/matches", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderMatchesPage(req, res, userSession);
+	
+	renderMatchesPage(req, res, req.userSession);
 });
 
 app.get("/players", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderPlayersPage(req, res, userSession);
+	renderPlayersPage(req, res, req.userSession);
 });
 
 app.get("/rankings", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderRankingsPage(req, res, userSession);
+	renderRankingsPage(req, res, req.userSession);
 });
 
 app.get("/ctfleague", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderCTFLeaguePage(req, res, userSession);
+	renderCTFLeaguePage(req, res, req.userSession);
 });
 
 app.get("/records", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderRecordsPage(req, res, userSession);
+	renderRecordsPage(req, res, req.userSession);
 });
 
 app.get("/maps", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderMapsPage(req, res, userSession);
+	renderMapsPage(req, res, req.userSession);
 });
 
 app.get("/player/:id", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderPlayerPage(req, res, userSession);
+	renderPlayerPage(req, res, req.userSession);
 });
 
 app.get("/map/:id", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderMapPage(req, res, userSession);
+	renderMapPage(req, res, req.userSession);
 });
 
 
 app.get("/watchlist", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderWatchlistPage(req, res, userSession);
+	renderWatchlistPage(req, res, req.userSession);
 });
 
 app.get("/jsonexamples", async (req, res) =>{
 
-	const userSession = await getSessionInfo(res, req, sessionStore);
-
-	renderJSONExamples(req, res, userSession);
+	renderJSONExamples(req, res, req.userSession);
 });
 
 app.get("/matchshot/:id", async (req, res) =>{
@@ -170,8 +171,7 @@ app.get("/matchshot/:id", async (req, res) =>{
 
 app.get("/login", async (req, res) =>{
 
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderLoginPage(req, res, sessionStore, userSession);
+	renderLoginPage(req, res, sessionStore, req.userSession);
 });
 
 app.post("/login", async (req, res) =>{
@@ -200,8 +200,7 @@ app.get("/logout", async (req, res) =>{
 
 
 app.get("/register", async (req, res) =>{
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	renderRegisterPage(req, res, userSession);
+	renderRegisterPage(req, res, req.userSession);
 });
 
 app.post("/register", async (req, res) =>{
@@ -219,12 +218,11 @@ app.post("/register", async (req, res) =>{
 
 app.get("/admin", async (req, res) =>{
 
-	const userSession = await getSessionInfo(res, req, sessionStore);
-	if(userSession === null){
+	if(req.userSession === null){
 		res.status(401).send("Access Denied");
 	}else{
 
-		renderAdminPage(req, res, userSession);
+		renderAdminPage(req, res, req.userSession);
 	}
 });
 
@@ -299,6 +297,7 @@ app.get("/api/json/:mode/:cat", async (req, res) =>{
 });
 
 app.listen(websitePort, () => {
-  	console.log(`Node UTStats Lite running on port ${websitePort}`);
-	console.log(`Edit websitePort in config.mjs if you wish to change ports`)
+	new Message(`Node UTStats Lite running on port ${websitePort}`,"pass");
+	new Message(`Edit websitePort in config.mjs if you wish to change ports`,"note");
+	new Message(`Node UTStats Lite is using ${(SQL_MODE === "sqlite") ? "SQLite" : "MYSQL"} database.`,"note");
 })
