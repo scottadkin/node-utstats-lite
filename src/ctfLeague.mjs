@@ -162,6 +162,7 @@ async function bulkInsertEntries(mapId, gametypeId, tableData){
         "cap_for","cap_against","cap_offset","points"
     ];
 
+
     return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","gametype_id","map_id"]);
     //await bulkInsert(query, insertVars);
 }

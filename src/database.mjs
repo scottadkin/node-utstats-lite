@@ -329,6 +329,8 @@ async function mysqlInsertOnDuplicateUpdate(tableName, columns, vars){
 export async function sqlInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
     //conflict not needed for mysql on duplicate key update
+
+    if(vars.length === 0) return;
     
     if(SQL_MODE !== "sqlite"){
 
