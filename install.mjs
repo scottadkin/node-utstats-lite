@@ -398,13 +398,25 @@ const queries = [
             activated tinyint NOT NULL
         ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_sessions (
+        /*`CREATE TABLE IF NOT EXISTS nstats_sessions (
         session_id varchar(128) COLLATE utf8mb4_bin NOT NULL,
         expires int(11) unsigned NOT NULL,
         user_id int(11) unsigned DEFAULT 0,
         data mediumtext COLLATE utf8mb4_bin,
         PRIMARY KEY (session_id)
-        ) ENGINE=InnoDB`,
+        ) ENGINE=InnoDB`,*/
+
+        `CREATE TABLE IF NOT EXISTS nstats_sessions(
+            id int NOT NULL AUTO_INCREMENT,
+            session_id varchar(128) NOT NULL,
+            created DATETIME NOT NULL,
+            expires DATETIME NOT NULL,
+            user_id int(11) NOT NULL,
+            user_ip varchar(39) NOT NULL,
+            session_data mediumtext,
+            UNIQUE INDEX session_idx(session_id),
+            PRIMARY KEY (id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
         `CREATE TABLE IF NOT EXISTS nstats_logs_downloads (
             id int NOT NULL AUTO_INCREMENT,

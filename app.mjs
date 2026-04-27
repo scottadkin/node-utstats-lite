@@ -45,7 +45,7 @@ const MySQLStore = __MySQLStore(session);
 
 import { mysqlPool } from './src/database.mjs';
 
-const sessionStore = new MySQLStore({
+/*const sessionStore = new MySQLStore({
 	"createDatabaseTable": false,
 	"schema": {
 		"tableName": "nstats_sessions",
@@ -68,7 +68,9 @@ app.use(session({
 	"genid": function(req){
 		return createRandomString(1024);
 	}
-}))
+}))*/
+
+const sessionStore = null;
 
 app.use(cookieParser());
 

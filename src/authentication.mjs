@@ -277,18 +277,31 @@ export async function login(req, res, sessionStore){
 
 }
 
+
+async function destroySession(id){
+
+    const query = `DELETE FROM nstats_sessions WHERE session_id=?`;
+
+    return await simpleQuery(query, [id]);
+}
+
 export async function logout(req, res, sessionStore){
 
     const id = req.cookies?.nstats_sid ?? null;
 
     if(id === null) throw new Error(`You are not logged in`);
 
-    await sessionStore.destroy(id, (err) =>{
+
+    await destroySession(id);
+
+    /*await sessionStore.destroy(id, (err) =>{
 
         if(err) throw new Error(err.message);
 
         clearUserCookies(res);
-    } );
+    } );*/
+
+    clearUserCookies(res);
     
     
     return true;

@@ -378,7 +378,7 @@ export async function sqlSingleUpdateReturnChanged(query, vars){
 
         const [result] = await pool.query(query, vars);
 
-        return result.changedRows;
+        return result.affectedRows;
     }
     
 }
