@@ -2,6 +2,8 @@ import mysql from "mysql2/promise";
 import { mysqlSettings, SQL_MODE} from "../config.mjs";
 import { DatabaseSync } from 'node:sqlite';
 const database = new DatabaseSync('./test.db');
+database.exec("PRAGMA jounral_mode = WAL;");
+database.exec("PRAGMA busy_timeout = 15000;");
 
 
 function sqlitePlaceholderArray(values){
