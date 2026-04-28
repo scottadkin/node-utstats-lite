@@ -652,7 +652,21 @@ function _updateTotals(totals, playerData){
 
         const h = higherBetter[i];
 
+        
+
+        
+
         for(let x = 0; x < pTotals.length; x++){
+
+            if(h === "last_active"){
+
+                const parsedDate = new Date(playerData[h]);
+                if(parsedDate > pTotals[x][h]){
+                    pTotals[x][h] = parsedDate;
+                }
+                
+                continue;
+            }
             
             if(pTotals[x][h] < playerData[h]){
                 pTotals[x][h] = playerData[h];
@@ -788,9 +802,9 @@ async function insertPlayerGametypeTotals(data){
 
     //await deleteMultiplePlayerTotals([...playerIds]);
 
-    const t = `nstats_player_totals`
+    const t = `nstats_player_totals`;
 
-    const query = `INSERT INTO ${t} (player_id,gametype_id,map_id,last_active,playtime,total_matches,
+    /*const query = `INSERT INTO ${t} (player_id,gametype_id,map_id,last_active,playtime,total_matches,
     wins,draws,losses,winrate,score,
     frags,kills,deaths,suicides,team_kills,
     efficiency,ttl, first_blood, spree_1,spree_2,
@@ -831,7 +845,7 @@ async function insertPlayerGametypeTotals(data){
     ${t}.item_body=new.item_body,
     ${t}.item_pads=new.item_pads,
     ${t}.item_invis=new.item_invis,
-    ${t}.item_shp=new.item_shp`;
+    ${t}.item_shp=new.item_shp`;*/
 
 
 

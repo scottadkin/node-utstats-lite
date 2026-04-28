@@ -20,9 +20,10 @@ export class Match{
         const min = r[5];
         const sec = r[6];
 
-        const matchDate = new Date(`${year}-${month}-${day} ${hour}:${min}:00`);
+        const matchDate = new Date(`${year}-${month}-${day} ${hour}:${min}:${sec}`);
 
         this.timestamp = Math.floor(matchDate * 0.001);
-        this.date = `${year}-${month}-${day}T${hour}:${min}:${sec}`;
+        this.date = matchDate;
+        //this.date = `${year}-${month}-${day}T${hour}:${min}:${sec}`;
     }
 }

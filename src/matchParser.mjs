@@ -102,7 +102,7 @@ export class MatchParser{
         }   
 
         this.players.bIgnoreBots = this.bIgnoreBots;
-        await this.players.setPlayerMasterIds(this.match.date);
+        await this.players.setPlayerMasterIds();
 
 
         this.kills.setAllDeaths();
