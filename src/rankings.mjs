@@ -96,7 +96,7 @@ async function insertRankingSetting(data){
 }
 
 
-async function insertDefaultRankingSettings(){
+export async function insertDefaultRankingSettings(){
 
 
     for(let i = 0; i < DEFAULT_RANKING_SETTINGS.length; i++){

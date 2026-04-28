@@ -12,18 +12,18 @@ export const DEFAULT_SETTINGS = [
     {"category": "combined", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
     {"category": "combined", "name": "Enable League", "type": "bool", "value": "true"},
     {"category": "combined", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-    {"category": "combined", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(Date.now())},
+    {"category": "combined", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(0)},
 
     {"category": "maps", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
     {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
     {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
     {"category": "maps", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-    {"category": "maps", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(Date.now())},
+    {"category": "maps", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(0)},
     {"category": "gametypes", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
     {"category": "gametypes", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
     {"category": "gametypes", "name": "Enable League", "type": "bool", "value": "true"},
     {"category": "gametypes", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-    {"category": "gametypes", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(Date.now())},
+    {"category": "gametypes", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(0)},
 ];
 
 
@@ -40,9 +40,9 @@ export async function insertDefaultCTFLeagueSettings(){
 
     const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?,?)`;
 
-    for(let i = 0; i < settings.length; i++){
+    for(let i = 0; i < DEFAULT_SETTINGS.length; i++){
 
-        const s = settings[i];
+        const s = DEFAULT_SETTINGS[i];
 
         if(!await bCTFSettingExist(s.name, s.category)){
             

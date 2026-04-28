@@ -12,7 +12,7 @@ import { setAllPlayerMapAverages } from "./src/players.mjs";
 import { setAllMapTotals as setAllMapWeaponTotals } from "./src/weapons.mjs";
 import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./src/damage.mjs";
 import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./src/ctfLeague.mjs";
-import {DEFAULT_RANKING_SETTINGS } from "./src/rankings.mjs";
+import {insertDefaultRankingSettings } from "./src/rankings.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -1051,7 +1051,7 @@ async function removeLogTablesImporterIdColumns(){
   
         await restoreDefaultSiteSettings();
 
-        await insertRankingSettings();
+        await insertDefaultRankingSettings();
 
         await insertDefaultCTFLeagueSettings();
 
