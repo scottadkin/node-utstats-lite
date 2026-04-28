@@ -253,6 +253,110 @@ export async function bulkInsert(query, vars, maxPerInsert){
 
 }
 
+
+function sqliteArrayInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
+
+    //SQLITE MAX VARS LIMIT of 32766 per query
+    const MAX_SQLITE_VARS = 32000;
+
+    const varsPerRow = columns.length;
+    const totalVars = vars.length * columns.length;
+
+    let conflictString = ``;
+
+    for(let i = 0; i < columns.length; i++){
+
+        conflictString += `${columns[i]}=excluded.${columns[i]}`;
+
+        if(i < columns.length - 1){
+            conflictString += `, `;
+        }
+    }
+
+
+    let partIndex = 0;
+
+    const queryParts = [
+        {
+            "placeholderString": ``,
+            "vars": []
+        }
+    ];
+
+    const placeholderString = `(${sqlitePlaceholderArray(columns)})`;
+
+    let currentVarCount = 0;
+
+    for(let i = 0; i < vars.length; i++){
+
+        currentVarCount+=columns.length;
+
+        queryParts[partIndex].placeholderString += placeholderString;
+        queryParts[partIndex].vars.push(...vars[i]);
+
+        //if next row goes over var limit create new query part to prevent that
+        if(currentVarCount + varsPerRow >= MAX_SQLITE_VARS){
+            partIndex++;
+            queryParts.push({"placeholderString": ``, "vars": []});
+            currentVarCount = 0;
+            //skip adding comma, not needed if splitting into multiple queries
+            continue;
+        }
+
+        if(i < vars.length - 1) queryParts[partIndex].placeholderString += `, `;
+    }
+    
+    
+    for(let i = 0; i < queryParts.length; i++){
+
+        const q = queryParts[i];
+
+        let query = `INSERT INTO ${tableName}(${columns.toString()}) VALUES ${q.placeholderString}
+        ON CONFLICT(${conflict.toString()}) DO UPDATE SET ${conflictString}`;
+
+        const prepare = database.prepare(query);
+
+        prepare.run(...sqliteConvertDates(q.vars));
+
+
+    }
+
+}
+
+function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
+
+
+    if(conflict.length === 0) throw new Error(`OnDuplicateUpdate needs a conflict key`);
+
+    if(vars.length === 0) return;
+
+    if(Array.isArray(vars[0])){
+
+        return sqliteArrayInsertOnDuplicateUpdate(tableName, columns, vars, conflict);
+    }
+  
+    let placeholderString = `(${sqlitePlaceholderArray(columns)})`;
+    
+    let query = `INSERT INTO ${tableName}(${columns.toString()}) VALUES ${placeholderString}
+    ON CONFLICT(${conflict.toString()}) DO UPDATE SET `;
+
+    for(let i = 0; i < columns.length; i++){
+
+        query += `${columns[i]}=excluded.${columns[i]}`;
+
+        if(i < columns.length - 1){
+            query += `, `;
+        }
+    }
+
+
+
+    const prepare = database.prepare(query);
+
+    prepare.run(...sqliteConvertDates(vars));
+        
+}
+
 /**
  * 
  * @param {String} tableName 
@@ -260,7 +364,7 @@ export async function bulkInsert(query, vars, maxPerInsert){
  * @param {Array<Any>} vars an array of values, or an array of arrays with values
  * @param {Array<String>} conflict  sqlite needs the column names of the indexes not the name of the index itself
  */
-function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
+/*function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
     if(conflict.length === 0) throw new Error(`OnDuplicateUpdate needs a conflict key`);
 
@@ -289,6 +393,9 @@ function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
         }
     }
 
+    console.log(query);
+    console.log(query.length);
+
     const prepare = database.prepare(query);
 
     if(!Array.isArray(vars[0])){
@@ -307,7 +414,7 @@ function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
         prepare.run(...fv);
     }
 
-}
+}*/
 
 async function mysqlInsertOnDuplicateUpdate(tableName, columns, vars){
 

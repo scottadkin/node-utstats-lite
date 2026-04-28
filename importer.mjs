@@ -372,8 +372,6 @@ async function main(ctfLeagueSettings){
     const result = await simpleQuery(query);
 
 
-    
-
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
