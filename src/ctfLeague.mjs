@@ -7,6 +7,50 @@ import { getUniqueMapGametypeCombosInPastDays, getUniqueGametypesInPastDays } fr
 import Message from "./message.mjs";
 
 
+export const DEFAULT_SETTINGS = [
+    {"category": "combined", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
+    {"category": "combined", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
+    {"category": "combined", "name": "Enable League", "type": "bool", "value": "true"},
+    {"category": "combined", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
+    {"category": "combined", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(Date.now())},
+
+    {"category": "maps", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
+    {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
+    {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
+    {"category": "maps", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
+    {"category": "maps", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(Date.now())},
+    {"category": "gametypes", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
+    {"category": "gametypes", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
+    {"category": "gametypes", "name": "Enable League", "type": "bool", "value": "true"},
+    {"category": "gametypes", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
+    {"category": "gametypes", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(Date.now())},
+];
+
+
+async function bCTFSettingExist(name, category){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_ctf_league_settings WHERE name=? AND category=?`;
+
+    const result = await simpleQuery(query, [name, category]);
+
+    return result[0].total_rows > 0;
+}
+
+export async function insertDefaultCTFLeagueSettings(){
+
+    const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?,?)`;
+
+    for(let i = 0; i < settings.length; i++){
+
+        const s = settings[i];
+
+        if(!await bCTFSettingExist(s.name, s.category)){
+            
+            await simpleQuery(query, [s.category, s.name, s.type, s.value]);
+        }
+    }
+}
+
 async function getPlayerHistory(mapId, gametypeId, maxAgeDays, ctfGametypes){
 
     const now = Date.now();

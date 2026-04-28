@@ -5,13 +5,14 @@ import { mysqlSettings } from "./config.mjs";
 import mysql from "mysql2/promise";
 import {createRandomString} from "./src/generic.mjs";
 import { simpleQuery } from "./src/database.mjs";
-import { restoreDefaultSettings } from "./src/siteSettings.mjs";
+import { restoreDefaultSettings as restoreDefaultSiteSettings } from "./src/siteSettings.mjs";
 import { restoreDefaultLayouts } from "./src/pageLayout.mjs";
 import { setMatchMapGametypeIds } from "./src/players.mjs";
 import { setAllPlayerMapAverages } from "./src/players.mjs";
 import { setAllMapTotals as setAllMapWeaponTotals } from "./src/weapons.mjs";
 import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./src/damage.mjs";
-import { refreshAllTables } from "./src/ctfLeague.mjs";
+import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./src/ctfLeague.mjs";
+import {DEFAULT_RANKING_SETTINGS } from "./src/rankings.mjs";
 
 let connection = mysql.createPool({
     "host": mysqlSettings.host,
@@ -744,101 +745,6 @@ const queries = [
 ];
 
 
-async function bLogsSettingsExist(){
-
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_logs_folder`;
-    const result = await simpleQuery(query);
-
-    if(result[0].total_rows > 0) return true;
-
-    return false;
-}
-
-
-async function insertSiteSettings(){
-
-    await restoreDefaultSettings();
-}
-
-
-async function bRankingSettingExist(category, name){
-
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_ranking_settings WHERE category=? AND name=?`;
-    const result = await simpleQuery(query, [category, name]);
-
-    return result[0].total_rows > 0;
-}
-
-
-async function insertRankingSetting(data){
-
-    const query = `INSERT INTO nstats_ranking_settings VALUES(NULL,?,?,?,?)`;
-
-    await simpleQuery(query,[
-        data.category,
-        data.name,
-        data.displayName,
-        data.points
-    ]);
-}
-
-
-async function insertRankingSettings(){
-
-    const settings = [
-        // penalty is score * points
-        {"category": "penalty", "name": "under_30", "displayName": "Under 30 Minutes Playtime Penalty", "points": 0.10},
-        {"category": "penalty", "name": "under_60", "displayName": "Under 60 Minutes Playtime Penalty", "points": 0.15},
-        {"category": "penalty", "name": "under_90", "displayName": "Under 90 Minutes Playtime Penalty", "points": 0.20},
-        {"category": "penalty", "name": "under_120", "displayName": "Under 2 Hours Playtime Penalty", "points": 0.25},
-        {"category": "penalty", "name": "under_180", "displayName": "Under 3 Hours Playtime Penalty", "points": 0.40},
-        {"category": "penalty", "name": "under_240", "displayName": "Under 4 Hours Playtime Penalty", "points": 0.50},
-        {"category": "penalty", "name": "under_300", "displayName": "Under 5 Hours Playtime Penalty", "points": 0.66},
-        {"category": "penalty", "name": "under_600", "displayName": "Under 10 Hours Playtime Penalty", "points": 0.75},
-        {"category": "penalty", "name": "min_matches", "displayName": "Minimum Matches Played", "points": 20},
-        {"category": "penalty", "name": "map_min_matches", "displayName": "Minimum Matches Played(Map Rankings)", "points": 5},
-
-        {"category": "general", "name": "kills", "displayName": "Kill", "points": 300},
-        {"category": "general", "name": "deaths", "displayName": "Death", "points": -150},
-        {"category": "general", "name": "suicides", "displayName": "Suicide", "points": -150},
-        {"category": "general", "name": "team_kills", "displayName": "Team Kill", "points": -1200},
-        {"category": "general", "name": "spree_1", "displayName": "Killing Spree", "points": 600},
-        {"category": "general", "name": "spree_2", "displayName": "Rampage", "points": 600},
-        {"category": "general", "name": "spree_3", "displayName": "Dominating", "points": 900},
-        {"category": "general", "name": "spree_4", "displayName": "Unstoppable", "points": 1200},
-        {"category": "general", "name": "spree_5", "displayName": "Godlike", "points": 1800},
-        {"category": "general", "name": "multi_1", "displayName": "Double Kill", "points": 600},
-        {"category": "general", "name": "multi_2", "displayName": "Multi Kill", "points": 600},
-        {"category": "general", "name": "multi_3", "displayName": "Ultra Kill", "points": 600},
-        {"category": "general", "name": "multi_4", "displayName": "Monster Kill", "points": 1200},
-
-        {"category": "ctf", "name": "flag_taken", "displayName": "Flag Taken", "points": 600},
-        {"category": "ctf", "name": "flag_pickup", "displayName": "Flag Pickup", "points": 600},
-        {"category": "ctf", "name": "flag_drop", "displayName": "Flag Dropped", "points": 0},
-        {"category": "ctf", "name": "flag_assist", "displayName": "Flag Assist", "points": 3000},
-        {"category": "ctf", "name": "flag_cover", "displayName": "Flag Cover", "points": 1800},
-        {"category": "ctf", "name": "flag_seal", "displayName": "Flag Seal", "points": 1200},
-        {"category": "ctf", "name": "flag_cap", "displayName": "Flag Capture", "points": 6000},
-        {"category": "ctf", "name": "flag_kill", "displayName": "Flag Kill", "points": 1200},
-        {"category": "ctf", "name": "flag_return", "displayName": "Flag Return", "points": 600},
-        {"category": "ctf", "name": "flag_return_base", "displayName": "Flag Return Base", "points": 50},
-        {"category": "ctf", "name": "flag_return_mid", "displayName": "Flag Return Mid", "points": 100},
-        {"category": "ctf", "name": "flag_return_enemy_base", "displayName": "Flag Return Enemy Base", "points": 200},
-        {"category": "ctf", "name": "flag_return_save", "displayName": "Flag Return Save", "points": 250},
-    ];
-
-
-    for(let i = 0; i < settings.length; i++){
-
-        const s = settings[i];
-
-        if(!await bRankingSettingExist(s.category, s.name)){
-            await insertRankingSetting(s);
-        }
-    }
-}
-
-
 async function bColumnExist(table, column){
 
     const query = `SHOW COLUMNS FROM ${table}`;
@@ -887,14 +793,6 @@ export async function addPageLayouts(){
     await restoreDefaultLayouts();
 }
 
-async function bCTFSettingExist(name, category){
-
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_ctf_league_settings WHERE name=? AND category=?`;
-
-    const result = await simpleQuery(query, [name, category]);
-
-    return result[0].total_rows > 0;
-}
 
 
 async function updateDominationTables(){
@@ -911,41 +809,6 @@ async function updateDominationTables(){
     await addColumn("nstats_match_dom", "stolen_caps", "int NOT NULL");
 }
 
-async function insertCTFLeagueSettings(){
-
-    const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?,?)`;
-
-    const dummyDate = new Date(0);
-
-    const settings = [
-        {"category": "combined", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
-        {"category": "combined", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
-        {"category": "combined", "name": "Enable League", "type": "bool", "value": "true"},
-        {"category": "combined", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-        {"category": "combined", "name": "Last Whole League Refresh", "type": "datetime", "value": dummyDate.toISOString()},
-
-        {"category": "maps", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
-        {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
-        {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
-        {"category": "maps", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-        {"category": "maps", "name": "Last Whole League Refresh", "type": "datetime", "value": dummyDate.toISOString()},
-        {"category": "gametypes", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
-        {"category": "gametypes", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
-        {"category": "gametypes", "name": "Enable League", "type": "bool", "value": "true"},
-        {"category": "gametypes", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-        {"category": "gametypes", "name": "Last Whole League Refresh", "type": "datetime", "value": dummyDate.toISOString()},
-    ];
-
-    for(let i = 0; i < settings.length; i++){
-
-        const s = settings[i];
-
-        if(!await bCTFSettingExist(s.name, s.category)){
-            
-            await simpleQuery(query, [s.category, s.name, s.type, s.value]);
-        }
-    }
-}
 
 
 async function bJSONSettingExist(name, category){
@@ -1184,15 +1047,13 @@ async function removeLogTablesImporterIdColumns(){
 
         await removeLogTablesImporterIdColumns();
 
-        if(!await bLogsSettingsExist()){
-            await simpleQuery(`INSERT INTO nstats_logs_folder VALUES(NULL, "1999-11-30 00:00:00","1999-11-30 00:00:00",0,0,0,0,0,0,0)`);
-        }
-
-        await insertSiteSettings();
+        await createDefaultLogsFolderSettings();
+  
+        await restoreDefaultSiteSettings();
 
         await insertRankingSettings();
 
-        await insertCTFLeagueSettings();
+        await insertDefaultCTFLeagueSettings();
 
         await addTableIndexes();
 

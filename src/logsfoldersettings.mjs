@@ -24,3 +24,24 @@ export async function getSettings(){
 
     return null;
 }
+
+
+async function bLogsSettingsExist(){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_logs_folder`;
+    const result = await simpleQuery(query);
+
+    if(result[0].total_rows > 0) return true;
+
+    return false;
+}
+
+export async function createDefaultLogsFolderSettings(){
+
+    if(await bLogsSettingsExist()) return;
+
+    const dummyDate = new Date(Date.now());
+    
+    return await simpleQuery(`INSERT INTO nstats_logs_folder VALUES(NULL, ?, ?,0,0,0,0,0,0,0)`, [dummyDate, dummyDate]);
+    
+}

@@ -1,6 +1,6 @@
 import { simpleQuery } from "./src/database.mjs";
 import { restoreDefaultSettings } from "./src/siteSettings.mjs";
-import { addPageLayouts } from "./install.mjs";
+import { restoreDefaultLayouts} from "./src/pageLayout.mjs";
 
 
 
@@ -828,7 +828,7 @@ for(let i = 0; i < rankingSettings.length; i++){
 simpleQuery(`INSERT INTO nstats_logs_folder VALUES(NULL, '1999-11-30 00:00:00','1999-11-30 00:00:00',0,0,0,0,0,0,0)`);
 
 await restoreDefaultSettings();
-await addPageLayouts();
+await restoreDefaultLayouts();
 
 /*import { Jimp } from "jimp";
 import {readFile, writeFile} from "fs/promises";
