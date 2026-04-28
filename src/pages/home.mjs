@@ -29,7 +29,7 @@ export async function renderHomePage(req, res, userSession){
 
         let serversList = [];
 
-        if(pageSettings["Display Servers"] === "1"){
+        if(pageSettings["Display Servers"] === 1){
             serversList = await getBasicServerList();
         }
 

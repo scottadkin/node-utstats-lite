@@ -67,21 +67,21 @@ export async function renderPlayerPage(req, res, userSession){
         );
 
         let gametypeTotals = [];
-        
-        if(pageSettings["Display Gametype Totals"] === "1"){
+
+        if(pageSettings["Display Gametype Totals"] === 1){
 
             gametypeTotals = await getPlayerGametypeTotals(playerId);
         }
 
         let ctfTotals = [];
 
-        if(pageSettings["Display CTF"] === "1"){
+        if(pageSettings["Display CTF"] === 1){
             ctfTotals = await getPlayerCTFTotals(playerId);
         }
 
         let weaponTotals = [];
 
-        if(pageSettings["Display Weapons"] === "1"){
+        if(pageSettings["Display Weapons"] === 1){
             weaponTotals = await getPlayerWeaponTotals(playerId);    
         }
 
@@ -91,7 +91,7 @@ export async function renderPlayerPage(req, res, userSession){
 
         let rankings = null;
 
-        if(pageSettings["Display Rankings"] === "1"){
+        if(pageSettings["Display Rankings"] === 1){
             //no real speed diffs with indexes
             rankings = await getPlayerRankings(playerId, minDate);
             rankings.minDate = minDate;
@@ -100,7 +100,7 @@ export async function renderPlayerPage(req, res, userSession){
         
         let ctfLeagueData = [];
 
-        if(pageSettings["Display CTF League"] === "1"){
+        if(pageSettings["Display CTF League"] === 1){
             ctfLeagueData = await getPlayerMapsLeagueData(playerId);
         }
         
