@@ -2,8 +2,10 @@ import mysql from "mysql2/promise";
 import { mysqlSettings, SQL_MODE} from "../config.mjs";
 import { DatabaseSync } from 'node:sqlite';
 
+let database = null;
+
 if(SQL_MODE === "sqlite"){
-    const database = new DatabaseSync('./data/main.db');
+    database = new DatabaseSync('./data/main.db');
     database.exec("PRAGMA jounral_mode = WAL;");
     database.exec("PRAGMA busy_timeout = 15000;");
 }
@@ -211,20 +213,31 @@ async function mysqlBulkInsert(query, vars, maxPerInsert){
     return;
 }
 
-export async function bulkInsert(query, vars, maxPerInsert){
 
-    if(vars.length === 0) return;
-    if(maxPerInsert === undefined) maxPerInsert = 100000;
+function sqliteBulkInsert(query, vars){
 
-    if(SQL_MODE !== "sqlite") return await mysqlBulkInsert(query, vars, maxPerInsert);
+    //SQLITE MAX VARS LIMIT of 32766 per query
+    const MAX_SQLITE_VARS = 32000;
+
+    let partIndex = 0;
+    const queryParts = [
+        {"placeholders": "", "vars": []}
+    ];
+
+    const totalVars = vars[0].length * vars.length;
+
+    let currentVarCount = 0;
+
+    const varsPerRow = vars[0].length;
 
     let placeholder = ``;
 
     for(let i = 0; i < vars.length; i++){
 
         const v = vars[i];
-
         let subPlaceholders = ``;
+
+        currentVarCount += varsPerRow;
 
         for(let x = 0; x < v.length; x++){
 
@@ -235,26 +248,49 @@ export async function bulkInsert(query, vars, maxPerInsert){
             }
         }
 
-        subPlaceholders = `(${subPlaceholders})`;
+        queryParts[partIndex].placeholders += `(${subPlaceholders})`;
+        queryParts[partIndex].vars.push(...vars[i]);
 
 
-        placeholder += subPlaceholders;
 
-        if(i < vars.length - 1){
-            placeholder += `,`;
+        if(currentVarCount + varsPerRow >= MAX_SQLITE_VARS){
+
+            queryParts[partIndex].placeholders += ``;
+            partIndex++;
+            currentVarCount = 0;
+            queryParts.push({"placeholders": "", "vars": []});
+            //dont need comma as new part started
+            continue;
+        }else{
+
+            if(i < vars.length - 1){
+                queryParts[partIndex].placeholders += `,`;
+            }
         }
     }
 
     const qM = query.indexOf("?");
 
-    if(qM === -1) throw new Error(`No values ? foundm bulkInsert`);
+    if(qM === -1) throw new Error(`No values ? found bulkInsert`);
 
-    const aaaa = query.replace("?", placeholder);
-    
-    const sqliteQuery = createSqlLiteQuery(aaaa, vars);
+    for(let i = 0; i < queryParts.length; i++){
 
-    const prepare = database.prepare(aaaa);
-    prepare.run(...sqliteQuery.vars);
+        const currentQuery = query.replace("?", queryParts[i].placeholders);
+
+        const prepare = database.prepare(currentQuery);
+
+        prepare.run(...sqliteConvertDates(queryParts[i].vars));
+    }
+}
+
+export async function bulkInsert(query, vars, maxPerInsert){
+
+    if(vars.length === 0) return;
+    if(maxPerInsert === undefined) maxPerInsert = 100000;
+
+    if(SQL_MODE !== "sqlite") return await mysqlBulkInsert(query, vars, maxPerInsert);
+
+    return sqliteBulkInsert(query, vars);
 
 }
 

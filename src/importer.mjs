@@ -45,8 +45,9 @@ export async function insertLogDownloadHistory(host, importerId, name, fileSize)
 
     const date = new Date(Date.now());
 
+    
     const columns = ["file_name", "date", "importer_id", "ftp_ip", "file_size"];
-    await sqlInsertOnDuplicateUpdate(t, columns, [name, date, importerId, host, fileSize], ["file_name"]);
+    await sqlInsertOnDuplicateUpdate(t, columns, [[name, date, importerId, host, fileSize]], ["file_name"]);
     //await simpleQuery(query, [name, new Date(Date.now()), importerId, host, fileSize]);
 }
 
