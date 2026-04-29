@@ -276,13 +276,19 @@ export function convertTimestamp(timestamp, noDayName, noTime, bSkipMSConversion
     noTime = (noTime !== undefined) ? noTime : false;
     bSkipMSConversion = (bSkipMSConversion !== undefined) ? bSkipMSConversion : false;
 
-    const now = new Date();
+    let now = 0;
 
-    if(!bSkipMSConversion){
-        timestamp *= 1000;
+    if(typeof timestamp !== "string"){
+        now = new Date();
+
+        if(!bSkipMSConversion){
+            timestamp *= 1000;
+        }
+
+        now.setTime(timestamp);
+    }else{
+        now = new Date(timestamp);
     }
-
-    now.setTime(timestamp);
 
     const year = now.getFullYear();
     const month = now.getMonth();

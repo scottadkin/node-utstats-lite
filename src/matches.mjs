@@ -1558,7 +1558,7 @@ export async function getMatchesByHashes(hashes){
     nstats_maps.name as map_name,
     nstats_servers.name as server_name,
     IF(nstats_matches.solo_winner > 0, nstats_players.name, '') as solo_winner_name,
-    IF(nstats_matches.solo_winner > 0, nstats_players.country, ') as solo_winner_country
+    IF(nstats_matches.solo_winner > 0, nstats_players.country, '') as solo_winner_country
     FROM nstats_matches 
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_matches.gametype_id
     LEFT JOIN nstats_maps ON nstats_maps.id = nstats_matches.map_id
