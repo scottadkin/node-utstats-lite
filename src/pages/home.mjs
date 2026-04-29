@@ -13,7 +13,6 @@ export async function renderHomePage(req, res, userSession){
     try{
         const pageSettings = await getCategorySettings("Home");
         const pageLayout = await getPageLayout("Home");
-
         const socialSettings = await getCategorySettings("Social Media");
         const welcomeMessageSettings = await getCategorySettings("Welcome Message");
 

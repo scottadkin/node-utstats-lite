@@ -9,3 +9,4 @@ restore-from/*
 !restore-from/delete.me
 test.db
 test.db-journal
+data/*.db

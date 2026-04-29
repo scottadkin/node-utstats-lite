@@ -530,6 +530,7 @@ export async function refreshAllTables(type){
     
     newData[type] = {"Last Whole League Refresh": {"value": new Date(now).toISOString(), "category": type}};
     await updateSettings(newData);
+
 }
 
 

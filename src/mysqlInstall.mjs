@@ -7,16 +7,6 @@ import { mysqlSettings } from "../config.mjs";
 import mysql from "mysql2/promise";
 import { simpleQuery } from "./database.mjs";
 
-
-new Message(`Node UTStats Lite - MYSQL Installer Started`,"note");
-
-let connection = mysql.createPool({
-    "host": mysqlSettings.host,
-    "user": mysqlSettings.user,
-    "password": mysqlSettings.password
-});
-
-
 const queries = [
     `CREATE DATABASE IF NOT EXISTS ${mysqlSettings.database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`,
     `CREATE TABLE IF NOT EXISTS nstats_ftp (
@@ -971,9 +961,17 @@ async function removeLogTablesImporterIdColumns(){
 }
 
 
-export default async function mysqlInstall(){
+export async function mysqlInstall(){
  
     try{
+
+        new Message(`Node UTStats Lite - MYSQL Installer Started`,"note");
+
+        let connection = mysql.createPool({
+            "host": mysqlSettings.host,
+            "user": mysqlSettings.user,
+            "password": mysqlSettings.password
+        });
         
         for(let i = 0; i < queries.length; i++){
          
@@ -981,7 +979,7 @@ export default async function mysqlInstall(){
 
             if(i === 0){
 
-                connection.end();
+                await connection.end();
 
                 connection = mysql.createPool({
                     "host": mysqlSettings.host,
@@ -995,7 +993,7 @@ export default async function mysqlInstall(){
               
         }
 
-        connection.end();
+        await connection.end();
 
         await removeLogTablesImporterIdColumns();
 
@@ -1019,8 +1017,6 @@ export default async function mysqlInstall(){
 
         new Message(`Removing start offset from event timestamps.`,"note");
         await removeStartOffsets();
-
-        process.exit();
 
     }catch(err){
         console.trace(err);

@@ -1,8 +1,6 @@
 import { simpleQuery } from "./database.mjs";
 import Message from "./message.mjs";
 
-new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
-
 const queries = [
     `CREATE TABLE IF NOT EXISTS nstats_sessions(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -734,7 +732,9 @@ const queries = [
 
 ];
 
-export default async function sqliteInstall(){
+export async function sqliteInstall(){
+
+    new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
 
     for(let i = 0; i < queries.length; i++){
 
