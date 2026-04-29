@@ -168,7 +168,15 @@ export async function getCategorySettings(category){
 
         const r = result[i];
 
-        data[r.setting_name] = (r.setting_type === "bool") ? parseInt(r.setting_value) : r.setting_value;
+        let currentValue = r.setting_value;
+
+        if(r.setting_type === "bool"){
+            currentValue = parseInt(currentValue);
+        }else if(r.setting_type === "perPage"){
+            currentValue = parseInt(currentValue);
+        }
+
+        data[r.setting_name] = currentValue;
     }
 
 

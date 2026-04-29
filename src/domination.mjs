@@ -288,7 +288,7 @@ export async function getDOMMatchPlayersAPIJSON(matchId){
     nstats_match_dom.total_score_time,
     nstats_match_dom.stolen_points,
     nstats_match_dom.stolen_caps,
-    IF(nstats_match_dom.point_id = 0, "All", nstats_dom_control_points.name) as point_name
+    IF(nstats_match_dom.point_id = 0, 'All', nstats_dom_control_points.name) as point_name
     FROM nstats_match_dom 
     LEFT JOIN nstats_dom_control_points ON nstats_dom_control_points.id = nstats_match_dom.point_id
     WHERE nstats_match_dom.match_id=?`;

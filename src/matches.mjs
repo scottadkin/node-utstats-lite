@@ -1412,8 +1412,8 @@ export async function getMatchBasicPlayersJSON(matchId){
     nstats_match_players.kills,
     nstats_match_players.deaths,
     nstats_match_players.time_on_server as playtime,
-    IFNULL(nstats_players.name, "Not Found") as name,
-    IFNULL(nstats_players.hash, "Not Found") as hash
+    IFNULL(nstats_players.name, 'Not Found') as name,
+    IFNULL(nstats_players.hash, 'Not Found') as hash
     FROM nstats_match_players
     LEFT JOIN nstats_players on nstats_players.id = nstats_match_players.player_id
     WHERE nstats_match_players.match_id = ? ORDER BY nstats_match_players.score DESC
