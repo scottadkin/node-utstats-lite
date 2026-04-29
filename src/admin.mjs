@@ -1,5 +1,5 @@
 import { bulkInsert, mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
-import { mysqlSettings } from "../config.mjs";
+import { mysqlSettings, SQL_MODE } from "../config.mjs";
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import Message from "./message.mjs";
 import archiver from "archiver";
@@ -7,53 +7,58 @@ import fs from "fs";
 import unzipper from "unzipper";
 import {toMYSQLDateTime} from "./generic.mjs";
 
+const DELETE_TABLES = [
+    "classic_weapon_match_stats",
+    "ctf_caps",
+    "ctf_cap_kills",
+    "ctf_cap_suicides",
+    "ctf_carry_times",
+    "ctf_covers",
+    "damage_match", 
+    "dom_control_points",
+    "gametypes",
+    "importer_history",
+    "kills",
+    "logs",
+    "logs_rejected",     
+    "logs_downloads",     
+    "maps",
+    "map_rankings",
+    "map_weapon_totals",
+    "matches",
+    "matches_dom",
+    "match_ctf",
+    "match_dom",
+    "match_dom_team_score_history",
+    "match_players",
+    "match_weapon_stats",
+    "players",
+    "player_ctf_league",
+    "player_map_minute_averages",
+    "player_totals",
+    "player_totals_ctf",
+    "player_totals_damage",
+    "player_totals_weapons",
+    "rankings",
+    "servers",
+    "weapons" 
+];
+
 export async function clearAllDataTables(){
 
-    const tables = [
-        "classic_weapon_match_stats",
-        "ctf_caps",
-        "ctf_cap_kills",
-        "ctf_cap_suicides",
-        "ctf_carry_times",
-        "ctf_covers",
-        "damage_match", 
-        "dom_control_points",
-        "gametypes",
-        "importer_history",
-        "kills",
-        "logs",
-        "logs_rejected",     
-        "logs_downloads",     
-        "maps",
-        "map_rankings",
-        "map_weapon_totals",
-        "matches",
-        "matches_dom",
-        "match_ctf",
-        "match_dom",
-        "match_dom_team_score_history",
-        "match_players",
-        "match_weapon_stats",
-        "players",
-        "player_ctf_league",
-        "player_map_minute_averages",
-        "player_totals",
-        "player_totals_ctf",
-        "player_totals_damage",
-        "player_totals_weapons",
-        "rankings",
-        "servers",
-        "weapons" 
-    ];
+    for(let i = 0; i < DELETE_TABLES.length; i++){
 
+        const t = DELETE_TABLES[i];
 
-    for(let i = 0; i < tables.length; i++){
+        if(SQL_MODE !== "sqlite"){
 
-        const t = tables[i];
+            await simpleQuery(`TRUNCATE nstats_${t}`);
 
-        const query = `TRUNCATE nstats_${t}`;
+        }else{
 
-        await simpleQuery(query);
+            await simpleQuery(`DELETE FROM nstats_${t}`);
+            await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${t}'`);
+        }
     }
     
 }
