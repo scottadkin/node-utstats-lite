@@ -183,3 +183,31 @@ export async function bJSONApiEnabled(category){
 
     return result[0].setting_value === "1";
 }
+
+
+async function bJSONSettingExist(name, category){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_json_api WHERE setting_name=? AND category=?`;
+
+    const result = await simpleQuery(query, [name, category]);
+
+    return result[0].total_rows > 0;
+}
+
+
+export async function updateJSONApiSettings(){
+
+    const settings = [{"category": "match", "name": "Enable JSON API", "type": "bool", "value": 1}];
+
+    const query = `INSERT INTO nstats_json_api VALUES(NULL,?,?,?,?)`;
+
+    for(let i = 0; i < settings.length; i++){
+
+        const {category, name, type, value} = settings[i];
+
+        if(!await bJSONSettingExist(name, category)){
+
+            await simpleQuery(query, [category, name, type, value]);
+        }
+    }
+}

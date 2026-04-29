@@ -1,0 +1,1029 @@
+import { setMatchMapGametypeIds } from "./players.mjs";
+import { setAllPlayerMapAverages } from "./players.mjs";
+import { setAllMapTotals as setAllMapWeaponTotals } from "./weapons.mjs";
+import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./damage.mjs";
+import Message from "./message.mjs";
+import { mysqlSettings } from "../config.mjs";
+import mysql from "mysql2/promise";
+import { simpleQuery } from "./database.mjs";
+
+
+new Message(`Node UTStats Lite - MYSQL Installer Started`,"note");
+
+let connection = mysql.createPool({
+    "host": mysqlSettings.host,
+    "user": mysqlSettings.user,
+    "password": mysqlSettings.password
+});
+
+
+const queries = [
+    `CREATE DATABASE IF NOT EXISTS ${mysqlSettings.database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`,
+    `CREATE TABLE IF NOT EXISTS nstats_ftp (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        name varchar(100) NOT NULL,
+        host varchar(250) NOT NULL,
+        port int(11) NOT NULL,
+        user varchar(50) NOT NULL,
+        password varchar(50) NOT NULL,
+        target_folder varchar(250) NOT NULL,
+        delete_after_import tinyint(1) NOT NULL,
+        first datetime NOT NULL,
+        last datetime NOT NULL,
+        total_imports int(11) NOT NULL,
+        total_logs_imported int(11) NOT NULL,
+        ignore_bots int(1) NOT NULL,
+        ignore_duplicates int(1) NOT NULL,
+        min_players int(2) NOT NULL,
+        min_playtime int(11) NOT NULL,
+        sftp int(1) NOT NULL,
+        enabled INT(1) NOT NULL,
+        delete_tmp_files INT(1) NOT NULL,
+        append_team_sizes INT(1) NOT NULL
+      ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_logs_folder (
+    id int(11) NOT NULL AUTO_INCREMENT,
+    first datetime NOT NULL,
+    last datetime NOT NULL,
+    total_imports int(11) NOT NULL,
+    total_logs_imported int(11) NOT NULL,
+    ignore_bots int(1) NOT NULL,
+    ignore_duplicates int(1) NOT NULL,
+    min_players int(2) NOT NULL,
+    min_playtime int(11) NOT NULL,
+    append_team_sizes INT(1) NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,  
+
+    `CREATE TABLE IF NOT EXISTS nstats_players (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        name varchar(32) NOT NULL,
+        country varchar(3) NOT NULL,
+        hash varchar(32) NOT NULL,
+        INDEX name_idx (name),
+        INDEX hash_idx (hash)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_matches (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        server_id int(11) NOT NULL,
+        gametype_id int(11) NOT NULL,
+        map_id int(11) NOT NULL,
+        hardcore int(1) NOT NULL,
+        tournament_mode int(1) DEFAULT 0,
+        gamespeed int(3) DEFAULT 100,
+        gamespeed_real int(3) DEFAULT 100,
+        insta int(1) NOT NULL,
+        date datetime NOT NULL,
+        playtime float NOT NULL,
+        match_start float NOT NULL,
+        match_end float NOT NULL,
+        players int(11) NOT NULL,
+        total_teams int(1) NOT NULL,
+        team_0_score int(11) NOT NULL,   
+        team_1_score int(11) NOT NULL,   
+        team_2_score int(11) NOT NULL,   
+        team_3_score int(11) NOT NULL,   
+        solo_winner int(11) NOT NULL,
+        solo_winner_score int(11) NOT NULL,
+        target_score int(11) NOT NULL,
+        time_limit int(11) NOT NULL,
+        mutators text NOT NULL,
+        hash varchar(32) NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_matches_dom (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        match_id int(11) NOT NULL,
+        real_total_score FLOAT NOT NULL,
+        importer_total_score FLOAT NOT NULL,
+        total_control_time FLOAT NOT NULL,
+        total_score_time FLOAT NOT NULL,
+        team_0_real_score FLOAT NOT NULL,
+        team_1_real_score FLOAT NOT NULL,
+        team_2_real_score FLOAT NOT NULL,
+        team_3_real_score FLOAT NOT NULL,
+        team_0_importer_score FLOAT NOT NULL,
+        team_1_importer_score FLOAT NOT NULL,
+        team_2_importer_score FLOAT NOT NULL,
+        team_3_importer_score FLOAT NOT NULL,
+        team_0_control_time FLOAT NOT NULL,
+        team_1_control_time FLOAT NOT NULL,
+        team_2_control_time FLOAT NOT NULL,
+        team_3_control_time FLOAT NOT NULL,
+        team_0_control_percent FLOAT NOT NULL,
+        team_1_control_percent FLOAT NOT NULL,
+        team_2_control_percent FLOAT NOT NULL,
+        team_3_control_percent FLOAT NOT NULL,
+        team_0_caps int NOT NULL,
+        team_1_caps int NOT NULL,
+        team_2_caps int NOT NULL,
+        team_3_caps int NOT NULL,
+        team_0_score_time float NOT NULL,
+        team_1_score_time float NOT NULL,
+        team_2_score_time float NOT NULL,
+        team_3_score_time float NOT NULL,
+        team_0_stolen_points float NOT NULL,
+        team_1_stolen_points float NOT NULL,
+        team_2_stolen_points float NOT NULL,
+        team_3_stolen_points float NOT NULL,
+        team_0_stolen_caps int NOT NULL,
+        team_1_stolen_caps int NOT NULL,
+        team_2_stolen_caps int NOT NULL,
+        team_3_stolen_caps int NOT NULL,
+        INDEX match_idx (match_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+    `CREATE TABLE IF NOT EXISTS nstats_servers (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        name varchar(255) NOT NULL,
+        ip varchar(39) NOT NULL,
+        port int(11) NOT NULL,
+        matches INT(11) NOT NULL,
+        playtime float NOT NULL,
+        first_match datetime NOT NULL,
+        last_match datetime NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_gametypes (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        name varchar(255) NOT NULL,
+        matches INT(11) NOT NULL,
+        playtime float NOT NULL,
+        first_match datetime NOT NULL,
+        last_match datetime NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_maps (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        name varchar(255) NOT NULL,
+        matches int NOT NULL,
+        playtime float NOT NULL,
+        first_match datetime NOT NULL,
+        last_match datetime NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_match_players (     
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        spectator int(1) NOT NULL,
+        ip varchar(39) COLLATE utf8mb4_unicode_ci NOT NULL,
+        country varchar(3) COLLATE utf8mb4_unicode_ci NOT NULL,
+        hwid varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        mac1 varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        mac2 varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        match_id int NOT NULL,
+        map_id int NOT NULL,
+        gametype_id int NOT NULL,
+        match_date datetime NOT NULL,
+        match_result varchar(1) NOT NULL,
+        bot int(1) NOT NULL,
+        ping_min int(11) NOT NULL,
+        ping_avg int(11) NOT NULL,
+        ping_max int(11) NOT NULL,
+        team int(3) NOT NULL,
+        score int NOT NULL,
+        frags int NOT NULL,
+        kills int NOT NULL,
+        deaths int NOT NULL,
+        suicides int NOT NULL,
+        team_kills int NOT NULL,
+        efficiency float NOT NULL,
+        time_on_server float NOT NULL,
+        ttl float NOT NULL,
+        first_blood int(1) NOT NULL,
+        spree_1 int NOT NULL,
+        spree_2 int NOT NULL,
+        spree_3 int NOT NULL,
+        spree_4 int NOT NULL,
+        spree_5 int NOT NULL,
+        spree_best int NOT NULL,
+        multi_1 int NOT NULL,
+        multi_2 int NOT NULL,
+        multi_3 int NOT NULL,
+        multi_4 int NOT NULL,
+        multi_best int NOT NULL,
+        headshots int NOT NULL,
+        item_amp int NOT NULL,
+        item_belt int NOT NULL,
+        item_boots int NOT NULL,
+        item_body int NOT NULL,
+        item_pads int NOT NULL,
+        item_invis int NOT NULL,
+        item_shp int NOT NULL,
+        INDEX match_idx (match_id),
+        INDEX player_idx (player_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        match_id int(11) NOT NULL,
+        map_id int(11) NOT NULL,
+        gametype_id int(11) NOT NULL,
+        player_id int(11) NOT NULL,
+        weapon_id int(11) NOT NULL,
+        kills int(11) NOT NULL,
+        deaths int(11) NOT NULL,
+        team_kills int(11) NOT NULL,
+        suicides int(11) NOT NULL,
+        INDEX match_idx (match_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_weapons (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        name varchar(255) NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_kills (
+        id bigint NOT NULL AUTO_INCREMENT,
+        match_id int(11) NOT NULL,
+        timestamp float NOT NULL,
+        kill_type int(11) NOT NULL,
+        killer_id int(11) NOT NULL,
+        killer_weapon int(11) NOT NULL,
+        victim_id int(11) NOT NULL,
+        victim_weapon int(11) NOT NULL,
+        INDEX match_idx (match_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_match_ctf (
+        id int NOT NULL AUTO_INCREMENT,
+        match_id int NOT NULL,     
+        map_id int NOT NULL,
+        gametype_id int NOT NULL,
+        player_id int NOT NULL,
+        flag_taken int NOT NULL,
+        flag_pickup int NOT NULL,
+        flag_drop int NOT NULL,
+        flag_assist int NOT NULL,
+        flag_cover int NOT NULL,
+        flag_seal int NOT NULL,
+        flag_cap int NOT NULL,
+        flag_kill int NOT NULL,
+        flag_return int NOT NULL,
+        flag_return_base int NOT NULL,
+        flag_return_mid int NOT NULL,
+        flag_return_enemy_base int NOT NULL,
+        flag_return_save int NOT NULL,
+        flag_carry_time FLOAT NOT NULL,
+        flag_carry_time_min FLOAT NOT NULL,
+        flag_carry_time_max FLOAT NOT NULL,
+        INDEX match_idx (match_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_dom_control_points (
+        id int NOT NULL AUTO_INCREMENT,
+        name varchar(255) NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_match_dom (
+        id int NOT NULL AUTO_INCREMENT,
+        match_id int NOT NULL,  
+        map_id int NOT NULL,
+        gametype_id int NOT NULL,
+        player_id int NOT NULL,
+        point_id int NOT NULL,
+        total_caps int NOT NULL,
+        total_control_time float NOT NULL,
+        longest_control_time float NOT NULL,
+        shortest_control_time float NOT NULL,
+        control_percent float NOT NULL,
+        control_point_score float NOT NULL,
+        max_control_point_score float NOT NULL,
+        total_score_time float NOT NULL,
+        max_total_score_time float NOT NULL,
+        stolen_points float NOT NULL,
+        stolen_caps int NOT NULL,
+        INDEX match_idx(match_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_player_totals (     
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        gametype_id int NOT NULL,
+        map_id int NOT NULL,
+        last_active datetime NOT NULL,
+        playtime float NOT NULL,
+        total_matches int NOT NULL,
+        wins int NOT NULL,
+        draws int NOT NULL,
+        losses int NOT NULL,
+        winrate float NOT NULL,
+        score int NOT NULL,
+        frags int NOT NULL,
+        kills int NOT NULL,
+        deaths int NOT NULL,
+        suicides int NOT NULL,
+        team_kills int NOT NULL,
+        efficiency float NOT NULL,
+        ttl float NOT NULL,
+        first_blood int(1) NOT NULL,
+        spree_1 int NOT NULL,
+        spree_2 int NOT NULL,
+        spree_3 int NOT NULL,
+        spree_4 int NOT NULL,
+        spree_5 int NOT NULL,
+        spree_best int NOT NULL,
+        multi_1 int NOT NULL,
+        multi_2 int NOT NULL,
+        multi_3 int NOT NULL,
+        multi_4 int NOT NULL,
+        multi_best int NOT NULL,
+        headshots int NOT NULL,
+        item_amp int NOT NULL,
+        item_belt int NOT NULL,
+        item_boots int NOT NULL,
+        item_body int NOT NULL,
+        item_pads int NOT NULL,
+        item_invis int NOT NULL,
+        item_shp int NOT NULL,
+        UNIQUE INDEX pgm_idx (player_id,gametype_id,map_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_player_totals_weapons (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        player_id int(11) NOT NULL,
+        gametype_id int(11) NOT NULL,
+        weapon_id int(11) NOT NULL,
+        total_matches int(11) NOT NULL,
+        kills int(11) NOT NULL,
+        deaths int(11) NOT NULL,
+        suicides int(11) NOT NULL,
+        team_kills int(11) NOT NULL,
+        eff float NOT NULL,
+        UNIQUE INDEX pgw_idx (player_id, gametype_id, weapon_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_player_totals_ctf (
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        gametype_id int NOT NULL,
+        map_id int NOT NULL,
+        total_matches int NOT NULL,
+        flag_taken int NOT NULL,
+        max_flag_taken int NOT NULL,
+        flag_pickup int NOT NULL,
+        max_flag_pickup int NOT NULL,
+        flag_drop int NOT NULL,
+        max_flag_drop int NOT NULL,
+        flag_assist int NOT NULL,
+        max_flag_assist int NOT NULL,
+        flag_cover int NOT NULL,
+        max_flag_cover int NOT NULL,
+        flag_seal int NOT NULL,
+        max_flag_seal int NOT NULL,
+        flag_cap int NOT NULL,
+        max_flag_cap int NOT NULL,
+        flag_kill int NOT NULL,
+        max_flag_kill int NOT NULL,
+        flag_return int NOT NULL,
+        max_flag_return int NOT NULL,
+        flag_return_base int NOT NULL,
+        max_flag_return_base int NOT NULL,
+        flag_return_mid int NOT NULL,
+        max_flag_return_mid int NOT NULL,
+        flag_return_enemy_base int NOT NULL,
+        max_flag_return_enemy_base int NOT NULL,
+        flag_return_save int NOT NULL,
+        max_flag_return_save int NOT NULL,
+        UNIQUE INDEX pgm_idx (player_id, gametype_id, map_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_users (
+        id int NOT NULL AUTO_INCREMENT,
+        name varchar(100) NOT NULL,
+        password varchar(64) NOT NULL,
+        activated tinyint NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    /*`CREATE TABLE IF NOT EXISTS nstats_sessions (
+    session_id varchar(128) COLLATE utf8mb4_bin NOT NULL,
+    expires int(11) unsigned NOT NULL,
+    user_id int(11) unsigned DEFAULT 0,
+    data mediumtext COLLATE utf8mb4_bin,
+    PRIMARY KEY (session_id)
+    ) ENGINE=InnoDB`,*/
+
+    `CREATE TABLE IF NOT EXISTS nstats_sessions(
+        id int NOT NULL AUTO_INCREMENT,
+        session_id varchar(128) NOT NULL,
+        created DATETIME NOT NULL,
+        expires DATETIME NOT NULL,
+        user_id int(11) NOT NULL,
+        user_ip varchar(39) NOT NULL,
+        session_data mediumtext,
+        UNIQUE INDEX session_idx(session_id),
+        PRIMARY KEY (id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_logs_downloads (
+        id int NOT NULL AUTO_INCREMENT,
+        file_name varchar(255) NOT NULL,
+        date datetime NOT NULL,
+        importer_id int NOT NULL,
+        ftp_ip varchar(39) NOT NULL,
+        file_size int(9) NOT NULL, 
+        UNIQUE INDEX name_idx(file_name)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_logs (
+        id int NOT NULL AUTO_INCREMENT,
+        file_name varchar(255) NOT NULL,
+        date datetime NOT NULL,
+        match_id int NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_logs_rejected (
+        id int NOT NULL AUTO_INCREMENT,
+        file_name varchar(255) NOT NULL,
+        date datetime NOT NULL,
+        reason varchar(255) NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_site_settings (
+        id int NOT NULL AUTO_INCREMENT,
+        category varchar(255) NOT NULL,
+        setting_type varchar(255) NOT NULL,
+        setting_name varchar(255) NOT NULL,
+        setting_value text NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+
+    `CREATE TABLE IF NOT EXISTS nstats_importer_history (
+        id int NOT NULL AUTO_INCREMENT,
+        importer_id int NOT NULL,
+        date datetime NOT NULL,
+        logs_found int NOT NULL,
+        imported int NOT NULL,
+        failed int NOT NULL,
+        total_time float NOT NULL
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_rankings (
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        gametype_id int NOT NULL,
+        matches int NOT NULL,
+        playtime float NOT NULL,
+        score float NOT NULL,
+        last_active datetime NOT NULL,
+        UNIQUE INDEX pg_idx (player_id, gametype_id)
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_ranking_settings (
+        id int NOT NULL AUTO_INCREMENT,
+        category varchar(255) NOT NULL,
+        name varchar(255) NOT NULL,
+        display_name varchar(255) NOT NULL,
+        points float NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_page_layout (
+        id int NOT NULL AUTO_INCREMENT,
+        page varchar(255) NOT NULL,
+        item varchar(255) NOT NULL,
+        page_order int NOT NULL
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_damage_match (
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        match_id int NOT NULL,
+        map_id int NOT NULL,
+        gametype_id int NOT NULL,
+        damage_delt int NOT NULL,
+        damage_taken int NOT NULL,
+        self_damage int NOT NULL,
+        team_damage_delt int NOT NULL,
+        team_damage_taken int NOT NULL,
+        fall_damage int NOT NULL,
+        drown_damage int NOT NULL,
+        cannon_damage int NOT NULL,
+        INDEX match_idx (match_id),
+        PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_player_totals_damage (
+    id int NOT NULL AUTO_INCREMENT,
+    player_id int NOT NULL,
+    gametype_id int NOT NULL,
+    total_matches int NOT NULL,
+    playtime FLOAT NOT NULL,
+    damage_delt int NOT NULL,
+    damage_taken int NOT NULL,
+    self_damage int NOT NULL,
+    team_damage_delt int NOT NULL,
+    team_damage_taken int NOT NULL,
+    fall_damage int NOT NULL,
+    drown_damage int NOT NULL,
+    cannon_damage int NOT NULL,
+    PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+
+    `CREATE TABLE IF NOT EXISTS nstats_ctf_caps (
+    id int NOT NULL AUTO_INCREMENT,
+    match_id int NOT NULL,
+    map_id int NOT NULL,
+    gametype_id int NOT NULL,
+    cap_type tinyint NOT NULL,
+    flag_team tinyint NOT NULL,
+    capping_team tinyint NOT NULL,
+    taken_timestamp float NOT NULL,
+    taken_player int NOT NULL,
+    cap_timestamp float NOT NULL,
+    cap_player int NOT NULL,
+    cap_time float NOT NULL,
+    carry_time float NOT NULL,
+    drop_time float NOT NULL,
+    total_drops int NOT NULL,
+    total_covers int NOT NULL,
+    unique_carriers int NOT NULL,
+    red_kills int NOT NULL,
+    blue_kills int NOT NULL,
+    green_kills int NOT NULL,
+    yellow_kills int NOT NULL,
+    red_suicides int NOT NULL,
+    blue_suicides int NOT NULL,
+    green_suicides int NOT NULL,
+    yellow_suicides int NOT NULL,
+    INDEX match_idx(match_id),
+    PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+`CREATE TABLE IF NOT EXISTS nstats_ctf_covers (
+id int NOT NULL AUTO_INCREMENT,
+match_id int NOT NULL,
+cap_id int NOT NULL,
+timestamp float NOT NULL,
+player_id int NOT NULL,
+INDEX match_idx(match_id),
+PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+`CREATE TABLE IF NOT EXISTS nstats_ctf_carry_times (
+    id int NOT NULL AUTO_INCREMENT,
+    match_id int NOT NULL,
+    map_id int NOT NULL,
+    gametype_id int NOT NULL,
+    cap_id int NOT NULL,
+    player_id int NOT NULL,
+    start_timestamp float NOT NULL,
+    end_timestamp float NOT NULL,
+    carry_time float NOT NULL,
+    INDEX match_idx(match_id),
+    PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+    `CREATE TABLE IF NOT EXISTS nstats_ctf_cap_kills (
+    id int NOT NULL AUTO_INCREMENT,
+    match_id int NOT NULL,
+    cap_id int NOT NULL,
+    timestamp float NOT NULL,
+    killer_id int NOT NULL,
+    killer_team int NOT NULL,
+    INDEX match_idx (match_id),
+    PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_ctf_cap_suicides (
+    id int NOT NULL AUTO_INCREMENT,
+    match_id int NOT NULL,
+    cap_id int NOT NULL,
+    timestamp float NOT NULL,
+    player_id int NOT NULL,
+    player_team int NOT NULL,
+    INDEX match_idx(match_id),
+    PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+    `CREATE TABLE IF NOT EXISTS nstats_player_map_minute_averages (
+    id int NOT NULL AUTO_INCREMENT,
+    player_id int NOT NULL,
+    map_id int NOT NULL,
+    gametype_id int NOT NULL,
+    total_playtime float NOT NULL,
+    total_matches float NOT NULL,
+    score float NOT NULL,
+    frags float NOT NULL,
+    kills float NOT NULL,
+    deaths float NOT NULL,
+    suicides float NOT NULL,
+    team_kills float NOT NULL,
+    headshots float NOT NULL,
+    item_amp float NOT NULL,
+    item_belt float NOT NULL,
+    item_boots float NOT NULL,
+    item_body float NOT NULL,
+    item_pads float NOT NULL,
+    item_invis float NOT NULL,
+    item_shp float NOT NULL,
+    flag_taken float NOT NULL,
+    flag_pickup float NOT NULL,
+    flag_drop float NOT NULL,
+    flag_assist float NOT NULL,
+    flag_cover float NOT NULL,
+    flag_seal float NOT NULL,
+    flag_cap float NOT NULL,
+    flag_kills float NOT NULL,
+    flag_return float NOT NULL,
+    flag_return_base float NOT NULL,
+    flag_return_mid float NOT NULL,
+    flag_return_enemy_base float NOT NULL,
+    flag_return_save float NOT NULL,
+    dom_caps float NOT NULL,
+    UNIQUE INDEX pmg_idx (player_id,map_id,gametype_id),
+    PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+
+    `CREATE TABLE IF NOT EXISTS nstats_map_weapon_totals (
+        id int(11) NOT NULL AUTO_INCREMENT,
+        map_id int(11) NOT NULL,
+        total_matches int(11) NOT NULL,
+        total_playtime FLOAT NOT NULL,
+        weapon_id int(11) NOT NULL,
+        kills int(11) NOT NULL,
+        deaths int(11) NOT NULL,
+        suicides int(11) NOT NULL,
+        team_kills int(11) NOT NULL,
+        kills_per_min FLOAT NOT NULL,
+        deaths_per_min FLOAT NOT NULL,
+        team_kills_per_min FLOAT NOT NULL,
+        suicides_per_min FLOAT NOT NULL, 
+        UNIQUE INDEX mw_idx (map_id,weapon_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
+        id int NOT NULL AUTO_INCREMENT,
+        player_id int NOT NULL,
+        map_id int NOT NULL,
+        matches int NOT NULL,
+        playtime float NOT NULL,
+        score float NOT NULL,
+        last_active datetime NOT NULL,
+        UNIQUE INDEX pm_idx (player_id, map_id)
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+
+    `CREATE TABLE IF NOT EXISTS nstats_classic_weapon_match_stats (
+        id int NOT NULL AUTO_INCREMENT,
+        match_id int NOT NULL,
+        gametype_id int NOT NULL,
+        map_id int NOT NULL,
+        player_id int NOT NULL,
+        weapon_id int NOT NULL,
+        kills int NOT NULL,
+        deaths int NOT NULL,
+        shots int NOT NULL,
+        hits int NOT NULL,
+        accuracy float NOT NULL,
+        damage int NOT NULL,
+        INDEX match_idx (match_id)
+        ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_player_ctf_league (
+    id int NOT NULL AUTO_INCREMENT,
+    player_id int NOT NULL,
+    gametype_id int NOT NULL,
+    map_id int NOT NULL,
+    first_match datetime NOT NULL,
+    last_match datetime NOT NULL,
+    playtime float NOT NULL,
+    total_matches int NOT NULL,
+    wins int NOT NULL,
+    draws int NOT NULL,
+    losses int NOT NULL,
+    winrate float NOT NULL,
+    cap_for int NOT NULL,
+    cap_against int NOT NULL,
+    cap_offset int NOT NULL,
+    points int NOT NULL,
+    INDEX mgp_idx (map_id, gametype_id, player_id),
+    UNIQUE INDEX pgm_idx (player_id,gametype_id,map_id)
+    ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
+    id INT NOT NULL AUTO_INCREMENT,
+    category varchar(255) NOT NULL,
+    name varchar(255) NOT NULL,
+    type varchar(255) NOT NULL,
+    value varchar(255) NOT NULL,
+    PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_user_login_attempts (
+    id INT NOT NULL AUTO_INCREMENT,
+    date DATETIME NOT NULL,
+    target_username varchar(100),
+    ip varchar(39) NOT NULL,
+    PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_match_dom_team_score_history (
+    id INT NOT NULL AUTO_INCREMENT,
+    match_id int NOT NULL,
+    timestamp float NOT NULL,
+    real_total_score float NOT NULL,
+    real_team_0_score float NOT NULL,
+    real_team_1_score float NOT NULL,
+    real_team_2_score float NOT NULL,
+    real_team_3_score float NOT NULL,
+    importer_total_score float NOT NULL,
+    importer_team_0_score float NOT NULL,
+    importer_team_1_score float NOT NULL,
+    importer_team_2_score float NOT NULL,
+    importer_team_3_score float NOT NULL,
+    INDEX match_idx(match_id),
+    PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_json_api(
+    id INT NOT NULL AUTO_INCREMENT,
+    category varchar(255) NOT NULL,
+    setting_name varchar(255) NOT NULL,
+    setting_type varchar(255) NOT NULL,
+    setting_value varchar(255) NOT NULL,
+    PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+];
+
+async function bColumnExist(table, column){
+
+    const query = `SHOW COLUMNS FROM ${table}`;
+
+    const result = await simpleQuery(query);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(r["Field"] === column) return true;
+    }
+
+    return false;
+}
+
+async function addColumn(table, name, type){
+
+    try{
+
+        if(await bColumnExist(table, name)) return;
+
+        const query = `ALTER TABLE ${table} ADD COLUMN ${name} ${type}`;
+
+        await simpleQuery(query);
+
+        new Message(`Added column ${name} to TABLE ${table}`,"pass");
+
+    }catch(err){
+        new Message(err.message, "error");
+    }
+}
+
+async function deleteColumn(table, name){
+
+    if(!await bColumnExist(table, name)) return;
+
+    const query = `ALTER TABLE ${table} DROP COLUMN ${name}`;
+
+    return await simpleQuery(query);
+}
+
+async function updateDominationTables(){
+
+    await addColumn("nstats_match_dom", "total_control_time", "float NOT NULL");
+    await addColumn("nstats_match_dom", "longest_control_time", "float NOT NULL");
+    await addColumn("nstats_match_dom", "shortest_control_time", "float NOT NULL");
+    await addColumn("nstats_match_dom", "control_percent", "float NOT NULL");
+    await addColumn("nstats_match_dom", "control_point_score", "float NOT NULL");
+    await addColumn("nstats_match_dom", "max_control_point_score", "float NOT NULL");
+    await addColumn("nstats_match_dom", "total_score_time", "float NOT NULL");
+    await addColumn("nstats_match_dom", "max_total_score_time", "float NOT NULL");
+    await addColumn("nstats_match_dom", "stolen_points", "float NOT NULL");
+    await addColumn("nstats_match_dom", "stolen_caps", "int NOT NULL");
+}
+
+async function updateMatchesTable(){
+
+    await addColumn("nstats_matches", "tournament_mode", "int DEFAULT 100 AFTER hardcore");
+    await addColumn("nstats_matches", "gamespeed", "int DEFAULT 100 AFTER tournament_mode");
+    await addColumn("nstats_matches", "gamespeed_real", "int DEFAULT 100 AFTER gamespeed");
+}
+
+
+async function removeStartOffset(matchId, start){
+
+    const queries = [
+        {"query": "UPDATE nstats_ctf_cap_kills SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+        {"query": "UPDATE nstats_ctf_cap_suicides SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+        {"query": "UPDATE nstats_ctf_caps SET taken_timestamp=taken_timestamp-?,cap_timestamp=cap_timestamp-? WHERE match_id=?", "vars": [start, start, matchId]},
+        {"query": "UPDATE nstats_ctf_carry_times SET start_timestamp=start_timestamp-?,end_timestamp=end_timestamp-? WHERE match_id=?", "vars": [start, start, matchId]},
+        {"query": "UPDATE nstats_ctf_covers SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+        {"query": "UPDATE nstats_kills SET timestamp=timestamp-? WHERE match_id=?", "vars": [start, matchId]},
+    ];
+
+    const promises = [];
+
+    for(let i = 0; i < queries.length; i++){
+
+        const q = queries[i];
+        promises.push(simpleQuery(q.query, q.vars));
+    }
+
+    return Promise.all(promises);
+}
+
+async function removeStartOffsets(){
+
+    const query = `SELECT id,playtime,match_start FROM nstats_matches`;
+    const result = await simpleQuery(query);
+
+    const matchLengths = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        matchLengths[r.id] = {"playtime":r.playtime, "start": r.match_start};
+
+    }
+
+    const maxQuery = `SELECT match_id,MAX(timestamp) as timestamp FROM nstats_kills GROUP BY match_id`
+
+    const max = await simpleQuery(maxQuery);
+
+    const matchesToFix = [];
+
+    for(let i = 0; i < max.length; i++){
+
+        const {"match_id": matchId, timestamp} = max[i];
+
+        if(matchLengths[matchId] === undefined) continue;
+
+        const startTime = matchLengths[matchId].start;
+        const playtime = matchLengths[matchId].playtime;
+
+        if(timestamp > playtime){
+            matchesToFix.push({"id": matchId, "start": startTime});
+        }
+    }
+
+    if(matchesToFix.length === 0){
+        new Message(`No match events need timestamps adjusted`, "note");
+        return;
+    }
+ 
+    for(let i = 0; i < matchesToFix.length; i++){
+
+        new Message(`Fixing match event timestamps for matchId ${matchesToFix[i].id}. (${i+1}/${matchesToFix.length})`, "note");
+
+        await removeStartOffset(matchesToFix[i].id, matchesToFix[i].start).then(() =>{
+            new Message(`Fixed match event id = ${matchesToFix[i].id}. (${i+1}/${matchesToFix.length})`, "pass");
+        }).catch((err) =>{
+            new Message(`Failed to update match event timestamps id =${matchesToFix[i].id}, ${err.toString()}`,"error");
+        });
+    }
+}
+
+async function dropIndex(table, indexName){
+
+    const query = `ALTER TABLE ${table} DROP INDEX ${indexName}`;
+
+    new Message(`Dropping INDEX ${indexName} from ${table}, Non_unique has been changed.`,"note");
+    return await simpleQuery(query);
+}
+
+//MAKE SURE TO ADD CHECK IF UNIQUE OR NOT
+async function bIndexExists(table, indexName, bUnique){
+
+    if(bUnique === undefined) bUnique = false;
+
+    const result = await simpleQuery(`SHOW INDEXES FROM ${table}`);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const keyName = r.Key_name;
+
+        if(keyName === indexName){
+
+            const bCurrentUnique = r.Non_unique === 0;
+
+            if(bCurrentUnique !== bUnique){
+                await dropIndex(r.Table, r.Key_name);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    return false;
+}
+
+async function addTableIndexes(){
+
+    const targets = [
+        {"table": "nstats_kills", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_cap_kills", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_match_weapon_stats", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_match_players", "column": "match_id", "index": "match_idx","bUnique": false},
+        //doing 2 different indexes improves player profile page load without making match page querys slower
+        {"table": "nstats_match_players", "column": "player_id", "index": "player_idx","bUnique": false},
+        {"table": "nstats_match_ctf", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_carry_times", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_covers", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_caps", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_ctf_cap_suicides", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_classic_weapon_match_stats", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_match_dom_team_score_history", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_match_dom", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_matches_dom", "column": "match_id", "index": "match_idx","bUnique": false},
+        {"table": "nstats_damage_match", "column": "match_id", "index": "match_idx","bUnique": false},
+        //faster player profile loading
+        {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx","bUnique": false},
+        {"table": "nstats_player_totals", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": true},
+        {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": true},
+        {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx","bUnique": true},
+        {"table": "nstats_players", "column": "name", "index": "name_idx","bUnique": false},
+        {"table": "nstats_players", "column": "hash", "index": "hash_idx","bUnique": false},
+        {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},
+        {"table": "nstats_rankings", "column": "player_id,gametype_id", "index": "pg_idx", "bUnique": true},
+        {"table": "nstats_map_rankings", "column": "player_id,map_id", "index": "pm_idx", "bUnique": true},   
+        {"table": "nstats_map_weapon_totals", "column": "map_id,weapon_id", "index": "mw_idx","bUnique": true},
+        //faster ctf league calculating
+        {"table": "nstats_player_ctf_league", "column": "player_id,gametype_id,map_id", "index": "pgm_idx","bUnique": true},
+        
+    ];
+
+    for(let i = 0; i < targets.length; i++){
+
+        const {table, index, column, bUnique} = targets[i];
+
+        if(await bIndexExists(table, index, bUnique)) continue;
+        new Message(`Adding index to table ${table}, for column ${column} as ${index}`,"note");
+        await simpleQuery(`CREATE ${(bUnique) ? "UNIQUE" : "" } INDEX ${index} ON ${table}(${column})`);
+    }
+}
+
+//removed in 2.3.0
+async function removeLogTablesImporterIdColumns(){
+
+    const tables = ["nstats_logs", "nstats_logs_rejected"];
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        await deleteColumn(t, "importer_id");
+    }
+}
+
+
+export default async function mysqlInstall(){
+ 
+    try{
+        
+        for(let i = 0; i < queries.length; i++){
+         
+            await connection.query(queries[i]);
+
+            if(i === 0){
+
+                connection.end();
+
+                connection = mysql.createPool({
+                    "host": mysqlSettings.host,
+                    "user": mysqlSettings.user,
+                    "password": mysqlSettings.password,
+                    "database": mysqlSettings.database
+                });
+            }
+
+            new Message(`Performed query ${i+1} of ${queries.length}`,"pass");
+              
+        }
+
+        connection.end();
+
+        await removeLogTablesImporterIdColumns();
+
+        await addTableIndexes();
+
+        await updateDominationTables();
+
+        await updateMatchesTable();
+
+        new Message("Setting match map & gametype ids.", "note");
+        await setMatchMapGametypeIds();
+
+        new Message("Calculating Player Map Averages", "note");
+        await setAllPlayerMapAverages();
+        
+        new Message("Calculating Map Weapon Totals", "note");
+        await setAllMapWeaponTotals();
+
+        new Message("Setting damage match map & gametypeIds.", "note");
+        await damageSetMatchMapGametypeIds();
+
+        new Message(`Removing start offset from event timestamps.`,"note");
+        await removeStartOffsets();
+
+        process.exit();
+
+    }catch(err){
+        console.trace(err);
+    }
+};
+

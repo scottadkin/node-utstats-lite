@@ -1,10 +1,5 @@
-import { simpleQuery } from "./src/database.mjs";
-import { restoreDefaultSettings } from "./src/siteSettings.mjs";
-import { restoreDefaultLayouts} from "./src/pageLayout.mjs";
-import { insertDefaultRankingSettings } from "./src/rankings.mjs";
-import { insertDefaultCTFLeagueSettings } from "./src/ctfLeague.mjs";
-import { createDefaultLogsFolderSettings } from "./src/logsfoldersettings.mjs";
-import Message from "./src/message.mjs";
+import { simpleQuery } from "./database.mjs";
+import Message from "./message.mjs";
 
 new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
 
@@ -739,22 +734,12 @@ const queries = [
 
 ];
 
-for(let i = 0; i < queries.length; i++){
+export default async function sqliteInstall(){
 
-    new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
-	simpleQuery(queries[i]);
-    new Message(`Query passed`,"pass");
+    for(let i = 0; i < queries.length; i++){
+
+        new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
+        simpleQuery(queries[i]);
+        new Message(`Query passed`,"pass");
+    }
 }
-
-new Message("Inserting Default Rankings Settings", "note");
-await insertDefaultRankingSettings();
-new Message("Inserting Default CTF League Settings", "note");
-await insertDefaultCTFLeagueSettings();
-new Message("Inserting Default Site Settings", "note");
-await restoreDefaultSettings();
-new Message("Inserting Default Site Page Layout Settings", "note");
-await restoreDefaultLayouts();
-new Message("Creating Default Logs Folder Settings", "note");
-await createDefaultLogsFolderSettings();
-
-new Message("Install complete", "progress");
