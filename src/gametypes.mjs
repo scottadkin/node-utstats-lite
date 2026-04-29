@@ -87,19 +87,21 @@ async function createTotals(gametypeId){
 
     const result = await simpleQuery(query, [gametypeId]);
 
-    if(result.length === 0) return null;
-
+    if(result[0].total_matches === 0) return null;
     return result[0];
 }
 
 async function updateTotals(id, totals){
 
-    const query = `UPDATE nstats_gametypes SET matches=?,playtime=?,first_match=?,last_match=? WHERE id=?`;
 
-    if(totals.first_match === null || totals.last_match === null || totals.playtime === null){
-        new Message(`Can't update gametype totals, frist_match,last_match, or playtime are null`,"warning");
+    if(totals === null){
+        //new Message(`Can't update gametype totals,first_match,last_match, or playtime are null`,"warning");
+
+        return await simpleQuery(`DELETE FROM nstats_gametypes WHERE id=?`, [id]);
         return;
     }
+
+    const query = `UPDATE nstats_gametypes SET matches=?,playtime=?,first_match=?,last_match=? WHERE id=?`;
 
     return await simpleQuery(query, [totals.total_matches, totals.playtime, totals.first_match, totals.last_match, id]);
 }
@@ -107,11 +109,6 @@ async function updateTotals(id, totals){
 export async function updateBasicTotals(gametypeId){
 
     const totals = await createTotals(gametypeId);
-
-    if(totals === null){
-        new Message(`Failed to create totals (gametypes.updateBasicTotals)`,"warning");
-        return;
-    }
 
     await updateTotals(gametypeId, totals);
 }
