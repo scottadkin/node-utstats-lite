@@ -10,3 +10,7 @@ restore-from/*
 test.db
 test.db-journal
 data/*.db
+logs/*.log
+logs/*.zip
+logs/imported/*.log
+logs/rejected/*.log

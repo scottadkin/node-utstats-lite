@@ -314,7 +314,6 @@ function sqliteArrayInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
         }
     }
 
-
     let partIndex = 0;
 
     const queryParts = [
@@ -337,6 +336,11 @@ function sqliteArrayInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
         //if next row goes over var limit create new query part to prevent that
         if(currentVarCount + varsPerRow >= MAX_SQLITE_VARS){
+
+            //don't want to create an empty query part
+            if(i === vars.length - 1){
+                break;
+            }
             partIndex++;
             queryParts.push({"placeholderString": ``, "vars": []});
             currentVarCount = 0;
@@ -352,20 +356,18 @@ function sqliteArrayInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
         const q = queryParts[i];
 
-        let query = `INSERT INTO ${tableName}(${columns.toString()}) VALUES ${q.placeholderString}
+        const query = `INSERT INTO ${tableName}(${columns.toString()}) VALUES ${q.placeholderString}
         ON CONFLICT(${conflict.toString()}) DO UPDATE SET ${conflictString}`;
 
         const prepare = database.prepare(query);
-
+    
         prepare.run(...sqliteConvertDates(q.vars));
-
+    
 
     }
-
 }
 
 function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
-
 
     if(conflict.length === 0) throw new Error(`OnDuplicateUpdate needs a conflict key`);
 
@@ -389,8 +391,6 @@ function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
             query += `, `;
         }
     }
-
-
 
     const prepare = database.prepare(query);
 
