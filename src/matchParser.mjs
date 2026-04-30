@@ -222,7 +222,7 @@ export class MatchParser{
                 this.dom.insertMatchResult(this.matchId),
                 this.dom.saveScoreIntervals(this.matchId),
             ]);   
-                 
+
         }else if(this.dom.bAnyData){
 
             new Message(`Skipping inserting domination match data, no final score found.`,"warning");

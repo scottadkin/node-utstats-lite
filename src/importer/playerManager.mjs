@@ -47,7 +47,10 @@ export class PlayerManager{
             playerId = parseInt(result[2]);
 
         }else{
-            throw new Error(`rename normalreg and brokenreg didn't work`);
+
+            new Message(`rename normalreg and brokenreg didn't work`, "error");
+            return;
+            //throw new Error(`rename normalreg and brokenreg didn't work`);
         }
 
         if(namesToIds[playerName] === undefined){
@@ -107,7 +110,7 @@ export class PlayerManager{
         const idsToNames = {};
 
         const timestampReg = /^(\d+?\.\d+?)\t(.+)$/i;
-        const reg =  /^player\t(.+?)\t(.+)$/i;
+        const reg = /^player\t(.+?)\t(.+)$/i;
         //const renameReg = /^(.+)\t(\d+)$/i;
         //const connectReg = /^(.+)\t(\d+?)\t.+$/i;
 
@@ -135,6 +138,7 @@ export class PlayerManager{
 
             //work around rename/connects with weird characters
             if(renameReg2.test(subString)){
+
                 const nameResult = renameReg2.exec(subString);
                 this.rename(timestamp, nameResult, idsToNames, namesToIds, connectEvents);
 
