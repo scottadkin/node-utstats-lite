@@ -7,6 +7,18 @@ import { mysqlSettings } from "../config.mjs";
 import mysql from "mysql2/promise";
 import { simpleQuery } from "./database.mjs";
 
+const createSessionTableQuery = `CREATE TABLE IF NOT EXISTS nstats_sessions(
+    id int NOT NULL AUTO_INCREMENT,
+    session_id varchar(128) NOT NULL,
+    created DATETIME NOT NULL,
+    expires DATETIME NOT NULL,
+    user_id int(11) NOT NULL,
+    user_ip varchar(39) NOT NULL,
+    session_data mediumtext,
+    UNIQUE INDEX session_idx(session_id),
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`;
+
 const queries = [
     `CREATE DATABASE IF NOT EXISTS ${mysqlSettings.database} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`,
     `CREATE TABLE IF NOT EXISTS nstats_ftp (
@@ -393,17 +405,7 @@ const queries = [
     PRIMARY KEY (session_id)
     ) ENGINE=InnoDB`,*/
 
-    `CREATE TABLE IF NOT EXISTS nstats_sessions(
-        id int NOT NULL AUTO_INCREMENT,
-        session_id varchar(128) NOT NULL,
-        created DATETIME NOT NULL,
-        expires DATETIME NOT NULL,
-        user_id int(11) NOT NULL,
-        user_ip varchar(39) NOT NULL,
-        session_data mediumtext,
-        UNIQUE INDEX session_idx(session_id),
-        PRIMARY KEY (id)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+    createSessionTableQuery,
 
     `CREATE TABLE IF NOT EXISTS nstats_logs_downloads (
         id int NOT NULL AUTO_INCREMENT,
@@ -961,6 +963,33 @@ async function removeLogTablesImporterIdColumns(){
 }
 
 
+//table changed in 2.4.0
+async function updateSessionTable(){
+
+    const query = `SHOW COLUMNS FROM nstats_sessions`;
+
+    const result = await simpleQuery(query);
+
+    const columns = result.map((r) =>{
+        return r.Field;
+    });
+
+    //old table had 4 columns new one has 7
+    if(columns.length === 7){
+        return;
+    }
+
+    new Message(`Detected old nstats_sessions table.`,"note");
+
+    const dropQuery = `DROP TABLE nstats_sessions`;
+
+    await simpleQuery(dropQuery);
+    new Message(`Dropped table nstats_sessions.`,"pass");
+
+    await simpleQuery(createSessionTableQuery);
+    new Message(`Created new table nstats_sessions`, "pass");
+}
+
 export async function mysqlInstall(){
  
     try{
@@ -1017,6 +1046,8 @@ export async function mysqlInstall(){
 
         new Message(`Removing start offset from event timestamps.`,"note");
         await removeStartOffsets();
+
+        await updateSessionTable();
 
     }catch(err){
         console.trace(err);

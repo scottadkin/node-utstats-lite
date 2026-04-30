@@ -26,7 +26,7 @@ export const multiKillTimeLimit = 3;
 //how old a tmp file must be before it's deleted(seconds)
 export const minTmpFileLifetime = 60 * 60 * 6;
 
-export const DEFAULT_DATE = "1999-11-30 00:00:00";
+export const DEFAULT_DATE = new Date("1999-11-30 00:00:00");
 
 export const websitePort = 3000;
 

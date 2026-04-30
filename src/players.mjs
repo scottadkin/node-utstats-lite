@@ -522,7 +522,7 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
         "totalTtl": 0,
         "ttl": 0,
         "eff": 0,
-        "last_active": new Date(DEFAULT_DATE),
+        "last_active": DEFAULT_DATE,
         "wins": 0,
         "losses": 0,
         "draws": 0,
