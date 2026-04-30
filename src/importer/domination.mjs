@@ -444,6 +444,11 @@ export class Domination{
             return t
         }).reverse();
 
+
+        if(ts.length === 0){
+            return null;
+        }
+
         const lastTimestamp = ts[0];
 
         const scores = this.teamScoreTimestamps[lastTimestamp];
@@ -744,6 +749,14 @@ export class Domination{
         }
 
         const finalScore = this.getFinalLogScores();
+
+        if(finalScore === null){
+            new Message("Domination.setPlayerCapStats() finalScore is null", "warning");
+            this.bNoFinalScore = true;
+            return;
+        }
+
+        this.bNoFinalScore = false;
         let importerScore = this.getTotalControlPointScores();
 
         const offset = importerScore - finalScore;

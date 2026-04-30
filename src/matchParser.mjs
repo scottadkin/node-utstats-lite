@@ -215,13 +215,17 @@ export class MatchParser{
             this.ctf.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id)
         ]);   
 
-        if(this.dom.bAnyData){
+        if(this.dom.bAnyData && !this.dom.bNoFinalScore){
 
             await Promise.all([
                 this.dom.insertPlayerMatchData(this.players.players, this.matchId, this.gametype.id, this.map.id),
                 this.dom.insertMatchResult(this.matchId),
                 this.dom.saveScoreIntervals(this.matchId),
-            ]);        
+            ]);   
+                 
+        }else if(this.dom.bAnyData){
+
+            new Message(`Skipping inserting domination match data, no final score found.`,"warning");
         }
           
         this.kills.setWeaponIds(this.weapons);

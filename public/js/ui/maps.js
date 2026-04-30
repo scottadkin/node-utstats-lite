@@ -144,7 +144,12 @@ class MapListDisplay{
         if(data.length === 0){
 
             const info = UIDiv("info");
-            info.append(`No maps found when searching for "${nameSearch}"`);
+            
+            if(nameSearch !== ""){
+                info.append(`No maps found when searching for "${nameSearch}"`);
+            }else{
+                info.append(`No maps in database.`);
+            }
             parent.append(info);
             return;   
         }
