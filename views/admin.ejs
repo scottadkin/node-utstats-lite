@@ -80,6 +80,12 @@ function renderModes(mode){
 
         const {display, value, description, style} = modes[i];
 
+
+        if(value === "database-backup" && SQL_MODE === "sqlite"){
+
+            continue;
+        }
+
         %>
             <div class="admin-cat-box" <%- (style !== undefined) ? `style="${style}"` : ""%>>
                 <a href="/admin?mode=<%- value %>">
