@@ -9,7 +9,7 @@ import { mapScreenshotQuality } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
 import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
-import { clearAllDataTables, createArchivedBackup, createDatabaseBackup, getAllBackupsInfo, getAllDatabaseTableInfo, restoreDatabase } from "../admin.mjs";
+import { clearAllDataTables, createArchivedBackup, createDatabaseBackup, getAllBackupsInfo, getAllDatabaseTableInfo, getSQLiteStats, restoreDatabase } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
@@ -303,7 +303,12 @@ export default class AdminJSONManager{
 
                 const result = await restoreDatabase(this.req.body.targetBackup);
 
-                return this.res.json(result)
+                return this.res.json(result);
+
+            }else if(this.mode === "load-sqlite-stats"){
+
+                const result = await getSQLiteStats();
+                return this.res.json(result);
             }
 
 

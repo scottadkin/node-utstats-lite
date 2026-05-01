@@ -4180,7 +4180,65 @@ class AdminMYSQLBackupManager{
         this.renderUncompressedBackup();
         this.renderCompressedBackup();
         this.renderBackups();
-        this.renderRestoreFrom();
-        
+        this.renderRestoreFrom();     
+    }
+}
+
+
+
+class AdminSQLiteBackupManager{
+
+    constructor(parent){
+
+        this.parent = document.querySelector(parent);
+
+        console.log("adminSQLITEbackupManager");
+
+        this.wrapper = UIDiv();
+        this.mode = "stats";
+
+        this.createTabs();
+
+        this.dbStats = null;
+
+
+        this.parent.append(this.wrapper);
+
+        this.loadData();
+
+    }
+
+    createTabs(){
+
+        const tabOptions = [
+            {"display": "Database Stats", "value": "stats"},
+        ];
+
+
+        this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
+    }
+
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch("/admin/", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-sqlite-stats"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.dbStats = res;
+
+            console.log(res);
+
+        }catch(err){
+            console.trace(err);
+        }
     }
 }

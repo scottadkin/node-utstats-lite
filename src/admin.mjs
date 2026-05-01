@@ -424,3 +424,24 @@ export async function restoreDatabase(backupTarget){
     }
    
 }
+
+export async function getSQLiteStats(){
+
+    const dbStats = await stat("./data/main.db");
+
+    const tableNames = await simpleQuery(`SELECT name FROM sqlite_schema 
+    WHERE type='table' AND name LIKE 'nstats_%'
+    ORDER BY name;`);
+
+    const totalRows = [];
+
+    for(let i = 0; i < tableNames.length; i++){
+
+        const result = await simpleQuery(`SELECT COUNT(id) as total_rows FROM ${tableNames[i].name}`);
+        totalRows.push({"table": tableNames[i].name, "rows": result[0].total_rows});
+
+    }
+
+    return {"fileSize": dbStats.size, "accessTime": dbStats.atimeMs, "modifiedTime": dbStats.mtimeMs, totalRows};
+   
+}

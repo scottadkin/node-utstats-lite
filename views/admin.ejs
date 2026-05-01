@@ -1,4 +1,14 @@
 <%
+
+
+let backupDescription = ``;
+
+if(SQL_MODE === "sqlite"){
+    backupDescription = `Create A Backup Of Your SQLite Database, restore SQLite database from a backup.`;
+}else{
+    backupDescription = `Create A Backup Of Your MYSQL Database, restore MYSQL database from a backup, view database table sizes, and backup information.`;
+}
+
 const modes = [
     {
         "display": "Site Settings",
@@ -42,9 +52,9 @@ const modes = [
         "description": "Enable or Disable JSON API"
     },
     {
-        "display": "Database Backup Manager",
-        "value": "database-backup",
-        "description": "Create A Backup Of MYSQL Database, restore MYSQL database from backup, view database table sizes, and backup information."
+        "display": (SQL_MODE === "mysql") ? "MYSQL Database Backup Manager" : "SQLite Database Backup Manager" ,
+        "value": (SQL_MODE === "mysql") ? "database-backup" : "sqlite-database-backup",
+        "description": backupDescription
     }
 ];
 
@@ -79,12 +89,6 @@ function renderModes(mode){
     for(let i = 0; i < modes.length; i++){
 
         const {display, value, description, style} = modes[i];
-
-
-        if(value === "database-backup" && SQL_MODE === "sqlite"){
-
-            continue;
-        }
 
         %>
             <div class="admin-cat-box" <%- (style !== undefined) ? `style="${style}"` : ""%>>
@@ -135,6 +139,9 @@ function renderCategory(mode){
         %><script>new AdminJSONManager("#root")</script><%
     }else if(mode === "database-backup"){
         %><script>new AdminMYSQLBackupManager("#root");</script><%
+    }else if(mode === "sqlite-database-backup"){
+        %><script>new AdminSQLiteBackupManager("#root")</script><%
+
     }
 }
 
