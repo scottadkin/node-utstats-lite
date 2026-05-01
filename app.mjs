@@ -18,7 +18,6 @@ import { renderCTFLeaguePage } from './src/pages/ctfLeague.mjs';
 import { renderRecordsPage } from './src/pages/records.mjs';
 import JSONManager from './src/json/JSONManager.mjs';
 import AdminJSONManager from './src/json/AdminJSONManager.mjs';
-import session from 'express-session';
 import { renderLoginPage } from './src/pages/login.mjs';
 import { renderRegisterPage } from './src/pages/register.mjs';
 import { getSessionInfo, login, logout, register } from './src/authentication.mjs';
@@ -30,7 +29,6 @@ import Message from './src/message.mjs';
 import { renderMapsPage } from './src/pages/maps.mjs';
 import { createRandomString } from './src/generic.mjs';
 
-import __MySQLStore from "express-mysql-session";
 import cookieParser from 'cookie-parser';
 
 import multer from 'multer';
@@ -41,34 +39,8 @@ import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
 
 new Message("Attempting To Start Node UTStats Lite Website","progress");
 
-const MySQLStore = __MySQLStore(session);
 
-import { mysqlPool } from './src/database.mjs';
 
-/*const sessionStore = new MySQLStore({
-	"createDatabaseTable": false,
-	"schema": {
-		"tableName": "nstats_sessions",
-		"columnNames": {
-			"session_id": "session_id",
-			"expires": "expires",
-			"data": "data",
-		}
-	}
-}, mysqlPool);
-
-app.use(session({
-	"secret": SESSION_SECRET,
-	"resave": false,
-	"saveUninitialized": false,
-	"cookie": {
-		"sameSite": true,
-		"httpOnly": true
-	},
-	"genid": function(req){
-		return createRandomString(1024);
-	}
-}))*/
 
 const sessionStore = null;
 

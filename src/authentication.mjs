@@ -136,9 +136,9 @@ async function setSessionUserId(sId, userId){
 
 function updateExpireDates(res, sId, userId, userName, expires){
 
-    res.cookie("nstats_name", userName, {expires, "httpOnly": true, "path": "/"});
-    res.cookie("nstats_userid", userId, {expires, "httpOnly": true, "path": "/"});
-    res.cookie("nstats_sid", sId, {expires, "httpOnly": true, "path": "/"});
+    res.cookie("nstats_name", userName, {expires, "httpOnly": true, "path": "/", "sameSite": true});
+    res.cookie("nstats_userid", userId, {expires, "httpOnly": true, "path": "/", "sameSite": true});
+    res.cookie("nstats_sid", sId, {expires, "httpOnly": true, "path": "/", "sameSite": true});
 }
 
 async function updateUserSession(res, sessionStore, sId, userId, userIp, userName, expires){
