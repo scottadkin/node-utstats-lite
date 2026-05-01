@@ -31,13 +31,13 @@
 
         if(maxMatchAge != 0){
             %>
-                Only matches played in the previous <b><%= maxMatchAge %> days</b> are counted towards a league.<br>
+                Only matches played in the previous <b><%= parseInt(maxMatchAge) %> days</b> are counted towards a league.<br>
             <%
         }
 
         if(maxMatchesPerPlayer != 0){
             %>
-                Players have a maximum of <b><%= maxMatchesPerPlayer %> matches</b> counted towards a league, only their most recent will be counted if they play more.<br>
+                Players have a maximum of <b><%= parseInt(maxMatchesPerPlayer) %> matches</b> counted towards a league, only their most recent will be counted if they play more.<br>
             <%
         }
 
