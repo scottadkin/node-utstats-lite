@@ -4199,10 +4199,18 @@ class AdminSQLiteBackupManager{
 
         const tabOptions = [
             {"display": "Database Stats", "value": "stats"},
+            {"display": "Saved Backups", "value": "saved-backups"},
+            {"display": "Create Backup", "value": "create-backup"},
         ];
 
 
         this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+  
+            this.mode = e.detail.newTab;
+            this.render();
+        });
     }
 
 
@@ -4234,6 +4242,11 @@ class AdminSQLiteBackupManager{
     renderStats(){
 
         if(this.mode !== "stats") return;
+
+        const info = UIDiv("info");
+
+        info.append("These are the current stats of your SQLite database.");
+        this.content.append(info);
 
         const basicRows = [
             [
@@ -4277,10 +4290,32 @@ class AdminSQLiteBackupManager{
 
     }
 
+    renderCreateBackup(){
+
+        if(this.mode !== "create-backup") return;
+
+        const info = UIDiv("info");
+
+        info.append("Create a backup of your database with SQLite's built in backup creation.");
+
+        this.content.append(info);
+    }
+
+    renderSavedBackups(){
+
+        if(this.mode !== "saved-backups") return;
+        const info = UIDiv("info");
+
+        info.append("These are the backups you currently have for your node-utstats-lite.");
+        this.content.append(info);
+    }
+
     render(){
 
         this.content.innerHTML = ``;
 
         this.renderStats();
+        this.renderCreateBackup();
+        this.renderSavedBackups();
     }
 }
