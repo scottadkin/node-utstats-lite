@@ -3760,19 +3760,6 @@ class AdminMYSQLBackupManager{
         this.info.append(...content);
     }
 
-    toByteString(size){
-
-        if(size > 1024 * 1024){
-            size = `${(size / (1024 * 1024)).toFixed(2)} MiB`;
-        }else if(size > 1024){
-            size = `${(size / 1024).toFixed(2)} KiB`;
-        }else{
-            size = `${size} Bytes`;
-        }
-
-        return size;
-    }
-
 
     renderStats(){
 
@@ -3790,7 +3777,7 @@ class AdminMYSQLBackupManager{
             totals.rows += s.TABLE_ROWS;
             totals.size += size;
 
-            size = this.toByteString(size);
+            size = toByteString(size);
 
             return [{"content":s.TABLE_NAME, "className": "text-left"}, s.TABLE_ROWS, size];
         });
@@ -3798,7 +3785,7 @@ class AdminMYSQLBackupManager{
         tableData.push([
             {"content": "All Table Totals", "className": "text-left team-none"},
             {"content": totals.rows, "className": "team-none"},
-            {"content": this.toByteString(totals.size), "className": "team-none"},
+            {"content": toByteString(totals.size), "className": "team-none"},
         ]);
 
         this.table = new UITable(this.content, {
@@ -3960,7 +3947,7 @@ class AdminMYSQLBackupManager{
             data.push([
                 f.name, 
                 (f.files !== undefined) ? "Folder" : "Archive", 
-                this.toByteString(f.size), 
+                toByteString(f.size), 
                 {
                     "content": toDateString(f.modified, true), 
                     "className": "date"
@@ -3973,7 +3960,7 @@ class AdminMYSQLBackupManager{
         data.push([
             {"content":"Totals","className": "team-none"}, 
             {"content":"-","className": "team-none"}, 
-            {"content":this.toByteString(totalSize),"className": "team-none"},
+            {"content":toByteString(totalSize),"className": "team-none"},
             {"content":"-","className": "team-none"},
         ]);
 
@@ -4095,7 +4082,7 @@ class AdminMYSQLBackupManager{
         const tableRows = [
             ["Backup Name", info.name],
             ["Backup Type", (info.files !== undefined) ? "Uncompressed(Folder)" : "Archive"],
-            ["File Size", this.toByteString(info.size)],
+            ["File Size", toByteString(info.size)],
             [
                 "Last Modified", 
                 {"content": info.modified, "parse": ["date"], "className": "date"}
@@ -4192,8 +4179,6 @@ class AdminSQLiteBackupManager{
 
         this.parent = document.querySelector(parent);
 
-        console.log("adminSQLITEbackupManager");
-
         this.wrapper = UIDiv();
         this.mode = "stats";
 
@@ -4201,6 +4186,8 @@ class AdminSQLiteBackupManager{
 
         this.dbStats = null;
 
+        this.content = UIDiv();
+        this.wrapper.append(this.content);
 
         this.parent.append(this.wrapper);
 
@@ -4235,10 +4222,65 @@ class AdminSQLiteBackupManager{
 
             this.dbStats = res;
 
-            console.log(res);
+            this.render();
+
 
         }catch(err){
             console.trace(err);
+            new UINotification(this.parent, "error", "Failed to load sqlite stats", err.toString());
         }
+    }
+
+    renderStats(){
+
+        if(this.mode !== "stats") return;
+
+        const basicRows = [
+            [
+                {"content":"File Size", "className": "text-left"},
+                toByteString(this.dbStats.fileSize)
+            ],
+            [
+                "Last Modified",
+                {"content": this.dbStats.modifiedTime, "parse": ["date"], "className": "date"}
+            ]
+        ];
+
+        new UITable(this.content, {"headers":["Property", "Value"]}, basicRows);
+
+        const tableOptions = {
+            "headers": [
+                "Table Name", "Total Rows"
+            ]
+        };
+
+        let totalRows = 0;
+
+        const rows = this.dbStats.totalRows.map((r) =>{
+
+            totalRows += r.rows;
+
+            return [
+                {"content":r.table, "className": "text-left"},
+                r.rows
+            ]
+        });
+
+        rows.push([
+            {"className": "team-none", "content": "Totals"},
+            {"className": "team-none", "content": totalRows},
+        ]);
+
+
+        const table = new UITable(this.content, tableOptions, rows);
+
+
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        this.renderStats();
     }
 }

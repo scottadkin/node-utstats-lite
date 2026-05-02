@@ -452,3 +452,17 @@ function stripFileExtension(name){
 
     return result[1];
 }
+
+
+function toByteString(size){
+
+    if(size > 1024 * 1024){
+        size = `${(size / (1024 * 1024)).toFixed(2)} MiB`;
+    }else if(size > 1024){
+        size = `${(size / 1024).toFixed(2)} KiB`;
+    }else{
+        size = `${size} Bytes`;
+    }
+
+    return size;
+}

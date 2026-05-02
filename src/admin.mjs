@@ -442,6 +442,6 @@ export async function getSQLiteStats(){
 
     }
 
-    return {"fileSize": dbStats.size, "accessTime": dbStats.atimeMs, "modifiedTime": dbStats.mtimeMs, totalRows};
+    return {"fileSize": dbStats.size, "modifiedTime": dbStats.mtimeMs, totalRows};
    
 }
