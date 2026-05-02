@@ -96,6 +96,7 @@ export async function getMultiplePlayersMasterId(names){
     const query = `SELECT id,name FROM nstats_players WHERE name IN (?)`;
     const result = await simpleQuery(query, [names]);
 
+
     const promises = [];
 
     const players = [];
@@ -214,6 +215,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate, gam
         ]);
 
     }
+
 
     const query = `INSERT INTO nstats_match_players (
         player_id, spectator, ip, country, hwid,

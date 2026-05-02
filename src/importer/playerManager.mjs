@@ -216,7 +216,16 @@ export class PlayerManager{
             p.disconnect(matchEnd, matchStart, null);
 
             if(bImportRandomizeNames){
+
+                const index = this.playerNames.indexOf(p.name);
+
                 p.name = createRandomString(20);
+
+                if(index !== -1){
+                    this.playerNames[index] = p.name;
+                }else{
+                    new Message(`Failed to find this.playerNames index for value ${p.name}`,"warning");
+                }          
             }
         }
 
@@ -495,6 +504,7 @@ export class PlayerManager{
     async setPlayerMasterIds(){
 
         const masterIds = await getMultiplePlayersMasterId(this.playerNames);
+
 
         for(let i = 0; i < this.players.length; i++){
 
