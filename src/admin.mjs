@@ -6,6 +6,7 @@ import archiver from "archiver";
 import fs from "fs";
 import unzipper from "unzipper";
 import {toMYSQLDateTime} from "./generic.mjs";
+import { backup, DatabaseSync } from "node:sqlite";
 
 const DELETE_TABLES = [
     "classic_weapon_match_stats",
@@ -444,4 +445,21 @@ export async function getSQLiteStats(){
 
     return {"fileSize": dbStats.size, "modifiedTime": dbStats.mtimeMs, totalRows};
    
+}
+
+
+export async function createSQLiteBackup(){
+
+    const db = new DatabaseSync("./data/main.db");
+
+    const backupName = createBackupDirName();
+
+    const result = await backup(db, `./backups/sqlite/${backupName}.db`,{
+        "progress": ({ totalPages, remainingPages }) => {
+            console.log('Backup in progress', { totalPages, remainingPages });
+        }
+    });
+
+    return backupName;
+
 }

@@ -673,10 +673,10 @@ class UINotification{
         this.closeButton.className = "small-button margin-bottom-1";
 
 
-        this.dateElem = UIDiv("tiny-font");
+        this.dateElem = UIDiv("notification-date");
         this.dateElem.append(this.date);
 
-        this.wrapper.append(this.title, this.elem, this.closeButton, this.dateElem);
+        this.wrapper.append(this.dateElem, this.title, this.elem, this.closeButton);
 
         this.parent.append(this.wrapper);
 

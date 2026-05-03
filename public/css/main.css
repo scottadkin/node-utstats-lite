@@ -1061,6 +1061,13 @@ canvas{
 	font-size:var(--font-size-1);
 }
 
+.notification-date{
+	font-size:12px;
+	padding:5px;
+	border-top:1px solid var(--border-color-1);
+	border-bottom:1px solid var(--border-color-1);
+	background-color:rgba(0,0,0,0.25);
+}
 
 .calendar-heatmap{
 	background-color:var(--bg-color-mid);

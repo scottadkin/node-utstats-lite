@@ -5,8 +5,11 @@ config.mjs
 test.mjs
 backups/*
 !backups/delete.me
-restore-from/*
+backups/sqlite/*
+!backups/sqlite/
+!backups/sqlite/delete.me
 !restore-from/delete.me
+restore-from/*
 test.db
 test.db-journal
 data/*.db

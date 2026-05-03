@@ -4180,7 +4180,9 @@ class AdminSQLiteBackupManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "stats";
+        this.mode = "create-backup";
+
+        this.bBackupInProgress = false;
 
         this.createTabs();
 
@@ -4207,7 +4209,12 @@ class AdminSQLiteBackupManager{
         this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
-  
+
+            if(this.bBackupInProgress){
+                this.tabs.setMode(this.mode);
+                return;
+            }
+
             this.mode = e.detail.newTab;
             this.render();
         });
@@ -4235,7 +4242,43 @@ class AdminSQLiteBackupManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed to load sqlite stats", err.toString());
+            new UINotification(this.parent, "error", "Failed To Load SQLite Stats", err.toString());
+        }
+    }
+
+    async createBackup(){
+
+        try{
+
+            if(this.bBackupInProgress){
+                new UINotification(this.parent, "warning", "Please Wait", "Backup already in progress, please wait.");
+                return;
+            }
+
+            this.bBackupInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "create-sqlite-backup"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Backup Created", `Backup created and saved as ./backups/sqlite/${res}.db`);
+
+            console.log(res);
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Create SQLite Backup", err.toString());
+
+        }finally{
+
+            this.bBackupInProgress = false;
         }
     }
 
@@ -4299,6 +4342,19 @@ class AdminSQLiteBackupManager{
         info.append("Create a backup of your database with SQLite's built in backup creation.");
 
         this.content.append(info);
+
+        const form = UIDiv("form");
+
+        const button = document.createElement("button");
+        button.className = "submit-button";
+        button.append("Create Backup");
+        button.addEventListener("click", () =>{
+            this.createBackup();
+        });
+
+        form.append(button);
+
+        this.content.append(form);
     }
 
     renderSavedBackups(){
@@ -4307,7 +4363,7 @@ class AdminSQLiteBackupManager{
         const info = UIDiv("info");
 
         info.append("These are the backups you currently have for your node-utstats-lite.");
-        this.content.append(info);
+        this.content.append(info);      
     }
 
     render(){

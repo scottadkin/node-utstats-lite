@@ -9,7 +9,7 @@ import { mapScreenshotQuality } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
 import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
-import { clearAllDataTables, createArchivedBackup, createDatabaseBackup, getAllBackupsInfo, getAllDatabaseTableInfo, getSQLiteStats, restoreDatabase } from "../admin.mjs";
+import { clearAllDataTables, createArchivedBackup, createDatabaseBackup, createSQLiteBackup, getAllBackupsInfo, getAllDatabaseTableInfo, getSQLiteStats, restoreDatabase } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
@@ -294,7 +294,6 @@ export default class AdminJSONManager{
 
                 return this.createArchivedBackup();
 
-                //return this.res.json(await createArchivedBackup());
             }else if(this.mode === "restore-database"){
 
                 if(this.req.body.targetBackup === undefined){
@@ -308,6 +307,12 @@ export default class AdminJSONManager{
             }else if(this.mode === "load-sqlite-stats"){
 
                 const result = await getSQLiteStats();
+                return this.res.json(result);
+
+            }else if(this.mode === "create-sqlite-backup"){
+
+                const result = await createSQLiteBackup();
+
                 return this.res.json(result);
             }
 
