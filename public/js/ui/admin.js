@@ -4267,7 +4267,7 @@ class AdminSQLiteBackupManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Backup Created", `Backup created and saved as ./backups/sqlite/${res}.db`);
+            new UINotification(this.parent, "pass", "Backup Created", `Backup created and saved as ./backups/sqlite/${res}.gz`);
 
             console.log(res);
 

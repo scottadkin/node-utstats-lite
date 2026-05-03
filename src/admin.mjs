@@ -1,12 +1,15 @@
 import { bulkInsert, mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
 import { mysqlSettings, SQL_MODE } from "../config.mjs";
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { createReadStream, createWriteStream } from "node:fs";
 import Message from "./message.mjs";
 import archiver from "archiver";
 import fs from "fs";
 import unzipper from "unzipper";
 import {toMYSQLDateTime} from "./generic.mjs";
 import { backup, DatabaseSync } from "node:sqlite";
+import { createGzip } from 'node:zlib';
+import { pipeline } from 'node:stream/promises';
 
 const DELETE_TABLES = [
     "classic_weapon_match_stats",
@@ -447,6 +450,13 @@ export async function getSQLiteStats(){
    
 }
 
+async function createCompressedSQLiteBackup(input, output) {
+  const gzip = createGzip();
+  const source = createReadStream(input);
+  const destination = createWriteStream(output);
+  return await pipeline(source, gzip, destination);
+}
+
 
 export async function createSQLiteBackup(){
 
@@ -459,6 +469,9 @@ export async function createSQLiteBackup(){
             console.log('Backup in progress', { totalPages, remainingPages });
         }
     });
+
+    await createCompressedSQLiteBackup(`./backups/sqlite/${backupName}.db`, `./backups/sqlite/${backupName}.gz`);
+    await rm(`./backups/sqlite/${backupName}.db`);
 
     return backupName;
 
