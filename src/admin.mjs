@@ -1,7 +1,7 @@
 import { bulkInsert, mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
 import { mysqlSettings, SQL_MODE } from "../config.mjs";
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
-import { createReadStream, createWriteStream } from "node:fs";
+import { createReadStream, createWriteStream, fstat } from "node:fs";
 import Message from "./message.mjs";
 import archiver from "archiver";
 import fs from "fs";
@@ -475,4 +475,26 @@ export async function createSQLiteBackup(){
 
     return backupName;
 
+}
+
+export async function getSQLiteBackups(){
+
+    const DIR = "./backups/sqlite/";
+
+    const files = await readdir(DIR);
+
+    const backups = [];
+
+    const reg = /^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}.gz$/i;
+
+    for(let i = 0; i < files.length; i++){
+
+        if(reg.test(files[i])){
+            //backups.push(files[i]);
+            const stats = await stat(`${DIR}${files[i]}`);
+            backups.push({"name": files[i], stats});
+        }
+    }
+
+    return backups;
 }

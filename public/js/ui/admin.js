@@ -4180,7 +4180,7 @@ class AdminSQLiteBackupManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "create-backup";
+        this.mode = "saved-backups";
 
         this.bBackupInProgress = false;
 
@@ -4294,11 +4294,11 @@ class AdminSQLiteBackupManager{
         const basicRows = [
             [
                 {"content":"File Size", "className": "text-left"},
-                toByteString(this.dbStats.fileSize)
+                toByteString(this.dbStats.sqliteStats.fileSize)
             ],
             [
                 "Last Modified",
-                {"content": this.dbStats.modifiedTime, "parse": ["date"], "className": "date"}
+                {"content": this.dbStats.sqliteStats.modifiedTime, "parse": ["date"], "className": "date"}
             ]
         ];
 
@@ -4312,7 +4312,7 @@ class AdminSQLiteBackupManager{
 
         let totalRows = 0;
 
-        const rows = this.dbStats.totalRows.map((r) =>{
+        const rows = this.dbStats.sqliteStats.totalRows.map((r) =>{
 
             totalRows += r.rows;
 
@@ -4362,8 +4362,30 @@ class AdminSQLiteBackupManager{
         if(this.mode !== "saved-backups") return;
         const info = UIDiv("info");
 
-        info.append("These are the backups you currently have for your node-utstats-lite.");
-        this.content.append(info);      
+        info.append(
+            "These are the backups you currently have for your node-utstats-lite install.",
+            UIBr(),
+            "SQLite backups are located in the website's ",
+            UIB("/backups/sqlite/"), ` folder.`
+        );
+        this.content.append(info);    
+        
+        const tableOptions = {
+            "headers": [
+                "File", "Last Modified", "Size"
+            ]
+        };
+
+        const rows = this.dbStats.backups.map((b) =>{
+            return [
+                {"content": b.name, "className": "text-left"},
+                {"content": b.stats.mtimeMs, "parse": ["date"], "className": "date"},
+                toByteString(b.stats.size)
+            ];
+        });
+        
+
+        new UITable(this.content, tableOptions, rows);
     }
 
     render(){
