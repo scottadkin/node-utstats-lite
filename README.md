@@ -1,37 +1,38 @@
-## Node UTStats Lite
-Unreal Tournament stats website for the https://github.com/rxut/UTStatsLite mutator
+# Node UTStats Lite
+Unreal Tournament stats website using express for the https://github.com/rxut/UTStatsLite mutator, using either MYSQL or SQLite for the database.
 
-## Main Features
-### Match Reports 
+# Main Features
+
+## Match Reports 
 Covering various events like CTF summary, Domiation summary, Frags summary, Special events, Weapon events, Damage summary(requires optional mutator), Kills match up, and many more. 
-### Match Screenshots System 
+## Match Screenshots System 
 Website pages can display screenshots based on match data to recreate the scoreboards in Unreal Tournament.
-### Player Profiles 
+## Player Profiles 
 Displaying various detailed stats, from gametype totals, winrates, match records, ctf stats with various filtering options, ctf league, rankings, recent matches, item & weapon summaries.
-### Players Page
+## Players Page
 Search for players and order results by various options.
-### Records Page
+## Records Page
 There are numerous different record types for both lifetime totals and single match records, such as most kills, deaths, longest spree, best multi kill, headshots and more. Records are also split by gametype and lifetime for more useful data.
-### Maps Page
+## Maps Page
 Search for a map by name.
-### Map Page
+## Map Page
 Each map has it's own page displaying items such as basic summary, weapons summary, player rankings, player ctf league, recent matches, top player averages based on events per minute.
-### Home Page 
+## Home Page 
 Displays recent matches, servers, maps, players, social media links, and a customizable welcome message.
-### Watchlist Page
+## Watchlist Page
 Displays your saved matches and players, you can add matches or players by clicking add to my watchlist buttons on match reports or player profiles. Data is saved to your browsers localstorage.
-### Player Rankings System 
+## Player Rankings System 
 Players are rewarded points for certain events in matches and then divided by playtime, you can be compared with other players for unique gametypes, and maps. 
 The values for these events are customizable in the admin area, you can also set time penalities to reduce player scores if they are under different playtimes, add minimum matches played before players are visible in a table, gametypes and maps have separate minimum matches played settings. 
-### CTF League System 
+## CTF League System 
 Players can compete with each other to try and top a football inspired league table system awarding 3 points for a win, 1 point for a draw, and 0 points for a loss. There are multiple customizable settings like last active, max matches(only the most recent games in the range are counted) to prevent players who have just played the most matches from being on top of the table. There are tables for gametypes, maps, and lifetime(any ctf gametype and any map). This works best in a pug environment.
-### Admin Control Panel
+## Admin Control Panel
 Admins can add ftp/sftp servers, adjust page settings, upload map screenshots, adjust ranking settings.
-### SFTP & FTP Support
+## SFTP & FTP Support
 You can use both FTP and SFTP to download utstats logs in regular intervals, there is no limit to how many servers you can add. Each server also has customizable settings like: ignore duplicate logs, ignore bots, append team sizes to gametype names, minimum players, and minimum playtime.
-### Customizable Pages 
+## Customizable Pages 
 Admins can decide what is displayed, how many of said item displays, and what display method such as table view or rich view.
-### Basic Metadata
+## Basic Metadata
 Each page, match report, player profile, map page, have unique info about them for better link sharing, matches is also display a simplified map screenshot of the match result in apps such as discord.
 
 ## Critical Vulnerability v1.2.0-v1.8.0(Next.js Website) React2Shell
@@ -42,13 +43,14 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 
 ## Requirements 
 - MYSQL Server
-- Node.js 18.X or later
+- Node.js 22.5 or later
 
 **Note:** If you are upgrading from a version prior to v1.5.1 you also need to update the utstats-lite-mutator
 
 ## Upgrade Restrictions
 - Versions 1.0.0 -> 1.8.x are compatible with each other(Next.js Website).
 - Versions 2.0.0 and greater are compatible with each other.(Express.js Website)
+- You can not upgrade a mysql install to a sqlite install.
 
 
 ## Installing
@@ -56,8 +58,8 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 - Open a terminal in the folder you extracted to.
 - Run the command **npm install** to install all dependencies.
 - Rename **config.example.mjs** to **config.mjs** 
-- Open **config.mjs** and change the settings to connect to your mysql server.
-- If you are using an **ARM OS** you will have to follow this(https://github.com/Automattic/node-canvas?tab=readme-ov-file#compiling) additional step to get the canvas package to install otherwise you will get an error message
+- Open **config.mjs** and change the settings to connect to your mysql server, or if you want to use SQLIite instead set **SQL_MODE** to "sqlite".
+- If you are using an **ARM OS** you will have to follow this(https://github.com/Automattic/node-canvas?tab=readme-ov-file#compiling) additional step to get the canvas package to install otherwise you will get an error message.
 - Run the command **node install.mjs** to create the database and other settings.
 
 
