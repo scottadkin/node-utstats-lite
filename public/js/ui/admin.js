@@ -4272,6 +4272,7 @@ class AdminSQLiteBackupManager{
 
             new UINotification(this.parent, "pass", "Backup Created", `Backup created and saved as ./backups/sqlite/${res}.gz`);
 
+            await this.loadData();
             console.log(res);
 
         }catch(err){
