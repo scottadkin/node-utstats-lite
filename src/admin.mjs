@@ -3,7 +3,8 @@ import { mysqlSettings, SQL_MODE } from "../config.mjs";
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { createReadStream, createWriteStream, fstat } from "node:fs";
 import Message from "./message.mjs";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
+
 import fs from "fs";
 import unzipper from "unzipper";
 import {toMYSQLDateTime} from "./generic.mjs";
@@ -263,7 +264,7 @@ export async function createArchivedBackup(callback){
     const dir = `./backups/`;
 
     const output = fs.createWriteStream(dir + `${backupDirName}.zip`);
-    const archive = archiver("zip", {
+    const archive = new ZipArchive("zip", {
         zlib: { level: 9 }, // Sets the compression level.
     });
 
