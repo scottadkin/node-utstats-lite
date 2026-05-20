@@ -21,6 +21,7 @@ import {
 } from "../servers.mjs";
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
+import { testChangeDatabase } from "../database.mjs";
 
 
 
@@ -308,6 +309,7 @@ export default class AdminJSONManager{
 
                 const result = await getSQLiteStats();
                 const backups = await getSQLiteBackups();
+
                 return this.res.json({"sqliteStats": result, backups});
 
             }else if(this.mode === "create-sqlite-backup"){

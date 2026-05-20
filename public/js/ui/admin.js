@@ -4180,9 +4180,11 @@ class AdminSQLiteBackupManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "saved-backups";
+        this.mode = "restore-from-backup";
 
         this.bBackupInProgress = false;
+        this.selectedBackup = "";
+        this.bRestoreInProgress = false;
 
         this.createTabs();
 
@@ -4203,6 +4205,7 @@ class AdminSQLiteBackupManager{
             {"display": "Database Stats", "value": "stats"},
             {"display": "Saved Backups", "value": "saved-backups"},
             {"display": "Create Backup", "value": "create-backup"},
+            {"display": "Restore From Backup", "value": "restore-from-backup"},
         ];
 
 
@@ -4210,7 +4213,7 @@ class AdminSQLiteBackupManager{
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
-            if(this.bBackupInProgress){
+            if(this.bBackupInProgress || this.bRestoreInProgress){
                 this.tabs.setMode(this.mode);
                 return;
             }
@@ -4373,19 +4376,163 @@ class AdminSQLiteBackupManager{
         const tableOptions = {
             "headers": [
                 "File", "Last Modified", "Size"
-            ]
+            ],
         };
 
         const rows = this.dbStats.backups.map((b) =>{
             return [
                 {"content": b.name, "className": "text-left"},
                 {"content": b.stats.mtimeMs, "parse": ["date"], "className": "date"},
-                toByteString(b.stats.size)
+                toByteString(b.stats.size),
             ];
         });
         
 
         new UITable(this.content, tableOptions, rows);
+    }
+
+
+
+    updateSelectedInfo(){
+        
+        this.selectedInfoElem.innerHTML = "";
+
+        const elem = UIDiv("info");
+        this.selectedInfoElem.append(elem);
+
+        let data = null;
+
+        for(let i = 0; i < this.dbStats.backups.length; i++){
+
+            const b = this.dbStats.backups[i];
+
+            if(b.name !== this.selectedBackup) continue;
+            data = b;
+            break;
+        }
+
+        if(data === null){
+            return elem.append("You have not selected a backup");
+        }
+
+        const elems = [];
+
+        elems.push(
+            UIB(data.name), 
+            UIBr(), 
+            UIBr(),
+            `Backup created ${toDateString(data.stats.birthtimeMs)}`,
+            UIBr(),
+            `Size ${toByteString(data.stats.size)}(compressed)`
+        );
+
+        this.restoreButton = document.createElement("button");
+        this.restoreButton.className = "submit-button";
+        this.restoreButton.append("Restore Database From Backup");
+
+        this.restoreButton.addEventListener("click", () =>{
+            this.restoreFromBackup();
+        });
+
+        this.selectedInfoElem.append(this.restoreButton);
+
+
+        elem.append(...elems);
+    }
+
+    async restoreFromBackup(){
+
+        try{
+
+            if(this.bRestoreInProgress){
+
+                return;
+            }
+
+            this.bRestoreInProgress = true;
+            
+            this.restoreButton.className = "hidden";
+
+            if(this.selectedBackup === ""){
+
+                throw new Error("You have not selected a backup");
+            }
+
+            const req = await fetch("/admin/", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "restore-from-sqlite-backup",
+                    "backup": this.selectedBackup
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+                throw new Error(res.error);
+            }
+
+            console.log(res);
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", `Failed To Restore From Backup`, err.toString());
+        }finally{
+
+            this.bRestoreInProgress = false;
+            this.restoreButton.className = "submit-button";
+        }
+    }
+    renderRestoreFromBackup(){
+
+        if(this.mode !== "restore-from-backup") return;
+
+        const info = UIDiv("info");
+
+        info.append(
+            "Restore the database to a previous backed up state."
+        );
+
+        this.content.append(info);
+
+        const warning = UIDiv("error");
+        const warningTitle = UIDiv("error-title");
+        warningTitle.append("Warning");
+
+        warning.append(warningTitle);
+        warning.append(
+            `- Make sure the importer process is turned off before performing this action.`,
+            UIBr(),
+            `- The site's current database will be swapped with the selected backup, if the current database is locked the process will fail.`
+
+        );
+        this.content.append(warning);
+
+        const form = UIDiv("form");
+
+        const row = UIDiv("form-row");
+
+        row.append(UILabel("Selected Backup"));
+
+        const selectOptions = this.dbStats.backups.map((b) =>{
+            return {"display": b.name, "value": b.name};
+        });
+
+        selectOptions.unshift({"display": "- Please Select A Backup -", "value": ""});
+
+        this.selectedInfoElem = UIDiv("text-center");
+
+        const select = new UISelect(row, selectOptions, "", (e) =>{
+
+            this.selectedBackup = e;
+
+            this.updateSelectedInfo();
+        });
+
+        form.append(row);
+        this.content.append(form, this.selectedInfoElem);
+
     }
 
     render(){
@@ -4395,5 +4542,6 @@ class AdminSQLiteBackupManager{
         this.renderStats();
         this.renderCreateBackup();
         this.renderSavedBackups();
+        this.renderRestoreFromBackup();
     }
 }

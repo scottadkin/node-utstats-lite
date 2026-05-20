@@ -5,9 +5,26 @@ import { DatabaseSync } from 'node:sqlite';
 let database = null;
 
 if(SQL_MODE === "sqlite"){
-    database = new DatabaseSync('./data/main.db');
+    database = new DatabaseSync("./data/main.db");
     database.exec("PRAGMA jounral_mode = WAL;");
     database.exec("PRAGMA busy_timeout = 15000;");
+}
+
+
+
+export function testChangeDatabase(){
+
+    try{
+        
+        database.close();
+
+        database = new DatabaseSync("./data/main.db");
+        database.exec("PRAGMA jounral_mode = WAL;");
+        database.exec("PRAGMA busy_timeout = 15000;");
+
+    }catch(err){
+        console.trace(err);
+    }
 }
 
 
