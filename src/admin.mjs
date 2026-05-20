@@ -1,4 +1,4 @@
-import { bulkInsert, mysqlGetColumnsAsArray, simpleQuery } from "./database.mjs";
+import { bulkInsert, mysqlGetColumnsAsArray, simpleQuery, testChangeDatabase } from "./database.mjs";
 import { mysqlSettings, SQL_MODE } from "../config.mjs";
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { createReadStream, createWriteStream, fstat } from "node:fs";
@@ -8,8 +8,9 @@ import fs from "fs";
 import unzipper from "unzipper";
 import {toMYSQLDateTime} from "./generic.mjs";
 import { backup, DatabaseSync } from "node:sqlite";
-import { createGzip } from 'node:zlib';
+import { createGzip, unzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
+import { promisify } from "node:util";
 
 const DELETE_TABLES = [
     "classic_weapon_match_stats",
@@ -497,4 +498,32 @@ export async function getSQLiteBackups(){
     }
 
     return backups;
+}
+
+
+
+export async function restoreFromSQLiteBackup(backupName){
+
+    const test = await readFile(`./backups/sqlite/${backupName}`);
+
+    unzip(test, (err, buffer) => {
+
+        if (err) {
+            console.error('An error occurred:', err);
+            throw new Error(err);
+           // process.exitCode = 1;
+        }
+
+
+        return buffer;
+    });
+
+    const do_unzip = promisify(unzip);
+
+    const content = await do_unzip(test);
+
+    await writeFile(`./data/${backupName}`, content);
+
+    await testChangeDatabase(`./data/${backupName}`);
+    
 }

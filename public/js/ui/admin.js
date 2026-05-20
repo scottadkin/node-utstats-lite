@@ -4475,6 +4475,8 @@ class AdminSQLiteBackupManager{
 
             console.log(res);
 
+            new UINotification(this.parent, "pass", `Restore Complete`, `Restore from backup completed`);
+
         }catch(err){
             console.trace(err);
             new UINotification(this.parent, "error", `Failed To Restore From Backup`, err.toString());
@@ -4504,7 +4506,9 @@ class AdminSQLiteBackupManager{
         warning.append(
             `- Make sure the importer process is turned off before performing this action.`,
             UIBr(),
-            `- The site's current database will be swapped with the selected backup, if the current database is locked the process will fail.`
+            `- The site's current database will be swapped with the selected backup, if the current database is locked the process will fail.`,
+            UIBr(),
+            "- Your current login session may become invalid after restore is complete."
 
         );
         this.content.append(warning);

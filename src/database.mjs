@@ -1,6 +1,7 @@
 import mysql from "mysql2/promise";
 import { mysqlSettings, SQL_MODE} from "../config.mjs";
 import { DatabaseSync } from 'node:sqlite';
+import { rename } from "node:fs/promises";
 
 let database = null;
 
@@ -12,11 +13,14 @@ if(SQL_MODE === "sqlite"){
 
 
 
-export function testChangeDatabase(){
+export async function testChangeDatabase(newFileURL){
 
     try{
-        
+
         database.close();
+
+        await rename("./data/main.db", "./data/main.old");
+        await rename(newFileURL, `./data/main.db`);
 
         database = new DatabaseSync("./data/main.db");
         database.exec("PRAGMA jounral_mode = WAL;");
