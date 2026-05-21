@@ -382,7 +382,13 @@ export function sanitizePagePerPage(page, perPage){
     if(page !== page || perPage !== perPage) throw new Error(`Page and perPage must be valid integers`);
     page--;
     if(page < 0) page = 0;
-    if(perPage < 5 || perPage > 100) perPage = 50;
+
+    if(perPage < 5){
+        perPage = 5;
+    }else if(perPage > 100){
+        perPage = 100;
+    }
+    
 
     let start = page * perPage;
 

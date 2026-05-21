@@ -174,11 +174,37 @@ export async function getTotalMatches(server, gametype, map){
     return 0;
 }
 
-export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype, map){
+export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype, map, bHomePage){
 
     const DEFAULT_PER_PAGE = 50;
 
-    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+    let page = 0;
+    let perPage = 0;
+    let start = 0;
+
+    if(!bHomePage){
+
+        [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+
+    }else{
+
+        page = 0;
+        perPage = parseInt(dirtyPerPage);
+
+        if(perPage !== perPage){
+
+            perPage = 5;
+
+        }else{
+
+            if(perPage < 1){
+                perPage = 1;
+            }else if(perPage > 100){
+                perPage = 100;
+            }
+        }
+
+    }
 
     server = parseInt(server);
     gametype = parseInt(gametype);

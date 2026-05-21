@@ -18,7 +18,7 @@ export async function renderHomePage(req, res, userSession){
 
         let perPage = pageSettings["Total Recent Matches"] ?? 5;
 
-        const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0);
+        const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0, true);
 
         let screenshotData = null;
 
