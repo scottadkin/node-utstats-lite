@@ -1556,17 +1556,18 @@ export async function adminGetForceNamesData(){
     ${mt}.mac1,
     ${mt}.mac2,
     ${pt}.name,
+    ${pt}.country,
     MIN(${mt}.match_date) as first_seen,
     MAX(${mt}.match_date) as last_seen, COUNT(*) as total_matches 
     FROM nstats_match_players 
     LEFT JOIN ${pt} ON ${mt}.player_id = ${pt}.id
+    WHERE ${mt}.spectator=0 AND ${mt}.bot=0
     GROUP BY 
     ${mt}.player_id,
-    ${mt}.ip,
-    ${mt}.country,
     ${mt}.hwid,
     ${mt}.mac1,
-    ${mt}.mac2`;
+    ${mt}.mac2
+    ORDER BY ${pt}.name ASC`;
 
     return await simpleQuery(query);
     

@@ -229,13 +229,15 @@ function UITableCell(params){
         elem.colSpan = colSpan;
     }
 
+    if(className !== "") elem.className = className;
+
     if(Array.isArray(content)){
 
         elem.append(...content);
         return elem;
     }
 
-    if(className !== "") elem.className = className;
+    
 
     if(params.id !== undefined) elem.id = params.id;
 
@@ -1595,6 +1597,15 @@ class UITable{
 
             this.elem.append(row);
         }
+    }
+
+    updateRows(newRows){
+
+        this.data = newRows;
+        this.elem.innerHTML = ``;
+
+        this.createHeaders();
+        this.createDataRows();
     }
 
 }

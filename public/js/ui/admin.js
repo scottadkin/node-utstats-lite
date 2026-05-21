@@ -4547,10 +4547,11 @@ class AdminPlayerForceName{
 
     constructor(parent, parentMode){
 
+
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "hwid";
+        this.mode = "current";
 
         this.parent.append(this.wrapper);
 
@@ -4558,9 +4559,10 @@ class AdminPlayerForceName{
 
         this.data = [];
        
+        this.createElems();
         this.loadData();
 
-        this.createElems();
+        
     }
 
 
@@ -4582,6 +4584,7 @@ class AdminPlayerForceName{
             }
 
             this.data = res;
+            this.render();
 
         }catch(err){
             console.trace(err);
@@ -4598,12 +4601,19 @@ class AdminPlayerForceName{
     createTabs(){
 
         const tabOptions = [
+            {"display": "Current Data", "value": "current"},
             {"display": "Force By HWID", "value": "hwid"},
             {"display": "Force By MAC Addresses", "value": "mac"},
             {"display": "Force HWID & MAC Addresses", "value": "both"},
         ];
 
         this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.mode = e.detail.newTab;
+            this.render();
+        });
     }
 
     createElems(){
@@ -4628,10 +4638,48 @@ class AdminPlayerForceName{
         row.append(UILabel("Force By"));
 
         this.form.append(row);
+        
 
         this.content.append(this.form);
 
-        this.render();
+        const tableOptions = {
+            "width": 1,
+            "headers": ["Name", "HWID", "MAC1", "MAC2", "Total Matches"]
+        };
+
+        this.table = new UITable(this.content, tableOptions, []);
+
+        this.wrapper.append(this.content);
+
+    }
+
+
+    renderCurrentData(){
+
+        const rows = [];
+
+
+        if(this.mode === "current"){
+
+            for(let i = 0; i < this.data.length; i++){
+
+                const d = this.data[i];
+
+                rows.push([
+                    {
+                        "content": [UICountryFlag(d.country), d.name], 
+                        "className": "text-left"
+                    } ,
+                    d.hwid,
+                    d.mac1,
+                    d.mac2, 
+                    d.total_matches
+                ]);
+            }
+        }
+
+        this.table.updateRows(rows);
+
     }
 
     render(){
@@ -4641,6 +4689,12 @@ class AdminPlayerForceName{
         }else{
             this.wrapper.className = "";
         }
+
+
+        this.renderCurrentData();
+
+        
+
     }
 }
 
