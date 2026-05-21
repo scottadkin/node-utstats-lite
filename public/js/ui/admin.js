@@ -3404,15 +3404,6 @@ class AdminServersManager{
 }
 
 
-class UIAdminFormRow{
-
-    constructor(parent){
-
-        this.parent = parent;
-
-    }
-}
-
 
 class AdminJSONManager{
 
@@ -4548,5 +4539,136 @@ class AdminSQLiteBackupManager{
         this.renderCreateBackup();
         this.renderSavedBackups();
         this.renderRestoreFromBackup();
+    }
+}
+
+
+class AdminPlayerForceName{
+
+    constructor(parent, parentMode){
+
+        this.parent = parent;
+
+        this.wrapper = UIDiv();
+        this.mode = "hwid";
+
+        this.parent.append(this.wrapper);
+
+        this.bActive = parentMode === "force-name";
+       
+
+        this.createElems();
+    }
+
+    setActive(value){
+        this.bActive = value;
+        this.render();
+    }
+
+    createTabs(){
+
+        const tabOptions = [
+            {"display": "Force By HWID", "value": "hwid"},
+            {"display": "Force By MAC Addresses", "value": "mac"},
+            {"display": "Force HWID & MAC Addresses", "value": "both"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
+    }
+
+    createElems(){
+
+        this.info = UIDiv("info");
+
+        this.info.append(
+            `Force a player's name by overriding the name used in the stats logs.`,
+            UIBr(), 
+            `You can assign an override name by `, UIB(` HWID, `),
+            UIB(`MAC1 & MAC2, or HWID With MAC1 & MAC2`));
+        
+
+        this.wrapper.append(this.info);
+        this.createTabs();
+        this.content = UIDiv();
+        
+
+        this.form = UIDiv("form");
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Force By"));
+
+        this.form.append(row);
+
+        this.content.append(this.form);
+
+        this.render();
+    }
+
+    render(){
+
+        if(!this.bActive){
+            this.wrapper.className = "hidden";
+        }else{
+            this.wrapper.className = "";
+        }
+    }
+}
+
+class AdminPlayersManager{
+
+    constructor(parent){
+
+        this.parent = document.querySelector(parent);
+
+        this.wrapper = UIDiv();
+        
+        this.parent.append(this.wrapper);
+        this.mode = "force-name";
+
+
+        this.forceNameManager = new AdminPlayerForceName(this.parent, this.mode);
+
+        UIHeader(this.wrapper, "Player Manager");
+
+        this.createTabs();
+        this.content = UIDiv();
+
+        this.wrapper.append(this.content);
+
+        this.render();
+    }
+
+    createTabs(){
+
+        const tabOptions = [
+            {"display": "Force Player Name", "value": "force-name"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.forceNameManager.setActive(e.detail.newTab === "force-name");
+       
+            
+            this.mode = e.detail.newTab;
+            
+        });
+    }
+
+
+    renderForceName(){
+
+        if(this.mode !== "force-name") return;
+
+        this.forceNameManager.render();
+    
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        this.renderForceName();
     }
 }

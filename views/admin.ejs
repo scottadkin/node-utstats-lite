@@ -55,7 +55,12 @@ const modes = [
         "display": (SQL_MODE === "mysql") ? "MYSQL Database Backup Manager" : "SQLite Database Backup Manager" ,
         "value": (SQL_MODE === "mysql") ? "database-backup" : "sqlite-database-backup",
         "description": backupDescription
-    }
+    },
+    {
+        "display": "Player Manager",
+        "value": "players",
+        "description": "Player manager description"
+    },
 ];
 
 modes.sort((a, b) =>{
@@ -141,6 +146,8 @@ function renderCategory(mode){
         %><script>new AdminMYSQLBackupManager("#root");</script><%
     }else if(mode === "sqlite-database-backup"){
         %><script>new AdminSQLiteBackupManager("#root")</script><%
+    }else if(mode === "players"){
+        %><script>new AdminPlayersManager("#root")</script><%
 
     }
 }
