@@ -1522,6 +1522,10 @@ class UITable{
         
     }
 
+    updateClassName(newValue){
+
+        this.elem.className = newValue;
+    }
 
     bOptionExist(key){
         return this.optionKeys.indexOf(key) !== -1;

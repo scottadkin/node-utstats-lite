@@ -4552,12 +4552,14 @@ class AdminPlayerForceName{
 
         this.wrapper = UIDiv();
         this.mode = "current";
+        this.selectedHWID = "";
 
         this.parent.append(this.wrapper);
 
         this.bActive = parentMode === "force-name";
 
         this.data = [];
+        this.uniqueHWIDS = [];
        
         this.createElems();
         this.loadData();
@@ -4584,6 +4586,33 @@ class AdminPlayerForceName{
             }
 
             this.data = res;
+
+            const hwids = new Set();
+
+            for(let i = 0; i < this.data.length; i++){
+
+                const d = this.data[i];
+                if(d.hwid !== "" && d.hwid !== "N/A"){
+                    hwids.add(d.hwid)
+                }
+            }
+
+            this.uniqueHWIDS = [...hwids];
+
+            this.uniqueHWIDS.sort((a, b) =>{
+
+                a = a.toLowerCase();
+                b = b.toLowerCase();
+
+                if(a < b){
+                    return -1;
+                }else if(a > b){
+                    return 1;
+                }
+
+                return 0;
+            });
+
             this.render();
 
         }catch(err){
@@ -4633,11 +4662,6 @@ class AdminPlayerForceName{
         
 
         this.form = UIDiv("form");
-
-        const row = UIDiv("form-row");
-        row.append(UILabel("Force By"));
-
-        this.form.append(row);
         
 
         this.content.append(this.form);
@@ -4661,6 +4685,8 @@ class AdminPlayerForceName{
 
         if(this.mode === "current"){
 
+            this.table.updateClassName("");
+
             for(let i = 0; i < this.data.length; i++){
 
                 const d = this.data[i];
@@ -4676,10 +4702,58 @@ class AdminPlayerForceName{
                     d.total_matches
                 ]);
             }
+        }else{
+            this.table.updateClassName("hidden");
         }
 
         this.table.updateRows(rows);
 
+    }
+
+
+    updateHWIDInfo(){
+
+        this.hwidInfoElem.innerHTML = "";
+
+        if(this.selectedHWID === ""){
+            this.hwidInfoElem.append("No HWID selected");
+            return;
+        }
+
+        //display used by info here
+        this.hwidInfoElem.append(this.selectedHWID);
+    }
+
+    renderForceByHWID(){
+
+        if(this.mode !== "hwid") return;
+
+        this.form.innerHTML = "";
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Target HWID"));
+
+        const hwids = this.uniqueHWIDS.map((h) =>{
+
+            return {"display": h, "value": h};
+
+        });
+
+        hwids.unshift({"display": "- Please Select A HWID -", "value": ""});
+
+        this.hwidInfoElem = UIDiv("info");
+        this.hwidInfoElem.append("No HWID selected");
+
+        const select = new UISelect(row, hwids, this.selectedHWID, (e) =>{
+            console.log(e);
+            this.selectedHWID = e;
+            this.updateHWIDInfo();
+        });
+
+
+
+        this.form.append(row, UIBr());
+        this.form.append(this.hwidInfoElem);
     }
 
     render(){
@@ -4692,6 +4766,7 @@ class AdminPlayerForceName{
 
 
         this.renderCurrentData();
+        this.renderForceByHWID();
 
         
 
