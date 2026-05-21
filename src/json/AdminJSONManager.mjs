@@ -22,6 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
+import { adminGetForceNamesData } from "../players.mjs";
 
 
 
@@ -326,6 +327,11 @@ export default class AdminJSONManager{
 
                 return this.res.json({"message": "passed"});
 
+            }else if(this.mode === "load-admin-force-names-data"){
+
+                const result = await adminGetForceNamesData();
+
+                return this.res.json(result);
             }
 
 

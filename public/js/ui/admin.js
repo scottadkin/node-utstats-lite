@@ -4555,9 +4555,39 @@ class AdminPlayerForceName{
         this.parent.append(this.wrapper);
 
         this.bActive = parentMode === "force-name";
+
+        this.data = [];
        
+        this.loadData();
 
         this.createElems();
+    }
+
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-admin-force-names-data"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+
+                throw new Error(res.error);
+            }
+
+            this.data = res;
+
+        }catch(err){
+            console.trace(err);
+
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString())
+        }
     }
 
     setActive(value){

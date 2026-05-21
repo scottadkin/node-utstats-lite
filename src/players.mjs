@@ -1541,3 +1541,33 @@ export async function getNamesAndHashesById(playerIds){
 
     return data;
 }
+
+
+export async function adminGetForceNamesData(){
+
+    const mt = "nstats_match_players";
+    const pt = "nstats_players";
+
+    const query = `SELECT 
+    ${mt}.player_id,
+    ${mt}.ip,
+    ${mt}.country,
+    ${mt}.hwid,
+    ${mt}.mac1,
+    ${mt}.mac2,
+    ${pt}.name,
+    MIN(${mt}.match_date) as first_seen,
+    MAX(${mt}.match_date) as last_seen, COUNT(*) as total_matches 
+    FROM nstats_match_players 
+    LEFT JOIN ${pt} ON ${mt}.player_id = ${pt}.id
+    GROUP BY 
+    ${mt}.player_id,
+    ${mt}.ip,
+    ${mt}.country,
+    ${mt}.hwid,
+    ${mt}.mac1,
+    ${mt}.mac2`;
+
+    return await simpleQuery(query);
+    
+}
