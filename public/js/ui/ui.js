@@ -815,8 +815,7 @@ class UISelect{
 
         for(let i = 0; i < this.select.length; i++){
 
-            this.select[i].selected = this.select[i].value === newValue;
-            
+            this.select[i].selected = this.select[i].value === newValue;      
         }
     }
 
@@ -832,6 +831,13 @@ class UISelect{
             if(value == this.initialValue) elem.selected = true;
             this.select.append(elem);
         }
+    }
+
+    updateOptions(newOptions){
+
+        this.options = newOptions;
+        this.select.innerHTML = "";
+        this.createOptions();
     }
 }
 

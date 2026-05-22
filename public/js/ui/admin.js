@@ -4551,8 +4551,9 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "current";
+        this.mode = "hwid";
         this.selectedHWID = "";
+        this.hwidSearch = "";
 
         this.parent.append(this.wrapper);
 
@@ -4724,6 +4725,26 @@ class AdminPlayerForceName{
         this.hwidInfoElem.append(this.selectedHWID);
     }
 
+
+    filterHWIDSelect(){
+
+        const options = [{"display": "- Please Select A HWID -", "value": ""}];
+
+        const search = this.hwidSearch.toLowerCase();
+
+        for(let i = 0; i < this.uniqueHWIDS.length; i++){
+
+            const h = this.uniqueHWIDS[i].toLowerCase();
+
+            if(h.includes(search)){
+                options.push({"display": h, "value": h});
+            }
+
+        }
+
+        this.hwidSelect.updateOptions(options);
+    }
+
     renderForceByHWID(){
 
         if(this.mode !== "hwid") return;
@@ -4733,27 +4754,31 @@ class AdminPlayerForceName{
         const row = UIDiv("form-row");
         row.append(UILabel("Target HWID"));
 
-        const hwids = this.uniqueHWIDS.map((h) =>{
-
-            return {"display": h, "value": h};
-
-        });
-
-        hwids.unshift({"display": "- Please Select A HWID -", "value": ""});
+        const hwids = [];
 
         this.hwidInfoElem = UIDiv("info");
         this.hwidInfoElem.append("No HWID selected");
 
-        const select = new UISelect(row, hwids, this.selectedHWID, (e) =>{
-            console.log(e);
+        this.hwidSelect = new UISelect(row, hwids, this.selectedHWID, (e) =>{
             this.selectedHWID = e;
             this.updateHWIDInfo();
         });
 
+        this.filterHWIDSelect();
+
+        const search = UIFormInputRow("Filter", "id", "text", this.hwidSearch, "placeholder", (e) =>{
+            this.hwidSearch = e;
+            this.selectedHWID = "";
+            this.updateHWIDInfo();
+
+            this.filterHWIDSelect();
+        })
 
 
-        this.form.append(row, UIBr());
+        this.form.append(search, row, UIBr());
         this.form.append(this.hwidInfoElem);
+
+        
     }
 
     render(){
@@ -4764,6 +4789,7 @@ class AdminPlayerForceName{
             this.wrapper.className = "";
         }
 
+        this.form.innerHTML = "";
 
         this.renderCurrentData();
         this.renderForceByHWID();
