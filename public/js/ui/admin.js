@@ -4590,8 +4590,6 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
-            console.log(res);
-
             this.usage = res.usage;
             this.hwidToNames = res.hwidToNames;
 
@@ -4668,7 +4666,8 @@ class AdminPlayerForceName{
             `Force a player's name by overriding the name used in the stats logs.`,
             UIBr(), 
             `You can assign an override name by `, UIB(` HWID, `),
-            UIB(`MAC1 & MAC2, or HWID With MAC1 & MAC2`));
+            UIB(`MAC1 & MAC2, or HWID With MAC1 & MAC2.`), UIBr(), 
+            UIB(`Note: `), `You can not force a name to an empty hwid/mac value, or to a hwid that's value is N/A`);
         
 
         this.wrapper.append(this.info);
@@ -4719,12 +4718,22 @@ class AdminPlayerForceName{
         ];
 
         const t = new UITable(this.form, tableOptions, rows);
-
-
-
-
     }
 
+
+    getNameForcedToHWID(target){
+
+
+        for(let i = 0; i < this.hwidToNames.length; i++){
+
+            const h = this.hwidToNames[i];
+
+            if(h.hwid == target) return h;
+
+        }
+
+        return null;
+    }
 
     updateHWIDInfo(){
 
@@ -4738,6 +4747,16 @@ class AdminPlayerForceName{
         const target = this.selectedHWID.toLowerCase();
 
         UIHeader(this.hwidInfoElem, "Selected HWID History");
+
+        const forcedName = this.getNameForcedToHWID(target);
+
+        if(forcedName !== null){
+
+            const error = UIDiv("error");
+            error.append(`HWID is already forced to `, UIB(forcedName.name));
+
+            this.hwidInfoElem.append(error);
+        }
 
         const matches = [];
 
@@ -4802,6 +4821,7 @@ class AdminPlayerForceName{
         for(let i = 0; i < this.uniqueHWIDS.length; i++){
 
             const h = this.uniqueHWIDS[i].toLowerCase();
+            
 
             if(h.includes(search)){
                 options.push({"display": h, "value": h});
@@ -4821,6 +4841,7 @@ class AdminPlayerForceName{
                 throw new Error("Please Wait For Previous Action To Complete");
                 return;
             }
+
             this.bActionInProgress = true;
 
             const req = await fetch("/admin", {
@@ -4835,11 +4856,15 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
+            new UINotification(this.parent, "pass", "HWID Forced To Use Name", "Changes saved successfully");
+            this.selectedHWID = "";
+
         }catch(err){
             console.trace(err);
             new UINotification(this.parent, "error", "Failed To Force HWID To Use Name", err.toString())
         }finally{
 
+            await this.loadData();
             this.bActionInProgress = false;
         }
     }
