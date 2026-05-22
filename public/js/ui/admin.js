@@ -4735,6 +4735,43 @@ class AdminPlayerForceName{
         return null;
     }
 
+    async deleteForceHWIDToName(){
+
+        try{
+
+            if(this.bActionInProgress){
+                throw new Error("Please wait for previous action to complete.");
+            }
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "delete-force-hwid-to-name", 
+                    "hwid": this.selectedHWID
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Success", "Forced HWID to name deleted successfully");
+            await this.loadData();
+
+        }catch(err){
+
+            console.trace(err);
+
+            new UINotification(this.parent, "error", "Failed To Delete HWID To Name", err.toString());
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     updateHWIDInfo(){
 
         this.hwidInfoElem.innerHTML = "";
@@ -4753,7 +4790,22 @@ class AdminPlayerForceName{
         if(forcedName !== null){
 
             const error = UIDiv("error");
-            error.append(`HWID is already forced to `, UIB(forcedName.name));
+            
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "submit-button";
+            deleteButton.append(`Delete Existing HWID To Name`);
+
+            deleteButton.addEventListener("click", () =>{
+                this.deleteForceHWIDToName();
+            });
+
+            error.append(
+                `HWID is already forced to `, 
+                UIB(forcedName.name), UIBr(), UIBr(),
+                "You can delete the existing HWID to name by clicking the button below", 
+                UIBr(), UIBr(),
+                deleteButton);
 
             this.hwidInfoElem.append(error);
         }
@@ -4857,7 +4909,7 @@ class AdminPlayerForceName{
             }
 
             new UINotification(this.parent, "pass", "HWID Forced To Use Name", "Changes saved successfully");
-            this.selectedHWID = "";
+            //this.selectedHWID = "";
 
         }catch(err){
             console.trace(err);

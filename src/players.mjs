@@ -1616,3 +1616,14 @@ export async function adminForceNameOnHWID(hwid, name){
         throw new Error(err);
     }
 }
+
+export async function adminDeleteForceNameToHWID(hwid){
+
+    if(hwid === undefined) throw new Error("HWID is undefined");
+    if(hwid === "") throw new Error("HWID can not be an empty string");
+    if(hwid.toLowerCase() === "n/a") throw new Error("HWID can not be N/A");
+
+    const query = "DELETE FROM nstats_force_name_hwid WHERE hwid=?";
+
+    return await simpleQuery(query, [hwid]);
+}

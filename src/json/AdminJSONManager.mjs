@@ -22,7 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminForceNameOnHWID, adminGetAllForceHWIDToNames, adminGetForceNamesData } from "../players.mjs";
+import { adminDeleteForceNameToHWID, adminForceNameOnHWID, adminGetAllForceHWIDToNames, adminGetForceNamesData } from "../players.mjs";
 
 
 
@@ -341,6 +341,10 @@ export default class AdminJSONManager{
            
                 return this.res.json({"message": "passed", "rowId": result});
                 
+            }else if(this.mode === "delete-force-hwid-to-name"){
+
+                await adminDeleteForceNameToHWID(this.req.body.hwid);
+                return this.res.json({"message": "passed"});
             }
 
 
