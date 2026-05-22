@@ -1573,3 +1573,12 @@ export async function adminGetForceNamesData(){
     return await simpleQuery(query);
     
 }
+
+
+export async function adminGetAllForceHWIDToNames(){
+
+    const query = `SELECT * FROM nstats_force_name_hwid ORDER BY name ASC`;
+    
+    return await simpleQuery(query);
+
+}

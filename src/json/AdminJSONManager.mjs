@@ -22,7 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminGetForceNamesData } from "../players.mjs";
+import { adminGetAllForceHWIDToNames, adminGetForceNamesData } from "../players.mjs";
 
 
 
@@ -329,9 +329,11 @@ export default class AdminJSONManager{
 
             }else if(this.mode === "load-admin-force-names-data"){
 
-                const result = await adminGetForceNamesData();
+                const usage = await adminGetForceNamesData();
+                const hwidToNames = await adminGetAllForceHWIDToNames();
+                console.log(hwidToNames);
 
-                return this.res.json(result);
+                return this.res.json({usage, hwidToNames});
             }
 
 

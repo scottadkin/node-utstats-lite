@@ -4569,7 +4569,9 @@ class AdminPlayerForceName{
     }
 
 
+
     async loadData(){
+        
 
         try{
 
@@ -4586,33 +4588,43 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
-            this.data = res;
+            console.log(res);
+
+            this.usage = res.usage;
+            this.hwidToNames = res.hwidToNames;
 
             const hwids = new Set();
+            const mac1s = new Set();
+            const mac2s = new Set();
+            const names = new Set();
 
-            for(let i = 0; i < this.data.length; i++){
+            for(let i = 0; i < this.usage.length; i++){
 
-                const d = this.data[i];
+                const d = this.usage[i];
                 if(d.hwid !== "" && d.hwid !== "N/A"){
                     hwids.add(d.hwid)
                 }
+
+                if(d.mac1 !== ""){
+                    mac1s.add(d.mac1);
+                }
+
+                if(d.mac2 !== ""){
+                    mac2s.add(d.mac2);
+                }
+
+                names.add(d.name);
             }
 
             this.uniqueHWIDS = [...hwids];
+            this.uniqueMac1s = [...mac1s];
+            this.uniqueMac2s = [...mac2s];
+            this.uniqueNames = [...mac2s];
 
-            this.uniqueHWIDS.sort((a, b) =>{
-
-                a = a.toLowerCase();
-                b = b.toLowerCase();
-
-                if(a < b){
-                    return -1;
-                }else if(a > b){
-                    return 1;
-                }
-
-                return 0;
-            });
+            this.uniqueHWIDS.sort(sortByStringInsensitive);
+            this.uniqueMac1s.sort(sortByStringInsensitive);
+            this.uniqueMac2s.sort(sortByStringInsensitive);
+            this.uniqueNames.sort(sortByStringInsensitive);
 
             this.render();
 
@@ -4681,33 +4693,33 @@ class AdminPlayerForceName{
 
     renderCurrentData(){
 
-        const rows = [];
+        if(this.mode !== "current"){
 
-
-        if(this.mode === "current"){
-
-            this.table.updateClassName("");
-
-            for(let i = 0; i < this.data.length; i++){
-
-                const d = this.data[i];
-
-                rows.push([
-                    {
-                        "content": [UICountryFlag(d.country), d.name], 
-                        "className": "text-left"
-                    } ,
-                    d.hwid,
-                    d.mac1,
-                    d.mac2, 
-                    d.total_matches
-                ]);
-            }
-        }else{
             this.table.updateClassName("hidden");
+            return;
         }
 
-        this.table.updateRows(rows);
+        this.form.innerHTML = "";
+
+
+        const info = UIDiv("info");
+
+        const tableOptions = {
+            "headers": ["Type", "Value"]
+        };
+
+        const rows = [
+            [{"content": `Total Forced HWIDs to Names`, "className": "text-left"}, this.hwidToNames.length],
+            [{"content": `Unique Player Names`, "className": "text-left"}, this.uniqueNames.length],
+            [{"content": `Unique HWIDs`, "className": "text-left"}, this.uniqueHWIDS.length],
+            [{"content": `Unique MAC1 Addresses`, "className": "text-left"}, this.uniqueMac1s.length],
+            [{"content": `Unique MAC2 Addresses`, "className": "text-left"}, this.uniqueMac2s.length],
+        ];
+
+        const t = new UITable(this.form, tableOptions, rows);
+
+
+
 
     }
 
@@ -4726,9 +4738,9 @@ class AdminPlayerForceName{
 
         const matches = [];
 
-        for(let i = 0; i < this.data.length; i++){
+        for(let i = 0; i < this.usage.length; i++){
 
-            const d = this.data[i];
+            const d = this.usage[i];
 
             if(d.hwid.toLowerCase() === target){
                 matches.push(d);
@@ -4820,6 +4832,7 @@ class AdminPlayerForceName{
 
         const search = UIFormInputRow("Filter", "id", "text", this.hwidSearch, "placeholder", (e) =>{
             this.hwidSearch = e;
+
             this.selectedHWID = "";
             this.updateHWIDInfo();
 
