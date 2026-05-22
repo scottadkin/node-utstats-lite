@@ -4715,14 +4715,66 @@ class AdminPlayerForceName{
     updateHWIDInfo(){
 
         this.hwidInfoElem.innerHTML = "";
+        this.hwidInfoElem.className = "info";
 
         if(this.selectedHWID === ""){
             this.hwidInfoElem.append("No HWID selected");
             return;
         }
 
+        const target = this.selectedHWID.toLowerCase();
+
+        const matches = [];
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.hwid.toLowerCase() === target){
+                matches.push(d);
+            }
+        }
+
+        if(matches.length === 0){
+
+            this.hwidInfoElem.append(`No data found for `, UIB(this.selectedHWID), ".");
+            return;
+        }
+
+        const elems = [];
+
+        
+        const rows = [];
+
+        for(let i = 0; i < matches.length; i++){
+
+            const m = matches[i];
+
+            //elems.push(m.name, UIBr());
+
+            rows.push([
+                {"content": [UICountryFlag(m.country), m.name], "className": "text-left"},
+                {"content": m.ip},
+                {"content": m.mac1, "className": "tiny-font"},
+                {"content": m.mac2, "className": "tiny-font"},
+                {"content": m.first_seen, "parse": ["date"], "className": "date tiny-font"},
+                {"content": m.last_seen, "parse": ["date"], "className": "date tiny-font"},
+                {"content": m.total_playtime, "parse": ["mmss"]},
+                {"content": m.total_matches},
+            ]);
+
+        }
+
+        const tableOptions = {
+            "headers": ["Name", "IP", "MAC1", "MAC2", "First Seen", "Last Seen", "Playtime", "Total Matches"]
+        };
+
+        this.hwidInfoElem.className = "";
+
+        const table = new UITable(this.hwidInfoElem, tableOptions, rows);
+
         //display used by info here
-        this.hwidInfoElem.append(this.selectedHWID);
+        this.hwidInfoElem.append(...elems);
     }
 
 

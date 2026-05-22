@@ -1558,7 +1558,8 @@ export async function adminGetForceNamesData(){
     ${pt}.name,
     ${pt}.country,
     MIN(${mt}.match_date) as first_seen,
-    MAX(${mt}.match_date) as last_seen, COUNT(*) as total_matches 
+    MAX(${mt}.match_date) as last_seen, COUNT(*) as total_matches,
+    SUM(${mt}.time_on_server) as total_playtime 
     FROM nstats_match_players 
     LEFT JOIN ${pt} ON ${mt}.player_id = ${pt}.id
     WHERE ${mt}.spectator=0 AND ${mt}.bot=0
