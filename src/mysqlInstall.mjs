@@ -729,6 +729,13 @@ PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_
     setting_type varchar(255) NOT NULL,
     setting_value varchar(255) NOT NULL,
     PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
+
+    `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid(
+        id INT NOT NULL AUTO_INCREMENT,
+        hwid varchar(255) NOT NULL,
+        name varchar(32) NOT NULL,
+        UNIQUE INDEX nfnh_nidx(name),
+    PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 ];
 
 async function bColumnExist(table, column){

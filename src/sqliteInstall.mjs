@@ -730,6 +730,13 @@ const queries = [
         setting_value TEXT NOT NULL
         ) STRICT`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            hwid TEXT COLLATE NOCASE NOT NULL,
+            name TEXT NOT NULL
+        ) STRICT`,
+        `CREATE UNIQUE INDEX IF NOT EXISTS nfnh_nidx ON nstats_force_name_hwid(name)`
+
 ];
 
 export async function sqliteInstall(){
