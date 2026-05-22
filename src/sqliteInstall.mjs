@@ -735,7 +735,7 @@ const queries = [
             hwid TEXT COLLATE NOCASE NOT NULL,
             name TEXT NOT NULL
         ) STRICT`,
-        `CREATE UNIQUE INDEX IF NOT EXISTS nfnh_nidx ON nstats_force_name_hwid(name)`
+        `CREATE UNIQUE INDEX IF NOT EXISTS nfnh_hidx ON nstats_force_name_hwid(hwid)`
 
 ];
 

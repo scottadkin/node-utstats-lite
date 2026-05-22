@@ -4554,6 +4554,8 @@ class AdminPlayerForceName{
         this.mode = "hwid";
         this.selectedHWID = "";
         this.hwidSearch = "";
+        this.overrideName = "";
+        this.bActionInProgress = false;
 
         this.parent.append(this.wrapper);
 
@@ -4727,14 +4729,15 @@ class AdminPlayerForceName{
     updateHWIDInfo(){
 
         this.hwidInfoElem.innerHTML = "";
-        this.hwidInfoElem.className = "info";
+        this.hwidInfoElem.className = "";
 
         if(this.selectedHWID === ""){
-            this.hwidInfoElem.append("No HWID selected");
             return;
         }
 
         const target = this.selectedHWID.toLowerCase();
+
+        UIHeader(this.hwidInfoElem, "Selected HWID History");
 
         const matches = [];
 
@@ -4809,6 +4812,38 @@ class AdminPlayerForceName{
         this.hwidSelect.updateOptions(options);
     }
 
+
+    async forceHWIDToName(){
+
+        try{
+
+            if(this.bActionInProgress){
+                throw new Error("Please Wait For Previous Action To Complete");
+                return;
+            }
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "force-hwid-to-use-name", "hwid": this.selectedHWID, "name": this.overrideName})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+                throw new Error(res.error);
+            }
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Force HWID To Use Name", err.toString())
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     renderForceByHWID(){
 
         if(this.mode !== "hwid") return;
@@ -4821,6 +4856,7 @@ class AdminPlayerForceName{
         const hwids = [];
 
         this.hwidInfoElem = UIDiv("info");
+
         this.hwidInfoElem.append("No HWID selected");
 
         this.hwidSelect = new UISelect(row, hwids, this.selectedHWID, (e) =>{
@@ -4828,9 +4864,11 @@ class AdminPlayerForceName{
             this.updateHWIDInfo();
         });
 
+        this.updateHWIDInfo();
         this.filterHWIDSelect();
 
         const search = UIFormInputRow("Filter", "id", "text", this.hwidSearch, "placeholder", (e) =>{
+
             this.hwidSearch = e;
 
             this.selectedHWID = "";
@@ -4839,8 +4877,26 @@ class AdminPlayerForceName{
             this.filterHWIDSelect();
         })
 
+        const hwidNameOverride = new UIFormInputRow(
+            "Name To Force", 
+            "hwid-force-name", 
+            "text", 
+            this.overrideName, 
+            "name...", 
+            (e) =>{
+                this.overrideName = e;
+            }
+        );
 
-        this.form.append(search, row, UIBr());
+        const submit = document.createElement("button");
+        submit.className = "submit-button";
+        submit.append("Save Changes");
+        submit.addEventListener("click", () =>{
+            this.forceHWIDToName();
+        });
+
+
+        this.form.append(search, row, hwidNameOverride, submit, UIBr(), UIBr());
         this.form.append(this.hwidInfoElem);
 
         

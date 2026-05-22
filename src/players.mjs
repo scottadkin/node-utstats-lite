@@ -1582,3 +1582,37 @@ export async function adminGetAllForceHWIDToNames(){
     return await simpleQuery(query);
 
 }
+
+export async function adminForceNameOnHWID(hwid, name){
+
+    if(hwid === undefined){
+        throw new Error("HWID is undefined");
+    }
+
+    if(name === undefined){
+        throw new Error("Name is undefined");
+    }else if(name === ""){
+        throw new Error("Name can not be an empty string");
+    }
+
+    if(hwid === ""){
+        throw new Error("You can not force a name to an empty HWID string.");
+    }else if(hwid.toLowerCase() === "n/a"){
+        throw new Error("YOu can not force a name to a HWID with the value of n/a");
+    }
+
+    const query = "INSERT INTO nstats_force_name_hwid VALUES(NULL,?,?)";
+
+    try{
+
+        return await sqlInsertReturnRowId(query, [hwid, name]);
+
+    }catch(err){
+
+        if(err.errstr === "constraint failed"){
+            throw new Error("HWID is already forced to another name");
+        }
+
+        throw new Error(err);
+    }
+}
