@@ -735,7 +735,15 @@ const queries = [
             hwid TEXT COLLATE NOCASE NOT NULL,
             name TEXT NOT NULL
         ) STRICT`,
-        `CREATE UNIQUE INDEX IF NOT EXISTS nfnh_hidx ON nstats_force_name_hwid(hwid)`
+        `CREATE UNIQUE INDEX IF NOT EXISTS nfnh_hidx ON nstats_force_name_hwid(hwid)`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_force_name_mac(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mac1 TEXT COLLATE NOCASE NOT NULL,
+            mac2 TEXT COLLATE NOCASE NOT NULL,
+            name TEXT NOT NULL
+        ) STRICT`,
+        `CREATE UNIQUE INDEX IF NOT EXISTS nfnm_midx ON nstats_force_name_mac(mac1,mac2)`
 
 ];
 
