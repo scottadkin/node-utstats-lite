@@ -4853,7 +4853,6 @@ class AdminPlayerForceName{
 
             rows.push([
                 {"content": [UICountryFlag(m.country), m.name], "className": "text-left"},
-                {"content": m.ip},
                 {"content": m.mac1, "className": "tiny-font"},
                 {"content": m.mac2, "className": "tiny-font"},
                 {"content": m.first_seen, "parse": ["date"], "className": "date tiny-font"},
@@ -4865,7 +4864,7 @@ class AdminPlayerForceName{
         }
 
         const tableOptions = {
-            "headers": ["Name", "IP", "MAC1", "MAC2", "First Seen", "Last Seen", "Playtime", "Total Matches"]
+            "headers": ["Name", "MAC1", "MAC2", "First Seen", "Last Seen", "Playtime", "Total Matches"]
         };
 
         this.hwidInfoElem.className = "";

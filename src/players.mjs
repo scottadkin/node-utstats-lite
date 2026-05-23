@@ -1550,8 +1550,6 @@ export async function adminGetForceNamesData(){
 
     const query = `SELECT 
     ${mt}.player_id,
-    ${mt}.ip,
-    ${mt}.country,
     ${mt}.hwid,
     ${mt}.mac1,
     ${mt}.mac2,
