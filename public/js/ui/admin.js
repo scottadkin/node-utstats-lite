@@ -4547,7 +4547,6 @@ class AdminPlayerForceName{
 
     constructor(parent, parentMode){
 
-
         this.parent = parent;
 
         this.wrapper = UIDiv();
@@ -4566,8 +4565,7 @@ class AdminPlayerForceName{
        
         this.createElems();
         this.loadData();
-
-        
+   
     }
 
 
@@ -4718,6 +4716,21 @@ class AdminPlayerForceName{
         ];
 
         const t = new UITable(this.form, tableOptions, rows);
+
+        new UIHeader(this.form, "Current Names Forced By HWID");
+
+        const hwidOptions = {
+            "headers": ["Name", "HWID"]
+        };
+
+        const hwidRows = this.hwidToNames.map((h) =>{
+            return [
+                {"className": "text-left", "content": h.name}, 
+                h.hwid.toUpperCase()
+            ];
+        });
+
+        const hwidTable = new UITable(this.form, hwidOptions, hwidRows);
     }
 
 
