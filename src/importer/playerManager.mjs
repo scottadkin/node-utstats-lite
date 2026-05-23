@@ -2,7 +2,8 @@ import { Player } from "./player.mjs";
 import Message from "../message.mjs";
 import { updateMasterPlayers, 
     updatePlayerTotals, bulkInsertPlayerMatchData, updateMapAverages, 
-    getMultiplePlayersMasterId} from "../players.mjs";
+    getMultiplePlayersMasterId,
+    getHWIDForceNames} from "../players.mjs";
 import geoip from "geoip-lite";
 import { createRandomString, scalePlaytime } from "../generic.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
@@ -496,16 +497,60 @@ export class PlayerManager{
             new Message(`Failed to get player by id ${playerId}, setPlayerStatProperty()`,"error");
             return;
         } 
-;
+
 
         player.stats[key] = value;
     }
 
+    getAllHWIDS(){
+
+        const found = new Set();
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(p.hwid === "" || p.hwid.toLowerCase() === "n/a") continue;
+
+            found.add(p.hwid);
+        }
+
+
+        return [...found];
+
+    }
+
+
+    async forceHWIDNames(){
+
+        const hwids = this.getAllHWIDS();
+
+        const hwidForceNames = await getHWIDForceNames(hwids);
+
+        this.playerNames = [];
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(hwidForceNames[p.hwid] === undefined){
+                this.playerNames.push(p.name);
+                continue;
+            }
+
+            p.name = hwidForceNames[p.hwid];
+            this.playerNames.push(p.name);
+        }
+    }
+
     async setPlayerMasterIds(){
+
+
+        await this.forceHWIDNames();
 
         const masterIds = await getMultiplePlayersMasterId(this.playerNames);
 
-
+        
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];

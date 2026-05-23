@@ -1627,3 +1627,24 @@ export async function adminDeleteForceNameToHWID(hwid){
 
     return await simpleQuery(query, [hwid]);
 }
+
+
+export async function getHWIDForceNames(targets){
+
+    if(targets.length === 0) return {};
+
+    const query = `SELECT hwid,name FROM nstats_force_name_hwid WHERE hwid IN(?)`;
+
+    const result = await simpleQuery(query, [targets]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        data[result[i].hwid.toUpperCase()] = result[i].name;
+    }
+
+    return data;
+
+    
+}
