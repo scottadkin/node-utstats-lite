@@ -4571,6 +4571,7 @@ class AdminPlayerForceName{
         this.bActive = parentMode === "force-name";
 
         this.data = [];
+        this.usage = [];
         this.uniqueHWIDS = [];
        
         this.createElems();
@@ -4597,6 +4598,8 @@ class AdminPlayerForceName{
 
                 throw new Error(res.error);
             }
+
+            console.log(res.usage);
 
             this.usage = res.usage;
             this.hwidToNames = res.hwidToNames;
@@ -4872,7 +4875,7 @@ class AdminPlayerForceName{
                 {"content": m.mac2, "className": "tiny-font"},
                 {"content": m.first_seen, "parse": ["date"], "className": "date tiny-font"},
                 {"content": m.last_seen, "parse": ["date"], "className": "date tiny-font"},
-                {"content": m.total_playtime, "parse": ["mmss"]},
+                {"content": m.total_playtime, "parse": ["mmss"], "className": "mmss"},
                 {"content": m.total_matches},
             ]);
 
@@ -5005,64 +5008,186 @@ class AdminPlayerForceName{
     
     }
 
+    createMacSelectOptions(filter){
+
+        filter = filter.toLowerCase();
+        const found = [];
+
+        for(let i = 0; i < this.uniqueMacs.length; i++){
+
+            const m = this.uniqueMacs[i].toLowerCase();
+
+            if(!m.includes(filter)) continue;
+
+            found.push({"display": m.toUpperCase(), "value": m});
+        }
+
+        found.unshift({"display": "- None Selected -", "value": ""});
+
+        return found;
+    }
+
+
+    renderMacHistory(){
+
+        this.macInfoElem.innerHTML = "";
+        this.macInfoElem.className = "";
+
+        if(this.selectedMAC1 === "" && this.selectedMAC2 === ""){
+            this.macInfoElem.className = "info";
+            this.macInfoElem.append("No address(es) selected.");
+            return;
+        }
+
+        const found = [];
+
+        for(let i = 0; i < this.usage.length; i++){
+
+            const u = this.usage[i];
+
+            let matchType = [];
+
+            const m1 = u.mac1.toLowerCase();
+            const m2 = u.mac2.toLowerCase();
+
+
+            if(this.selectedMAC1 !== ""){
+
+                if(m1 !== "" && m1 === this.selectedMAC1){
+                    matchType.push("m1");
+                }
+                if(m2 !== "" && m2 === this.selectedMAC1){
+                    matchType.push("m2");
+                }
+            }
+
+            if(this.selectedMAC2 !== ""){
+
+                if(m1 !== "" && m1 === this.selectedMAC2){
+                    matchType.push("m1");
+                }
+                if(m2 !== "" && m2 === this.selectedMAC2){
+                    matchType.push("m2");
+                }
+            }
+
+
+            if(matchType.length === 0) continue;
+
+            found.push({"match": matchType, "data": u});
+        }
+
+
+        console.log(found);
+
+        const tableOptions = {
+            "headers": ["Name", "MAC1", "MAC2", "First Seen", "Last Seen", "Playtime", "Total Matches"]
+        };
+
+        const rows = found.map((f) =>{
+
+            const {match, data} = f;
+
+            return [
+                {"content": [UICountryFlag(data.country), data.name], "className": "text-left"},
+                {
+                    "content": data.mac1, 
+                    "className": `tiny-font ${(match.indexOf("m1") !== -1) ? "team-green yellow-font" :""}`
+                },
+                {
+                    "content": data.mac2, 
+                    "className": `tiny-font ${(match.indexOf("m2") !== -1) ? "team-green yellow-font" :""}`
+                },
+                {"content": data.first_seen, "parse": ["date"], "className": "date"},
+                {"content": data.last_seen, "parse": ["date"], "className": "date"},
+                {"content": data.total_playtime, "parse": ["mmss"], "className": "mmss"},
+                {"content": data.total_matches}
+            ];
+        });
+
+        const table = new UITable(this.macInfoElem, tableOptions, rows);
+    }
+
     renderForceByMac(){
 
         if(this.mode !== "mac") return;
 
         const info = UIDiv("info");
+
         info.append(
-            "Force a player name by a single mac address or by a pair of mac addresses.",
+            "Force a player name by a single MAC address or by a pair of MAC addresses.",
             UIBr(),
-            "To force a name by a single address simply leave one of the options empty."
+            "To force a name by a single address simply leave one of the options empty.",
+            UIBr(),
+            "* indicates an optional field."
         );
 
         this.form.append(info);
 
+        this.mac1Options = this.createMacSelectOptions(this.mac1Filter);
+        this.mac2Options = this.createMacSelectOptions(this.mac2Filter);
 
-        const filter1Row = UIFormInputRow("Filter MAC1", "m1", "text", this.mac1Filter, "mac1...", (e) =>{
+
+        const filter1Row = UIFormInputRow("Filter MAC1 Options", "m1", "text", this.mac1Filter, "mac1...", (e) =>{
             this.mac1Filter = e;
+            this.mac1Options = this.createMacSelectOptions(this.mac1Filter);
+            this.mac1Select.updateOptions(this.mac1Options);
         });
         
         this.form.append(filter1Row);
 
-        
-
-        const selectOptions = this.uniqueMacs.map((m) =>{
-            return {"display": m.toUpperCase(), "value": m};
-        });
-
-        selectOptions.unshift({"display": "", "value": ""});
 
         const row = UIDiv("form-row");
         row.append(UILabel("MAC1"));
 
-        const m1 = new UISelect(row, selectOptions, this.selectedMAC1, (e) =>{
+        this.mac1Select = new UISelect(row, this.mac1Options, this.selectedMAC1, (e) =>{
+
             this.selectedMAC1 = e;
+            this.renderMacHistory();
+  
         });
         
-        this.form.append(row);
+        this.form.append(row, UIBr());
 
 
-        const filter2Row = UIFormInputRow("Filter MAC2", "m12", "text", this.mac2Filter, "mac2...", (e) =>{
+        const filter2Row = UIFormInputRow("Filter MAC2 Options", "m12", "text", this.mac2Filter, "mac2...", (e) =>{
             this.mac2Filter = e;
+            this.mac2Options = this.createMacSelectOptions(this.mac2Filter);
+            this.mac2Select.updateOptions(this.mac2Options);
         });
         
         this.form.append(filter2Row);
 
         const row2 = UIDiv("form-row");
-        row2.append(UILabel("MAC2"));
+        row2.append(UILabel("MAC2*"));
 
-        const m2 = new UISelect(row2, selectOptions, this.selectedMAC2, (e) =>{
+        this.mac2Select = new UISelect(row2, this.mac2Options, this.selectedMAC2, (e) =>{
+
             this.selectedMAC2 = e;
+            this.renderMacHistory();
         });
         
-        this.form.append(row2);
+        this.form.append(row2, UIBr());
 
         const nameRow = UIFormInputRow("Name To Force", "new-name", "text", this.overrideName, "Name to user...", (e) =>{
             this.overrideName = e;
         })
 
         this.form.append(nameRow);
+
+
+        const button = document.createElement("button");
+        button.className = "submit-button";
+
+        button.append("Save Changes");
+        this.form.append(button, UIBr(), UIBr());
+
+        UIHeader(this.form, "Selected MAC Address(es) History");
+        this.macInfoElem = UIDiv();
+        
+        this.form.append(this.macInfoElem);
+
+        this.renderMacHistory();
 
     }
 
