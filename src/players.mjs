@@ -1646,3 +1646,11 @@ export async function getHWIDForceNames(targets){
 
     
 }
+
+
+export async function adminGetAllForceMacToNames(){
+
+    const query = `SELECT * FROM nstats_force_name_mac ORDER BY name ASC`;
+
+    return await simpleQuery(query);
+}

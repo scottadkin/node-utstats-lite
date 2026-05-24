@@ -4550,11 +4550,21 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "hwid";
+        this.mode = "mac";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
         this.bActionInProgress = false;
+        this.mac1Filter = "";
+        this.mac2Filter = "";
+        this.selectedMAC1 = "";
+        this.selectedMAC2 = "";
+
+        this.uniqueHWIDS = [];
+        this.uniqueMacs = [];
+        this.uniqueMac1s = [];
+        this.uniqueMac2s = [];
+        this.uniqueNames = [];
 
         this.parent.append(this.wrapper);
 
@@ -4592,6 +4602,7 @@ class AdminPlayerForceName{
             this.hwidToNames = res.hwidToNames;
 
             const hwids = new Set();
+            const allMacs = new Set();
             const mac1s = new Set();
             const mac2s = new Set();
             const names = new Set();
@@ -4605,21 +4616,25 @@ class AdminPlayerForceName{
 
                 if(d.mac1 !== ""){
                     mac1s.add(d.mac1);
+                    allMacs.add(d.mac1);
                 }
 
                 if(d.mac2 !== ""){
                     mac2s.add(d.mac2);
+                    allMacs.add(d.mac2);
                 }
 
                 names.add(d.name);
             }
 
             this.uniqueHWIDS = [...hwids];
+            this.uniqueMacs = [...allMacs];
             this.uniqueMac1s = [...mac1s];
             this.uniqueMac2s = [...mac2s];
             this.uniqueNames = [...mac2s];
 
             this.uniqueHWIDS.sort(sortByStringInsensitive);
+            this.uniqueMacs.sort(sortByStringInsensitive);
             this.uniqueMac1s.sort(sortByStringInsensitive);
             this.uniqueMac2s.sort(sortByStringInsensitive);
             this.uniqueNames.sort(sortByStringInsensitive);
@@ -4987,8 +5002,68 @@ class AdminPlayerForceName{
 
         this.form.append(search, row, hwidNameOverride, submit, UIBr(), UIBr());
         this.form.append(this.hwidInfoElem);
+    
+    }
+
+    renderForceByMac(){
+
+        if(this.mode !== "mac") return;
+
+        const info = UIDiv("info");
+        info.append(
+            "Force a player name by a single mac address or by a pair of mac addresses.",
+            UIBr(),
+            "To force a name by a single address simply leave one of the options empty."
+        );
+
+        this.form.append(info);
+
+
+        const filter1Row = UIFormInputRow("Filter MAC1", "m1", "text", this.mac1Filter, "mac1...", (e) =>{
+            this.mac1Filter = e;
+        });
+        
+        this.form.append(filter1Row);
 
         
+
+        const selectOptions = this.uniqueMacs.map((m) =>{
+            return {"display": m.toUpperCase(), "value": m};
+        });
+
+        selectOptions.unshift({"display": "", "value": ""});
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("MAC1"));
+
+        const m1 = new UISelect(row, selectOptions, this.selectedMAC1, (e) =>{
+            this.selectedMAC1 = e;
+        });
+        
+        this.form.append(row);
+
+
+        const filter2Row = UIFormInputRow("Filter MAC2", "m12", "text", this.mac2Filter, "mac2...", (e) =>{
+            this.mac2Filter = e;
+        });
+        
+        this.form.append(filter2Row);
+
+        const row2 = UIDiv("form-row");
+        row2.append(UILabel("MAC2"));
+
+        const m2 = new UISelect(row2, selectOptions, this.selectedMAC2, (e) =>{
+            this.selectedMAC2 = e;
+        });
+        
+        this.form.append(row2);
+
+        const nameRow = UIFormInputRow("Name To Force", "new-name", "text", this.overrideName, "Name to user...", (e) =>{
+            this.overrideName = e;
+        })
+
+        this.form.append(nameRow);
+
     }
 
     render(){
@@ -5003,6 +5078,7 @@ class AdminPlayerForceName{
 
         this.renderCurrentData();
         this.renderForceByHWID();
+        this.renderForceByMac();
 
         
 
