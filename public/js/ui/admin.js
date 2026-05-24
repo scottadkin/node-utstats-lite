@@ -4559,6 +4559,7 @@ class AdminPlayerForceName{
         this.mac2Filter = "";
         this.selectedMAC1 = "";
         this.selectedMAC2 = "";
+        this.bOnlyDisplayOnBothMacMatch = false;
 
         this.uniqueHWIDS = [];
         this.uniqueMacs = [];
@@ -5050,35 +5051,57 @@ class AdminPlayerForceName{
             const m1 = u.mac1.toLowerCase();
             const m2 = u.mac2.toLowerCase();
 
+            if(this.bOnlyDisplayOnBothMacMatch){
 
-            if(this.selectedMAC1 !== ""){
+                if(this.selectedMAC1 !== "" && this.selectedMAC2 !== ""){
 
-                if(m1 !== "" && m1 === this.selectedMAC1){
-                    matchType.push("m1");
+                    if(this.selectedMAC1 === this.selectedMAC2){
+
+                        if(m1 === this.selectedMAC1 || m2 === this.selectedMAC1){
+                            matchType.push("m1", "m2");
+                        }
+
+                    }else{
+
+                        if(m1 === this.selectedMAC1 && m2 === this.selectedMAC2){
+                            matchType.push("m1", "m2");
+                        }else if(m1 === this.selectedMAC2 && m2 === this.selectedMAC1){
+                            matchType.push("m1", "m2");   
+                        }
+                    }
+
                 }
-                if(m2 !== "" && m2 === this.selectedMAC1){
-                    matchType.push("m2");
+
+            }else{
+
+
+                if(this.selectedMAC1 !== ""){
+
+                    if(m1 !== "" && m1 === this.selectedMAC1){
+                        matchType.push("m1");
+                    }
+                    if(m2 !== "" && m2 === this.selectedMAC1){
+                        matchType.push("m2");
+                    }
                 }
+
+                if(this.selectedMAC2 !== ""){
+
+                    if(m1 !== "" && m1 === this.selectedMAC2){
+                        matchType.push("m1");
+                    }
+                    if(m2 !== "" && m2 === this.selectedMAC2){
+                        matchType.push("m2");
+                    }
+                }
+
             }
-
-            if(this.selectedMAC2 !== ""){
-
-                if(m1 !== "" && m1 === this.selectedMAC2){
-                    matchType.push("m1");
-                }
-                if(m2 !== "" && m2 === this.selectedMAC2){
-                    matchType.push("m2");
-                }
-            }
-
 
             if(matchType.length === 0) continue;
 
             found.push({"match": matchType, "data": u});
         }
 
-
-        console.log(found);
 
         const tableOptions = {
             "headers": ["Name", "MAC1", "MAC2", "First Seen", "Last Seen", "Playtime", "Total Matches"]
@@ -5105,6 +5128,11 @@ class AdminPlayerForceName{
             ];
         });
 
+        if(rows.length === 0){
+
+            rows.push([{"colSpan": 7, "content": "No matches found"}]);
+        }
+
         const table = new UITable(this.macInfoElem, tableOptions, rows);
     }
 
@@ -5119,7 +5147,10 @@ class AdminPlayerForceName{
             UIBr(),
             "To force a name by a single address simply leave one of the options empty.",
             UIBr(),
-            "* indicates an optional field."
+            "* indicates an optional field.",
+            UIBr(),
+            "If ", UIB("Both MAC Addresses Must Match"), ` is enabled history is only displayed 
+            if both mac addresses are found in a single combination, it doesn't matter which order they are in to be matched.`
         );
 
         this.form.append(info);
@@ -5127,11 +5158,22 @@ class AdminPlayerForceName{
         this.mac1Options = this.createMacSelectOptions(this.mac1Filter);
         this.mac2Options = this.createMacSelectOptions(this.mac2Filter);
 
+        const bothMatchTF = new UITrueFalse(this.bOnlyDisplayOnBothMacMatch, "both-match-needed", false, (e) =>{
+            this.bOnlyDisplayOnBothMacMatch = e;
+            this.renderMacHistory();
+        })
+
+
+        const tfRow = UIDiv("form-row");
+        tfRow.append(UILabel("Both MAC Addresses Must Match"));
+        tfRow.append(bothMatchTF.elem);
+        this.form.append(tfRow);
 
         const filter1Row = UIFormInputRow("Filter MAC1 Options", "m1", "text", this.mac1Filter, "mac1...", (e) =>{
             this.mac1Filter = e;
             this.mac1Options = this.createMacSelectOptions(this.mac1Filter);
             this.mac1Select.updateOptions(this.mac1Options);
+            this.selectedMAC1 = "";
         });
         
         this.form.append(filter1Row);
@@ -5154,6 +5196,7 @@ class AdminPlayerForceName{
             this.mac2Filter = e;
             this.mac2Options = this.createMacSelectOptions(this.mac2Filter);
             this.mac2Select.updateOptions(this.mac2Options);
+            this.selectedMAC2 = "";
         });
         
         this.form.append(filter2Row);
