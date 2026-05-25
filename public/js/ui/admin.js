@@ -5136,6 +5136,46 @@ class AdminPlayerForceName{
         const table = new UITable(this.macInfoElem, tableOptions, rows);
     }
 
+
+    async saveForceToMacAddresses(){
+
+        try{
+
+            if(this.bActionInProgress){
+                throw new Error("Previous action still being processed");
+            }
+
+            this.bActionInProgress = true;
+
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "save-force-name-by-mac-addresses",
+                    "name": this.overrideName,
+                    "mac1": this.selectedMAC1,
+                    "mac2": this.selectedMAC2
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+                throw new Error(res.error);
+            }
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Apply Force Name By MAC Addresses", err.toString());
+
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     renderForceByMac(){
 
         if(this.mode !== "mac") return;
@@ -5145,12 +5185,15 @@ class AdminPlayerForceName{
         info.append(
             "Force a player name by a single MAC address or by a pair of MAC addresses.",
             UIBr(),
-            "To force a name by a single address simply leave one of the options empty.",
+            "To force a name by a single address simply leave the second HWID empty.",
+            UIBr(),
+            "If ", UIB("Both MAC Addresses Must Match"), ` is enabled, history is only displayed 
+            if both mac addresses are found in a single combination, 
+            it doesn't matter which order they are in to be matched.`,
+            UIBr(), 
+            `If both MAC1 and MAC2 are the same value you still have to select the same address in both dropdowns.`,
             UIBr(),
             "* indicates an optional field.",
-            UIBr(),
-            "If ", UIB("Both MAC Addresses Must Match"), ` is enabled history is only displayed 
-            if both mac addresses are found in a single combination, it doesn't matter which order they are in to be matched.`
         );
 
         this.form.append(info);
@@ -5223,6 +5266,10 @@ class AdminPlayerForceName{
         button.className = "submit-button";
 
         button.append("Save Changes");
+        button.addEventListener("click", () =>{
+            this.saveForceToMacAddresses();
+        });
+
         this.form.append(button, UIBr(), UIBr());
 
         UIHeader(this.form, "Selected MAC Address(es) History");
