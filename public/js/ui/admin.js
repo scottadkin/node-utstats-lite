@@ -5165,6 +5165,8 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
+            new UINotification(this.parent, "pass", "Success", "Force name by MAC addresses complete.");
+
         }catch(err){
 
             console.trace(err);

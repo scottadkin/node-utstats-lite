@@ -12,7 +12,7 @@ import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategoryS
 import { setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 
-new Message('Node UTStats 2 Importer module started.','note');
+new Message('Node UTStats Lite Importer module started.','note');
 
 
 

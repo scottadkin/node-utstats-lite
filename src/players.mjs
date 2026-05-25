@@ -1657,10 +1657,27 @@ export async function adminGetAllForceMacToNames(){
 
 export async function adminForceNameOnMacAddresses(mac1, mac2, name){
 
+    
     if(mac1 === undefined) throw new Error("Mac1 is undefined.");
     if(mac2 === undefined) throw new Error("Mac2 is undefined.");
     if(name === undefined) throw new Error("Name is undefined.");
 
     if(mac1 === "") throw new Error("Mac1 can't be an empty string.");
+    if(name === "") throw new Error("Name can't be an empty string.");
+
+    const query = `INSERT INTO nstats_force_name_mac VALUES(NULL,?,?,?)`;
+
+    try{
+
+        return await sqlInsertReturnRowId(query, [mac1, mac2, name]);
+
+    }catch(err){
+
+        if(err.errstr === 'constraint failed'){
+            throw new Error(`MAC1 & MAC2 Combination already in use`);
+        }
+
+        throw new Error(err);
+    }
 
 }

@@ -352,6 +352,8 @@ export default class AdminJSONManager{
 
                 await adminForceNameOnMacAddresses(this.req.body.mac1, this.req.body.mac2, this.req.body.name);
 
+                return this.res.json({"message": "passed"});
+
 
             }
 
