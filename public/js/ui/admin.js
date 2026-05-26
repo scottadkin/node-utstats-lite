@@ -4686,7 +4686,13 @@ class AdminPlayerForceName{
             UIBr(), 
             `You can assign an override name by `, UIB(` HWID, `),
             UIB(`MAC1 & MAC2, or HWID With MAC1 & MAC2.`), UIBr(), 
-            UIB(`Note: `), `You can not force a name to an empty hwid/mac value, or to a hwid that's value is N/A`);
+            UIB(`Note: `), `You can not force a name to an empty hwid/mac value, or to a hwid that's value is N/A.`,
+            UIBr(),
+            `If a single target player is forced by multiple methods the name override will use the highest priority one and skip the rest, the priority order:`,
+            UIBr(), `- HWID & MAC Combination`,
+            UIBr(), `- HWID`,
+            UIBr(), `- MAC Combination`,
+        );
         
 
         this.wrapper.append(this.info);
@@ -4754,6 +4760,24 @@ class AdminPlayerForceName{
         });
 
         const hwidTable = new UITable(this.form, hwidOptions, hwidRows);
+
+
+        new UIHeader(this.form, "Current Names Forced By MAC Addresses");
+
+        const macRows = this.macToNames.map((m) =>{
+
+            return [
+                {"className": "text-left", "content": m.name},
+                m.mac1.toUpperCase(),
+                m.mac2.toUpperCase()
+            ];
+        });
+
+        const macOptions = {
+            "headers": ["Name", "MAC1", "MAC2"]
+        };
+
+        const macTable = new UITable(this.form, macOptions, macRows);
     }
 
 
@@ -5194,7 +5218,9 @@ class AdminPlayerForceName{
             UIBr(),
             "To force a name by a single address simply leave the second HWID empty.",
             UIBr(),
-            "If ", UIB("Both MAC Addresses Must Match"), ` is enabled, history is only displayed 
+            "When ", UIB("Both MAC Addresses Must Match"), ` is disabled, history is displayed if there are any matches to the selected MAC addresses.`,
+            UIBr(),
+            "When ", UIB("Both MAC Addresses Must Match"), ` is enabled, history is only displayed 
             if both mac addresses are found in a single combination, 
             it doesn't matter which order they are in to be matched.`,
             UIBr(), 
