@@ -5094,6 +5094,41 @@ class AdminPlayerForceName{
         return found;
     }
 
+
+    async deleteForceMacToName(mac1, mac2){
+
+        try{
+
+            if(this.bActionInProgress) throw new Error("Previous action has not finished, please wait.");
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "delete-force-mac-to-name", "mac1": mac1, "mac2": mac2})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+                throw new Error(res.error);
+            }
+
+            await this.loadData();
+            new UINotification(this.parent, "pass", "Success", "Deleted force MAC to name.");
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Delete Force MAC To Name", err.toString());
+
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     updateMacWarning(){
 
         this.macWarningElem.innerHTML = "";
@@ -5117,6 +5152,9 @@ class AdminPlayerForceName{
             const deleteButton = document.createElement("button");
             deleteButton.className = "delete-button";
             deleteButton.append("Delete Force Name");
+            deleteButton.addEventListener("click", () =>{
+                this.deleteForceMacToName(m.mac1, m.mac2);
+            });
 
             if(m.mac2 !== ""){
 

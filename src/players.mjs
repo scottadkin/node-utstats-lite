@@ -1679,5 +1679,11 @@ export async function adminForceNameOnMacAddresses(mac1, mac2, name){
 
         throw new Error(err);
     }
+}
 
+export async function adminDeleteForceNameOnMacAddresses(mac1, mac2){
+
+    const query = `DELETE FROM nstats_force_name_mac WHERE mac1=? AND mac2=?`;
+
+    return await simpleQuery(query, [mac1, mac2]);
 }
