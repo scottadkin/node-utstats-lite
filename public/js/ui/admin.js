@@ -4692,6 +4692,7 @@ class AdminPlayerForceName{
             UIBr(), `- HWID & MAC Combination`,
             UIBr(), `- HWID`,
             UIBr(), `- MAC Combination`,
+            UIBr(), `- Single MAC Address`,
         );
         
 
@@ -5056,11 +5057,100 @@ class AdminPlayerForceName{
         return found;
     }
 
+    getForcedByMacName(mac1, mac2){
+
+        mac1 = mac1.toLowerCase();
+        mac2 = mac2.toLowerCase();
+
+        if(mac1 === mac2 && mac1 === "") return [];
+
+        const found = [];
+
+        for(let i = 0; i < this.macToNames.length; i++){
+
+            const m = this.macToNames[i];
+
+            const currentMac1 = m.mac1.toLowerCase();
+            const currentMac2 = m.mac2.toLowerCase();
+
+            if((currentMac1 === mac1 && currentMac2 === mac2) || (currentMac1 === mac2 && currentMac2 === mac1)){
+                found.push(m);
+                continue;
+            }
+
+            if(currentMac1 === mac1 || currentMac1 === mac2){
+                found.push(m);
+                continue;
+            }
+
+            if(currentMac2 !== "" && (currentMac2 === mac1 || currentMac2 === mac2)){
+                found.push(m);
+                continue;
+            }
+
+
+        }
+
+        return found;
+    }
+
+    updateMacWarning(){
+
+        this.macWarningElem.innerHTML = "";
+        this.macWarningElem.className = "";
+
+        const matches = this.getForcedByMacName(this.selectedMAC1, this.selectedMAC2);
+
+        if(matches.length === 0) return;
+
+
+        this.macWarningElem.className = "warning";
+
+        const useElems = [];
+
+        const rows = [];
+
+        for(let i = 0; i < matches.length; i++){
+
+            const m = matches[i];
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-button";
+            deleteButton.append("Delete Force Name");
+
+            if(m.mac2 !== ""){
+
+                rows.push([
+                    {"content": `${m.mac1} + ${m.mac2}`, "className": "text-left"},
+                    {"content": m.name, "className": "text-left"},
+                    {"content": deleteButton},
+                ]);
+
+            }else{
+                rows.push([
+                    {"content": m.mac1, "className": "text-left"},
+                    {"content": m.name, "className": "text-left"},
+                    {"content": deleteButton},
+                ]);
+            }
+        }
+
+        this.macWarningElem.append(
+            UIB(`MAC address(es) are already forced to use ${matches.length} ${plural(matches.length, "name")}`),
+            UIBr(), UIBr()
+        );
+
+        new UITable(this.macWarningElem, {"headers": ["MAC Addresses", "Name", "Delete"]}, rows);
+        
+    }
 
     renderMacHistory(){
 
         this.macInfoElem.innerHTML = "";
         this.macInfoElem.className = "";
+        
+
+        this.updateMacWarning();
 
         if(this.selectedMAC1 === "" && this.selectedMAC2 === ""){
             this.macInfoElem.className = "info";
@@ -5224,7 +5314,7 @@ class AdminPlayerForceName{
             if both mac addresses are found in a single combination, 
             it doesn't matter which order they are in to be matched.`,
             UIBr(), 
-            `If both MAC1 and MAC2 are the same value you still have to select the same address in both dropdowns.`,
+            `If both MAC1 and MAC2 are the same value you still have to select the same address in both dropdowns for the history to show.`,
             UIBr(),
             "* indicates an optional field.",
         );
@@ -5293,6 +5383,9 @@ class AdminPlayerForceName{
         })
 
         this.form.append(nameRow);
+
+        this.macWarningElem = UIDiv("hidden");
+        this.form.append(this.macWarningElem);
 
 
         const button = document.createElement("button");
