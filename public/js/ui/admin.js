@@ -4566,6 +4566,7 @@ class AdminPlayerForceName{
         this.uniqueMac1s = [];
         this.uniqueMac2s = [];
         this.uniqueNames = [];
+        this.macToNames = [];
 
         this.parent.append(this.wrapper);
 
@@ -4604,6 +4605,7 @@ class AdminPlayerForceName{
 
             this.usage = res.usage;
             this.hwidToNames = res.hwidToNames;
+            this.macToNames = res.macToNames;
 
             const hwids = new Set();
             const allMacs = new Set();
@@ -4728,8 +4730,10 @@ class AdminPlayerForceName{
 
         const rows = [
             [{"content": `Total Forced HWIDs to Names`, "className": "text-left"}, this.hwidToNames.length],
+            [{"content": `Total Forced MAC Address Combinations to Names`, "className": "text-left"}, this.macToNames.length],    
             [{"content": `Unique Player Names`, "className": "text-left"}, this.uniqueNames.length],
             [{"content": `Unique HWIDs`, "className": "text-left"}, this.uniqueHWIDS.length],
+            [{"content": `Total Unique MAC Address Combinations`, "className": "text-left"}, this.uniqueMacs.length],
             [{"content": `Unique MAC1 Addresses`, "className": "text-left"}, this.uniqueMac1s.length],
             [{"content": `Unique MAC2 Addresses`, "className": "text-left"}, this.uniqueMac2s.length],
         ];
@@ -5165,6 +5169,7 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
+            await this.loadData();
             new UINotification(this.parent, "pass", "Success", "Force name by MAC addresses complete.");
 
         }catch(err){
