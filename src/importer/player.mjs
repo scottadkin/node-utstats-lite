@@ -8,6 +8,10 @@ export class Player{
         //this.timestamp = timestamp;
         this.name = name;
         this.matchIds = [playerId];
+
+        this.bNameForcedByHWID = false;
+        this.bNameForcedByMACCombination = false;
+        this.bNameForcedBySingleMAC = false;
         
 
         this.ip = "";

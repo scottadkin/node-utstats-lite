@@ -3,7 +3,8 @@ import Message from "../message.mjs";
 import { updateMasterPlayers, 
     updatePlayerTotals, bulkInsertPlayerMatchData, updateMapAverages, 
     getMultiplePlayersMasterId,
-    getHWIDForceNames} from "../players.mjs";
+    getHWIDForceNames,
+    getForcedByMacNames} from "../players.mjs";
 import geoip from "geoip-lite";
 import { createRandomString, scalePlaytime } from "../generic.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
@@ -520,6 +521,29 @@ export class PlayerManager{
 
     }
 
+    getAllMACs(){
+
+        const found = new Set();
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(p.mac1 !== ""){
+                found.add(p.mac1);
+     
+            }
+
+            if(p.mac2 !== ""){
+                found.add(p.mac2);
+    
+            }
+        }
+
+
+        return [...found];
+    }
+
 
     async forceHWIDNames(){
 
@@ -535,18 +559,101 @@ export class PlayerManager{
 
             if(hwidForceNames[p.hwid] === undefined){
                 this.playerNames.push(p.name);
+                p.bNameForcedByHWID = false;
                 continue;
             }
 
             p.name = hwidForceNames[p.hwid];
+            p.bNameForcedByHWID = true;
             this.playerNames.push(p.name);
         }
+    }
+
+    updatePlayerNamesList(oldName, newName){
+
+        const index = this.playerNames.indexOf(oldName);
+
+        if(index === -1){
+            new Message(`Could not find name in player list`,"error");
+            return;
+        }
+
+        this.playerNames[index] = newName;
+    }
+
+    async forceMACNames(){
+
+        const macs = this.getAllMACs();
+
+        const forcedData = await getForcedByMacNames(macs);
+
+        for(let i = 0; i < forcedData.length; i++){
+
+            const forced = forcedData[i];
+
+            for(let x = 0; x < this.players.length; x++){
+
+                const p = this.players[x];
+
+                //hwid has higher priority
+                if(p.bNameForcedByHWID) continue;
+                //2 mac address combination has higher priority
+                if(p.bNameForcedByMACCombination) continue;
+
+                if(p.mac1 === "" && p.mac2 === "") continue;
+
+                if(p.mac1 === ""){
+                    //new Message("mac1 can't be an empty string", "warning");
+                    continue;
+                }
+
+                if(p.mac1 !== forced.mac1 && p.mac2 !== forced.mac1 && p.mac1 !== forced.mac2 && p.mac2 !== forced.mac1){
+                    continue;
+                }
+
+
+                if(forced.mac2 === ""){
+                    new Message(`MAC single address forced name, applied to ${p.name}, changed to ${forced.name}`,"note");
+
+                    this.updatePlayerNamesList(p.name, forced.name);
+                    p.name = forced.name;
+                    p.bNameForcedBySingleMAC = true;
+                    continue;
+                }
+
+                const currentMacs = [p.mac1, p.mac2];
+
+                const bFoundM1 = currentMacs.indexOf(forced.mac1) !== -1;
+                const bFoundM2 = currentMacs.indexOf(forced.mac2) !== -1;
+
+
+                if(bFoundM1 && bFoundM2){
+
+                    new Message(`MAC addresses combination forced name, applied to ${p.name}, changed to ${forced.name}`,"note");
+                    this.updatePlayerNamesList(p.name, forced.name);
+                    p.name = forced.name;    
+                    p.bNameForcedByMACCombination = true;
+                    continue;
+                }
+                
+                // This won't be needed, can't have partial matches
+                /*if(bFoundM1 || bFoundM2){
+                    new Message(`MAC single address forced name, applied to ${p.name}, changed to ${forced.name}`,"note");
+                    p.name = forced.name;
+                    p.bNameForcedBySingleMAC = true;
+                }*/
+                
+            }
+        }
+
     }
 
     async setPlayerMasterIds(){
 
 
         await this.forceHWIDNames();
+
+        await this.forceMACNames();
 
         const masterIds = await getMultiplePlayersMasterId(this.playerNames);
 

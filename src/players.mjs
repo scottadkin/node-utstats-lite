@@ -1687,3 +1687,16 @@ export async function adminDeleteForceNameOnMacAddresses(mac1, mac2){
 
     return await simpleQuery(query, [mac1, mac2]);
 }
+
+
+export async function getForcedByMacNames(targets){
+
+    if(targets.length === 0) return [];
+
+    const query = `SELECT UPPER(mac1) as mac1,UPPER(mac2) as mac2,name FROM nstats_force_name_mac WHERE mac1 IN(?) OR mac2 IN(?)`;
+
+    return await simpleQuery(query, [targets, targets]);
+
+
+
+}
