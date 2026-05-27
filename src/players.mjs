@@ -1655,6 +1655,17 @@ export async function adminGetAllForceMacToNames(){
     return await simpleQuery(query);
 }
 
+
+//check if same pair of addresses are in the database but in another order
+async function bMacComboAlreadyExist(mac1, mac2){
+
+    const query = `SELECT COUNT(*) as total_entries FROM nstats_force_name_mac WHERE (mac1=? AND mac2=?) OR (mac2=? AND mac1=?)`;
+
+    const result = await simpleQuery(query, [mac1, mac2, mac1, mac2]);
+
+    return result[0].total_entries > 0;
+}
+
 export async function adminForceNameOnMacAddresses(mac1, mac2, name){
 
     
@@ -1667,15 +1678,15 @@ export async function adminForceNameOnMacAddresses(mac1, mac2, name){
 
     const query = `INSERT INTO nstats_force_name_mac VALUES(NULL,?,?,?)`;
 
+    if(await bMacComboAlreadyExist(mac1, mac2)){
+        throw new Error("MAC Combination already exists, it may already be added in a different order.")
+    }
+
     try{
 
         return await sqlInsertReturnRowId(query, [mac1, mac2, name]);
 
     }catch(err){
-
-        if(err.errstr === 'constraint failed'){
-            throw new Error(`MAC1 & MAC2 Combination already in use`);
-        }
 
         throw new Error(err);
     }
@@ -1696,7 +1707,5 @@ export async function getForcedByMacNames(targets){
     const query = `SELECT UPPER(mac1) as mac1,UPPER(mac2) as mac2,name FROM nstats_force_name_mac WHERE mac1 IN(?) OR mac2 IN(?)`;
 
     return await simpleQuery(query, [targets, targets]);
-
-
 
 }
