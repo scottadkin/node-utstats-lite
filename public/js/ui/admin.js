@@ -4550,7 +4550,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "mac";
+        this.mode = "both";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -4612,12 +4612,15 @@ class AdminPlayerForceName{
             const mac1s = new Set();
             const mac2s = new Set();
             const names = new Set();
+            const hwidAndMac = new Set();
 
             for(let i = 0; i < this.usage.length; i++){
 
                 const d = this.usage[i];
+
                 if(d.hwid !== "" && d.hwid !== "N/A"){
                     hwids.add(d.hwid)
+                    hwidAndMac.add([d.hwid, d.mac1, d.mac2]);
                 }
 
                 if(d.mac1 !== ""){
@@ -4630,6 +4633,8 @@ class AdminPlayerForceName{
                     allMacs.add(d.mac2);
                 }
 
+
+
                 names.add(d.name);
             }
 
@@ -4638,12 +4643,44 @@ class AdminPlayerForceName{
             this.uniqueMac1s = [...mac1s];
             this.uniqueMac2s = [...mac2s];
             this.uniqueNames = [...mac2s];
+            this.uniqueHWIDMACs = [...hwidAndMac];
 
             this.uniqueHWIDS.sort(sortByStringInsensitive);
             this.uniqueMacs.sort(sortByStringInsensitive);
             this.uniqueMac1s.sort(sortByStringInsensitive);
             this.uniqueMac2s.sort(sortByStringInsensitive);
             this.uniqueNames.sort(sortByStringInsensitive);
+
+            this.uniqueHWIDMACs.sort((a, b) =>{
+
+                const hwidA = a[0].toUpperCase();
+                const hwidB = b[0].toUpperCase();
+
+                const mac1A = a[1].toUpperCase();
+                const mac1B = b[1].toUpperCase();
+
+                const mac2A = a[2].toUpperCase();
+                const mac2B = b[2].toUpperCase();
+
+                if(hwidA < hwidB){
+                    return -1;
+                }else if(hwidA > hwidB){
+                    return 1;
+                }
+
+                if(mac1A < mac1B){
+                    return -1;
+                }else if(mac1A > mac1B){
+                    return 1;
+                }
+
+                if(mac2A < mac2B){
+                    return -1;
+                }else if(mac2A > mac2B){
+                    return 1;
+                }
+                return 0;
+            });
 
             this.render();
 
@@ -4663,9 +4700,10 @@ class AdminPlayerForceName{
 
         const tabOptions = [
             {"display": "Current Data", "value": "current"},
+            {"display": "Force BY HWID & MAC Addresses", "value": "both"},
             {"display": "Force By HWID", "value": "hwid"},
             {"display": "Force By MAC Addresses", "value": "mac"},
-            {"display": "Force HWID & MAC Addresses", "value": "both"},
+            
         ];
 
         this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
@@ -4740,6 +4778,7 @@ class AdminPlayerForceName{
             [{"content": `Total Forced MAC Address Combinations to Names`, "className": "text-left"}, this.macToNames.length],    
             [{"content": `Unique Player Names`, "className": "text-left"}, this.uniqueNames.length],
             [{"content": `Unique HWIDs`, "className": "text-left"}, this.uniqueHWIDS.length],
+            [{"content": `Unique HWIDs and MAC Combinations`, "className": "text-left"}, this.uniqueHWIDMACs.length],
             [{"content": `Total Unique MAC Address Combinations`, "className": "text-left"}, this.uniqueMacs.length],
             [{"content": `Unique MAC1 Addresses`, "className": "text-left"}, this.uniqueMac1s.length],
             [{"content": `Unique MAC2 Addresses`, "className": "text-left"}, this.uniqueMac2s.length],
@@ -4981,22 +5020,16 @@ class AdminPlayerForceName{
         }
     }
 
-    renderForceByHWID(){
-
-        if(this.mode !== "hwid") return;
-
-        this.form.innerHTML = "";
-
-        const row = UIDiv("form-row");
-        row.append(UILabel("Target HWID"));
-
-        const hwids = [];
+    createHWIDFormElems(){
 
         this.hwidInfoElem = UIDiv("info");
 
         this.hwidInfoElem.append("No HWID selected");
 
-        this.hwidSelect = new UISelect(row, hwids, this.selectedHWID, (e) =>{
+        const row = UIDiv("form-row");
+        row.append(UILabel("Target HWID"));
+
+        this.hwidSelect = new UISelect(row, [], this.selectedHWID, (e) =>{
             this.selectedHWID = e;
             this.updateHWIDInfo();
         });
@@ -5004,7 +5037,7 @@ class AdminPlayerForceName{
         this.updateHWIDInfo();
         this.filterHWIDSelect();
 
-        const search = UIFormInputRow("Filter", "id", "text", this.hwidSearch, "placeholder", (e) =>{
+        this.hwidSearchElem = UIFormInputRow("Filter", "id", "text", this.hwidSearch, "placeholder", (e) =>{
 
             this.hwidSearch = e;
 
@@ -5014,7 +5047,9 @@ class AdminPlayerForceName{
             this.filterHWIDSelect();
         })
 
-        const hwidNameOverride = new UIFormInputRow(
+        if(this.mode === "both") return row;
+
+        this.hwidNameOverrideElem = new UIFormInputRow(
             "Name To Force", 
             "hwid-force-name", 
             "text", 
@@ -5025,6 +5060,22 @@ class AdminPlayerForceName{
             }
         );
 
+        
+
+        return row;
+    }
+
+    renderForceByHWID(){
+
+        if(this.mode !== "hwid") return;
+
+        this.form.innerHTML = "";
+
+        const hwids = [];
+
+
+        const row = this.createHWIDFormElems(hwids);
+
         const submit = document.createElement("button");
         submit.className = "submit-button";
         submit.append("Save Changes");
@@ -5033,7 +5084,7 @@ class AdminPlayerForceName{
         });
 
 
-        this.form.append(search, row, hwidNameOverride, submit, UIBr(), UIBr());
+        this.form.append(this.hwidSearchElem, row, this.hwidNameOverrideElem, submit, UIBr(), UIBr());
         this.form.append(this.hwidInfoElem);
     
     }
@@ -5335,29 +5386,7 @@ class AdminPlayerForceName{
         }
     }
 
-    renderForceByMac(){
-
-        if(this.mode !== "mac") return;
-
-        const info = UIDiv("info");
-
-        info.append(
-            "Force a player name by a single MAC address or by a pair of MAC addresses.",
-            UIBr(),
-            "To force a name by a single address simply leave the second HWID empty.",
-            UIBr(),
-            "When ", UIB("Both MAC Addresses Must Match"), ` is disabled, history is displayed if there are any matches to the selected MAC addresses.`,
-            UIBr(),
-            "When ", UIB("Both MAC Addresses Must Match"), ` is enabled, history is only displayed 
-            if both mac addresses are found in a single combination, 
-            it doesn't matter which order they are in to be matched.`,
-            UIBr(), 
-            `If both MAC1 and MAC2 are the same value you still have to select the same address in both dropdowns for the history to show.`,
-            UIBr(),
-            "* indicates an optional field.",
-        );
-
-        this.form.append(info);
+    renderMacFormElems(){
 
         this.mac1Options = this.createMacSelectOptions(this.mac1Filter);
         this.mac2Options = this.createMacSelectOptions(this.mac2Filter);
@@ -5406,7 +5435,7 @@ class AdminPlayerForceName{
         this.form.append(filter2Row);
 
         const row2 = UIDiv("form-row");
-        row2.append(UILabel("MAC2*"));
+        row2.append(UILabel("MAC2"));
 
         this.mac2Select = new UISelect(row2, this.mac2Options, this.selectedMAC2, (e) =>{
 
@@ -5421,6 +5450,32 @@ class AdminPlayerForceName{
         })
 
         this.form.append(nameRow);
+
+    }
+
+    renderForceByMac(){
+
+        if(this.mode !== "mac") return;
+
+        const info = UIDiv("info");
+
+        info.append(
+            "Force a player name by a single MAC address or by a pair of MAC addresses.",
+            UIBr(),
+            "To force a name by a single address simply leave the second HWID empty.",
+            UIBr(),
+            "When ", UIB("Both MAC Addresses Must Match"), ` is disabled, history is displayed if there are any matches to the selected MAC addresses.`,
+            UIBr(),
+            "When ", UIB("Both MAC Addresses Must Match"), ` is enabled, history is only displayed 
+            if both mac addresses are found in a single combination, 
+            it doesn't matter which order they are in to be matched.`,
+            UIBr(), 
+            `If both MAC1 and MAC2 are the same value you still have to select the same address in both dropdowns for the history to show.`
+        );
+
+        this.form.append(info);
+
+        this.renderMacFormElems();
 
         this.macWarningElem = UIDiv("hidden");
         this.form.append(this.macWarningElem);
@@ -5445,6 +5500,31 @@ class AdminPlayerForceName{
 
     }
 
+
+    renderForceByBoth(){
+
+        if(this.mode !== "both") return;
+
+        const info = UIDiv("info");
+
+        info.append(`Force a player's name when both HWID and MAC addresses match.`);
+
+        this.form.append(info);
+
+        const hwidRow = this.createHWIDFormElems();
+
+        this.form.append(this.hwidSearchElem, hwidRow);
+        this.renderMacFormElems();
+        const submit = document.createElement("button");
+        submit.className = "submit-button";
+        submit.append("Save Changes");
+        submit.addEventListener("click", () =>{
+            //this.forceHWIDToName();
+        });
+
+        this.form.append(submit, UIBr(), UIBr());
+    }
+
     render(){
 
         if(!this.bActive){
@@ -5458,6 +5538,7 @@ class AdminPlayerForceName{
         this.renderCurrentData();
         this.renderForceByHWID();
         this.renderForceByMac();
+        this.renderForceByBoth();
 
         
 
