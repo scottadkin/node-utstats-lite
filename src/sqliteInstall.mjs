@@ -743,7 +743,16 @@ const queries = [
             mac2 TEXT COLLATE NOCASE NOT NULL,
             name TEXT NOT NULL
         ) STRICT`,
-        `CREATE UNIQUE INDEX IF NOT EXISTS nfnm_midx ON nstats_force_name_mac(mac1,mac2)`
+        `CREATE UNIQUE INDEX IF NOT EXISTS nfnm_midx ON nstats_force_name_mac(mac1,mac2)`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid_and_mac(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            hwid TEXT COLLATE NOCASE NOT NULL,
+            mac1 TEXT COLLATE NOCASE NOT NULL,
+            mac2 TEXT COLLATE NOCASE NOT NULL,
+            name TEXT NOT NULL
+        ) STRICT`,
+        `CREATE UNIQUE INDEX IF NOT EXISTS nfnhm_midx ON nstats_force_name_hwid_and_mac(hwid,mac1,mac2)`
 
 ];
 
@@ -754,7 +763,7 @@ export async function sqliteInstall(){
     for(let i = 0; i < queries.length; i++){
 
         new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
-        simpleQuery(queries[i]);
+        await simpleQuery(queries[i]);
         new Message(`Query passed`,"pass");
     }
 }
