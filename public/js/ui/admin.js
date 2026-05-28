@@ -4633,8 +4633,6 @@ class AdminPlayerForceName{
                     allMacs.add(d.mac2);
                 }
 
-
-
                 names.add(d.name);
             }
 
@@ -5030,8 +5028,14 @@ class AdminPlayerForceName{
         row.append(UILabel("Target HWID"));
 
         this.hwidSelect = new UISelect(row, [], this.selectedHWID, (e) =>{
+
             this.selectedHWID = e;
-            this.updateHWIDInfo();
+
+            if(this.mode === "hwid"){
+                this.updateHWIDInfo();
+            }else{
+                this.updateForceByBothHistory();
+            }
         });
 
         this.updateHWIDInfo();
@@ -5042,9 +5046,17 @@ class AdminPlayerForceName{
             this.hwidSearch = e;
 
             this.selectedHWID = "";
-            this.updateHWIDInfo();
 
-            this.filterHWIDSelect();
+            if(this.mode === "hwid"){
+
+                this.updateHWIDInfo();
+                this.filterHWIDSelect();
+                
+            }else{
+                this.updateForceByBothHistory();
+            }
+
+            
         })
 
         if(this.mode === "both") return row;
@@ -5393,12 +5405,16 @@ class AdminPlayerForceName{
 
         const bothMatchTF = new UITrueFalse(this.bOnlyDisplayOnBothMacMatch, "both-match-needed", false, (e) =>{
             this.bOnlyDisplayOnBothMacMatch = e;
-            this.renderMacHistory();
+            if(this.mode === "mac"){
+                this.renderMacHistory();
+            }else{
+                this.updateForceByBothHistory();
+            }
         })
 
 
         const tfRow = UIDiv("form-row");
-        tfRow.append(UILabel("Both MAC Addresses Must Match"));
+        tfRow.append(UILabel("Both MAC Addresses Must Match(History output)"));
         tfRow.append(bothMatchTF.elem);
         this.form.append(tfRow);
 
@@ -5418,7 +5434,11 @@ class AdminPlayerForceName{
         this.mac1Select = new UISelect(row, this.mac1Options, this.selectedMAC1, (e) =>{
 
             this.selectedMAC1 = e;
-            this.renderMacHistory();
+            if(this.mode === "mac"){
+                this.renderMacHistory();
+            }else{
+                this.updateForceByBothHistory();
+            }
   
         });
         
@@ -5440,7 +5460,12 @@ class AdminPlayerForceName{
         this.mac2Select = new UISelect(row2, this.mac2Options, this.selectedMAC2, (e) =>{
 
             this.selectedMAC2 = e;
-            this.renderMacHistory();
+
+            if(this.mode === "mac"){
+                this.renderMacHistory();
+            }else{
+                this.updateForceByBothHistory();
+            }
         });
         
         this.form.append(row2, UIBr());
@@ -5501,19 +5526,76 @@ class AdminPlayerForceName{
     }
 
 
+    getMatchHWIDAndMacs(hwid, mac1, mac2){
+
+        const found = [];
+
+        const currentMACS = [mac1, mac2];
+
+        for(let i = 0; i < this.usage.length; i++){
+
+            const u = this.usage[i];
+
+            if(u.hwid !== hwid) continue;
+            if(mac1 === "" && mac2 === "") continue;
+
+            const m1Index = currentMACS.indexOf(u.mac1);
+            const m2Index = currentMACS.indexOf(u.mac2);
+
+            if(m1Index !== -1 && m2Index !== -1){
+                found.push(u);
+            }
+
+        }
+
+        return found;
+    }
+
+
+    updateForceByBothHistory(){
+
+        this.bothHistoryElem.innerHTML = ``;
+
+
+        UIHeader(this.bothHistoryElem, "HWID & MAC Combination History");
+
+        if(this.selectedHWID === ""){
+            this.bothHistoryElem.append("No HWID selected");
+            return;
+        }
+
+        if(this.selectedMAC1 === "" && this.selectedMAC2 !== ""){
+            this.bothHistoryElem.append("For just a single MAC address override, MAC1 must be set instead of MAC2.");
+            return;
+        }else if(this.selectedMAC1 === ""){
+            this.bothHistoryElem.append("MAC1 can't be an empty string");
+            return;
+        }
+
+
+        console.log(this.getMatchHWIDAndMacs(this.selectedHWID, this.selectedMAC1, this.selectedMAC2));
+
+
+
+    }
+
     renderForceByBoth(){
 
         if(this.mode !== "both") return;
 
         const info = UIDiv("info");
 
-        info.append(`Force a player's name when both HWID and MAC addresses match.`);
+        info.append(
+            `Force a player's name when both HWID and MAC addresses match.`,
+            UIBr(), "If the HWID string is empty or N/A it can't be used, and will not be displayed in the history.",
+            UIBr(), "If BOTH MAC strings are empty the combination can't be used, and will not be displayed in the history."
+        );
 
         this.form.append(info);
 
         const hwidRow = this.createHWIDFormElems();
 
-        this.form.append(this.hwidSearchElem, hwidRow);
+        this.form.append(this.hwidSearchElem, hwidRow, UIBr());
         this.renderMacFormElems();
         const submit = document.createElement("button");
         submit.className = "submit-button";
@@ -5523,6 +5605,12 @@ class AdminPlayerForceName{
         });
 
         this.form.append(submit, UIBr(), UIBr());
+
+
+
+        this.bothHistoryElem = UIDiv();
+        this.form.append(this.bothHistoryElem);
+        this.updateForceByBothHistory();
     }
 
     render(){
