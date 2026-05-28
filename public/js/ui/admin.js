@@ -4550,7 +4550,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "both";
+        this.mode = "hwid";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -4973,7 +4973,7 @@ class AdminPlayerForceName{
             
 
             if(h.includes(search)){
-                options.push({"display": h, "value": h});
+                options.push({"display": h.toUpperCase(), "value": h.toUpperCase()});
             }
 
         }
@@ -5025,10 +5025,14 @@ class AdminPlayerForceName{
         this.hwidInfoElem.append("No HWID selected");
 
         const row = UIDiv("form-row");
-        row.append(UILabel("Target HWID"));
+        row.append(UILabel("Select An Exisiting HWID"));
 
-        this.hwidSelect = new UISelect(row, [], this.selectedHWID, (e) =>{
+        const hwidSelectOptions = [];
 
+        this.hwidSelect = new UISelect(row, [], this.hwidSearch, (e) =>{
+
+            this.hwidSearch = e;
+            this.selectedHWIDInput.value = e;
             this.selectedHWID = e;
 
             if(this.mode === "hwid"){
@@ -5036,16 +5040,23 @@ class AdminPlayerForceName{
             }else{
                 this.updateForceByBothHistory();
             }
-        });
 
-        this.updateHWIDInfo();
+        });
+        
         this.filterHWIDSelect();
 
-        this.hwidSearchElem = UIFormInputRow("Filter", "id", "text", this.hwidSearch, "placeholder", (e) =>{
+        this.updateHWIDInfo();
+
+        this.selectedHWIDInput = UIInput("text", "select-hwid", this.selectedHWID, "Selected HWID", (e) =>{
+            console.log(e);
+            this.selectedHWID = e;
+            this.updateHWIDInfo();
+        });
+        
+
+        this.hwidSearchElem = UIFormInputRow("Filter Existing HWIDs", "id", "text", this.hwidSearch, "placeholder", (e) =>{
 
             this.hwidSearch = e;
-
-            this.selectedHWID = "";
 
             if(this.mode === "hwid"){
 
@@ -5054,10 +5065,22 @@ class AdminPlayerForceName{
                 
             }else{
                 this.updateForceByBothHistory();
-            }
+            }    
+        });
 
-            
-        })
+        const testRow = UIDiv("form-row");
+        testRow.append(UILabel("Target HWID"));
+        
+    
+
+        testRow.append(this.selectedHWIDInput);
+
+
+
+        /*this.hwidSelectedElem = UIFormInputRow("Target HWID", "target-hwid", "text", this.selectedHWID, "selected hwid", (e) =>{
+            this.selectedHWID = e;
+            this.updateHWIDInfo();
+        });*/
 
         if(this.mode === "both") return row;
 
@@ -5073,8 +5096,8 @@ class AdminPlayerForceName{
         );
 
         
+        this.form.append(this.hwidSearchElem, row, testRow, this.hwidSelectedElem, this.hwidNameOverrideElem);
 
-        return row;
     }
 
     renderForceByHWID(){
@@ -5086,7 +5109,7 @@ class AdminPlayerForceName{
         const hwids = [];
 
 
-        const row = this.createHWIDFormElems(hwids);
+        this.createHWIDFormElems(hwids);
 
         const submit = document.createElement("button");
         submit.className = "submit-button";
@@ -5096,7 +5119,7 @@ class AdminPlayerForceName{
         });
 
 
-        this.form.append(this.hwidSearchElem, row, this.hwidNameOverrideElem, submit, UIBr(), UIBr());
+        this.form.append(submit, UIBr(), UIBr());
         this.form.append(this.hwidInfoElem);
     
     }
