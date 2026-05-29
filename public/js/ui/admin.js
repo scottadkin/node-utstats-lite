@@ -4550,7 +4550,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "hwid";
+        this.mode = "mac";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -4601,14 +4601,10 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
-            console.log(res.usage);
 
             this.usage = res.usage;
             this.hwidToNames = res.hwidToNames;
             this.macToNames = res.macToNames;
-
-            console.log(this.hwidToNames);
-            console.log(this.macToNames);
 
             const hwids = new Set();
             const allMacs = new Set();
@@ -5051,7 +5047,6 @@ class AdminPlayerForceName{
         this.updateHWIDInfo();
 
         this.selectedHWIDInput = UIInput("text", "select-hwid", this.selectedHWID, "Selected HWID", (e) =>{
-            console.log(e);
             this.selectedHWID = e;
             this.updateHWIDInfo();
         });
@@ -5061,10 +5056,12 @@ class AdminPlayerForceName{
 
             this.hwidSearch = e;
 
+            this.filterHWIDSelect();
+
             if(this.mode === "hwid"){
 
                 this.updateHWIDInfo();
-                this.filterHWIDSelect();
+                
                 
             }else{
                 this.updateForceByBothHistory();
@@ -5074,7 +5071,7 @@ class AdminPlayerForceName{
         const selectedRow = UIDiv("form-row");
         selectedRow.append(UILabel("Selected HWID"), this.selectedHWIDInput);
 
-        if(this.mode === "both") return row;
+        if(this.mode === "both") return [selectedRow, row];
 
         this.hwidNameOverrideElem = new UIFormInputRow(
             "Name To Force", 
@@ -5138,8 +5135,6 @@ class AdminPlayerForceName{
 
     getForcedByMacName(mac1, mac2){
 
-        mac1 = mac1.toLowerCase();
-        mac2 = mac2.toLowerCase();
 
         if(mac1 === mac2 && mac1 === "") return [];
 
@@ -5149,8 +5144,8 @@ class AdminPlayerForceName{
 
             const m = this.macToNames[i];
 
-            const currentMac1 = m.mac1.toLowerCase();
-            const currentMac2 = m.mac2.toLowerCase();
+            const currentMac1 = m.mac1;
+            const currentMac2 = m.mac2;
 
             if((currentMac1 === mac1 && currentMac2 === mac2) || (currentMac1 === mac2 && currentMac2 === mac1)){
                 found.push(m);
@@ -5235,6 +5230,7 @@ class AdminPlayerForceName{
                 this.deleteForceMacToName(m.mac1, m.mac2);
             });
 
+
             if(m.mac2 !== ""){
 
                 rows.push([
@@ -5244,6 +5240,7 @@ class AdminPlayerForceName{
                 ]);
 
             }else{
+
                 rows.push([
                     {"content": m.mac1, "className": "text-left"},
                     {"content": m.name, "className": "text-left"},
@@ -5283,8 +5280,8 @@ class AdminPlayerForceName{
 
             let matchType = [];
 
-            const m1 = u.mac1.toLowerCase();
-            const m2 = u.mac2.toLowerCase();
+            const m1 = u.mac1;
+            const m2 = u.mac2;
 
             if(this.bOnlyDisplayOnBothMacMatch){
 
@@ -5345,6 +5342,7 @@ class AdminPlayerForceName{
         const rows = found.map((f) =>{
 
             const {match, data} = f;
+
 
             return [
                 {"content": [UICountryFlag(data.country), data.name], "className": "text-left"},
@@ -5438,27 +5436,54 @@ class AdminPlayerForceName{
             this.mac1Filter = e;
             this.mac1Options = this.createMacSelectOptions(this.mac1Filter);
             this.mac1Select.updateOptions(this.mac1Options);
-            this.selectedMAC1 = "";
         });
         
         this.form.append(filter1Row);
 
 
-        const row = UIDiv("form-row");
-        row.append(UILabel("MAC1"));
 
-        this.mac1Select = new UISelect(row, this.mac1Options, this.selectedMAC1, (e) =>{
+        this.selectedMAC1Input = document.createElement("input");
+        this.selectedMAC1Input.type = "text";
+        this.selectedMAC1Input.className = "textbox";
+        this.selectedMAC1Input.value = this.selectedMAC1;
+        this.selectedMAC1Input.placeholder = "Selected Mac1...";
+        this.selectedMAC1Input.addEventListener("input", (e) =>{
 
-            this.selectedMAC1 = e;
+            this.selectedMAC1 = e.target.value.toUpperCase();
+
             if(this.mode === "mac"){
                 this.renderMacHistory();
             }else{
                 this.updateForceByBothHistory();
             }
-  
         });
+
+
+        const mac1Row = UIDiv("form-row");
+        mac1Row.append(UILabel("Filtered Existing MAC Addresses"));
+
+        this.mac1Select = new UISelect(mac1Row, this.mac1Options, this.selectedMAC1, (e) =>{
+
+            this.selectedMAC1 = e.toUpperCase();
+            this.selectedMAC1Input.value = e.toUpperCase();
+
+            if(this.mode === "mac"){
+                this.renderMacHistory();
+            }else{
+                this.updateForceByBothHistory();
+            }
+        });
+
+        const mac1SelectRow = UIDiv("form-row");
+
         
-        this.form.append(row, UIBr());
+
+        mac1SelectRow.append(UILabel("Selected MAC1"), this.selectedMAC1Input);
+
+        this.form.append(mac1Row, mac1SelectRow, UIBr());
+
+
+        
 
 
         const filter2Row = UIFormInputRow("Filter MAC2 Options", "m12", "text", this.mac2Filter, "mac2...", (e) =>{
@@ -5471,11 +5496,38 @@ class AdminPlayerForceName{
         this.form.append(filter2Row);
 
         const row2 = UIDiv("form-row");
-        row2.append(UILabel("MAC2"));
+        row2.append(UILabel("Filtered Existing MAC Addresses"));
+
+
+        
+
+        this.selectedMAC2Input = document.createElement("input");
+        this.selectedMAC2Input.type = "text";
+        this.selectedMAC2Input.className = "textbox";
+        this.selectedMAC2Input.value = this.selectedMAC2;
+        this.selectedMAC2Input.placeholder = "Selected Mac2...";
+
+        this.selectedMAC2Input.addEventListener("input", (e) =>{
+
+            this.selectedMAC2 = e.target.value.toUpperCase();
+
+            if(this.mode === "mac"){
+                this.renderMacHistory();
+            }else{
+                this.updateForceByBothHistory();
+            }
+        });
+
+        row2.append(this.selectedMAC2Input);
+
+        const mac2Row = UIDiv("form-row");
+        mac2Row.append(UILabel("Selected MAC2"), this.selectedMAC2Input);
 
         this.mac2Select = new UISelect(row2, this.mac2Options, this.selectedMAC2, (e) =>{
 
-            this.selectedMAC2 = e;
+            this.selectedMAC2 = e.toUpperCase();
+
+            this.selectedMAC2Input.value = e.toUpperCase();
 
             if(this.mode === "mac"){
                 this.renderMacHistory();
@@ -5484,7 +5536,7 @@ class AdminPlayerForceName{
             }
         });
         
-        this.form.append(row2, UIBr());
+        this.form.append(row2, mac2Row, UIBr());
 
         const nameRow = UIFormInputRow("Name To Force", "new-name", "text", this.overrideName, "Name to user...", (e) =>{
             this.overrideName = e;
@@ -5609,9 +5661,9 @@ class AdminPlayerForceName{
 
         this.form.append(info);
 
-        const hwidRow = this.createHWIDFormElems();
+        const [selectedHWIDRow, hwidRow] = this.createHWIDFormElems();
 
-        this.form.append(this.hwidSearchElem, hwidRow, UIBr());
+        this.form.append(this.hwidSearchElem, hwidRow, selectedHWIDRow, UIBr());
         this.renderMacFormElems();
         const submit = document.createElement("button");
         submit.className = "submit-button";

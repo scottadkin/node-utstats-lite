@@ -1650,7 +1650,7 @@ export async function getHWIDForceNames(targets){
 
 export async function adminGetAllForceMacToNames(){
 
-    const query = `SELECT UPPER(mac1) as mac1, UPPER(mac2) as mac2 FROM nstats_force_name_mac ORDER BY name ASC`;
+    const query = `SELECT UPPER(mac1) as mac1, UPPER(mac2) as mac2, name FROM nstats_force_name_mac ORDER BY name ASC`;
 
     return await simpleQuery(query);
 }
@@ -1658,6 +1658,8 @@ export async function adminGetAllForceMacToNames(){
 
 //check if same pair of addresses are in the database but in another order
 async function bMacComboAlreadyExist(mac1, mac2){
+
+
 
     const query = `SELECT COUNT(*) as total_entries FROM nstats_force_name_mac WHERE (mac1=? AND mac2=?) OR (mac2=? AND mac1=?)`;
 
@@ -1675,6 +1677,9 @@ export async function adminForceNameOnMacAddresses(mac1, mac2, name){
 
     if(mac1 === "") throw new Error("Mac1 can't be an empty string.");
     if(name === "") throw new Error("Name can't be an empty string.");
+
+    mac1 = mac1.toUpperCase();
+    mac2 = mac2.toUpperCase();
 
     const query = `INSERT INTO nstats_force_name_mac VALUES(NULL,?,?,?)`;
 
@@ -1694,6 +1699,9 @@ export async function adminForceNameOnMacAddresses(mac1, mac2, name){
 
 export async function adminDeleteForceNameOnMacAddresses(mac1, mac2){
 
+    mac1 = mac1.toUpperCase();
+    mac2 = mac2.toUpperCase();
+
     const query = `DELETE FROM nstats_force_name_mac WHERE mac1=? AND mac2=?`;
 
     return await simpleQuery(query, [mac1, mac2]);
@@ -1703,6 +1711,11 @@ export async function adminDeleteForceNameOnMacAddresses(mac1, mac2){
 export async function getForcedByMacNames(targets){
 
     if(targets.length === 0) return [];
+
+    for(let i = 0; i < targets.length; i++){
+
+        targets[i] = targets[i].toUpperCase();
+    }
 
     const query = `SELECT UPPER(mac1) as mac1,UPPER(mac2) as mac2,name FROM nstats_force_name_mac WHERE mac1 IN(?) OR mac2 IN(?)`;
 
