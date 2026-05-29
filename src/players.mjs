@@ -1550,9 +1550,9 @@ export async function adminGetForceNamesData(){
 
     const query = `SELECT 
     ${mt}.player_id,
-    ${mt}.hwid,
-    ${mt}.mac1,
-    ${mt}.mac2,
+    UPPER(${mt}.hwid) as hwid,
+    UPPER(${mt}.mac1) as mac1,
+    UPPER(${mt}.mac2) as mac2,
     ${pt}.name,
     ${pt}.country,
     MIN(${mt}.match_date) as first_seen,
@@ -1575,7 +1575,7 @@ export async function adminGetForceNamesData(){
 
 export async function adminGetAllForceHWIDToNames(){
 
-    const query = `SELECT * FROM nstats_force_name_hwid ORDER BY name ASC`;
+    const query = `SELECT id,UPPER(hwid) as hwid,name FROM nstats_force_name_hwid ORDER BY name ASC`;
     
     return await simpleQuery(query);
 
@@ -1631,7 +1631,7 @@ export async function getHWIDForceNames(targets){
 
     if(targets.length === 0) return {};
 
-    const query = `SELECT hwid,name FROM nstats_force_name_hwid WHERE hwid IN(?)`;
+    const query = `SELECT UPPER(hwid) as hwid,name FROM nstats_force_name_hwid WHERE hwid IN(?)`;
 
     const result = await simpleQuery(query, [targets]);
 
@@ -1650,7 +1650,7 @@ export async function getHWIDForceNames(targets){
 
 export async function adminGetAllForceMacToNames(){
 
-    const query = `SELECT * FROM nstats_force_name_mac ORDER BY name ASC`;
+    const query = `SELECT UPPER(mac1) as mac1, UPPER(mac2) as mac2 FROM nstats_force_name_mac ORDER BY name ASC`;
 
     return await simpleQuery(query);
 }

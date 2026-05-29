@@ -4607,6 +4607,9 @@ class AdminPlayerForceName{
             this.hwidToNames = res.hwidToNames;
             this.macToNames = res.macToNames;
 
+            console.log(this.hwidToNames);
+            console.log(this.macToNames);
+
             const hwids = new Set();
             const allMacs = new Set();
             const mac1s = new Set();
@@ -4651,14 +4654,14 @@ class AdminPlayerForceName{
 
             this.uniqueHWIDMACs.sort((a, b) =>{
 
-                const hwidA = a[0].toUpperCase();
-                const hwidB = b[0].toUpperCase();
+                const hwidA = a[0];
+                const hwidB = b[0];
 
-                const mac1A = a[1].toUpperCase();
-                const mac1B = b[1].toUpperCase();
+                const mac1A = a[1];
+                const mac1B = b[1];
 
-                const mac2A = a[2].toUpperCase();
-                const mac2B = b[2].toUpperCase();
+                const mac2A = a[2];
+                const mac2B = b[2];
 
                 if(hwidA < hwidB){
                     return -1;
@@ -4793,7 +4796,7 @@ class AdminPlayerForceName{
         const hwidRows = this.hwidToNames.map((h) =>{
             return [
                 {"className": "text-left", "content": h.name}, 
-                h.hwid.toUpperCase()
+                h.hwid
             ];
         });
 
@@ -4806,8 +4809,8 @@ class AdminPlayerForceName{
 
             return [
                 {"className": "text-left", "content": m.name},
-                m.mac1.toUpperCase(),
-                m.mac2.toUpperCase()
+                m.mac1,
+                m.mac2
             ];
         });
 
@@ -4879,7 +4882,7 @@ class AdminPlayerForceName{
             return;
         }
 
-        const target = this.selectedHWID.toLowerCase();
+        const target = this.selectedHWID.toUpperCase();
 
         UIHeader(this.hwidInfoElem, "Selected HWID History");
 
@@ -4914,7 +4917,7 @@ class AdminPlayerForceName{
 
             const d = this.usage[i];
 
-            if(d.hwid.toLowerCase() === target){
+            if(d.hwid === target){
                 matches.push(d);
             }
         }
@@ -5025,7 +5028,7 @@ class AdminPlayerForceName{
         this.hwidInfoElem.append("No HWID selected");
 
         const row = UIDiv("form-row");
-        row.append(UILabel("Select An Exisiting HWID"));
+        row.append(UILabel("Exisiting HWIDs"));
 
         const hwidSelectOptions = [];
 
@@ -5068,19 +5071,8 @@ class AdminPlayerForceName{
             }    
         });
 
-        const testRow = UIDiv("form-row");
-        testRow.append(UILabel("Target HWID"));
-        
-    
-
-        testRow.append(this.selectedHWIDInput);
-
-
-
-        /*this.hwidSelectedElem = UIFormInputRow("Target HWID", "target-hwid", "text", this.selectedHWID, "selected hwid", (e) =>{
-            this.selectedHWID = e;
-            this.updateHWIDInfo();
-        });*/
+        const selectedRow = UIDiv("form-row");
+        selectedRow.append(UILabel("Selected HWID"), this.selectedHWIDInput);
 
         if(this.mode === "both") return row;
 
@@ -5096,7 +5088,7 @@ class AdminPlayerForceName{
         );
 
         
-        this.form.append(this.hwidSearchElem, row, testRow, this.hwidSelectedElem, this.hwidNameOverrideElem);
+        this.form.append(this.hwidSearchElem, row, selectedRow, this.hwidNameOverrideElem);
 
     }
 
@@ -5114,6 +5106,7 @@ class AdminPlayerForceName{
         const submit = document.createElement("button");
         submit.className = "submit-button";
         submit.append("Save Changes");
+
         submit.addEventListener("click", () =>{
             this.forceHWIDToName();
         });
