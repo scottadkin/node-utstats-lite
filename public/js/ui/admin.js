@@ -5675,6 +5675,43 @@ class AdminPlayerForceName{
 
     }
 
+    async deleteForceByBoth(hwid, mac1, mac2){
+
+        try{
+
+            if(this.bActionInProgress){
+
+                new UINotification(this.parent, "error", "Failed To Delete Force By Both", "A previous action has not finished, please wait until it's finished.");
+                return;
+            }
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "delete-force-name-by-both", hwid, mac1, mac2})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+
+            await this.loadData();
+            new UINotification(this.parent, "pass", "Success", "Deleted force name by HWID and MAC combination.");
+            
+
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Delete Force By Both", err.toString());
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+
+    }
     updateForceByBothHistory(){
 
         this.bothHistoryElem.innerHTML = ``;
@@ -5745,6 +5782,10 @@ class AdminPlayerForceName{
                 const button = document.createElement("button");
                 button.className = "delete-button";
                 button.append("Delete Force By Both");
+                button.addEventListener("click", () =>{
+
+                    this.deleteForceByBoth(e.hwid, e.mac1, e.mac2);
+                });
 
                 rows.push([
                     {"content": e.name, "className": "text-left"},
@@ -5754,7 +5795,7 @@ class AdminPlayerForceName{
                     {"content": button}
                 ]);
             }
-            
+
             const table = new UITable(warning, tableOptions, rows);
             this.bothHistoryElem.append(warning);
         }

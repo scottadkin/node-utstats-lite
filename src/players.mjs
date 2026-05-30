@@ -1768,3 +1768,11 @@ export async function adminGetAllForceNamesByHWIDAndMac(){
 
     return await simpleQuery(query);
 }
+
+
+export async function adminDeleteForceNameByBoth(hwid, mac1, mac2){
+
+    const query = `DELETE FROM nstats_force_name_hwid_and_mac WHERE hwid=? AND (mac1=? OR mac1=?) AND (mac2=? OR mac2=?)`;
+
+    return await simpleQuery(query, [hwid, mac1, mac2, mac1, mac2]);
+}
