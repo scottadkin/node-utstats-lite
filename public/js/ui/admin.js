@@ -4567,6 +4567,7 @@ class AdminPlayerForceName{
         this.uniqueMac2s = [];
         this.uniqueNames = [];
         this.macToNames = [];
+        this.bothToNames = [];
 
         this.parent.append(this.wrapper);
 
@@ -4606,6 +4607,7 @@ class AdminPlayerForceName{
             this.usage = res.usage;
             this.hwidToNames = res.hwidToNames;
             this.macToNames = res.macToNames;
+            this.bothToNames = res.bothToNames;
 
             const hwids = new Set();
             const allMacs = new Set();
@@ -5636,7 +5638,42 @@ class AdminPlayerForceName{
         return found;
     }
 
+    getExistingForceByBoth(hwid, mac1, mac2){
 
+        const found = [];
+
+        for(let i = 0; i < this.bothToNames.length; i++){
+
+            const b = this.bothToNames[i];
+            
+
+            if(b.hwid !== "" && hwid !== b.hwid) continue;
+       
+            if(b.mac1 === "" && b.mac2 === "") continue;
+
+
+            if((b.mac1 === mac1 || b.mac1 === mac2) && (b.mac2 === mac1 || b.mac2 === mac2)){
+
+                found.push(b);
+                continue;
+            }
+
+            //if(b.mac1 === mac1 || b.mac1 === mac2)
+
+            /*if(b.mac1 !== "" && mac1 === b.mac1){
+                found.push(b);
+                continue;
+            }
+
+            if(b.mac2 !== "" && mac2 === b.mac2){
+                found.push(b);
+                continue;
+            }*/
+            
+        }
+        return found;
+
+    }
 
     updateForceByBothHistory(){
 
@@ -5653,7 +5690,7 @@ class AdminPlayerForceName{
 
         const matches = this.getMatchHWIDAndMacs(this.selectedHWID, this.selectedMAC1, this.selectedMAC2);
       
-        const matchClass = "team-green yellow";
+        const matchClass = "team-green yellow-font";
 
         const rows = matches.map((m) =>{
 
@@ -5685,6 +5722,44 @@ class AdminPlayerForceName{
 
         });
 
+        const existingForceByBoth = this.getExistingForceByBoth(this.selectedHWID, this.selectedMAC1, this.selectedMAC2);
+
+
+        if(existingForceByBoth.length !== 0){
+
+            const warning = UIDiv("warning");
+
+            warning.append(UIB(`Existing HWID & MAC address combinations.`), UIBr(), UIBr());
+
+            const tableOptions = {
+                "width": 1,
+                "headers": ["Forced Name", "HWID", "MAC1", "MAC2", "Action"]
+            };
+            
+            const rows = [];
+
+            for(let i = 0; i < existingForceByBoth.length; i++){
+
+                const e = existingForceByBoth[i];
+
+                const button = document.createElement("button");
+                button.className = "delete-button";
+                button.append("Delete Force By Both");
+
+                rows.push([
+                    {"content": e.name, "className": "text-left"},
+                    {"content": e.hwid, "className": "tiny-font"},
+                    {"content": e.mac1, "className": "tiny-font"},
+                    {"content": e.mac2, "className": "tiny-font"},
+                    {"content": button}
+                ]);
+            }
+            
+            const table = new UITable(warning, tableOptions, rows);
+            this.bothHistoryElem.append(warning);
+        }
+
+
 
         if(rows.length === 0){
 
@@ -5692,15 +5767,12 @@ class AdminPlayerForceName{
         }
 
 
-            const tableOptions = {
-                "width": 1,
-                "headers": ["Name", "HWID", "MAC1", "MAC2", "Last Seen", "Total Playtime"]
-            };
+        const tableOptions = {
+            "width": 1,
+            "headers": ["Name", "HWID", "MAC1", "MAC2", "Last Seen", "Total Playtime"]
+        };
 
-            this.forceByBothTable = new UITable(this.bothHistoryElem, tableOptions, rows);
-
-
-        console.log(matches);
+        this.forceByBothTable = new UITable(this.bothHistoryElem, tableOptions, rows);
 
 
 
