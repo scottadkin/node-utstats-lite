@@ -22,7 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetForceNamesData } from "../players.mjs";
+import { adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetForceNamesData } from "../players.mjs";
 
 
 
@@ -359,6 +359,11 @@ export default class AdminJSONManager{
 
                 await adminDeleteForceNameOnMacAddresses(this.req.body.mac1, this.req.body.mac2);
 
+                return this.res.json({"message": "passed"});
+            
+            }else if(this.mode === "force-name-by-both"){
+
+                await adminForceNameOnBoth(this.req.body.name, this.req.body.hwid, this.req.body.mac1, this.req.body.mac2);
                 return this.res.json({"message": "passed"});
             }
 

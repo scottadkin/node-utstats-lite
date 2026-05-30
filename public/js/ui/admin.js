@@ -4550,7 +4550,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "mac";
+        this.mode = "both";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -5647,6 +5647,48 @@ class AdminPlayerForceName{
 
     }
 
+
+    async forceByBoth(){
+
+        try{
+
+            if(this.bActionInProgress){
+
+                new UINotification(this.parent, "error", "Failed To Force By HWID & MAC Addresses", "Previous action is still being processed.");
+                return;
+            }
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "force-name-by-both", 
+                    "name": this.overrideName,
+                    "hwid": this.selectedHWID, 
+                    "mac1": this.selectedMAC1, 
+                    "mac2": this.selectedMAC2
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            await this.loadData();
+            new UINotification(this.parent, "pass", "Success", `HWID and MAC combination is now force to use the name ${this.overrideName}`);
+
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Force By HWID & MAC Addresses", err.toString());
+            
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     renderForceByBoth(){
 
         if(this.mode !== "both") return;
@@ -5669,7 +5711,7 @@ class AdminPlayerForceName{
         submit.className = "submit-button";
         submit.append("Save Changes");
         submit.addEventListener("click", () =>{
-            //this.forceHWIDToName();
+            this.forceByBoth();
         });
 
         this.form.append(submit, UIBr(), UIBr());

@@ -1722,3 +1722,25 @@ export async function getForcedByMacNames(targets){
     return await simpleQuery(query, [targets, targets]);
 
 }
+
+
+export async function adminForceNameOnBoth(name, hwid, mac1, mac2){
+
+    if(name === undefined || hwid === undefined || mac1 === undefined || mac2 === undefined){
+        throw new Error("All arguments must not be undefined");
+    }
+
+    if(name === "") throw new Error("Name can not be an empty string");
+
+    hwid = hwid.toUpperCase();
+    mac1 = mac1.toUpperCase();
+    mac2 = mac2.toUpperCase();
+
+    if(hwid === "") throw new Error("HWID can not be an empty string");
+    if(mac1 === "") throw new Error("MAC1 can not be an empty string");
+
+
+    const query = `INSERT INTO nstats_force_name_hwid_and_mac VALUES(NULL,?,?,?,?)`;
+
+    return await simpleQuery(query, [hwid, mac1, mac2, name]);
+}
