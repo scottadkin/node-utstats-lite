@@ -4601,6 +4601,7 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
+            console.log(res);
 
             this.usage = res.usage;
             this.hwidToNames = res.hwidToNames;
@@ -5596,6 +5597,8 @@ class AdminPlayerForceName{
 
     getMatchHWIDAndMacs(hwid, mac1, mac2){
 
+        if(hwid === "" && mac1 === "" && mac2 === "") return [];
+
         const found = [];
 
         const currentMACS = [mac1, mac2];
@@ -5603,14 +5606,28 @@ class AdminPlayerForceName{
         for(let i = 0; i < this.usage.length; i++){
 
             const u = this.usage[i];
+            
+            if(u.hwid === "" && u.mac1 === "" && u.mac2 === "") continue;
 
-            if(u.hwid !== hwid) continue;
-            if(mac1 === "" && mac2 === "") continue;
 
+            if(u.hwid === this.selectedHWID){
+                found.push(u);
+                continue;
+            }
             const m1Index = currentMACS.indexOf(u.mac1);
             const m2Index = currentMACS.indexOf(u.mac2);
 
-            if(m1Index !== -1 && m2Index !== -1){
+            if(this.bOnlyDisplayOnBothMacMatch && u.mac1 !== "" && u.mac2 !== ""){
+
+                if(m1Index !== -1 && m2Index !== -1){
+                    found.push(u);
+                
+                }
+
+                continue;
+            }
+
+            if((u.mac1 !== "" && m1Index !== -1) || (u.mac2 !== "" && m2Index !== -1)){
                 found.push(u);
             }
 
@@ -5620,6 +5637,7 @@ class AdminPlayerForceName{
     }
 
 
+
     updateForceByBothHistory(){
 
         this.bothHistoryElem.innerHTML = ``;
@@ -5627,21 +5645,62 @@ class AdminPlayerForceName{
 
         UIHeader(this.bothHistoryElem, "HWID & MAC Combination History");
 
-        if(this.selectedHWID === ""){
-            this.bothHistoryElem.append("No HWID selected");
+        if(this.selectedHWID === "" && this.selectedMAC1 === "" && this.selectedMAC2 === ""){
+
+            this.bothHistoryElem.append("No HWID or MAC addresses selected.");
             return;
         }
 
-        if(this.selectedMAC1 === "" && this.selectedMAC2 !== ""){
-            this.bothHistoryElem.append("For just a single MAC address override, MAC1 must be set instead of MAC2.");
-            return;
-        }else if(this.selectedMAC1 === ""){
-            this.bothHistoryElem.append("MAC1 can't be an empty string");
-            return;
+        const matches = this.getMatchHWIDAndMacs(this.selectedHWID, this.selectedMAC1, this.selectedMAC2);
+      
+        const matchClass = "team-green yellow";
+
+        const rows = matches.map((m) =>{
+
+            let hwidClass, mac1Class, mac2Class = "";
+   
+            if(m.hwid === this.selectedHWID){
+                hwidClass = matchClass;
+            }
+
+            if(m.mac1 !== "" && (m.mac1 === this.selectedMAC1 || m.mac1 === this.selectedMAC2)){
+                mac1Class = matchClass;
+            }
+
+            if(m.mac2 !== "" && (m.mac2 === this.selectedMAC1 || m.mac2 === this.selectedMAC2)){
+                mac2Class = matchClass;
+            }
+          
+
+            return [
+                {"content": [UICountryFlag(m.country), m.name], "className": "text-left"},
+                {"content": m.hwid, "className": `${hwidClass} tiny-font`},
+                {"content": m.mac1, "className": `${mac1Class} tiny-font`},
+                {"content": m.mac2, "className": `${mac2Class} tiny-font`},
+                {"content": m.last_seen, "className": "date", "parse": ["date"]},
+                {"content": m.total_playtime, "className": "mmss", "parse": ["mmss"]},
+                
+            ];
+
+
+        });
+
+
+        if(rows.length === 0){
+
+            rows.push([{"content": "No matches found", "colSpan": 4}]);
         }
 
 
-        console.log(this.getMatchHWIDAndMacs(this.selectedHWID, this.selectedMAC1, this.selectedMAC2));
+            const tableOptions = {
+                "width": 1,
+                "headers": ["Name", "HWID", "MAC1", "MAC2", "Last Seen", "Total Playtime"]
+            };
+
+            this.forceByBothTable = new UITable(this.bothHistoryElem, tableOptions, rows);
+
+
+        console.log(matches);
 
 
 

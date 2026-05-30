@@ -22,7 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetForceNamesData } from "../players.mjs";
+import { adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetForceNamesData } from "../players.mjs";
 
 
 
@@ -332,9 +332,10 @@ export default class AdminJSONManager{
                 const usage = await adminGetForceNamesData();
                 const hwidToNames = await adminGetAllForceHWIDToNames();
                 const macToNames = await adminGetAllForceMacToNames();
+                const bothToNames = await adminGetAllForceNamesByHWIDAndMac();
 
   
-                return this.res.json({usage, hwidToNames, macToNames});
+                return this.res.json({usage, hwidToNames, macToNames, bothToNames});
 
             }else if(this.mode === "force-hwid-to-use-name"){
 

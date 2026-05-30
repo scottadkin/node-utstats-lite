@@ -1724,6 +1724,18 @@ export async function getForcedByMacNames(targets){
 }
 
 
+//check if same combination is in database but with the mac addresses in a different order
+async function bHWIDAndMacComboExists(hwid, mac1, mac2){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_force_name_hwid_and_mac WHERE hwid=? AND (mac1=? AND mac2=?) OR (mac2=? AND mac1=?)`;
+
+    const vars = [hwid, mac1, mac2, mac2, mac1];
+
+    const result = await simpleQuery(query, vars);
+
+    return result[0].total_rows > 0;
+}
+
 export async function adminForceNameOnBoth(name, hwid, mac1, mac2){
 
     if(name === undefined || hwid === undefined || mac1 === undefined || mac2 === undefined){
@@ -1740,7 +1752,19 @@ export async function adminForceNameOnBoth(name, hwid, mac1, mac2){
     if(mac1 === "") throw new Error("MAC1 can not be an empty string");
 
 
+    if(await bHWIDAndMacComboExists(hwid, mac1, mac2)){
+        throw new Error(`HWID and MAC addresses combination already exists(MAC addresses may be in a different order).`);
+    }
+
     const query = `INSERT INTO nstats_force_name_hwid_and_mac VALUES(NULL,?,?,?,?)`;
 
     return await simpleQuery(query, [hwid, mac1, mac2, name]);
+}
+
+
+export async function adminGetAllForceNamesByHWIDAndMac(){
+
+    const query = `SELECT id,hwid,mac1,mac2,name FROM nstats_force_name_hwid_and_mac ORDER BY name ASC`;
+
+    return await simpleQuery(query);
 }
