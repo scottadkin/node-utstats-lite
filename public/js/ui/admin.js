@@ -4723,10 +4723,6 @@ class AdminPlayerForceName{
 
         this.info.append(
             `Force a player's name by overriding the name used in the stats logs.`,
-            UIBr(), 
-            `You can assign an override name by `, UIB(` HWID, `),
-            UIB(`MAC1 & MAC2, or HWID With MAC1 & MAC2.`), UIBr(), 
-            UIB(`Note: `), `You can not force a name to an empty hwid/mac value, or to a hwid that's value is N/A.`,
             UIBr(),
             `If a single target player is forced by multiple methods the name override will use the highest priority one and skip the rest, the priority order:`,
             UIBr(), `- HWID & MAC Combination`,
@@ -4803,6 +4799,10 @@ class AdminPlayerForceName{
             ]
         });
 
+        if(bothRows.length === 0){
+            bothRows.push([{"content": "No data found", "colSpan": 4}]);
+        }
+
         const bothTable = new UITable(this.form, bothOptions, bothRows);
 
         new UIHeader(this.form, "Current Names Forced By HWID");
@@ -4832,7 +4832,12 @@ class AdminPlayerForceName{
             ];
         });
 
+        if(macRows.length === 0){
+            macRows.push([{"content": "No data found","colSpan": 3}]);
+        }
+
         const macOptions = {
+            "width":1,
             "headers": ["Name", "MAC1", "MAC2"]
         };
 
