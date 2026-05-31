@@ -4550,7 +4550,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "both";
+        this.mode = "current";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -4561,6 +4561,7 @@ class AdminPlayerForceName{
         this.selectedMAC2 = "";
         this.bOnlyDisplayOnBothMacMatch = false;
 
+        this.hwidToNames = [];
         this.uniqueHWIDS = [];
         this.uniqueMacs = [];
         this.uniqueMac1s = [];
@@ -4568,6 +4569,7 @@ class AdminPlayerForceName{
         this.uniqueNames = [];
         this.macToNames = [];
         this.bothToNames = [];
+        this.uniqueHWIDMACs = [];
 
         this.parent.append(this.wrapper);
 
@@ -4749,7 +4751,6 @@ class AdminPlayerForceName{
             "headers": ["Name", "HWID", "MAC1", "MAC2", "Total Matches"]
         };
 
-        this.table = new UITable(this.content, tableOptions, []);
 
         this.wrapper.append(this.content);
 
@@ -4760,7 +4761,6 @@ class AdminPlayerForceName{
 
         if(this.mode !== "current"){
 
-            this.table.updateClassName("hidden");
             return;
         }
 
@@ -4776,6 +4776,7 @@ class AdminPlayerForceName{
         const rows = [
             [{"content": `Total Forced HWIDs to Names`, "className": "text-left"}, this.hwidToNames.length],
             [{"content": `Total Forced MAC Address Combinations to Names`, "className": "text-left"}, this.macToNames.length],    
+            [{"content": `Total Forced HWID & MAC Address Combinations to Names`, "className": "text-left"}, this.bothToNames.length],    
             [{"content": `Unique Player Names`, "className": "text-left"}, this.uniqueNames.length],
             [{"content": `Unique HWIDs`, "className": "text-left"}, this.uniqueHWIDS.length],
             [{"content": `Unique HWIDs and MAC Combinations`, "className": "text-left"}, this.uniqueHWIDMACs.length],
@@ -4785,6 +4786,24 @@ class AdminPlayerForceName{
         ];
 
         const t = new UITable(this.form, tableOptions, rows);
+
+        new UIHeader(this.form, "Current Names Forced By HWID & MAC Addresses");
+
+        const bothOptions = {
+            "width": 1,
+            "headers": ["Name", "HWID", "MAC1", "MAC2"]
+        };
+
+        const bothRows = this.bothToNames.map((b) =>{
+            return [
+                {"content": b.name, "className": "text-left"},
+                {"content": b.hwid, "className": "tiny-font"},
+                {"content": b.mac1, "className": "tiny-font"},
+                {"content": b.mac2, "className": "tiny-font"}
+            ]
+        });
+
+        const bothTable = new UITable(this.form, bothOptions, bothRows);
 
         new UIHeader(this.form, "Current Names Forced By HWID");
 
@@ -5658,17 +5677,6 @@ class AdminPlayerForceName{
                 continue;
             }
 
-            //if(b.mac1 === mac1 || b.mac1 === mac2)
-
-            /*if(b.mac1 !== "" && mac1 === b.mac1){
-                found.push(b);
-                continue;
-            }
-
-            if(b.mac2 !== "" && mac2 === b.mac2){
-                found.push(b);
-                continue;
-            }*/
             
         }
         return found;
@@ -5887,7 +5895,6 @@ class AdminPlayerForceName{
         });
 
         this.form.append(submit, UIBr(), UIBr());
-
 
 
         this.bothHistoryElem = UIDiv();
