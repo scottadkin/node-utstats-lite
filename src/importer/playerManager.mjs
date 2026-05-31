@@ -5,7 +5,9 @@ import { updateMasterPlayers,
     getMultiplePlayersMasterId,
     getHWIDForceNames,
     getForcedByMacNames,
-    getForceNamesByBoth} from "../players.mjs";
+    getForceNamesByBoth,
+    bulkInsertPlayerForceRenameHistory
+} from "../players.mjs";
 import geoip from "geoip-lite";
 import { createRandomString, scalePlaytime } from "../generic.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
@@ -21,6 +23,8 @@ export class PlayerManager{
 
         this.idsToNames = {};
         this.playerNames = [];
+
+        this.nameOverrideHistory = [];
     }
 
 
@@ -567,6 +571,7 @@ export class PlayerManager{
             }
 
             new Message(`Force player name by HWID ${p.name} changed to ${hwidForceNames[p.hwid]}`,"note");
+            this.nameOverrideHistory.push({"oldName": p.name, "newName": hwidForceNames[p.hwid], "type": "HWID"});
             this.updatePlayerNamesList(p.name, hwidForceNames[p.hwid]);
             p.name = hwidForceNames[p.hwid];
             p.bNameForcedByHWID = true;
@@ -621,7 +626,7 @@ export class PlayerManager{
 
                 if(forced.mac2 === ""){
                     new Message(`MAC single address forced name, applied to ${p.name}, changed to ${forced.name}`,"note");
-
+                    this.nameOverrideHistory.push({"oldName": p.name, "newName": forced.name, "type": "MAC-SINGLE"});
                     this.updatePlayerNamesList(p.name, forced.name);
                     p.name = forced.name;
                     p.bNameForcedBySingleMAC = true;
@@ -637,6 +642,7 @@ export class PlayerManager{
                 if(bFoundM1 && bFoundM2){
 
                     new Message(`MAC addresses combination forced name, applied to ${p.name}, changed to ${forced.name}`,"note");
+                    this.nameOverrideHistory.push({"oldName": p.name, "newName": forced.name, "type": "MAC-BOTH"});
                     this.updatePlayerNamesList(p.name, forced.name);
                     p.name = forced.name;    
                     p.bNameForcedByMACCombination = true;
@@ -693,12 +699,30 @@ export class PlayerManager{
                 if(p.mac2 !== r.mac1 && p.mac2 !== r.mac2) continue;
 
                 new Message(`Force name by HWID and MAC addresses, ${p.name} changed to ${r.name}`,"note");
+                this.nameOverrideHistory.push({"oldName": p.name, "newName": r.name, "type": "HWID-MAC"});
                 this.updatePlayerNamesList(p.name, r.name);
                 p.name = r.name;
                 p.bNameForcedByHWIDAndMAC = true;
             }
         }
 
+    }
+
+
+    setForceNameHistoryPlayerId(name, masterId){
+
+        name = name.toLowerCase();
+
+        for(let i = 0; i < this.nameOverrideHistory.length; i++){
+
+            const h = this.nameOverrideHistory[i];
+
+            if(h.newName.toLowerCase() === name){
+
+                h.playerId = masterId;
+                return;
+            }
+        }
     }
 
     async setPlayerMasterIds(){
@@ -720,6 +744,7 @@ export class PlayerManager{
 
                 if(masterIds[x].name === p.name){
                     p.masterId = masterIds[x].id;
+                    this.setForceNameHistoryPlayerId(p.name, p.masterId);
                     break;
                 }
             }
@@ -731,6 +756,8 @@ export class PlayerManager{
     async insertPlayerMatchData(matchId, matchDate, gametypeId, mapId){
 
         await bulkInsertPlayerMatchData(this.players, matchId, matchDate, gametypeId, mapId);
+
+        await bulkInsertPlayerForceRenameHistory(matchId, this.nameOverrideHistory);
 
     }
 

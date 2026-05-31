@@ -47,7 +47,11 @@ const DELETE_TABLES = [
     "player_totals_weapons",
     "rankings",
     "servers",
-    "weapons" 
+    "weapons",
+    "nstats_force_name_hwid",
+    "nstats_force_name_mac",
+    "nstats_force_name_hwid_and_mac",
+    "nstats_force_name_history"
 ];
 
 export async function clearAllDataTables(){

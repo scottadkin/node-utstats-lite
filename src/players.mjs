@@ -1807,3 +1807,28 @@ export async function getForceNamesByBoth(targets){
 
     return found;
 }
+
+
+export async function bulkInsertPlayerForceRenameHistory(matchId, history){
+
+    if(history.length === 0) return;
+
+    const query = `INSERT INTO nstats_force_name_history (match_id,player_id,force_type,original_name,new_name) VALUES ?`;
+
+    const insertVars = [];
+
+    for(let i = 0; i < history.length; i++){
+
+        const h = history[i];
+
+        if(h.playerId === undefined){
+            new Message(`Can't insert rename history, playerId is undefined.`,"error");
+            continue;
+        }
+
+        insertVars.push([matchId, h.playerId, h.type, h.oldName, h.newName]);
+    }
+
+
+    return await bulkInsert(query, insertVars);
+}
