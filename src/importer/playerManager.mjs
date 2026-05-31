@@ -4,7 +4,8 @@ import { updateMasterPlayers,
     updatePlayerTotals, bulkInsertPlayerMatchData, updateMapAverages, 
     getMultiplePlayersMasterId,
     getHWIDForceNames,
-    getForcedByMacNames} from "../players.mjs";
+    getForcedByMacNames,
+    getForceNamesByBoth} from "../players.mjs";
 import geoip from "geoip-lite";
 import { createRandomString, scalePlaytime } from "../generic.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
@@ -19,7 +20,6 @@ export class PlayerManager{
         this.renameHistory = [];
 
         this.idsToNames = {};
-        this.namesToIds = {};
         this.playerNames = [];
     }
 
@@ -551,21 +551,26 @@ export class PlayerManager{
 
         const hwidForceNames = await getHWIDForceNames(hwids);
 
-        this.playerNames = [];
+        //this.playerNames = [];
 
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
 
+            //hwid and mac combo has highest priority
+            if(p.bNameForcedByHWIDAndMAC) continue;
+
             if(hwidForceNames[p.hwid] === undefined){
-                this.playerNames.push(p.name);
+                //this.playerNames.push(p.name);
                 p.bNameForcedByHWID = false;
                 continue;
             }
 
+            new Message(`Force player name by HWID ${p.name} changed to ${hwidForceNames[p.hwid]}`,"note");
+            this.updatePlayerNamesList(p.name, hwidForceNames[p.hwid]);
             p.name = hwidForceNames[p.hwid];
             p.bNameForcedByHWID = true;
-            this.playerNames.push(p.name);
+           
         }
     }
 
@@ -595,6 +600,8 @@ export class PlayerManager{
 
                 const p = this.players[x];
 
+                //highest priority
+                if(p.bNameForcedByHWIDAndMAC) continue;
                 //hwid has higher priority
                 if(p.bNameForcedByHWID) continue;
                 //2 mac address combination has higher priority
@@ -648,8 +655,55 @@ export class PlayerManager{
 
     }
 
+
+    async forceHWIDAndMACNames(){
+
+        const targets = [];
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            //always need a HWID
+            if(p.hwid === "") continue;
+            //mac1 cant be an empty string
+            if(p.mac1 === "") continue;
+
+            targets.push({"hwid": p.hwid, "mac1": p.mac1, "mac2": p.mac2});
+        }
+
+
+        const result = await getForceNamesByBoth(targets);
+
+        if(result.length === 0) return;
+
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            for(let x = 0; x < result.length; x++){
+
+                const r = result[x];
+
+                if(p.hwid === "") continue;
+
+                if(p.hwid !== r.hwid) continue;
+                if(p.mac1 === "") continue;
+                if(p.mac1 !== r.mac1 && p.mac1 !== r.mac2) continue;
+                if(p.mac2 !== r.mac1 && p.mac2 !== r.mac2) continue;
+
+                new Message(`Force name by HWID and MAC addresses, ${p.name} changed to ${r.name}`,"note");
+                this.updatePlayerNamesList(p.name, r.name);
+                p.name = r.name;
+                p.bNameForcedByHWIDAndMAC = true;
+            }
+        }
+
+    }
+
     async setPlayerMasterIds(){
 
+        await this.forceHWIDAndMACNames();
 
         await this.forceHWIDNames();
 

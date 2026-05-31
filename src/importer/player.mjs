@@ -9,6 +9,7 @@ export class Player{
         this.name = name;
         this.matchIds = [playerId];
 
+        this.bNameForcedByHWIDAndMAC = false;
         this.bNameForcedByHWID = false;
         this.bNameForcedByMACCombination = false;
         this.bNameForcedBySingleMAC = false;

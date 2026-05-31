@@ -96,7 +96,6 @@ export async function getMultiplePlayersMasterId(names){
     const query = `SELECT id,name FROM nstats_players WHERE name IN (?)`;
     const result = await simpleQuery(query, [names]);
 
-
     const promises = [];
 
     const players = [];
@@ -115,6 +114,7 @@ export async function getMultiplePlayersMasterId(names){
     if(names.length === 0) return players;
 
     for(let i = 0; i < names.length; i++){
+
 
         const current = createMasterPlayer(names[i]).then((id) =>{
             players.push({id, "name": names[i]});
@@ -213,7 +213,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate, gam
             p.stats.items.invis,
             p.stats.items.shp
         ]);
-
+ 
     }
 
 
@@ -1775,4 +1775,35 @@ export async function adminDeleteForceNameByBoth(hwid, mac1, mac2){
     const query = `DELETE FROM nstats_force_name_hwid_and_mac WHERE hwid=? AND (mac1=? OR mac1=?) AND (mac2=? OR mac2=?)`;
 
     return await simpleQuery(query, [hwid, mac1, mac2, mac1, mac2]);
+}
+
+
+export async function getForceNamesByBoth(targets){
+
+    if(targets.length === 0) return [];
+
+    const query = `SELECT hwid,mac1,mac2,name FROM nstats_force_name_hwid_and_mac WHERE hwid=? AND (mac1=? OR mac1=?) AND (mac2=? OR mac2=?)`;
+
+    const promises = [];
+
+    for(let i = 0; i < targets.length; i++){
+
+        const {hwid, mac1, mac2} = targets[i];
+        promises.push(simpleQuery(query, [hwid, mac1, mac2, mac1, mac2]));
+    }
+
+    const result = await Promise.all(promises);
+
+    const found = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        if(r.length === 0) continue;
+        found.push(r[0]);
+
+    }
+
+
+    return found;
 }
