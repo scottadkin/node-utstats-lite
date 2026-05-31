@@ -752,7 +752,16 @@ const queries = [
             mac2 TEXT COLLATE NOCASE NOT NULL,
             name TEXT NOT NULL
         ) STRICT`,
-        `CREATE UNIQUE INDEX IF NOT EXISTS nfnhm_midx ON nstats_force_name_hwid_and_mac(hwid,mac1,mac2)`
+        `CREATE UNIQUE INDEX IF NOT EXISTS nfnhm_midx ON nstats_force_name_hwid_and_mac(hwid,mac1,mac2)`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_force_name_history(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_id INTEGER NOT NULL,
+            player_id INTEGER NOT NULL,
+            force_type TEXT NOT NULL,
+            original_name TEXT COLLATE NOCASE NOT NULL,
+            new_name TEXT COLLATE NOCASE NOT NULL
+        ) STRICT`,
 
 ];
 
