@@ -1575,7 +1575,7 @@ export async function adminGetForceNamesData(){
 
 export async function adminGetAllForceHWIDToNames(){
 
-    const query = `SELECT id,UPPER(hwid) as hwid,name FROM nstats_force_name_hwid ORDER BY name ASC`;
+    const query = `SELECT id,UPPER(hwid) as hwid, name, date_added FROM nstats_force_name_hwid ORDER BY name ASC`;
     
     return await simpleQuery(query);
 
@@ -1599,11 +1599,11 @@ export async function adminForceNameOnHWID(hwid, name){
         throw new Error("YOu can not force a name to a HWID with the value of n/a");
     }
 
-    const query = "INSERT INTO nstats_force_name_hwid VALUES(NULL,?,?)";
+    const query = "INSERT INTO nstats_force_name_hwid VALUES(NULL,?,?,?)";
 
     try{
 
-        return await sqlInsertReturnRowId(query, [hwid, name]);
+        return await sqlInsertReturnRowId(query, [new Date(Date.now()), hwid, name]);
 
     }catch(err){
 
@@ -1631,7 +1631,7 @@ export async function getHWIDForceNames(targets){
 
     if(targets.length === 0) return {};
 
-    const query = `SELECT UPPER(hwid) as hwid,name FROM nstats_force_name_hwid WHERE hwid IN(?)`;
+    const query = `SELECT UPPER(hwid) as hwid,name,date_added FROM nstats_force_name_hwid WHERE hwid IN(?)`;
 
     const result = await simpleQuery(query, [targets]);
 
@@ -1650,7 +1650,7 @@ export async function getHWIDForceNames(targets){
 
 export async function adminGetAllForceMacToNames(){
 
-    const query = `SELECT UPPER(mac1) as mac1, UPPER(mac2) as mac2, name FROM nstats_force_name_mac ORDER BY name ASC`;
+    const query = `SELECT UPPER(mac1) as mac1, UPPER(mac2) as mac2, name, date_added FROM nstats_force_name_mac ORDER BY name ASC`;
 
     return await simpleQuery(query);
 }
@@ -1681,7 +1681,7 @@ export async function adminForceNameOnMacAddresses(mac1, mac2, name){
     mac1 = mac1.toUpperCase();
     mac2 = mac2.toUpperCase();
 
-    const query = `INSERT INTO nstats_force_name_mac VALUES(NULL,?,?,?)`;
+    const query = `INSERT INTO nstats_force_name_mac VALUES(NULL,?,?,?,?)`;
 
     if(await bMacComboAlreadyExist(mac1, mac2)){
         throw new Error("MAC Combination already exists, it may already be added in a different order.")
@@ -1689,7 +1689,7 @@ export async function adminForceNameOnMacAddresses(mac1, mac2, name){
 
     try{
 
-        return await sqlInsertReturnRowId(query, [mac1, mac2, name]);
+        return await sqlInsertReturnRowId(query, [new Date(Date.now()), mac1, mac2, name]);
 
     }catch(err){
 
@@ -1717,7 +1717,7 @@ export async function getForcedByMacNames(targets){
         targets[i] = targets[i].toUpperCase();
     }
 
-    const query = `SELECT UPPER(mac1) as mac1,UPPER(mac2) as mac2,name FROM nstats_force_name_mac WHERE mac1 IN(?) OR mac2 IN(?)`;
+    const query = `SELECT UPPER(mac1) as mac1,UPPER(mac2) as mac2,name,date_added FROM nstats_force_name_mac WHERE mac1 IN(?) OR mac2 IN(?)`;
 
     return await simpleQuery(query, [targets, targets]);
 
@@ -1756,15 +1756,15 @@ export async function adminForceNameOnBoth(name, hwid, mac1, mac2){
         throw new Error(`HWID and MAC addresses combination already exists(MAC addresses may be in a different order).`);
     }
 
-    const query = `INSERT INTO nstats_force_name_hwid_and_mac VALUES(NULL,?,?,?,?)`;
+    const query = `INSERT INTO nstats_force_name_hwid_and_mac VALUES(NULL,?,?,?,?,?)`;
 
-    return await simpleQuery(query, [hwid, mac1, mac2, name]);
+    return await simpleQuery(query, [new Date(Date.now()), hwid, mac1, mac2, name]);
 }
 
 
 export async function adminGetAllForceNamesByHWIDAndMac(){
 
-    const query = `SELECT id,hwid,mac1,mac2,name FROM nstats_force_name_hwid_and_mac ORDER BY name ASC`;
+    const query = `SELECT id,hwid,mac1,mac2,name,date_added FROM nstats_force_name_hwid_and_mac ORDER BY name ASC`;
 
     return await simpleQuery(query);
 }
@@ -1822,6 +1822,7 @@ export async function bulkInsertPlayerForceRenameHistory(matchId, history){
         const h = history[i];
 
         if(h.playerId === undefined){
+
             new Message(`Can't insert rename history, playerId is undefined.`,"error");
             continue;
         }

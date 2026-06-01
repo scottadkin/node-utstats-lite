@@ -732,6 +732,7 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date_added TEXT NOT NULL,
             hwid TEXT COLLATE NOCASE NOT NULL,
             name TEXT NOT NULL
         ) STRICT`,
@@ -739,6 +740,7 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_force_name_mac(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date_added TEXT NOT NULL,
             mac1 TEXT COLLATE NOCASE NOT NULL,
             mac2 TEXT COLLATE NOCASE NOT NULL,
             name TEXT NOT NULL
@@ -747,6 +749,7 @@ const queries = [
 
         `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid_and_mac(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date_added TEXT NOT NULL,
             hwid TEXT COLLATE NOCASE NOT NULL,
             mac1 TEXT COLLATE NOCASE NOT NULL,
             mac2 TEXT COLLATE NOCASE NOT NULL,

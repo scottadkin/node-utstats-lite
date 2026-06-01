@@ -5450,7 +5450,9 @@ class AdminPlayerForceName{
         this.mac2Options = this.createMacSelectOptions(this.mac2Filter);
 
         const bothMatchTF = new UITrueFalse(this.bOnlyDisplayOnBothMacMatch, "both-match-needed", false, (e) =>{
+
             this.bOnlyDisplayOnBothMacMatch = e;
+
             if(this.mode === "mac"){
                 this.renderMacHistory();
             }else{
@@ -5921,17 +5923,17 @@ class AdminPlayerForceName{
         const tableOptions = {
             "width": 1,
             "perPage": 20,
-            "headers": ["MatchID", "PlayerID", "Original Name", "Override Name", "Override Type"]
+            "headers": ["Match Link", "Player Profile", "Original Name", "Override Name", "Override Type"]
         };
 
         const rows = this.nameOverrideHistory.map((h) =>{
 
             return [
-                {"content": UIA(h.match_id, `/match/${h.match_id}`, "_blank"), "className": "text-left"},
-                {"content": UIA(h.player_id, `/player/${h.player_id}`, "_blank"), "className": "text-left"},
-                {"content": h.original_name, "className": "text-left"},
-                {"content": h.new_name, "className": "text-left"},
-                {"content": h.force_type, "className": "text-left"},
+                {"content": UIA(`View Match`, `/match/${h.match_id}`, "_blank")},
+                {"content": UIA(`View Player`, `/player/${h.player_id}`, "_blank")},
+                {"content": h.original_name},
+                {"content": h.new_name},
+                {"content": h.force_type },
             ];
         });
         

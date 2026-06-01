@@ -597,6 +597,20 @@ export class PlayerManager{
 
         const forcedData = await getForcedByMacNames(macs);
 
+
+        forcedData.sort((a, b) =>{
+
+            a = a.name;
+            b = b.name;
+
+            if(a === "FORCE BY MAC BOTH" && b === "FORCE BY MAC SINGLE"){
+                return -1;
+            }else if(a === "FORCE BY MAC SINGLE" && b === "FORCE BY MAC BOTH"){
+                return 1;
+            }
+            return 0;
+        });
+
         for(let i = 0; i < forcedData.length; i++){
 
             const forced = forcedData[i];
@@ -612,6 +626,9 @@ export class PlayerManager{
                 //2 mac address combination has higher priority
                 if(p.bNameForcedByMACCombination) continue;
 
+                //only do the first single MAC match and ignore the rest
+                //if(p.bNameForcedBySingleMAC) continue;
+
                 if(p.mac1 === "" && p.mac2 === "") continue;
 
                 if(p.mac1 === ""){
@@ -626,6 +643,9 @@ export class PlayerManager{
 
                 if(forced.mac2 === ""){
                     new Message(`MAC single address forced name, applied to ${p.name}, changed to ${forced.name}`,"note");
+
+                    
+
                     this.nameOverrideHistory.push({"oldName": p.name, "newName": forced.name, "type": "MAC-SINGLE"});
                     this.updatePlayerNamesList(p.name, forced.name);
                     p.name = forced.name;
@@ -723,6 +743,7 @@ export class PlayerManager{
                 return;
             }
         }
+
     }
 
     async setPlayerMasterIds(){
