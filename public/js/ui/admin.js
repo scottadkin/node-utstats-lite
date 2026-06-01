@@ -4810,6 +4810,7 @@ class AdminPlayerForceName{
         new UIHeader(this.form, "Current Names Forced By HWID");
 
         const hwidOptions = {
+            "width": 2,
             "headers": ["Name", "HWID"],
             "perPage": 20
         };

@@ -1527,7 +1527,7 @@ class UITable{
 
         this.perPage = options.perPage ?? 0;
         this.currentPage = 0;
-        this.totalPages = (this.perPage > 0 && this.data.length > 0) ? Math.ceil(this.data.length / this.perPage) : null;
+        this.totalPages = (this.perPage > 0 && this.data.length > 0) ? Math.ceil(this.data.length / this.perPage) : 0;
 
         this.init();
         
@@ -1583,7 +1583,7 @@ class UITable{
 
     init(){
 
-        if(this.perPage !== 0){
+        if(this.perPage !== 0 && this.totalPages > 1){
 
             this.perPageInfoWrapper = UIDiv(`table-pagination ${(this.bOptionExist("width") ? `t-width-${this.options.width}` : "")}`);
 
@@ -1686,6 +1686,9 @@ class UITable{
     updateRows(newRows){
 
         //TODO: update pagination if required
+
+        this.currentPage = 0;
+        this.totalPages = (this.perPage > 0 && newRows.length > 0) ? Math.ceil(newRows.length / this.perPage) : null;
 
         this.data = newRows;
         this.elem.innerHTML = ``;
