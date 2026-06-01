@@ -5955,11 +5955,29 @@ class AdminPlayerForceName{
 
             if(u.name.indexOf(this.nameSearch) === -1) continue;
 
+            const hwidCol = UITableCell({"content": u.hwid, "className": "tiny-font hover"});
+
+            hwidCol.addEventListener("click", () =>{
+                this.selectedHWID = u.hwid;
+            });
+
+            const mac1Col = UITableCell({"content": u.mac1, "className": "tiny-font hover"});
+
+            mac1Col.addEventListener("click", () =>{
+                this.selectedMAC1 = u.mac1;
+            });
+
+            const mac2Col = UITableCell({"content": u.mac2, "className": "tiny-font hover"});
+
+            mac2Col.addEventListener("click", () =>{
+                this.selectedMAC2 = u.mac2;
+            });
+
             rows.push([
-                {"content": u.name, "className": "text-left"},
-                {"content": u.hwid, "className": "tiny-font"},
-                {"content": u.mac1, "className": "tiny-font"},
-                {"content": u.mac2, "className": "tiny-font"},
+                {"content": [UICountryFlag(u.country), u.name], "className": "text-left"},
+                {"content": hwidCol, "bSkipTd": true},
+                {"content": mac1Col, "bSkipTd": true},
+                {"content": mac2Col, "bSkipTd": true},
                 {"content": u.last_seen, "parse": ["date"], "className": "date tiny-font"},
                 {"content": u.total_playtime, "parse": ["mmss"], "className": "mmss"},
             ]);
@@ -5988,7 +6006,10 @@ class AdminPlayerForceName{
 
         const info = UIDiv("info");
 
-        info.append(`Search for HWID and MAC usage history by player name.`);
+        info.append(
+            `Search for HWID and MAC usage history by player name.`, UIBr(),
+            `Click on a HWID, MAC1, or MAC2 to set it as your selected value for that type.`
+        );
 
         this.form.append(info);
 
