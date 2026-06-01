@@ -4570,6 +4570,7 @@ class AdminPlayerForceName{
         this.macToNames = [];
         this.bothToNames = [];
         this.uniqueHWIDMACs = [];
+        this.nameOverrideHistory = [];
 
         this.parent.append(this.wrapper);
 
@@ -4604,12 +4605,11 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
-            console.log(res);
-
             this.usage = res.usage;
             this.hwidToNames = res.hwidToNames;
             this.macToNames = res.macToNames;
             this.bothToNames = res.bothToNames;
+            this.nameOverrideHistory = res.renameHistory;
 
             const hwids = new Set();
             const allMacs = new Set();
@@ -4702,6 +4702,7 @@ class AdminPlayerForceName{
 
         const tabOptions = [
             {"display": "Current Data", "value": "current"},
+            {"display": "Name Override History", "value": "rename-history"},
             {"display": "Force BY HWID & MAC Addresses", "value": "both"},
             {"display": "Force By HWID", "value": "hwid"},
             {"display": "Force By MAC Addresses", "value": "mac"},

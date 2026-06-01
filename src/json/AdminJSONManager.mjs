@@ -22,7 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetForceNamesData } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetForceNamesData, adminGetNameOverrideHistory } from "../players.mjs";
 
 
 
@@ -333,9 +333,10 @@ export default class AdminJSONManager{
                 const hwidToNames = await adminGetAllForceHWIDToNames();
                 const macToNames = await adminGetAllForceMacToNames();
                 const bothToNames = await adminGetAllForceNamesByHWIDAndMac();
+                const renameHistory = await adminGetNameOverrideHistory();
 
   
-                return this.res.json({usage, hwidToNames, macToNames, bothToNames});
+                return this.res.json({usage, hwidToNames, macToNames, bothToNames, renameHistory});
 
             }else if(this.mode === "force-hwid-to-use-name"){
 

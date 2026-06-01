@@ -1829,6 +1829,12 @@ export async function bulkInsertPlayerForceRenameHistory(matchId, history){
         insertVars.push([matchId, h.playerId, h.type, h.oldName, h.newName]);
     }
 
-
     return await bulkInsert(query, insertVars);
+}
+
+export async function adminGetNameOverrideHistory(){
+
+    const query = `SELECT match_id,player_id,force_type,original_name,new_name FROM nstats_force_name_history ORDER BY id DESC`;
+
+    return await simpleQuery(query);
 }
