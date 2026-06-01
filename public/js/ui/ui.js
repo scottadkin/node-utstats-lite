@@ -1522,6 +1522,7 @@ class UITable{
 
         this.parent = parent;
         this.options = options;
+        this.headers = options.headers ?? null;
         this.data = data;
 
         this.init();
@@ -1539,13 +1540,13 @@ class UITable{
 
     createHeaders(){
 
-        if(!this.bOptionExist("headers")) return;
+        if(this.headers === null) return;
 
         const row = UITr();
 
-        for(let i = 0; i < this.options.headers.length; i++){
+        for(let i = 0; i < this.headers.length; i++){
 
-            const h = this.options.headers[i];
+            const h = this.headers[i];
             row.append(UITableHeaderColumn({"content": h}));
             
         }
@@ -1575,6 +1576,16 @@ class UITable{
     }
 
     createDataRows(){
+
+        if(this.data.length === 0){
+
+            this.elem.append(UITableCell({
+                "content": "No data found", 
+                "colSpan": (this.headers === null) ? 99 : this.headers.length
+            }));
+
+            return;
+        }
 
         for(let i = 0; i < this.data.length; i++){
 
@@ -1607,6 +1618,7 @@ class UITable{
 
             this.elem.append(row);
         }
+
     }
 
     updateRows(newRows){

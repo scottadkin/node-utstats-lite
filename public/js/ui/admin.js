@@ -4550,7 +4550,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "current";
+        this.mode = "rename-history";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -5908,6 +5908,32 @@ class AdminPlayerForceName{
         this.updateForceByBothHistory();
     }
 
+    renderOverrideHistory(){
+
+        if(this.mode !== "rename-history") return;
+
+        
+
+        const tableOptions = {
+            "width": 1,
+            "headers": ["MatchID", "PlayerID", "Original Name", "Override Name", "Override Type"]
+        };
+
+        const rows = this.nameOverrideHistory.map((h) =>{
+
+            return [
+                {"content": UIA(h.match_id, `/match/${h.match_id}`, "_blank"), "className": "text-left"},
+                {"content": UIA(h.player_id, `/player/${h.player_id}`, "_blank"), "className": "text-left"},
+                {"content": h.original_name, "className": "text-left"},
+                {"content": h.new_name, "className": "text-left"},
+                {"content": h.force_type, "className": "text-left"},
+            ];
+        });
+        
+
+        const table = new UITable(this.form, tableOptions, rows);
+    }
+
     render(){
 
         if(!this.bActive){
@@ -5919,6 +5945,7 @@ class AdminPlayerForceName{
         this.form.innerHTML = "";
 
         this.renderCurrentData();
+        this.renderOverrideHistory();
         this.renderForceByHWID();
         this.renderForceByMac();
         this.renderForceByBoth();
