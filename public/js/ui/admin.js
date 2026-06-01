@@ -4550,7 +4550,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "rename-history";
+        this.mode = "name-search";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -4560,6 +4560,7 @@ class AdminPlayerForceName{
         this.selectedMAC1 = "";
         this.selectedMAC2 = "";
         this.bOnlyDisplayOnBothMacMatch = false;
+        this.nameSearch = "";
 
         this.hwidToNames = [];
         this.uniqueHWIDS = [];
@@ -4702,6 +4703,7 @@ class AdminPlayerForceName{
 
         const tabOptions = [
             {"display": "Current Data", "value": "current"},
+            {"display": "Search Usage By Name", "value": "name-search"},
             {"display": "Name Override History", "value": "rename-history"},
             {"display": "Force BY HWID & MAC Addresses", "value": "both"},
             {"display": "Force By HWID", "value": "hwid"},
@@ -5942,6 +5944,75 @@ class AdminPlayerForceName{
         const table = new UITable(this.form, tableOptions, rows);
     }
 
+
+    getNameSearchRows(){
+
+        const rows = [];
+
+        for(let i = 0; i < this.usage.length; i++){
+
+            const u = this.usage[i];
+
+            if(u.name.indexOf(this.nameSearch) === -1) continue;
+
+            rows.push([
+                {"content": u.name, "className": "text-left"},
+                {"content": u.hwid, "className": "tiny-font"},
+                {"content": u.mac1, "className": "tiny-font"},
+                {"content": u.mac2, "className": "tiny-font"},
+                {"content": u.last_seen, "parse": ["date"], "className": "date tiny-font"},
+                {"content": u.total_playtime, "parse": ["mmss"], "className": "mmss"},
+            ]);
+        }
+
+
+        /*rows.sort((a, b) =>{
+
+            a = a[0].content.toLowerCase();
+            b = b[0].content.toLowerCase();
+
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+            return 0;
+        });*/
+
+        return rows;
+    }
+
+    renderSearchByName(){
+
+        if(this.mode !== "name-search") return;
+
+        const info = UIDiv("info");
+
+        info.append(`Search for HWID and MAC usage history by player name.`);
+
+        this.form.append(info);
+
+        const searchRow = UIFormInputRow("Search By Name", "name-search", "text", this.nameSearch, "Search By Name...", (e) =>{
+
+            this.nameSearch = e;
+
+            this.nameSearchTable.updateRows(this.getNameSearchRows());
+        });
+
+        this.form.append(searchRow, UIBr());
+
+        const tableOptions = {
+            "width": 1,
+            "perPage": 100,
+            "headers": ["Name", "HWID", "MAC1", "MAC2", "Last Seen", "Total Playtime"]
+        };
+
+     
+
+        this.nameSearchTable = new UITable(this.form, tableOptions, this.getNameSearchRows());
+        
+    }
+
     render(){
 
         if(!this.bActive){
@@ -5953,6 +6024,7 @@ class AdminPlayerForceName{
         this.form.innerHTML = "";
 
         this.renderCurrentData();
+        this.renderSearchByName();
         this.renderOverrideHistory();
         this.renderForceByHWID();
         this.renderForceByMac();
