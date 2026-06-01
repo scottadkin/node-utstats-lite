@@ -4789,7 +4789,7 @@ class AdminPlayerForceName{
         const bothOptions = {
             "width": 1,
             "perPage": 20,
-            "headers": ["Name", "HWID", "MAC1", "MAC2"]
+            "headers": ["Name", "HWID", "MAC1", "MAC2", "Created"]
         };
 
         const bothRows = this.bothToNames.map((b) =>{
@@ -4797,13 +4797,12 @@ class AdminPlayerForceName{
                 {"content": b.name, "className": "text-left"},
                 {"content": b.hwid, "className": "tiny-font"},
                 {"content": b.mac1, "className": "tiny-font"},
-                {"content": b.mac2, "className": "tiny-font"}
+                {"content": b.mac2, "className": "tiny-font"},
+                {"content": b.date_added, "className": "date", "parse": ["date"]},
             ]
         });
 
-        if(bothRows.length === 0){
-            bothRows.push([{"content": "No data found", "colSpan": 4}]);
-        }
+
 
         const bothTable = new UITable(this.form, bothOptions, bothRows);
 
@@ -4811,14 +4810,15 @@ class AdminPlayerForceName{
 
         const hwidOptions = {
             "width": 2,
-            "headers": ["Name", "HWID"],
+            "headers": ["Name", "HWID", "Created"],
             "perPage": 20
         };
 
         const hwidRows = this.hwidToNames.map((h) =>{
             return [
                 {"className": "text-left", "content": h.name}, 
-                h.hwid
+                h.hwid,
+                {"content": h.date_added, "className": "date", "parse": ["date"]}
             ];
         });
 
@@ -4832,18 +4832,17 @@ class AdminPlayerForceName{
             return [
                 {"className": "text-left", "content": m.name},
                 m.mac1,
-                m.mac2
+                m.mac2,
+                {"content": m.date_added, "className": "date", "parse": ["date"]}
             ];
         });
 
-        if(macRows.length === 0){
-            macRows.push([{"content": "No data found","colSpan": 3}]);
-        }
+
 
         const macOptions = {
             "width":1,
             "perPage": 20,
-            "headers": ["Name", "MAC1", "MAC2"]
+            "headers": ["Name", "MAC1", "MAC2", "Created"]
         };
 
         const macTable = new UITable(this.form, macOptions, macRows);
@@ -5268,6 +5267,7 @@ class AdminPlayerForceName{
                 rows.push([
                     {"content": `${m.mac1} + ${m.mac2}`, "className": "text-left"},
                     {"content": m.name, "className": "text-left"},
+                    {"content": m.date_added, "className": "date", "parse": ["date"]},
                     {"content": deleteButton},
                 ]);
 
@@ -5276,6 +5276,7 @@ class AdminPlayerForceName{
                 rows.push([
                     {"content": m.mac1, "className": "text-left"},
                     {"content": m.name, "className": "text-left"},
+                    {"content": m.date_added, "className": "date", "parse": ["date"]},
                     {"content": deleteButton},
                 ]);
             }
@@ -5286,7 +5287,7 @@ class AdminPlayerForceName{
             UIBr(), UIBr()
         );
 
-        new UITable(this.macWarningElem, {"headers": ["MAC Addresses", "Name", "Delete"]}, rows);
+        new UITable(this.macWarningElem, {"headers": ["MAC Addresses", "Name", "Created", "Delete"]}, rows);
         
     }
 
@@ -5772,7 +5773,7 @@ class AdminPlayerForceName{
                 {"content": m.mac1, "className": `${mac1Class} tiny-font`},
                 {"content": m.mac2, "className": `${mac2Class} tiny-font`},
                 {"content": m.last_seen, "className": "date", "parse": ["date"]},
-                {"content": m.total_playtime, "className": "mmss", "parse": ["mmss"]},
+                {"content": m.total_playtime, "className": "mmss", "parse": ["mmss"]}
                 
             ];
 
@@ -5780,7 +5781,6 @@ class AdminPlayerForceName{
         });
 
         const existingForceByBoth = this.getExistingForceByBoth(this.selectedHWID, this.selectedMAC1, this.selectedMAC2);
-
 
         if(existingForceByBoth.length !== 0){
 
@@ -5790,7 +5790,7 @@ class AdminPlayerForceName{
 
             const tableOptions = {
                 "width": 1,
-                "headers": ["Forced Name", "HWID", "MAC1", "MAC2", "Action"]
+                "headers": ["Forced Name", "HWID", "MAC1", "MAC2", "Created", "Action"]
             };
             
             const rows = [];
@@ -5812,6 +5812,7 @@ class AdminPlayerForceName{
                     {"content": e.hwid, "className": "tiny-font"},
                     {"content": e.mac1, "className": "tiny-font"},
                     {"content": e.mac2, "className": "tiny-font"},
+                    {"content": e.date_added, "parse": ["date"], "className": "date"},
                     {"content": button}
                 ]);
             }
@@ -5824,7 +5825,7 @@ class AdminPlayerForceName{
 
         if(rows.length === 0){
 
-            rows.push([{"content": "No matches found", "colSpan": 4}]);
+            rows.push([{"content": "No matches found", "colSpan": 5}]);
         }
 
 
