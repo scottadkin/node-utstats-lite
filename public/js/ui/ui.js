@@ -1525,6 +1525,10 @@ class UITable{
         this.headers = options.headers ?? null;
         this.data = data;
 
+        this.perPage = options.perPage ?? 0;
+        this.currentPage = 0;
+        this.totalPages = (this.perPage > 0 && this.data.length > 0) ? Math.ceil(this.data.length / this.perPage) : null;
+
         this.init();
         
     }
@@ -1562,7 +1566,59 @@ class UITable{
         this.elem.className = `t-width-${this.options.width}`;
     }
 
+    changePage(newPage){
+
+        if(newPage < 0) newPage = 0;
+        if(newPage > this.totalPages - 1) newPage = this.totalPages - 1;
+
+        this.currentPage = newPage;
+
+        this.elem.innerHTML = "";
+
+        this.perPageInfo.innerHTML = `Displaying Page ${this.currentPage + 1} of ${this.totalPages}`;
+
+        this.createHeaders();
+        this.createDataRows();
+    }
+
     init(){
+
+        if(this.perPage !== 0){
+
+            this.perPageInfoWrapper = UIDiv(`table-pagination ${(this.bOptionExist("width") ? `t-width-${this.options.width}` : "")}`);
+
+            this.perPageInfo = UIDiv();
+            this.perPageInfo.append(`Displaying Page ${this.currentPage + 1} of ${this.totalPages}`);
+
+            this.perPageInfoWrapper.append(this.perPageInfo);
+            const buttonWrapper = UIDiv("table-pagination-buttons duo");
+
+            const previous = document.createElement("button");
+            previous.className = "small-button";
+            previous.append("Previous");
+            previous.addEventListener("click", () =>{
+
+                this.changePage(this.currentPage - 1);
+            });
+
+            const next = document.createElement("button");
+            next.className = "small-button";
+            next.append("Next");
+            next.addEventListener("click", () =>{
+
+                this.changePage(this.currentPage + 1);
+            });
+
+            buttonWrapper.append(previous, next);
+            this.perPageInfoWrapper.append(buttonWrapper);
+            this.parent.append(this.perPageInfoWrapper);
+
+        }else{
+
+            this.perPageInfo = UIDiv("hidden");
+
+            this.parent.append(this.perPageInfo);
+        }
 
         this.elem = document.createElement("table");
 
@@ -1587,7 +1643,13 @@ class UITable{
             return;
         }
 
-        for(let i = 0; i < this.data.length; i++){
+        const start = this.currentPage * this.perPage;
+
+        let end = (this.perPage === 0) ? this.data.length : start + this.perPage;
+
+        if(end > this.data.length) end = this.data.length;
+
+        for(let i = start; i < end; i++){
 
             let d = this.data[i];
 
@@ -1622,6 +1684,8 @@ class UITable{
     }
 
     updateRows(newRows){
+
+        //TODO: update pagination if required
 
         this.data = newRows;
         this.elem.innerHTML = ``;

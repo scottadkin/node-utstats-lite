@@ -311,6 +311,22 @@ table{
 	border:1px solid var(--border-color-1);
 }
 
+.table-pagination{
+    background-color: var(--bg-color-mid);
+    margin-left:auto;
+    margin-right:auto;
+    padding:var(--padding-1) 0px;
+    font-size:var(--font-size-small);
+    user-select: none;
+}
+
+.table-pagination-buttons{
+    margin-top:var(--margin-2);
+    max-width:300px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
 
 th{
     padding:var(--padding-1) var(--padding-3);

@@ -4788,6 +4788,7 @@ class AdminPlayerForceName{
 
         const bothOptions = {
             "width": 1,
+            "perPage": 20,
             "headers": ["Name", "HWID", "MAC1", "MAC2"]
         };
 
@@ -4809,7 +4810,8 @@ class AdminPlayerForceName{
         new UIHeader(this.form, "Current Names Forced By HWID");
 
         const hwidOptions = {
-            "headers": ["Name", "HWID"]
+            "headers": ["Name", "HWID"],
+            "perPage": 20
         };
 
         const hwidRows = this.hwidToNames.map((h) =>{
@@ -4839,6 +4841,7 @@ class AdminPlayerForceName{
 
         const macOptions = {
             "width":1,
+            "perPage": 20,
             "headers": ["Name", "MAC1", "MAC2"]
         };
 
@@ -5916,6 +5919,7 @@ class AdminPlayerForceName{
 
         const tableOptions = {
             "width": 1,
+            "perPage": 20,
             "headers": ["MatchID", "PlayerID", "Original Name", "Override Name", "Override Type"]
         };
 
