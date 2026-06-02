@@ -209,6 +209,13 @@ function UITableHeaderColumn(params){
         elem.append(a);
     }
 
+    if(params.click !== undefined){
+
+        elem.addEventListener("click", () =>{
+            params.click();
+        });
+    }
+
     return elem;
 }
 
@@ -1560,7 +1567,14 @@ class UITable{
         for(let i = 0; i < this.headers.length; i++){
 
             const h = this.headers[i];
-            row.append(UITableHeaderColumn({"content": h}));
+
+            if(typeof h === "string"){
+                row.append(UITableHeaderColumn({"content": h}));
+            }else{
+
+                row.append(UITableHeaderColumn(h));
+     
+            }
             
         }
 

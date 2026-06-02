@@ -158,6 +158,8 @@ class MapListDisplay{
         this.parent = parent;
         this.data = data;
         this.displayMode = displayMode.toLowerCase();     
+        this.sortBy = "name";
+        this.bAscOrder = true;
 
         if(this.displayMode === "table") this.renderTable();
         if(this.displayMode === "default") this.renderRichView();
@@ -172,6 +174,66 @@ class MapListDisplay{
         );
     }
 
+
+    createRows(){
+
+        const rows = [];
+
+        this.data.sort((a, b) =>{
+
+            let key = "name";
+
+            const sort = this.sortBy.toLowerCase();
+
+            if(sort === "first"){
+                key = "first_match";
+            }else if(sort === "last"){
+                key = "last_match";
+            }else if(sort === "matches"){
+                key = "matches";
+            }else if(sort === "playtime"){
+                key = "playtime";
+            }
+
+            a = a[key];
+            b = b[key];
+
+
+            if(!this.bAscOrder){
+                if(a > b){
+                    return -1;
+                }else if(a < b){
+                    return 1;
+                }
+            }else{
+                if(a > b){
+                    return 1;
+                }else if(a < b){
+                    return -1;
+                }
+            }
+            return 0;
+
+        });
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            const url = `/map/${d.id}`;
+
+            rows.push([
+                {"content": d.name, "className": "text-left", url},
+                {"content": d.first_match, "parse": ["date"], "className": "date", url},
+                {"content": d.last_match, "parse": ["date"], "className": "date", url},
+                {"content": d.matches, url},
+                {"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}
+            ]);
+        }
+
+        return rows;
+    }
+
     renderTable(){
 
         const table = document.createElement("table");
@@ -179,34 +241,36 @@ class MapListDisplay{
 
         const headers = ["Name", "First", "Last", "Matches", "Playtime"];
 
-        const headerRow = document.createElement("tr");
+        const headerRows = [];
 
         for(let i = 0; i < headers.length; i++){
 
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}))
+           // console.log(u);
+
+            headerRows.push({
+                "content": headers[i], 
+                "className": "hover",
+                "click": () =>{
+
+                    if(this.sortBy === headers[i].toLowerCase()){
+                        this.bAscOrder = !this.bAscOrder;
+                    }else{
+                        this.sortBy = headers[i].toLowerCase();
+                        this.bAscOrder = true;
+                    }
+
+                    this.table.updateRows(this.createRows());
+                }
+            });
         }
 
-        table.append(headerRow);
+        const tableOptions = {
+            "width": "1",
+            "headers": headerRows, 
+        };
 
-        for(let i = 0; i < this.data.length; i++){
 
-            const d = this.data[i];
-
-            const row = document.createElement("tr");
-
-            const url = `/map/${d.id}`;
-
-            row.append(UITableCell({"content": d.name, "className": "text-left", url}));
-            row.append(UITableCell({"content": d.first_match, "parse": ["date"], "className": "date", url}));
-            row.append(UITableCell({"content": d.last_match, "parse": ["date"], "className": "date", url}));
-            row.append(UITableCell({"content": d.matches, url}));
-            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
-
-            table.append(row);
-
-        }
-
-        this.parent.append(table);
+        this.table = new UITable(this.parent, tableOptions, this.createRows());
     }
 
     renderRichView(){
