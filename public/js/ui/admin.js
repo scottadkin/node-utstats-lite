@@ -4550,7 +4550,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv();
-        this.mode = "name-search";
+        this.mode = "current";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -4755,6 +4755,73 @@ class AdminPlayerForceName{
 
     }
 
+    createCurrentHWIDRows(){
+
+        return this.hwidToNames.map((h) =>{
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-button";
+            deleteButton.innerHTML = "Delete";
+
+            deleteButton.addEventListener("click", () =>{
+                deleteButton.className = "hidden";
+                this.deleteForceHWIDToName(h.hwid, true);
+            });
+
+            return [
+                {"className": "text-left", "content": h.name}, 
+                h.hwid,
+                {"content": h.date_added, "className": "date", "parse": ["date"]},
+                {"content": deleteButton}
+            ];
+        });
+    }
+
+
+    createBothToNamesRows(){
+
+        return this.bothToNames.map((b) =>{
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-button";
+            deleteButton.append("Delete");
+            deleteButton.addEventListener("click", () =>{
+
+                this.deleteForceByBoth(b.hwid, b.mac1, b.mac2, true);
+            })
+            
+            return [
+                {"content": b.name, "className": "text-left"},
+                {"content": b.hwid, "className": "tiny-font"},
+                {"content": b.mac1, "className": "tiny-font"},
+                {"content": b.mac2, "className": "tiny-font"},
+                {"content": b.date_added, "className": "date", "parse": ["date"]},
+                {"content": deleteButton}
+            ]
+        });
+    }
+
+
+    createMACRows(){
+
+        return this.macToNames.map((m) =>{
+
+            const deleteButton = UIButton("Delete", "delete-button");
+            
+            deleteButton.addEventListener("click", () =>{
+
+                this.deleteForceMacToName(m.mac1, m.mac2, true);
+            });
+
+            return [
+                {"className": "text-left", "content": m.name},
+                m.mac1,
+                m.mac2,
+                {"content": m.date_added, "className": "date", "parse": ["date"]},
+                {"content": deleteButton}
+            ];
+        });
+    }
 
     renderCurrentData(){
 
@@ -4790,22 +4857,10 @@ class AdminPlayerForceName{
         const bothOptions = {
             "width": 1,
             "perPage": 20,
-            "headers": ["Name", "HWID", "MAC1", "MAC2", "Created"]
+            "headers": ["Name", "HWID", "MAC1", "MAC2", "Created", "Delete"]
         };
 
-        const bothRows = this.bothToNames.map((b) =>{
-            return [
-                {"content": b.name, "className": "text-left"},
-                {"content": b.hwid, "className": "tiny-font"},
-                {"content": b.mac1, "className": "tiny-font"},
-                {"content": b.mac2, "className": "tiny-font"},
-                {"content": b.date_added, "className": "date", "parse": ["date"]},
-            ]
-        });
-
-
-
-        const bothTable = new UITable(this.form, bothOptions, bothRows);
+        this.bothToNamesTable = new UITable(this.form, bothOptions, this.createBothToNamesRows());
 
         new UIHeader(this.form, "Current Names Forced By HWID");
 
@@ -4815,49 +4870,24 @@ class AdminPlayerForceName{
             "perPage": 20
         };
 
-        const hwidRows = this.hwidToNames.map((h) =>{
+        
 
-            const deleteButton = document.createElement("button");
-            deleteButton.className = "delete-button";
-            deleteButton.innerHTML = "Delete";
-
-            deleteButton.addEventListener("click", () =>{
-                deleteButton.className = "hidden";
-                this.deleteForceHWIDToName(h.hwid, true);
-            });
-
-            return [
-                {"className": "text-left", "content": h.name}, 
-                h.hwid,
-                {"content": h.date_added, "className": "date", "parse": ["date"]},
-                {"content": deleteButton}
-            ];
-        });
-
-        const hwidTable = new UITable(this.form, hwidOptions, hwidRows);
+        this.hwidTable = new UITable(this.form, hwidOptions, this.createCurrentHWIDRows());
 
 
         new UIHeader(this.form, "Current Names Forced By MAC Addresses");
 
-        const macRows = this.macToNames.map((m) =>{
-
-            return [
-                {"className": "text-left", "content": m.name},
-                m.mac1,
-                m.mac2,
-                {"content": m.date_added, "className": "date", "parse": ["date"]}
-            ];
-        });
+        
 
 
 
         const macOptions = {
             "width":1,
             "perPage": 20,
-            "headers": ["Name", "MAC1", "MAC2", "Created"]
+            "headers": ["Name", "MAC1", "MAC2", "Created", "Delete"]
         };
 
-        const macTable = new UITable(this.form, macOptions, macRows);
+        this.macTable = new UITable(this.form, macOptions, this.createMACRows());
     }
 
 
@@ -4878,6 +4908,8 @@ class AdminPlayerForceName{
     async deleteForceHWIDToName(selectedHWID, bSkipRender){
 
         try{
+
+            selectedHWID = selectedHWID.toUpperCase();
 
             if(this.bActionInProgress){
                 throw new Error("Please wait for previous action to complete.");
@@ -4904,8 +4936,21 @@ class AdminPlayerForceName{
                 await this.loadData();
             }else{
 
-                //TODO: delete hwid from existing lists without rendering
-                //UPDATE current HWID to names table to remove deleted entry
+                const newHWIDS = [];
+
+                for(let i = 0; i < this.hwidToNames.length; i++){
+
+                    const h = this.hwidToNames[i];
+                    //if(h.hwid)
+
+                    if(h.hwid !== selectedHWID){
+                        newHWIDS.push(h);
+                    }
+                }
+
+
+                this.hwidToNames = newHWIDS;
+                this.hwidTable.updateRows(this.createCurrentHWIDRows());
             }
 
         }catch(err){
@@ -5222,7 +5267,7 @@ class AdminPlayerForceName{
     }
 
 
-    async deleteForceMacToName(mac1, mac2){
+    async deleteForceMacToName(mac1, mac2, bSkipRender){
 
         try{
 
@@ -5242,7 +5287,27 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
-            await this.loadData();
+            if(!bSkipRender){
+
+                await this.loadData();
+
+            }else{
+
+                const newData = [];
+
+                for(let i = 0; i < this.macToNames.length; i++){
+
+                    const m = this.macToNames[i];
+
+                    if(m.mac1 === mac1 && m.mac2 === mac2) continue;
+                    newData.push(m);
+                }
+
+                this.macToNames = newData;
+                this.macTable.updateRows(this.createMACRows());
+            }
+
+            
             new UINotification(this.parent, "pass", "Success", "Deleted force MAC to name.");
 
         }catch(err){
@@ -5280,7 +5345,7 @@ class AdminPlayerForceName{
             deleteButton.className = "delete-button";
             deleteButton.append("Delete Force Name");
             deleteButton.addEventListener("click", () =>{
-                this.deleteForceMacToName(m.mac1, m.mac2);
+                this.deleteForceMacToName(m.mac1, m.mac2, false);
             });
 
 
@@ -5718,7 +5783,7 @@ class AdminPlayerForceName{
 
     }
 
-    async deleteForceByBoth(hwid, mac1, mac2){
+    async deleteForceByBoth(hwid, mac1, mac2, bSkipRender){
 
         try{
 
@@ -5741,7 +5806,24 @@ class AdminPlayerForceName{
             if(res.error !== undefined) throw new Error(res.error);
 
 
-            await this.loadData();
+            if(!bSkipRender){
+                await this.loadData();
+            }else{
+
+                const newData = [];
+
+                for(let i = 0; i < this.bothToNames.length; i++){
+
+                    const b = this.bothToNames[i];
+
+                    if(b.hwid === hwid && b.mac1 === mac1 && b.mac2 === mac2) continue;
+                    newData.push(b);
+                }
+
+                this.bothToNames = newData;
+
+                this.bothToNamesTable.updateRows(this.createBothToNamesRows());
+            }
             new UINotification(this.parent, "pass", "Success", "Deleted force name by HWID and MAC combination.");
             
 
@@ -5826,7 +5908,7 @@ class AdminPlayerForceName{
                 button.append("Delete Force By Both");
                 button.addEventListener("click", () =>{
 
-                    this.deleteForceByBoth(e.hwid, e.mac1, e.mac2);
+                    this.deleteForceByBoth(e.hwid, e.mac1, e.mac2, false);
                 });
 
                 rows.push([

@@ -18,6 +18,15 @@ function UIB(text, className){
     return elem;
 }
 
+function UIButton(text, className){
+
+    const elem = document.createElement("button");
+    elem.append(text);
+    if(className !== undefined) elem.className = className;
+
+    return elem;
+}
+
 
 function UISpan(text, className){
 
