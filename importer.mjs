@@ -360,6 +360,7 @@ async function main(ctfLeagueSettings){
         ls.min_players, ls.min_playtime, 
         ls.append_team_sizes, ctfLeagueSettings
     );
+
     const leftOverEnd = performance.now();
 
     const totals = {...leftOverStats};
@@ -488,6 +489,7 @@ async function startImport(){
                 bPreviousImportCompleted = false;
                 await startImport();
                 bPreviousImportCompleted = true;  
+                new Message("Current Import Interval Completed.","progress");
 
             }else{
                 new Message(`Previous import cycle is running, skipping this cycle.`,"progress");

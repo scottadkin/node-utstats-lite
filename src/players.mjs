@@ -1823,7 +1823,8 @@ export async function bulkInsertPlayerForceRenameHistory(matchId, history){
 
         if(h.playerId === undefined){
 
-            new Message(`Can't insert rename history, playerId is undefined.`,"error");
+            new Message(`Can't insert rename history, playerId is undefined for ${h.newName}.`,"error");
+     
             continue;
         }
 

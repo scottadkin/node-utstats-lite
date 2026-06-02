@@ -740,7 +740,7 @@ export class PlayerManager{
             if(h.newName.toLowerCase() === name){
 
                 h.playerId = masterId;
-                return;
+                //return;
             }
         }
 
