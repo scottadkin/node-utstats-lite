@@ -4765,7 +4765,6 @@ class AdminPlayerForceName{
 
         this.form.innerHTML = "";
 
-
         const info = UIDiv("info");
 
         const tableOptions = {
@@ -4811,16 +4810,27 @@ class AdminPlayerForceName{
         new UIHeader(this.form, "Current Names Forced By HWID");
 
         const hwidOptions = {
-            "width": 2,
-            "headers": ["Name", "HWID", "Created"],
+            "width": 1,
+            "headers": ["Name", "HWID", "Created", "Delete"],
             "perPage": 20
         };
 
         const hwidRows = this.hwidToNames.map((h) =>{
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "delete-button";
+            deleteButton.innerHTML = "Delete";
+
+            deleteButton.addEventListener("click", () =>{
+                deleteButton.className = "hidden";
+                this.deleteForceHWIDToName(h.hwid, true);
+            });
+
             return [
                 {"className": "text-left", "content": h.name}, 
                 h.hwid,
-                {"content": h.date_added, "className": "date", "parse": ["date"]}
+                {"content": h.date_added, "className": "date", "parse": ["date"]},
+                {"content": deleteButton}
             ];
         });
 
@@ -4865,7 +4875,7 @@ class AdminPlayerForceName{
         return null;
     }
 
-    async deleteForceHWIDToName(){
+    async deleteForceHWIDToName(selectedHWID, bSkipRender){
 
         try{
 
@@ -4880,7 +4890,7 @@ class AdminPlayerForceName{
                 "method": "POST",
                 "body": JSON.stringify({
                     "mode": "delete-force-hwid-to-name", 
-                    "hwid": this.selectedHWID
+                    "hwid": selectedHWID
                 })
             });
 
@@ -4889,7 +4899,14 @@ class AdminPlayerForceName{
             if(res.error !== undefined) throw new Error(res.error);
 
             new UINotification(this.parent, "pass", "Success", "Forced HWID to name deleted successfully");
-            await this.loadData();
+            
+            if(!bSkipRender){
+                await this.loadData();
+            }else{
+
+                //TODO: delete hwid from existing lists without rendering
+                //UPDATE current HWID to names table to remove deleted entry
+            }
 
         }catch(err){
 
@@ -4927,7 +4944,9 @@ class AdminPlayerForceName{
             deleteButton.append(`Delete Existing HWID To Name`);
 
             deleteButton.addEventListener("click", () =>{
-                this.deleteForceHWIDToName();
+                
+                this.deleteForceHWIDToName(this.selectedHWID, false);
+                
             });
 
             error.append(
@@ -5039,6 +5058,7 @@ class AdminPlayerForceName{
 
             new UINotification(this.parent, "pass", "HWID Forced To Use Name", "Changes saved successfully");
             //this.selectedHWID = "";
+            this.hwidSearch = "";
 
         }catch(err){
             console.trace(err);
@@ -5983,20 +6003,6 @@ class AdminPlayerForceName{
             ]);
         }
 
-
-        /*rows.sort((a, b) =>{
-
-            a = a[0].content.toLowerCase();
-            b = b[0].content.toLowerCase();
-
-            if(a < b){
-                return -1;
-            }else if(a > b){
-                return 1;
-            }
-            return 0;
-        });*/
-
         return rows;
     }
 
@@ -6028,8 +6034,6 @@ class AdminPlayerForceName{
             "headers": ["Name", "HWID", "MAC1", "MAC2", "Last Seen", "Total Playtime"]
         };
 
-     
-
         this.nameSearchTable = new UITable(this.form, tableOptions, this.getNameSearchRows());
         
     }
@@ -6050,9 +6054,6 @@ class AdminPlayerForceName{
         this.renderForceByHWID();
         this.renderForceByMac();
         this.renderForceByBoth();
-
-        
-
     }
 }
 
