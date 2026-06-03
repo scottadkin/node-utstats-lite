@@ -1,7 +1,7 @@
 import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { getTeamName, toMatchResultString } from "./generic.mjs";
 import { getMatchBasicTeamGame, getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
-import { toJSONAPIKeyNames } from "./json.mjs";
+import { bIncludeMostUsedNameByHWID, toJSONAPIKeyNames } from "./json.mjs";
 import Message from "./message.mjs";
 import { getMostCommonNameUsedByHWIDS, getPlayersById } from "./players.mjs";
 
@@ -1290,6 +1290,8 @@ export async function getMatchLadderJSON(id){
     const pmt = "nstats_match_players";
     const pt = "nstats_players";
 
+    const bIncludeMostUsedName = await bIncludeMostUsedNameByHWID("match");
+
     const query = `SELECT 
     ${mt}.player_id,
     ${mt}.flag_taken,
@@ -1305,7 +1307,7 @@ export async function getMatchLadderJSON(id){
     ${pmt}.country,
     ${pmt}.team,
     ${pmt}.match_result,
-    ${pmt}.hwid,
+    ${(bIncludeMostUsedName) ? `${pmt}.hwid,` : ""}
     ${pt}.name,
     ${pt}.hash
     FROM nstats_match_ctf
@@ -1317,14 +1319,18 @@ export async function getMatchLadderJSON(id){
 
     const players = [];
 
+    
+
     const uniqueHWIDS = new Set();
 
     for(let i = 0; i < result.length; i++){
 
         players.push(toJSONAPIKeyNames(result[i], {"flag_return_save": "flagSave"}));
 
-        if(result[i].hwid !== "" && result[i].hwid.toLowerCase() !== "n/a"){
-            uniqueHWIDS.add(result[i].hwid);
+        if(bIncludeMostUsedName){
+            if(result[i].hwid !== "" && result[i].hwid.toLowerCase() !== "n/a"){
+                uniqueHWIDS.add(result[i].hwid);
+            }
         }
 
        // delete result[i].hwid;
@@ -1332,13 +1338,15 @@ export async function getMatchLadderJSON(id){
         result[i].matchResult = toMatchResultString(result[i].matchResult);
     }
 
-    const commonNames = await getMostCommonNameUsedByHWIDS([...uniqueHWIDS]);
+    if(bIncludeMostUsedName){
+        const commonNames = await getMostCommonNameUsedByHWIDS([...uniqueHWIDS]);
 
 
-    for(let i = 0; i < players.length; i++){
+        for(let i = 0; i < players.length; i++){
 
-        players[i].mostUsedNameByHWID = commonNames[players[i].hwid] ?? null;
-        delete players[i].hwid;
+            players[i].mostUsedNameByHWID = commonNames[players[i].hwid] ?? null;
+            delete players[i].hwid;
+        }
     }
 
     return {...match, players};

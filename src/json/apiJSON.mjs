@@ -104,10 +104,12 @@ export default class ApiJSON{
         };
 
         if(mode === "match"){
+
             if(!await bJSONApiEnabled("match")){
 
                 return this.res.json({"error": "Disabled By Admin"});
             }
+            
             json = await this.processMatchRequests(cat);
         }
 

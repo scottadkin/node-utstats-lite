@@ -1,4 +1,5 @@
 import { simpleQuery } from "./database.mjs";
+import Message from "./message.mjs";
 
 /**
  * 
@@ -197,7 +198,10 @@ async function bJSONSettingExist(name, category){
 
 export async function updateJSONApiSettings(){
 
-    const settings = [{"category": "match", "name": "Enable JSON API", "type": "bool", "value": 1}];
+    const settings = [
+        {"category": "match", "name": "Enable JSON API", "type": "bool", "value": 1},
+        {"category": "match", "name": "Include Most Used Name By HWID To CTF Ladder Response", "type": "bool", "value": 1},
+    ];
 
     const query = `INSERT INTO nstats_json_api VALUES(NULL,?,?,?,?)`;
 
@@ -210,4 +214,20 @@ export async function updateJSONApiSettings(){
             await simpleQuery(query, [category, name, type, value]);
         }
     }
+}
+
+export async function bIncludeMostUsedNameByHWID(category){
+
+    category = category.toLowerCase();
+
+    const query = `SELECT setting_value FROM nstats_json_api WHERE category=? AND setting_name='Include Most Used Name By HWID To CTF Ladder Response'`;
+
+    const result = await simpleQuery(query, [category]);
+
+    if(result.length === 0){
+        new Message(`You are missing JSON API setting 'Include Most Used Name By HWID To CTF Ladder Response'`,"warning");
+        return false;
+    }
+
+    return result[0].setting_value === "1";
 }
