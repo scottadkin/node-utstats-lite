@@ -135,7 +135,9 @@ function toKillsPerTimeframe(data, timeframe){
 
 export async function getKillsGraphData(matchId, matchStart, timeframe){
 
+    matchStart = 0;
     const {kills, teamKills} = await getGraphKillsData(matchId, matchStart);
+
 
     const graphKills = toKillsPerTimeframe(kills, timeframe);
     const graphTeamKills = toKillsPerTimeframe(teamKills, timeframe);

@@ -572,6 +572,30 @@ export class PlayerManager{
         return data;
     }
 
+
+    fixDuplicateOverrideNames(names){
+
+        const total = Object.values(names).length;
+        const unique = new Set(Object.keys(names));
+
+        console.log(unique);
+        console.log(unique.size, total);
+
+        if(total === unique.size) return;
+
+        new Message(`${total - unique.size} Duplicate Names Found!`,"warning");
+
+        const inUse = [];
+
+        for(const [key, value] of Object.entries(names)){
+
+            if(inUse.indexOf(value.toLowerCase()) !== -1){
+
+                console.log("ALREADY IN USE");
+            }
+        }
+    }
+
     async forceHWIDNames(){
 
         const hwids = this.getAllHWIDS();
@@ -589,19 +613,18 @@ export class PlayerManager{
 
         }
 
-        //only override ones that don't have a forced name, manual ones take priority
         if(this.bAutoAssignHWIDToName && missing.length > 0){
 
             const missingNamesToHWIDs = this.getNamesByHWID(missing);
 
-
             for(const [hwid, name] of Object.entries(missingNamesToHWIDs)){
 
                 hwidForceNames[hwid] = await autoAssignHWIDToName(hwid, name);
-            }
-
-           
+            }  
         }
+
+        //console.log(hwidForceNames);
+        //this.fixDuplicateOverrideNames(hwidForceNames);
 
         for(let i = 0; i < this.players.length; i++){
 
