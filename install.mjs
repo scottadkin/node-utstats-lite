@@ -11,6 +11,7 @@ import {sqliteInstall} from "./src/sqliteInstall.mjs";
 import { SQL_MODE } from "./config.mjs";
 import { updateJSONApiSettings } from "./src/json.mjs";
 import { createDefaultLogsFolderSettings} from "./src/logsfoldersettings.mjs";
+import { installPlayerSettings } from "./src/players.mjs";
 
 
 async function main(){
@@ -35,6 +36,9 @@ async function main(){
     await createDefaultLogsFolderSettings();
     new Message("Creating JSON API Settings","note");
     await updateJSONApiSettings();
+
+    new Message("Inserting Default Player Settings", "note");
+    await installPlayerSettings();
 
     if(!fs.existsSync("./salt.mjs")){
 

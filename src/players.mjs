@@ -9,6 +9,10 @@ import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";
 
+const DEFAULT_PLAYER_SETTINGS = [
+    {"category": "Importer", "name": "Auto Assign HWID To Name", "valueType": "bool", "value": "false"}
+];
+
 const PLAYER_TOTALS_COLUMNS_MATCHES = `player_id,
 gametype_id,
 map_id,
@@ -1838,4 +1842,33 @@ export async function adminGetNameOverrideHistory(){
     const query = `SELECT match_id,player_id,force_type,original_name,new_name FROM nstats_force_name_history ORDER BY id DESC`;
 
     return await simpleQuery(query);
+}
+
+
+async function bPlayerSettingExists(category, name){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_players_settings WHERE category=? AND name=?`;
+
+    const result = await simpleQuery(query, [category, name]);
+
+    return result[0].total_rows > 0;
+}
+
+export async function installPlayerSettings(){
+
+
+    const query = `INSERT INTO nstats_players_settings VALUES(NULL,?,?,?,?)`;
+
+    for(let i = 0; i < DEFAULT_PLAYER_SETTINGS.length; i++){
+
+        const {category, name, valueType, value} = DEFAULT_PLAYER_SETTINGS[i];
+
+        if(!await bPlayerSettingExists(category, name)){
+
+            await simpleQuery(query, [category, name, valueType, value]);
+        }else{
+            new Message(`Player setting already exists, skipping insert.`,"note");
+        }
+
+    }
 }
