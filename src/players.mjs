@@ -1804,7 +1804,6 @@ export async function getForceNamesByBoth(targets){
 
     }
 
-
     return found;
 }
 

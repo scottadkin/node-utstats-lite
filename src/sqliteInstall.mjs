@@ -766,6 +766,14 @@ const queries = [
             new_name TEXT COLLATE NOCASE NOT NULL
         ) STRICT`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_players_settings(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT COLLATE NOCASE NOT NULL,
+            name TEXT COLLATE NOCASE NOT NULL,
+            value_type TEXT COLLATE NOCASE NOT NULL,
+            value TEXT COLLATE NOCASE NOT NULL
+        ) STRICT`,
+
 ];
 
 export async function sqliteInstall(){

@@ -4549,7 +4549,7 @@ class AdminPlayerForceName{
 
         this.parent = parent;
 
-        this.wrapper = UIDiv();
+        this.wrapper = UIDiv("hidden");
         this.mode = "current";
         this.selectedHWID = "";
         this.hwidSearch = "";
@@ -6139,6 +6139,78 @@ class AdminPlayerForceName{
     }
 }
 
+class AdminPlayersImporterSettings{
+
+    constructor(parent, parentMode){
+
+        this.parent = parent;
+
+        this.parentMode = parentMode;
+        this.bActive = parentMode === "importer";
+
+        this.wrapper = UIDiv("hidden");
+
+        
+
+        this.content = UIDiv();
+        this.wrapper.append(this.content);
+        this.createInfo();
+        this.createForm();
+        this.parent.append(this.wrapper);
+
+        //if(!this.bActive) return;
+
+
+        this.render();
+        
+    }
+
+    createInfo(){
+
+        this.info = UIDiv("info");
+
+        this.info.append(
+            `These settings are applied to all logs imported no matter which server or method used.`
+        );
+
+        this.content.append(this.info);
+    }
+
+    createForm(){
+
+        this.form = new UIDiv("form");
+
+        const autoHWIDRow = UIDiv("form-row");
+        autoHWIDRow.append(UILabel("Auto Assign Name To HWID"));
+
+        const test = new UITrueFalse(false, "auto-assign-hwid", false);
+
+        autoHWIDRow.append(test.elem);
+
+        this.form.append(autoHWIDRow);
+
+        this.content.append(this.form);
+    }
+
+    setActive(newActive){
+
+        this.bActive = newActive;
+        this.render();
+    }
+
+    render(){
+
+        if(!this.bActive){
+            this.wrapper.className = "hidden";
+        }else{
+            this.wrapper.className = "";
+        }
+
+        
+        
+    }
+}
+
 class AdminPlayersManager{
 
     constructor(parent){
@@ -6148,9 +6220,10 @@ class AdminPlayersManager{
         this.wrapper = UIDiv();
         
         this.parent.append(this.wrapper);
-        this.mode = "force-name";
+        this.mode = "importer";
 
 
+        this.importerSettings = new AdminPlayersImporterSettings(this.parent, this.mode);
         this.forceNameManager = new AdminPlayerForceName(this.parent, this.mode);
 
         UIHeader(this.wrapper, "Player Manager");
@@ -6166,6 +6239,7 @@ class AdminPlayersManager{
     createTabs(){
 
         const tabOptions = [
+            {"display": "Importer Settings", "value": "importer"},
             {"display": "Force Player Name", "value": "force-name"},
         ];
 
@@ -6174,6 +6248,7 @@ class AdminPlayersManager{
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
             this.forceNameManager.setActive(e.detail.newTab === "force-name");
+            this.importerSettings.setActive(e.detail.newTab === "importer");
        
             
             this.mode = e.detail.newTab;
@@ -6190,10 +6265,18 @@ class AdminPlayersManager{
     
     }
 
+    renderImporterSettings(){
+
+        if(this.mode !== "importer") return;
+
+        this.importerSettings.render();
+    }
+
     render(){
 
         this.content.innerHTML = ``;
 
+        this.renderImporterSettings();
         this.renderForceName();
     }
 }

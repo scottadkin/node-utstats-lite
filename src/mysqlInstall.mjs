@@ -758,14 +758,22 @@ PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_
         PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 
     `CREATE TABLE IF NOT EXISTS nstats_force_name_history(
-            id INT NOT NULL AUTO_INCREMENT,
-            match_id INT NOT NULL,
-            player_id INT NOT NULL,
-            force_type varchar(32) NOT NULL,
-            original_name varchar(32) NOT NULL,
-            new_name varchar(32) NOT NULL,
-            PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-         `,
+        id INT NOT NULL AUTO_INCREMENT,
+        match_id INT NOT NULL,
+        player_id INT NOT NULL,
+        force_type varchar(32) NOT NULL,
+        original_name varchar(32) NOT NULL,
+        new_name varchar(32) NOT NULL,
+        PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        `,
+
+    `CREATE TABLE IF NOT EXISTS nstats_players_settings(
+        id INT NOT NULL AUTO_INCREMENT,
+        category varchar(255) NOT NULL,
+        name varchar(255) NOT NULL,
+        value_type varchar(255) NOT NULL,
+        value varchar(255) NOT NULL,
+    PRIMARY KEY(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`,
 ];
 
 async function bColumnExist(table, column){
