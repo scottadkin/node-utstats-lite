@@ -1,5 +1,5 @@
 import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate} from "./database.mjs";
-import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates } from "./generic.mjs";
+import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
@@ -1585,6 +1585,53 @@ export async function adminGetAllForceHWIDToNames(){
 
 }
 
+
+async function bNameInUseByHWID(name){
+
+    const query = `SELECT COUNT(*) as total_uses FROM nstats_force_name_hwid WHERE name=?`;
+    const result = await simpleQuery(query, [name]);
+
+    console.log(result);
+}
+
+/**
+ * Force HWID to use name, if already in use by another hwid append id
+ * @param {*} hwid 
+ * @param {*} targetName 
+ */
+export async function autoAssignHWIDToName(hwid, targetName){
+    
+
+    let bFoundFreeName = false;
+    let currentName = targetName;
+    let attempt = 1;
+
+    while(!bFoundFreeName){
+
+        if(await bNameInUseByHWID(currentName)){
+
+            attempt++;
+            currentName = `${targetName}${attempt}`;
+
+            if(attempt > 20){
+                currentName = `Player_${createRandomString(12)}`;
+            }
+
+        }else{
+            bFoundFreeName = true;
+        }
+    }
+
+    const query = "INSERT INTO nstats_force_name_hwid VALUES(NULL,?,?,?)";
+
+
+    await simpleQuery(query, [new Date(Date.now()), hwid, currentName]);
+
+    return currentName;
+
+
+}
+
 export async function adminForceNameOnHWID(hwid, name){
 
     if(hwid === undefined){
@@ -1901,4 +1948,20 @@ export async function updatePlayerSettings(changes){
 
         await simpleQuery(query, [value.toString(), id]);
     }
+}
+
+
+export async function bAutoForceNameToHWID(){
+
+    const query = `SELECT value FROM nstats_players_settings WHERE category='importer' AND name='Auto Assign HWID To First Used Name'`;
+
+    const result = await simpleQuery(query);
+
+    if(result.length === 0){
+
+        new Message(`Player settings is missing "Auto Assign HWID To First Used Name"` ,"error");
+        process.exit();
+    }
+
+    return result[0].value === "true";
 }

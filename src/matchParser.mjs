@@ -19,7 +19,7 @@ import { bImportRandomizeNames } from "../config.mjs";
 
 export class MatchParser{
 
-    constructor(rawData, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes){
+    constructor(rawData, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, bAutoAssignHWIDToName){
 
         this.rawData = rawData;
         this.bIgnoreBots = bIgnoreBots;
@@ -27,12 +27,13 @@ export class MatchParser{
         this.minPlayers = minPlayers;
         this.minPlaytime = minPlaytime;
         this.bAppendTeamSizes = bAppendTeamSizes;
+        this.bAutoAssignHWIDToName = bAutoAssignHWIDToName;
         this.lines = [];
 
         const lineReg = /^(.+?)$/img;
         this.lines = rawData.match(lineReg);
 
-        this.players = new PlayerManager();
+        this.players = new PlayerManager(bAutoAssignHWIDToName);
         //console.log(`${this.rawData}`);
         this.match = new Match();
         this.server = new Server();

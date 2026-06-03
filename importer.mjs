@@ -11,6 +11,7 @@ import { bLogAlreadyImported } from "./src/importer.mjs";
 import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, getMultipleLeagueCategorySettings, refreshAllTables } from "./src/ctfLeague.mjs";
 import { setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
+import { bAutoForceNameToHWID } from "./src/players.mjs";
 
 new Message('Node UTStats Lite Importer module started.','note');
 
@@ -123,7 +124,8 @@ async function updateCTFLeague(m, ctfLeagueSettings){
     } 
 }
 
-async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings){
+async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, 
+    bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName){
 
     try{
 
@@ -156,7 +158,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         data = data.toString().replace(/\u0000/ig, '');
 
-        const m = new MatchParser(data, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes);
+        const m = new MatchParser(data, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, bAutoAssignHWIDToName);
 
         await m.main();
 
@@ -232,7 +234,8 @@ async function getMultipleDownloadedFrom(fileNames){
 
 //serverId is -1 if logs are from the websites /Logs folder
 //if serverId is -1(leftover logs) look for download data and use the ftp settings from importer_id if exists.
-async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings){
+async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, 
+    minPlaytime, bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName){
 
     const start = performance.now();
 
@@ -266,7 +269,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
                 f, 
                 bIgnoreBots, bIgnoreDuplicates, 
                 minPlayers, minPlaytime, bAppendTeamSizes, 
-                ctfLeagueSettings
+                ctfLeagueSettings, bAutoAssignHWIDToName
             )){
                 imported++;
             }else{
@@ -279,8 +282,11 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
         const history = downloadHistory?.logs[f] ?? null;
 
         if(history === null){
+
             new Message(`Could not find download information for ${f}, using logs folder importer settings instead.`,"note");
-            if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, ctfLeagueSettings)){
+
+            if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, 
+                bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName)){
                 imported++;
             }else{
                 failed++;
@@ -307,7 +313,8 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
             logSettings.min_players, 
             logSettings.min_playtime,
             logSettings.append_team_sizes, 
-            ctfLeagueSettings
+            ctfLeagueSettings, 
+            bAutoAssignHWIDToName
         )){
             imported++;
         }else{
@@ -340,7 +347,11 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, m
 async function main(ctfLeagueSettings){
 
 
+    
+
     const start = performance.now();
+
+    const bAutoAssignHWIDToName = await bAutoForceNameToHWID();
 
     const logsFolderSettings = await getLogsFolderSettings();
 
@@ -358,7 +369,7 @@ async function main(ctfLeagueSettings){
     const leftOverStats = await parseLogs(
         -1, ls.ignore_bots, ls.ignore_duplicates, 
         ls.min_players, ls.min_playtime, 
-        ls.append_team_sizes, ctfLeagueSettings
+        ls.append_team_sizes, ctfLeagueSettings, bAutoAssignHWIDToName
     );
 
     const leftOverEnd = performance.now();
@@ -422,7 +433,7 @@ async function main(ctfLeagueSettings){
             r.min_players,
             r.min_playtime,
             r.append_team_sizes,
-            ctfLeagueSettings
+            ctfLeagueSettings, bAutoAssignHWIDToName
         );
 
         totals.passed += passed;
@@ -480,6 +491,7 @@ async function startImport(){
 
         let bPreviousImportCompleted = false;
         await startImport();
+        new Message("Current Import Interval Completed.","progress");
         bPreviousImportCompleted = true;
 
         setInterval(async () =>{

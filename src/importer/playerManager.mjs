@@ -6,7 +6,8 @@ import { updateMasterPlayers,
     getHWIDForceNames,
     getForcedByMacNames,
     getForceNamesByBoth,
-    bulkInsertPlayerForceRenameHistory
+    bulkInsertPlayerForceRenameHistory,
+    autoAssignHWIDToName
 } from "../players.mjs";
 import geoip from "geoip-lite";
 import { createRandomString, scalePlaytime } from "../generic.mjs";
@@ -15,7 +16,7 @@ import { bImportRandomizeNames } from "../../config.mjs";
 
 export class PlayerManager{
 
-    constructor(){
+    constructor(bAutoAssignHWIDToName){
 
         this.players = [];
 
@@ -23,6 +24,7 @@ export class PlayerManager{
 
         this.idsToNames = {};
         this.playerNames = [];
+        this.bAutoAssignHWIDToName = bAutoAssignHWIDToName;
 
         this.nameOverrideHistory = [];
     }
@@ -517,7 +519,7 @@ export class PlayerManager{
 
             if(p.hwid === "" || p.hwid.toLowerCase() === "n/a") continue;
 
-            found.add(p.hwid);
+            found.add(p.hwid.toUpperCase());
         }
 
 
@@ -549,13 +551,57 @@ export class PlayerManager{
     }
 
 
+    getNamesByHWID(hwids){
+
+        if(hwids.length === 0) return {};
+
+        const data = {};
+
+        for(let x = 0; x < this.players.length; x++){
+
+            const p = this.players[x];
+
+            if(p.hwid === "") continue;
+            
+            if(hwids.indexOf(p.hwid) !== -1){
+                data[p.hwid] = p.name;
+            }
+       
+        }
+
+        return data;
+    }
+
     async forceHWIDNames(){
 
         const hwids = this.getAllHWIDS();
 
         const hwidForceNames = await getHWIDForceNames(hwids);
 
-        //this.playerNames = [];
+        const missing = [...hwids];
+
+        for(const key of Object.keys(hwidForceNames)){
+
+            const index = missing.indexOf(key);
+            if(index === -1) continue;
+
+            missing.splice(index, 1);
+
+        }
+
+        //only override ones that don't have a forced name, manual ones take priority
+        if(this.bAutoAssignHWIDToName && missing.length > 0){
+
+            const missingNamesToHWIDs = this.getNamesByHWID(missing);
+
+
+            for(const [hwid, name] of Object.entries(missingNamesToHWIDs)){
+
+                hwidForceNames[hwid] = await autoAssignHWIDToName(hwid, name);
+            }
+
+           
+        }
 
         for(let i = 0; i < this.players.length; i++){
 
