@@ -1886,6 +1886,19 @@ export async function adminGetAllPlayerSettings(){
         }
     }
 
-
     return result;
+}
+
+export async function updatePlayerSettings(changes){
+
+    if(changes.length === 0) return;
+
+    const query = `UPDATE nstats_players_settings SET value=? WHERE id=?`;
+
+    for(let i = 0; i < changes.length; i++){
+
+        const {value, id} = changes[i];
+
+        await simpleQuery(query, [value.toString(), id]);
+    }
 }

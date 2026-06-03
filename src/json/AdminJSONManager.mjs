@@ -22,7 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, updatePlayerSettings } from "../players.mjs";
 
 
 
@@ -377,6 +377,18 @@ export default class AdminJSONManager{
 
                 const settings = await adminGetAllPlayerSettings();
                 return this.res.json({settings});
+
+            }else if(this.mode === "save-player-settings"){
+
+                const changes = this.req.body.changes ?? null;
+
+                if(!Array.isArray(changes)){
+                    throw new Error("Changes must be an array of setting changes.");
+                }
+
+                await updatePlayerSettings(changes);
+
+                return this.res.json({"message": "passed"});
             }
 
 

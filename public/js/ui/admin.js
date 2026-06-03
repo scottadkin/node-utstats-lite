@@ -6247,7 +6247,7 @@ class AdminPlayersImporterSettings{
             const o = this.savedSettings[i];
             const n = this.settings[i];
 
-            if(o.value !== n.value) found.push(n);
+            if(o.value !== n.value) found.push({"id": n.id, "value": n.value});
         }
 
         return found;
