@@ -22,7 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetForceNamesData, adminGetNameOverrideHistory } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory } from "../players.mjs";
 
 
 
@@ -372,6 +372,11 @@ export default class AdminJSONManager{
 
                 await adminDeleteForceNameByBoth(this.req.body.hwid, this.req.body.mac1, this.req.body.mac2);
                 return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "load-player-settings"){
+
+                const settings = await adminGetAllPlayerSettings();
+                return this.res.json({settings});
             }
 
 

@@ -10,7 +10,7 @@ import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";
 
 const DEFAULT_PLAYER_SETTINGS = [
-    {"category": "Importer", "name": "Auto Assign HWID To Name", "valueType": "bool", "value": "false"}
+    {"category": "Importer", "name": "Auto Assign HWID To First Used Name", "valueType": "bool", "value": "false"}
 ];
 
 const PLAYER_TOTALS_COLUMNS_MATCHES = `player_id,
@@ -1869,6 +1869,23 @@ export async function installPlayerSettings(){
         }else{
             new Message(`Player setting already exists, skipping insert.`,"note");
         }
-
     }
+}
+
+export async function adminGetAllPlayerSettings(){
+
+    const query = `SELECT * FROM nstats_players_settings ORDER BY category ASC, name ASC`;
+
+    const result = await simpleQuery(query);
+
+    for(let i = 0; i < result.length; i++){
+
+        if(result[i].value_type === "bool"){
+
+            result[i].value = result[i].value === "true";
+        }
+    }
+
+
+    return result;
 }

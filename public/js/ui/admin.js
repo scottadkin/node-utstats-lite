@@ -6147,26 +6147,62 @@ class AdminPlayersImporterSettings{
 
         this.parentMode = parentMode;
         this.bActive = parentMode === "importer";
+        this.bUnsavedChanges = false;
+        this.bActionInProgress = false;
+
+        this.savedSettings = [];
+        this.settings = [];
 
         this.wrapper = UIDiv("hidden");
 
         
 
         this.content = UIDiv();
+        
         this.wrapper.append(this.content);
         this.createInfo();
+        
         this.createForm();
         this.parent.append(this.wrapper);
 
         //if(!this.bActive) return;
 
+        this.loadData();
 
-        this.render();
+
         
+    }
+
+    async loadData(){
+
+        try{
+
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-player-settings"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.settings = res.settings;
+            this.savedSettings = JSON.parse(JSON.stringify(res.settings));
+
+            this.render();
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Player Settings", err.toString());
+        }
     }
 
     createInfo(){
 
+        
         this.info = UIDiv("info");
 
         this.info.append(
@@ -6174,20 +6210,24 @@ class AdminPlayersImporterSettings{
         );
 
         this.content.append(this.info);
+
+        this.warning = UIDiv((this.bUnsavedChanges) ? "warning": "hidden");
+        const saveButton = UIButton("Save Changes", "submit-button");
+        saveButton.addEventListener("click", () =>{
+            this.saveChanges();
+        });
+        this.warning.append("You have unsaved changes!", UIBr(), UIBr(), saveButton);
+        
+        this.content.append(this.warning);
+
+        
     }
 
     createForm(){
 
         this.form = new UIDiv("form");
 
-        const autoHWIDRow = UIDiv("form-row");
-        autoHWIDRow.append(UILabel("Auto Assign Name To HWID"));
 
-        const test = new UITrueFalse(false, "auto-assign-hwid", false);
-
-        autoHWIDRow.append(test.elem);
-
-        this.form.append(autoHWIDRow);
 
         this.content.append(this.form);
     }
@@ -6198,6 +6238,93 @@ class AdminPlayersImporterSettings{
         this.render();
     }
 
+    getUnsavedChanges(){
+
+        const found = [];
+
+        for(let i = 0; i < this.settings.length; i++){
+
+            const o = this.savedSettings[i];
+            const n = this.settings[i];
+
+            if(o.value !== n.value) found.push(n);
+        }
+
+        return found;
+    }
+
+    async saveChanges(){
+
+        try{
+
+            if(this.bActionInProgress){
+                new UINotification(this.parent, "error", "Please Wait", "A previous action has not finished.");
+                return;
+            }
+
+            this.bActionInProgress = true;
+
+            const changes = this.getUnsavedChanges();
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "save-player-settings", changes})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Success", "Changes saved successfully");
+
+            this.savedSettings = JSON.parse(JSON.stringify(this.settings));
+            this.warning.className = "hidden";
+            this.bUnsavedChanges = false;
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Save Changes", err.toString());
+
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
+    updateSetting(id, value){
+
+
+        for(let i = 0; i < this.settings.length; i++){
+
+            const s = this.settings[i];
+
+            if(s.id === id){
+                s.value = value;
+                break;
+            }
+        }
+
+        //check for other changes as well and update warning
+
+        for(let i = 0; i < this.settings.length; i++){
+
+            const oldS = this.savedSettings[i];
+            const newS = this.settings[i];
+
+            if(oldS.value !== newS.value){
+
+                this.bUnsavedChanges = true;
+                this.warning.className = "warning";
+                return;
+            }
+        }
+
+        this.bUnsavedChanges = false;
+        this.warning.className = "hidden";
+    }
+
     render(){
 
         if(!this.bActive){
@@ -6206,8 +6333,26 @@ class AdminPlayersImporterSettings{
             this.wrapper.className = "";
         }
 
-        
-        
+        this.form.innerHTML = "";
+
+        for(let i = 0; i < this.settings.length; i++){
+
+            const s = this.settings[i];
+
+            const row = UIDiv("form-row");
+            row.append(UILabel(s.name));
+
+            if(s.value_type === "bool"){
+
+                const tf = new UITrueFalse(s.value, `row-${i}`, false, (e) =>{
+                    this.updateSetting(s.id, e);
+                });
+
+                row.append(tf.elem);
+            }
+            
+            this.form.append(row);
+        }
     }
 }
 
