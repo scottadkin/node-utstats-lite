@@ -84,7 +84,7 @@ const matchCTFLadderInfo = [
     ], 
     [
       UIB("players array: ", "blue-font"),
-      `name, id, hash team, country, flagTaken, flagPickup,flagDrop,flagAssist,flagCover,flagSeal,flagCapture,flagKill,flagReturn,matchResult`
+      `name, id, hash team, country, flagTaken, flagPickup,flagDrop,flagAssist,flagCover,flagSeal,flagCapture,flagKill,flagReturn,matchResult,mostUsedNameByHWID`
     ], 
   ]),
 ];
@@ -116,7 +116,8 @@ const matchCTFLadder = `{
       "flagKill": 23,
       "flagReturn": 16,
       "flagSave": 4,
-      "matchResult": "Won"
+      "matchResult": "Won",
+      "mostUsedNameByHWID": "Test Name"
     },...
   ]
 }`;

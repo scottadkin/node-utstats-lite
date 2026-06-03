@@ -3,7 +3,7 @@ import { getTeamName, toMatchResultString } from "./generic.mjs";
 import { getMatchBasicTeamGame, getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
 import Message from "./message.mjs";
-import { getPlayersById } from "./players.mjs";
+import { getMostCommonNameUsedByHWIDS, getPlayersById } from "./players.mjs";
 
 const CTF_TOTAL_KEYS = [
     "flag_taken", "flag_pickup", "flag_drop", "flag_assist",
@@ -1305,6 +1305,7 @@ export async function getMatchLadderJSON(id){
     ${pmt}.country,
     ${pmt}.team,
     ${pmt}.match_result,
+    ${pmt}.hwid,
     ${pt}.name,
     ${pt}.hash
     FROM nstats_match_ctf
@@ -1316,11 +1317,28 @@ export async function getMatchLadderJSON(id){
 
     const players = [];
 
+    const uniqueHWIDS = new Set();
+
     for(let i = 0; i < result.length; i++){
 
         players.push(toJSONAPIKeyNames(result[i], {"flag_return_save": "flagSave"}));
+
+        if(result[i].hwid !== "" && result[i].hwid.toLowerCase() !== "n/a"){
+            uniqueHWIDS.add(result[i].hwid);
+        }
+
+       // delete result[i].hwid;
         result[i].team = getTeamName(result[i].team);
         result[i].matchResult = toMatchResultString(result[i].matchResult);
+    }
+
+    const commonNames = await getMostCommonNameUsedByHWIDS([...uniqueHWIDS]);
+
+
+    for(let i = 0; i < players.length; i++){
+
+        players[i].mostUsedNameByHWID = commonNames[players[i].hwid] ?? null;
+        delete players[i].hwid;
     }
 
     return {...match, players};

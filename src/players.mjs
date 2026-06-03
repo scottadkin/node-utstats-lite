@@ -1965,3 +1965,38 @@ export async function bAutoForceNameToHWID(){
 
     return result[0].value === "true";
 }
+
+export async function getMostCommonNameUsedByHWIDS(hwids){
+
+    if(hwids.length === 0) return {};
+
+    //probably very slow way of doing this
+
+    const mt = "nstats_match_players";
+    const pt = "nstats_players";
+
+    const query = `SELECT ${mt}.hwid,
+    ${mt}.player_id,
+    COUNT(*) as total_rows,
+    ${pt}.name as name 
+    FROM nstats_match_players 
+    LEFT JOIN ${pt} ON ${mt}.player_id = ${pt}.id
+    WHERE ${mt}.hwid=? GROUP BY ${mt}.hwid,${mt}.player_id ORDER BY total_rows DESC LIMIT 1`;
+
+
+    const mostCommon = {};
+
+    for(let i = 0; i < hwids.length; i++){
+
+        const result = await simpleQuery(query, [hwids[i]])
+
+        if(result.length === 0){
+            mostCommon[hwids[i]] = "";
+        }else{
+            mostCommon[hwids[i]] = result[0].name;
+        }
+    }
+    
+    return mostCommon;
+
+}
