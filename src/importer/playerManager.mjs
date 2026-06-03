@@ -573,17 +573,15 @@ export class PlayerManager{
     }
 
 
-    fixDuplicateOverrideNames(names){
+    async fixDuplicateOverrideNames(names){
 
         const total = Object.values(names).length;
-        const unique = new Set(Object.keys(names));
+        const unique = new Set(Object.values(names));
 
-        console.log(unique);
-        console.log(unique.size, total);
 
         if(total === unique.size) return;
 
-        new Message(`${total - unique.size} Duplicate Names Found!`,"warning");
+        new Message(`${total - unique.size} Duplicate Name(s) Found!`,"warning");
 
         const inUse = [];
 
@@ -591,7 +589,12 @@ export class PlayerManager{
 
             if(inUse.indexOf(value.toLowerCase()) !== -1){
 
-                console.log("ALREADY IN USE");
+                new Message(`${value} has already been assigned to a previous HWID, generating random name`,"Warning");
+
+                names[key] = `PLAYER${createRandomString(10)}`;
+
+            }else{
+                inUse.push(value.toLowerCase());
             }
         }
     }
@@ -624,7 +627,8 @@ export class PlayerManager{
         }
 
         //console.log(hwidForceNames);
-        //this.fixDuplicateOverrideNames(hwidForceNames);
+        //Only added this to force by HWID, add to other methods if requested
+        await this.fixDuplicateOverrideNames(hwidForceNames);
 
         for(let i = 0; i < this.players.length; i++){
 

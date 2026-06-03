@@ -1682,7 +1682,7 @@ export async function getHWIDForceNames(targets){
 
     if(targets.length === 0) return {};
 
-    const query = `SELECT UPPER(hwid) as hwid,name,date_added FROM nstats_force_name_hwid WHERE hwid IN(?)`;
+    const query = `SELECT UPPER(hwid) as hwid,name,date_added FROM nstats_force_name_hwid WHERE hwid IN(?) ORDER BY date_added ASC`;
 
     const result = await simpleQuery(query, [targets]);
 
