@@ -599,6 +599,14 @@ export class PlayerManager{
         }
     }
 
+
+    addNameOverrideHistory(oldName, newName, type){
+
+        if(oldName.toLowerCase() === newName.toLowerCase()) return;
+
+        this.nameOverrideHistory.push({oldName, newName, type});
+    }
+
     async forceHWIDNames(){
 
         const hwids = this.getAllHWIDS();
@@ -644,7 +652,7 @@ export class PlayerManager{
             }
 
             new Message(`Force player name by HWID ${p.name} changed to ${hwidForceNames[p.hwid]}`,"note");
-            this.nameOverrideHistory.push({"oldName": p.name, "newName": hwidForceNames[p.hwid], "type": "HWID"});
+            this.addNameOverrideHistory(p.name, hwidForceNames[p.hwid], "HWID");
             this.updatePlayerNamesList(p.name, hwidForceNames[p.hwid]);
             p.name = hwidForceNames[p.hwid];
             p.bNameForcedByHWID = true;
@@ -719,7 +727,7 @@ export class PlayerManager{
 
                     
 
-                    this.nameOverrideHistory.push({"oldName": p.name, "newName": forced.name, "type": "MAC-SINGLE"});
+                    this.addNameOverrideHistory(p.name, forced.name, "MAC-SINGLE");
                     this.updatePlayerNamesList(p.name, forced.name);
                     p.name = forced.name;
                     p.bNameForcedBySingleMAC = true;
@@ -735,7 +743,7 @@ export class PlayerManager{
                 if(bFoundM1 && bFoundM2){
 
                     new Message(`MAC addresses combination forced name, applied to ${p.name}, changed to ${forced.name}`,"note");
-                    this.nameOverrideHistory.push({"oldName": p.name, "newName": forced.name, "type": "MAC-BOTH"});
+                    this.addNameOverrideHistory(p.name, forced.name, "MAC-BOTH");
                     this.updatePlayerNamesList(p.name, forced.name);
                     p.name = forced.name;    
                     p.bNameForcedByMACCombination = true;
@@ -792,7 +800,7 @@ export class PlayerManager{
                 if(p.mac2 !== r.mac1 && p.mac2 !== r.mac2) continue;
 
                 new Message(`Force name by HWID and MAC addresses, ${p.name} changed to ${r.name}`,"note");
-                this.nameOverrideHistory.push({"oldName": p.name, "newName": r.name, "type": "HWID-MAC"});
+                this.addNameOverrideHistory(p.name, r.name, "HWID-MAC");
                 this.updatePlayerNamesList(p.name, r.name);
                 p.name = r.name;
                 p.bNameForcedByHWIDAndMAC = true;
