@@ -1591,7 +1591,7 @@ async function bNameInUseByHWID(name){
     const query = `SELECT COUNT(*) as total_uses FROM nstats_force_name_hwid WHERE name=?`;
     const result = await simpleQuery(query, [name]);
 
-    console.log(result);
+    return result[0].total_uses > 0;
 }
 
 /**
@@ -1999,4 +1999,25 @@ export async function getMostCommonNameUsedByHWIDS(hwids){
     
     return mostCommon;
 
+}
+
+
+export async function adminRenameForceHWIDToName(hwid, newName){
+
+    if(hwid === undefined) throw new Error("HWID is undefined");
+    if(newName === undefined) throw new Error("newName is undefined");
+
+    if(newName === "") throw new Error("newName can't be an empty string.");
+
+    hwid = hwid.toUpperCase();
+    if(hwid === "" || hwid === "n/a") throw new Error("Not a valid HWID");
+
+    /*if(await bNameInUseByHWID(newName)){
+
+        throw new Error("Name is already");
+    }*/
+
+    const query = `UPDATE nstats_force_name_hwid SET name=? WHERE hwid=?`;
+
+    return await simpleQuery(query, [newName, hwid]);
 }

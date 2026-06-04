@@ -4964,6 +4964,60 @@ class AdminPlayerForceName{
         }
     }
 
+    updateHWIDToNames(hwid, newName){
+
+
+        hwid = hwid.toUpperCase();
+
+        for(let i = 0; i < this.hwidToNames.length; i++){
+
+            const h = this.hwidToNames[i];
+
+            if(h.hwid.toUpperCase() === hwid){
+                h.name = newName;
+                return;
+            }
+        }
+    }
+
+
+    async renameHWIDToName(hwid, newName){
+
+        try{
+
+            if(this.bActionInProgress){
+                new UINotification(this.parent, "error", "Please Wait", "A previous action has not finished.");
+                return;
+            }
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "rename-force-hwid-to-name", hwid, "name": newName})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.updateHWIDToNames(hwid, newName);
+            this.render();
+
+            new UINotification(this.parent, "pass", "Successful", "Force name by HWID successfully updated.");
+
+            
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Rename Force Name BY HWID", err.toString());
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     updateHWIDInfo(){
 
         this.hwidInfoElem.innerHTML = "";
@@ -4981,7 +5035,7 @@ class AdminPlayerForceName{
 
         if(forcedName !== null){
 
-            const error = UIDiv("error");
+            const error = UIDiv("warning");
             
 
             const deleteButton = document.createElement("button");
@@ -4997,11 +5051,49 @@ class AdminPlayerForceName{
             error.append(
                 `HWID is already forced to `, 
                 UIB(forcedName.name), UIBr(), UIBr(),
-                "You can delete the existing HWID to name by clicking the button below", 
+                "You can delete the existing forced name by HWID by clicking the button below.", 
                 UIBr(), UIBr(),
-                deleteButton);
+                deleteButton, UIBr(), UIBr()
+            );
 
+            
+
+            const renameForm = UIDiv();
+
+            renameForm.append(`Rename the existing name forced by this HWID.`, UIBr());
+
+            const currentNameElem = UIDiv("form-row");
+            const dummyNameElem = document.createElement("input");
+            dummyNameElem.type = "text";
+            dummyNameElem.className = "textbox";
+            dummyNameElem.disabled = true;
+            dummyNameElem.value = forcedName.name;
+
+            currentNameElem.append(UILabel("Current Name"), dummyNameElem);
+
+            const newNameRow = UIDiv("form-row");
+
+            this.newNameElem = document.createElement("input");
+
+            this.newNameElem.type = "text";
+            this.newNameElem.className = "textbox";
+
+            newNameRow.append(UILabel("New Name"), this.newNameElem);
+
+            
+
+            const renameButton = UIButton("Rename Entry", "submit-button");
+
+            renameButton.addEventListener("click", () =>{
+                this.renameHWIDToName(this.selectedHWID, this.newNameElem.value);
+            });
+
+            renameForm.append(UIBr(), currentNameElem, newNameRow, renameButton);
+            
+
+            error.append(renameForm);
             this.hwidInfoElem.append(error);
+
         }
 
         const matches = [];
@@ -6022,8 +6114,6 @@ class AdminPlayerForceName{
     renderOverrideHistory(){
 
         if(this.mode !== "rename-history") return;
-
-        
 
         const tableOptions = {
             "width": 1,

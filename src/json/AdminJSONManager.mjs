@@ -22,7 +22,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, updatePlayerSettings } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, adminRenameForceHWIDToName, updatePlayerSettings } from "../players.mjs";
 
 
 
@@ -350,6 +350,11 @@ export default class AdminJSONManager{
                 await adminDeleteForceNameToHWID(this.req.body.hwid);
                 return this.res.json({"message": "passed"});
 
+            }else if(this.mode === "rename-force-hwid-to-name"){
+                
+                await adminRenameForceHWIDToName(this.req.body.hwid, this.req.body.name);
+                return this.res.json({"message": "passed"});
+                
             }else if(this.mode === "save-force-name-by-mac-addresses"){
 
                 await adminForceNameOnMacAddresses(this.req.body.mac1, this.req.body.mac2, this.req.body.name);
