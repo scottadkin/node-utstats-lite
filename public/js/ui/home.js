@@ -166,35 +166,30 @@ function homeRenderMostPlayedGametypes(parent, data){
     parent = document.querySelector(parent);
     UIHeader(parent, "Most Played Gametypes");
 
-    const table = document.createElement("table");
-    table.className = "t-width-1";
+    const tableOptions = {
+        "width": 1,
+        "headers": ["Name", "First", "Last", "Matches", "Playtime"]
+    };
 
-    const headers = ["Name", "First", "Last", "Matches", "Playtime"];
-    const headerRow = document.createElement("tr");
-
-    for(let i = 0; i < headers.length; i++){
-        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-    }
-
-    table.append(headerRow);
+    const rows = [];
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
-        const row = document.createElement("tr");
-
         const url = `/matches/?g=${d.id}`;
 
-        row.append(UITableCell({"content": d.name, "className": "text-left", url}));
-        row.append(UITableCell({"content": d.first_match, "parse": ["date"], "className": "date", url}));
-        row.append(UITableCell({"content": d.last_match, "parse": ["date"], "className": "date", url}));
-        row.append(UITableCell({"content": d.matches, url}));
-        row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
-        table.append(row);
+        rows.push([
+            {"content": d.name, "className": "text-left", url},
+            {"content": d.first_match, "parse": ["date"], "className": "date", url},
+            {"content": d.last_match, "parse": ["date"], "className": "date", url},
+            {"content": d.matches, url},
+            {"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}
+        ]);
+
     }
 
-    parent.append(table);
+    const table = new UITable(parent, tableOptions, rows);
 }
 
 function homeRenderMostPlayedMaps(parent, data, displayMode){
@@ -205,41 +200,39 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
     UIHeader(parent, "Most Played Maps");
 
     let wrapper = null;
+    
 
     if(displayMode === "default"){
         wrapper = UIDiv("rich-outter");
-    }else{
-
-        wrapper = document.createElement("table");
-        wrapper.className = "t-width-1";
-        
-        const headers = ["Name", "First", "Last", "Matches", "Playtime"];
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
-        wrapper.append(headerRow);
     }
 
+    const rows = [];
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
         if(displayMode === "default"){
             wrapper.append(UIMapRichBox(d));
+
         }else{
 
-            const row = document.createElement("tr");
             const url = `/map/${d.id}`;
 
-            row.append(UITableCell({"content": d.name, "className": "text-left", url}));
-            row.append(UITableCell({"content": d.first_match, "parse": ["date"], "className": "date", url}));
-            row.append(UITableCell({"content": d.last_match, "parse": ["date"], "className": "date", url}));
-            row.append(UITableCell({"content": d.matches, url}));
-            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}));
-            wrapper.append(row);
+            rows.push([
+                {"content": d.name, "className": "text-left", url},
+                {"content": d.first_match, "parse": ["date"], "className": "date", url},
+                {"content": d.last_match, "parse": ["date"], "className": "date", url},
+                {"content": d.matches, url},
+                {"content": d.playtime, "parse": ["playtime"], "className": "playtime", url},
+            ]);
+
         }
+    }
+
+    if(displayMode === "table"){
+        const tableOptions = {"width": 1, "headers": ["Name", "First", "Last", "Matches", "Playtime"]};
+        new UITable(parent, tableOptions, rows);
+        return;
     }
 
     parent.append(wrapper);  
