@@ -1,12 +1,14 @@
 class MapsSearchForm{
 
-    constructor(parent, nameSearch, displayMode, page, perPage, maps, totalMatches){
+    constructor(parent, nameSearch, sortBy, order, displayMode, page, perPage, maps, totalMatches){
 
         this.parent = document.querySelector(parent);
         this.nameSearch = decodeHTML(nameSearch);
         this.displayMode = displayMode;
         this.perPage = perPage;
         this.page = page;
+        this.sortBy = sortBy;
+        this.order = order;
 
         this.displayModes = [
             {"display": "Default", "value": "default"},
@@ -36,7 +38,9 @@ class MapsSearchForm{
             this.nameSearch, 
             this.displayMode,
             this.page, 
-            this.perPage
+            this.perPage,
+            this.sortBy,
+            this.order
         );   
     }
 
@@ -60,6 +64,26 @@ class MapsSearchForm{
             console.trace(err);
             new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
         }
+    }
+
+    createSortBySelect(parent){
+
+        const options = [
+            {"display": "Name", "value": "name"},
+            {"display": "First Match", "value": "first"},
+            {"display": "Last Match", "value": "last"},
+            {"display": "Matches", "value": "matches"},
+            {"display": "Playtime", "value": "playtime"},
+        ];
+
+        
+
+        const elem = new UISelect(parent, options, this.sortBy, (e) =>{
+            this.sortBy = e;
+            this.updateUrl();
+            this.renderResults();
+        });
+
     }
 
     createForm(){
@@ -91,6 +115,27 @@ class MapsSearchForm{
         nameRow.append(nameElem);
 
         this.form.append(nameRow);
+
+        const sortByRow = UIDiv("form-row");
+        sortByRow.append(UILabel("Sort By"));
+
+        this.form.append(sortByRow);
+
+        this.createSortBySelect(sortByRow);
+
+
+        const orderRow = UIDiv("form-row");
+        orderRow.append(UILabel("Order"));
+
+        new UIOrderSelect(orderRow, this.order, (e) =>{
+            this.order = e;
+
+            this.updateUrl();
+            this.renderResults();
+        });
+
+        this.form.append(orderRow);
+
 
         const displayRow = document.createElement("div");
         displayRow.className = "form-row";
@@ -127,19 +172,23 @@ class MapsSearchForm{
 
         this.form.append(displayRow);
 
+       
+
         this.parent.append(this.form);
 
     }
 
     updateUrl(){
-        history.pushState({},"",`/maps/?name=${this.nameSearch}&display=${this.displayMode}`);
+        history.pushState(
+            {},"",
+            `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${this.order}`);
     }
 }
 
 
 class MapListDisplay{
 
-    constructor(parent, data, totalMatches, nameSearch, displayMode, page, perPage){
+    constructor(parent, data, totalMatches, nameSearch, displayMode, page, perPage, sortBy, order){
 
         if(data.length === 0){
 
@@ -158,13 +207,14 @@ class MapListDisplay{
         this.parent = parent;
         this.data = data;
         this.displayMode = displayMode.toLowerCase();     
-        this.sortBy = "name";
-        this.bAscOrder = true;
+        this.sortBy = sortBy;
+        this.bAscOrder = order === "ASC";
+
+        this.sortData();
 
         if(this.displayMode === "table") this.renderTable();
         if(this.displayMode === "default") this.renderRichView();
 
-        //parent, url, totalResults, perPage, currentPage
         new UIPagination(
             this.parent, 
             `/maps/?name=${this.nameSearch}&display=${displayMode}&perPage=${perPage}&page=`,
@@ -174,10 +224,7 @@ class MapListDisplay{
         );
     }
 
-
-    createRows(){
-
-        const rows = [];
+    sortData(){
 
         this.data.sort((a, b) =>{
 
@@ -215,6 +262,11 @@ class MapListDisplay{
             return 0;
 
         });
+    }
+
+    createRows(){
+
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
@@ -258,6 +310,8 @@ class MapListDisplay{
                         this.sortBy = headers[i].toLowerCase();
                         this.bAscOrder = true;
                     }
+
+                    this.sortData();
 
                     this.table.updateRows(this.createRows());
                 }

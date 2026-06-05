@@ -10,6 +10,21 @@ export async function renderMapsPage(req, res, userSession){
         let title = "Maps";
         let description = "View all the maps played on our servers.";
 
+        let sortBy = req.query.sortBy ?? "name";
+
+        sortBy = sortBy.toLowerCase();
+
+
+        let order = req.query.order ?? "ASC";
+
+        order = order.toUpperCase();
+
+        if(order !== "ASC" && order !== "DESC"){
+            order = "ASC";
+        }
+
+
+
         let displayMode = req.query.display ?? pageSettings["Default Display Mode"] ?? "default";
         displayMode = displayMode.toLowerCase();
 
@@ -43,6 +58,8 @@ export async function renderMapsPage(req, res, userSession){
             "host": req.headers.host,
             title,
             "meta": {"description": description, "image": "images/maps/default.jpg"},
+            sortBy,
+            order,
             displayMode,
             nameSearch,
             totalMatches,

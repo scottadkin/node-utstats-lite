@@ -3466,8 +3466,7 @@ class AdminJSONManager{
     createTabs(){
 
         const options = [
-            {"display": "Match", "value": "match"},
-            {"display": "test", "value": "test"},
+            {"display": "Match", "value": "match"}
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode);
