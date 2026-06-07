@@ -1,5 +1,4 @@
-import { bulkInsert, mysqlGetColumnsAsArray, simpleQuery, testChangeDatabase } from "./database.mjs";
-import { SQL_MODE } from "../config.mjs";
+import { bulkInsert, simpleQuery, testChangeDatabase } from "./database.mjs";
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { createReadStream, createWriteStream, fstat } from "node:fs";
 import Message from "./message.mjs";
@@ -60,15 +59,11 @@ export async function clearAllDataTables(){
 
         const t = DELETE_TABLES[i];
 
-        if(SQL_MODE !== "sqlite"){
+   
 
-            await simpleQuery(`TRUNCATE nstats_${t}`);
-
-        }else{
-
-            await simpleQuery(`DELETE FROM nstats_${t}`);
-            await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${t}'`);
-        }
+        await simpleQuery(`DELETE FROM nstats_${t}`);
+        await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${t}'`);
+    
     }   
 }
 

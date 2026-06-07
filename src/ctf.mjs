@@ -1,4 +1,4 @@
-import { simpleQuery, bulkInsert, mysqlGetColumnsAsArray, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate } from "./database.mjs";
+import { simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { getTeamName, toMatchResultString } from "./generic.mjs";
 import { getMatchBasicTeamGame, getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
 import { bIncludeMostUsedNameByHWID, toJSONAPIKeyNames } from "./json.mjs";

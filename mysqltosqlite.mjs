@@ -1,8 +1,9 @@
 import Message from "./src/message.mjs";
-import { readdir, readFile, mkdir, writeFile, copyFile } from "node:fs/promises";
+import { readdir, readFile, mkdir, writeFile, copyFile, access, constants, rename } from "node:fs/promises";
 import mysql from "mysql2/promise";
 import { createBackupDirName } from "./src/generic.mjs";
 import { toMYSQLDateTime } from "./src/generic.mjs";
+import { installMain } from "./install.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 
@@ -152,7 +153,6 @@ async function mysqlBulkInsert(query, vars, maxPerInsert){
 }
 
 
-
 async function init(){
 
     try{
@@ -173,17 +173,39 @@ async function init(){
     }
 
 
-    const test = await createDatabaseBackup();
-    //console.log(test);
+    /*const test = await createDatabaseBackup();
 
-    //const test = { "folder": './backups/2026-06-07-14-00-39' };
 
     const files = await readdir(test.folder);
 
 
 
     const testFile = await readFile(`${test.folder}/${"nstats_ftp.json"}`);
-    console.log(JSON.parse(testFile));
+    console.log(JSON.parse(testFile));*/
+
+
+    try{
+
+        await access("./data/main.db", constants.F_OK);
+
+        new Message(`SQLite Database file already in data directory, moving existing file to backups folder.`,"note");
+
+        await rename("./data/main.db", `./backups/sqlite/${createBackupDirName()}.db`);
+
+
+    }catch(err){
+
+        
+
+        if(err.code !== "ENOENT"){
+            console.trace(err);
+            process.exit();
+        }
+  
+    }
+
+    await installMain();
+
 
 
 

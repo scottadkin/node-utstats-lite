@@ -9,7 +9,12 @@ import { mapScreenshotQuality } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
 import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
-import { clearAllDataTables, createArchivedBackup, createDatabaseBackup, createSQLiteBackup, getAllBackupsInfo, getAllDatabaseTableInfo, getSQLiteBackups, getSQLiteStats, restoreDatabase, restoreFromSQLiteBackup } from "../admin.mjs";
+import { 
+    clearAllDataTables/*, createArchivedBackup, createDatabaseBackup*/, 
+    createSQLiteBackup, getAllBackupsInfo, /*getAllDatabaseTableInfo, */
+    getSQLiteBackups, getSQLiteStats, restoreDatabase, 
+    restoreFromSQLiteBackup 
+} from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
@@ -54,10 +59,12 @@ export default class AdminJSONManager{
 
     async createArchivedBackup(){
 
-        await createArchivedBackup((fileName) =>{
+        throw new Error("No longer exists");
+
+        /*await createArchivedBackup((fileName) =>{
 
             return this.res.json({"fileName": fileName});
-        });
+        });*/
        
     }
 

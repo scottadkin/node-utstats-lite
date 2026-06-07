@@ -1,5 +1,3 @@
-import { SQL_MODE } from "../../config.mjs";
-
 export async function renderAdminPage(req, res, userSession){
 
     try{
@@ -15,7 +13,7 @@ export async function renderAdminPage(req, res, userSession){
             "host": req.headers.host,
             userSession,
             mode,
-            SQL_MODE
+            "SQL_MODE": "sqlite"
         });
 
     }catch(err){

@@ -6,23 +6,17 @@ import { restoreDefaultSettings as restoreDefaultSiteSettings } from "./src/site
 import { restoreDefaultLayouts as restoreDefaultPageLayouts} from "./src/pageLayout.mjs";
 import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./src/ctfLeague.mjs";
 import {insertDefaultRankingSettings } from "./src/rankings.mjs";
-import {mysqlInstall} from "./src/mysqlInstall.mjs";
 import {sqliteInstall} from "./src/sqliteInstall.mjs";
-import { SQL_MODE } from "./config.mjs";
 import { updateJSONApiSettings } from "./src/json.mjs";
 import { createDefaultLogsFolderSettings} from "./src/logsfoldersettings.mjs";
 import { installPlayerSettings } from "./src/players.mjs";
 
 
-async function main(){
+export async function installMain(){
 
-    if(SQL_MODE === "sqlite"){
-        new Message("Selected Database Type is SQLite", "note");
-        await sqliteInstall();
-    }else{
-        new Message("Selected Database Type is MYSQL", "note");
-        await mysqlInstall();
-    }
+
+    await sqliteInstall();
+
 
     new Message("Inserting Default Rankings Settings", "note");
     await insertDefaultRankingSettings();
@@ -67,5 +61,5 @@ async function main(){
 
 }
 
-await main();
+await installMain();
 

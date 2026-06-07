@@ -1,4 +1,4 @@
-import {mysqlGetColumnsAsArray, simpleQuery, sqlInsertReturnRowId} from "./database.mjs";
+import {simpleQuery, sqlInsertReturnRowId} from "./database.mjs";
 import {getMapNames, getNameById} from "./maps.mjs";
 import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
 import { getAllNames, getServerNames } from "./servers.mjs";
