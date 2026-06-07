@@ -1,9 +1,10 @@
 import Message from "./src/message.mjs";
-import { readdir, readFile, mkdir, writeFile, copyFile, access, constants, rename } from "node:fs/promises";
+import { readdir, readFile, mkdir, writeFile, copyFile, access, constants, rename, rm } from "node:fs/promises";
 import mysql from "mysql2/promise";
 import { createBackupDirName } from "./src/generic.mjs";
 import { toMYSQLDateTime } from "./src/generic.mjs";
-import { installMain } from "./install.mjs";
+import { sqliteInstall } from "./src/sqliteInstall.mjs";
+import { closeDatabase, createNewDatabase, bulkInsert } from "./src/database.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 
@@ -94,9 +95,15 @@ async function getAllTableNames(){
     });
 }
 
-async function createDatabaseBackup(){
+async function createDatabaseBackup(overrideName){
 
-    const backupDirName = createBackupDirName();
+    let backupDirName = "";
+
+    if(overrideName !== undefined){
+        backupDirName = overrideName;
+    }else{
+        backupDirName = createBackupDirName();
+    }
 
     const tables = await getAllTableNames();
 
@@ -152,8 +159,157 @@ async function mysqlBulkInsert(query, vars, maxPerInsert){
     return;
 }
 
+//Don't want to accidently mix backups or leave deleted tables data in the folder
+async function deleteOldRestoreJSONFiles(){
+
+    const dir = `./restore-from/`;
+
+    const files = await readdir(dir);
+
+    const reg = /^.+?\.json$/i;
+
+    for(let i = 0; i < files.length; i++){
+
+        const f = files[i];
+
+        if(!reg.test(f)) continue;
+
+        await rm(`${dir}${f}`);
+    }
+
+}
+
+async function truncateTable(tableName){
+
+    const query = `TRUNCATE ${tableName}`;
+
+    return await pool.query(query);
+}
+
+async function restoreTable(tableName, fileName){
+
+    new Message(`Attempting to restore ${tableName} from ${fileName}`,"note");
+
+    const buffer = await readFile(fileName);
+    const {columns, rows} = JSON.parse(buffer);
+
+    const query = `INSERT INTO ${tableName} (${columns.toString()}) VALUES ?`;
+
+    await bulkInsert(query, rows);
+
+    new Message(`Inserted ${rows.length} rows of data into table ${tableName}`,"pass");
+
+    return rows.length;
+
+}
+
+async function restoreDatabase(backupTarget){
+
+    try{
+
+        const backupDir = `./backups/`;
+        const restoreDir = `./restore-from/`;
+
+        const targetFile = `${backupDir}${backupTarget}`;
+
+
+        const jsonReg = /^(.+?)\.json$/i;
+
+        let jsonFiles = [];
+
+        await deleteOldRestoreJSONFiles();
+
+      
+        const buFolder = await readdir(targetFile);
+
+        for(let i = 0; i < buFolder.length; i++){
+
+            const f = buFolder[i];
+
+            if(jsonReg.test(f)){
+    
+                await copyFile(`${targetFile}/${f}`, `${restoreDir}${f}`);
+                new Message(`Copied ${targetFile}/${f} to ${restoreDir}${f}`,"pass");
+
+            }else{
+
+                new Message(`Skipping file ${f}`,"note");
+            }
+        }
+        
+
+        const files = await readdir(restoreDir);
+
+        let rowsInserted = [];
+
+        for(let i = 0; i < files.length; i++){
+
+            const f = files[i];
+
+            const jResult = jsonReg.exec(f);
+
+            if(jResult === null) continue;
+            
+            //new Message(`Truncate table ${jResult[1]}.`,"note");
+           // await truncateTable(jResult[1]);
+            
+            const totalRows = await restoreTable(jResult[1], `${restoreDir}${f}`);
+
+            rowsInserted.push({"table": jResult[1], "rows": totalRows});
+        }
+
+        return rowsInserted;
+
+    }catch(err){
+        console.trace(err);
+        return err.toString();
+    }
+   
+}
+
+
+async function bSQLiteFileAlreadyExists(){
+    
+
+    let test = await access("./data/main.db", constants.F_OK);
+
+    return test === undefined;
+}
+
+
+async function backupSQLiteExistingFile(backupName){
+
+    try{
+
+
+        closeDatabase();
+
+
+        if(await bSQLiteFileAlreadyExists()){
+            
+            new Message(`SQLite Database file already in data directory, moving existing file to backups folder.`,"note");
+
+            console.log("rename");
+            await rename("./data/main.db", `./backups/sqlite/${backupName}.db`);
+        }
+
+        createNewDatabase();
+
+
+    }catch(err){
+
+        
+
+        if(err.code !== "ENOENT"){
+            throw new Error(err);
+            
+        }
+  
+    }
+}
 
 async function init(){
+
 
     try{
 
@@ -172,42 +328,32 @@ async function init(){
         process.exit();
     }
 
-
-    /*const test = await createDatabaseBackup();
-
-
-    const files = await readdir(test.folder);
-
-
-
-    const testFile = await readFile(`${test.folder}/${"nstats_ftp.json"}`);
-    console.log(JSON.parse(testFile));*/
-
+    const backupName = createBackupDirName();
 
     try{
+        const test = await createDatabaseBackup(backupName);
 
-        await access("./data/main.db", constants.F_OK);
 
-        new Message(`SQLite Database file already in data directory, moving existing file to backups folder.`,"note");
+        const files = await readdir(test.folder);
 
-        await rename("./data/main.db", `./backups/sqlite/${createBackupDirName()}.db`);
 
+        const testFile = await readFile(`${test.folder}/${"nstats_ftp.json"}`);
+        console.log(JSON.parse(testFile));
 
     }catch(err){
-
-        
-
-        if(err.code !== "ENOENT"){
-            console.trace(err);
-            process.exit();
-        }
-  
+        process.exit();
+        console.trace(err);
     }
 
-    await installMain();
 
+    await backupSQLiteExistingFile(backupName);
+    
 
+    console.log("install");
+    await sqliteInstall(true);
 
+    console.log("restore");
+    await restoreDatabase(backupName);
 
     process.exit();
 }

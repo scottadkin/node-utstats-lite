@@ -12,7 +12,7 @@ import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalcu
 import { 
     clearAllDataTables/*, createArchivedBackup, createDatabaseBackup*/, 
     createSQLiteBackup, getAllBackupsInfo, /*getAllDatabaseTableInfo, */
-    getSQLiteBackups, getSQLiteStats, restoreDatabase, 
+    getSQLiteBackups, getSQLiteStats, /*restoreDatabase*/ 
     restoreFromSQLiteBackup 
 } from "../admin.mjs";
 import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
@@ -305,13 +305,14 @@ export default class AdminJSONManager{
 
             }else if(this.mode === "restore-database"){
 
-                if(this.req.body.targetBackup === undefined){
+                throw new Error("No longer exists");
+                /*if(this.req.body.targetBackup === undefined){
                     throw new Error(`No target backup found`);
                 }
 
                 const result = await restoreDatabase(this.req.body.targetBackup);
 
-                return this.res.json(result);
+                return this.res.json(result);*/
 
             }else if(this.mode === "load-sqlite-stats"){
 

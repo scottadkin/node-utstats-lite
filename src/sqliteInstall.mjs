@@ -1,5 +1,14 @@
 import { simpleQuery } from "./database.mjs";
+import fs from "fs";
 import Message from "./message.mjs";
+import {createRandomString} from "./generic.mjs";
+import { restoreDefaultSettings as restoreDefaultSiteSettings } from "./siteSettings.mjs";
+import { restoreDefaultLayouts as restoreDefaultPageLayouts} from "./pageLayout.mjs";
+import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./ctfLeague.mjs";
+import {insertDefaultRankingSettings } from "./rankings.mjs";
+import { updateJSONApiSettings } from "./json.mjs";
+import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
+import { installPlayerSettings } from "./players.mjs";
 
 const queries = [
     `CREATE TABLE IF NOT EXISTS nstats_sessions(
@@ -776,7 +785,7 @@ const queries = [
 
 ];
 
-export async function sqliteInstall(){
+export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
 
@@ -785,5 +794,51 @@ export async function sqliteInstall(){
         new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
         await simpleQuery(queries[i]);
         new Message(`Query passed`,"pass");
+    }
+
+    if(!bOnlyCreateTables){
+
+        new Message("Inserting Default Rankings Settings", "note");
+        await insertDefaultRankingSettings();
+        new Message("Inserting Default CTF League Settings", "note");
+        await insertDefaultCTFLeagueSettings();
+        new Message("Inserting Default Site Settings", "note");
+        await restoreDefaultSiteSettings();
+        new Message("Inserting Default Site Page Layout Settings", "note");
+        await restoreDefaultPageLayouts();
+        new Message("Creating Default Logs Folder Settings", "note");
+        await createDefaultLogsFolderSettings();
+        new Message("Creating JSON API Settings","note");
+        await updateJSONApiSettings();
+
+        new Message("Inserting Default Player Settings", "note");
+        await installPlayerSettings();
+    }
+
+    if(!fs.existsSync("./salt.mjs")){
+
+        new Message(`Creating password salt`,"note");
+
+        const seed = createRandomString(10000);
+        const fileContents = `export const salt = \`${seed}\`;`;
+
+        fs.writeFileSync("./salt.mjs", fileContents);
+    }
+
+    if(!fs.existsSync("./secret.mjs")){
+
+        new Message(`Creating session secret`, "note");
+        const seed2 = createRandomString(2048);
+        const fileContents2 = `export const SESSION_SECRET = \`${seed2}\`;`;
+        fs.writeFileSync("./secret.mjs", fileContents2);
+    }
+
+
+
+    if(!bOnlyCreateTables){
+        new Message(`Refreshing player ctf league Map tables.`,"note");
+        await refreshAllTables("maps");
+        new Message(`Refreshing player ctf league Gametype tables.`,"note");
+        await refreshAllTables("gametypes");
     }
 }

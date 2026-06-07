@@ -1,5 +1,6 @@
 import { DatabaseSync } from 'node:sqlite';
 import { rename } from "node:fs/promises";
+
 let database = new DatabaseSync("./data/main.db");
 database.exec("PRAGMA jounral_mode = WAL;");
 database.exec("PRAGMA busy_timeout = 15000;");
@@ -23,6 +24,17 @@ export async function testChangeDatabase(newFileURL){
     }
 }
 
+export async function closeDatabase(){
+
+    database.close();
+}
+
+export async function createNewDatabase(){
+
+    database = new DatabaseSync("./data/main.db");
+    database.exec("PRAGMA jounral_mode = WAL;");
+    database.exec("PRAGMA busy_timeout = 15000;");
+}
 
 function sqlitePlaceholderArray(values){
 
