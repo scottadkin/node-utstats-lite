@@ -1,7 +1,8 @@
 import Message from "./src/message.mjs";
-import { createDatabaseBackup } from "./src/admin.mjs";
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, mkdir, writeFile, copyFile } from "node:fs/promises";
 import mysql from "mysql2/promise";
+import { createBackupDirName } from "./src/generic.mjs";
+import { toMYSQLDateTime } from "./src/generic.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 
@@ -23,6 +24,101 @@ const pool = mysql.createPool({
     "connectionLimit": mysqlSettings.connectionLimit ?? 10
 });
 
+async function mysqlGetColumnsAsArray(tableName, bPrefixTableName){
+
+    if(bPrefixTableName === undefined) bPrefixTableName = false;
+
+    const query = `SHOW COLUMNS FROM ${tableName}`;
+
+    const [results] = await pool.query(query);
+
+    return results.map((r) =>{
+
+        if(bPrefixTableName){
+            return `${tableName}.${r.Field}`;
+        }else{
+            return r.Field;
+        }
+    });
+
+}
+
+async function getFullTable(tableName){
+
+
+    const columns = await mysqlGetColumnsAsArray(tableName);
+
+    const query = `SELECT * FROM ${tableName}`;
+
+    const [results] = await pool.query(query);
+
+    const dateColumns = ["first", "last", "first_match", "last_match", "date", "match_date", "last_active"];
+
+    const rows = results.map((r) =>{
+
+        const current = [];
+        for(const [key, value] of Object.entries(r)){
+            //console.log(key, value);
+
+            if(dateColumns.indexOf(key) !== -1){
+
+                if(typeof value === "object" && value instanceof Date){
+   
+                    current.push(toMYSQLDateTime(value));
+                }else{
+                    current.push(value);
+                }
+            }else{
+                current.push(value);
+            }
+
+            //console.log(key === "last_active" typeof value);
+        }
+        return Object.values(current);
+    });
+
+
+    return {rows, columns}
+}
+
+
+async function getAllTableNames(){
+
+    const query = `SELECT table_name FROM information_schema.tables WHERE table_schema='${mysqlSettings.database}'`;
+
+    const [results, fields] = await pool.query(query);
+
+    return results.map((r) =>{
+        return r.TABLE_NAME;
+    });
+}
+
+async function createDatabaseBackup(){
+
+    const backupDirName = createBackupDirName();
+
+    const tables = await getAllTableNames();
+
+    const dir = `./backups/${backupDirName}`;
+
+    await mkdir(dir);
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        const data = await getFullTable(t);
+
+        new Message(`Creating backup of table ${t} as ${dir}/${t}.json`,"note");
+        await writeFile(`${dir}/${t}.json`, JSON.stringify(data));
+    }
+
+    new Message(`Creating backup of salt.mjs`, "note");
+    await copyFile("./salt.mjs", `${dir}/salt.mjs`);
+
+
+    return {"folder": dir};
+}
 
 async function mysqlBulkInsert(query, vars, maxPerInsert){
 
@@ -56,36 +152,43 @@ async function mysqlBulkInsert(query, vars, maxPerInsert){
 }
 
 
-try{
 
-    await pool.query(`SELECT id FROM nstats_users LIMIT 1`);
+async function init(){
 
-}catch(err){
+    try{
 
-    const reg = /unknown database/i;
+        await pool.query(`SELECT id FROM nstats_users LIMIT 1`);
 
-    if(reg.test(err.sqlMessage)){
-        new Message(`MYSQL database "${mysqlSettings.database}" doesn't exist.`,"error");
+    }catch(err){
+
+        const reg = /unknown database/i;
+
+        if(reg.test(err.sqlMessage)){
+            new Message(`MYSQL database "${mysqlSettings.database}" doesn't exist.`,"error");
+            process.exit();
+        }
+        
+        console.trace(err);
         process.exit();
     }
-    
-    console.trace(err);
+
+
+    const test = await createDatabaseBackup();
+    //console.log(test);
+
+    //const test = { "folder": './backups/2026-06-07-14-00-39' };
+
+    const files = await readdir(test.folder);
+
+
+
+    const testFile = await readFile(`${test.folder}/${"nstats_ftp.json"}`);
+    console.log(JSON.parse(testFile));
+
+
+
     process.exit();
 }
 
+await init();
 
-//const test = await createDatabaseBackup();
-//console.log(test);
-
-const test = { "folder": './backups/2026-06-07-14-00-39' };
-
-const files = await readdir(test.folder);
-
-
-
-const testFile = await readFile(`${test.folder}/${"nstats_ftp.json"}`);
-console.log(JSON.parse(testFile));
-
-
-
-process.exit();

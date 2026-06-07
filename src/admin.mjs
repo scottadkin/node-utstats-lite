@@ -11,6 +11,7 @@ import { backup, DatabaseSync } from "node:sqlite";
 import { createGzip, unzip } from 'node:zlib';
 import { pipeline } from 'node:stream/promises';
 import { promisify } from "node:util";
+import { createBackupDirName } from "./generic.mjs";
 
 const DELETE_TABLES = [
     "classic_weapon_match_stats",
@@ -155,110 +156,15 @@ export async function getAllDatabaseTableInfo(){
     FROM information_schema.tables WHERE table_schema='${mysqlSettings.database}'`;
 
     return await simpleQuery(query); 
-}
-
-export async function getAllTableNames(){
-
-    const query = `SELECT table_name FROM information_schema.tables WHERE table_schema='${mysqlSettings.database}'`;
-
-    const result = await simpleQuery(query);
-
-    return result.map((r) =>{
-        return r.TABLE_NAME;
-    });
 }*/
 
-async function getFullTable(tableName){
-
-
-    const columns = await mysqlGetColumnsAsArray(tableName);
-
-    const query = `SELECT * FROM ${tableName}`;
-
-    const result = await simpleQuery(query);
-
-    const dateColumns = ["first", "last", "first_match", "last_match", "date", "match_date", "last_active"];
-
-    const rows = result.map((r) =>{
-
-        const current = [];
-        for(const [key, value] of Object.entries(r)){
-            //console.log(key, value);
-
-            if(dateColumns.indexOf(key) !== -1){
-
-                if(typeof value === "object" && value instanceof Date){
-   
-                    current.push(toMYSQLDateTime(value));
-                }else{
-                    current.push(value);
-                }
-            }else{
-                current.push(value);
-            }
-
-            //console.log(key === "last_active" typeof value);
-        }
-        return Object.values(current);
-    });
-
-
-    return {rows, columns}
-}
-
-function createBackupDirName(){
-
-    const now = new Date(Date.now());
-
-    const year = now.getFullYear();
-    let month = now.getMonth() + 1;
-    
-    let date = now.getDate();
-    let hours = now.getHours();
-    let minutes = now.getMinutes();
-    let seconds = now.getSeconds();
-
-    if(month < 10) month = `0${month}`;
-    if(date < 10) date = `0${date}`;
-    if(hours < 10) hours = `0${hours}`;
-    if(minutes < 10) minutes = `0${minutes}`;
-    if(seconds < 10) seconds = `0${seconds}`;
-
-
-    return `${year}-${month}-${date}-${hours}-${minutes}-${seconds}`;
-}
-
-
-export async function createDatabaseBackup(){
-
-    const backupDirName = createBackupDirName();
-
-    const tables = await getAllTableNames();
-
-    const dir = `./backups/${backupDirName}`;
-
-    await mkdir(dir);
-
-    for(let i = 0; i < tables.length; i++){
-
-        const t = tables[i];
-
-        const data = await getFullTable(t);
-
-        new Message(`Creating backup of table ${t} as ${dir}/${t}.json`,"note");
-        await writeFile(`${dir}/${t}.json`, JSON.stringify(data));
-    }
-
-    new Message(`Creating backup of salt.mjs`, "note");
-    await copyFile("./salt.mjs", `${dir}/salt.mjs`);
-
-
-    return {"folder": dir};
-}
 
 
 
-export async function createArchivedBackup(callback){
+
+
+
+/*export async function createArchivedBackup(callback){
 
     const backupDirName = createBackupDirName();
     const tables = await getAllTableNames();
@@ -317,7 +223,7 @@ export async function createArchivedBackup(callback){
     archive.pipe(output);
 
     archive.finalize();
-}
+}*/
 
 //Don't want to accidently mix backups or leave deleted tables data in the folder
 async function deleteOldRestoreJSONFiles(){
