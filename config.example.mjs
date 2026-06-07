@@ -1,17 +1,3 @@
-export const SQL_MODE = "mysql";
-
-export const mysqlSettings = {
-    "host": "localhost",
-    "port": 3306,
-    "user": "root",
-    "password": "",
-    "database": "node_utstats_lite",
-
-    //note: The importer will also have the same limit,
-    //if both are running that's double this value
-    "connectionLimit": 10
-};
-
 export const logFilePrefix = "unreal.nglog.";
 
 export const importedLogsFolder = "./Logs";

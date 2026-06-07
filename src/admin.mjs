@@ -1,10 +1,9 @@
 import { bulkInsert, mysqlGetColumnsAsArray, simpleQuery, testChangeDatabase } from "./database.mjs";
-import { mysqlSettings, SQL_MODE } from "../config.mjs";
+import { SQL_MODE } from "../config.mjs";
 import { copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { createReadStream, createWriteStream, fstat } from "node:fs";
 import Message from "./message.mjs";
 import { ZipArchive } from "archiver";
-
 import fs from "fs";
 import unzipper from "unzipper";
 import {toMYSQLDateTime} from "./generic.mjs";
@@ -69,10 +68,8 @@ export async function clearAllDataTables(){
             await simpleQuery(`DELETE FROM nstats_${t}`);
             await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${t}'`);
         }
-    }
-    
+    }   
 }
-
 
 export async function getAllBackupsInfo(){
 
@@ -151,6 +148,7 @@ export async function getAllBackupsInfo(){
     return backups;
 }
 
+/*
 export async function getAllDatabaseTableInfo(){
 
     const query = `SELECT table_name,table_rows,data_length,index_length 
@@ -168,7 +166,7 @@ export async function getAllTableNames(){
     return result.map((r) =>{
         return r.TABLE_NAME;
     });
-}
+}*/
 
 async function getFullTable(tableName){
 
