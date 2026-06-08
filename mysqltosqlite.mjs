@@ -13,7 +13,7 @@ const mysqlSettings = {
     "port": 3306,
     "user": "root",
     "password": "",
-    "database": "node_utstats_lite",
+    "database": "node_utstats_lite_very_large",
     "connectionLimit": 10
 };
 
@@ -156,6 +156,28 @@ async function truncateTable(tableName){
     return await pool.query(query);
 }
 
+//older version didn't have unique constraint so there can be duplicates
+//we only care about the most recent download info
+function fixLogsDownloadDuplicates(data){
+
+    const usedNames = new Set();
+
+    const newData = [];
+
+    for(let i = data.length - 1; i >= 0; i--){
+
+        if(usedNames.has(data[i].file_name)){
+            continue;
+        }
+
+        usedNames.add(data[i].file_name);
+        newData.unshift(data[i]);
+    }
+
+    return newData;
+}
+
+
 async function restoreTable(tableName, fileName){
 
     new Message(`Attempting to restore ${tableName} from ${fileName}`,"note");
@@ -165,7 +187,11 @@ async function restoreTable(tableName, fileName){
 
     const query = `INSERT INTO ${tableName} (${columns.toString()}) VALUES ?`;
 
-    await bulkInsert(query, rows);
+    if(tableName === "nstats_logs_downloads"){
+        await bulkInsert(query, fixLogsDownloadDuplicates(rows));
+    }else{
+        await bulkInsert(query, rows);
+    }
 
     new Message(`Inserted ${rows.length} rows of data into table ${tableName}`,"pass");
 
@@ -232,6 +258,8 @@ async function restoreDatabase(backupTarget){
 
     }catch(err){
         console.trace(err);
+        new Message(`Failed to restore.`,"error");
+        process.exit();
         return err.toString();
     }
    

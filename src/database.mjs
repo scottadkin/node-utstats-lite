@@ -119,42 +119,32 @@ function createSqlLiteQuery(originalQuery, originalVars){
 
 }
 
-async function sqliteSimpleQuery(query, vars){
+export async function simpleQuery(query, vars){
 
-    try{
-        if(query === undefined) throw new Error("No query specified.");
+    if(query === undefined) throw new Error("No query specified.");
 
-        if(vars === undefined){
 
-            const prepare = database.prepare(query);
-    
-            return prepare.all([]);         
-        }
+    if(vars === undefined){
 
-        if(!Array.isArray(vars)){
+        const prepare = database.prepare(query);
 
-            const prepare = database.prepare(query);
-    
-            return prepare.all(vars);
-        }
-
-        const sqliteQuery = createSqlLiteQuery(query, vars);
-          
-        const prepare = database.prepare(sqliteQuery.query);
-        return prepare.all(...sqliteQuery.vars);
-
-    }catch(err){
-        console.trace(err);
-        throw new Error(err);
+        return prepare.all();         
     }
+
+    if(!Array.isArray(vars)){
+
+        const prepare = database.prepare(query);
+
+        return prepare.all(vars);
+    }
+
+    const sqliteQuery = createSqlLiteQuery(query, vars);
+        
+    const prepare = database.prepare(sqliteQuery.query);
+    return prepare.all(...sqliteQuery.vars);
+
 }
 
-
-export async function simpleQuery(query, vars){   
-
-   return await sqliteSimpleQuery(query, vars);
-
-}
 
 
 export async function sqlInsertReturnRowId(query, vars){
@@ -320,7 +310,7 @@ function sqliteArrayInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
     }
 }
 
-function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
+export async function sqlInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
 
     if(conflict.length === 0) throw new Error(`OnDuplicateUpdate needs a conflict key`);
 
@@ -348,26 +338,5 @@ function sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
     const prepare = database.prepare(query);
 
     prepare.run(...sqliteConvertDates(vars));
-        
-}
 
-
-export async function sqlInsertOnDuplicateUpdate(tableName, columns, vars, conflict){
-
-    if(vars.length === 0) return;
-
-    return sqliteInsertOnDuplicateUpdate(tableName, columns, vars, conflict);
-
-}
-
-export async function sqlSingleUpdateReturnChanged(query, vars){
-
-    if(vars === undefined || vars.length === 0) throw new Error(`sqlSingleUpdateReturnChanged vars is required`);
-
-    const test = database.prepare(`${query}`);
-
-    vars = sqliteConvertDates(vars);
-    test.run(...vars);
-
-    return "sqlite"; 
 }

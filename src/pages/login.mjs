@@ -9,7 +9,7 @@ export async function renderLoginPage(req, res, sessionStore, userSession){
 
         if(req.cookies.nstats_sid !== undefined){
 
-            if(!await bSessionExist(sessionStore, req.cookies.nstats_sid)){
+            if(!await bSessionExist(req.cookies.nstats_sid)){
                 clearUserCookies(res);
                 res.send("Not a valid session");
                 return;
