@@ -12,8 +12,7 @@ export async function renderAdminPage(req, res, userSession){
             },
             "host": req.headers.host,
             userSession,
-            mode,
-            "SQL_MODE": "sqlite"
+            mode
         });
 
     }catch(err){

@@ -270,5 +270,4 @@ app.get("/api/json/:mode/:cat", async (req, res) =>{
 app.listen(websitePort, () => {
 	new Message(`Node UTStats Lite running on port ${websitePort}`,"pass");
 	new Message(`Edit websitePort in config.mjs if you wish to change ports`,"note");
-	//new Message(`Node UTStats Lite is using ${(SQL_MODE === "sqlite") ? "SQLite" : "MYSQL"} database.`,"note");
 })

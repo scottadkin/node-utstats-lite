@@ -1,14 +1,6 @@
 <%
 
 
-let backupDescription = ``;
-
-if(SQL_MODE === "sqlite"){
-    backupDescription = `Create A Backup Of Your SQLite Database, restore SQLite database from a backup.`;
-}else{
-    backupDescription = `Create A Backup Of Your MYSQL Database, restore MYSQL database from a backup, view database table sizes, and backup information.`;
-}
-
 const modes = [
     {
         "display": "Site Settings",
@@ -52,9 +44,9 @@ const modes = [
         "description": "Enable or Disable JSON API"
     },
     {
-        "display": (SQL_MODE === "mysql") ? "MYSQL Database Backup Manager" : "SQLite Database Backup Manager" ,
-        "value": (SQL_MODE === "mysql") ? "database-backup" : "sqlite-database-backup",
-        "description": backupDescription
+        "display":  "SQLite Database Backup Manager" ,
+        "value":  "sqlite-database-backup",
+        "description": `Create A Backup Of Your SQLite Database, restore SQLite database from a backup.`
     },
     {
         "display": "Player Manager",
@@ -142,8 +134,6 @@ function renderCategory(mode){
         %><script>new AdminServersManager("#root");</script><%
     }else if(mode === "json"){
         %><script>new AdminJSONManager("#root")</script><%
-    }else if(mode === "database-backup"){
-        %><script>new AdminMYSQLBackupManager("#root");</script><%
     }else if(mode === "sqlite-database-backup"){
         %><script>new AdminSQLiteBackupManager("#root")</script><%
     }else if(mode === "players"){

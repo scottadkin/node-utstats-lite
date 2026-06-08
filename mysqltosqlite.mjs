@@ -128,36 +128,6 @@ async function createDatabaseBackup(overrideName){
     return {"folder": dir};
 }
 
-async function mysqlBulkInsert(query, vars, maxPerInsert){
-
-
-    let startIndex = 0;
-
-    if(vars.length < maxPerInsert){
-
-        if(SQL_MODE !== "sqlite"){
-            return await pool.query(query, [vars]);
-        }else{
-            throw new Error("bulkInsert not added to sqlite yet");
-        }
-    }
-
-    while(startIndex < vars.length){
-
-        const end = (startIndex + maxPerInsert > vars.length) ? vars.length : startIndex + maxPerInsert;
-        const currentVars = vars.slice(startIndex, end);
-
-        if(SQL_MODE !== "sqlite"){
-            await pool.query(query, [currentVars]);
-        }else{
-            throw new Error("bulkInsert not added to sqlite yet");
-        }
-
-        startIndex += maxPerInsert;
-    }
-
-    return;
-}
 
 //Don't want to accidently mix backups or leave deleted tables data in the folder
 async function deleteOldRestoreJSONFiles(){
@@ -331,30 +301,24 @@ async function init(){
     const backupName = createBackupDirName();
 
     try{
+
         const test = await createDatabaseBackup(backupName);
 
-
-        const files = await readdir(test.folder);
-
-
-        const testFile = await readFile(`${test.folder}/${"nstats_ftp.json"}`);
-        console.log(JSON.parse(testFile));
-
     }catch(err){
-        process.exit();
+        
         console.trace(err);
+        process.exit();
     }
 
 
     await backupSQLiteExistingFile(backupName);
     
 
-    console.log("install");
     await sqliteInstall(true);
 
-    console.log("restore");
     await restoreDatabase(backupName);
 
+    new Message(`MYSQL To SQlite transfer complete.`,"progress");
     process.exit();
 }
 
