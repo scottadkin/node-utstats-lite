@@ -13,7 +13,7 @@ const mysqlSettings = {
     "port": 3306,
     "user": "root",
     "password": "",
-    "database": "node_utstats_lite_very_large",
+    "database": "node_utstats_lite",
     "connectionLimit": 10
 };
 

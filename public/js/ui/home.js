@@ -287,3 +287,79 @@ function homeRenderMostActivePlayers(parent, data){
 
     parent.append(wrapper);
 }
+
+
+class homeRenderRecentActivity{
+    
+    constructor(parent, data){
+
+        this.parent = document.querySelector(parent, data);
+        this.data = data;
+        console.log(data);
+        console.log("fart");
+
+
+        const gData = {"title": "Test Graph", "data": [
+            {
+                "name": "Total Matches", 
+                "fillStyle": "red", 
+                "data": []
+            },
+            {
+                "name": "Total Playtime", 
+                "fillStyle": "blue",
+                 "data": []
+            },
+            {
+                "name": "Unique Maps", 
+                "fillStyle": "yellow",
+                 "data": []
+            },
+             {
+                "name": "Unique Servers", 
+                "fillStyle": "orange",
+                 "data": []
+            },
+            {
+                "name": "Unique Gametypes", 
+                "fillStyle": "pink",
+                 "data": []
+            }
+        ], "yAxisLabel": "test label"};
+
+        
+
+        for(const [date, d] of Object.entries(this.data)){
+
+            console.log(date);
+
+            let totalPlaytime = 0;
+            let totalPlayers =0;
+
+            const uniqueMaps = new Set();
+            const uniqueServers = new Set();
+            const uniqueGametypes = new Set();
+
+            for(let i = 0; i < d.length; i++){
+
+                console.log(d[i]);
+                totalPlaytime += d[i].playtime;
+                totalPlayers += d[i].players;
+                uniqueMaps.add(d[i].map_name);
+                uniqueServers.add(d[i].server_name);
+                uniqueGametypes.add(d[i].gametype_name);
+            }
+
+            gData.data[0].data.push(d.length);
+            gData.data[1].data.push((totalPlaytime > 0) ? totalPlaytime / 60 / 60 : 0);
+            gData.data[2].data.push(uniqueMaps.size);
+            gData.data[3].data.push(uniqueServers.size);
+            gData.data[4].data.push(uniqueGametypes.size);
+
+
+        }
+
+        new BarChartGraph(this.parent, "test-1", 1920, 1080, gData, {});
+        new LineGraph(this.parent, "test-2", 1920, 1080, gData, {});
+    }
+}

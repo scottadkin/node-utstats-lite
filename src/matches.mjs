@@ -2139,3 +2139,59 @@ export async function getMatchStartTimestamp(id){
 
     return result[0].match_start;
 }
+
+export async function getRecentActivityByDay(){
+
+    const mT = `nstats_matches`;
+    const sT = `nstats_servers`;
+    const gT = `nstats_gametypes`;
+    const mapT = `nstats_maps`;
+
+    const query = `SELECT 
+    ${sT}.name as server_name,
+    ${gT}.name as gametype_name,
+    ${mapT}.name as map_name,
+    ${mT}.date,
+    ${mT}.playtime,
+    ${mT}.players 
+    FROM ${mT} 
+    LEFT JOIN ${sT} ON ${sT}.id = ${mT}.server_id
+    LEFT JOIN ${gT} ON ${gT}.id = ${mT}.gametype_id
+    LEFT JOIN ${mapT} ON ${mapT}.id = ${mT}.map_id
+    
+    ORDER BY ${mT}.date DESC`;
+
+    //WHERE date > '2025-%'
+    const result = await simpleQuery(query);
+
+    const byDate = {};
+
+    const dateReg = /^((\d{4})-(\d{2})-(\d{2})).+$/i;
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const dateResult = dateReg.exec(r.date);
+
+        if(dateResult === null){
+            console.log(`getRecentActivtyByDay dateReg failed!`);
+            continue;
+        }
+
+        
+        const ymd = dateResult[1];
+        const year = dateResult[2];
+        const month = dateResult[3];
+        const day = dateResult[4];
+
+        if(byDate[ymd] === undefined){
+            byDate[ymd] = [];      
+        }
+
+        byDate[ymd].push(r);
+       
+    }
+
+    return byDate;
+}
