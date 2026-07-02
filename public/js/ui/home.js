@@ -295,8 +295,7 @@ class homeRenderRecentActivity{
 
         this.parent = document.querySelector(parent, data);
         this.data = data;
-        console.log(data);
-        console.log("fart");
+
 
 
         const gData = {"title": "Test Graph", "data": [
@@ -312,37 +311,39 @@ class homeRenderRecentActivity{
             },
             {
                 "name": "Unique Maps", 
-                "fillStyle": "yellow",
+                "fillStyle": "green",
                  "data": []
             },
              {
                 "name": "Unique Servers", 
-                "fillStyle": "orange",
+                "fillStyle": "grey",
                  "data": []
             },
             {
                 "name": "Unique Gametypes", 
-                "fillStyle": "pink",
+                "fillStyle": "yellow",
                  "data": []
             }
         ], "yAxisLabel": "test label"};
 
         
 
+        const testTitles = [];
+
         for(const [date, d] of Object.entries(this.data)){
 
-            console.log(date);
+            testTitles.push(date);
 
             let totalPlaytime = 0;
-            let totalPlayers =0;
+            let totalPlayers = 0;
 
             const uniqueMaps = new Set();
             const uniqueServers = new Set();
             const uniqueGametypes = new Set();
 
+
             for(let i = 0; i < d.length; i++){
 
-                console.log(d[i]);
                 totalPlaytime += d[i].playtime;
                 totalPlayers += d[i].players;
                 uniqueMaps.add(d[i].map_name);
@@ -359,7 +360,11 @@ class homeRenderRecentActivity{
 
         }
 
-        new BarChartGraph(this.parent, "test-1", 1920, 1080, gData, {});
-        new LineGraph(this.parent, "test-2", 1920, 1080, gData, {});
+        gData.dataTitles = testTitles;
+
+        const testOptions = {"className": "new-canvas", "bNoXAxisLabels": true, "bNoMainTitle": true, "dataPointsPerPage": 20}
+
+        new BarChartGraph(this.parent, "test-1", 690, 360, gData, testOptions);
+        new LineGraph(this.parent, "test-2", 690, 360, gData, testOptions);
     }
 }

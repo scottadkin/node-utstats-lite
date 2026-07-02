@@ -1055,6 +1055,15 @@ canvas{
 	box-shadow: var(--box-shadow-1);
 }
 
+.new-canvas{
+
+    width:auto;
+    display:block;
+    border:5px solid green;
+    margin-left:auto;
+    margin-right: auto;
+}
+
 .notification{
 	position:fixed;
 	bottom:0px;

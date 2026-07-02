@@ -208,6 +208,11 @@ class GraphCanvas{
         this.canvas.tabIndex = 0;
         this.canvas.id = graphId;
 
+        if(overrideOptions.className !== undefined){
+
+            this.canvas.className = overrideOptions.className;
+        }
+
         this.canvas.width = defaultWidth;
         this.canvas.height = defaultHeight;
 
