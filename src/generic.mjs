@@ -654,3 +654,51 @@ export function createBackupDirName(){
 
     return `${year}-${month}-${date}-${hours}-${minutes}-${seconds}`;
 }
+
+
+export function toYYMMDD(date){
+
+    if(date === undefined){
+        date = new Date();
+    }
+
+    const year = date.getFullYear();
+    let month = date.getMonth() + 1;
+    let dayOfMonth = date.getDate();
+
+    if(month < 10){
+        month = `0${month}`;
+    }
+
+    if(dayOfMonth < 10){
+        dayOfMonth = `0${dayOfMonth}`;
+    }
+
+    return `${year}-${month}-${dayOfMonth}`;
+}
+
+export function createYYMMDDBetween(startYYMMDD, endYYMMDD){
+
+    
+
+    const test = [
+    ];
+
+    const start = Math.ceil(new Date(startYYMMDD));
+    const end = Math.ceil(new Date(endYYMMDD));
+
+    if(end < start) throw new Error("End less than start");
+
+    let current = Math.ceil(start);
+
+    while(current < end){
+
+
+        test.push(toYYMMDD(new Date(current)));
+        current += DAY;
+
+    }
+
+    return test;
+
+}

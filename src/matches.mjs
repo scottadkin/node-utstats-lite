@@ -19,7 +19,9 @@ import { getMatchData as domGetMatchData, getDOMMatchPlayersAPIJSON } from "./do
 import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, 
     mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, 
-    getHeatmapDates, toMatchResultString, getPlayer
+    getHeatmapDates, toMatchResultString, getPlayer,
+    toYYMMDD,
+    createYYMMDDBetween
  } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
@@ -2193,5 +2195,41 @@ export async function getRecentActivityByDay(){
        
     }
 
-    return byDate;
+    const nowDateString = toYYMMDD();
+
+
+    const testKeys = Object.keys(byDate)
+
+    const testDates = createYYMMDDBetween(testKeys[testKeys.length - 1], nowDateString);
+
+    for(let i = 0; i < testDates.length; i++){
+
+        const t = testDates[i];
+
+        if(byDate[t] === undefined){
+            byDate[t] = [];
+        }
+    }
+
+
+    const arrayTest = [];
+
+    for(const [date, entries] of Object.entries(byDate)){
+
+        arrayTest.push({date, entries});
+    }
+
+    arrayTest.sort((a, b) =>{
+        a = a.date;
+        b = b.date;
+
+        if(a < b){
+            return 1;
+        }else if(a > b){
+            return -1;
+        }
+        return 0;
+    });
+
+    return arrayTest;
 }

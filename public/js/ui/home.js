@@ -330,9 +330,10 @@ class homeRenderRecentActivity{
 
         const testTitles = [];
 
-        for(const [date, d] of Object.entries(this.data)){
+        for(let i = 0; i < this.data.length; i++){
 
-            testTitles.push(date);
+            const dataSet = this.data[i];
+            testTitles.push(dataSet.date);
 
             let totalPlaytime = 0;
             let totalPlayers = 0;
@@ -341,24 +342,24 @@ class homeRenderRecentActivity{
             const uniqueServers = new Set();
             const uniqueGametypes = new Set();
 
+            for(let x = 0; x < dataSet.entries.length; x++){
 
-            for(let i = 0; i < d.length; i++){
+                const e = dataSet.entries[x];
 
-                totalPlaytime += d[i].playtime;
-                totalPlayers += d[i].players;
-                uniqueMaps.add(d[i].map_name);
-                uniqueServers.add(d[i].server_name);
-                uniqueGametypes.add(d[i].gametype_name);
+                totalPlaytime += e.playtime;
+                totalPlayers += e.players;
+                uniqueMaps.add(e.map_name);
+                uniqueServers.add(e.server_name);
+                uniqueGametypes.add(e.gametype_name);
             }
 
-            gData.data[0].data.push(d.length);
+            gData.data[0].data.push(dataSet.entries.length);
             gData.data[1].data.push((totalPlaytime > 0) ? totalPlaytime / 60 / 60 : 0);
             gData.data[2].data.push(uniqueMaps.size);
             gData.data[3].data.push(uniqueServers.size);
             gData.data[4].data.push(uniqueGametypes.size);
-
-
         }
+
 
         gData.dataTitles = testTitles;
 
