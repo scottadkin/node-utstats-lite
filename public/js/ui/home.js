@@ -366,6 +366,6 @@ class homeRenderRecentActivity{
         const testOptions = {"className": "new-canvas", "bNoXAxisLabels": true, "bNoMainTitle": true, "dataPointsPerPage": 20}
 
         new BarChartGraph(this.parent, "test-1", 690, 360, gData, testOptions);
-        new LineGraph(this.parent, "test-2", 690, 360, gData, testOptions);
+        //new LineGraph(this.parent, "test-2", 690, 360, gData, testOptions);
     }
 }

@@ -865,7 +865,6 @@ class GraphCanvas{
     }
 
     drawText(options){
-        
 
         const requiredKeys = ["text", "x", "y"];
 
@@ -902,7 +901,9 @@ class GraphCanvas{
 
             let fontSize = options.fontSize;
 
-            if(bScale){
+            const bNoTextScale = options?.bNoTextScale ?? false;
+
+            if(!bNoTextScale && bScale){
 
                 if(!bOptionExists(options, "rotate")){
                     fontSize = scale(canvas, "y", fontSize);
@@ -912,6 +913,7 @@ class GraphCanvas{
             }
 
             this.lastFontSize = fontSize;
+
             context.font = `${fontSize}px ${this.lastFont}`;  
         }
 

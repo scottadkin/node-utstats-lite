@@ -7,6 +7,8 @@ import { sqliteInstall } from "./src/sqliteInstall.mjs";
 import { closeDatabase, createNewDatabase, bulkInsert } from "./src/database.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
+new Message(`MYSQL database must be from node-ustats-lite v2.5.0`,"warning");
+new Message(`If the MYSQL database is from a version prior to v2.5.0 this process may fail.`,"warning");
 
 const mysqlSettings = {
     "host": "localhost",
@@ -16,7 +18,6 @@ const mysqlSettings = {
     "database": "node_utstats_lite",
     "connectionLimit": 10
 };
-
 
 const pool = mysql.createPool({
     "host": mysqlSettings.host,
