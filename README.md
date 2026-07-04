@@ -1,5 +1,5 @@
 # Node UTStats Lite
-Unreal Tournament stats website using express for the https://github.com/rxut/UTStatsLite mutator, using either MYSQL or SQLite for the database.
+Unreal Tournament stats website using express and SQLite for the https://github.com/rxut/UTStatsLite mutator.
 
 # Main Features
 
@@ -42,26 +42,26 @@ Affected node-utstats-lite Versions:
 v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 
 ## Requirements 
-- MYSQL Server
 - Node.js 22.5 or later
+- MYSQL Server (Version 2.5.1 or lower)
 
 **Note:** If you are upgrading from a version prior to v1.5.1 you also need to update the utstats-lite-mutator
 
 ## Upgrade Restrictions
-- Versions 1.0.0 -> 1.8.x are compatible with each other(Next.js Website).
-- Versions 2.0.0 and greater are compatible with each other.(Express.js Website)
-- You can not upgrade a mysql install to a sqlite install.
+- Versions 1.0.0 -> 1.8.x are compatible with each other.(Next.js Website MYSQL).
+- Versions 2.0.0 -> 2.5.0 are compatible with each other.(Express.js Website MYSQL)
+- Versions 2.5.1 and greater are compatiable with each other.(Express.js Website SQLITE)
 
+## Changing Existing MYSQL Database To SQLite Database
+- Version 2.5.0 is required to be installed before v2.5.1 that contains the mysqltosqlite tool.
 
 ## Installing
 - Extract the contents of the archive into a folder.
 - Open a terminal in the folder you extracted to.
 - Run the command **npm install** to install all dependencies.
 - Rename **config.example.mjs** to **config.mjs** 
-- Open **config.mjs** and change the settings to connect to your mysql server, or if you want to use SQLIite instead set **SQL_MODE** to "sqlite".
 - If you are using an **ARM OS** you will have to follow this(https://github.com/Automattic/node-canvas?tab=readme-ov-file#compiling) additional step to get the canvas package to install otherwise you will get an error message.
 - Run the command **node install.mjs** to create the database and other settings.
-
 
 ## How to change website port
 - Open confi.mjs and edit **websitePort** accordingly, you have to restart the website for the changes to take effect.
