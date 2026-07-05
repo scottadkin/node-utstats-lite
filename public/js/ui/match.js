@@ -313,7 +313,7 @@ function renderSpecialEvents(parent, totalTeams, players){
 
     const wrapper = UIDiv();
     const title = UIDiv("header-wrapper")
-    title.append = "Special Events";
+    title.append("Special Events");
     wrapper.append(title);
 
     const sprees = [];
