@@ -6,6 +6,7 @@ class Graph{
         maxDataPoints, style, bEnableAdvanced, minimumDataPoints, bSkipForcedWholeNums){
        
         this.canvas = canvas;
+        this.canvas.className = "old-graph-canvas";
         this.canvas.width = width;
         this.canvas.height = height;
         this.context = canvas.getContext("2d");
