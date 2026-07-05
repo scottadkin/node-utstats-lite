@@ -334,10 +334,11 @@ table{
 
 
 th{
-    padding:var(--padding-1) var(--padding-3);
+    padding:0px var(--padding-3);
 	font-weight:500;
 	font-size:var(--font-size-80);
 	background-color:var(--bg-header-color);
+    line-height:2rem;
 }
 
 th:hover{
@@ -349,10 +350,10 @@ th:hover{
 }
 
 td{
-	padding:5px 5px;
-	font-size:var(--font-size-70);
-	line-height:var(--line-height-1);
+	padding:0px var(--padding-3);
+	font-size:var(--font-size-80);
 	font-weight:500;
+    line-height: 1.8rem;
 }
 
 td a{
@@ -594,19 +595,20 @@ option{
 	background-color:var(--bg-color-mid);
 	text-align:center;
 	margin-bottom:var(--margin-2);
-	font-size: var(--font-size-60);
+	font-size: var(--font-size-80);
 	border-top: 1px solid var(--border-color-1);
 	border-bottom: 1px solid var(--border-color-1);
 }
 
 .tab{
     display:inline-block;
-    padding:var(--padding-1) var(--padding-1);
+    padding:0px var(--padding-1);
     user-select: none;
 	border-bottom:2px solid var(--border-color-4);
 	margin-bottom:-2px;
 	font-weight:500;
 	transition: var(--transition-all);
+    line-height:2.5rem;
 }
 
 .tab:hover{
@@ -705,7 +707,7 @@ option{
 
 .welcome-message{
 	text-align:center;
-	margin-bottom:var(--margin-1);
+	margin-bottom:var(--margin-2);
 	font-size:var(--font-size-80);
 }
 
@@ -728,8 +730,7 @@ option{
 .small-button{
 	display:inline-block;
 	background-color:var(--bg-color-light);
-	
-	font-size:var(--font-size-60);
+	font-size:var(--font-size-70);
 	padding:var(--padding-2);
 	border:1px solid var(--border-color-5);
 	user-select: none;
@@ -765,8 +766,8 @@ option{
 
 .previous-next-buttons-info{
 	flex: 0 1 auto;
-	line-height:30px;
 	text-align:center;
+    font-size:var(--font-size-60);
 	
 }
 
@@ -923,8 +924,7 @@ option{
     text-align:center;
     padding:var(--padding-1);
     font-weight:400;
-    margin-bottom:var(--margin-1);
-    font-size:var(--font-size-120);
+    margin-bottom:var(--margin-2);
 	background-color:var(--bg-header-color);
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 	border:1px solid var(--border-color-1);
