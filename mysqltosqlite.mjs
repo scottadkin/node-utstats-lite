@@ -5,6 +5,7 @@ import { createBackupDirName } from "./src/generic.mjs";
 import { toMYSQLDateTime } from "./src/generic.mjs";
 import { sqliteInstall } from "./src/sqliteInstall.mjs";
 import { closeDatabase, createNewDatabase, bulkInsert } from "./src/database.mjs";
+import { mysqlInstall } from "./src/mysqlInstall.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 new Message(`MYSQL database must be from node-ustats-lite v2.5.0`,"warning");
@@ -326,6 +327,9 @@ async function init(){
         console.trace(err);
         process.exit();
     }
+
+
+    await mysqlInstall(mysqlSettings);
 
     const backupName = createBackupDirName();
 
