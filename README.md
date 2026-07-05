@@ -1,5 +1,5 @@
 # Node UTStats Lite
-Unreal Tournament stats website using express and SQLite for the https://github.com/rxut/UTStatsLite mutator.
+Unreal Tournament stats website using express and SQLite for the https://github.com/rxut/UTStatsLite mutator. MYSQL was used upto version 2.5.0, any release after uses sqlite but there is a tool to convert an existing mysql database to an sqlite one.
 
 # Main Features
 
@@ -43,17 +43,13 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 
 ## Requirements 
 - Node.js 22.5 or later
-- MYSQL Server (Version 2.5.1 or lower)
+- MYSQL Server (Version 2.5.1 or lower, or to use the mysqltosqlite tool)
 
 **Note:** If you are upgrading from a version prior to v1.5.1 you also need to update the utstats-lite-mutator
 
 ## Upgrade Restrictions
 - Versions 1.0.0 -> 1.8.x are compatible with each other.(Next.js Website MYSQL).
-- Versions 2.0.0 -> 2.5.0 are compatible with each other.(Express.js Website MYSQL)
-- Versions 2.5.1 and greater are compatiable with each other.(Express.js Website SQLITE)
-
-## Changing Existing MYSQL Database To SQLite Database
-- Version 2.5.0 is required to be installed before v2.5.1 that contains the mysqltosqlite tool.
+- Versions 2.0.0 -> 2.x.x are compatible with each other.(Express.js Website MYSQL)
 
 ## Installing
 - Extract the contents of the archive into a folder.
