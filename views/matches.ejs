@@ -6,6 +6,7 @@
     }) %>
 
 <script src="../js/ui/ui.js"></script>
+<script src="../js/ui/table.js"></script>
 <script src="../js/ui/matches.js"></script>
 
 <div id="root"></div>
@@ -25,7 +26,7 @@
     const matchData = <%- JSON.stringify(matches)%>;  
 
     <% if(displayMode !== "default"){ %>
-        renderMatchesTable("#root", matchData);
+        renderMatchesTable("#root", matchData, false, true);
     <%}else{ %>
         new MatchesRichView("#root", matchData);
     <% }

@@ -136,7 +136,7 @@ function renderServerList(parent, servers){
 }
 
 
-function homeRenderRecentMatches(parent, data){
+function homeRenderRecentMatches(parent, data, displayMode){
 
     parent = document.querySelector(parent);
 
@@ -149,7 +149,26 @@ function homeRenderRecentMatches(parent, data){
 
     parent.append(wrapper);
 
-    new MatchesRichView("#home-recent-matches", data);
+    if(displayMode === "default"){
+
+        new MatchesRichView("#home-recent-matches", data);
+    }else{
+
+        const tableOptions = {
+            "headers": [
+                {"display": "Map"},
+                {"display": "Gametype"},
+                {"display": "Server"},
+                {"display": "Date"},
+                {"display": "Players"},
+                {"display": "Playtime"},
+                {"display": "Result"},
+            ]
+        };
+
+
+        renderMatchesTable(parent, data, false, false);
+    }
 }
 
 function homeRenderMostPlayedGametypes(parent, data){
@@ -216,19 +235,28 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
             const url = `/map/${d.id}`;
 
             rows.push([
-                {"content": d.name, "className": "text-left", url},
-                {"content": d.first_match, "parse": ["date"], "className": "date", url},
-                {"content": d.last_match, "parse": ["date"], "className": "date", url},
-                {"content": d.matches, url},
-                {"content": d.playtime, "parse": ["playtime"], "className": "playtime", url},
+                {"display": d.name, "value": d.name.toLowerCase(), "className": "text-left", url},
+                {"display": toDateString(d.first_match), "value": d.first_match,  "className": "date", url},
+                {"display": toDateString(d.last_match), "value": d.last_match,  "className": "date", url},
+                {"value": d.matches, url},
+                {"display": toPlaytime(d.playtime), "value": d.playtime, "className": "playtime", url},
             ]);
 
         }
     }
 
     if(displayMode === "table"){
-        const tableOptions = {"width": 1, "headers": ["Name", "First", "Last", "Matches", "Playtime"]};
-        new UITable(parent, tableOptions, rows);
+        const tableOptions = {
+            "width": 1, 
+            "headers": [
+                {"display": "Name"}, 
+                {"display": "First"}, 
+                {"display": "Last"}, 
+                {"display": "Matches"}, 
+                {"display": "Playtime"}
+            ]
+        };
+        new TESTUITable(parent, tableOptions, rows);
         return;
     }
 

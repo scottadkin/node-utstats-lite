@@ -4,9 +4,11 @@ function renderMatchesPagination(parent, server, gametype, map, totalMatches, pe
     new UIPagination(parent, `/matches/?s=${server}&g=${gametype}&m=${map}&display=${displayMode}&page=`, totalMatches, perPage, currentPage);
 }
 
-function renderMatchesTable(parent, data, bMapsPage){
+function renderMatchesTable(parent, data, bMapsPage, bNoSort){
 
-    parent = document.querySelector(parent);
+    if(typeof parent === "string"){
+        parent = document.querySelector(parent);
+    }
 
     const matches = data.data;
 
@@ -14,53 +16,59 @@ function renderMatchesTable(parent, data, bMapsPage){
 
     if(bMapsPage === undefined) bMapsPage = false;
 
+    if(bNoSort === undefined) bNoSort = false;
+
     const wrapper = UIDiv("center text-center");
 
-    const table = document.createElement("table");
-    table.className = "t-width-1";
 
-    const headers = [
-        "Gametype", "Server", "Date", "Players", "Playtime", "Result"
-    ];
 
-    if(!bMapsPage) headers.unshift("Map");
+    const tableOptions = {
+        "width": 1,
+        bNoSort,
+        "headers": [
+            {"display": "Gametype"},
+            {"display": "Server"},
+            {"display": "Date"},
+            {"display": "Players"},
+            {"display": "Playtime"},
+            {"display": "Result"},
+        ]
+    };
 
-    const headerRow = document.createElement("tr");
+    if(!bMapsPage) tableOptions.headers.unshift({"display": "Map"});
 
-    for(let i = 0; i < headers.length; i++){
 
-        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-    }
-
-    table.append(headerRow);
+    const rows = [];
 
 
     for(let i = 0; i < matches.length; i++){
 
         const m = matches[i];
         
-        const row = document.createElement("tr");
+        const row = [];
 
         const url = `/match/${m.id}`;
 
         if(!bMapsPage){
-            row.append(UITableCell({"content": m.map_name, "className": "text-left", url}));
+            row.push({"display": m.map_name, "value": m.map_name.toLowerCase(), "className": "text-left", url});
         }
-        row.append(UITableCell({"content": m.gametype_name, "className": "font-small", url}));
-        row.append(UITableCell({"content": m.server_name, "className": "font-small", url}));
-        row.append(UITableCell({"content": m.date, "parse": ["date"], "className": "playtime", url}));
-        row.append(UITableCell({"content": m.players, "parse": ["ignore0"], url}));
-        row.append(UITableCell({"content": m.playtime, "parse": ["playtime"], "className": "playtime", url}));
+        row.push({"display": m.gametype_name, "value": m.gametype_name.toLowerCase(), "className": "font-small", url});
+        row.push({"display": m.server_name, "value": m.server_name.toLowerCase(), "className": "font-small", url});
+        row.push({"display": toDateString(m.date), "value": m.date,  "className": "playtime", url});
+        row.push({"value": m.players, url});
+        row.push({"display": toPlaytime(m.playtime), "value": m.playtime,  "className": "playtime", url});
 
         const a = document.createElement("td");
         UIMatchScoreBox(a, m, true, false);
-        row.append(a);
-        table.append(row);
+        row.push({"display": a, "bSkipTD": true});
+
+        rows.push(row);
     }
 
 
-    wrapper.append(table);
+    //wrapper.append(table);
 
+    new TESTUITable(wrapper, tableOptions, rows)
 
     parent.append(wrapper); 
 }

@@ -18,7 +18,7 @@ class TESTUITable{
 
         this.setTotalPages();
 
-        this.bCanSort = options.bNoSort ?? true;
+        this.bNoSort = options.bNoSort ?? false;
 
         this.bAscOrder = true;
         
@@ -61,19 +61,22 @@ class TESTUITable{
             const cell = document.createElement("th");
             cell.append(h.display);
 
-            cell.addEventListener("click", () =>{
+            if(!this.bNoSort){
 
-                this.lastSortBy = this.sortBy;
-                this.sortBy = i;
+                cell.addEventListener("click", () =>{
 
-                if(this.sortBy === this.lastSortBy){
-                    this.bAscOrder = !this.bAscOrder;
-                }
+                    this.lastSortBy = this.sortBy;
+                    this.sortBy = i;
 
-                this.sortData();
-                this.renderRows();
+                    if(this.sortBy === this.lastSortBy){
+                        this.bAscOrder = !this.bAscOrder;
+                    }
 
-            });
+                    this.sortData();
+                    this.renderRows();
+
+                });
+            }
 
             cell.style.cssText = `user-select:none;cursor:pointer;`;
             headerRow.append(cell);
