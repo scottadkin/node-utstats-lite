@@ -25,7 +25,11 @@ class TESTUITable{
         this.sortBy = options.sortBy ?? 0;
         this.lastSortBy = this.sortBy;
 
+
         this.table = document.createElement("table");
+        if(this.options.className !== undefined){
+            this.table.className = this.options.className;
+        }
         this.parent.append(this.table);
 
 

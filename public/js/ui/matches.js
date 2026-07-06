@@ -32,7 +32,8 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort){
             {"display": "Players"},
             {"display": "Playtime"},
             {"display": "Result"},
-        ]
+        ],
+        "className": "t-width-1"
     };
 
     if(!bMapsPage) tableOptions.headers.unshift({"display": "Map"});

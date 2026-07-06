@@ -131,7 +131,8 @@ function renderServerList(parent, servers){
             {"display": "Last Match"},
             {"display": "Playtime"},
             {"display": "Matches"},
-        ]
+        ],
+        "className": "t-width-1",
     }, rows);
 }
 
@@ -185,7 +186,8 @@ function homeRenderMostPlayedGametypes(parent, data){
             {"display": "Last"}, 
             {"display": "Matches"}, 
             {"display": "Playtime"}
-        ]
+        ],
+        "className": "t-width-1"
     };
 
     const rows = [];
@@ -254,7 +256,8 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
                 {"display": "Last"}, 
                 {"display": "Matches"}, 
                 {"display": "Playtime"}
-            ]
+            ],
+            "className": "t-width-1"
         };
         new TESTUITable(parent, tableOptions, rows);
         return;
@@ -306,7 +309,8 @@ function homeRenderMostActivePlayers(parent, data){
             {"display": "Matches Played"}, 
             {"display": "Wins"}, 
             {"display": "Total Playtime"}
-        ]
+        ],
+        "className": "t-width-1"
     }, rows);
 
 
