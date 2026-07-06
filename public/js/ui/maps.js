@@ -192,14 +192,14 @@ class MapListDisplay{
 
         if(data.length === 0){
 
-            const info = UIDiv("info");
+            const content = [];
             
             if(nameSearch !== ""){
-                info.append(`No maps found when searching for "${nameSearch}"`);
+                content.push(`No maps found when searching for "${nameSearch}"`);
             }else{
-                info.append(`No maps in database.`);
+                content.push(`No maps in database.`);
             }
-            parent.append(info);
+            parent.append(UIInfo(content));
             return;   
         }
 
@@ -621,9 +621,7 @@ class UIMapPlayerRankings{
     render(){
 
         if(this.totalMatches === 0){
-            const none = UIDiv("info");
-            none.innerHTML = `There are no player rankings data within the timeframe.`;
-            this.content.append(none);
+            this.content.append(UIInfo([`There are no player rankings data within the timeframe.`]));
             return;
         }
 

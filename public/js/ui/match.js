@@ -2801,9 +2801,7 @@ class MatchJSONApiInfo{
         );
 
 
-        const examples = UIDiv("info");
-        examples.append(UIA("JSON API Examples", `/jsonexamples/?mode=match`,"_blank"));
-        this.wrapper.append(examples);
+        this.wrapper.append(UIInfo([UIA("JSON API Examples", `/jsonexamples/?mode=match`,"_blank")]));
     }
 }
 

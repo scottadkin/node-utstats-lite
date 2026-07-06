@@ -64,9 +64,7 @@ class UIWatchlistMatches{
 
         if(this.matches.length === 0){
 
-            const none = UIDiv("info");
-            none.innerHTML = `No Matches Found`;
-            this.wrapper.append(none);
+            this.wrapper.append(UIInfo([`No Matches Found`]));
             return;
         }
 
@@ -200,9 +198,7 @@ class UIWatchlistPlayers{
                 this.table.innerHTML = "";
             }
             
-            const info = UIDiv("info");
-            info.append(`No Players Found`);
-            this.wrapper.append(info);
+            this.wrapper.append(UIInfo([`No Players Found`]));
 
             return;
         }

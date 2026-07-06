@@ -110,7 +110,7 @@ class AdminFTPManager{
 
         UIHeader(this.content, "Current Logs Folder Settings");
 
-        const wrapper = UIDiv("info");
+        const content = [];
 
 
         const infoList = UIUnorderedList([
@@ -126,14 +126,14 @@ class AdminFTPManager{
             `If the importer can not find download history for a log these settings are also used.`
         ]);
 
-        wrapper.append(
+        content.push(
             infoList, UIBr()
         );
 
 
         const logs = this.logsFolderSettings;
 
-        wrapper.append(
+        content.push(
             UIAdminInfoRow("Total Imports", logs["total_imports"]),
             UIAdminInfoRow("Total Logs Imported", logs["total_logs_imported"]),
             UIAdminInfoRow("Latest Import",  toDateString(logs["last"])),
@@ -146,7 +146,7 @@ class AdminFTPManager{
         );
         
 
-        this.content.append(wrapper);
+        this.content.append(UIInfo(content));
     }
 
 
@@ -981,12 +981,10 @@ class AdminMapsManager{
     renderScreenshotsInfo(){
 
         //image/png, image/x-ms-bmp, image/bmp, image/gif, image/jpeg, image/tiff
-        const infoWrapper = UIDiv("info");
-        const info = UIDiv("info-text");
 
-        infoWrapper.append(info);
+        const content = [];
 
-        info.append(
+        content.push(
             `- This is where you can upload map screenshots that are used in various areas of the site.`,
             UIBr(),
             `- File names are automatically assigned to match the selected map so the website can recognize the image.`,
@@ -997,7 +995,7 @@ class AdminMapsManager{
         for(let i = 0; i < this.validScreenshotTypes.length; i++){
 
             const v = this.validScreenshotTypes[i];
-            const item = document.createElement("b");
+            const item = UIB();
 
             item.append(v);
 
@@ -1005,10 +1003,10 @@ class AdminMapsManager{
                 item.append(", ");
             }
 
-            info.append(item);
+            content.push(item);
         }
 
-        info.append(
+        content.push(
             UIBr(),
             `- You can manually place images into the site's `, 
             UIB("/images/maps/"), 
@@ -1020,11 +1018,11 @@ class AdminMapsManager{
 
         for(let i = 0; i < this.badImageChars.length; i++){
             const b = this.badImageChars[i];
-            info.append(UIB(b));
-            if(i < this.badImageChars.length - 1) info.append(" ");
+            content.push(UIB(b));
+            if(i < this.badImageChars.length - 1) content.push(" ");
         }
 
-        info.append(
+        content.push(
             UIBr(), 
             "An example: ", 
             UIB("DM-Deck16]["), 
@@ -1040,8 +1038,9 @@ class AdminMapsManager{
             UIBr(), `- For best results use an aspect ratio of 16:9.`, UIBr()
         );
 
+        const info = UIInfo(content);
 
-        this.wrapper.append(infoWrapper);
+        this.wrapper.append(info);
 
     }
 

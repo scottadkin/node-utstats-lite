@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-	--bg-color-light:rgb(52,52,63);
-	--bg-color-mid:rgb(44,44,53);
-	--bg-color-dark:rgb(34,34,43);
+	--bg-color-light:rgb(54,54,54);
+	--bg-color-mid:rgb(46,46,46);
+	--bg-color-dark:rgb(32,32,32);
 	--bg-header-color:rgb(27,45,59);
 	--button-hover-color:rgb(56,56,56);
 	--tab-bg-color:rgb(0,0,0);
@@ -85,10 +85,11 @@ nav{
 
 nav a{
     display:inline-block;
-    padding:8px 10px;
+    padding:var(--padding-1) var(--padding-1);
 	font-weight:400;
 	transition: color 0.5s;
 	border-bottom:2px solid transparent;
+    font-size:0.9rem;
 	
 }
 
@@ -513,10 +514,9 @@ option{
 	line-height: var(--line-height-1);
 }
 
-
 .info-text{
-	max-width:1000px;
-	text-align: left;
+	max-width:75ch;
+	text-align: center;
 	margin-left:auto;
 	margin-right: auto;
 }

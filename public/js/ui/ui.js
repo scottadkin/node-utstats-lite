@@ -1831,3 +1831,30 @@ function UIUnorderedList(data){
     }
     return parent;
 }
+
+
+
+function UIInfo(content){
+
+    const wrapper = UIDiv("info");
+
+    const inner = UIDiv("info-text");
+
+    const contentType = typeof content; 
+
+
+    if(contentType === "string"){
+        inner.append(content);
+    }else if(Array.isArray(contentType)){
+        inner.append(...content);
+    }else if(contentType === "object"){
+        inner.append(...content);
+    }else{
+
+        throw new Error(`UIInfo not valid content`);
+    }
+
+    wrapper.append(inner);
+
+    return wrapper;
+}

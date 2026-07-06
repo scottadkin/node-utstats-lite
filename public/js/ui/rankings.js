@@ -135,10 +135,8 @@ class RankingsSearchForm{
 
         if(this.data.length === 0){
 
-            const noData = UIDiv("info");
-            noData.append(`There has not been enough matches played in the selected time range for there to be any rankings.`);
             this.table.className = "hidden";
-            this.parent.append(noData);
+            this.parent.append(UIInfo([`There has not been enough matches played in the selected time range for there to be any rankings.`]));
             return;
         }
 

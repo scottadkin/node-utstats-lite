@@ -87,16 +87,12 @@ function renderSocials(parent, settings){
 
         UIHeader(wrapper, "Find Us On Our Website");
 
-        const info = UIDiv("info");
-
         const link = document.createElement("a");
         link.href = settings["External Site"];
         link.className = "bold"
         link.append(settings["External Site"]);
 
-
-        info.append(`We also have another website you may like to visit `, link);
-        wrapper.append(info);
+        wrapper.append(UIInfo([`We also have another website you may like to visit `, link]));
        // UISocial(wrapper, settings["External Site"], "red.png");
     }
 
