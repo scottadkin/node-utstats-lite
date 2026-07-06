@@ -2842,9 +2842,9 @@ class AdminMatchesManager{
 
             const row = {"id": `match-row-${d.id}`, "columns": [
                 {"content": d.date, "parse": ["date"], "className": "date", url, urlTarget},
-                {"content": d.server_name, url, urlTarget, "className": "font-small" },
-                {"content": d.gametype_name, url, urlTarget, "className": "font-small"},
-                {"content": d.map_name, url, urlTarget, "className": "font-small"},
+                {"content": d.server_name, url, urlTarget, "className": "tiny-font" },
+                {"content": d.gametype_name, url, urlTarget, "className": "tiny-font"},
+                {"content": d.map_name, url, urlTarget, "className": "tiny-font"},
                 {"content": d.players, url, urlTarget},
                 {"content": d.playtime, "parse": ["playtime"], "className": "playtime", url, urlTarget}
             ]};
@@ -2941,9 +2941,9 @@ class AdminMatchesManager{
             
             tRows.push([
                 {"content": d.latest_date, "parse": ["date"], "className": "date", url, urlTarget},
-                {"content": d.server_name, "className": "font-small", url, urlTarget},
-                {"content": d.gametype_name, "className": "font-small", url, urlTarget},
-                {"content": d.map_name, "className": "font-small", url, urlTarget},
+                {"content": d.server_name, "className": "tiny-font", url, urlTarget},
+                {"content": d.gametype_name, "className": "tiny-font", url, urlTarget},
+                {"content": d.map_name, "className": "tiny-font", url, urlTarget},
                 {"content": d.total_matches - 1, url, urlTarget}
             ]);
 
