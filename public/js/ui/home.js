@@ -103,20 +103,9 @@ function renderServerList(parent, servers){
 
     if(servers.length === 0) return;
     UIHeader(parent, "Our Servers");
-    parent = document.querySelector(parent);
 
 
-    const table = document.createElement("table");
-    table.className = "t-width-1";
-
-    const headers = ["Name", "First Match", "Last Match", "Playtime", "Matches"];
-    const headerRow = document.createElement("tr");
-    for(let i = 0; i < headers.length; i++){
-
-        headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-    }
-
-    table.appendChild(headerRow);
+    const rows = [];
 
     for(let i = 0; i < servers.length; i++){
 
@@ -126,17 +115,24 @@ function renderServerList(parent, servers){
 
         const url = `/matches/?s=${s.id}`;
 
-        tableRow.appendChild(UITableCell({"content": s.name, "className": "text-left", url}));
-        tableRow.appendChild(UITableCell({"content": toDateString(s.first_match, true), "className": "date", url}));
-        tableRow.appendChild(UITableCell({"content": toDateString(s.last_match, true), "className": "date", url}));
-        tableRow.appendChild(UITableCell({"content": toPlaytime(s.playtime), "className": "date", url}));
-        tableRow.appendChild(UITableCell({"content": s.matches, url}));
-
-        table.appendChild(tableRow);
+        rows.push([
+            {"display": s.name, "value": s.name.toLowerCase(), "className": "text-left", url},
+            {"display": toDateString(s.first_match, true), "value": s.first_match, "className": "date", url},
+            {"display": toDateString(s.last_match, true), "value": s.last_match,"className": "date", url},
+            {"display": toPlaytime(s.playtime), "value": s.playtime,"className": "date", url},
+            {"value": s.matches, url}
+        ]);
     }
 
-
-    parent.appendChild(table);
+    new TESTUITable(parent, {
+        "headers": [
+            {"display": "Name"},
+            {"display": "First Match"},
+            {"display": "Last Match"},
+            {"display": "Playtime"},
+            {"display": "Matches"},
+        ]
+    }, rows);
 }
 
 
@@ -244,20 +240,7 @@ function homeRenderMostActivePlayers(parent, data){
 
     UIHeader(wrapper, "Most Active Players");
 
-
-    const table = document.createElement("table");
-    table.className = "t-width-1";
-
-    const headers = ["Name", "Last Active", "Matches Played", "Wins", "Total Playtime"];
-
-    const headerRow = document.createElement("tr");
-
-    for(let i = 0; i < headers.length; i++){
-
-        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-    }
-
-    table.append(headerRow);
+    const rows = [];
 
     for(let i = 0; i < data.length; i++){
 
@@ -265,21 +248,34 @@ function homeRenderMostActivePlayers(parent, data){
 
         const row = document.createElement("tr");
 
-        row.append(UIPlayerLink({
+        const playerLink = UIPlayerLink({
             "playerId": d.id,
             "name": d.name,
             "country": d.country,
             "bTableElem": true
-        }));
+        });
 
-        row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
-        row.append(UITableCell({"content": d.total_matches}));
-        row.append(UITableCell({"content": d.wins, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
-        table.append(row);
+        rows.push([
+            {"value": d.name.toLowerCase(), "display": playerLink, "bSkipTD": true},
+            {"display": toDateString(d.last_active), "value": d.last_active, "className": "date"},
+            {"value": d.total_matches},
+            {"value": ignore0(d.wins)},
+            {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime"},
+        ]);
+
     }
 
-    wrapper.append(table);
+
+    const table = new TESTUITable(wrapper, {
+        "headers": [
+            {"display": "Name"}, 
+            {"display": "Last Active"}, 
+            {"display": "Matches Played"}, 
+            {"display": "Wins"}, 
+            {"display": "Total Playtime"}
+        ]
+    }, rows);
+
 
     parent.append(wrapper);
 }
