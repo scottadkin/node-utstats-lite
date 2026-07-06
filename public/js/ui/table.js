@@ -368,18 +368,33 @@ class TESTUITable{
 
                 const d = data[x];
 
+                let currentCellData = d.display ?? d.value;
+
+                if(d.url !== undefined){
+
+                    const a = document.createElement("a");
+                    a.href = d.url;
+
+                    a.append(currentCellData);
+
+                    currentCellData = a;
+                }
+
                 if(!d.bSkipTD){
 
                     const cell = document.createElement("td");
-                    cell.append(d.display ?? d.value);
+        
+                    cell.append(currentCellData);
                     if(d.className !== undefined) cell.className = d.className;
                     row.append(cell);
 
                 }else{
 
                     //don't allow className for override TD
-                    row.append(d.display ?? d.value);
+                    row.append(currentCellData);
                 }
+
+              
             }
 
             this.tableBody.append(row);

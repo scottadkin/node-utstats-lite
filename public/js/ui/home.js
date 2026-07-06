@@ -160,7 +160,13 @@ function homeRenderMostPlayedGametypes(parent, data){
 
     const tableOptions = {
         "width": 1,
-        "headers": ["Name", "First", "Last", "Matches", "Playtime"]
+        "headers": [
+            {"display":"Name"}, 
+            {"display": "First"}, 
+            {"display": "Last"}, 
+            {"display": "Matches"}, 
+            {"display": "Playtime"}
+        ]
     };
 
     const rows = [];
@@ -172,16 +178,16 @@ function homeRenderMostPlayedGametypes(parent, data){
         const url = `/matches/?g=${d.id}`;
 
         rows.push([
-            {"content": d.name, "className": "text-left", url},
-            {"content": d.first_match, "parse": ["date"], "className": "date", url},
-            {"content": d.last_match, "parse": ["date"], "className": "date", url},
-            {"content": d.matches, url},
-            {"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}
+            {"display": d.name, "value": d.name.toLowerCase(), "className": "text-left", url},
+            {"display": toDateString(d.first_match), "value": d.first_match, "className": "date", url},
+            {"display": toDateString(d.last_match), "value": d.last_match, "className": "date", url},
+            {"value": d.matches, url},
+            {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime", url}
         ]);
 
     }
 
-    const table = new UITable(parent, tableOptions, rows);
+    const table = new TESTUITable(parent, tableOptions, rows);
 }
 
 function homeRenderMostPlayedMaps(parent, data, displayMode){
@@ -193,12 +199,11 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
 
     let wrapper = null;
     
-
     if(displayMode === "default"){
         wrapper = UIDiv("rich-outter");
     }
-
     const rows = [];
+
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
