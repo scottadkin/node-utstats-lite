@@ -378,6 +378,11 @@ tr:hover{
 	background-color:rgb(64,64,64);
 }
 
+tfoot td{
+    background-color:var(--bg-color-dark);
+    color:var(--font-color-3);
+}
+
 .player-name-td{
 	min-width:150px;
 	width:150px;

@@ -83,12 +83,12 @@ function createFragTableRow(p, totalTeams, bTotals){
     }
 
     const row =  [
-            {"value": p.time_on_server, "className": `${teamColorClass} playtime`, "parse": ["playtime"]},
+            {"value": p.time_on_server, "display": MMSS(p.time_on_server), "className": `${teamColorClass} playtime`, "parse": ["playtime"]},
             {"value": p.score, "display": ignore0(p.score)},
             {"value": p.frags, "display": ignore0(p.frags)}, 
             {"value": p.kills, "display": ignore0(p.kills)},
             {"value": p.deaths, "display": ignore0(p.deaths)},
-            {"value": net},
+            {"display": net, "value": p.kills - p.deaths},
             {"value": p.suicides, "display": ignore0(p.suicides)},
             {"value": p.team_kills, "display": ignore0(p.team_kills)},
             {"value": p.headshots, "display": ignore0(p.headshots)},
@@ -230,17 +230,17 @@ function renderFragsTables(parent, totalTeams, playerData){
             ],
             "footer": [
                 {"display": "Total|Max|Avg"},
-                {"display": "SUM", "dataType": "FLOAT"},
-                {"display": "SUM", "dataType": "INT"},
-                {"display": "SUM", "dataType": "INT"},
-                {"display": "SUM", "dataType": "INT"},
-                {"display": "SUM", "dataType": "INT"},
-                {"display": "SUM", "dataType": "INT"},
-                {"display": "SUM", "dataType": "INT"},
-                {"display": "SUM", "dataType": "INT"},
-                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "FLOAT", "callback": (v) =>{ return MMSS(v)}},
+                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                {"display": "SUM", "dataType": "INT",  "callback": (v) => ignore0(v)},
+                {"display": "SUM", "dataType": "INT", "callback": (v) => { return (v > 0) ?  `+${v}`: v}},
+                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
                 {"display": `${totals[i].efficiency.toFixed(2)}%`},
-                {"display": totals[i].ttl},
+                {"display": totals[i].ttl, "callback": (v) =>{ return MMSS(v)}},
             ]
         };
         new TESTUITable(wrapper, tableOptions, tables[i])

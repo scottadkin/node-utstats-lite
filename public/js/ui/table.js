@@ -325,9 +325,20 @@ class TESTUITable{
                     preFix = preFix(value);
                 }
 
-                cell.append(`${preFix}${value}${postFix}`);
+                const fullOutput = `${preFix}${value}${postFix}`
+
+                if(o.callback === undefined){
+                    cell.append(fullOutput);
+                }else{
+                    cell.append(o.callback(fullOutput));
+                }
             }else{
-                cell.append(o.display);
+
+                if(o.callback === undefined){
+                    cell.append(o.display);
+                }else{
+                    cell.append(o.callback(o.display));
+                }
             }
 
             row.append(cell);
