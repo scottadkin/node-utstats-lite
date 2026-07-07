@@ -89,13 +89,13 @@ class DomControlPoint{
         this.totalCaps++
 
         if(this.instigator === null){
-            this.firstTouchedTimestamp = scaledTimestamp;
+            this.firstTouchedTimestamp = originalTimestamp;
         }
 
 
-        const playerTeam = instigator.getTeamAt(scaledTimestamp);
+        const playerTeam = instigator.getTeamAt(originalTimestamp);
 
-        this.calcCurrentScore(scaledTimestamp);
+        this.calcCurrentScore(originalTimestamp);
 
         if(playerTeam !== null){
             this.lastCapTeam = playerTeam;
@@ -103,7 +103,7 @@ class DomControlPoint{
         }
         
 
-        this.lastTouchedTimestamp = scaledTimestamp;
+        this.lastTouchedTimestamp = originalTimestamp;
         this.instigator = instigator;
 
         //UT Bug, this should be set here but gets set in the first timer call allowing new player to get points early
@@ -188,17 +188,17 @@ class DomControlPoint{
 
             if(!this.bBeenScoreReady) this.bBeenScoreReady = true;
 
-            this.currentFirstScoreGivenTimestamp = scaledTimestamp;
+            this.currentFirstScoreGivenTimestamp = originalTimestamp;
             
         }
     }
 
 
-    matchEnd(scaledTimestamp){
+    matchEnd(originalTimestamp){
 
         if(this.instigator === null) return;
  
-        this.calcCurrentScore(scaledTimestamp);
+        this.calcCurrentScore(originalTimestamp);
         
     }
 }
@@ -704,6 +704,7 @@ export class Domination{
                 lastTimestamp = e.timestamp;    
 
                 const realScore = this.getScoreAt(e.timestamp);
+             
 
                 this.pingAllControlPoints(e.timestamp, e.remainingTime, realScore, gameSpeed);
                        
@@ -731,7 +732,7 @@ export class Domination{
         //make sure to give players that last amount of points if any
 
         for(const controlPoint of Object.values(this.controlPoints)){
-            controlPoint.matchEnd(scaledMatchEnd);
+            controlPoint.matchEnd(matchEnd);
         }
 
        

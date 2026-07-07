@@ -432,20 +432,16 @@ class MatchDominationSummary{
         this.parent = document.querySelector(parent);
 
         this.generalWrapper = UIDiv();
-        this.generalTitle = UIDiv("header-wrapper");
-        this.generalTitle.append(`Domination Summary`);
+        UIHeader(this.generalWrapper, "Domination Summary");
         this.generalContent = UIDiv();
-        this.generalWrapper.append(this.generalTitle, this.generalContent);
+        this.generalWrapper.append(this.generalContent);
         this.parent.append(this.generalWrapper);
         this.renderGeneral();
 
         this.playersWrapper = UIDiv();
-
         this.mode = "percent";
+        UIHeader(this.playersWrapper, "Domination Players Summary");
 
-        this.playersTitle = UIDiv("header-wrapper");
-        this.playersTitle.append("Domination Players Summary");
-        this.playersWrapper.append(this.playersTitle);
 
         this.createTabs();
 
@@ -623,17 +619,17 @@ class MatchDominationSummary{
     renderGeneral(){
 
         const tableOptions = {
-            "width": 1,
+            "className": "t-width-1",
             "headers": [
-                "Team", 
-                "Total Captures", 
-                "Total Control Time", 
-                "Total Control Percent", 
-                "Total Score Time*",
-                "Stolen Caps*",
-                "Stolen Score*",
-                "Importer Score*",
-                "Final UT Score"
+                {"display": "Team"}, 
+                {"display": "Total Captures"}, 
+                {"display": "Total Control Time"}, 
+                {"display": "Total Control Percent"}, 
+                {"display": "Total Score Time*"},
+                {"display": "Stolen Caps*"},
+                {"display": "Stolen Score*"},
+                {"display": "Importer Score*"},
+                {"display": "Final UT Score"}
             ]
         };
 
@@ -645,36 +641,37 @@ class MatchDominationSummary{
 
             rows.push([
                 {
-                    "content": `${getTeamName(i)} Team`, 
+                    "value": `${getTeamName(i)} Team`, 
                     "className": `${getTeamColorClass(i)} text-left`
                 },
                 {
-                    "content": d[`team_${i}_caps`], 
-                    "parse": ["ignore0"]
+                    "value": d[`team_${i}_caps`], 
+                    "callback": ignore0
                 },
                 {
-                    "content": d[`team_${i}_control_time`], 
-                    "className": "playtime", 
-                    "parse": "mmss"
+                    "value": d[`team_${i}_control_time`], 
+                    "display": MMSS(d[`team_${i}_control_time`]),
+                    "className": "playtime"
                 },
                 {
-                    "content": `${d[`team_${i}_control_percent`]}%`
+                    "value": `${d[`team_${i}_control_percent`]}%`
                 },
                 {
-                    "content": d[`team_${i}_score_time`], "className": 
-                    "playtime", "parse": ["mmss"]
+                    "value": d[`team_${i}_score_time`], "className": 
+                    "playtime",
+                    "display": MMSS(d[`team_${i}_score_time`]),
                 },
                 {
-                    "content": d[`team_${i}_stolen_caps`], "parse": ["ignore0"]
+                    "value": d[`team_${i}_stolen_caps`], "callback": ignore0
                 },
                 {
-                    "content": d[`team_${i}_stolen_points`].toFixed(2)
+                    "value": d[`team_${i}_stolen_points`].toFixed(2)
                 },
                 {
-                    "content": d[`team_${i}_importer_score`].toFixed(2)
+                    "value": d[`team_${i}_importer_score`].toFixed(2)
                 },
                 {
-                    "content": d[`team_${i}_real_score`].toFixed(2)
+                    "value": d[`team_${i}_real_score`].toFixed(2)
                 }
             ]);
 
@@ -755,7 +752,8 @@ class MatchDominationSummary{
 
  
         this.generalContent.append(info);
-        new UITable(this.generalContent, tableOptions, rows);
+        //new UITable(this.generalContent, tableOptions, rows);
+        new TESTUITable(this.generalContent, tableOptions, rows)
 
         const graphWrapper = UIDiv("graph-wrapper");
         graphWrapper.append(canvas);
