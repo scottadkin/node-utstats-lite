@@ -480,15 +480,18 @@ class MatchDominationSummary{
 
     createHeaderRow(controlPoints){
 
-        const headerRow = document.createElement("tr");
+        //const headerRow = document.createElement("tr");
             
-        headerRow.append(UITableHeaderColumn({"content": "Player"}));
+       // headerRow.append(UITableHeaderColumn({"content": "Player"}));
 
+        const found = [];
         for(const [pointId, pointName] of Object.entries(controlPoints)){
-            headerRow.append(UITableHeaderColumn({"content": pointName}));
+            //headerRow.append(UITableHeaderColumn({"content": pointName}));
+            found.push({"display": pointName});
         }
 
-        return headerRow;
+        //return headerRow;
+        return found;
     }
 
 
@@ -630,6 +633,17 @@ class MatchDominationSummary{
                 {"display": "Stolen Score*"},
                 {"display": "Importer Score*"},
                 {"display": "Final UT Score"}
+            ],
+            "footer": [
+                {"display": "Totals"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "FLOAT", "callback": MMSS},
+                {"display": "SUM", "dataType": "FLOAT","callback": (v) => parseFloat(v).toFixed(2)},
+                {"display": "SUM","dataType": "FLOAT", "callback": MMSS},
+                {"display": "SUM","dataType": "INT"},
+                {"display": "SUM", "dataType": "FLOAT", "callback": (v) => parseFloat(v).toFixed(2)},
+                {"display": "SUM", "dataType": "FLOAT","callback": (v) => parseFloat(v).toFixed(2)},
+                {"display": "SUM", "dataType": "FLOAT","callback": (v) => parseFloat(v).toFixed(2)},
             ]
         };
 
@@ -765,21 +779,27 @@ class MatchDominationSummary{
 
 
         this.content.innerHTML = ``;
-        
+    
         this.updateInfo();
         const playerData = this.data.playerData;
         const controlPoints = this.data.dom.controlPoints;
         const domData = this.data.dom.data;
 
-
         const higherBetter = ["long-time", "max-points"];
         const totalKeys = ["percent", "time", "caps", "total-points", "stolen-points", "stolen-caps"];
 
+        const headerRowOptions = this.createHeaderRow(controlPoints);
+
         for(let i = 0; i < this.totalTeams; i++){
 
-            const table = document.createElement("table");
-            table.className = "t-width-4";
-            table.append(this.createHeaderRow(controlPoints));
+            const tableOptions = {
+                "className": "t-width-1",
+                "headers": [{"display": "Player"},...headerRowOptions],
+                "footer": [{"display": "Combined"}]
+            };
+
+
+            const rows = [];
 
             const totals = {};
 
@@ -789,15 +809,21 @@ class MatchDominationSummary{
 
                 if(p.spectator || p.team !== i) continue;
 
-                const dataRow = document.createElement("tr");
+                const row = [];
 
-                dataRow.append(UIPlayerLink({
-                    "playerId": p.player_id, 
-                    "className": `${getTeamColorClass(p.team)} text-left`, 
-                    "country": p.country, 
-                    "bTableElem": true, 
-                    "name": p.name
-                }));
+                row.push(
+                    {
+                    "value": p.name.toLowerCase(), 
+                    "bSkipTD": true,
+                        "display": UIPlayerLink({
+                            "playerId": p.player_id, 
+                            "className": `${getTeamColorClass(p.team)} text-left`, 
+                            "country": p.country, 
+                            "bTableElem": true, 
+                            "name": p.name
+                        })
+                    }
+                );
 
                 for(const pointId of Object.keys(controlPoints)){
 
@@ -835,24 +861,19 @@ class MatchDominationSummary{
                             totals[pointId] += currentValue;
                         }
                     }
+                    
+                    const col = {"display": content, "value": currentValue};
 
-                    const col = UITableCell({
-                        "content": content    
-                    });
+                    if(className !== ""){
+                        col.className = className;
+                    }
 
-                    if(className !== "") col.className = className;
-
-                    dataRow.append(col);
+                    row.push(col);
                 }
             
-                table.append(dataRow);
+                rows.push(row);
             }
 
-            const totalRow = document.createElement("tr");
-
-            totalRow.append(UITableCell({
-                "content": "Combined", "className": "team-none"
-            }));
 
 
             for(const pointId of Object.keys(controlPoints)){
@@ -863,12 +884,12 @@ class MatchDominationSummary{
 
                 if(className !== "") col.className = className;
 
-                totalRow.append(col);
+                tableOptions.footer.push({"display": content, "value": currentValue});
             }
 
-            table.append(totalRow);
 
-            this.content.append(table);
+            new TESTUITable(this.content, tableOptions, rows)
+
         }
     }
 }
