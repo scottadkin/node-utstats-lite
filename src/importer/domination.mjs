@@ -63,7 +63,8 @@ class DomControlPoint{
         let scoreTimeHeld = 0;
 
     
-        if(this.bScoreReady){
+        //don't counted the bugged UT state as valid score time
+        if(this.bScoreReady && this.scoreTime <= 0){
             scoreTimeHeld = timestamp - this.currentFirstScoreGivenTimestamp;
         }
 
