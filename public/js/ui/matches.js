@@ -21,7 +21,6 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort){
     const wrapper = UIDiv("center text-center");
 
 
-
     const tableOptions = {
         "width": 1,
         bNoSort,

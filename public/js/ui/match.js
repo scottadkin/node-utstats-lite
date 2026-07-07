@@ -82,26 +82,24 @@ function createFragTableRow(p, totalTeams, bTotals){
         teamColorClass = getTeamColorClass(p.team);
     }
 
-    const row = {
-        "className": teamColorClass,
-        "columns": [
-            {"content": p.time_on_server, "className": "playtime", "parse": ["playtime"]},
-            {"content": p.score, "parse": ["ignore0"]},
-            {"content": p.frags, "parse": ["ignore0"]}, 
-            {"content": p.kills, "parse": ["ignore0"]},
-            {"content": p.deaths, "parse": ["ignore0"]},
-            {"content": net},
-            {"content": p.suicides, "parse": ["ignore0"]},
-            {"content": p.team_kills, "parse": ["ignore0"]},
-            {"content": p.headshots, "parse": ["ignore0"]},
-            {"content": `${p.efficiency.toFixed(2)}%`},
-            {"content": p.ttl, "className": "playtime", "parse": ["mmss"]}
+    const row =  [
+            {"value": p.time_on_server, "className": `${teamColorClass} playtime`, "parse": ["playtime"]},
+            {"value": p.score, "display": ignore0(p.score)},
+            {"value": p.frags, "display": ignore0(p.frags)}, 
+            {"value": p.kills, "display": ignore0(p.kills)},
+            {"value": p.deaths, "display": ignore0(p.deaths)},
+            {"value": net},
+            {"value": p.suicides, "display": ignore0(p.suicides)},
+            {"value": p.team_kills, "display": ignore0(p.team_kills)},
+            {"value": p.headshots, "display": ignore0(p.headshots)},
+            {"value": p.efficiency, "display": `${p.efficiency.toFixed(2)}%`},
+            {"value": p.ttl, "display": MMSS(p.ttl), "className": "playtime",}
         ]
-    };
+    ;
 
     if(!bTotals){
 
-        row.columns.unshift({"content": UIPlayerLink(
+        row.unshift({"value": UIPlayerLink(
             {
                 "playerId": p.player_id, 
                 "name": p.name, 
@@ -109,10 +107,10 @@ function createFragTableRow(p, totalTeams, bTotals){
                 "bTableElem": true, 
                 "className": `text-left ${teamColorClass}`
             }
-        ), "bSkipTd": true});
+        ), "bSkipTD": true});
         
     }else{
-        row.columns.unshift({"content": "Totals", "className": "team-none"});
+        row.unshift({"display": "Totals", "className": "team-none"});
     }
 
     return row;
@@ -129,24 +127,6 @@ function renderFragsTables(parent, totalTeams, playerData){
     title.innerHTML = "Frags Summary";
 
     wrapper.append(title);
-
-    const tableOptions = {
-        "width": 1, 
-        "headers": [
-            "Player",
-            "Playtime",
-            "Score",
-            "Frags",
-            "Kills",
-            "Deaths",
-            "Net",
-            "Suicides",
-            "Team Kills",
-            "Headshots",
-            "Efficiency",
-            "TTL"
-        ]
-    };
 
 
     const tables = [];
@@ -187,14 +167,10 @@ function renderFragsTables(parent, totalTeams, playerData){
 
         let team = (totalTeams < 2) ? 0 : p.team;
 
-        totals[team].time_on_server += p.time_on_server;
-        totals[team].score += p.score;
-        totals[team].frags += p.frags;
         totals[team].kills += p.kills;
         totals[team].deaths += p.deaths;
         totals[team].suicides += p.suicides;
         totals[team].team_kills += p.team_kills;
-        totals[team].headshots += p.headshots;
         totals[team].players++;
         totals[team].totalTTL += p.ttl;
 
@@ -223,7 +199,7 @@ function renderFragsTables(parent, totalTeams, playerData){
         }
     }
 
-    if(totalTeams < 2){
+    /*if(totalTeams < 2){
 
         tables[0].push(createFragTableRow(totals[0], totalTeams, true))
 
@@ -232,10 +208,42 @@ function renderFragsTables(parent, totalTeams, playerData){
         for(let i = 0; i < totalTeams; i++){
             tables[i].push(createFragTableRow(totals[i], totalTeams, true));
         }
-    }
+    }*/
 
     for(let i = 0; i < tables.length; i++){
-        new UITable(wrapper, tableOptions, tables[i]);
+
+        const tableOptions = {
+            "className": "t-width-1", 
+            "headers": [
+                {"display": "Player"},
+                {"display": "Playtime"},
+                {"display": "Score"},
+                {"display": "Frags"},
+                {"display": "Kills"},
+                {"display": "Deaths"},
+                {"display": "Net"},
+                {"display": "Suicides"},
+                {"display": "Team Kills"},
+                {"display": "Headshots"},
+                {"display": "Efficiency"},
+                {"display": "TTL"}
+            ],
+            "footer": [
+                {"display": "Total|Max|Avg"},
+                {"display": "SUM", "dataType": "FLOAT"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": "SUM", "dataType": "INT"},
+                {"display": `${totals[i].efficiency.toFixed(2)}%`},
+                {"display": totals[i].ttl},
+            ]
+        };
+        new TESTUITable(wrapper, tableOptions, tables[i])
     }
 
     parent.append(wrapper);
