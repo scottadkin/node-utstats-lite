@@ -67,6 +67,8 @@ class TESTUITable{
 
             if(!this.bNoSort){
 
+                cell.style.cssText = `user-select:none;cursor:pointer;`;
+
                 cell.addEventListener("click", () =>{
 
                     this.lastSortBy = this.sortBy;
@@ -82,7 +84,7 @@ class TESTUITable{
                 });
             }
 
-            cell.style.cssText = `user-select:none;cursor:pointer;`;
+            
             headerRow.append(cell);
         }
 

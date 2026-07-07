@@ -234,31 +234,23 @@ class RankingsExplain{
         
         this.content.innerHTML = ``;
 
-        const table = document.createElement("table");
-        table.className = `rankings-explained-table`;
-
-        const headerRow = document.createElement("tr");
-        headerRow.append(UITableHeaderColumn({"content": "Event"}));
-        headerRow.append(UITableHeaderColumn({"content": (this.mode !== "penalty") ? "Value" : "Penalty"}));
-        table.append(headerRow);
-
         let settings = this.settings[this.mode];
 
         if(settings === undefined) return;
 
         settings = Object.values(settings);
 
+        const rows = [];
 
         for(let i = 0; i < settings.length; i++){
 
             const s = settings[i];
+
             if(this.mode === "penalty" && !/under/i.test(s.displayName)){
                 continue;
             }
 
-            const row = document.createElement("tr");
-
-            row.append(UITableCell({"content": s.displayName, "className": "text-left"}));
+            const row = [];
 
             let currentValue = s.points;
 
@@ -266,11 +258,26 @@ class RankingsExplain{
                 currentValue = `Final Score * ${currentValue.toFixed(2)}`;
             }
 
-            row.append(UITableCell({"content": currentValue, "className": "text-center"}));
-            table.append(row);
+            row.push({
+                    "value": s.displayName.toLowerCase(), 
+                    "display": s.displayName, "className": "text-left"
+                },
+                {"value": currentValue, "className": "text-center"}
+            );
+
+            rows.push(row);
         }
 
-        this.content.append(table);
+        const tableOptions = {
+            "className": "rankings-explained-table",
+            "headers": [
+                {"display": "Event"},
+                {"display": (this.mode !== "penalty") ? "Value" : "Penalty"}
+            ]
+        };
+
+        new TESTUITable(this.content, tableOptions, rows);
+
         
     }
 }
