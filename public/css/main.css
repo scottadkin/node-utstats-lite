@@ -333,6 +333,15 @@ table{
     margin-right:auto;
 }
 
+caption h3{
+    background-color:var(--bg-header-color);
+    font-size:var(--font-size-90);
+    font-weight:400;
+    line-height: 2rem;
+    border-top:1px solid var(--border-color-2);
+    border-left:1px solid var(--border-color-2);
+    border-right:1px solid var(--border-color-2);
+}
 
 th{
     padding:0px var(--padding-3);

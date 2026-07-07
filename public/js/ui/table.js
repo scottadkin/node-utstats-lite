@@ -451,7 +451,7 @@ class TESTUITable{
 
     renderButtons(){
 
-        if(this.perPage <= 1){
+        if(this.perPage <= 1 && this.captionTitle === undefined){
             this.caption.classList.add("hidden");
             return;
         }
@@ -459,6 +459,9 @@ class TESTUITable{
         this.caption.classList.remove("hidden"); 
 
 
+        if(this.perPage <= 1){
+            return;
+        }
 
         if(this.previous === undefined){
 

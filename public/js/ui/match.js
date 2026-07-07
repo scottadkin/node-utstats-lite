@@ -20,8 +20,7 @@ function renderBasicInfo(parent, data, players){
 
     const wrapper = UIDiv("match-basic-info-wrapper center");
 
-    const header = UIDiv("header-wrapper");
-    header.innerHTML = `${data.gametype_name} on ${data.map_name}`;
+    UIHeader(parent, `${data.gametype_name} on ${data.map_name}`);
 
     if(data.solo_winner !== 0){
 
@@ -31,8 +30,6 @@ function renderBasicInfo(parent, data, players){
     }
  
     UIMatchScoreBox(wrapper, data, false, false, players);
-  
-    parent.append(header);
 
     const infoElems = UIDiv("match-basic-info-wrapper-info");
 
@@ -99,7 +96,7 @@ function createFragTableRow(p, totalTeams, bTotals){
 
     if(!bTotals){
 
-        row.unshift({"value": UIPlayerLink(
+        row.unshift({"value": p.name.toLowerCase(), "display": UIPlayerLink(
             {
                 "playerId": p.player_id, 
                 "name": p.name, 
@@ -122,12 +119,8 @@ function renderFragsTables(parent, totalTeams, playerData){
     parent = document.querySelector(parent);
 
     const wrapper = UIDiv();
-    const title = UIDiv("header-wrapper");
 
-    title.innerHTML = "Frags Summary";
-
-    wrapper.append(title);
-
+    UIHeader(wrapper, "Frags Summary");
 
     const tables = [];
     const totals = [];
@@ -199,17 +192,6 @@ function renderFragsTables(parent, totalTeams, playerData){
         }
     }
 
-    /*if(totalTeams < 2){
-
-        tables[0].push(createFragTableRow(totals[0], totalTeams, true))
-
-    }else{
-
-        for(let i = 0; i < totalTeams; i++){
-            tables[i].push(createFragTableRow(totals[i], totalTeams, true));
-        }
-    }*/
-
     for(let i = 0; i < tables.length; i++){
 
         const tableOptions = {
@@ -257,8 +239,9 @@ function createSpreeRow(player, totalTeams){
 
     row.push(
         {
-            "bSkipTd": true,
-            "content": UIPlayerLink({
+            "bSkipTD": true,
+            "value": player.name.toLowerCase(),
+            "display": UIPlayerLink({
                 "playerId": player.player_id, 
                 "className": `${teamColorClass} text-left`, 
                 "country": player.country, 
@@ -270,10 +253,12 @@ function createSpreeRow(player, totalTeams){
 
 
     for(let i = 1; i < 6; i++){
-        row.push({"content": player[`spree_${i}`], "parse": ["ignore0"]});
+
+        const s = player[`spree_${i}`];
+        row.push({"display": ignore0(s), "value": s});
     }
 
-    row.push({"content": player["spree_best"], "parse": ["ignore0"]});
+    row.push({"display": ignore0(player["spree_best"]), "value": player["spree_best"]});
 
     return row;
 }
@@ -284,8 +269,9 @@ function createMultiRow(player, totalTeams){
 
     const row = [   
         {
-            "bSkipTd": true,
-            "content": UIPlayerLink({
+            "bSkipTD": true,
+            "value": player.name.toLowerCase(),
+            "display": UIPlayerLink({
                 "playerId": player.player_id, 
                 "className": `${teamColorClass} text-left`, 
                 "country": player.country, 
@@ -295,10 +281,13 @@ function createMultiRow(player, totalTeams){
     ];
 
     for(let i = 1; i < 5; i++){
-        row.push({"content": player[`multi_${i}`], "parse": ["ignore0"]});
+
+        const m = player[`multi_${i}`];
+
+        row.push({"display": ignore0(m), "value": m});
     }
 
-    row.push({"content": player["multi_best"], "parse": ["ignore0"]});
+    row.push({"display": ignore0(player["multi_best"]), "value": player["multi_best"]});
 
     return row;
 }
@@ -320,25 +309,51 @@ function renderSpecialEvents(parent, totalTeams, players){
     parent = document.querySelector(parent);
 
     const wrapper = UIDiv();
-    const title = UIDiv("header-wrapper")
-    title.append("Special Events");
-    wrapper.append(title);
+    const title = UIHeader(wrapper, "Special Events");
 
     const sprees = [];
 
     const spreeTableOptions = {
-        "width": 1,
+        "className": "t-width-1",
         "headers": [
-            "Player", "Killing Spree", "Rampage", "Dominating", "Unstoppable", "Godlike", "Best Spree"
+            {"display": "Player"}, 
+            {"display": "Killing Spree"}, 
+            {"display": "Rampage"}, 
+            {"display": "Dominating"}, 
+            {"display": "Unstoppable"}, 
+            {"display": "Godlike"}, 
+            {"display": "Best Spree"}
+        ],
+        "footer": [
+            {"display": "Total | Best"},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "MAX", "dataType": "INT", "callback": ignore0}
         ]
     };
 
     const multis = [];
 
     const multiTableOptions = {
-        "width": 1,
+        "className": "t-width-1",
         "headers": [
-            "Player", "Double Kill", "Multi Kill", "Ultra Kill", "Monster Kill", "Best Multi Kill"
+            {"display": "Player"}, 
+            {"display": "Double Kill"}, 
+            {"display":"Multi Kill"}, 
+            {"display":"Ultra Kill"},
+            {"display": "Monster Kill"},
+            {"display":"Best Multi Kill"}
+        ],
+        "footer": [
+            {"display": "Total | Best"},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "MAX", "dataType": "INT", "callback": ignore0}
         ]
     };
 
@@ -377,11 +392,11 @@ function renderSpecialEvents(parent, totalTeams, players){
 
  
     if(sprees.length > 1){
-        new UITable(wrapper, spreeTableOptions, sprees);
+        new TESTUITable(wrapper, spreeTableOptions, sprees);
     }
 
     if(multis.length > 1){
-         new UITable(wrapper, multiTableOptions, multis);
+        new TESTUITable(wrapper, multiTableOptions, multis);
     }
 
     if(multis.length > 1 || sprees.length > 1){
