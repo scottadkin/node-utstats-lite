@@ -1741,15 +1741,14 @@ class MatchWeaponSummary{
 
         this.wrapper = UIDiv(`scroll-x t-width-1 center`);
 
-        const title = UIDiv("header-wrapper");
-        title.innerHTML = `Weapons Summary`;
-        this.parent.append(title);
+        UIHeader(this.parent, "Weapons Summary");
         this.currentMode = "kills";
 
         this.createTabs();
 
-        this.table = document.createElement("table");
-        this.wrapper.append(this.table);
+
+        this.table = new TESTUITable(this.wrapper, {"className": "t-width-1"}, []);
+
         this.parent.append(this.wrapper);
 
         this.render();
@@ -1807,18 +1806,13 @@ class MatchWeaponSummary{
 
         if(this.currentMode === "totals") return;
 
-        const headerRow = document.createElement("tr");
-
-        headerRow.append(UITableHeaderColumn({"content": "Player"}));
+        const headers = [{"display": "Player"}];
 
         for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
             if(weaponName === "All") continue;
 
-            const col = document.createElement("th");
             const weaponImage = this.getImage(weaponName);
-
-            col.className = "tiny-font white team-none";
 
             if(weaponImage !== "blank"){
 
@@ -1826,41 +1820,46 @@ class MatchWeaponSummary{
                 img.src = `/images/weapons/${weaponImage}.png`;
                 img.className = "weapon-icon"; 
                 img.title = weaponName;
-                col.append(img);
+   
+                headers.push({"display": img});
                 
             }else{
-               
-                col.append(weaponName.toUpperCase());
-            }
-            
-            headerRow.append(col);
+               headers.push({"display": weaponName.toUpperCase(), "className":"tiny-font white team-none" });
+      
+            }      
         }
-
-        this.table.append(headerRow);
-
         
+
+        const rows = [];
+
         for(const [playerId, player] of Object.entries(this.playerData)){
 
-            const row = document.createElement("tr");
-
             if(player.bSpectator) continue;
+            const row = [];
 
-            row.appendChild(UIPlayerLink({
-                "playerId": playerId, 
-                "name": player.name, 
-                "country": player.country, 
-                "bTableElem": true,
-                "className": (this.totalTeams < 2) ? "" : getTeamColorClass(player.team)
-            }));
+            row.push({
+                "display": UIPlayerLink({
+                    "playerId": playerId, 
+                    "name": player.name, 
+                    "country": player.country, 
+                    "bTableElem": true,
+                    "className": (this.totalTeams < 2) ? "" : getTeamColorClass(player.team)
+                }), 
+                "value": player.name.toLowerCase(),
+                "bSkipTD": true
+            });
 
             for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
                 if(weaponName === "All") continue;
-                row.appendChild(UITableCell({"content": this.getPlayerWeaponStat(this.currentMode, playerId, weaponId), "parse": ["ignore0"]}));
+                const statValue = this.getPlayerWeaponStat(this.currentMode, playerId, weaponId);
+                row.push({"display": ignore0(statValue), "value": statValue, "parse": ["ignore0"]});
             }
 
-            this.table.appendChild(row);
-        }       
+            rows.push(row);
+        }    
+
+        this.table.updateRows(rows, headers);   
     }
 
     getWeaponTotalStats(weaponId){
@@ -1898,42 +1897,39 @@ class MatchWeaponSummary{
 
         if(this.currentMode !== "totals") return;
 
-        this.table.className = `t-width-1`;
-        const headerRow = document.createElement("tr");
+        const headers = ["Weapon", "Team Kills", "Suicides", "Deaths", "Kills", "KPM"].map((h) =>{
+            return {"display": h}
+        });
 
-        headerRow.appendChild(UITableHeaderColumn({"content": "Weapon"}));
-        headerRow.appendChild(UITableHeaderColumn({"content": "Team Kills"}));
-        headerRow.appendChild(UITableHeaderColumn({"content": "Suicides"}));
-        headerRow.appendChild(UITableHeaderColumn({"content": "Deaths"}));
-        headerRow.appendChild(UITableHeaderColumn({"content": "Kills"}));
-        headerRow.appendChild(UITableHeaderColumn({"content": "KPM"}));
-
-        this.table.appendChild(headerRow);
+        const rows = [];
 
         for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
             if(weaponName === "All") continue;
 
-            const row = document.createElement("tr");
-            row.appendChild(UITableCell({"content": weaponName, "className": "text-left"}));
+            const row = [];document.createElement("tr");
+            row.push({"display": weaponName, "value": weaponName.toLowerCase(), "className": "text-left team-none"});
 
 
             const wStats = this.getWeaponTotalStats(weaponId);
 
-            row.appendChild(UITableCell({"content": wStats.teamKills, "parse": ["ignore0"]}));
-            row.appendChild(UITableCell({"content": wStats.suicides, "parse": ["ignore0"]}));
-            row.appendChild(UITableCell({"content": wStats.deaths, "parse": ["ignore0"]}));
-            row.appendChild(UITableCell({"content": wStats.kills, "parse": ["ignore0"]}));
-            row.appendChild(UITableCell({"content": wStats.kpm.toFixed(2)}));
-            this.table.appendChild(row);
+            row.push({"display": ignore0(wStats.teamKills), "value": wStats.teamKills});
+            row.push({"display": ignore0(wStats.suicides), "value": wStats.suicides});
+            row.push({"display": ignore0(wStats.deaths), "value": wStats.deaths});
+            row.push({"display": ignore0(wStats.kills), "value": wStats.kills});
+            row.push({"display": wStats.kpm.toFixed(2), "value": wStats.kpm});
+
+            rows.push(row);
         }
+
+        this.table.updateRows(rows, headers);
 
     }
 
     render(){
 
-        this.table.innerHTML = ``;
-        this.table.className = "";
+        //this.table.innerHTML = ``;
+        //this.table.className = "";
 
         this.renderStatType();
         this.renderTotals();

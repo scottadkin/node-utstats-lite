@@ -54,9 +54,15 @@ class TESTUITable{
         if(this.options.headers === undefined) return;
 
 
-        this.tableHead = document.createElement("thead");
-        const headerRow = document.createElement("tr");
+        if(this.tableHead === undefined){
+            this.tableHead = document.createElement("thead");
+            
+        }else{
+            this.tableHead.innerHTML = ``;
+        }
 
+
+        const headerRow = document.createElement("tr");
 
         for(let i = 0; i < this.options.headers.length; i++){
 
@@ -435,7 +441,7 @@ class TESTUITable{
 
     }
 
-    updateRows(newRows){
+    updateRows(newRows, newHeaders){
 
         this.tableBody.innerHTML = "";
 
@@ -444,6 +450,12 @@ class TESTUITable{
         this.page = 0;
         this.setTotalPages();
 
+        
+        if(newHeaders !== undefined){
+            this.options.headers = newHeaders;
+            this.sortBy = 0;
+            this.renderHeaders();
+        }
         this.sortData();
 
         this.renderCaption();
