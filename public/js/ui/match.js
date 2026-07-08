@@ -1063,9 +1063,8 @@ function renderCTFSummary(parent, totalTeams, data, players){
 
     const wrapper = UIDiv();
 
-    const title = UIDiv("header-wrapper");
-    title.innerHTML = "Capture The Flag Summary";
-    wrapper.append(title);
+    UIHeader(wrapper, "Capture The Flag Summary");
+  
 
     const tabs = new UITabs(wrapper, [
         {"display": "General", "value": "general"},
@@ -1123,10 +1122,9 @@ class CTFCaps{
 
         this.wrapper = UIDiv();
 
-        this.title = UIDiv("header-wrapper");
-        this.title.innerHTML = "Capture The Flag Caps";
-        this.wrapper.append(this.title);
 
+        this.title = UIHeader(this.wrapper, "Capture The Flag Caps");
+       
         this.createTabs();
 
         this.content = UIDiv("ctf-cap");
@@ -1643,13 +1641,18 @@ class CTFCaps{
     renderBasicCaps(){
 
         const tableOptions = {
-            "width": 1,
+            "className": "t-width-1",
             "headers": [
                 "Taken", "Taken By", "Drops", "Covers", 
                 "Kills", "Suicides", "Capped By", 
                 "Cap", "Travel Time", "Score"
             ]
         };
+
+
+        tableOptions.headers = tableOptions.headers.map((h) =>{
+            return {"display": h};
+        });
 
         const data = [];
 
@@ -1669,31 +1672,40 @@ class CTFCaps{
             const scores = UIBasicTeamScore(teamScores[0], teamScores[1]);
             const kills = UIBasicTeamScore(c.red_kills, c.blue_kills);
             const suicides = UIBasicTeamScore(c.red_suicides, c.blue_suicides);
-            
+
             data.push([
                 
-                UIMMSS(c.taken_timestamp), 
-                UIPlayerLink({
-                    "playerId": c.taken_player, 
-                    "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
-                    "country": grabPlayer.country
-                }), 
-                ignore0(c.total_drops),
-                ignore0(c.total_covers),
-                kills,
-                suicides,
-                UIPlayerLink({
-                    "playerId": c.cap_player, 
-                    "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
-                    "country": capPlayer.country
-                }), 
-                UIMMSS(c.cap_timestamp),
-                {"content": c.cap_time, "parse": ["playtime2"], "className": "playtime"},
-                scores
+                {
+                    "display": UIMMSS(c.taken_timestamp), 
+                    "value": c.taken_timestamp
+                }, 
+                {
+                    "display": UIPlayerLink({
+                        "playerId": c.taken_player, 
+                        "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
+                        "country": grabPlayer.country,
+                    }), 
+                    "value": grabPlayer.name.toLowerCase()
+                }, 
+                {"display": ignore0(c.total_drops), "value": c.total_drops},
+                {"display": ignore0(c.total_covers), "value": c.total_covers},
+                {"display": kills, "value": c.red_kills + c.blue_kills},
+                {"display": suicides, "value": c.red_suicides + c.blue_suicides},
+                {
+                    "display": UIPlayerLink({
+                        "playerId": c.cap_player, 
+                        "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
+                        "country": capPlayer.country
+                    }), 
+                    "value": capPlayer.name.toLowerCase()
+                }, 
+                {"display": UIMMSS(c.cap_timestamp), "value": c.cap_timestamp},
+                {"display": toPlaytime(c.cap_time, true), "value": c.cap_time, "className": "playtime"},
+                {"display": scores, "value":teamScores[0] + teamScores[1]}
             ]);
         }
 
-        const table = new UITable(this.content, tableOptions, data);
+        const table = new TESTUITable(this.content, tableOptions, data);
 
     }
 

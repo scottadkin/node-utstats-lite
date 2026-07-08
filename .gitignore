@@ -17,3 +17,4 @@ logs/*.log
 logs/*.zip
 logs/imported/*.log
 logs/rejected/*.log
+GITHUB.lnk
