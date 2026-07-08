@@ -389,7 +389,6 @@ tr:hover{
 
 tfoot td{
     background-color:var(--bg-color-dark);
-    color:var(--font-color-3);
 }
 
 .player-name-td{

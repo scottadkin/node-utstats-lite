@@ -293,6 +293,8 @@ class TESTUITable{
 
             const cell = document.createElement("td");
 
+            if(o.className !== undefined) cell.className = o.className;
+
             if(o.display === "SUM" || o.display === "AVG" || o.display === "MAX" || o.display === "MIN"){
 
                 let value = o.display;

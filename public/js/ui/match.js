@@ -904,18 +904,29 @@ function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKe
         "flag_carry_time_min"
     ];
 
-    for(let i = 0; i < totalTeams; i++){
+    const tableOptions = {
+        headers, 
+        "className": "t-width-1",
+        "footer": [
+            {"display": "Player"},
+        ]
+    }
 
-        const table = document.createElement("table");
-        table.className = "t-width-1";
-        
-        const headerRow = document.createElement("tr");
+    for(let i = 0; i < dataKeys.length; i++){
 
-        for(let x = 0; x < headers.length; x++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[x]}));
+        const current = {"display": "SUM", "dataType": "FLOAT"};
+
+        if(playtimeTypes.indexOf(dataKeys[i]) !== -1){
+            current.callback = (v) => { return toPlaytime(v, true)};
+            current.className = "playtime";
+        }else{
+            current.callback = ignore0;
         }
+        tableOptions.footer.push(current);
+    }
 
-        table.appendChild(headerRow);
+    
+    for(let i = 0; i < totalTeams; i++){
 
         const totals = {};
         
@@ -923,54 +934,48 @@ function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKe
             totals[dataKeys[z]] = 0;
         }
 
+        const rows = [];
+
         for(let x = 0; x < data.playerData.length; x++){
 
             const p = data.playerData[x];
 
             if(p.spectator) continue;
 
-            const row = document.createElement("tr");
+            const row = []
 
             const player = players?.[p.player_id] ?? {"name": "Not Found", "country": "xx", "team": 255};
 
             if(player.team !== i) continue;
 
-            row.appendChild(UIPlayerLink({
-                "playerId": p.player_id,
-                "className": getTeamColorClass(i), 
-                "country": player.country, "bTableElem": "true", "name": player.name
-            }));
+            row.push({
+                "value": player.name.toLowerCase(), 
+                "display": UIPlayerLink({
+                    "playerId": p.player_id,
+                    "className": getTeamColorClass(i), 
+                    "country": player.country, "bTableElem": "true", "name": player.name
+                }),
+                "bSkipTD": true
+            });
 
             for(let z = 0; z < dataKeys.length; z++){
 
                 totals[dataKeys[z]] += p[dataKeys[z]];
 
                 if(playtimeTypes.indexOf(dataKeys[z]) === -1){
-                    row.appendChild(UITableCell({"content":  p[dataKeys[z]], "parse": "ignore0"}));
+                    row.push({"value": p[dataKeys[z]], "display": ignore0(p[dataKeys[z]])});
                 }else{
-                    row.appendChild(UITableCell({"content":  p[dataKeys[z]], "className": "playtime", "parse": ["playtime"]}));
+                    row.push({"value": p[dataKeys[z]], "display": toPlaytime(p[dataKeys[z]], true), "className": "playtime"});
                 }
             }
 
-            table.appendChild(row);
+
+            rows.push(row);
+
         }
 
-        const totalsRow = document.createElement("tr");
 
-        totalsRow.appendChild(UITableCell({"content":  "Totals", "className": "team-none"}));
-
-        for(let z = 0; z < dataKeys.length; z++){
-
-            if(playtimeTypes.indexOf(dataKeys[z]) === -1){
-                totalsRow.appendChild(UITableCell({"content":  totals[dataKeys[z]], "parse": "ignore0"}));
-            }else{
-                totalsRow.appendChild(UITableCell({"content":  totals[dataKeys[z]], "className": "playtime", "parse": ["playtime"]}));
-            }
-        }
-
-        table.appendChild(totalsRow);
-
-        parent.appendChild(table);
+        new TESTUITable(parent, tableOptions, rows);
     }
 }
 
@@ -978,10 +983,12 @@ function renderGeneralCTFTab(parent, totalTeams, data, players){
 
     parent.innerHTML = "";
 
-    const headers = [
+    let headers = [
         "Player", "Taken", "Pickup", "Drop", "Assist", "Cover", 
         "Seal", "Capture", "Kill", "Return", "Carry Time"
     ];
+
+     headers = headers.map((h) =>{ return {"display": h}} );
 
     const dataKeys = [
         "flag_taken",
@@ -1004,10 +1011,12 @@ function renderReturnCTFTab(parent, totalTeams, data, players){
 
     parent.innerHTML = "";
 
-    const headers = [
+    let headers = [
         "Player", "Return", "Return Base", "Return Mid", 
         "Return Enemy Base", "Return Close Save"
     ];
+
+    headers = headers.map((h) =>{ return {"display": h}} );
 
     const dataKeys = [
         "flag_return",
@@ -1024,13 +1033,15 @@ function renderCarryTimeCTFTab(parent, totalTeams, data, players){
 
     parent.innerHTML = "";
 
-    const headers = [
+    let headers = [
         "Player", "Times Held", 
         "Total Carry Time",
         "Max Carry Time", 
         "Avg Carry Time",
         "Min Carry Time",
     ];
+
+    headers = headers.map((h) =>{ return {"display": h}} );
 
     const dataKeys = [
         "times_held",
