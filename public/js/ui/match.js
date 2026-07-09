@@ -1859,7 +1859,7 @@ class MatchWeaponSummary{
             rows.push(row);
         }    
 
-        this.table.updateRows(rows, headers);   
+        this.table.updateRows(rows, headers, null);   
     }
 
     getWeaponTotalStats(weaponId){
@@ -1901,13 +1901,22 @@ class MatchWeaponSummary{
             return {"display": h}
         });
 
+        const footer = [
+            {"display": "Totals | AVG"},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "FLOAT", "callback": (v) => `${parseFloat(v).toFixed(2)}`},
+        ];
+
         const rows = [];
 
         for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
             if(weaponName === "All") continue;
 
-            const row = [];document.createElement("tr");
+            const row = [];
             row.push({"display": weaponName, "value": weaponName.toLowerCase(), "className": "text-left team-none"});
 
 
@@ -1922,7 +1931,7 @@ class MatchWeaponSummary{
             rows.push(row);
         }
 
-        this.table.updateRows(rows, headers);
+        this.table.updateRows(rows, headers, footer);
 
     }
 

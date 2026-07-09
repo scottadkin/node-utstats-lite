@@ -291,6 +291,12 @@ class TESTUITable{
 
         if(this.tableFooter === undefined) return;
 
+        if(this.options.footer === undefined){
+            //delete this.tableFooter;
+
+            return;
+        }
+
         const row = document.createElement("tr");
 
         for(let i = 0; i < this.options.footer.length; i++){
@@ -368,12 +374,17 @@ class TESTUITable{
             this.tableBody = document.createElement("tbody");
         }
 
+        if(this.options.footer === undefined && this.tableFooter !== undefined){
+            this.tableFooter.innerHTML = ``;
+        }
+
         if(this.options.footer !== undefined){
 
-            if(this.tableFooter !== undefined){
-                this.tableFooter.innerHTML = ``;
-            }else{
+            if(this.tableFooter === undefined){
+           
                 this.tableFooter = document.createElement("tfoot");
+            }else{
+                this.tableFooter.innerHTML = ``;
             }
         }
 
@@ -433,10 +444,10 @@ class TESTUITable{
         if(bFirstRender){
 
             this.table.append(this.tableBody);
+        }
 
-            if(this.tableFooter !== undefined){
-                this.table.append(this.tableFooter);
-            }
+        if(this.tableFooter !== undefined){
+            this.table.append(this.tableFooter);
         }
 
     }
@@ -457,11 +468,14 @@ class TESTUITable{
             this.renderHeaders();
         }
 
-        if(newFooter !== undefined){
+        if(newFooter !== undefined && newFooter !== null){
+    
             this.options.footer = newFooter;
             
+        }else if(newFooter === null){  
+            delete this.options.footer;
         }
-        
+
         this.sortData();
 
         this.renderCaption();
