@@ -1802,11 +1802,26 @@ class MatchWeaponSummary{
         return 0;
     }
 
+
+    bAnyEventData(playerId){
+
+        const data = {"bAllZero": true};
+        for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
+
+            if(weaponName === "All") continue;
+            const statValue = this.getPlayerWeaponStat(this.currentMode, playerId, weaponId);
+            if(statValue !== 0) return true;
+        }
+
+        return false;
+    }
+
     renderStatType(){
 
         if(this.currentMode === "totals") return;
 
         const headers = [{"display": "Player"}];
+        const footers = [{"display": "Totals"}];
 
         for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
@@ -1825,16 +1840,20 @@ class MatchWeaponSummary{
                 
             }else{
                headers.push({"display": weaponName.toUpperCase(), "className":"tiny-font white team-none" });
-      
             }      
+
+            footers.push({"display": "SUM", "dataType": "INT", "callback": ignore0});
         }
         
-
         const rows = [];
 
         for(const [playerId, player] of Object.entries(this.playerData)){
 
             if(player.bSpectator) continue;
+
+
+            if(!this.bAnyEventData(playerId)) continue;
+
             const row = [];
 
             row.push({
@@ -1849,6 +1868,11 @@ class MatchWeaponSummary{
                 "bSkipTD": true
             });
 
+            
+            
+
+
+
             for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
                 if(weaponName === "All") continue;
@@ -1859,7 +1883,7 @@ class MatchWeaponSummary{
             rows.push(row);
         }    
 
-        this.table.updateRows(rows, headers, null);   
+        this.table.updateRows(rows, headers, footers);   
     }
 
     getWeaponTotalStats(weaponId){
@@ -1902,7 +1926,7 @@ class MatchWeaponSummary{
         });
 
         const footer = [
-            {"display": "Totals | AVG"},
+            {"display": "Totals"},
             {"display": "SUM", "dataType": "INT", "callback": ignore0},
             {"display": "SUM", "dataType": "INT", "callback": ignore0},
             {"display": "SUM", "dataType": "INT", "callback": ignore0},
@@ -1916,17 +1940,17 @@ class MatchWeaponSummary{
 
             if(weaponName === "All") continue;
 
-            const row = [];
-            row.push({"display": weaponName, "value": weaponName.toLowerCase(), "className": "text-left team-none"});
-
-
             const wStats = this.getWeaponTotalStats(weaponId);
 
-            row.push({"display": ignore0(wStats.teamKills), "value": wStats.teamKills});
-            row.push({"display": ignore0(wStats.suicides), "value": wStats.suicides});
-            row.push({"display": ignore0(wStats.deaths), "value": wStats.deaths});
-            row.push({"display": ignore0(wStats.kills), "value": wStats.kills});
-            row.push({"display": wStats.kpm.toFixed(2), "value": wStats.kpm});
+            const row = [
+                {"display": weaponName, "value": weaponName.toLowerCase(), "className": "text-left team-none"},
+                {"display": ignore0(wStats.teamKills), "value": wStats.teamKills},
+                {"display": ignore0(wStats.suicides), "value": wStats.suicides},
+                {"display": ignore0(wStats.deaths), "value": wStats.deaths},
+                {"display": ignore0(wStats.kills), "value": wStats.kills},
+                {"display": wStats.kpm.toFixed(2), "value": wStats.kpm}
+            ];
+
 
             rows.push(row);
         }
