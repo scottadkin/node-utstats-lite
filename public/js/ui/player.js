@@ -903,11 +903,6 @@ class PlayerCTFLeague{
         this.mode = "gametypes";
         this.createTabs();
 
-        this.table = document.createElement("table");
-        this.table.className = `t-width-1`;
-
-        this.parent.appendChild(this.table);
-
         this.render();
     }
 
@@ -929,10 +924,6 @@ class PlayerCTFLeague{
 
     createRow(data){
 
-        const row = document.createElement("tr");
-
-        row.appendChild(UITableCell({"content": parseInt(data.pos) + 1, "parse": ["ordinal"]}));
-
 
         let name = "Unknown";
 
@@ -944,17 +935,25 @@ class PlayerCTFLeague{
             name = `Lifetime`;
         }
 
-        row.appendChild(UITableCell({
-            "content": name,//(this.mode === "gametypes") ? data.gametype_name : data.map_name,
-            "className": "text-left"
-        }));
+
+        const row = [
+            {
+                "display": `${data.pos+1}${getOrdinal(parseInt(data.pos) + 1)}`, 
+                "value": data.pos
+            },
+            {
+                "display": name,
+                "value": name.toLowerCase(),
+                "className": "text-left"
+            }
+        ];
 
         const ignore0keys = [
             "total_matches", "wins", "draws", "losses", "cap_for", "cap_against"
         ];
 
         for(let i = 0; i < ignore0keys.length; i++){
-            row.appendChild(UITableCell({"content": data[ignore0keys[i]], "parse": ["ignore0"]}));
+            row.push({"display": ignore0(data[ignore0keys[i]]), "value": data[ignore0keys[i]]});
         }
 
 
@@ -964,8 +963,7 @@ class PlayerCTFLeague{
             diff = `+${diff}`;
         }
 
-        row.appendChild(UITableCell({"content": diff}));
-        row.appendChild(UITableCell({"content": data.points, "parse": ["ignore0"]}));
+        row.push({"display": diff, "value": data.cap_offset},{"display": ignore0(data.points), "value": data.points});
 
 
         return row;
@@ -973,22 +971,13 @@ class PlayerCTFLeague{
 
     render(){
 
-        this.table.innerHTML = ``;
 
         const headers = [
             "Place", "Name", "Played", "Wins", "Draws", "Losses",
             "Caps For", "Caps Against", "Cap Diff", "Points"
         ];
-
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.appendChild(headerRow);
-
       
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
@@ -998,7 +987,13 @@ class PlayerCTFLeague{
             if(this.mode === "maps" && (d.map_id === 0 || d.gametype_id !== 0)) continue;
             if(this.mode === "combined" && (d.map_id !== 0 || d.gametype_id !== 0)) continue;
 
-            this.table.appendChild(this.createRow(d));
+            rows.push(this.createRow(d));
+        }
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.parent, {"className": "t-width-1", "headers": headers.map((h) =>{return {"display": h}})}, rows);
+        }else{
+            this.table.updateRows(rows);
         }
     }
 }
