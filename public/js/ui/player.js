@@ -18,23 +18,19 @@ class PlayerRecentMatches{
 
         UIHeader(this.wrapper, "Recent Matches");
 
-        this.parent.appendChild(this.wrapper);
+        this.parent.append(this.wrapper);
 
         this.changeNamesToArrays();
 
         this.createForm();
-
-        this.table = document.createElement("table");
-        this.table.className = "t-width-1";
 
 
         //need to add support for event classback is url is set to null, make sure dont create link elemens
         this.pagination = new UIPagination(this.wrapper, (newPage) =>{
             this.page = newPage;
             this.loadData();
-        }, this.totalMatches, this.perPage, this.page);
+        }, 0, this.perPage, this.page);
 
-        this.wrapper.appendChild(this.table);
 
         this.loadData();
     }
@@ -83,7 +79,7 @@ class PlayerRecentMatches{
         const allOption = document.createElement("option");
         allOption.value = "0";
         allOption.innerHTML = "Any";
-        select.appendChild(allOption);
+        select.append(allOption);
 
         const names = (type === "gametype") ? this.gametypeNames : this.mapNames;
 
@@ -93,8 +89,8 @@ class PlayerRecentMatches{
 
             const option = document.createElement("option");
             option.value = id;
-            option.appendChild(document.createTextNode(name));
-            select.appendChild(option);
+            option.append(name);
+            select.append(option);
         }
 
         select.addEventListener("change", (e) =>{
@@ -118,29 +114,25 @@ class PlayerRecentMatches{
 
     createForm(){
 
-        this.form = document.createElement("div");
+        this.form = UIDiv();
 
 
-        this.gametypeRow = document.createElement("div");
-        this.gametypeRow.className = "form-row";
+        this.gametypeRow = UIDiv("form-row");
 
         const gLabel = document.createElement("label");
         gLabel.innerHTML = "Gametype";
         gLabel.htmlFor = "recent-match-gametype";
-        this.gametypeRow.appendChild(gLabel);
-        this.gametypeRow.appendChild(this.createSelect("gametype"));
-        this.form.appendChild(this.gametypeRow);
+        this.gametypeRow.append(gLabel, this.createSelect("gametype"));
+        this.form.append(this.gametypeRow);
 
-        this.mapRow = document.createElement("div");
-        this.mapRow.className = "form-row";
+        this.mapRow = UIDiv("form-row");
         const mLabel = document.createElement("label");
         mLabel.innerHTML = "Map";
         mLabel.htmlFor = "recent-match-map";
-        this.mapRow.appendChild(mLabel);
-        this.mapRow.appendChild(this.createSelect("map"));
-        this.form.appendChild(this.mapRow);
+        this.mapRow.append(mLabel,this.createSelect("map"));
+        this.form.append(this.mapRow);
 
-        this.wrapper.appendChild(this.form);
+        this.wrapper.append(this.form);
     }
 
 
@@ -160,9 +152,10 @@ class PlayerRecentMatches{
 
             this.data = res;
 
-            this.pagination.updateResults(this.page, res.totalMatches, this.perPage);
+            
 
             this.renderTable();
+            this.pagination.updateResults(this.page, res.totalMatches, this.perPage);
 
         }catch(err){
             console.trace(err);
@@ -171,14 +164,9 @@ class PlayerRecentMatches{
 
     createRow(data){
 
-        const row = document.createElement("tr");
 
         const url = `/match/${data.match_id}`;
 
-        row.appendChild(UITableCell({"content": toDateString(data.match_date), "className": "date", url}));
-        row.appendChild(UITableCell({"content": data.gametype_name, url}));
-        row.appendChild(UITableCell({"content": data.map_name, url}));
-        row.appendChild(UITableCell({"content": data.time_on_server, "parse": ["playtime"], "className": "playtime", url}));
 
         let string = "";
         let className = "";
@@ -199,40 +187,34 @@ class PlayerRecentMatches{
             string = "N/A";
         }
 
-        row.appendChild(UITableCell({"content": string, className, url}));
+        return [
+            {"display": toDateString(data.match_date), "className": "date", url},
+            {"display": data.gametype_name, url},
+            {"display": data.map_name, url},
+            {"display": MMSS(data.time_on_server), "className": "mmss", url},
+            {"display": string, className, url}];
 
 
-        return row;
+      
     }
 
     renderTable(){
 
-
-        this.table.innerHTML = "";
-        this.wrapper.className = "";
-
-        if(this.data.totalMatches === 0){
-            this.wrapper.className = "hidden";
-            return;
-
-        }
-
-        const headers = ["Date", "Gametype", "Map", "Playtime", "Match Result"];
-
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.appendChild(headerRow);
+        const rows = [];
 
         for(let i = 0; i < this.data.matches.length; i++){
 
             const d = this.data.matches[i];
 
-            this.table.appendChild(this.createRow(d));
+            rows.push(this.createRow(d));
+        }
+
+        if(this.table === undefined){
+            const headers = ["Date", "Gametype", "Map", "Playtime", "Match Result"];
+            const tableOptions = {"className": "t-width-1","bNoSort": true, "headers": headers.map((h) =>{ return {"display": h}})};
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows);
         }
     }
 }
