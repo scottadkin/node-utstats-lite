@@ -693,11 +693,6 @@ class PlayerWeaponsSummary{
 
         this.mode = 0;
         this.createTabs();
-        
-
-        this.table = document.createElement("table");
-        this.table.className = `t-width-1`;
-        this.parent.appendChild(this.table);
 
         this.render();
     }
@@ -723,41 +718,87 @@ class PlayerWeaponsSummary{
 
     createRow(d){
 
-        const row = document.createElement("tr");
-
-        row.appendChild(UITableCell({"content": d.weapon_name, "className": "text-left"}));
-        row.appendChild(UITableCell({"content": d.total_matches}));
-        row.appendChild(UITableCell({"content": d.team_kills, "parse": ["ignore0"]}));
-        row.appendChild(UITableCell({"content": d.deaths, "parse": ["ignore0"]}));
-        row.appendChild(UITableCell({"content": d.kills, "parse": ["ignore0"]}));
-        row.appendChild(UITableCell({"content": `${d.eff.toFixed(2)}%`}));
-
-        return row;
+        return [
+            {"display": d.weapon_name, "value":d.weapon_name.toLowerCase(), "className": "text-left"},
+            {"value": d.total_matches},
+            {"display": ignore0(d.team_kills), "value": d.team_kills},
+            {"display": ignore0(d.deaths), "value": d.deaths},
+            {"display": ignore0(d.kills), "value": d.kills},
+            {"display": `${d.eff.toFixed(2)}%`, "value": d.eff},
+        ]
     }
 
     render(){
 
-        this.table.innerHTML = ``;
 
         const headers = [
             "Name", "Matches", "Team Kills", "Deaths", "Kills", "Efficiency"
         ];
 
-        const headerRow = document.createElement("tr");
+        const rows = [];
 
-        for(let i = 0; i < headers.length; i++){
-
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.appendChild(headerRow);
+        const totals = {
+            "teamKills": 0,
+            "deaths": 0,
+            "kills": 0,
+            "matches": 0
+        };
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
             if(d.gametype_id !== this.mode) continue;
-            this.table.appendChild(this.createRow(d));
+
+            totals.teamKills += d.team_kills;
+            totals.deaths += d.deaths;
+            totals.kills += d.kills;
+            if(d.total_matches > totals.matches) totals.matches = d.total_matches;
+            rows.push(this.createRow(d));
+        }
+
+        let footer = null;
+
+        if(rows.length > 1){
+
+            let eff = 0;
+
+            if(totals.kills > 0){
+
+                if(totals.deaths === 0 && totals.teamKills === 0){
+                    eff = 100;
+                }else{
+
+                    const t = totals.deaths + totals.teamKills;
+                    if(t !== 0){
+                        eff = (totals.kills / (t + totals.kills)) * 100;
+                    }
+                }
+            }
+
+            footer = [
+                {"display": "Totals"},
+                {"display": totals.matches},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": `${eff.toFixed(2)}%`},
+            ];
+        }
+
+        const h = headers.map((h) =>{ return {"display": h}});
+
+        if(this.table === undefined){
+
+            this.table = new TESTUITable(
+                this.parent, 
+                {
+                    "className": "t-width-1",
+                    "headers": h,
+                    footer},
+                    rows);
+        }else{
+            this.table.updateRows(rows, h, footer);
         }
     }
 }

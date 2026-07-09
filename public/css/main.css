@@ -391,6 +391,7 @@ tfoot td{
     background-color:var(--bg-color-dark);
 }
 
+
 .player-name-td{
 	min-width:150px;
 	width:150px;
@@ -739,7 +740,7 @@ option{
 }
 
 
-.small-button{
+.small-button, .uit-but{
 	display:inline-block;
 	background-color:var(--bg-color-light);
 	font-size:var(--font-size-70);
@@ -750,16 +751,16 @@ option{
 }
 
 
-.small-button:hover{
+.small-button:hover, .uit-but:hover{
 	cursor: pointer;
 	background-color:var(--button-hover-color);
 	
 }
 
-.previous-next-buttons{
+.previous-next-buttons, .uit-bw{
 	display:flex;
 	justify-content: center;
-	font-size:var(--font-size-50);
+	font-size:var(--font-size-70);
 	height:30px;
 	line-height: 30px;
 	flex-wrap: wrap;
