@@ -2399,11 +2399,6 @@ class MatchDamageSummary{
 
         UIHeader(parent, "Damage Summary");
 
-        this.table = document.createElement("table");
-        this.table.className = "t-width-1";
-
-        this.parent.appendChild(this.table);
-
         this.render();
     }
 
@@ -2420,53 +2415,37 @@ class MatchDamageSummary{
 
     createRow(player){
 
-        const row = document.createElement("tr");
+       const damageTypes = ["fallDamage", "drownDamage", "selfDamage", "damageTaken", "damageDelt"];
+       const teamDamageTypes = ["teamDamageTaken", "teamDamageDelt"];
 
-        row.appendChild(UIPlayerLink({
-            "playerId": player.player_id, 
-            "name": player.name, 
-            "country": player.country, 
-            "bTableElem": true,
-            "className": (this.totalTeams < 2) ? "team-none" : getTeamColorClass(player.team)
-        }));
+       const row = [
+        {
+            "bSkipTD": true, 
+            "value": player.name.toLowerCase(),
+            "display": UIPlayerLink({
+                "playerId": player.player_id, 
+                "name": player.name, 
+                "country": player.country, 
+                "bTableElem": true,
+                "className": (this.totalTeams < 2) ? "team-none" : getTeamColorClass(player.team)
+            })
+        }];
 
+        for(let i = 0; i < damageTypes.length; i++){
 
-        row.appendChild(UITableCell({
-            "content": player.damage.fallDamage,
-            "parse": ["ignore0"]
-        }));
+            const t = damageTypes[i];
+            row.push({"display": ignore0(player.damage[t]), "value": player.damage[t]});
+        }
 
-        row.appendChild(UITableCell({
-            "content": player.damage.drownDamage,
-            "parse": ["ignore0"]
-        }));
-
-        row.appendChild(UITableCell({
-            "content": player.damage.selfDamage,
-            "parse": ["ignore0"]
-        }));
-
-        row.appendChild(UITableCell({
-            "content": player.damage.damageTaken,
-            "parse": ["ignore0"]
-        }));
-
-        row.appendChild(UITableCell({
-            "content": player.damage.damageDelt,
-            "parse": ["ignore0"]
-        }));
 
         if(this.bAnyTeamDamage()){
 
-            row.appendChild(UITableCell({
-                "content": player.damage.teamDamageTaken,
-                "parse": ["ignore0"]
-            }));
+            for(let i = 0; i < teamDamageTypes.length; i++){
 
-            row.appendChild(UITableCell({
-                "content": player.damage.teamDamageDelt,
-                "parse": ["ignore0"]
-            }));
+                const t = teamDamageTypes[i];
+                row.push({"display": ignore0(player.damage[t]), "value": player.damage[t]});
+            }
+
         }
 
         return row;
@@ -2489,8 +2468,6 @@ class MatchDamageSummary{
 
     render(){
 
-        const headerRow = document.createElement("tr");
-
         const headers = [
             "Player",
             "Fall Damage",
@@ -2500,17 +2477,25 @@ class MatchDamageSummary{
             "Damage Delt"
         ];
 
+        const footer = [
+            {"display": "Total"},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+        ];
+
         if(this.bAnyTeamDamage()){
-            headers.push("Team Damage Taken");
-            headers.push("Team Damage Delt");
+            headers.push("Team Damage Taken","Team Damage Delt");
+
+            footer.push(
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0}
+            );
         }
 
-        for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.appendChild(headerRow);
-
+        const rows = [];
 
         for(let i = 0; i < this.players.length; i++){
 
@@ -2518,9 +2503,18 @@ class MatchDamageSummary{
 
             if(p.spectator || p.damage === undefined) continue;
 
-            this.table.appendChild(this.createRow(p));
+            rows.push(this.createRow(p));
         }
 
+        if(this.table === undefined){
+
+            this.table = new TESTUITable(
+                this.parent, 
+                {"className": "t-width-1", footer, "headers": headers.map((h) =>{ return {"display": h}})}, 
+                rows);
+        }else{
+            this.table.updateRows(rows,null, footer);
+        }
     }
 }
 
