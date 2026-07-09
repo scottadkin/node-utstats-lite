@@ -356,6 +356,10 @@ class PlayerSpecialEvents{
 
             if(this.mode === "all" && d.gametype_id !== 0) continue;
 
+            if(this.mode !== "all" && this.data.length === 2 && d.gametype_id === 0){
+                continue;
+            }
+
             let total = 0;
 
             for(let x = 0; x < keys.length; x++){
@@ -430,14 +434,11 @@ class PlayerCTFSummary{
         this.data = data;
         this.type = "gametypes";
         this.mode = "general";
-    
-        this.table = document.createElement("table");
+
     
         UIHeader(this.parent, "Capture The Flag Summary");
         
         this.createTabs();
-
-        this.parent.appendChild(this.table);
         this.render();
 
     }
@@ -486,18 +487,30 @@ class PlayerCTFSummary{
     createGeneralRow(data, bMax){
 
         if(bMax === undefined) bMax = false;
-        const row = document.createElement("tr");
+
+        const row = [];
 
         const ignore0Keys = [
             "taken", "pickup", "drop", "assist", "cover", "seal",
             "cap", "kill", "return"
         ];
 
-        row.appendChild(UITableCell({"content": this.getTypeName(data), "className": "text-left"}));
-        row.appendChild(UITableCell({"content": data.total_matches}));
+
+        row.push({
+                "display": this.getTypeName(data), 
+                "value": this.getTypeName(data).toLowerCase(), 
+                "className": "text-left"
+            },
+            {
+                "value": 
+                data.total_matches
+            });
 
         for(let i = 0; i < ignore0Keys.length; i++){
-            row.appendChild(UITableCell({"content": data[`${(bMax) ? "max_" : "" }flag_${ignore0Keys[i]}`], "parse": ["ignore0"]}));
+
+            const key = `${(bMax) ? "max_" : "" }flag_${ignore0Keys[i]}`;
+
+            row.push({"display": ignore0(data[key]), "value": data[key]});
         }
 
         return row;
@@ -507,26 +520,32 @@ class PlayerCTFSummary{
 
         if(bMax === undefined) bMax = false;
 
-        const row = document.createElement("tr");
-
         const ignore0Keys = [
             "", "_base", "_mid", "_enemy_base", "_save"
         ];
 
-        row.appendChild(UITableCell({"content": this.getTypeName(data), "className": "text-left"}));
-        row.appendChild(UITableCell({"content": data.total_matches}));
+        const row = [];
+
+        row.push(
+            {
+                "display": this.getTypeName(data), 
+                "value": this.getTypeName(data).toLowerCase(), 
+                "className": "text-left"
+            }, {
+                "value": data.total_matches
+            }
+        );
 
         for(let i = 0; i < ignore0Keys.length; i++){
-            row.appendChild(UITableCell({"content": data[`${(bMax) ? "max_" : "" }flag_return${ignore0Keys[i]}`], "parse": ["ignore0"]}));
+
+            const key = `${(bMax) ? "max_" : "" }flag_return${ignore0Keys[i]}`;
+            row.push({"display": ignore0(data[key]), "value": data[key]});
         }
 
         return row;
     }
 
     render(){
-
-        this.table.innerHTML = ``;
-        this.table.className = `t-width-1`;
 
         const generalHeaders = [
             "Gametype", "Matches", "Taken", "Pickup",
@@ -541,18 +560,26 @@ class PlayerCTFSummary{
 
         
 
-        const headers = (this.mode !== "returns" && this.mode !== "return-records") ? generalHeaders : returnHeaders;
+        let headers = (this.mode !== "returns" && this.mode !== "return-records") ? generalHeaders : returnHeaders;
 
+        
         if(this.type === "maps") headers[0] = "Map";
 
-        const headerRow = document.createElement("tr");
+        headers = headers.map((h) =>{ return {"display": h}});
+
+        const footer = [];
 
         for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-        }
-        
-        this.table.appendChild(headerRow);
 
+            if(i === 0){
+                footer.push({"display": "Total", "className": "text-left"});
+            }else{
+                footer.push({"display": "SUM", "dataType": "INT", "callback": ignore0});
+            }
+        }
+  
+
+        const rows = [];
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
@@ -562,15 +589,27 @@ class PlayerCTFSummary{
             if(this.type === "lifetime" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
 
             if(this.mode === "general"){
-                this.table.appendChild(this.createGeneralRow(d));
+                rows.push(this.createGeneralRow(d));
             }else if(this.mode === "returns"){
-                this.table.appendChild(this.createReturnsRow(d));
+                rows.push(this.createReturnsRow(d));
             }else if(this.mode === "general-records"){
-                this.table.appendChild(this.createGeneralRow(d, true));
+                rows.push(this.createGeneralRow(d, true));
             }else if(this.mode === "return-records"){
-                 this.table.appendChild(this.createReturnsRow(d, true));
+                rows.push(this.createReturnsRow(d, true));
             }
+        }
 
+        if(this.table === undefined){
+
+            const tableOptions = {
+                headers,
+                "className": "t-width-1",
+                "footer": (rows.length > 1) ? footer : null
+            };
+            this.table = new TESTUITable(this.parent, tableOptions, rows)
+        }else{
+
+            this.table.updateRows(rows,headers, (rows.length > 1) ? footer : null);
         }
     }
 }
