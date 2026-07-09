@@ -1048,6 +1048,12 @@ ul{
 
 .vertical-text{
 	writing-mode: vertical-lr;
+    padding:5px 0px;
+}
+
+.vertical-text img{
+    transform: rotate(90deg);
+    height:21px;
 }
 
 .graph-wrapper{
