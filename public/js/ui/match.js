@@ -1928,9 +1928,6 @@ class MatchWeaponSummary{
 
     render(){
 
-        //this.table.innerHTML = ``;
-        //this.table.className = "";
-
         this.renderStatType();
         this.renderTotals();
    
@@ -1955,9 +1952,6 @@ class MatchClassicWeaponStats{
 
         this.createTabs();
 
-        this.table = document.createElement("table");
-        this.table.className = "t-width-1";
-        this.parent.appendChild(this.table);
         this.render();
     }
 
@@ -1966,7 +1960,15 @@ class MatchClassicWeaponStats{
         const options = [];
 
         for(const [id, name] of Object.entries(this.weaponNames)){
+
             if(id == 0) continue;
+
+            const testTotals = this.getWeaponTotals(parseInt(id));
+
+
+            const totalValue = Object.values(testTotals).reduce((total, currentValue) => { return total + Math.abs(currentValue)});
+
+            if(totalValue === 0) continue;
             options.push({"display": name, "value": parseInt(id)});
         }
 
@@ -1990,18 +1992,61 @@ class MatchClassicWeaponStats{
         });
     }
 
-    render(){
 
-        this.table.innerHTML = ``;
-        const headerRow = document.createElement("tr");
+    getWeaponTotals(weaponId){
 
-        const headers = ["Player", "Kills", "Deaths", "Shots", "Hits", "Accuracy", "Damage"];
+        const totals = {
+            "kills": 0,
+            "deaths": 0,
+            "shots": 0,
+            "hits": 0,
+            "damage": 0,
+            "accuracy": 0 
+        };
 
-        for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.weapon_id !== weaponId) continue;
+
+            totals.kills += d.kills;
+            totals.deaths += d.deaths;
+            totals.shots += d.shots;
+            totals.hits += d.hits;
+            totals.damage += d.damage;
         }
 
-        this.table.appendChild(headerRow);
+
+        if(totals.shots > 0 && totals.hits > 0){
+            totals.accuracy = (totals.hits / totals.shots) * 100;
+        }
+
+        return totals;
+    }
+
+    render(){
+
+    
+        const headers = ["Player", "Kills", "Deaths", "Shots", "Hits", "Accuracy", "Damage"];
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": headers.map((h) =>{ return{"display": h}})
+        };
+
+        const footer = [
+            {"display": "Total | AVG"},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": `${this.getWeaponTotals(this.currentWeapon).accuracy.toFixed(2)}%`},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+        ];
+
+
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
@@ -2009,27 +2054,36 @@ class MatchClassicWeaponStats{
 
             if(d.weapon_id !== this.currentWeapon) continue;
 
-            const row = document.createElement("tr");
-
             const player = getPlayer(this.players, d.player_id);
 
-            row.appendChild(UIPlayerLink({
-                "playerId": d.player_id, 
-                "name": player.name, 
-                "country": player.country, 
-                "bTableElem": true,
-                "className": (this.totalTeams >= 2) ? getTeamColorClass(player.team) : "team-none"
-            }));
+            const row = [
+                {
+                    "bSkipTD": true,
+                    "display": UIPlayerLink({
+                        "playerId": d.player_id, 
+                        "name": player.name, 
+                        "country": player.country, 
+                        "bTableElem": true,
+                        "className": (this.totalTeams >= 2) ? getTeamColorClass(player.team) : "team-none",
+                    }),
+                    "value": player.name.toLowerCase()
+                },
+                {"display": ignore0(d.kills), "value": d.kills},
+                {"display": ignore0(d.deaths), "value": d.deaths},
+                {"display": ignore0(d.shots), "value": d.shots},
+                {"display": ignore0(d.hits), "value": d.hits},
+                {"display": `${d.accuracy.toFixed(2)}%`, "value": d.accuracy},
+                {"display": ignore0(d.damage), "value": d.accuracy},
+            ];
+            rows.push(row);
+        }
 
+        if(this.table === undefined){
+            tableOptions.footer = footer;
+            this.table = new TESTUITable(this.parent, tableOptions, rows);
+        }else{
 
-            row.appendChild(UITableCell({"content": d.kills, "parse": ["ignore0"]}));
-            row.appendChild(UITableCell({"content": d.deaths, "parse": ["ignore0"]}));
-            row.appendChild(UITableCell({"content": d.shots, "parse": ["ignore0"]}));
-            row.appendChild(UITableCell({"content": d.hits, "parse": ["ignore0"]}));
-            row.appendChild(UITableCell({"content": `${d.accuracy.toFixed(2)}%` }));
-            row.appendChild(UITableCell({"content": d.damage, "parse": ["ignore0"]}));
-
-            this.table.appendChild(row);
+            this.table.updateRows(rows, tableOptions.headers, footer);
         }
     }
 }

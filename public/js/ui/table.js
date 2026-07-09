@@ -441,7 +441,7 @@ class TESTUITable{
 
     }
 
-    updateRows(newRows, newHeaders){
+    updateRows(newRows, newHeaders, newFooter){
 
         this.tableBody.innerHTML = "";
 
@@ -456,6 +456,12 @@ class TESTUITable{
             this.sortBy = 0;
             this.renderHeaders();
         }
+
+        if(newFooter !== undefined){
+            this.options.footer = newFooter;
+            
+        }
+        
         this.sortData();
 
         this.renderCaption();
