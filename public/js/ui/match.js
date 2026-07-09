@@ -1809,7 +1809,9 @@ class MatchWeaponSummary{
         for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
             if(weaponName === "All") continue;
+
             const statValue = this.getPlayerWeaponStat(this.currentMode, playerId, weaponId);
+
             if(statValue !== 0) return true;
         }
 
@@ -1867,11 +1869,6 @@ class MatchWeaponSummary{
                 "value": player.name.toLowerCase(),
                 "bSkipTD": true
             });
-
-            
-            
-
-
 
             for(const [weaponId, weaponName] of Object.entries(this.weaponStats.names)){
 
@@ -2126,39 +2123,43 @@ function renderMatchPings(parent, players, totalTeams){
 
     const parentElem = document.querySelector(parent);
     UIHeader(parent, "Player Ping Summary");
-    
-    const table = document.createElement("table");
 
-    const headerRow = document.createElement("tr");
-    headerRow.appendChild(UITableHeaderColumn({"content": "Player"}));
-    headerRow.appendChild(UITableHeaderColumn({"content": "Min"}));
-    headerRow.appendChild(UITableHeaderColumn({"content": "Average"}));
-    headerRow.appendChild(UITableHeaderColumn({"content": "Max"}));
+    const headers = ["Player", "Min", "Average", "Max"].map((h) =>{ return {"display": h}})
+    const footer = [
+        {"display": "Average"},
+        {"display": "AVG", "dataType": "FLOAT"},
+        {"display": "AVG", "dataType": "FLOAT"},
+        {"display": "AVG", "dataType": "FLOAT"}
+    ];
 
-    table.appendChild(headerRow);
+    const rows = [];
 
     for(let i = 0; i < players.length; i++){
 
         const p = players[i];
         if(p.spectator) continue;
 
-        const row = document.createElement("tr");
-        row.appendChild(UIPlayerLink({
-            "playerId": p.player_id,
-            "name": p.name, 
-            "country": p.country, 
-            "bTableElem": true,
-            "className": (totalTeams >= 2) ? getTeamColorClass(p.team) : "team-none"
-        }));
+        const row = [
+            {
+                "bSkipTD": true, 
+                "display": UIPlayerLink({
+                    "playerId": p.player_id,
+                    "name": p.name, 
+                    "country": p.country, 
+                    "bTableElem": true,
+                    "className": (totalTeams >= 2) ? getTeamColorClass(p.team) : "team-none"
+                }),
+                "value": p.name.toLowerCase()
+            },
+            {"value":p.ping_min},
+            {"value":p.ping_avg},
+            {"value":p.ping_max}
+        ];
 
-        row.appendChild(UITableCell({"content":p.ping_min}));
-        row.appendChild(UITableCell({"content":p.ping_avg}));
-        row.appendChild(UITableCell({"content":p.ping_max}));
-
-        table.appendChild(row);
+        rows.push(row);
     }
 
-    parentElem.appendChild(table);
+    new TESTUITable(parentElem, {"className": "t-width-2", headers, footer}, rows);
 }
 
 
