@@ -2285,24 +2285,20 @@ class MatchItemsSummary{
         this.totalTeams = totalTeams;
 
         this.headers = {
-            "player": {"title": "Player"},
-            "body": {"title": "Body Armour"},
-            "pads": {"title": "Thigh Pads"},
-            "shp": {"title": "Super Health Pack"},
-            "invis": {"title": "Invisibility"},
-            "belt": {"title": "Shield Belt"},
-            "amp": {"title": "Damage Amp"},
-            "boots": {"title": "Jump Boots"},
+            "player": {"display": "Player"},
+            "body": {"display": "Body Armour"},
+            "pads": {"display": "Thigh Pads"},
+            "shp": {"display": "Super Health Pack"},
+            "invis": {"display": "Invisibility"},
+            "belt": {"display": "Shield Belt"},
+            "amp": {"display": "Damage Amp"},
+            "boots": {"display": "Jump Boots"},
         };
 
         if(!this.bAnyData()) return;
 
-        this.table = document.createElement("table");
-        this.table.className = "t-width-1";
         UIHeader(parent, "Items Summary");
-        this.parent.appendChild(this.table);
-
-        
+     
         
         this.render();
     }
@@ -2335,18 +2331,9 @@ class MatchItemsSummary{
 
     render(){
 
-        this.table.innerHTML = "";
+        const headers = Object.values(this.headers);
 
-
-        const headerRow = document.createElement("tr");
-
-        for(const [columnName, info] of Object.entries(this.headers)){
-
-            headerRow.appendChild(UITableHeaderColumn({"content": info.title}));
-        }
-
-        this.table.appendChild(headerRow);
-
+        const rows = [];
 
         for(let i = 0; i < this.playerData.length; i++){
 
@@ -2354,27 +2341,47 @@ class MatchItemsSummary{
 
             if(!this.bPlayerAnyData(p)) continue;
 
-            const row = document.createElement("tr");
-
-            row.appendChild(UIPlayerLink({
-                "playerId": p.player_id, 
-                "name": p.name, 
-                "country": p.country, 
-                "bTableElem": true, 
-                "className": (this.totalTeams < 2) ? "team-none" : getTeamColorClass(p.team)
-            }));
+            const row = [
+                {
+                    "bSkipTD": true, 
+                    "value": p.name.toLowerCase(), 
+                    "display": UIPlayerLink({
+                        "playerId": p.player_id, 
+                        "name": p.name, 
+                        "country": p.country, 
+                        "bTableElem": true, 
+                        "className": (this.totalTeams < 2) ? "team-none" : getTeamColorClass(p.team)
+                    })
+                }
+            ];
 
             for(const columnName of Object.keys(this.headers)){
 
                 if(columnName === "player") continue;
 
-                row.appendChild(UITableCell({
-                    "content": p[`item_${columnName}`], 
-                    "parse": ["ignore0"]
-                }));
+                row.push({
+                    "value": p[`item_${columnName}`], 
+                    "display": ignore0(p[`item_${columnName}`])
+                });
             }
 
-            this.table.appendChild(row);
+            rows.push(row);
+        }
+
+        if(this.table === undefined){
+
+            const footer = [
+                {"display": "Total"}
+            ];
+
+            for(let i = 1; i <headers.length; i++){
+                footer.push({"display": "SUM", "callback": ignore0, "dataType": "INT"});
+            }
+
+            this.table = new TESTUITable(this.parent, {"className": "t-width-1", headers, footer}, rows);
+        }else{
+
+            this.table.updateRows(rows);
         }
     }
 }
