@@ -227,78 +227,85 @@ function playerGametypeTotals(parent, data){
 
     UIHeader(parent, "Gametype Totals");
 
-    const table = document.createElement("table");
-    table.className = "t-width-1";
-
     const headers = [
         "Gametype", "Last Active", "Score", "Frags", "Deaths",
         "Suicides", "Team Kills", "Eff", "Matches", "Wins", "Winrate",
         "Playtime"
     ];
 
-    const headerRow = document.createElement("tr");
+    const rows = [];
 
-    for(let i = 0; i < headers.length; i++){
-
-        headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-    }
-
-    table.appendChild(headerRow);
+    let footerRow = null;
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
-        const row = document.createElement("tr");
+        if(data.length === 2){
+            //we don't want to display duplicate data if the player has only played one gametype
+            if(d.gametype_name === "All") continue;
+        }
 
-        row.appendChild(UITableCell({
-            "content": d.gametype_name,
-            "className": "text-left"
-        }));
 
-        row.appendChild(UITableCell({
-            "content": toDateString(d.last_active, true), 
-            "className": "date"
-        }));
+        const row = [
+            {
+                "display": d.gametype_name,
+                "value": d.gametype_name.toLowerCase(),
+                "className": "text-left"
+            },
+            {
+                "display": toDateString(d.last_active, true), 
+                "value": d.last_active,
+                "className": "date"
+            }
+        ];
 
         const ignore0Keys_1 = [
             "score", "frags", "deaths", "suicides", "team_kills"
         ];
 
         for(let x = 0; x < ignore0Keys_1.length; x++){
-            row.appendChild(UITableCell({
-                "content": d[ignore0Keys_1[x]], 
-                "parse": ["ignore0"]
-            }));
+            row.push({
+                "display": ignore0(d[ignore0Keys_1[x]]), 
+                "value": d[ignore0Keys_1[x]]
+            });
         }
 
 
-        row.appendChild(UITableCell({
-            "content": `${d.efficiency.toFixed(2)}%`, 
-        }));
-
-        row.appendChild(UITableCell({
-            "content": d.total_matches, 
-            "parse": ["ignore0"]
-        }))
-        row.appendChild(UITableCell({
-            "content": d.wins, 
-            "parse": ["ignore0"]
-        }))
-
-         row.appendChild(UITableCell({
-            "content": `${d.winrate.toFixed(2)}%`, 
-        }));
-
-        row.appendChild(UITableCell({
-            "content": d.playtime, 
-            "parse": ["playtime"],
+        row.push({
+                "display": `${d.efficiency.toFixed(2)}%`,
+                "value": d.efficiency 
+            },
+            {
+                "display": ignore0(d.total_matches), 
+                "value": d.total_matches
+            },
+            {
+                "display": ignore0(d.wins), 
+                "value": d.wins
+            },
+            {
+                "display": `${d.winrate.toFixed(2)}%`, 
+                "value": d.winrate, 
+            },
+            {
+            "display": toPlaytime(d.playtime, true), 
+            "value": d.playtime,
             "className": "playtime"
-        }))
-        table.appendChild(row);
+        });
+
+        if(d.gametype_name !== "All"){
+            rows.push(row);
+        }else{
+            footerRow = row;
+        }
     }
 
-    parent.appendChild(table);
+    new TESTUITable(parent, {
+        "className": "t-width-1", 
+        "headers": headers.map((h) =>{ return {"display": h}}), 
+        "footer": footerRow}, 
+    rows)
 }
 
 

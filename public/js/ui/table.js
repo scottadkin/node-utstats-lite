@@ -291,7 +291,7 @@ class TESTUITable{
 
         if(this.tableFooter === undefined) return;
 
-        if(this.options.footer === undefined){
+        if(this.options.footer === undefined || this.options.footer === null){
             //delete this.tableFooter;
 
             return;
