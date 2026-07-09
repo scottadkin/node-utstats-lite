@@ -319,14 +319,6 @@ class PlayerSpecialEvents{
         this.mode = "all";
 
         this.createTabs();
-
-
-        this.multisTable = document.createElement("table");
-        this.spreesTable = document.createElement("table");
-
-
-        this.parent.appendChild(this.multisTable);
-        this.parent.appendChild(this.spreesTable);
         
         this.render();
     }
@@ -350,26 +342,19 @@ class PlayerSpecialEvents{
 
     renderTable(table, headers, keys){
 
-        table.innerHTML = ``;
-        table.className = `t-width-1`;
-        const headerRow = document.createElement("tr");
-
         if(this.mode !== "all"){
-            headerRow.appendChild(UITableHeaderColumn({"content": "Gametype"}));
+            headers.unshift("Gametype");
         }
 
-        for(let i = 0; i < headers.length; i++){
+        let footer = null;
 
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        table.appendChild(headerRow);
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            if(this.mode === "all" && d.gametype_id != 0) continue;
+            if(this.mode === "all" && d.gametype_id !== 0) continue;
 
             let total = 0;
 
@@ -379,18 +364,24 @@ class PlayerSpecialEvents{
 
             if(total === 0) continue;
 
-            const row = document.createElement("tr");
+            const row = []
 
             if(this.mode !== "all"){
-                row.appendChild(UITableCell({"content": d.gametype_name, "className": "text-left"}));
+                row.push({"display": d.gametype_name, "value": d.gametype_name.toLowerCase(), "className": "text-left"});
             }
 
             for(let x = 0; x < keys.length; x++){
-                row.appendChild(UITableCell({"content": d[keys[x]], "parse": ["ignore0"]}));
+                row.push({"value": d[keys[x]], "display": ignore0(d[keys[x]])});
             }
 
-            table.appendChild(row);
+            if(d.gametype_id !== 0 || this.mode === "all"){
+                rows.push(row);
+            }else{
+                footer = row;
+            }
         }
+
+        table.updateRows(rows, headers.map((h) =>{ return {"display": h}}), footer);
 
     }
 
@@ -415,6 +406,14 @@ class PlayerSpecialEvents{
             "Godlike",
             "Best Spree"
         ];
+
+        if(this.multisTable === undefined){
+            this.multisTable = new TESTUITable(this.parent, {"className": "t-width-1", "headers": multiHeaders.map((h) =>{ return {"display": h}})}, []);
+        }
+
+        if(this.spreesTable === undefined){
+            this.spreesTable = new TESTUITable(this.parent, {"className": "t-width-1", "headers": spreeHeaders.map((h) =>{ return {"display": h}})}, []);
+        }
 
         this.renderTable(this.multisTable, multiHeaders, multiKeys);
         this.renderTable(this.spreesTable, spreeHeaders, spreeKeys);  
