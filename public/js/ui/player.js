@@ -624,24 +624,18 @@ class PlayerItemsSummary{
 
         UIHeader(this.parent, "Items Summary");
 
-        this.table = document.createElement("table");
-
-        this.parent.appendChild(this.table);
-
         this.render();
     }
 
     createRow(data){
 
-        const row = document.createElement("tr");
-
-        row.appendChild(UITableCell({"content": data.gametype_name, "className": "text-left"}));
+        const row = [{"display": data.gametype_name, "value": data.gametype_name.toLowerCase(), "className": "text-left"}];
 
         const keys = ["boots", "body", "pads", "invis", "shp", "belt", "amp"];
 
         for(let i = 0; i < keys.length; i++){
 
-            row.appendChild(UITableCell({"content": data[`item_${keys[i]}`], "parse": ["ignore0"]}));
+            row.push({"display": ignore0(data[`item_${keys[i]}`]), "value": data[`item_${keys[i]}`]});
         }
 
         return row;
@@ -649,28 +643,39 @@ class PlayerItemsSummary{
 
     render(){
 
-        this.table.innerHTML = ``;
-        this.table.className = `t-width-1`;
-
         const headers = [
             "Gametype",	"Jump Boots", "Body Armour", "Thigh Pads", "Invisibility", 
             "Super Health Pack", "Shield Belt", "Damage Amplifier"				
         ];
 
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-            headerRow.appendChild(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.appendChild(headerRow);
-
+        const rows = [];
+        let footer = null;
         
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            this.table.appendChild(this.createRow(d));
+            if(this.data.length === 2 && d.gametype_id === 0){
+                continue;
+            }
+
+            if(this.data.length > 2 && d.gametype_id === 0){
+                footer = this.createRow(d);
+            }else{
+                rows.push(this.createRow(d));
+            }
+        }
+
+        if(this.table === undefined){
+
+            const tableOptions = {
+                "className": "t-width-1",
+                "headers": headers.map((h) =>{ return {"display": h}}),
+                "footer": footer
+            };
+            this.table = new TESTUITable(this.parent, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows, null, footer);
         }
     }
 }
