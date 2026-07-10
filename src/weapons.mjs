@@ -297,9 +297,11 @@ export async function getPlayerTotals(playerId){
     nstats_player_totals_weapons.deaths,
     nstats_player_totals_weapons.team_kills,
     nstats_player_totals_weapons.eff,
-    nstats_weapons.name as weapon_name
+    nstats_weapons.name as weapon_name,
+    IF(nstats_player_totals_weapons.gametype_id = 0, 'All Gametypes', nstats_gametypes.name) as gametype_name
     FROM nstats_player_totals_weapons 
     LEFT JOIN nstats_weapons ON nstats_weapons.id = nstats_player_totals_weapons.weapon_id
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_player_totals_weapons.gametype_id
     WHERE nstats_player_totals_weapons.player_id=?`;
 
     return await simpleQuery(query, [playerId]);

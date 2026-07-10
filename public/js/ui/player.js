@@ -700,11 +700,10 @@ class PlayerItemsSummary{
 
 class PlayerWeaponsSummary{
 
-    constructor(parent, data, gametypeNames){
+    constructor(parent, data){
 
         this.parent = document.querySelector(parent);
         this.data = data;
-        this.gametypeNames = gametypeNames;
 
         UIHeader(this.parent, "Weapons Summary");
 
@@ -715,11 +714,23 @@ class PlayerWeaponsSummary{
     }
 
 
+    setAllGametypeNames(){
+
+        this.gametypeNames = {};
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            this.gametypeNames[d.gametype_id] = d.gametype_name;
+        }
+    }
+
     createTabs(){
 
-        const options = [
-            {"display": "All Gametypes", "value": 0},
-        ];
+        const options = [];
+
+        this.setAllGametypeNames();
 
         for(const [id, name] of Object.entries(this.gametypeNames)){
             options.push({"display": name, "value": parseInt(id)});

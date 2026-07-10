@@ -81,6 +81,8 @@ export async function renderPlayerPage(req, res, userSession){
             mapTotals = await getPlayerAllMapTotals(playerId);
         }
 
+
+
         let ctfTotals = [];
 
         if(pageSettings["Display CTF"] === 1){
@@ -118,7 +120,6 @@ export async function renderPlayerPage(req, res, userSession){
             ctfLeagueData = await getPlayerMapsLeagueData(playerId);
         }
         
-        setTypeName("gametypes", weaponTotals, gametypeNames);
         setTypeName("gametypes", ctfLeagueData, gametypeNames);
         setTypeName("maps", ctfLeagueData, mapNames);
         
