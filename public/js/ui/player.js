@@ -1,12 +1,13 @@
 class PlayerRecentMatches{
 
-    constructor(parent, playerId, gametypeNames, mapNames){
+    constructor(parent, playerId){
 
         this.parent = document.querySelector(parent);
         this.playerId = playerId;
-        this.gametypeNames = gametypeNames;
-        this.mapNames = mapNames;
 
+
+        this.gametypes = {};
+        this.maps = {};
         this.selectedGametype = 0;
         this.selectedMap = 0;
         this.perPage = 25;
@@ -20,7 +21,6 @@ class PlayerRecentMatches{
 
         this.parent.append(this.wrapper);
 
-        this.changeNamesToArrays();
 
         this.createForm();
 
@@ -32,9 +32,30 @@ class PlayerRecentMatches{
         }, 0, this.perPage, this.page);
 
 
-        this.loadData();
+        this.loadAllPlayedNames();
+        
     }
 
+    async loadAllPlayedNames(){
+
+        try{
+
+            const url = `../json/player-get-all-gametypes-maps?playerId=${this.playerId}`;
+
+            const req = await fetch(url);
+
+            const res = await req.json();
+
+            console.log(res);
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+        }catch(err){
+            console.trace(err);
+        }finally{
+            this.loadData();
+        }
+    }
 
     sortByName(a, b){
         
@@ -45,27 +66,6 @@ class PlayerRecentMatches{
         if(a > b) return 1;
         return 0;
     }
-
-    changeNamesToArrays(){
-
-        const gametypes = [];
-        const maps = [];
-
-        for(const [id, name] of Object.entries(this.gametypeNames)){
-            gametypes.push({"id": parseInt(id), name});
-        }
-
-        for(const [id, name] of Object.entries(this.mapNames)){
-            maps.push({"id": parseInt(id), name});
-        }
-
-        this.gametypeNames = gametypes;
-        this.mapNames = maps;
-
-        this.gametypeNames.sort(this.sortByName);
-        this.mapNames.sort(this.sortByName);
-    }
-
 
     createSelect(type){
 
@@ -81,7 +81,7 @@ class PlayerRecentMatches{
         allOption.innerHTML = "Any";
         select.append(allOption);
 
-        const names = (type === "gametype") ? this.gametypeNames : this.mapNames;
+        const names = (type === "gametype") ? this.gametypes : this.maps;
 
         for(let i = 0; i < names.length; i++){
 
@@ -150,6 +150,7 @@ class PlayerRecentMatches{
 
             if(res.error !== undefined) throw new Error(res.error);
 
+            console.log(res);
             this.data = res;
 
             

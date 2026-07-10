@@ -23,7 +23,6 @@
 
     const gametypeTotals = <%- JSON.stringify(gametypeTotals) %>;
     const mapTotals = <%- JSON.stringify(mapTotals) %>;
-    const gametypeNames = <%- JSON.stringify(gametypeNames) %>;
     const weaponTotals = <%-  JSON.stringify(weaponTotals) %>;
     playerPermaLinks(".perma-links", "<%= basicPlayerInfo.hash %>");
     <% 
@@ -58,7 +57,7 @@
                 %>new PlayerItemsSummary("#root", gametypeTotals);<%
             } break;
             case "Display Recent Matches": {
-                %>const rm = new PlayerRecentMatches("#root", <%= playerId %>, gametypeNames, <%- JSON.stringify(mapNames) %>);<%
+                %>const rm = new PlayerRecentMatches("#root", <%= playerId %>);<%
             } break;
             case "Display Activity Heatmap": {
                 %>new UIPlayerActivityHeatmap("#root", {

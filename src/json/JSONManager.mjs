@@ -1,4 +1,4 @@
-import { getPlayerActivityHeatmapData, getPlayerRecentMatches } from "../players.mjs";
+import { getPlayerActivityHeatmapData, getPlayerAllGametypesAndMaps, getPlayerRecentMatches } from "../players.mjs";
 import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData } from "../matches.mjs";
 import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages, search as searchMaps} from "../maps.mjs";
 import { getRankingsWithPlayerNames } from "../rankings.mjs";
@@ -34,6 +34,15 @@ export default class JSONManager{
         const data = await getPlayerRecentMatches(playerId, gametypeId, mapId, page, perPage);
 
         //const data = await getPlayerRecentMatches();
+        return this.res.status(200).json(data);
+    }
+
+    async getPlayerAllGametypeMapNames(){
+
+        const playerId = this.req.query?.playerId ?? "";
+
+        const data = await getPlayerAllGametypesAndMaps(playerId);
+
         return this.res.status(200).json(data);
     }
 
@@ -258,6 +267,10 @@ export default class JSONManager{
 
                 return await this.playerRecentMatches(); 
 
+            }else if(this.mode === "player-get-all-gametypes-maps"){
+                
+                return await this.getPlayerAllGametypeMapNames();
+                
             }else if(this.mode === "map-recent-matches"){
 
                 return await this.mapRecentMatches();

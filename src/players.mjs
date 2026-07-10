@@ -947,6 +947,25 @@ async function getPlayerTotalMatches(playerId, where, vars){
     return result[0].total_matches;
 }
 
+export async function getPlayerAllGametypesAndMaps(playerId){
+
+    const p = "nstats_player_totals";
+    const m = "nstats_maps";
+    const g = "nstats_gametypes";
+
+    const query = `SELECT DISTINCT 
+    ${p}.gametype_id,${p}.map_id, 
+    ${m}.name as map_name,
+    ${g}.name as gametype_name
+    FROM nstats_player_totals 
+    LEFT JOIN ${m} ON ${m}.id = ${p}.map_id
+    LEFT JOIN ${g} ON ${g}.id = ${p}.gametype_id
+    WHERE ${p}.player_id=? AND ${p}.gametype_id!=0 AND ${p}.map_id!=0`;
+
+    return await simpleQuery(query, [playerId]);
+
+}
+
 // add page and perpage filtering
 export async function getPlayerRecentMatches(playerId, gametype, map, page, perPage){
 
