@@ -864,8 +864,8 @@ class PlayerRankingSummary{
 
 
         return [
-            {"display": `${data.position}${getOrdinal(data.position)}`, "className": "ordinal"},
-            {"display": data.name, "className": "text-left"},
+            {"display": `${data.position}${getOrdinal(data.position)}`, "value": data.position, "className": "ordinal"},
+            {"display": data.name, "value": data.name.toLowerCase(), "className": "text-left"},
             {"display": toDateString(data.last_active, true), "value": data.last_active, "className": "date"},
             {"value": data.matches},
             {"display": toPlaytime(data.playtime), "value": data.playtime, "className": "playtime"},
