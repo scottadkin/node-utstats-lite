@@ -85,9 +85,17 @@ export async function renderPlayerPage(req, res, userSession){
             weaponTotals = await getPlayerWeaponTotals(playerId);    
         }
 
-        const month = 60 * 60 * 24 * 28;
+        
 
-        const minDate = new Date(Date.now() - month * 1000);
+        let rankingDayRange = (pageSettings["Rankings Activity Range"] !== undefined) ? parseInt(pageSettings["Rankings Activity Range"]) : 28;
+
+        if(rankingDayRange !== rankingDayRange) rankingDayRange = 28;
+
+        const dateMin = 60 * 60 * 24 * rankingDayRange;
+     
+        const minDate = new Date(Date.now() - dateMin * 1000);
+
+        console.log(minDate);
 
         let rankings = null;
 

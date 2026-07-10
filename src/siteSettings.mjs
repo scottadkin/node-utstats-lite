@@ -66,6 +66,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Player" ,"type": `bool`, "name": "Display Special Events", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Weapons", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Rankings", "value": "1"},
+    {"category": "Player" ,"type": `integer`, "name": "Rankings Activity Range", "value": "28"},
     {"category": "Player" ,"type": `bool`, "name": "Display Items", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Recent Matches", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Activity Heatmap", "value": "1"},
