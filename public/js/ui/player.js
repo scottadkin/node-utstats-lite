@@ -219,16 +219,16 @@ class PlayerRecentMatches{
     }
 }
 
-function playerGametypeTotals(parent, data){
+function playerBasicTotals(parent, data, bMaps){
 
     if(data.length === 0) return;
 
     parent = document.querySelector(parent);
 
-    UIHeader(parent, "Gametype Totals");
+    UIHeader(parent, `${(bMaps) ? "Map" : "Gametypes"} Totals`);
 
     const headers = [
-        "Gametype", "Last Active", "Score", "Frags", "Deaths",
+        (bMaps) ? "Map" : "Gametype", "Last Active", "Score", "Frags", "Deaths",
         "Suicides", "Team Kills", "Eff", "Matches", "Wins", "Winrate",
         "Playtime"
     ];
@@ -243,14 +243,18 @@ function playerGametypeTotals(parent, data){
 
         if(data.length === 2){
             //we don't want to display duplicate data if the player has only played one gametype
-            if(d.gametype_name === "All") continue;
+            if(bMaps){
+                if(d.map_name === "All") continue;
+            }else{
+                if(d.gametype_name === "All") continue;
+            }
         }
 
 
         const row = [
             {
-                "display": d.gametype_name,
-                "value": d.gametype_name.toLowerCase(),
+                "display": d.gametype_name ?? d.map_name,
+                "value": d.gametype_name?.toLowerCase() ?? d.map_name?.toLowerCase(),
                 "className": "text-left"
             },
             {
@@ -294,17 +298,30 @@ function playerGametypeTotals(parent, data){
             "className": "playtime"
         });
 
-        if(d.gametype_name !== "All"){
-            rows.push(row);
+        if(bMaps){
+
+            if(d.map_name !== "All"){
+                rows.push(row);
+            }else{
+                footerRow = row;
+            }
+
         }else{
-            footerRow = row;
+
+            if(d.gametype_name !== "All"){
+                rows.push(row);
+            }else{
+                footerRow = row;
+            }
         }
     }
 
     new TESTUITable(parent, {
         "className": "t-width-1", 
+        "perPage": (bMaps) ? 10 : 0,
         "headers": headers.map((h) =>{ return {"display": h}}), 
-        "footer": footerRow}, 
+        "footer": footerRow
+    }, 
     rows)
 }
 

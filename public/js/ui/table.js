@@ -26,10 +26,14 @@ class TESTUITable{
         this.lastSortBy = this.sortBy;
 
 
+        this.sortData();
+
         this.table = document.createElement("table");
+
         if(this.options.className !== undefined){
             this.table.className = this.options.className;
         }
+
         this.parent.append(this.table);
 
 
@@ -53,14 +57,12 @@ class TESTUITable{
 
         if(this.options.headers === undefined) return;
 
-
         if(this.tableHead === undefined){
             this.tableHead = document.createElement("thead");
             
         }else{
             this.tableHead.innerHTML = ``;
         }
-
 
         const headerRow = document.createElement("tr");
 

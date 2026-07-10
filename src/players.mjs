@@ -69,6 +69,35 @@ export const VALID_PLAYER_SORT_BYS = [
     "suicides", "efficiency", "matches", "playtime"
 ];
 
+function getPlayerTotalsColumnsProfile(){
+
+    const pT = "nstats_player_totals";
+
+
+    const toGet = [
+        "gametype_id", "map_id", "last_active", "playtime", "total_matches", "wins", "draws",
+        "losses", "winrate", "score", "frags", "kills", "deaths", "suicides", "team_kills", "efficiency",
+        "ttl", "first_blood", "spree_1", "spree_2", "spree_3", "spree_4", "spree_5", "spree_best",
+        "multi_1", "multi_2", "multi_3", "multi_4", "multi_best", "headshots", "item_amp", "item_pads", 
+        "item_boots", "item_body", "item_pads", "item_invis", "item_shp", "item_belt"
+    ];
+
+    let string = ``;
+
+    for(let i = 0; i < toGet.length; i++){
+
+        const g = toGet[i];
+
+        string += `${pT}.${g}`;
+
+        if(i < toGet.length - 1) string += `, `;
+    }
+
+
+    return string;
+
+}
+
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
     //const query = `SELECT id FROM nstats_players WHERE name=? AND hwid=? AND mac1=? AND mac2=?`;
@@ -884,9 +913,25 @@ export async function updatePlayerTotals(playerIds){
 
 export async function getPlayerGametypeTotals(playerId){
 
-    const query = `SELECT * FROM nstats_player_totals WHERE player_id=? AND map_id=0`;
+    const query = `SELECT ${getPlayerTotalsColumnsProfile()}, 
+    IF(nstats_player_totals.gametype_id = 0, 'All', nstats_gametypes.name) as gametype_name
+    FROM nstats_player_totals 
+    
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_player_totals.gametype_id 
+    WHERE nstats_player_totals.player_id=? AND nstats_player_totals.map_id=0`;
 
     return await simpleQuery(query, [playerId]);
+}
+
+export async function getPlayerAllMapTotals(playerId){
+
+    const query = `SELECT ${getPlayerTotalsColumnsProfile()}, 
+    IF(nstats_player_totals.map_id = 0, 'All', nstats_maps.name) as map_name
+    FROM nstats_player_totals LEFT JOIN nstats_maps ON nstats_player_totals.map_id = nstats_maps.id 
+    WHERE nstats_player_totals.player_id=? AND nstats_player_totals.gametype_id=0`;
+
+    return await simpleQuery(query, [playerId]);
+
 }
 
 

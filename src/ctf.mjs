@@ -12,6 +12,35 @@ const CTF_TOTAL_KEYS = [
     "flag_return_enemy_base", "flag_return_save"
 ];
 
+const PLAYER_PROFILE_CTF_COLUMNS = [
+    "gametype_id","map_id","total_matches",
+    "flag_taken","max_flag_taken","flag_pickup",
+    "max_flag_pickup","flag_drop","max_flag_drop",
+    "flag_assist","max_flag_assist","flag_cover",
+    "max_flag_cover","flag_seal","max_flag_seal",
+    "flag_cap","max_flag_cap","flag_kill",
+    "max_flag_kill","flag_return","max_flag_return",
+    "flag_return_base","max_flag_return_base",
+    "flag_return_mid","max_flag_return_mid",
+    "flag_return_enemy_base","max_flag_return_enemy_base",
+    "flag_return_save","max_flag_return_save"
+];
+
+function getPlayerCTFProfileColumns(){
+
+    let string = ``;
+
+    const t = "nstats_player_totals_ctf";
+
+    for(let i = 0; i < PLAYER_PROFILE_CTF_COLUMNS.length; i++){
+
+        string += `${t}.${PLAYER_PROFILE_CTF_COLUMNS[i]}`;
+        if(i < PLAYER_PROFILE_CTF_COLUMNS.length - 1) string += `, `;
+    }
+
+    return string;
+}
+
 export async function insertPlayerMatchData(players, matchId, gametypeId, mapId){
 
     const query = `INSERT INTO nstats_match_ctf (
@@ -369,7 +398,13 @@ export async function updatePlayerTotals(playerIds){
 
 export async function getPlayerCTFTotals(playerId){
 
-    const query = `SELECT * FROM nstats_player_totals_ctf WHERE player_id=?`;
+    const query = `SELECT ${getPlayerCTFProfileColumns()},
+    nstats_gametypes.name as gametype_name,
+    nstats_maps.name as map_name
+    FROM nstats_player_totals_ctf 
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_player_totals_ctf.gametype_id
+    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_player_totals_ctf.map_id
+    WHERE nstats_player_totals_ctf.player_id=?`;
 
     return await simpleQuery(query, [playerId]);
 }

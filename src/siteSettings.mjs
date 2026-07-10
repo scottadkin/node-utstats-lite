@@ -61,6 +61,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Match" ,"type": `bool`, "name": "Display Damage Stats", "value": "1"},
 
     {"category": "Player" ,"type": `bool`, "name": "Display Gametype Totals", "value": "1"},
+    {"category": "Player" ,"type": `bool`, "name": "Display Map Totals", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display CTF", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display CTF League", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Special Events", "value": "1"},

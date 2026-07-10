@@ -1,6 +1,7 @@
 import { convertTimestamp, toPlaytime } from "../generic.mjs";
 import { 
     getPlayerGametypeTotals,
+    getPlayerAllMapTotals,
     getPlayerProfileInfo,
     getUniquePlayedType
  } from "../players.mjs";
@@ -10,6 +11,8 @@ import { getPlayerRankings } from "../rankings.mjs";
 import { getPlayerMapsLeagueData } from "../ctfLeague.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
+
+
 
 
 function setTypeName(type, data, names){
@@ -67,10 +70,15 @@ export async function renderPlayerPage(req, res, userSession){
         );
 
         let gametypeTotals = [];
+        let mapTotals = [];
 
         if(pageSettings["Display Gametype Totals"] === 1){
 
             gametypeTotals = await getPlayerGametypeTotals(playerId);
+        }
+
+        if(pageSettings["Display Map Totals"] === 1){
+            mapTotals = await getPlayerAllMapTotals(playerId);
         }
 
         let ctfTotals = [];
@@ -85,7 +93,6 @@ export async function renderPlayerPage(req, res, userSession){
             weaponTotals = await getPlayerWeaponTotals(playerId);    
         }
 
-        
 
         let rankingDayRange = (pageSettings["Rankings Activity Range"] !== undefined) ? parseInt(pageSettings["Rankings Activity Range"]) : 28;
 
@@ -111,13 +118,9 @@ export async function renderPlayerPage(req, res, userSession){
             ctfLeagueData = await getPlayerMapsLeagueData(playerId);
         }
         
-        setTypeName("gametypes", gametypeTotals, gametypeNames);
-        setTypeName("gametypes", ctfTotals, gametypeNames);
         setTypeName("gametypes", weaponTotals, gametypeNames);
         setTypeName("gametypes", ctfLeagueData, gametypeNames);
         setTypeName("maps", ctfLeagueData, mapNames);
-        setTypeName("maps", ctfTotals, mapNames);
-
         
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
@@ -130,6 +133,7 @@ export async function renderPlayerPage(req, res, userSession){
             gametypeNames,
             mapNames,
             gametypeTotals,
+            mapTotals,
             ctfTotals,
             weaponTotals,
             rankings,
