@@ -95,14 +95,13 @@ export async function renderPlayerPage(req, res, userSession){
      
         const minDate = new Date(Date.now() - dateMin * 1000);
 
-        console.log(minDate);
-
         let rankings = null;
 
         if(pageSettings["Display Rankings"] === 1){
             //no real speed diffs with indexes
             rankings = await getPlayerRankings(playerId, minDate);
             rankings.minDate = minDate;
+            rankings.maxDays = rankingDayRange;
         
         }
         

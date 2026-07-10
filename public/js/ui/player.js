@@ -815,18 +815,13 @@ class PlayerRankingSummary{
 
         UIHeader(this.parent, "Ranking Summary");
 
-        this.info = document.createElement("div");
-        this.info.className = "info";
-        this.info.innerHTML = `Ranking positions based on gametypes where player has been active in the last 28 days.`;
+        const infoContent = `Ranking positions based on gametypes or maps where the player has been active in the last ${data.maxDays} Days.`;
 
-        this.parent.appendChild(this.info);
+        this.parent.append(UIInfo(infoContent));
 
         this.mode = "gametypes";
         this.createTabs();
 
-        this.table = document.createElement("table");
-        this.table.className = `t-width-1`;
-        this.parent.appendChild(this.table);
 
         this.render();
 
@@ -850,42 +845,46 @@ class PlayerRankingSummary{
 
     createRow(data){
 
-        const row = document.createElement("tr");
 
-        row.appendChild(UITableCell({"content": data.position, "parse": ["ordinal"], "className": "ordinal"}));
-        row.appendChild(UITableCell({"content": data.name, "className": "text-left"}));
-        row.appendChild(UITableCell({"content": data.last_active, "parse": ["date"], "className": "date"}));
-        row.appendChild(UITableCell({"content": data.matches}));
-        row.appendChild(UITableCell({"content": data.playtime, "parse": ["playtime"], "className": "playtime"}));
-        row.appendChild(UITableCell({"content": data.score.toFixed(2)}));
-        return row;
+        return [
+            {"display": `${data.position}${getOrdinal(data.position)}`, "className": "ordinal"},
+            {"display": data.name, "className": "text-left"},
+            {"display": toDateString(data.last_active, true), "value": data.last_active, "className": "date"},
+            {"value": data.matches},
+            {"display": toPlaytime(data.playtime), "value": data.playtime, "className": "playtime"},
+            {"display": data.score.toFixed(2), "value": data.score}
+        ];
     }
 
     render(){
-
-        this.table.innerHTML = ``;
-
-        const headerRow = document.createElement("tr");
 
         const headers = [
             "Place", "Name", "Last Active", 
             "Matches", "Playtime", "Points"
         ];
 
-        for(let i = 0; i < headers.length; i++){
-
-            headerRow.appendChild(UITableHeaderColumn({
-                "content": headers[i]
-            }));
-        }
-
-        this.table.appendChild(headerRow);
 
         const data = (this.mode === "gametypes") ? this.data.gametypes : this.data.maps;
 
+        const rows = [];
         for(let i = 0; i < data.length; i++){
 
-            this.table.appendChild(this.createRow(data[i]));
+            rows.push(this.createRow(data[i]));
+        }
+
+        if(this.table === undefined){
+
+            this.table = new TESTUITable(
+                this.parent,
+                {
+                    "className": "t-width-1", 
+                    "headers": headers.map((h) =>{ return {"display": h}})
+                },
+                rows
+            );
+        }else{
+
+            this.table.updateRows(rows);
         }
     }
 }
