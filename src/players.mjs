@@ -1,5 +1,5 @@
 import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate} from "./database.mjs";
-import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString } from "./generic.mjs";
+import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString, sortByName } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
@@ -962,8 +962,56 @@ export async function getPlayerAllGametypesAndMaps(playerId){
     LEFT JOIN ${g} ON ${g}.id = ${p}.gametype_id
     WHERE ${p}.player_id=? AND ${p}.gametype_id!=0 AND ${p}.map_id!=0`;
 
-    return await simpleQuery(query, [playerId]);
 
+    const result = await simpleQuery(query, [playerId])
+    const gametypes = {};
+    const maps = {};
+
+    //gametypeId => mapId
+    const uniqueCombos = {};
+
+    //each gametype player has played and what maps played on that gametype 
+    const gametypeMaps = {};
+    //each map player has played and what gametypes played on the map
+    const mapGametypes = {};
+
+   
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        gametypes[r.gametype_id] = r.gametype_name;
+        maps[r.map_id] = r.map_name;
+
+        if(gametypeMaps[r.gametype_id] === undefined){
+            gametypeMaps[r.gametype_id] = {"name": r.gametype_name, "maps": {}};
+        }
+
+        gametypeMaps[r.gametype_id].maps[r.map_id] = r.map_name;
+
+        if(mapGametypes[r.map_id] === undefined){
+            mapGametypes[r.map_id] = {"name": r.map_name, "gametypes": {}};
+        }
+
+        mapGametypes[r.map_id].gametypes[r.gametype_id] = r.gametype_name;
+    }
+
+    const gametypesArray = [];
+
+    for(const [key, value] of Object.entries(gametypes)){
+        gametypesArray.push({"id": parseInt(key), "name": value});
+    }
+
+    const mapsArray = [];
+    for(const [key, value] of Object.entries(maps)){
+        mapsArray.push({"id": parseInt(key), "name": value});
+    }
+
+    mapsArray.sort(sortByName)
+    gametypesArray.sort(sortByName)
+
+    return {"gametypes": gametypesArray, "maps": mapsArray, gametypeMaps, mapGametypes}
+ 
 }
 
 // add page and perpage filtering

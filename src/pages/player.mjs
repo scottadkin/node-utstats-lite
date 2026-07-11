@@ -61,12 +61,10 @@ export async function renderPlayerPage(req, res, userSession){
 
         if(basicPlayerInfo.country === "") basicPlayerInfo.country = "xx";
 
-        const [pageSettings, pageLayout, brandingSettings, gametypeNames, mapNames] = await Promise.all([
+        const [pageSettings, pageLayout, brandingSettings,] = await Promise.all([
             getCategorySettings("Player"),
             getPageLayout("Player"),
-            getCategorySettings("Branding"),
-            getUniquePlayedType("gametypes", playerId),
-            getUniquePlayedType("maps", playerId)]
+            getCategorySettings("Branding")]
         );
 
         let gametypeTotals = [];
@@ -120,8 +118,6 @@ export async function renderPlayerPage(req, res, userSession){
             ctfLeagueData = await getPlayerMapsLeagueData(playerId);
         }
         
-        setTypeName("gametypes", ctfLeagueData, gametypeNames);
-        setTypeName("maps", ctfLeagueData, mapNames);
         
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
@@ -131,8 +127,6 @@ export async function renderPlayerPage(req, res, userSession){
             title,
             basicPlayerInfo,
             "playerId": playerId,
-            gametypeNames,
-            mapNames,
             gametypeTotals,
             mapTotals,
             ctfTotals,

@@ -6,8 +6,10 @@ class PlayerRecentMatches{
         this.playerId = playerId;
 
 
-        this.gametypes = {};
-        this.maps = {};
+        this.gametypes = [];
+        this.maps = [];
+        this.gametypeMaps = {};
+        this.mapGametypes = {};
         this.selectedGametype = 0;
         this.selectedMap = 0;
         this.perPage = 25;
@@ -21,15 +23,6 @@ class PlayerRecentMatches{
 
         this.parent.append(this.wrapper);
 
-
-        this.createForm();
-
-
-        //need to add support for event classback is url is set to null, make sure dont create link elemens
-        this.pagination = new UIPagination(this.wrapper, (newPage) =>{
-            this.page = newPage;
-            this.loadData();
-        }, 0, this.perPage, this.page);
 
 
         this.loadAllPlayedNames();
@@ -50,21 +43,24 @@ class PlayerRecentMatches{
 
             if(res.error !== undefined) throw new Error(res.error);
 
+            this.gametypes = res.gametypes;
+            this.maps = res.maps;
+            this.gametypeMaps = res.gametypeMaps;
+            this.mapGametypes = res.mapGametypes;
+
         }catch(err){
             console.trace(err);
         }finally{
+            this.createForm();
+
+
+            //need to add support for event classback is url is set to null, make sure dont create link elemens
+            this.pagination = new UIPagination(this.wrapper, (newPage) =>{
+                this.page = newPage;
+                this.loadData();
+            }, 0, this.perPage, this.page);
             this.loadData();
         }
-    }
-
-    sortByName(a, b){
-        
-        a = a.name.toLowerCase();
-        b = b.name.toLowerCase();
-
-        if(a < b) return -1;
-        if(a > b) return 1;
-        return 0;
     }
 
     createSelect(type){
@@ -925,6 +921,8 @@ class PlayerCTFLeague{
         if(data.length === 0) return;
         this.parent = document.querySelector(parent);
         this.data = data;
+
+        console.log(this.data);
 
         UIHeader(this.parent, "CTF League");
 
