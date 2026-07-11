@@ -61,33 +61,25 @@ class PlayerRecentMatches{
         }
     }
 
-    createSelect(type){
+    createSelect(parent, type){
 
-        const select = document.createElement("select");
-        if(type === "gametype"){
-            select.id = `recent-match-gametype`;
-        }else{
-            select.id = `recent-match-map`;
-        }
-
-        const allOption = document.createElement("option");
-        allOption.value = "0";
-        allOption.innerHTML = "Any";
-        select.append(allOption);
 
         const names = (type === "gametype") ? this.gametypes : this.maps;
+
+        const options = [];
 
         for(let i = 0; i < names.length; i++){
 
             const {name, id} = names[i];
 
-            const option = document.createElement("option");
-            option.value = id;
-            option.append(name);
-            select.append(option);
+            options.push({"value": id, "display": name});
         }
 
-        select.addEventListener("change", (e) =>{
+
+        this[`${type}Select`] = new UISelect(parent, options, (type === "gametype") ? this.selectedGametype : this.selectedMap);
+
+
+        this[`${type}Select`].select.addEventListener("change", (e) =>{
 
             const v = parseInt(e.target.value);
 
@@ -102,7 +94,6 @@ class PlayerRecentMatches{
 
         });
 
-        return select;
     }
 
 
@@ -113,18 +104,14 @@ class PlayerRecentMatches{
 
         this.gametypeRow = UIDiv("form-row");
 
-        const gLabel = document.createElement("label");
-        gLabel.innerHTML = "Gametype";
-        gLabel.htmlFor = "recent-match-gametype";
-        this.gametypeRow.append(gLabel, this.createSelect("gametype"));
-        this.form.append(this.gametypeRow);
+        this.gametypeRow.append(UILabel("Gametype"));
+        this.createSelect(this.gametypeRow, "gametype");
 
         this.mapRow = UIDiv("form-row");
-        const mLabel = document.createElement("label");
-        mLabel.innerHTML = "Map";
-        mLabel.htmlFor = "recent-match-map";
-        this.mapRow.append(mLabel,this.createSelect("map"));
-        this.form.append(this.mapRow);
+
+        this.mapRow.append(UILabel("Map"));
+        this.createSelect(this.mapRow, "map");
+        this.form.append(this.gametypeRow, this.mapRow);
 
         this.wrapper.append(this.form);
     }
