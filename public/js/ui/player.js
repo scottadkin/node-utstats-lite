@@ -39,8 +39,6 @@ class PlayerRecentMatches{
 
             const res = await req.json();
 
-            console.log(res);
-
             if(res.error !== undefined) throw new Error(res.error);
 
             this.gametypes = res.gametypes;
@@ -922,7 +920,6 @@ class PlayerCTFLeague{
         this.parent = document.querySelector(parent);
         this.data = data;
 
-        console.log(this.data);
 
         UIHeader(this.parent, "CTF League");
 

@@ -537,8 +537,20 @@ export async function refreshAllTables(type){
 
 export async function getPlayerMapsLeagueData(playerId){
 
-    const query = `SELECT gametype_id,map_id,total_matches,wins,draws,losses,cap_for,cap_against,cap_offset,points
-    FROM nstats_player_ctf_league WHERE player_id=?`;
+    const pT = "nstats_player_ctf_league";
+    const mT = "nstats_maps";
+    const gT = "nstats_gametypes";
+
+    const query = `SELECT ${pT}.gametype_id,${pT}.map_id,${pT}.total_matches,
+    ${pT}.wins,${pT}.draws,${pT}.losses,${pT}.cap_for,
+    ${pT}.cap_against,${pT}.cap_offset,${pT}.points,
+    ${gT}.name as gametype_name,
+    ${mT}.name as map_name
+    FROM ${pT} 
+    LEFT JOIN ${gT} ON ${gT}.id = ${pT}.gametype_id
+    LEFT JOIN ${mT} ON ${mT}.id = ${pT}.map_id
+    
+    WHERE ${pT}.player_id=?`;
 
     const result = await simpleQuery(query, [playerId]);
 
