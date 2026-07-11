@@ -847,13 +847,32 @@ class UISelect{
             if(value == this.initialValue) elem.selected = true;
             this.select.append(elem);
         }
+        
     }
 
-    updateOptions(newOptions){
+    updateOptions(newOptions, selectedValue){
 
         this.options = newOptions;
+
+
+
         this.select.innerHTML = "";
         this.createOptions();
+
+        let bSelectedStillExist = false;
+
+        for(let i = 0; i < this.options.length; i++){
+
+            const o = this.options[i];
+
+
+            if(o.value == selectedValue){
+                bSelectedStillExist = true;
+                break;
+            }
+        }
+
+       return bSelectedStillExist;
     }
 }
 

@@ -63,12 +63,42 @@ class PlayerRecentMatches{
         }
     }
 
+    getValidMaps(targets){
+
+        const found = [];
+
+        for(let i = 0; i < this.maps.length; i++){
+
+            const m = this.maps[i];
+
+            if(targets.indexOf(m.id) !== -1){
+                found.push({"display": m.name, "value": m.id})
+            }
+        }
+
+        return found;
+    }
+
+    getValidOptions(type){
+
+        const valid = [{"value": 0, "display": "Any"}];
+
+        const targetData = (type === "map") ? this.gametypeMaps : this.mapGametypes;
+
+        if(targetData[this.selectedGametype] !== undefined){
+
+            valid.push(...this.getValidMaps(targetData[this.selectedGametype]));
+        }
+
+        return valid;
+    }
+
     createSelect(parent, type){
 
 
         const names = (type === "gametype") ? this.gametypes : this.maps;
 
-        const options = [];
+        const options = [{"display": "Any", "value": 0}];
 
         for(let i = 0; i < names.length; i++){
 
@@ -92,6 +122,14 @@ class PlayerRecentMatches{
                 this.selectedMap = v;
             }
 
+
+            const otherType = (type === "gametype") ? "map" : "gametype";
+
+            if(type === "gametype"){
+                if(!this[`${otherType}Select`].updateOptions(this.getValidOptions(otherType), this.selectedMap)){
+                    this.selectedMap = 0;
+                }
+            }
 
             //NEED TO UPDATE GAMETYPE AND MAP SELECT ON FILTER CHANGE TO REMOVE MAPS THAT HAVENT BEEN PLAYERD WITH COMBO OR GAMETYPE
 
