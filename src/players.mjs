@@ -984,16 +984,19 @@ export async function getPlayerAllGametypesAndMaps(playerId){
         maps[r.map_id] = r.map_name;
 
         if(gametypeMaps[r.gametype_id] === undefined){
-            gametypeMaps[r.gametype_id] = {"name": r.gametype_name, "maps": {}};
+            gametypeMaps[r.gametype_id] = [];
         }
 
-        gametypeMaps[r.gametype_id].maps[r.map_id] = r.map_name;
+        if(gametypeMaps[r.gametype_id].indexOf(r.map_id) === -1){
+            gametypeMaps[r.gametype_id].push(r.map_id);
+        }
 
         if(mapGametypes[r.map_id] === undefined){
-            mapGametypes[r.map_id] = {"name": r.map_name, "gametypes": {}};
+            mapGametypes[r.map_id] = [];
         }
-
-        mapGametypes[r.map_id].gametypes[r.gametype_id] = r.gametype_name;
+        if(mapGametypes[r.map_id].indexOf(r.gametype_id) === -1){
+            mapGametypes[r.map_id].push(r.gametype_id);
+        }
     }
 
     const gametypesArray = [];

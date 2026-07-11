@@ -46,6 +46,8 @@ class PlayerRecentMatches{
             this.gametypeMaps = res.gametypeMaps;
             this.mapGametypes = res.mapGametypes;
 
+            console.log(res);
+
         }catch(err){
             console.trace(err);
         }finally{
@@ -89,6 +91,9 @@ class PlayerRecentMatches{
             }else{
                 this.selectedMap = v;
             }
+
+
+            //NEED TO UPDATE GAMETYPE AND MAP SELECT ON FILTER CHANGE TO REMOVE MAPS THAT HAVENT BEEN PLAYERD WITH COMBO OR GAMETYPE
 
             this.loadData();
 
