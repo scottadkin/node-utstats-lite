@@ -669,15 +669,42 @@ class PlayerItemsSummary{
 
         this.parent = document.querySelector(parent);
         this.data = data;
+        this.mode = "all";
 
-        UIHeader(this.parent, "Items Summary");
+        this.wrapper = UIDiv();
 
+        this.parent.append(this.wrapper);
+
+        UIHeader(this.wrapper, "Items Summary");
+
+        this.createTabs();
         this.render();
+    }
+
+
+    createTabs(){
+
+        const tabOptions = [
+            {"display": "All Time","value": "all"},
+            {"display": "Gametypes","value": "gametypes"},
+            {"display": "Maps","value": "maps"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.mode = e.detail.newTab;
+
+            this.render();
+        })
     }
 
     createRow(data){
 
-        const row = [{"display": data.gametype_name, "value": data.gametype_name.toLowerCase(), "className": "text-left"}];
+        let name = (this.mode === "gametypes") ? data.gametype_name : data.map_name;
+
+        const row = [{"display": name, "value": name.toLowerCase(), "className": "text-left"}];
 
         const keys = ["boots", "body", "pads", "invis", "shp", "belt", "amp"];
 
@@ -689,12 +716,30 @@ class PlayerItemsSummary{
         return row;
     }
 
+    bAnyData(data){
+
+        const keys = ["boots", "body", "pads", "invis", "shp", "belt", "amp"];
+
+        for(let i = 0; i < keys.length; i++){
+
+            if(data[`item_${keys[i]}`] > 0) return true;
+            //row.push({"display": ignore0(data[`item_${keys[i]}`]), "value": data[`item_${keys[i]}`]});
+        }
+
+        return false;
+    }
+
     render(){
 
-        const headers = [
-            "Gametype",	"Jump Boots", "Body Armour", "Thigh Pads", "Invisibility", 
+        const headers = ["Jump Boots", "Body Armour", "Thigh Pads", "Invisibility", 
             "Super Health Pack", "Shield Belt", "Damage Amplifier"				
         ];
+
+        if(this.mode === "gametypes"){
+            headers.unshift("Gametype");
+        }else if(this.mode === "maps"){
+            headers.unshift("Map");
+        }
 
         const rows = [];
         let footer = null;
@@ -703,15 +748,20 @@ class PlayerItemsSummary{
 
             const d = this.data[i];
 
-            if(this.data.length === 2 && d.gametype_id === 0){
-                continue;
-            }
+            if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
+            if(this.mode === "gametypes" && (d.gametype_id === 0 || d.map_id !== 0)) continue;
+            if(this.mode === "maps" && (d.map_id === 0 || d.gametype_id !== 0)) continue;
 
-            if(this.data.length > 2 && d.gametype_id === 0){
-                footer = this.createRow(d);
-            }else{
-                rows.push(this.createRow(d));
-            }
+            //if(this.data.length === 2 && d.gametype_id === 0){
+            //    continue;
+            //}
+
+            //if(this.data.length > 2 && d.gametype_id === 0 && d.map_id === 0){
+           //     footer = this.createRow(d);
+           // }else{
+            if(!this.bAnyData(d)) continue;
+            rows.push(this.createRow(d));
+           // }
         }
 
         if(this.table === undefined){
@@ -723,7 +773,7 @@ class PlayerItemsSummary{
             };
             this.table = new TESTUITable(this.parent, tableOptions, rows);
         }else{
-            this.table.updateRows(rows, null, footer);
+            this.table.updateRows(rows, headers.map((h) =>{ return {"display": h}}), footer);
         }
     }
 }
