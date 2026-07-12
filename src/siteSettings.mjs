@@ -1,4 +1,5 @@
 import { simpleQuery } from "./database.mjs";
+import  Message from "./message.mjs";
 
 
 const DEFAULT_PAGE_SETTINGS = [
@@ -60,8 +61,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Match" ,"type": `bool`, "name": "Display JSON Links", "value": "1"},
     {"category": "Match" ,"type": `bool`, "name": "Display Damage Stats", "value": "1"},
 
-    {"category": "Player" ,"type": `bool`, "name": "Display Gametype Totals", "value": "1"},
-    {"category": "Player" ,"type": `bool`, "name": "Display Map Totals", "value": "1"},
+    {"category": "Player" ,"type": `bool`, "name": "Display Basic Totals", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display CTF", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display CTF League", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Special Events", "value": "1"},
@@ -187,8 +187,46 @@ export async function getCategorySettings(category){
 }
 
 
+function bValidSetting(cat, name){
+
+    for(let i = 0; i < DEFAULT_PAGE_SETTINGS.length; i++){
+
+        const s = DEFAULT_PAGE_SETTINGS[i];
+
+        if(s.category === cat && s.name === name) return true;
+    }
+
+    return false;
+}
+
+async function deleteSettingById(id){
+
+    return await simpleQuery(`DELETE FROM nstats_site_settings WHERE id=?`, [id]);
+}
+/**
+ * 
+ */
+async function deleteDeprecatedSettings(){
+
+
+    const rawSettings = await getAllSettings();
+
+
+    for(let i = 0; i < rawSettings.length; i++){
+
+        const s = rawSettings[i];
+
+        if(!bValidSetting(s.category, s.setting_name)){
+            new Message(`Found site setting that no longer exists(${s.category}.${s.setting_name}) Deleting`, "note");
+            await deleteSettingById(s.id);
+        }
+    }
+}
+
 export async function restoreDefaultSettings(){
     
+
+
     for(let i = 0; i < DEFAULT_PAGE_SETTINGS.length; i++){
 
         const s = DEFAULT_PAGE_SETTINGS[i];
@@ -197,6 +235,8 @@ export async function restoreDefaultSettings(){
             await insertSetting(s.category, s.type, s.name, s.value);
         }
     }
+
+    await deleteDeprecatedSettings();
 }
 
 async function deletePageSettings(page){
