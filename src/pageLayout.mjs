@@ -1,4 +1,5 @@
 import { simpleQuery } from "./database.mjs";
+import Message from "./message.mjs";
 
 const DEFAULT_PAGE_LAYOUTS = {
     "home": ["Welcome Message", "Social Media","Latest Screenshot", "Recent Matches", "Activity Heatmap", "Most Played Maps", "Most Played Gametypes", "Most Active Players", "Servers"],
@@ -82,10 +83,14 @@ export async function addPageLayout(page, item, pageOrder){
     return await simpleQuery(query, [page, item, pageOrder]);
 }
 
-export async function getAllPagesLayout(){
+export async function getAllPagesLayout(bReturnArray){
+
+    if(bReturnArray === undefined) bReturnArray = false;
 
     const query = `SELECT * FROM nstats_page_layout ORDER BY page ASC, page_order ASC`;
     const result = await simpleQuery(query);
+
+    if(bReturnArray) return result;
 
     const settings = {};
 
@@ -147,6 +152,36 @@ async function insertPageLayout(page, itemName, pageOrder){
     await simpleQuery(query, [page, itemName, pageOrder]);
 }
 
+function bValidSetting(page, item){
+
+    if(DEFAULT_PAGE_LAYOUTS[page] === undefined) return false;
+
+    if(DEFAULT_PAGE_LAYOUTS[page].indexOf(item) !== -1){
+        return true;
+    }
+
+    return false;
+}
+
+async function deleteById(id){
+
+    return await simpleQuery(`DELETE FROM nstats_page_layout WHERE id=?`, [id]);
+}
+
+async function deleteDeprecatedSettings(){
+
+    const currentSettings = await getAllPagesLayout(true);
+
+    for(let i = 0; i < currentSettings.length; i++){
+
+        const s = currentSettings[i];
+        if(!bValidSetting(s.page, s.item)){
+            new Message(`Found old page layout setting that the site no longer uses(${s.page}.${s.item}), deleting.`,"Note");
+            await deleteById(s.id);
+        }
+    }
+}
+
 export async function restoreDefaultLayouts(){
 
     for(const [page, data] of Object.entries(DEFAULT_PAGE_LAYOUTS)){
@@ -158,6 +193,8 @@ export async function restoreDefaultLayouts(){
             await insertPageLayout(page, d, i + 1);
         }
     }
+
+    await deleteDeprecatedSettings();
 }
 
 
