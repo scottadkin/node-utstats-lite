@@ -21,8 +21,6 @@
 
 <script>
 
-    const gametypeTotals = <%- JSON.stringify(gametypeTotals) %>;
-    const mapTotals = <%- JSON.stringify(mapTotals) %>;
     const weaponTotals = <%-  JSON.stringify(weaponTotals) %>;
     const generalTotals = <%- JSON.stringify(generalTotals) %>
     playerPermaLinks(".perma-links", "<%= basicPlayerInfo.hash %>");
@@ -35,7 +33,7 @@
 
         switch(settingKey){
 
-            case "Display Gametype Totals": {
+            case "Display Basic Totals": {
                 %>new PlayerBasicTotals("#root", generalTotals);<%
             } break;
             case "Display CTF": {
@@ -48,13 +46,13 @@
                 %>new PlayerRankingSummary("#root", <%- JSON.stringify(rankings) %>);<%
             } break;
             case "Display Special Events": {
-                %>new PlayerSpecialEvents("#root", gametypeTotals);<%
+                %>new PlayerSpecialEvents("#root", generalTotals);<%
             } break;
             case "Display Weapons": {
                 %>new PlayerWeaponsSummary("#root", weaponTotals);<%
             } break;
             case "Display Items": {
-                %>new PlayerItemsSummary("#root", gametypeTotals);<%
+                %>new PlayerItemsSummary("#root", generalTotals);<%
             } break;
             case "Display Recent Matches": {
                 %>const rm = new PlayerRecentMatches("#root", <%= playerId %>);<%

@@ -46,7 +46,6 @@ class PlayerRecentMatches{
             this.gametypeMaps = res.gametypeMaps;
             this.mapGametypes = res.mapGametypes;
 
-            console.log(res);
 
         }catch(err){
             console.trace(err);
@@ -174,10 +173,7 @@ class PlayerRecentMatches{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            console.log(res);
             this.data = res;
-
-            
 
             this.renderTable();
             this.pagination.updateResults(this.page, res.totalMatches, this.perPage);
@@ -365,8 +361,9 @@ class PlayerSpecialEvents{
     createTabs(){
 
         const options = [
-            {"display": "All", "value": "all"},
+            {"display": "All Time", "value": "all"},
             {"display": "Gametypes", "value": "gametypes"},
+            {"display": "Maps", "value": "maps"},
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode);
@@ -381,7 +378,7 @@ class PlayerSpecialEvents{
     renderTable(table, headers, keys){
 
         if(this.mode !== "all"){
-            headers.unshift("Gametype");
+            headers.unshift((this.mode === "maps") ? "Map" : "Gametype");
         }
 
         let footer = null;
@@ -391,12 +388,21 @@ class PlayerSpecialEvents{
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
+           // console.log(d);
 
-            if(this.mode === "all" && d.gametype_id !== 0) continue;
-
-            if(this.mode !== "all" && this.data.length === 2 && d.gametype_id === 0){
+            if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)){    
                 continue;
             }
+
+            if(this.mode === "gametypes" && (d.map_id !== 0 || d.gametype_id === 0)){
+                continue;
+            }
+
+            if(this.mode === "maps" && (d.gametype_id !== 0 || d.map_id === 0)){
+                continue;
+            }
+
+
 
             let total = 0;
 
@@ -408,19 +414,23 @@ class PlayerSpecialEvents{
 
             const row = []
 
+            let currentName = (this.mode === "gametypes") ? d.gametype_name : d.map_name;
+
             if(this.mode !== "all"){
-                row.push({"display": d.gametype_name, "value": d.gametype_name.toLowerCase(), "className": "text-left"});
+                row.push({"display": currentName, "value": currentName.toLowerCase(), "className": "text-left"});
             }
 
             for(let x = 0; x < keys.length; x++){
                 row.push({"value": d[keys[x]], "display": ignore0(d[keys[x]])});
             }
 
-            if(d.gametype_id !== 0 || this.mode === "all"){
+         
+
+            //if((d.gametype_id !== 0 && d.map_id !== 0) || this.mode === "all"){
                 rows.push(row);
-            }else{
-                footer = row;
-            }
+            //}else{
+           //     footer = row;
+            //}
         }
 
         table.updateRows(rows, headers.map((h) =>{ return {"display": h}}), footer);

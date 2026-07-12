@@ -42,20 +42,10 @@ export async function renderPlayerPage(req, res, userSession){
             getCategorySettings("Branding")]
         );
 
-        let gametypeTotals = [];
-        let mapTotals = [];
+
 
         const generalTotals = await getPlayerGeneralTotals(playerId);
-       /* console.log(testAll);
 
-        if(pageSettings["Display Gametype Totals"] === 1){
-
-            gametypeTotals = await getPlayerGametypeTotals(playerId);
-        }
-
-        if(pageSettings["Display Map Totals"] === 1){
-            mapTotals = await getPlayerAllMapTotals(playerId);
-        }*/
 
 
 
@@ -106,8 +96,6 @@ export async function renderPlayerPage(req, res, userSession){
             basicPlayerInfo,
             "playerId": playerId,
             generalTotals,
-            gametypeTotals,
-            mapTotals,
             ctfTotals,
             weaponTotals,
             rankings,
