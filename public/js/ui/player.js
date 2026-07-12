@@ -702,9 +702,15 @@ class PlayerItemsSummary{
 
     createRow(data){
 
-        let name = (this.mode === "gametypes") ? data.gametype_name : data.map_name;
+        
 
-        const row = [{"display": name, "value": name.toLowerCase(), "className": "text-left"}];
+        const row = [];
+
+        if(this.mode !== "all"){
+
+            const name = (this.mode === "gametypes") ? data.gametype_name : data.map_name;
+            row.unshift({"display": name, "value": name.toLowerCase(), "className": "text-left"});
+        }
 
         const keys = ["boots", "body", "pads", "invis", "shp", "belt", "amp"];
 
@@ -723,7 +729,6 @@ class PlayerItemsSummary{
         for(let i = 0; i < keys.length; i++){
 
             if(data[`item_${keys[i]}`] > 0) return true;
-            //row.push({"display": ignore0(data[`item_${keys[i]}`]), "value": data[`item_${keys[i]}`]});
         }
 
         return false;
@@ -752,16 +757,9 @@ class PlayerItemsSummary{
             if(this.mode === "gametypes" && (d.gametype_id === 0 || d.map_id !== 0)) continue;
             if(this.mode === "maps" && (d.map_id === 0 || d.gametype_id !== 0)) continue;
 
-            //if(this.data.length === 2 && d.gametype_id === 0){
-            //    continue;
-            //}
-
-            //if(this.data.length > 2 && d.gametype_id === 0 && d.map_id === 0){
-           //     footer = this.createRow(d);
-           // }else{
             if(!this.bAnyData(d)) continue;
             rows.push(this.createRow(d));
-           // }
+          
         }
 
         if(this.table === undefined){
