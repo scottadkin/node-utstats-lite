@@ -244,110 +244,106 @@ class PlayerRecentMatches{
     }
 }
 
-function playerBasicTotals(parent, data, bMaps){
 
-    if(data.length === 0) return;
+class PlayerBasicTotals{
 
-    parent = document.querySelector(parent);
+    constructor(parent, data){
 
-    UIHeader(parent, `${(bMaps) ? "Map" : "Gametypes"} Totals`);
+        this.parent = document.querySelector(parent);
+        this.data = data;
 
-    const headers = [
-        (bMaps) ? "Map" : "Gametype", "Last Active", "Score", "Frags", "Deaths",
-        "Suicides", "Team Kills", "Eff", "Matches", "Wins", "Winrate",
-        "Playtime"
-    ];
+        this.mode = "all";
 
-    const rows = [];
+        this.wrapper = UIDiv();
+        UIHeader(this.wrapper, "Basic Totals");
 
-    let footerRow = null;
+        this.parent.append(this.wrapper);
 
-    for(let i = 0; i < data.length; i++){
-
-        const d = data[i];
-
-        if(data.length === 2){
-            //we don't want to display duplicate data if the player has only played one gametype
-            if(bMaps){
-                if(d.map_name === "All") continue;
-            }else{
-                if(d.gametype_name === "All") continue;
-            }
-        }
-
-
-        const row = [
-            {
-                "display": d.gametype_name ?? d.map_name,
-                "value": d.gametype_name?.toLowerCase() ?? d.map_name?.toLowerCase(),
-                "className": "text-left"
-            },
-            {
-                "display": toDateString(d.last_active, true), 
-                "value": d.last_active,
-                "className": "date"
-            }
-        ];
-
-        const ignore0Keys_1 = [
-            "score", "frags", "deaths", "suicides", "team_kills"
-        ];
-
-        for(let x = 0; x < ignore0Keys_1.length; x++){
-            row.push({
-                "display": ignore0(d[ignore0Keys_1[x]]), 
-                "value": d[ignore0Keys_1[x]]
-            });
-        }
-
-
-        row.push({
-                "display": `${d.efficiency.toFixed(2)}%`,
-                "value": d.efficiency 
-            },
-            {
-                "display": ignore0(d.total_matches), 
-                "value": d.total_matches
-            },
-            {
-                "display": ignore0(d.wins), 
-                "value": d.wins
-            },
-            {
-                "display": `${d.winrate.toFixed(2)}%`, 
-                "value": d.winrate, 
-            },
-            {
-            "display": toPlaytime(d.playtime, true), 
-            "value": d.playtime,
-            "className": "playtime"
-        });
-
-        if(bMaps){
-
-            if(d.map_name !== "All"){
-                rows.push(row);
-            }else{
-                footerRow = row;
-            }
-
-        }else{
-
-            if(d.gametype_name !== "All"){
-                rows.push(row);
-            }else{
-                footerRow = row;
-            }
-        }
+        this.createTabs();
+        this.render();
     }
 
-    new TESTUITable(parent, {
-        "className": "t-width-1", 
-        "perPage": (bMaps) ? 10 : 0,
-        "headers": headers.map((h) =>{ return {"display": h}}), 
-        "footer": footerRow
-    }, 
-    rows)
+    createTabs(){
+
+        const options = [
+            {"display": "All Time", "value": "all"},
+            {"display": "Gametypes", "value": "gametypes"},
+            {"display": "Maps", "value": "maps"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.render();
+        
+        })
+    }
+
+    render(){
+
+        const headers = [
+            "Last Active", "Score", "Frags","Kills", "Deaths",
+            "Suicides", "Team Kills", "Eff", "Matches", "Wins", "Winrate",
+            "Playtime"
+        ];
+
+        if(this.mode !== "all"){
+            headers.unshift((this.mode === "maps") ? "Map" : "Gametype");
+        }
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": headers.map((h) =>{ return {"display": h}} )
+        };
+
+        const rows = [];
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(this.mode === "gametypes" && d.map_id !== 0) continue;
+            if(this.mode === "maps" && d.gametype_id !== 0) continue;
+            if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
+
+            const name = (this.mode === "gametypes") ? d.gametype_name : d.map_name;
+            
+
+            const row = [
+                {"display": toDateString(d.last_active, true), "value": d.last_active, "className": "date"},
+                {"display": ignore0(d.score), "value": d.score},
+                {"display": ignore0(d.frags), "value": d.frags},
+                {"display": ignore0(d.kills), "value": d.kills},
+                {"display": ignore0(d.deaths), "value": d.deaths},
+                {"display": ignore0(d.suicides), "value": d.suicides},
+                {"display": ignore0(d.team_kills), "value": d.team_kills},
+                {"display": `${d.efficiency.toFixed(2)}%`, "value": d.efficiency},
+                {"value": d.total_matches},
+                {"display": ignore0(d.wins), "value": d.wins},
+                {"display": `${d.winrate.toFixed(2)}%`, "value": d.winrate},
+                {"display": toPlaytime(d.playtime), "value": d.playtime, "className": "playtime"},
+            ];
+
+            if(this.mode !== "all"){
+                row.unshift({"display": name, "value": name.toLowerCase(), "className": "text-left"},);
+            }
+
+            if(this.mode !== "all" && (d.gametype_id === 0 && d.map_id === 0)){
+
+                tableOptions.footer = row;
+            }else{
+                rows.push(row);
+                tableOptions.footer = null;
+            }
+        }
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows, tableOptions.headers, tableOptions.footer);
+        }
+    }
 }
 
 

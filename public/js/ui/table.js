@@ -351,9 +351,9 @@ class TESTUITable{
             }else{
 
                 if(o.callback === undefined){
-                    cell.append(o.display);
+                    cell.append(o.display ?? o.value);
                 }else{
-                    cell.append(o.callback(o.display));
+                    cell.append(o.callback(o.display ?? o.value));
                 }
             }
 

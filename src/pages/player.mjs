@@ -3,7 +3,8 @@ import {
     getPlayerGametypeTotals,
     getPlayerAllMapTotals,
     getPlayerProfileInfo,
-    getUniquePlayedType
+    getUniquePlayedType,
+    getPlayerGeneralTotals
  } from "../players.mjs";
 import { getPlayerCTFTotals } from "../ctf.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "../weapons.mjs";
@@ -11,32 +12,6 @@ import { getPlayerRankings } from "../rankings.mjs";
 import { getPlayerMapsLeagueData } from "../ctfLeague.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
-
-
-
-
-function setTypeName(type, data, names){
-
-    let targetKey = "gametype_id";
-    let nameKey = "gametype_name";
-
-    if(type === "maps"){
-        targetKey = "map_id";
-        nameKey = "map_name";
-    }
-
-    for(let i = 0; i < data.length; i++){
-
-        const d = data[i];
-
-        if(d[targetKey] === 0){
-         
-            d[nameKey] = "All";       
-            continue;
-        }
-        d[nameKey] = names?.[d[targetKey]] ?? "Not Found";
-    }
-}
 
 
 export async function renderPlayerPage(req, res, userSession){
@@ -51,7 +26,7 @@ export async function renderPlayerPage(req, res, userSession){
 
         let title = `${basicPlayerInfo.name} - Player Profile`;
 
-        const lastSeenString = convertTimestamp(basicPlayerInfo.last_active,true, false, true);
+        const lastSeenString = convertTimestamp(basicPlayerInfo.last_active, true, false, true);
         const playtimeString = toPlaytime(basicPlayerInfo.playtime);
 
         let description = `View the player profile of ${basicPlayerInfo.name}, `;
@@ -70,6 +45,9 @@ export async function renderPlayerPage(req, res, userSession){
         let gametypeTotals = [];
         let mapTotals = [];
 
+        const generalTotals = await getPlayerGeneralTotals(playerId);
+       /* console.log(testAll);
+
         if(pageSettings["Display Gametype Totals"] === 1){
 
             gametypeTotals = await getPlayerGametypeTotals(playerId);
@@ -77,7 +55,7 @@ export async function renderPlayerPage(req, res, userSession){
 
         if(pageSettings["Display Map Totals"] === 1){
             mapTotals = await getPlayerAllMapTotals(playerId);
-        }
+        }*/
 
 
 
@@ -127,6 +105,7 @@ export async function renderPlayerPage(req, res, userSession){
             title,
             basicPlayerInfo,
             "playerId": playerId,
+            generalTotals,
             gametypeTotals,
             mapTotals,
             ctfTotals,

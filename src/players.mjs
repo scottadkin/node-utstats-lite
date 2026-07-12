@@ -934,6 +934,24 @@ export async function getPlayerAllMapTotals(playerId){
 
 }
 
+/**
+ * 
+ * @param {Number} playerId 
+ * @returns All gametype and map totals, not including CTF totals
+ */
+export async function getPlayerGeneralTotals(playerId){
+
+    const query = `SELECT ${getPlayerTotalsColumnsProfile()}, 
+    IF(nstats_player_totals.map_id = 0, 'All', nstats_maps.name) as map_name,
+    IF(nstats_player_totals.gametype_id = 0, 'All', nstats_gametypes.name) as gametype_name
+    FROM nstats_player_totals 
+    LEFT JOIN nstats_maps ON nstats_player_totals.map_id = nstats_maps.id 
+    LEFT JOIN nstats_gametypes ON nstats_player_totals.gametype_id = nstats_gametypes.id 
+    WHERE nstats_player_totals.player_id=?`;
+
+    return await simpleQuery(query, [playerId]);
+}
+
 
 async function getPlayerTotalMatches(playerId, where, vars){
 

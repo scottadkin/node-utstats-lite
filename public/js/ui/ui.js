@@ -831,7 +831,7 @@ class UISelect{
 
         for(let i = 0; i < this.select.length; i++){
 
-            this.select[i].selected = this.select[i].value === newValue;      
+            this.select[i].selected = this.select[i].value == newValue;      
         }
     }
 
@@ -868,6 +868,7 @@ class UISelect{
 
             if(o.value == selectedValue){
                 bSelectedStillExist = true;
+                this.changeSelected(selectedValue);
                 break;
             }
         }

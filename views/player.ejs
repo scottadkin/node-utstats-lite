@@ -24,6 +24,7 @@
     const gametypeTotals = <%- JSON.stringify(gametypeTotals) %>;
     const mapTotals = <%- JSON.stringify(mapTotals) %>;
     const weaponTotals = <%-  JSON.stringify(weaponTotals) %>;
+    const generalTotals = <%- JSON.stringify(generalTotals) %>
     playerPermaLinks(".perma-links", "<%= basicPlayerInfo.hash %>");
     <% 
     for(let i = 0; i < pageLayout.length; i++){
@@ -35,8 +36,7 @@
         switch(settingKey){
 
             case "Display Gametype Totals": {
-                %>playerBasicTotals("#root", gametypeTotals, false);<%
-                %>playerBasicTotals("#root", mapTotals, true);<%
+                %>new PlayerBasicTotals("#root", generalTotals);<%
             } break;
             case "Display CTF": {
                 %>new PlayerCTFSummary("#root", <%- JSON.stringify(ctfTotals) %>);<%
