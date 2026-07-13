@@ -135,7 +135,7 @@ async function deleteMultiplePlayerTotals(playerIds){
 
 async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
 
-    if(playerIds.length === 0) return;
+    if(playerIds !== null && playerIds.length === 0) return;
     const validTypes = ["all", "gametypes", "maps"];
 
     if(validTypes.indexOf(type) === -1) throw new Error("Not a valid type for getPlayersMatchDataByGroup");
@@ -155,12 +155,16 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
 
     let query = ``;
 
+    const where = (playerIds !== null) ? `WHERE player_id IN (?)` : ``;
+
+    const vars = (playerIds !== null) ? [playerIds] : [];
+
     if(type === "all"){
 
         query = `SELECT 
         ${columns}
         FROM nstats_match_weapon_stats 
-        WHERE player_id IN (?)
+        ${where}
         GROUP BY player_id,weapon_id`;
 
     }else if(type === "gametypes"){
@@ -169,7 +173,7 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
         gametype_id,
         ${columns}
         FROM nstats_match_weapon_stats 
-        WHERE player_id IN (?)
+        ${where}
         GROUP BY player_id,gametype_id,weapon_id`;
 
     }else if(type === "maps"){
@@ -178,12 +182,12 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
         map_id,
         ${columns}
         FROM nstats_match_weapon_stats 
-        WHERE player_id IN (?)
+        ${where}
         GROUP BY player_id,map_id,weapon_id`;
     }
 
 
-    return await simpleQuery(query, [playerIds]);
+    return await simpleQuery(query, vars);
 }
 
 
@@ -197,9 +201,9 @@ export async function updatePlayerTotals(playerIds){
 
 
     const promises = [
-        bulkInsertPlayerTotalsNew(allTotals, "all"), 
-        bulkInsertPlayerTotalsNew(gametypeTotals, "gametypes"), 
-        bulkInsertPlayerTotalsNew(mapTotals, "maps")
+        bulkInsertPlayerTotalsNew(allTotals, "all", false), 
+        bulkInsertPlayerTotalsNew(gametypeTotals, "gametypes", false), 
+        bulkInsertPlayerTotalsNew(mapTotals, "maps", false)
     ];
 
     return await Promise.all(promises);
@@ -207,7 +211,7 @@ export async function updatePlayerTotals(playerIds){
 
 }
 
-async function bulkInsertPlayerTotalsNew(data, type){
+async function bulkInsertPlayerTotalsNew(data, type, bRecalc){
 
     const validTypes = ["all", "gametypes", "maps"];
 
@@ -245,6 +249,7 @@ async function bulkInsertPlayerTotalsNew(data, type){
         }
 
 
+      
         insertVars.push([
             d.player_id, gametype, d.weapon_id,
             d.total_matches, d.kills, d.deaths,
@@ -252,21 +257,34 @@ async function bulkInsertPlayerTotalsNew(data, type){
             map, d.max_kills, d.max_deaths, 
             d.max_suicides, d.max_team_kills
         ]);
+
+   
     }
 
 
-    const t = "nstats_player_totals_weapons";
+    if(!bRecalc){
 
-    const columns = [`player_id`, `gametype_id`, `weapon_id`,
-        `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, 
-        `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`
-    ];
+        const t = "nstats_player_totals_weapons";
 
+        const columns = [`player_id`, `gametype_id`, `weapon_id`,
+            `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, 
+            `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`
+        ];
 
-    
-    await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","gametype_id", "map_id", "weapon_id"]);
+        await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","gametype_id", "map_id", "weapon_id"]);
 
-   // process.exit();
+    }else{
+
+        //need to make sure we have deleted all data in table first
+
+        const query = `INSERT INTO nstats_player_totals_weapons (player_id, gametype_id, weapon_id,
+            total_matches, kills, deaths, suicides, team_kills, 
+            eff, map_id, max_kills, max_deaths, max_suicides, max_team_kills) 
+            VALUES ?`;
+
+        await bulkInsert(query, insertVars);
+    }
+
 
 }
 
@@ -662,4 +680,27 @@ export async function setAllMapTotals(){
 
     await deleteAllMapTotals();
     await bulkInsertMapTotals(mapTotals);
+}
+
+
+async function deleteAllPlayerWeaponTotals(){
+
+    return await simpleQuery(`DELETE FROM nstats_player_totals_weapons WHERE id>=0`);
+}
+
+export async function recalculateAllPlayerTotals(){
+
+    const all = await calcPlayersTotalsFromMatchDataByGroup(null, "all");
+    const gametypes = await calcPlayersTotalsFromMatchDataByGroup(null, "gametypes");
+    const maps = await calcPlayersTotalsFromMatchDataByGroup(null, "maps");
+
+    await deleteAllPlayerWeaponTotals();
+
+    const promises = [
+        bulkInsertPlayerTotalsNew(all, "all", true), 
+        bulkInsertPlayerTotalsNew(gametypes, "gametypes", true), 
+        bulkInsertPlayerTotalsNew(maps, "maps", true)
+    ];
+
+    return await Promise.all(promises);
 }

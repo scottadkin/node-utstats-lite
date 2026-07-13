@@ -5895,6 +5895,87 @@ class AdminPlayersImporterSettings{
     }
 }
 
+class AdminPlayersWeaponsRecalculator{
+
+    constructor(parent, parentMode){
+
+        this.parent = parent;
+
+        this.bActive = parentMode === "recalc-weapon-totals";
+
+        this.wrapper = UIDiv();
+        this.parent.append(this.wrapper);
+        this.createElems();
+        this.render();
+    }
+
+    async recalculate(){
+
+        try{
+
+            this.button.className = "hidden";
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "recalculate-player-weapon-totals"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+            new UINotification(this.parent, "pass", "Success", "Player weapon totals recalculated successfully.");
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Recalculate Weapon Totals", err.toString());
+        }finally{
+
+            this.button.className = "submit-button";
+        }
+    }
+
+    createElems(){
+
+        this.info = UIInfo([
+            "Recalculate player weapon totals for all gametypes and maps.",
+            UIBr(),
+            `In update version 2.6.0 map totals and additional stat types where added, 
+            you can run this tool to generate the missing data without the need for reimporting logs.`
+        ]);
+
+        this.form = UIDiv("form");
+
+        this.button = UIButton("Recalculate Totals", "submit-button");
+
+        this.button.addEventListener("click", () =>{
+
+            this.recalculate();
+        });
+
+        this.form.append(this.button);
+        this.wrapper.append(this.info, this.form);
+    }
+
+    setActive(value){
+
+        this.bActive = value;
+        this.render();
+    }
+
+    render(){
+
+        if(!this.bActive){
+
+            this.wrapper.className = "hidden";
+            return;
+        }else{
+            this.wrapper.className = "";
+        }
+
+    }
+}
+
 class AdminPlayersManager{
 
     constructor(parent){
@@ -5904,11 +5985,12 @@ class AdminPlayersManager{
         this.wrapper = UIDiv();
         
         this.parent.append(this.wrapper);
-        this.mode = "importer";
+        this.mode = "recalc-weapon-totals";
 
 
         this.importerSettings = new AdminPlayersImporterSettings(this.parent, this.mode);
         this.forceNameManager = new AdminPlayerForceName(this.parent, this.mode);
+        this.playerWeaponsRecalculator = new AdminPlayersWeaponsRecalculator(this.parent, this.mode);
 
         UIHeader(this.wrapper, "Player Manager");
 
@@ -5925,6 +6007,7 @@ class AdminPlayersManager{
         const tabOptions = [
             {"display": "Importer Settings", "value": "importer"},
             {"display": "Force Player Name", "value": "force-name"},
+            {"display": "Recalculate Player Weapon Totals", "value": "recalc-weapon-totals"},
         ];
 
         this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
@@ -5933,6 +6016,7 @@ class AdminPlayersManager{
 
             this.forceNameManager.setActive(e.detail.newTab === "force-name");
             this.importerSettings.setActive(e.detail.newTab === "importer");
+            this.playerWeaponsRecalculator.setActive(e.detail.newTab === "recalc-weapon-totals");
        
             
             this.mode = e.detail.newTab;
@@ -5956,11 +6040,19 @@ class AdminPlayersManager{
         this.importerSettings.render();
     }
 
+    renderRecalculateWeapons(){
+
+        if(this.mode !== "recalc-weapon-totals") return;
+
+        this.playerWeaponsRecalculator.render();
+    }
+
     render(){
 
         this.content.innerHTML = ``;
 
         this.renderImporterSettings();
         this.renderForceName();
+        this.renderRecalculateWeapons();
     }
 }
