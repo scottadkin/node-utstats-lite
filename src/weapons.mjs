@@ -123,87 +123,6 @@ async function getAllPlayerMatchData(playerIds){
     return await simpleQuery(query, [playerIds]);
 }
 
-function calcPlayerTotals(playerIds){
-
-    
-    //playerid => gametypeid => weaponStats
-    const totals = {};
-
-    console.log(data);
-
-
-    return {"data": data, "matchIds": matchIds}
-}
-
-
-function _updatePlayerTotals(totals, data, gametypeId){
-
-
-    const playerId = data.player_id;
-    const weaponId = data.weapon_id;
-
-    data.kills = parseInt(data.kills);
-    data.deaths = parseInt(data.deaths);
-    data.suicides = parseInt(data.suicides);
-    data.team_kills = parseInt(data.team_kills);
-
-    if(totals[playerId] === undefined){
-        totals[playerId] = {};
-    }
-
-    if(totals[playerId][gametypeId] === undefined){
-        
-        totals[playerId][gametypeId] = {}; 
-    }
-
-    if(totals[playerId][gametypeId][weaponId] === undefined){
-
-        let eff = 0;
-
-        if(data.kills > 0){
-
-            if(data.deaths > 0){
-                eff = data.kills / (data.kills + data.deaths + data.team_kills) * 100;
-            }else{
-                eff = 100;
-            }
-        }
-
-
-        totals[playerId][gametypeId][weaponId]  = {      
-            "matches": data.total_matches,
-            "kills": data.kills,
-            "deaths": data.deaths,
-            "team_kills": data.team_kills,
-            "eff": eff,
-            "suicides": data.suicides       
-        };
-
-        return;
-    }
-
-    const t = totals[playerId][gametypeId][weaponId];
-
-    t.kills += data.kills;
-    t.deaths += data.deaths;
-    t.team_kills += data.team_kills;
-    t.suicides += data.suicides;
-
-    let eff = 0;
-
-    if(t.kills > 0){
-
-        if(t.deaths > 0){
-            eff = t.kills / (t.kills + t.deaths + t.team_kills) * 100;
-        }else{
-            eff = 100;
-        }
-    }
-
-    t.eff = eff;
-
-    t.matches+=data.total_matches;
-}
 
 async function deleteMultiplePlayerTotals(playerIds){
 
@@ -211,41 +130,6 @@ async function deleteMultiplePlayerTotals(playerIds){
     const query = `DELETE FROM nstats_player_totals_weapons WHERE player_id IN (?)`;
 
     return await simpleQuery(query, [playerIds]);
-}
-
-async function bulkInsertPlayerTotals(totals){
-
-    const insertVars = [];
-
-    const playerIds = new Set();
-
-    const mapId = 0;
-
-    for(const [playerId, playerData] of Object.entries(totals)){
-
-        playerIds.add(playerId);
-
-        for(const [gametypeId, gametypeData] of Object.entries(playerData)){
-
-            for(const [weaponId, weaponData] of Object.entries(gametypeData)){
-
-                insertVars.push([
-                    playerId, gametypeId, mapId, weaponId,
-                    weaponData.matches, weaponData.kills, weaponData.deaths,
-                    weaponData.suicides, weaponData.team_kills, weaponData.eff
-                ]);
-            }
-        }
-    }
-
-    const t = "nstats_player_totals_weapons";
-
-    const columns = [`player_id`, `gametype_id`, `map_id`, `weapon_id`,
-    `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, `eff`];
-
-
-    await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","gametype_id", "map_id", "weapon_id"]);
-
 }
 
 
@@ -257,12 +141,7 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
     if(validTypes.indexOf(type) === -1) throw new Error("Not a valid type for getPlayersMatchDataByGroup");
 
 
-    let query = ``;
-
-    if(type === "all"){
-
-        query = `SELECT 
-        player_id,
+    const columns = `player_id,
         weapon_id,
         COUNT(*) as total_matches,
         SUM(kills) as kills,
@@ -272,7 +151,14 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
         SUM(team_kills) as team_kills,
         MAX(team_kills) as worst_team_kills,
         SUM(suicides) as suicides,
-        MAX(suicides) as worst_suicides
+        MAX(suicides) as worst_suicides`;
+
+    let query = ``;
+
+    if(type === "all"){
+
+        query = `SELECT 
+        ${columns}
         FROM nstats_match_weapon_stats 
         WHERE player_id IN (?)
         GROUP BY player_id,weapon_id`;
@@ -280,18 +166,8 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
     }else if(type === "gametypes"){
 
         query = `SELECT 
-        player_id,
         gametype_id,
-        weapon_id,
-        COUNT(*) as total_matches,
-        SUM(kills) as kills,
-        MAX(kills) as best_kills,
-        SUM(deaths) as deaths,
-        MAX(deaths) as worst_deaths,
-        SUM(team_kills) as team_kills,
-        MAX(team_kills) as worst_team_kills,
-        SUM(suicides) as suicides,
-        MAX(suicides) as worst_suicides
+        ${columns}
         FROM nstats_match_weapon_stats 
         WHERE player_id IN (?)
         GROUP BY player_id,gametype_id,weapon_id`;
@@ -299,18 +175,8 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
     }else if(type === "maps"){
 
         query = `SELECT 
-        player_id,
         map_id,
-        weapon_id,
-        COUNT(*) as total_matches,
-        SUM(kills) as kills,
-        MAX(kills) as best_kills,
-        SUM(deaths) as deaths,
-        MAX(deaths) as worst_deaths,
-        SUM(team_kills) as team_kills,
-        MAX(team_kills) as worst_team_kills,
-        SUM(suicides) as suicides,
-        MAX(suicides) as worst_suicides
+        ${columns}
         FROM nstats_match_weapon_stats 
         WHERE player_id IN (?)
         GROUP BY player_id,map_id,weapon_id`;
@@ -325,15 +191,15 @@ export async function updatePlayerTotals(playerIds){
 
     if(playerIds.length === 0) return null;
 
-    const testAll = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "all");
-    const testGametypes = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "gametypes");
-    const testMaps = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "maps");
+    const allTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "all");
+    const gametypeTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "gametypes");
+    const mapTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "maps");
 
 
     const promises = [
-        bulkInsertPlayerTotalsNew(testAll, "all"), 
-        bulkInsertPlayerTotalsNew(testGametypes, "gametypes"), 
-        bulkInsertPlayerTotalsNew(testMaps, "maps")
+        bulkInsertPlayerTotalsNew(allTotals, "all"), 
+        bulkInsertPlayerTotalsNew(gametypeTotals, "gametypes"), 
+        bulkInsertPlayerTotalsNew(mapTotals, "maps")
     ];
 
     return await Promise.all(promises);
@@ -402,6 +268,7 @@ export async function getPlayerTotals(playerId){
 
     const query = `SELECT 
     nstats_player_totals_weapons.gametype_id,
+    nstats_player_totals_weapons.map_id,
     nstats_player_totals_weapons.weapon_id,
     nstats_player_totals_weapons.total_matches,
     nstats_player_totals_weapons.kills,
@@ -409,10 +276,12 @@ export async function getPlayerTotals(playerId){
     nstats_player_totals_weapons.team_kills,
     nstats_player_totals_weapons.eff,
     nstats_weapons.name as weapon_name,
-    IF(nstats_player_totals_weapons.gametype_id = 0, 'All Gametypes', nstats_gametypes.name) as gametype_name
+    IF(nstats_player_totals_weapons.gametype_id = 0, 'All Gametypes', nstats_gametypes.name) as gametype_name,
+    IF(nstats_player_totals_weapons.map_id = 0, 'All Maps', nstats_maps.name) as map_name
     FROM nstats_player_totals_weapons 
     LEFT JOIN nstats_weapons ON nstats_weapons.id = nstats_player_totals_weapons.weapon_id
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_player_totals_weapons.gametype_id
+    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_player_totals_weapons.map_id
     WHERE nstats_player_totals_weapons.player_id=?`;
 
     return await simpleQuery(query, [playerId]);

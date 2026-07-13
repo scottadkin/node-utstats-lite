@@ -784,6 +784,8 @@ class PlayerWeaponsSummary{
         this.parent = document.querySelector(parent);
         this.data = data;
         this.mode = "all";
+        this.selectedGametype = 0;
+        this.selectedMap = 0;
 
 
         this.wrapper = UIDiv();
@@ -793,9 +795,61 @@ class PlayerWeaponsSummary{
 
 
         console.log(this.data);
+        this.getAllUniqueNames();
         this.createTabs();
 
+        
+
         this.render();
+    }
+
+    sortByDisplayName(a, b){
+
+        a = a.display.toLowerCase();
+        b = b.display.toLowerCase();
+
+        if(a < b){
+            return -1;
+        }else if(a > b){
+            return 1;
+        }
+        return 0;
+    }
+
+    getAllUniqueNames(){
+
+        this.gametypeNames = [];
+        this.mapNames = [];
+
+        const foundGametypes = new Set();
+        const foundMaps = new Set();
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.gametype_name !== "All Gametypes" && !foundGametypes.has(d.gametype_id)){
+                foundGametypes.add(d.gametype_id);
+                this.gametypeNames.push({"value": d.gametype_id, "display": d.gametype_name});
+            }
+
+            if(d.map_name !== "All Maps" && !foundMaps.has(d.map_id)){
+
+                foundMaps.add(d.map_id);
+                this.mapNames.push({"value": d.map_id, "display": d.map_name});
+            }
+        }
+        
+        this.gametypeNames.sort(this.sortByDisplayName);
+        this.mapNames.sort(this.sortByDisplayName);
+
+        if(this.gametypeNames.length > 0){
+            this.selectedGametype = this.gametypeNames[0].value;
+        }
+
+        if(this.mapNames.length > 0){
+            this.selectedMap = this.mapNames[0].value;
+        }
     }
 
     createTabs(){
@@ -812,39 +866,38 @@ class PlayerWeaponsSummary{
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
             this.mode = e.detail.newTab;
+
+            this.gametypeRow.className = (this.mode === "gametypes") ? "form-row" : "hidden";
+            this.mapRow.className = (this.mode === "maps") ? "form-row" : "hidden";
             this.render();
         })
-    }
 
-    /*setAllGametypeNames(){
 
-        this.gametypeNames = {};
+        this.gametypeRow = UIDiv(`form-row ${(this.mode === "gametypes") ? "" : "hidden"}`);
 
-        for(let i = 0; i < this.data.length; i++){
+        this.gametypeRow.append(UILabel("Gametype"));
 
-            const d = this.data[i];
-
-            this.gametypeNames[d.gametype_id] = d.gametype_name;
-        }
-    }*/
-
-    /*createTabs(){
-
-        const options = [];
-
-        this.setAllGametypeNames();
-
-        for(const [id, name] of Object.entries(this.gametypeNames)){
-            options.push({"display": name, "value": parseInt(id)});
-        }
-
-        this.tabs = new UITabs(this.parent, options, this.mode);
-
-        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
-            this.mode = parseInt(e.detail.newTab);
+        this.gametypeSelect = new UISelect(this.gametypeRow, this.gametypeNames, this.selectedGametype, (e) =>{
+            this.selectedGametype = parseInt(e);
+       
             this.render();
         });
-    }*/
+
+        this.wrapper.append(this.gametypeRow);
+
+
+        this.mapRow = UIDiv(`form-row ${(this.mode === "maps") ? "" : "hidden"}`);
+        this.mapRow.append(UILabel("Map"));
+
+        this.mapSelect = new UISelect(this.mapRow, this.mapNames, this.selectedMap, (e) =>{
+            this.selectedMap = parseInt(e);
+       
+            this.render();
+        });
+
+        this.wrapper.append(this.mapRow);
+
+    }
 
     createRow(d){
 
@@ -861,7 +914,6 @@ class PlayerWeaponsSummary{
     }
 
     render(){
-
 
         const headers = [
            "Name", "Matches", "Team Kills", "Deaths", "Kills", "Efficiency"
@@ -881,7 +933,12 @@ class PlayerWeaponsSummary{
             const d = this.data[i];
 
             //if(d.gametype_id !== this.mode) continue;
-            if(this.mode === "all" && (d.gametype_id !== 0 /*|| d.map_id !== 0*/)) continue;
+            if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
+            if(this.mode === "gametypes" && d.map_id !== 0) continue;
+            if(this.mode === "gametypes" && (this.selectedGametype === 0 || d.gametype_id !== this.selectedGametype)) continue;
+
+            if(this.mode === "maps" && d.gametype_id !== 0) continue;
+            if(this.mode === "maps" && (this.selectedMap === 0 || d.map_id !== this.selectedMap)) continue;
 
             totals.teamKills += d.team_kills;
             totals.deaths += d.deaths;
@@ -911,7 +968,7 @@ class PlayerWeaponsSummary{
 
             footer = [
                 {"display": "Totals"},
-                {"display": totals.matches},
+                {"display": `${totals.matches}(MAX)`},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
