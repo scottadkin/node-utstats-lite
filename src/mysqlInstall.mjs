@@ -993,7 +993,7 @@ async function addTableIndexes(){
         {"table": "nstats_player_ctf_league", "column": "map_id, gametype_id, player_id", "index": "mgp_idx","bUnique": false},
         {"table": "nstats_player_totals", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": true},
         {"table": "nstats_player_totals_ctf", "column": "player_id, gametype_id, map_id", "index": "pgm_idx","bUnique": true},
-        {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, weapon_id", "index": "pgw_idx","bUnique": true},
+        {"table": "nstats_player_totals_weapons", "column": "player_id, gametype_id, map_id, weapon_id", "index": "pgmw_idx","bUnique": true},
         {"table": "nstats_players", "column": "name", "index": "name_idx","bUnique": false},
         {"table": "nstats_players", "column": "hash", "index": "hash_idx","bUnique": false},
         {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},
@@ -1004,6 +1004,10 @@ async function addTableIndexes(){
         {"table": "nstats_player_ctf_league", "column": "player_id,gametype_id,map_id", "index": "pgm_idx","bUnique": true},
         
     ];
+
+    if(await bIndexExists("nstats_player_totals_weapons", "pgw_idx", true)){
+        await dropIndex("nstats_player_totals_weapons", "pgw_idx");
+    }
 
     for(let i = 0; i < targets.length; i++){
 
@@ -1060,7 +1064,17 @@ async function updateSessionTable(){
 async function updatePlayerWeaponTotalsTable(){
 
 
+    if(await bIndexExists("nstats_player_totals_weapons", "pgw_idx", true)){
+        await dropIndex("nstats_player_totals_weapons", "pgw_idx");
+    }
+
+    if(!await bIndexExists("nstats_player_totals_weapons", "pgmw_idx", true)){
+        add
+    }
+
     await addColumn("nstats_player_totals_weapons", "map_id", "INT NOT NULL DEFAULT 0");
+
+    
 }
 
 export async function mysqlInstall(mysqlSettings){

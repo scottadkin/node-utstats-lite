@@ -357,9 +357,11 @@ const queries = [
             deaths INTEGER NOT NULL,
             suicides INTEGER NOT NULL,
             team_kills INTEGER NOT NULL,
-            eff REAL NOT NULL
+            eff REAL NOT NULL,
+            map_id INTEGER NOT NULL
         ) STRICT`,
-		 `CREATE UNIQUE INDEX IF NOT EXISTS pgw_idx ON nstats_player_totals_weapons(player_id, gametype_id, weapon_id)`,
+         `DROP INDEX IF EXISTS pgw_idx`, //replaced with pgmw idx below
+		 `CREATE UNIQUE INDEX IF NOT EXISTS pgmw_idx ON nstats_player_totals_weapons(player_id, gametype_id, map_id, weapon_id)`,
 
         `CREATE TABLE IF NOT EXISTS nstats_player_totals_ctf (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

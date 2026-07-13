@@ -335,6 +335,7 @@ export async function sqlInsertOnDuplicateUpdate(tableName, columns, vars, confl
         }
     }
 
+    console.log(query);
     const prepare = database.prepare(query);
 
     prepare.run(...sqliteConvertDates(vars));
