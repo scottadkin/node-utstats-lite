@@ -358,7 +358,11 @@ const queries = [
             suicides INTEGER NOT NULL,
             team_kills INTEGER NOT NULL,
             eff REAL NOT NULL,
-            map_id INTEGER NOT NULL
+            map_id INTEGER NOT NULL,
+            max_kills INTEGER NOT NULL,
+            max_deaths INTEGER NOT NULL,
+            max_suicides INTEGER NOT NULL,
+            max_team_kills INTEGER NOT NULL
         ) STRICT`,
          `DROP INDEX IF EXISTS pgw_idx`, //replaced with pgmw idx below
 		 `CREATE UNIQUE INDEX IF NOT EXISTS pgmw_idx ON nstats_player_totals_weapons(player_id, gametype_id, map_id, weapon_id)`,
@@ -820,6 +824,10 @@ async function updatePlayerWeaponTotalsTable(){
     new Message("Attempting to update nstats_player_totals_weapons table.","note");
 
     await addColumn("nstats_player_totals_weapons", "map_id", "INTEGER NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "max_kills", "INTEGER NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "max_deaths", "INTEGER NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "max_suicides", "INTEGER NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "max_team_kills", "INTEGER NOT NULL DEFAULT 0");
     new Message("Updated nstats_player_totals_weapons.","pass");
 
 }

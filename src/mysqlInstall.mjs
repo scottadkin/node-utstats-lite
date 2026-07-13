@@ -1068,12 +1068,11 @@ async function updatePlayerWeaponTotalsTable(){
         await dropIndex("nstats_player_totals_weapons", "pgw_idx");
     }
 
-    if(!await bIndexExists("nstats_player_totals_weapons", "pgmw_idx", true)){
-        add
-    }
-
     await addColumn("nstats_player_totals_weapons", "map_id", "INT NOT NULL DEFAULT 0");
-
+    await addColumn("nstats_player_totals_weapons", "map_kills", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "map_deaths", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "map_suicides", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "map_team_kills", "INT NOT NULL DEFAULT 0");
     
 }
 

@@ -793,8 +793,6 @@ class PlayerWeaponsSummary{
         this.parent.append(this.wrapper);
         UIHeader(this.wrapper, "Weapons Summary");
 
-
-        console.log(this.data);
         this.getAllUniqueNames();
         this.createTabs();
 
@@ -905,18 +903,25 @@ class PlayerWeaponsSummary{
             {"display": d.weapon_name, "value":d.weapon_name.toLowerCase(), "className": "text-left"},
             {"value": d.total_matches},
             {"display": ignore0(d.team_kills), "value": d.team_kills},
+            {"display": ignore0(d.max_team_kills), "value": d.max_team_kills},
             {"display": ignore0(d.deaths), "value": d.deaths},
+            {"display": ignore0(d.max_deaths), "value": d.max_deaths},
+            {"display": ignore0(d.suicides), "value": d.suicides},
+            {"display": ignore0(d.max_suicides), "value": d.max_suicides},
             {"display": ignore0(d.kills), "value": d.kills},
-            {"display": `${d.eff.toFixed(2)}%`, "value": d.eff},
-        ]
-
+            {"display": ignore0(d.max_kills), "value": d.max_kills},
+            {"display": `${d.eff.toFixed(2)}%`, "value": d.eff},   
+        ];
         return row;
     }
 
     render(){
 
         const headers = [
-           "Name", "Matches", "Team Kills", "Deaths", "Kills", "Efficiency"
+           "Name", "Matches", "Team Kills",
+           "Worst Team Kills", "Deaths", "Worst Deaths", 
+           "Suicides", "Most Suicides", "Kills", 
+            "Best Kills", "Efficiency"
         ];
 
         const rows = [];
@@ -970,8 +975,13 @@ class PlayerWeaponsSummary{
                 {"display": "Totals"},
                 {"display": `${totals.matches}(MAX)`},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0},
                 {"display": `${eff.toFixed(2)}%`},
             ];
         }

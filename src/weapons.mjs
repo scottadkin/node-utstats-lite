@@ -145,13 +145,13 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
         weapon_id,
         COUNT(*) as total_matches,
         SUM(kills) as kills,
-        MAX(kills) as best_kills,
+        MAX(kills) as max_kills,
         SUM(deaths) as deaths,
-        MAX(deaths) as worst_deaths,
+        MAX(deaths) as max_deaths,
         SUM(team_kills) as team_kills,
-        MAX(team_kills) as worst_team_kills,
+        MAX(team_kills) as max_team_kills,
         SUM(suicides) as suicides,
-        MAX(suicides) as worst_suicides`;
+        MAX(suicides) as max_suicides`;
 
     let query = ``;
 
@@ -245,16 +245,22 @@ async function bulkInsertPlayerTotalsNew(data, type){
         }
 
 
-        insertVars.push([d.player_id, gametype, d.weapon_id,
-                    d.total_matches, d.kills, d.deaths,
-                    d.suicides, d.team_kills, eff, map]);
+        insertVars.push([
+            d.player_id, gametype, d.weapon_id,
+            d.total_matches, d.kills, d.deaths,
+            d.suicides, d.team_kills, eff, 
+            map, d.max_kills, d.max_deaths, 
+            d.max_suicides, d.max_team_kills
+        ]);
     }
 
 
     const t = "nstats_player_totals_weapons";
 
     const columns = [`player_id`, `gametype_id`, `weapon_id`,
-    `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, `eff`, `map_id`];
+        `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, 
+        `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`
+    ];
 
 
     
@@ -273,8 +279,13 @@ export async function getPlayerTotals(playerId){
     nstats_player_totals_weapons.total_matches,
     nstats_player_totals_weapons.kills,
     nstats_player_totals_weapons.deaths,
+    nstats_player_totals_weapons.suicides,
     nstats_player_totals_weapons.team_kills,
     nstats_player_totals_weapons.eff,
+    nstats_player_totals_weapons.max_kills,
+    nstats_player_totals_weapons.max_deaths,
+    nstats_player_totals_weapons.max_suicides,
+    nstats_player_totals_weapons.max_team_kills,
     nstats_weapons.name as weapon_name,
     IF(nstats_player_totals_weapons.gametype_id = 0, 'All Gametypes', nstats_gametypes.name) as gametype_name,
     IF(nstats_player_totals_weapons.map_id = 0, 'All Maps', nstats_maps.name) as map_name
