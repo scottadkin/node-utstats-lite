@@ -785,9 +785,47 @@ const queries = [
 
 ];
 
+
+async function bColumnExist(tableName, columnName){
+
+    const result = await simpleQuery(`PRAGMA table_info(${tableName})`);
+
+
+    for(let i = 0; i < result.length; i++){
+
+        const {name} = result[i];
+        if(name === columnName) return true;
+    }
+
+    return false;
+}
+
+async function addColumn(tableName, columnName, columnType){
+
+    if(await bColumnExist(tableName, columnName)){
+        new Message(`${tableName} already has a column named ${columnName} skipping addColumn.`,"note");
+        return;
+    }
+    const query = `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnType}`;
+
+
+    await simpleQuery(query);
+}
+
+
+async function updatePlayerWeaponTotalsTable(){
+
+    new Message("Attempting to update nstats_player_totals_weapons table.","note");
+
+    await addColumn("nstats_player_totals_weapons", "map_id", "INTEGER NOT NULL DEFAULT 0");
+    new Message("Updated nstats_player_totals_weapons.","pass");
+
+}
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
+
+
 
     for(let i = 0; i < queries.length; i++){
 
@@ -795,6 +833,9 @@ export async function sqliteInstall(bOnlyCreateTables){
         await simpleQuery(queries[i]);
         new Message(`Query passed`,"pass");
     }
+
+
+    await updatePlayerWeaponTotalsTable();
 
     if(!bOnlyCreateTables){
 

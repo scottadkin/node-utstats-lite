@@ -1056,6 +1056,13 @@ async function updateSessionTable(){
     new Message(`Created new table nstats_sessions`, "pass");
 }
 
+
+async function updatePlayerWeaponTotalsTable(){
+
+
+    await addColumn("nstats_player_totals_weapons", "map_id", "INT NOT NULL DEFAULT 0");
+}
+
 export async function mysqlInstall(mysqlSettings){
  
     try{
@@ -1114,6 +1121,9 @@ export async function mysqlInstall(mysqlSettings){
 
         new Message(`Removing start offset from event timestamps.`,"note");
         await removeStartOffsets();
+
+        new Message(`Updating nstats_player_totals_weapons`, "node");
+        await updatePlayerWeaponTotalsTable();
 
         await updateSessionTable();
 

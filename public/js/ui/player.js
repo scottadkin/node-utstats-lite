@@ -783,17 +783,40 @@ class PlayerWeaponsSummary{
 
         this.parent = document.querySelector(parent);
         this.data = data;
+        this.mode = "all";
 
-        UIHeader(this.parent, "Weapons Summary");
 
-        this.mode = 0;
+        this.wrapper = UIDiv();
+
+        this.parent.append(this.wrapper);
+        UIHeader(this.wrapper, "Weapons Summary");
+
+
+        console.log(this.data);
         this.createTabs();
 
         this.render();
     }
 
+    createTabs(){
 
-    setAllGametypeNames(){
+        const options = [
+            {"display": "All Time", "value": "all"},
+            {"display": "Gametypes", "value": "gametypes"},
+            {"display": "Maps", "value": "maps"},
+        ];
+
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.mode = e.detail.newTab;
+            this.render();
+        })
+    }
+
+    /*setAllGametypeNames(){
 
         this.gametypeNames = {};
 
@@ -803,9 +826,9 @@ class PlayerWeaponsSummary{
 
             this.gametypeNames[d.gametype_id] = d.gametype_name;
         }
-    }
+    }*/
 
-    createTabs(){
+    /*createTabs(){
 
         const options = [];
 
@@ -821,11 +844,11 @@ class PlayerWeaponsSummary{
             this.mode = parseInt(e.detail.newTab);
             this.render();
         });
-    }
+    }*/
 
     createRow(d){
 
-        return [
+        const row = [
             {"display": d.weapon_name, "value":d.weapon_name.toLowerCase(), "className": "text-left"},
             {"value": d.total_matches},
             {"display": ignore0(d.team_kills), "value": d.team_kills},
@@ -833,13 +856,15 @@ class PlayerWeaponsSummary{
             {"display": ignore0(d.kills), "value": d.kills},
             {"display": `${d.eff.toFixed(2)}%`, "value": d.eff},
         ]
+
+        return row;
     }
 
     render(){
 
 
         const headers = [
-            "Name", "Matches", "Team Kills", "Deaths", "Kills", "Efficiency"
+           "Name", "Matches", "Team Kills", "Deaths", "Kills", "Efficiency"
         ];
 
         const rows = [];
@@ -855,7 +880,8 @@ class PlayerWeaponsSummary{
 
             const d = this.data[i];
 
-            if(d.gametype_id !== this.mode) continue;
+            //if(d.gametype_id !== this.mode) continue;
+            if(this.mode === "all" && (d.gametype_id !== 0 /*|| d.map_id !== 0*/)) continue;
 
             totals.teamKills += d.team_kills;
             totals.deaths += d.deaths;
