@@ -190,26 +190,22 @@ class RankingsExplain{
         this.minMatchesSetting = minMatchesSetting;
 
         this.wrapper = UIDiv();
-        this.header = UIDiv("header-wrapper");
-        this.header.append("Rankings Explained");
 
-        this.wrapper.append(this.header);
+        UIHeader(this.wrapper, "Rankings Explained");
+    
         this.mode = "general";
-
-        this.info = UIDiv("info");
-        this.wrapper.append(this.info);
+       
         this.parent.append(this.wrapper);
 
-        this.info.append(
+
+        this.wrapper.append(UIInfo(
             `Ranking scores are calculated by total various events in matches divided by playtime.`,
             UIBr(),
             `Players must participate in a minimum of ${this.minMatchesSetting} matches before getting a ranking score.`
-        );
+        ));
 
         
         this.createTabs();
-        this.content = UIDiv();
-        this.wrapper.append(this.content);
         this.renderContent();
     }
 
@@ -232,7 +228,6 @@ class RankingsExplain{
     renderContent(){
 
         
-        this.content.innerHTML = ``;
 
         let settings = this.settings[this.mode];
 
@@ -269,14 +264,22 @@ class RankingsExplain{
         }
 
         const tableOptions = {
-            "className": "rankings-explained-table",
+            "className": "t-width-4 rankings-explained-table",
             "headers": [
                 {"display": "Event"},
                 {"display": (this.mode !== "penalty") ? "Value" : "Penalty"}
-            ]
+            ],
+            "sortBy": (this.mode !== "penalty") ? 0 : 1
         };
 
-        new TESTUITable(this.content, tableOptions, rows);
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+        }else{
+
+            this.table.setSortBy((this.mode !== "penalty") ? 0 : 1);
+            this.table.updateRows(rows);
+        }
+        
 
         
     }

@@ -454,6 +454,11 @@ class TESTUITable{
 
     }
 
+    setSortBy(newSortBy){
+
+        this.sortBy = parseInt(newSortBy);
+    }
+
     updateRows(newRows, newHeaders, newFooter){
 
         this.tableBody.innerHTML = "";
