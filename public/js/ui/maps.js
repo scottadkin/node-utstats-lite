@@ -314,20 +314,31 @@ class MapListDisplay{
     }
 }
 
-function UIMapImage(parent, image){
-
-    if(image === "default.jpg") return;
+function UIMapImage(parent, image, requiredImageName){
 
     parent = document.querySelector(parent);
 
     const wrapper = UIDiv("text-center");
 
-    const img = document.createElement("img");
-    img.className = "map-sshot";
-    img.src = `../images/maps/${image}`;
-    img.alt = "Map Screenshot";
+    if(image === "default.jpg"){
 
-    wrapper.append(img);
+        wrapper.className = "error";
+        wrapper.append(
+            `Map doesn't have a screenshot, required screenshot name is:`, 
+            UIBr(), 
+            UIB(`${requiredImageName}.jpg`), 
+            UIBr()
+        );
+
+    }else{
+
+        const img = document.createElement("img");
+        img.className = "map-sshot";
+        img.src = `../images/maps/${image}`;
+        img.alt = "Map Screenshot";
+
+        wrapper.append(img);
+    }
 
     parent.append(wrapper);
 }

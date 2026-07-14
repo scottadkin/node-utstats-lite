@@ -364,12 +364,11 @@ export async function getMapInfo(mapId){
 
     if(result.length === 0) return null;
 
-    //const mapImageName = genericGetMapImageName(result[0].name);
-
     const imageName = result[0].name.toLowerCase();
 
     const images = await getMapImages([imageName]);
     result[0].image = images[imageName] ?? "default.jpg";
+    result[0].requiredImageName = imageName;
     return result[0];
 }
 
