@@ -320,8 +320,7 @@ function UIMapImage(parent, image){
 
     parent = document.querySelector(parent);
 
-    const wrapper = UIDiv();
-    wrapper.className = "text-center";
+    const wrapper = UIDiv("text-center");
 
     const img = document.createElement("img");
     img.className = "map-sshot";
@@ -339,29 +338,22 @@ function UIMapBasicSummary(parent, data){
 
     UIHeader(parent, "Basic Summary");
 
-    const table = document.createElement("table");
-    table.className = "t-width-4";
-
     const headers = ["First Match", "Last Match", "Matches Played", "Playtime"];
 
-    const headerRow = document.createElement("tr");
+    const row = [
+        {"display": toDateString(data.first_match), "value": data.first_match, "className": "date"},
+        {"display": toDateString(data.last_match), "value": data.last_match, "className": "date"},
+        {"value": data.matches},
+        {"display": toPlaytime(data.playtime), "value": data.playtime, "className": "date"},
+    ];
 
-    for(let i = 0; i < headers.length; i++){
+    const tableOptions = {
+        "className": "t-width-1",
+        "headers": headers.map((h) =>{ return {"display": h}})
+    };
 
-        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-    }
+    new TESTUITable(parent, tableOptions, [row]);
 
-    table.append(headerRow);
-
-    const row = document.createElement("tr");
-
-    row.append(UITableCell({"content": data.first_match, "parse": ["date"], "className": "date"}));
-    row.append(UITableCell({"content": data.last_match, "parse": ["date"], "className": "date"}));
-    row.append(UITableCell({"content": data.matches}));
-    row.append(UITableCell({"content": data.playtime, "parse": ["playtime"], "className": "playtime"}));
-
-    table.append(row);
-    parent.append(table);
 }
 
 
