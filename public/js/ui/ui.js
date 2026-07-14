@@ -1859,27 +1859,43 @@ function UIUnorderedList(data){
 
 
 
-function UIInfo(content){
+class UIInfo{
 
-    const wrapper = UIDiv("info");
+    constructor(parent, content){
 
-    const inner = UIDiv("info-text");
+        this.parent = parent;
 
-    const contentType = typeof content; 
+        this.originalContent = content;
 
-
-    if(contentType === "string"){
-        inner.append(content);
-    }else if(Array.isArray(contentType)){
-        inner.append(...content);
-    }else if(contentType === "object"){
-        inner.append(...content);
-    }else{
-
-        throw new Error(`UIInfo not valid content`);
+        this.createElems();
     }
 
-    wrapper.append(inner);
+    updateContent(content){
 
-    return wrapper;
+        const contentType = typeof content;
+
+        this.content.innerHTML = ``;
+
+        if(contentType === "string"){
+            this.content.append(content);
+        }else if(Array.isArray(contentType)){
+            this.content.append(...content);
+        }else if(contentType === "object"){
+            this.content.append(...content);
+        }else{
+
+            throw new Error(`UIInfo not valid content`);
+        }
+        
+    }
+
+    createElems(){
+
+        this.wrapper = UIDiv("info");
+        this.content = UIDiv("info-text");
+
+        this.updateContent(this.originalContent);
+        this.wrapper.append(this.content);
+        this.parent.append(this.wrapper);
+    }
 }

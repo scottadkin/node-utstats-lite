@@ -145,8 +145,7 @@ class AdminFTPManager{
             UIAdminInfoRow("Append Team Sizes To Gametype Names", UIStaticTrueFalse(logs["append_team_sizes"])
         );
         
-
-        this.content.append(UIInfo(content));
+        new UIInfo(this.content, content);
     }
 
 
@@ -1038,9 +1037,8 @@ class AdminMapsManager{
             UIBr(), `- For best results use an aspect ratio of 16:9.`, UIBr()
         );
 
-        const info = UIInfo(content);
+        new UIInfo(this.wrapper, content);
 
-        this.wrapper.append(info);
 
     }
 
@@ -5937,7 +5935,7 @@ class AdminPlayersWeaponsRecalculator{
 
     createElems(){
 
-        this.info = UIInfo([
+        this.info = new UIInfo(this.wrapper, [
             "Recalculate player weapon totals for all gametypes and maps.",
             UIBr(),
             `In update version 2.6.0 map totals and additional stat types where added, 
@@ -5954,7 +5952,7 @@ class AdminPlayersWeaponsRecalculator{
         });
 
         this.form.append(this.button);
-        this.wrapper.append(this.info, this.form);
+        this.wrapper.append(this.form);
     }
 
     setActive(value){

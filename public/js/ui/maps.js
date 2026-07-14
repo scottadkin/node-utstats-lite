@@ -158,7 +158,7 @@ class MapListDisplay{
                 content.push(`No maps in database.`);
             }
 
-            parent.append(UIInfo(content));
+            new UIInfo(parent, content);
             return;   
         }
 
@@ -503,8 +503,7 @@ class UIMapPlayerRankings{
 
         this.parent.append(this.wrapper);
 
-        this.info = UIDiv("info");
-        this.wrapper.append(this.info);
+        this.info = new UIInfo(this.wrapper, []);
         this.renderInfo();
 
         this.content = UIDiv();
@@ -540,9 +539,8 @@ class UIMapPlayerRankings{
 
     renderInfo(){
 
-        this.info.innerHTML = ``;
 
-        this.info.innerHTML = `Ranking based on players who have been active in the last ${this.timeRange} days.`;
+        this.info.updateContent([`Ranking based on players who have been active in the last ${this.timeRange} days.`]);
     }
 
     renderTable(){
@@ -585,7 +583,8 @@ class UIMapPlayerRankings{
     render(){
 
         if(this.totalMatches === 0){
-            this.content.append(UIInfo([`There are no player rankings data within the timeframe.`]));
+
+            new UIInfo(this.content, [`There are no player rankings data within the timeframe.`]);
             return;
         }
 

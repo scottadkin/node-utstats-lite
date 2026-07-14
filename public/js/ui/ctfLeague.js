@@ -159,7 +159,7 @@ class CTFLeagueTable{
 
         if(this.data.data.length === 0){
 
-            this.parent.append(UIInfo([`There is currently no players in this CTF League Table.`]));
+            new UIInfo(this.parent, [`There is currently no players in this CTF League Table.`]);
             return;
         }
 

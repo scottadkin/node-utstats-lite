@@ -136,7 +136,7 @@ class RankingsSearchForm{
         if(this.data.length === 0){
 
             this.table.className = "hidden";
-            this.parent.append(UIInfo([`There has not been enough matches played in the selected time range for there to be any rankings.`]));
+            new UIInfo(this.parent, [`There has not been enough matches played in the selected time range for there to be any rankings.`]);
             return;
         }
 
@@ -198,12 +198,10 @@ class RankingsExplain{
         this.parent.append(this.wrapper);
 
 
-        this.wrapper.append(UIInfo(
-            `Ranking scores are calculated by total various events in matches divided by playtime.`,
+        new UIInfo(this.wrapper, [`Ranking scores are calculated by total various events in matches divided by playtime.`,
             UIBr(),
-            `Players must participate in a minimum of ${this.minMatchesSetting} matches before getting a ranking score.`
-        ));
-
+            `Players must participate in a minimum of ${this.minMatchesSetting} matches before getting a ranking score.`]);
+  
         
         this.createTabs();
         this.renderContent();

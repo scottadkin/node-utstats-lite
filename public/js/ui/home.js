@@ -92,7 +92,7 @@ function renderSocials(parent, settings){
         link.className = "bold"
         link.append(settings["External Site"]);
 
-        wrapper.append(UIInfo([`We also have another website you may like to visit `, link]));
+        new UIInfo(wrapper, [`We also have another website you may like to visit `, link]);
        // UISocial(wrapper, settings["External Site"], "red.png");
     }
 

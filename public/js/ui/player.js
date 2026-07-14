@@ -1017,7 +1017,7 @@ class PlayerRankingSummary{
 
         const infoContent = `Ranking positions based on gametypes or maps where the player has been active in the last ${data.maxDays} Days.`;
 
-        this.parent.append(UIInfo(infoContent));
+        new UIInfo(this.parent, [infoContent]);
 
         this.mode = "gametypes";
         this.createTabs();
