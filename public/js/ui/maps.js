@@ -545,37 +545,46 @@ class UIMapPlayerRankings{
 
     renderTable(){
 
-        this.table = document.createElement("table");
-        this.table.className = "t-width-1";
-        this.content.append(this.table);
- 
         const headers = ["Place", "Name", "Last Active", "Playtime", "Matches", "Score"];
 
-        const headerRow = document.createElement("tr");
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": headers.map((h) =>{ return {"display": h}}),
+            "bNoSort": true
+        };
 
-        for(let i = 0; i < headers.length; i++){
-            
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.append(headerRow);
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
-
-            const row = document.createElement("tr");
-
             const place = i + 1 + this.perPage * (this.page - 1);
 
-            row.append(UITableCell({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
-            row.append(UIPlayerLink({"playerId": d.player_id, "name": d.name, "country": d.country, "bTableElem": true}));
-            row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
-            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
-            row.append(UITableCell({"content": d.matches}));
-            row.append(UITableCell({"content": d.score.toFixed(2)}));
+            rows.push([
+                {"display": `${place}${getOrdinal(place)}`, "value": place, "className": "ordinal"},
+                {
+                    "display": UIPlayerLink(
+                        {
+                            "playerId": d.player_id, 
+                            "name": d.name, 
+                            "country": d.country, 
+                            "bTableElem": true
+                        }), 
+                    "bSkipTD": true
+                },
+                {"display": toDateString(d.last_active), "className": "date"},
+                {"display": toPlaytime(d.playtime), "className": "playtime"},
+                {"display": d.matches},
+                {"display": `${d.score.toFixed(2)}`},
+            ]);
+        }
+        
 
-            this.table.append(row);
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.content, tableOptions, rows);
+        }else{
+
+            this.table.updateRows(rows);
         }
 
     }
@@ -587,9 +596,6 @@ class UIMapPlayerRankings{
             new UIInfo(this.content, [`There are no player rankings data within the timeframe.`]);
             return;
         }
-
-       
-        this.content.innerHTML = ``;
         
 
         this.renderTable();
