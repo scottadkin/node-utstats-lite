@@ -157,6 +157,7 @@ class MapListDisplay{
             }else{
                 content.push(`No maps in database.`);
             }
+
             parent.append(UIInfo(content));
             return;   
         }
@@ -182,23 +183,37 @@ class MapListDisplay{
         );
     }
 
+    headerToKey(header){
+
+        const headerNames = {
+            "Name": "name", 
+            "First": "first", 
+            "Last": "last", 
+            "Matches": "matches", 
+            "Playtime": "playtime"
+        };
+
+        return headerNames[header] ?? "unknown";
+
+    }
+
     sortData(){
 
+        let key = "name";
+
+        const sort = this.sortBy.toLowerCase();
+
+        if(sort === "first"){
+            key = "first_match";
+        }else if(sort === "last"){
+            key = "last_match";
+        }else if(sort === "matches"){
+            key = "matches";
+        }else if(sort === "playtime"){
+            key = "playtime";
+        }
+
         this.data.sort((a, b) =>{
-
-            let key = "name";
-
-            const sort = this.sortBy.toLowerCase();
-
-            if(sort === "first"){
-                key = "first_match";
-            }else if(sort === "last"){
-                key = "last_match";
-            }else if(sort === "matches"){
-                key = "matches";
-            }else if(sort === "playtime"){
-                key = "playtime";
-            }
 
             a = a[key];
             b = b[key];
@@ -220,6 +235,7 @@ class MapListDisplay{
             return 0;
 
         });
+
     }
 
     createRows(){
@@ -230,14 +246,15 @@ class MapListDisplay{
 
             const d = this.data[i];
 
+
             const url = `/map/${d.id}`;
 
             rows.push([
-                {"content": d.name, "className": "text-left", url},
-                {"content": d.first_match, "parse": ["date"], "className": "date", url},
-                {"content": d.last_match, "parse": ["date"], "className": "date", url},
-                {"content": d.matches, url},
-                {"content": d.playtime, "parse": ["playtime"], "className": "playtime", url}
+                {"display": d.name, "value": d.name.toLowerCase(), "className": "text-left", url},
+                {"value": d.first_match, "display": toDateString(d.first_match, true), "className": "date", url},
+                {"value": d.last_match, "display": toDateString(d.last_match, true), "className": "date", url},
+                {"value": d.matches, url},
+                {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime", url}
             ]);
         }
 
@@ -246,50 +263,46 @@ class MapListDisplay{
 
     renderTable(){
 
-        const table = document.createElement("table");
-        table.className = "t-width-1";
-
+  
         const headers = ["Name", "First", "Last", "Matches", "Playtime"];
 
-        const headerRows = [];
 
-        for(let i = 0; i < headers.length; i++){
+        const tableOptions = {
+            "className": "t-width-1",
+            "bNoSort": true,
+            "headers": headers.map((h) =>{ 
+                return {"display": h, "callback": () =>{ 
+         
+                    const targetKey = this.headerToKey(h);
 
-           // console.log(u);
-
-            headerRows.push({
-                "content": headers[i], 
-                "className": "hover",
-                "click": () =>{
-
-                    if(this.sortBy === headers[i].toLowerCase()){
+                    if(targetKey === this.sortBy){
                         this.bAscOrder = !this.bAscOrder;
                     }else{
-                        this.sortBy = headers[i].toLowerCase();
                         this.bAscOrder = true;
                     }
 
+       
+                    this.sortBy = targetKey;
+
                     this.sortData();
+                    this.table.updateRows(this.createRows()); 
 
-                    this.table.updateRows(this.createRows());
-                }
-            });
-        }
+                    const order = (this.bAscOrder) ? "ASC" : "DESC";
+                    history.pushState(
+                            {},
+                            "",
+                            `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${order}`
+                        );
+                    } 
+            }
+         })};
 
-        const tableOptions = {
-            "width": "1",
-            "headers": headerRows, 
-        };
-
-
-        this.table = new UITable(this.parent, tableOptions, this.createRows());
+        this.table = new TESTUITable(this.parent, tableOptions, this.createRows());
     }
 
     renderRichView(){
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "rich-outter";
-
+        const wrapper = UIDiv("rich-outter");
         this.parent.append(wrapper);
 
         for(let i = 0; i < this.data.length; i++){

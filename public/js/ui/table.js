@@ -26,7 +26,9 @@ class TESTUITable{
         this.lastSortBy = this.sortBy;
 
 
-        this.sortData();
+        if(!this.bNoSort){
+            this.sortData();
+        }
 
         this.table = document.createElement("table");
 
@@ -73,11 +75,14 @@ class TESTUITable{
             const cell = document.createElement("th");
             cell.append(h.display);
 
-            if(!this.bNoSort){
+            
 
-                cell.style.cssText = `user-select:none;cursor:pointer;`;
+            
 
-                cell.addEventListener("click", () =>{
+            cell.addEventListener("click", () =>{
+
+                
+                if(!this.bNoSort){
 
                     this.lastSortBy = this.sortBy;
                     this.sortBy = i;
@@ -86,11 +91,21 @@ class TESTUITable{
                         this.bAscOrder = !this.bAscOrder;
                     }
 
+                    
+
                     this.sortData();
                     this.renderRows();
+                }
 
-                });
-            }
+                if(h.callback !== undefined){
+                    cell.style.cssText = `user-select:none;cursor:pointer;`;
+                    h.callback(this.bAscOrder, this.lastSortBy, this.sortBy);
+                }else if(this.bNoSort){
+                    cell.style.cssText = `user-select:none;cursor:pointer;`;
+                }
+
+            });
+            
 
             
             headerRow.append(cell);
@@ -483,7 +498,9 @@ class TESTUITable{
             delete this.options.footer;
         }
 
-        this.sortData();
+        if(!this.bNoSort){
+            this.sortData();
+        }
 
         this.renderCaption();
         this.renderRows();
