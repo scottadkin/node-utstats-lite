@@ -17,7 +17,6 @@ class MapsSearchForm{
 
         this.createForm(); 
 
-
         this.resultWrapper = UIDiv();
 
         this.parent.append(this.resultWrapper);
@@ -74,52 +73,36 @@ class MapsSearchForm{
             {"display": "Last Match", "value": "last"},
             {"display": "Matches", "value": "matches"},
             {"display": "Playtime", "value": "playtime"},
-        ];
-
-        
+        ];  
 
         const elem = new UISelect(parent, options, this.sortBy, (e) =>{
             this.sortBy = e;
             this.updateUrl();
             this.renderResults();
         });
-
     }
 
     createForm(){
 
-        this.form = document.createElement("form");
-        this.form.className = "form";
+        this.form = UIDiv("form")
 
-        const nameRow = document.createElement("div");
-        nameRow.className = "form-row";
+        const nameRow = UIDiv("form-row");
 
-        const nameLabel = document.createElement("label");
-        nameLabel.innerHTML = "Name";
-        nameLabel.htmlFor = "name";
-        nameRow.append(nameLabel);
-
-        const nameElem = document.createElement("input");
-        nameElem.type = "text";
-        nameElem.className = "textbox";
-        nameElem.placeholder = "Search for a map...";
-        nameElem.id = nameElem.name = "name";
-        nameElem.value = this.nameSearch;
-
-        nameElem.addEventListener("input", (e) =>{
-            this.nameSearch = e.target.value;
+        const nameLabel = UILabel("Name", "name");
+   
+        const nameElem = UIInput("text", "name", this.nameSearch, "Search for a map...", (e) =>{
+            this.nameSearch = e;
             this.updateUrl();
             this.loadData();
-        });
+        })
 
-        nameRow.append(nameElem);
+        nameRow.append(nameLabel, nameElem);
 
         this.form.append(nameRow);
 
         const sortByRow = UIDiv("form-row");
         sortByRow.append(UILabel("Sort By"));
 
-        this.form.append(sortByRow);
 
         this.createSortBySelect(sortByRow);
 
@@ -129,50 +112,25 @@ class MapsSearchForm{
 
         new UIOrderSelect(orderRow, this.order, (e) =>{
             this.order = e;
-
             this.updateUrl();
             this.renderResults();
         });
 
-        this.form.append(orderRow);
+        this.form.append(sortByRow, orderRow);
 
+        const displayRow = UIDiv("form-row");
 
-        const displayRow = document.createElement("div");
-        displayRow.className = "form-row";
-
-        const displayLabel = document.createElement("label");
-        displayLabel.innerHTML = "Display Mode";
-        displayLabel.htmlFor = "display";
+        const displayLabel = UILabel("Display Mode", "display");
 
         displayRow.append(displayLabel);
 
-        const displayElem = document.createElement("select");
-        displayElem.name = "display";
-        displayElem.id = "display";
-
-        for(let i = 0; i < this.displayModes.length; i++){
-
-            const {display, value} = this.displayModes[i];
-
-            const option = document.createElement("option");
-            option.value = value;
-            option.innerHTML = display;
-
-            if(value == this.displayMode) option.selected = true;
-            displayElem.append(option);
-        }
-
-        displayRow.append(displayElem);
-
-        displayElem.addEventListener("change", (e) =>{
-            this.displayMode = e.target.value;
+        const displayElem = new UISelect(displayRow, this.displayModes, this.displayMode, (e) =>{
+            this.displayMode = e;
             this.updateUrl();
             this.renderResults();
-        });
+        }, "display");
 
         this.form.append(displayRow);
-
-       
 
         this.parent.append(this.form);
 

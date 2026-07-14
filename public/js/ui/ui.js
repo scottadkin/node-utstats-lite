@@ -808,11 +808,13 @@ function UICopyURLToClipboard(parent, text, url){
 
 class UISelect{
 
-    constructor(parent, options, initialValue, callback){
+    constructor(parent, options, initialValue, callback, id, name){
 
         this.parent = parent;
         this.options = options;
         this.initialValue = initialValue;
+
+        
 
         this.select = document.createElement("select");
 
@@ -821,6 +823,9 @@ class UISelect{
                 callback(e.target.value);
             }
         });
+
+        if(name !== undefined) this.select.name = name;
+        if(id !== undefined) this.select.id = id;
 
         this.createOptions();
 
