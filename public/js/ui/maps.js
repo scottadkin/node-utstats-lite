@@ -420,12 +420,9 @@ class UIMapRecentMatches{
 
     render(){
 
-     
         this.wrapper.innerHTML = ``;
         
-
         renderMatchesTable("#map-recent-matches", {"data": this.data}, true);
-
    
         this.pagination.updateResults(this.page, this.totalMatches, this.perPage);
         
@@ -440,31 +437,27 @@ function UIMapWeaponsSummary(parent, data){
 
     UIHeader(parent, "Weapons Summary");
 
-    data.weapons.sort((a, b) =>{
-        a = a.name.toLowerCase();
-        b = b.name.toLowerCase();
-
-        if(a < b) return -1;
-        if(a > b) return 1;
-        return 0;
-    });
-
-    const table = document.createElement("table");
-    table.className = "t-width-1";
-
-    const headerRow = document.createElement("tr");
-
     const headers = [
         "Name", "Deaths", "Suicides", "Team Kills",
         "Kills", "Kills Percentage", "KPM",
     ];
 
+    const tableOptions = {
+        "className": "t-width-1",
+        "headers": headers.map((h) =>{ return {"display": h}}),
+        "footer": [
+            {"display": "Totals | MAX"},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "INT", "callback": ignore0},
+            {"display": "SUM", "dataType": "FLOAT", "callback": (v) => `${parseFloat(v).toFixed(2)}%`},
+            {"display": "MAX", "dataType": "FLOAT", "callback": (v) => parseFloat(v).toFixed(2)},
+        ]
+    };
 
-    for(let i = 0; i < headers.length; i++){
-        headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-    }
 
-    table.append(headerRow);
+    const rows = [];
 
     for(let i = 0; i < data.weapons.length; i++){
 
@@ -477,21 +470,18 @@ function UIMapWeaponsSummary(parent, data){
             killsPercent = d.kills / data.totals.kills * 100;
         }
 
-        const row = document.createElement("tr");
-
-        row.append(UITableCell({"content": d.name, "className": "text-left"}));
-        row.append(UITableCell({"content": d.deaths, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": d.suicides, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": d.team_kills, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": d.kills, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": `${killsPercent.toFixed(2)}%`}));
-        row.append(UITableCell({"content": d.kills_per_min.toFixed(3)}));
-
-        table.append(row);
-
+        rows.push([
+            {"display": d.name,  "value": d.name.toLowerCase(), "className": "text-left"},
+            {"display": ignore0(d.deaths), "value": d.deaths},
+            {"display": ignore0(d.suicides), "value": d.suicides},
+            {"display": ignore0(d.team_kills), "value": d.team_kills},
+            {"display": ignore0(d.kills), "value": d.kills},
+            {"display": `${killsPercent.toFixed(2)}%`, "value": killsPercent},
+            {"display": d.kills_per_min.toFixed(3), "value": d.kills_per_min},
+        ]);
     }
 
-    parent.append(table);
+    new TESTUITable(parent, tableOptions, rows);
 }
 
 

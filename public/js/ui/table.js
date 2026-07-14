@@ -77,7 +77,17 @@ class TESTUITable{
 
             
 
+
             
+            if(!this.bNoSort){
+                cell.style.cssText = `user-select:none;cursor:pointer;`;
+            }else{
+
+                if(h.callback !== undefined){
+                    cell.style.cssText = `user-select:none;cursor:pointer;`;
+                }
+            }
+
 
             cell.addEventListener("click", () =>{
 
@@ -92,16 +102,12 @@ class TESTUITable{
                     }
 
                     
-
                     this.sortData();
                     this.renderRows();
                 }
 
                 if(h.callback !== undefined){
-                    cell.style.cssText = `user-select:none;cursor:pointer;`;
                     h.callback(this.bAscOrder, this.lastSortBy, this.sortBy);
-                }else if(this.bNoSort){
-                    cell.style.cssText = `user-select:none;cursor:pointer;`;
                 }
 
             });
