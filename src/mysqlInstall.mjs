@@ -1074,10 +1074,10 @@ async function updatePlayerWeaponTotalsTable(){
     }
 
     await addColumn("nstats_player_totals_weapons", "map_id", "INT NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "map_kills", "INT NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "map_deaths", "INT NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "map_suicides", "INT NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "map_team_kills", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "max_kills", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "max_deaths", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "max_suicides", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "max_team_kills", "INT NOT NULL DEFAULT 0");
     
 }
 
@@ -1135,6 +1135,12 @@ export async function mysqlInstall(mysqlSettings){
 
         await removeLogTablesImporterIdColumns();
 
+        new Message(`Updating nstats_player_totals_weapons`, "note");
+        await updatePlayerWeaponTotalsTable();
+
+         new Message(`Updating nstats_map_weapon_totals`, "note");
+        await updateMapWeaponTotalsTable();
+
         await addTableIndexes();
 
         await updateDominationTables();
@@ -1147,8 +1153,7 @@ export async function mysqlInstall(mysqlSettings){
         new Message("Calculating Player Map Averages", "note");
         await setAllPlayerMapAverages();
 
-        new Message(`Updating nstats_map_weapon_totals`, "note");
-        await updateMapWeaponTotalsTable();
+       
         
         new Message("Calculating Map Weapon Totals", "note");
         await setAllMapWeaponTotals();
@@ -1159,8 +1164,7 @@ export async function mysqlInstall(mysqlSettings){
         new Message(`Removing start offset from event timestamps.`,"note");
         await removeStartOffsets();
 
-        new Message(`Updating nstats_player_totals_weapons`, "note");
-        await updatePlayerWeaponTotalsTable();
+        
 
         
 
