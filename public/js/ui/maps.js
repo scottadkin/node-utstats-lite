@@ -430,60 +430,118 @@ class UIMapRecentMatches{
 }
 
 
-function UIMapWeaponsSummary(parent, data){
+class UIMapWeaponsSummary{
 
-    if(data === null) return;
-    parent = document.querySelector(parent);
+    constructor(parent, data){
 
-    UIHeader(parent, "Weapons Summary");
+        if(data === null) return;
+        this.parent = document.querySelector(parent);
+        this.data = data;
+        this.selectedGametype = 0;
 
-    const headers = [
-        "Name", "Deaths", "Suicides", "Team Kills",
-        "Kills", "Kills Percentage", "KPM",
-    ];
+        this.totals = {
+            "kills": 0,
+            "deaths": 0,
+            "suicides": 0,
+            "teamKills": 0
+        };
 
-    const tableOptions = {
-        "className": "t-width-1",
-        "headers": headers.map((h) =>{ return {"display": h}}),
-        "footer": [
-            {"display": "Totals | MAX"},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "FLOAT", "callback": (v) => `${parseFloat(v).toFixed(2)}%`},
-            {"display": "MAX", "dataType": "FLOAT", "callback": (v) => parseFloat(v).toFixed(2)},
-        ]
-    };
+        this.setTotals();
 
-
-    const rows = [];
-
-    for(let i = 0; i < data.weapons.length; i++){
-
-        const d = data.weapons[i];
-
-        let killsPercent = 0;
-
-        if(data.totals.kills > 0 && d.kills > 0){
-
-            killsPercent = d.kills / data.totals.kills * 100;
-        }
-
-        rows.push([
-            {"display": d.name,  "value": d.name.toLowerCase(), "className": "text-left"},
-            {"display": ignore0(d.deaths), "value": d.deaths},
-            {"display": ignore0(d.suicides), "value": d.suicides},
-            {"display": ignore0(d.team_kills), "value": d.team_kills},
-            {"display": ignore0(d.kills), "value": d.kills},
-            {"display": `${killsPercent.toFixed(2)}%`, "value": killsPercent},
-            {"display": d.kills_per_min.toFixed(3), "value": d.kills_per_min},
-        ]);
+        this.createElems();
+        this.renderTable();
+        
     }
 
-    new TESTUITable(parent, tableOptions, rows);
-}
+    setTotals(){
 
+        const uniqueGametypes = new Set();
+
+        this.gametypes = [];
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(!uniqueGametypes.has(d.gametype_id)){
+                uniqueGametypes.add(d.gametype_id);
+                this.gametypes.push({"display": d.gametype_name, "value": d.gametype_id});
+            }
+
+            this.totals.kills += d.kills;
+            this.totals.deaths += d.deaths;
+            this.totals.suicides += d.suicides;
+            this.totals.teamKills += d.team_kills;
+        }
+    }
+
+    createElems(){
+        UIHeader(this.parent, "Weapons Summary");
+
+        this.tabs = new UITabs(this.parent, this.gametypes, this.selectedGametype);
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.selectedGametype = parseInt(e.detail.newTab);
+            this.renderTable();
+        });
+    }
+
+    renderTable(){
+
+        const headers = [
+            "Name", "Deaths", "Suicides", "Team Kills",
+            "Kills", "Kills Percentage", "KPM",
+        ];
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": headers.map((h) =>{ return {"display": h}}),
+            "footer": [
+                {"display": "Totals | MAX"},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "FLOAT", "callback": (v) => `${parseFloat(v).toFixed(2)}%`},
+                {"display": "MAX", "dataType": "FLOAT", "callback": (v) => parseFloat(v).toFixed(2)},
+            ]
+        };
+
+
+        const rows = [];
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.gametype_id !== this.selectedGametype) continue;
+
+            let killsPercent = 0;
+
+            if(this.totals.kills > 0 && d.kills > 0){
+
+                killsPercent = d.kills / this.totals.kills * 100;
+            }
+
+            rows.push([
+                {"display": d.weapon_name,  "value": d.weapon_name.toLowerCase(), "className": "text-left"},
+                {"display": ignore0(d.deaths), "value": d.deaths},
+                {"display": ignore0(d.suicides), "value": d.suicides},
+                {"display": ignore0(d.team_kills), "value": d.team_kills},
+                {"display": ignore0(d.kills), "value": d.kills},
+                {"display": `${killsPercent.toFixed(2)}%`, "value": killsPercent},
+                {"display": d.kills_per_min.toFixed(3), "value": d.kills_per_min},
+            ]);
+        }
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.parent, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows);
+        }
+
+    }
+}
 
 class UIMapPlayerRankings{
 

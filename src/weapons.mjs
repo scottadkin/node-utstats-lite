@@ -519,36 +519,37 @@ export async function calcMapWeaponsTotals(mapId, gametypeId){
 
 export async function getMapWeaponStats(mapId){
 
-    const query = `SELECT total_matches,total_playtime,weapon_id,kills,deaths,team_kills,kills_per_min,
-    deaths_per_min,team_kills_per_min,suicides,suicides_per_min FROM nstats_map_weapon_totals WHERE map_id=?`;
+    const mT = "nstats_map_weapon_totals";
+    const gT = "nstats_gametypes";
+    const wT = "nstats_weapons";
+
+    const query = `SELECT 
+    ${mT}.total_matches,
+    ${mT}.total_playtime,
+    ${mT}.weapon_id,
+    ${mT}.kills,
+    ${mT}.deaths,
+    ${mT}.team_kills,
+    ${mT}.kills_per_min,
+    ${mT}.deaths_per_min,
+    ${mT}.team_kills_per_min,
+    ${mT}.suicides,
+    ${mT}.suicides_per_min,
+    ${mT}.gametype_id,
+    ${mT}.max_kills,
+    ${mT}.max_deaths,
+    ${mT}.max_suicides,
+    ${mT}.max_team_kills,
+    IF(${mT}.gametype_id != 0, ${gT}.name, 'All Gametypes') as gametype_name, 
+    ${wT}.name as weapon_name 
+    FROM ${mT} 
+    LEFT JOIN ${gT} ON ${mT}.gametype_id = ${gT}.id
+    LEFT JOIN ${wT} ON ${mT}.weapon_id = ${wT}.id
+    WHERE ${mT}.map_id=?`;
 
     const result = await simpleQuery(query, [mapId]);
 
-    const weaponIds = [...result.map((r) =>{
-        return r.weapon_id;
-    })]
-
-    const weaponNames = await getWeaponNames(weaponIds);
-
-    const totals = {
-        "kills": 0,
-        "deaths": 0,
-        "suicides": 0,
-        "team_kills": 0,
-    };
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i]; 
-        r.name = weaponNames[r.weapon_id] ?? "Not Found";
-
-        totals.kills += r.kills;
-        totals.deaths += r.deaths;
-        totals.suicides += r.suicides;
-        totals.team_kills += r.team_kills;
-    }
-
-    return {"weapons": result, totals};
+    return result;
 }
 
 
