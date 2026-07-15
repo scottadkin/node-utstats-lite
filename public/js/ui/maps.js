@@ -439,18 +439,21 @@ class UIMapWeaponsSummary{
         this.data = data;
         this.selectedGametype = 0;
 
-        this.totals = {
-            "kills": 0,
-            "deaths": 0,
-            "suicides": 0,
-            "teamKills": 0
-        };
+        this.totals = {};
 
         this.setTotals();
 
         this.createElems();
         this.renderTable();
         
+    }
+
+    updateTotal(gametypeId, currentData){
+
+        this.totals[gametypeId].kills += currentData.kills;
+        this.totals[gametypeId].deaths += currentData.deaths;
+        this.totals[gametypeId].suicides += currentData.suicides;
+        this.totals[gametypeId].teamKills += currentData.team_kills;
     }
 
     setTotals(){
@@ -468,29 +471,53 @@ class UIMapWeaponsSummary{
                 this.gametypes.push({"display": d.gametype_name, "value": d.gametype_id});
             }
 
-            this.totals.kills += d.kills;
-            this.totals.deaths += d.deaths;
-            this.totals.suicides += d.suicides;
-            this.totals.teamKills += d.team_kills;
+            if(this.totals[d.gametype_id] === undefined){
+                this.totals[d.gametype_id] = {
+                    "kills": 0,
+                    "deaths": 0,
+                    "suicides": 0,
+                    "teamKills": 0
+                };
+            }
+
+            this.updateTotal(d.gametype_id, d);
+    
         }
+
     }
 
     createElems(){
+
         UIHeader(this.parent, "Weapons Summary");
 
+        
+
         this.tabs = new UITabs(this.parent, this.gametypes, this.selectedGametype);
+
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
             this.selectedGametype = parseInt(e.detail.newTab);
             this.renderTable();
         });
+
+        this.info = new UIInfo(this.parent, [
+            UIB("Deaths, Suicides, Team Kills, Kills:"), 
+            " are totals from all matches played with matching map and gametype.",
+            UIBr(),
+            UIB("Max Suicides/Kills/Deaths "),
+            " are the highest total values recorded in a single match.",
+            UIBr(),
+            UIB("KPM "), "is kills per minute.", UIBr(),
+            UIB("Kills Precentage"), " is the percentage of kills made with each weapon compared to the total of all weapons."
+        
+        ]);
     }
 
     renderTable(){
 
         const headers = [
-            "Name", "Deaths", "Suicides", "Team Kills",
-            "Kills", "Kills Percentage", "KPM",
+            "Name", "Deaths", "Max Deaths", "Suicides", "Max Suicides", "Team Kills",
+            "Kills", "Max Kills", "Kills Percentage", "KPM",
         ];
 
         const tableOptions = {
@@ -499,11 +526,14 @@ class UIMapWeaponsSummary{
             "footer": [
                 {"display": "Totals | MAX"},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
                 {"display": "SUM", "dataType": "INT", "callback": ignore0},
-                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0},
                 {"display": "SUM", "dataType": "FLOAT", "callback": (v) => `${parseFloat(v).toFixed(2)}%`},
-                {"display": "MAX", "dataType": "FLOAT", "callback": (v) => parseFloat(v).toFixed(2)},
+                {"display": "SUM", "dataType": "FLOAT", "callback": (v) => parseFloat(v).toFixed(3)},
             ]
         };
 
@@ -518,19 +548,27 @@ class UIMapWeaponsSummary{
 
             let killsPercent = 0;
 
-            if(this.totals.kills > 0 && d.kills > 0){
+            const gametype = (this.selectedGametype === 0) ? 0 : d.gametype_id;
 
-                killsPercent = d.kills / this.totals.kills * 100;
+            const totalKills = this.totals[gametype].kills;
+
+            if(totalKills > 0 && d.kills > 0){
+
+                killsPercent = d.kills / totalKills * 100;
             }
 
             rows.push([
                 {"display": d.weapon_name,  "value": d.weapon_name.toLowerCase(), "className": "text-left"},
                 {"display": ignore0(d.deaths), "value": d.deaths},
+                {"display": ignore0(d.max_deaths), "value": d.max_deaths},
                 {"display": ignore0(d.suicides), "value": d.suicides},
+                {"display": ignore0(d.max_suicides), "value": d.max_suicides},
                 {"display": ignore0(d.team_kills), "value": d.team_kills},
                 {"display": ignore0(d.kills), "value": d.kills},
+                {"display": ignore0(d.max_kills), "value": d.max_kills},
                 {"display": `${killsPercent.toFixed(2)}%`, "value": killsPercent},
                 {"display": d.kills_per_min.toFixed(3), "value": d.kills_per_min},
+                    
             ]);
         }
 
