@@ -429,11 +429,19 @@ export async function getTotalMatches(id){
     return result[0].total_matches;
 }
 
-export async function getTotalPlaytimeAndMatches(id){
+export async function getTotalPlaytimeAndMatches(id, gametypeId){
 
-    const query = `SELECT COUNT(*) as total_matches, SUM(playtime) as total_playtime FROM nstats_matches WHERE map_id=?`;
+    let where = "map_id=?";
+    const vars = [id];
 
-    const result = await simpleQuery(query, [id]);
+    if(gametypeId !== 0){
+        where += ` AND gametype_id=?`;
+        vars.push(gametypeId);
+    }
+
+    const query = `SELECT COUNT(*) as total_matches, SUM(playtime) as total_playtime FROM nstats_matches WHERE ${where}`;
+
+    const result = await simpleQuery(query, vars);
 
     return {"playtime": result[0].total_playtime, "matches": result[0].total_matches};
 }

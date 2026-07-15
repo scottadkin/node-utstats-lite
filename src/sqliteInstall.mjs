@@ -659,7 +659,8 @@ const queries = [
             max_suicides INTEGER NOT NULL,
             max_team_kills INTEGER NOT NULL
         ) STRICT`,
-		 `CREATE UNIQUE INDEX IF NOT EXISTS mw_idx ON nstats_map_weapon_totals(map_id,weapon_id)`,
+         `DROP INDEX IF EXISTS mw_idx`,//replaced with mgw_idx below
+		 `CREATE UNIQUE INDEX IF NOT EXISTS mgw_idx ON nstats_map_weapon_totals(map_id,gametype_id,weapon_id)`,
 
         `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -664,7 +664,7 @@ PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_
         max_deaths int(11) NOT NULL,
         max_suicides int(11) NOT NULL,
         max_team_kills int(11) NOT NULL,  
-        UNIQUE INDEX mgw_idx (map_id,weapon_id)
+        UNIQUE INDEX mgw_idx (map_id,gametype_id,weapon_id)
     ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
     `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
@@ -1004,7 +1004,7 @@ async function addTableIndexes(){
         {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},
         {"table": "nstats_rankings", "column": "player_id,gametype_id", "index": "pg_idx", "bUnique": true},
         {"table": "nstats_map_rankings", "column": "player_id,map_id", "index": "pm_idx", "bUnique": true},   
-        //{"table": "nstats_map_weapon_totals", "column": "map_id,gametype_id,weapon_id", "index": "mgw_idx","bUnique": true},
+        {"table": "nstats_map_weapon_totals", "column": "map_id,gametype_id,weapon_id", "index": "mgw_idx","bUnique": true},
         //faster ctf league calculating
         {"table": "nstats_player_ctf_league", "column": "player_id,gametype_id,map_id", "index": "pgm_idx","bUnique": true},
         
@@ -1092,8 +1092,8 @@ async function updateMapWeaponTotalsTable(){
 
     
 
-    if(await bIndexExists("nstats_map_weapon_totals", "mgw_idx", true)){
-        await dropIndex("nstats_map_weapon_totals", "mgw_idx");
+    if(await bIndexExists("nstats_map_weapon_totals", "mw_idx", true)){
+        await dropIndex("nstats_map_weapon_totals", "mw_idx");
     }
 }
 
@@ -1146,6 +1146,9 @@ export async function mysqlInstall(mysqlSettings){
 
         new Message("Calculating Player Map Averages", "note");
         await setAllPlayerMapAverages();
+
+        new Message(`Updating nstats_map_weapon_totals`, "note");
+        await updateMapWeaponTotalsTable();
         
         new Message("Calculating Map Weapon Totals", "note");
         await setAllMapWeaponTotals();
@@ -1159,8 +1162,7 @@ export async function mysqlInstall(mysqlSettings){
         new Message(`Updating nstats_player_totals_weapons`, "note");
         await updatePlayerWeaponTotalsTable();
 
-        new Message(`Updating nstats_map_weapon_totals`, "note");
-        await updateMapWeaponTotalsTable();
+        
 
         await updateSessionTable();
 

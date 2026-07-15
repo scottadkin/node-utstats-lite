@@ -393,52 +393,45 @@ async function deleteMapWeaponTotals(mapId){
     return await simpleQuery(query, [mapId]);
 }
 
-async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
+async function bulkInsertMapWeaponTotals(totals){
 
     const t = `nstats_map_weapon_totals`;
-    /*const query = `INSERT INTO nstats_map_weapon_totals
-    (map_id, total_matches, total_playtime, weapon_id, kills, deaths, suicides, team_kills, kills_per_min, deaths_per_min, team_kills_per_min, suicides_per_min) 
-    VALUES ? as new
-    ON DUPLICATE KEY UPDATE 
-    ${t}.total_matches=new.total_matches,
-    ${t}.total_playtime=new.total_playtime,
-    ${t}.kills=new.kills,
-    ${t}.deaths=new.deaths,
-    ${t}.suicides=new.suicides,
-    ${t}.team_kills=new.team_kills,
-    ${t}.kills_per_min=new.kills_per_min,
-    ${t}.deaths_per_min=new.deaths_per_min,
-    ${t}.team_kills_per_min=new.team_kills_per_min,
-    ${t}.suicides_per_min=new.suicides_per_min
-    `;*/
 
     const insertVars = [];
 
-    for(const [weaponId, d] of Object.entries(totals)){
+    for(let i = 0; i < totals.length; i++){
+
+        const d = totals[i];
 
         insertVars.push([
-            mapId,
-            totalMatches,
-            playtime,
-            weaponId,
+            d.map_id,
+            d.matches,
+            d.playtime,
+            d.weapon_id,
             d.kills,
             d.deaths,
             d.suicides,
             d.teamKills,
-            d.killsPMin,
-            d.deathsPMin,
-            d.teamKillsPMin,
-            d.suicidesPMin
+            d.killsPerMin,
+            d.deathsPerMin,
+            d.teamKillsPerMin,
+            d.suicidesPerMin,
+            d.gametype_id,
+            d.max_kills,
+            d.max_deaths,
+            d.max_suicides,
+            d.max_team_kills,
         ]);
     }
 
     const columns = [
         "map_id", "total_matches", "total_playtime", "weapon_id", "kills", 
         "deaths", "suicides", "team_kills", "kills_per_min", "deaths_per_min", 
-        "team_kills_per_min", "suicides_per_min"
+        "team_kills_per_min", "suicides_per_min", "gametype_id", "max_kills",
+        "max_deaths", "max_suicides", "max_team_kills"
     ];
 
-    return await sqlInsertOnDuplicateUpdate(t,columns, insertVars, ["map_id", "weapon_id"]);
+    return await sqlInsertOnDuplicateUpdate(t,columns, insertVars, ["map_id", "gametype_id", "weapon_id"]);
     //await bulkInsert(query, insertVars);
 }
 
@@ -463,23 +456,83 @@ async function calcMapWeaponTotalsFromMatchTable(mapId, gametypeId){
     SUM(team_kills) as team_kills,
     MAX(team_kills) as max_team_kills, 
     SUM(suicides) as suicides,
-    MAX(suicides) as max_suicides 
+    MAX(suicides) as max_suicides
     FROM nstats_match_weapon_stats ${whereString} GROUP BY ${gametypeIdString}weapon_id`;
 
 
     return await simpleQuery(query, vars);
 }
 
+
+function setXPH(data, totalMatches, playtime, gametypeId){
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        d.matches = totalMatches;
+        d.playtime = playtime;
+        d.gametypeId = gametypeId;
+
+        d.killsPerMin = 0;
+        d.deathsPerMin = 0;
+        d.teamKillsPerMin = 0;
+        d.suicidesPerMin = 0;
+
+        if(playtime <= 0) continue;
+
+        if(d.kills > 0){
+            d.killsPerMin = (d.kills / playtime) * 60;
+        }
+
+        if(d.deaths > 0){
+            d.deathsPerMin = (d.deaths / playtime) * 60;
+        }
+
+        if(d.suicides > 0){
+            d.suicidesPerMin = (d.suicides / playtime) * 60;
+        }
+
+        if(d.team_kills > 0){
+            d.teamKillsPerMin = (d.team_kills / playtime) * 60;
+        }
+    }
+}
+
 export async function calcMapWeaponsTotals(mapId, gametypeId){
 
 
     const gametypeData = await calcMapWeaponTotalsFromMatchTable(mapId, gametypeId);
-    const allData = await calcMapWeaponTotalsFromMatchTable(mapId, 0);
+    const allTimeData = await calcMapWeaponTotalsFromMatchTable(mapId, 0);
 
     console.log(gametypeData);
 
-    process.exit();
+    const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(mapId, 0);
+    const {playtime: gametypePlaytime, matches: gametypeMatches} = await getTotalPlaytimeAndMatches(mapId, gametypeId);
+    console.log(allTimePlaytime, gametypePlaytime, gametypeId);
 
+
+
+   // for(let i = 0; i < gametypeData.length; i++){
+
+      //  const d = gametypeData[i];
+
+      //  d.matches = gametypeMatches;
+       // d.playtime = gametypePlaytime;
+        
+    setXPH(allTimeData, allTimeMatches, allTimePlaytime, 0);
+    setXPH(gametypeData, gametypeMatches, gametypePlaytime, gametypeId);
+
+        //console.log(d);
+   // }
+
+   console.log(allTimeData);
+
+    await bulkInsertMapWeaponTotals(allTimeData);
+    await bulkInsertMapWeaponTotals(gametypeData);
+
+    process.exit();
+    /*
     const query = `SELECT weapon_id, SUM(kills) as kills, 
     SUM(deaths) as deaths, 
     SUM(team_kills) as team_kills, 
@@ -524,7 +577,7 @@ export async function calcMapWeaponsTotals(mapId, gametypeId){
     }
 
     //await deleteMapWeaponTotals(mapId);
-    await bulkInsertMapWeaponTotals(mapId, playtime, matches, totals);
+    await bulkInsertMapWeaponTotals(mapId, playtime, matches, totals);*/
 }
 
 
@@ -641,6 +694,8 @@ async function bAnyWeaponTotalsData(){
 }
 
 export async function setAllMapTotals(){
+
+    return;
 
     if(await bAnyWeaponTotalsData()){
 
