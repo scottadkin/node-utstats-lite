@@ -17,6 +17,7 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort){
     if(bMapsPage === undefined) bMapsPage = false;
 
     if(bNoSort === undefined) bNoSort = false;
+    if(bMapsPage) bNoSort = true;
 
     const wrapper = UIDiv("center text-center");
 

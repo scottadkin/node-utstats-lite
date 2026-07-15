@@ -659,7 +659,8 @@ PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_
         deaths_per_min FLOAT NOT NULL,
         team_kills_per_min FLOAT NOT NULL,
         suicides_per_min FLOAT NOT NULL, 
-        UNIQUE INDEX mw_idx (map_id,weapon_id)
+        gametype_id int(11) NOT NULL,
+        UNIQUE INDEX mgw_idx (map_id,weapon_id)
     ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
     `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
@@ -999,7 +1000,7 @@ async function addTableIndexes(){
         {"table": "nstats_player_map_minute_averages", "column": "player_id,map_id,gametype_id", "index": "pmg_idx", "bUnique": true},
         {"table": "nstats_rankings", "column": "player_id,gametype_id", "index": "pg_idx", "bUnique": true},
         {"table": "nstats_map_rankings", "column": "player_id,map_id", "index": "pm_idx", "bUnique": true},   
-        {"table": "nstats_map_weapon_totals", "column": "map_id,weapon_id", "index": "mw_idx","bUnique": true},
+        //{"table": "nstats_map_weapon_totals", "column": "map_id,gametype_id,weapon_id", "index": "mgw_idx","bUnique": true},
         //faster ctf league calculating
         {"table": "nstats_player_ctf_league", "column": "player_id,gametype_id,map_id", "index": "pgm_idx","bUnique": true},
         
@@ -1076,6 +1077,16 @@ async function updatePlayerWeaponTotalsTable(){
     
 }
 
+async function updateMapWeaponTotalsTable(){
+
+
+    await addColumn("nstats_map_weapon_totals", "gametype_id", "INT NOT NULL DEFAULT 0");
+
+    if(await bIndexExists("nstats_map_weapon_totals", "mgw_idx", true)){
+        await dropIndex("nstats_map_weapon_totals", "mgw_idx");
+    }
+}
+
 export async function mysqlInstall(mysqlSettings){
  
     try{
@@ -1135,8 +1146,11 @@ export async function mysqlInstall(mysqlSettings){
         new Message(`Removing start offset from event timestamps.`,"note");
         await removeStartOffsets();
 
-        new Message(`Updating nstats_player_totals_weapons`, "node");
+        new Message(`Updating nstats_player_totals_weapons`, "note");
         await updatePlayerWeaponTotalsTable();
+
+        new Message(`Updating nstats_map_weapon_totals`, "note");
+        await updateMapWeaponTotalsTable();
 
         await updateSessionTable();
 

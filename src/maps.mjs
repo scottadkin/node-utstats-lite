@@ -159,6 +159,12 @@ export async function getMapImages(names){
     return images;
 }
 
+export async function deleteMap(mapId){
+
+    const query = `DELETE FROM nstats_maps WHERE id=?`;
+
+    return await simpleQuery(query, [mapId]);
+}
 
 async function calculateTotals(mapId){
 
@@ -171,14 +177,7 @@ async function calculateTotals(mapId){
     return result[0];
 }
 
-export async function deleteMap(mapId){
-
-    const query = `DELETE FROM nstats_maps WHERE id=?`;
-
-    return await simpleQuery(query, [mapId]);
-}
-
-export async function updateTotals(mapId){
+export async function updateTotals(mapId, gametypeId){
 
     const totals = await calculateTotals(mapId);
 

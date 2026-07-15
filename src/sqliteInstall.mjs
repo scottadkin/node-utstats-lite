@@ -652,7 +652,8 @@ const queries = [
             kills_per_min REAL NOT NULL,
             deaths_per_min REAL NOT NULL,
             team_kills_per_min REAL NOT NULL,
-            suicides_per_min REAL NOT NULL
+            suicides_per_min REAL NOT NULL,
+            gametype_id INTEGER NOT NULL
         ) STRICT`,
 		 `CREATE UNIQUE INDEX IF NOT EXISTS mw_idx ON nstats_map_weapon_totals(map_id,weapon_id)`,
 
@@ -829,8 +830,15 @@ async function updatePlayerWeaponTotalsTable(){
     await addColumn("nstats_player_totals_weapons", "max_suicides", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "max_team_kills", "INTEGER NOT NULL DEFAULT 0");
     new Message("Updated nstats_player_totals_weapons.","pass");
-
 }
+
+async function updateMapWeaponTotalsTable(){
+
+    new Message("Attempting to update nstats_map_weapon_totals table", "note");
+    await addColumn("nstats_map_weapon_totals", "gametype_id", "INTEGER NOT NULL DEFAULT 0");
+    new Message("Updated nstats_map_weapon_totals", "pass");
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -845,7 +853,11 @@ export async function sqliteInstall(bOnlyCreateTables){
     }
 
 
+    //2.6.0
     await updatePlayerWeaponTotalsTable();
+    //2.6.0
+    await updateMapWeaponTotalsTable();
+
 
     if(!bOnlyCreateTables){
 

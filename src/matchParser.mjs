@@ -244,7 +244,7 @@ export class MatchParser{
         ]);
 
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
-        await this.map.updateTotals();
+        await this.map.updateTotals(this.gametype.id);
        
         const uniquePlayerIds = this.players.getUniquePlayerIds();
 

@@ -34,8 +34,7 @@ export class Map{
         this.id = await updateMap(this.name);
     }
 
-    async updateTotals(){
-        await updateTotals(this.id);
+    async updateTotals(gametypeId){
+        await updateTotals(this.id, gametypeId);
     }
-
 }
