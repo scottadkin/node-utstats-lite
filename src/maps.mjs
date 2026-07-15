@@ -39,6 +39,9 @@ export const VALID_PLAYER_MAP_MINUTE_AVERAGES = [
     {"value": "dom_caps", "display": "Domination Caps"}
 ];
 
+
+export const VALID_MAP_SEARCH_BY = ["name", "first_match", "matches", "playtime", "last_match"];
+
 async function getMapId(name){
 
     const query = `SELECT id FROM nstats_maps WHERE name=?`;
@@ -802,15 +805,23 @@ async function getTotalPossibleMatches(nameSearch){
     return result[0].total_rows;
 }
 
-export async function search(name, dirtyPage, dirtyPerPage){
+export async function searchMaps(name, dirtyPage, dirtyPerPage, sortBy, order){
+    
+    if(VALID_MAP_SEARCH_BY.indexOf(sortBy) === -1) throw new Error(`Not a valid map search by type`);
 
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+
+    order = order.toUpperCase();
+
+    if(order !== "ASC" && order !== "DESC") order = "ASC";
+
 
     const query = `SELECT id,name,first_match,last_match,matches,playtime 
     FROM nstats_maps 
     WHERE name LIKE ? 
-    ORDER BY name ASC
+    ORDER BY ${sortBy} ${order}
     LIMIT ?, ?`;
+
 
     const result = await simpleQuery(query, [`%${name}%`, start, perPage]);
 

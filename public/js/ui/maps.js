@@ -49,10 +49,11 @@ class MapsSearchForm{
 
             const name = encodeURIComponent(this.nameSearch);
 
-            const req = await fetch(`/json/map-search/?name=${name}&page=${this.page}&perPage=${this.perPage}`);
+            const req = await fetch(`/json/map-search/?name=${name}&order=${this.order}&sortBy=${this.sortBy}&page=${this.page}&perPage=${this.perPage}`);
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
+
 
             this.maps = res.maps;
             this.totalMatches = res.totalMatches;
@@ -69,8 +70,8 @@ class MapsSearchForm{
 
         const options = [
             {"display": "Name", "value": "name"},
-            {"display": "First Match", "value": "first"},
-            {"display": "Last Match", "value": "last"},
+            {"display": "First Match", "value": "first_match"},
+            {"display": "Last Match", "value": "last_match"},
             {"display": "Matches", "value": "matches"},
             {"display": "Playtime", "value": "playtime"},
         ];  
@@ -78,7 +79,7 @@ class MapsSearchForm{
         const elem = new UISelect(parent, options, this.sortBy, (e) =>{
             this.sortBy = e;
             this.updateUrl();
-            this.renderResults();
+            this.loadData();
         });
     }
 
@@ -113,7 +114,7 @@ class MapsSearchForm{
         new UIOrderSelect(orderRow, this.order, (e) =>{
             this.order = e;
             this.updateUrl();
-            this.renderResults();
+            this.loadData();
         });
 
         this.form.append(sortByRow, orderRow);
@@ -137,6 +138,7 @@ class MapsSearchForm{
     }
 
     updateUrl(){
+        //window.location = `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${this.order}`;
         history.pushState(
             {},"",
             `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${this.order}`);
@@ -169,14 +171,13 @@ class MapListDisplay{
         this.sortBy = sortBy;
         this.bAscOrder = order === "ASC";
 
-        this.sortData();
 
         if(this.displayMode === "table") this.renderTable();
         if(this.displayMode === "default") this.renderRichView();
 
         new UIPagination(
             this.parent, 
-            `/maps/?name=${this.nameSearch}&display=${displayMode}&perPage=${perPage}&page=`,
+            `/maps/?name=${this.nameSearch}&display=${displayMode}&sortBy=${this.sortBy}&order=${order}&perPage=${perPage}&page=`,
             totalMatches,
             perPage,
             page
@@ -187,54 +188,13 @@ class MapListDisplay{
 
         const headerNames = {
             "Name": "name", 
-            "First": "first", 
-            "Last": "last", 
+            "First": "first_match", 
+            "Last": "last_match", 
             "Matches": "matches", 
             "Playtime": "playtime"
         };
 
         return headerNames[header] ?? "unknown";
-
-    }
-
-    sortData(){
-
-        let key = "name";
-
-        const sort = this.sortBy.toLowerCase();
-
-        if(sort === "first"){
-            key = "first_match";
-        }else if(sort === "last"){
-            key = "last_match";
-        }else if(sort === "matches"){
-            key = "matches";
-        }else if(sort === "playtime"){
-            key = "playtime";
-        }
-
-        this.data.sort((a, b) =>{
-
-            a = a[key];
-            b = b[key];
-
-
-            if(!this.bAscOrder){
-                if(a > b){
-                    return -1;
-                }else if(a < b){
-                    return 1;
-                }
-            }else{
-                if(a > b){
-                    return 1;
-                }else if(a < b){
-                    return -1;
-                }
-            }
-            return 0;
-
-        });
 
     }
 
@@ -245,7 +205,6 @@ class MapListDisplay{
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
-
 
             const url = `/map/${d.id}`;
 
@@ -272,7 +231,7 @@ class MapListDisplay{
             "bNoSort": true,
             "headers": headers.map((h) =>{ 
                 return {"display": h, "callback": () =>{ 
-         
+
                     const targetKey = this.headerToKey(h);
 
                     if(targetKey === this.sortBy){
@@ -280,20 +239,13 @@ class MapListDisplay{
                     }else{
                         this.bAscOrder = true;
                     }
-
        
                     this.sortBy = targetKey;
 
-                    this.sortData();
-                    this.table.updateRows(this.createRows()); 
-
                     const order = (this.bAscOrder) ? "ASC" : "DESC";
-                    history.pushState(
-                            {},
-                            "",
-                            `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${order}`
-                        );
-                    } 
+                    window.location = `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${order}`;
+         
+                }
             }
          })};
 

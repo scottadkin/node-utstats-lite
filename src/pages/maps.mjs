@@ -1,5 +1,6 @@
-import { search } from "../maps.mjs";
+import { searchMaps, VALID_MAP_SEARCH_BY } from "../maps.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
+
 
 export async function renderMapsPage(req, res, userSession){
 
@@ -14,6 +15,9 @@ export async function renderMapsPage(req, res, userSession){
 
         sortBy = sortBy.toLowerCase();
 
+        if(VALID_MAP_SEARCH_BY.indexOf(sortBy) === -1){
+            sortBy = "name";
+        }
 
         let order = req.query.order ?? "ASC";
 
@@ -52,7 +56,7 @@ export async function renderMapsPage(req, res, userSession){
         const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
-        const {totalMatches, maps} = await search(nameSearch, page, perPage);
+        const {totalMatches, maps} = await searchMaps(nameSearch, page, perPage, sortBy, order);
 
         res.render("maps.ejs",{
             "host": req.headers.host,
