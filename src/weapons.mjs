@@ -1,6 +1,6 @@
 import { bulkInsert, simpleQuery, sqlInsertOnDuplicateUpdate, sqlInsertReturnRowId } from "./database.mjs";
 import { getMatchesGametype, getMatchesPlaytime } from "./matches.mjs";
-import { getAllMapIds, getTotalPlaytimeAndMatches } from "./maps.mjs";
+import { getAllMapIds, getAllUniquePlayedGametypes, getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
 import Message from "./message.mjs";
 
@@ -631,86 +631,34 @@ async function bAnyWeaponTotalsData(){
 
 export async function setAllMapTotals(){
 
-    throw new Error("TODO: REWRITE for added gametype totals");
-    return;
-
-    if(await bAnyWeaponTotalsData()){
-
-        new Message(`Map weapon totals data already exists, skipping.`,"note");
-        return;
-    }
 
     const mapIds = await getAllMapIds();
-
-    const matchData = {};
     
-    const matchIds = new Set();
 
     for(let i = 0; i < mapIds.length; i++){
 
         const m = mapIds[i];
 
         const current = await getAllMapData(m);
+        const uniqueGametypes = await getAllUniquePlayedGametypes(m);
 
-        matchData[m] = current;
-        //get total playtime and matches
+        //all time map totals
+        const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(m, 0);
+        const mapAllTimeData = await calcMapWeaponTotalsFromMatchTable(m, 0);
+        setXPH(mapAllTimeData, allTimeMatches, allTimePlaytime, m, 0);
 
-        for(let x = 0; x < current.length; x++){
-            matchIds.add(current[x].match_id);
-        }
-        
+        await bulkInsertMapWeaponTotals(mapAllTimeData);
+
+        for(let x = 0; x < uniqueGametypes.length; x++){
+
+            const g = uniqueGametypes[x];
+
+            const {playtime, matches} = await getTotalPlaytimeAndMatches(m,g);
+            const mapGametypeData = await calcMapWeaponTotalsFromMatchTable(m, g);
+            setXPH(mapGametypeData, matches, playtime, m, g);
+            await bulkInsertMapWeaponTotals(mapGametypeData);
+        }   
     }
-
-    const matchPlaytimes = await getMatchesPlaytime([...matchIds]);
-
-    const mapTotals = {};
-    // mapId => weaponId => weaponStats
-
-    for(const [mapId, data] of Object.entries(matchData)){
-
-        for(let i = 0; i < data.length; i++){
-
-            const m = data[i];
-
-            if(mapTotals[mapId] === undefined){
-                mapTotals[mapId] = {};
-            }
-
-            if(mapTotals[mapId][m.weapon_id] === undefined){
-
-                mapTotals[mapId][m.weapon_id] = {
-                    "kills": 0,
-                    "deaths": 0,
-                    "teamKills": 0,
-                    "suicides": 0,
-                    "playtime": 0,
-                    "matchIds": new Set()
-                };
-            }
-
-            const playtime = matchPlaytimes[m.match_id] ?? 0;
-
-            const t = mapTotals[mapId][m.weapon_id];
-
-            t.kills += parseInt(m.kills);
-            t.deaths += parseInt(m.deaths);
-            t.teamKills += parseInt(m.team_kills);
-            t.suicides += parseInt(m.suicides);
-            t.playtime += playtime;
-            t.matchIds.add(m.match_id);
-
-        }
-        //console.log(data);
-        //console.log(playtime);
-    }
-
-    //console.log(matchData);
-    //get all match weapon data for each map
-    //insert new totals for maps
-
-
-    await deleteAllMapTotals();
-    await bulkInsertMapTotals(mapTotals);
 }
 
 

@@ -701,6 +701,17 @@ export async function getAllPlayedMatchIds(mapId){
     });
 }
 
+export async function getAllUniquePlayedGametypes(mapId){
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_matches WHERE map_id=?`
+
+    const result = await simpleQuery(query, [mapId]);
+
+    return result.map((r) =>{
+        return r.gametype_id;
+    });
+}
+
 
 
 export async function getNameById(mapId){

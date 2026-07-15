@@ -9,6 +9,7 @@ import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
 import { installPlayerSettings } from "./players.mjs";
+import { setAllMapTotals } from "./weapons.mjs";
 
 const queries = [
     `CREATE TABLE IF NOT EXISTS nstats_sessions(
@@ -885,6 +886,8 @@ export async function sqliteInstall(bOnlyCreateTables){
         new Message("Creating JSON API Settings","note");
         await updateJSONApiSettings();
 
+        await setAllMapTotals();
+        
         new Message("Inserting Default Player Settings", "note");
         await installPlayerSettings();
     }
