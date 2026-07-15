@@ -404,25 +404,26 @@ async function bulkInsertMapWeaponTotals(totals){
         const d = totals[i];
 
         insertVars.push([
-            d.map_id,
+            d.mapId,
             d.matches,
             d.playtime,
             d.weapon_id,
             d.kills,
             d.deaths,
             d.suicides,
-            d.teamKills,
+            d.team_kills,
             d.killsPerMin,
             d.deathsPerMin,
             d.teamKillsPerMin,
             d.suicidesPerMin,
-            d.gametype_id,
+            d.gametypeId,
             d.max_kills,
             d.max_deaths,
             d.max_suicides,
             d.max_team_kills,
         ]);
     }
+
 
     const columns = [
         "map_id", "total_matches", "total_playtime", "weapon_id", "kills", 
@@ -464,7 +465,7 @@ async function calcMapWeaponTotalsFromMatchTable(mapId, gametypeId){
 }
 
 
-function setXPH(data, totalMatches, playtime, gametypeId){
+function setXPH(data, totalMatches, playtime, mapId, gametypeId){
 
     for(let i = 0; i < data.length; i++){
 
@@ -472,6 +473,7 @@ function setXPH(data, totalMatches, playtime, gametypeId){
 
         d.matches = totalMatches;
         d.playtime = playtime;
+        d.mapId = mapId;
         d.gametypeId = gametypeId;
 
         d.killsPerMin = 0;
@@ -501,83 +503,17 @@ function setXPH(data, totalMatches, playtime, gametypeId){
 
 export async function calcMapWeaponsTotals(mapId, gametypeId){
 
-
     const gametypeData = await calcMapWeaponTotalsFromMatchTable(mapId, gametypeId);
     const allTimeData = await calcMapWeaponTotalsFromMatchTable(mapId, 0);
 
-    console.log(gametypeData);
-
     const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(mapId, 0);
     const {playtime: gametypePlaytime, matches: gametypeMatches} = await getTotalPlaytimeAndMatches(mapId, gametypeId);
-    console.log(allTimePlaytime, gametypePlaytime, gametypeId);
 
-
-
-   // for(let i = 0; i < gametypeData.length; i++){
-
-      //  const d = gametypeData[i];
-
-      //  d.matches = gametypeMatches;
-       // d.playtime = gametypePlaytime;
-        
-    setXPH(allTimeData, allTimeMatches, allTimePlaytime, 0);
-    setXPH(gametypeData, gametypeMatches, gametypePlaytime, gametypeId);
-
-        //console.log(d);
-   // }
-
-   console.log(allTimeData);
+    setXPH(allTimeData, allTimeMatches, allTimePlaytime, mapId, 0);
+    setXPH(gametypeData, gametypeMatches, gametypePlaytime, mapId, gametypeId);
 
     await bulkInsertMapWeaponTotals(allTimeData);
     await bulkInsertMapWeaponTotals(gametypeData);
-
-    process.exit();
-    /*
-    const query = `SELECT weapon_id, SUM(kills) as kills, 
-    SUM(deaths) as deaths, 
-    SUM(team_kills) as team_kills, 
-    SUM(suicides) as suicides 
-    FROM nstats_match_weapon_stats WHERE map_id=? GROUP BY weapon_id`;
-
-    const result = await simpleQuery(query, [mapId]);
-
-    const totals = {};
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        totals[r.weapon_id] = {
-            "kills": parseInt(r.kills),
-            "deaths": parseInt(r.deaths),
-            "teamKills": parseInt(r.team_kills),
-            "suicides": parseInt(r.suicides),
-            "killsPMin": 0,
-            "deathsPMin": 0,
-            "teamKillsPMin": 0,
-            "suicidesPMin": 0
-        };
-    }
-
-    const {playtime, matches} = await getTotalPlaytimeAndMatches(mapId);
-
-    let minutes = 0;
-
-    if(playtime > 0) minutes = playtime / 60;
-
-    if(minutes > 0){
-
-        for(const data of Object.values(totals)){
-
-            if(data.kills > 0) data.killsPMin = data.kills / minutes;
-            if(data.deaths > 0) data.deathsPMin = data.deaths / minutes;
-            if(data.teamKills > 0) data.teamKillsPMin = data.teamKills / minutes;
-            if(data.suicides > 0) data.suicidesPMin = data.suicides / minutes;
-        }
-    }
-
-    //await deleteMapWeaponTotals(mapId);
-    await bulkInsertMapWeaponTotals(mapId, playtime, matches, totals);*/
 }
 
 
@@ -695,6 +631,7 @@ async function bAnyWeaponTotalsData(){
 
 export async function setAllMapTotals(){
 
+    throw new Error("TODO: REWRITE for added gametype totals");
     return;
 
     if(await bAnyWeaponTotalsData()){
