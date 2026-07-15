@@ -442,9 +442,48 @@ async function bulkInsertMapWeaponTotals(mapId, playtime, totalMatches, totals){
     //await bulkInsert(query, insertVars);
 }
 
-export async function calcMapWeaponsTotals(mapId){
+async function calcMapWeaponTotalsFromMatchTable(mapId, gametypeId){
 
-    const query = `SELECT weapon_id, SUM(kills) as kills, SUM(deaths) as deaths, SUM(team_kills) as team_kills, SUM(suicides) as suicides 
+
+    let gametypeIdString = "";
+    let whereString = "WHERE map_id=?";
+    const vars = [mapId];
+
+    if(gametypeId !== 0){
+        vars.push(gametypeId);
+        gametypeIdString = "gametype_id,";
+        whereString += " AND gametype_id=?";
+    }
+
+    const query = `SELECT ${gametypeIdString}weapon_id, 
+    SUM(kills) as kills, 
+    MAX(kills) as max_kills,
+    SUM(deaths) as deaths,
+    MAX(deaths) as max_deaths, 
+    SUM(team_kills) as team_kills,
+    MAX(team_kills) as max_team_kills, 
+    SUM(suicides) as suicides,
+    MAX(suicides) as max_suicides 
+    FROM nstats_match_weapon_stats ${whereString} GROUP BY ${gametypeIdString}weapon_id`;
+
+
+    return await simpleQuery(query, vars);
+}
+
+export async function calcMapWeaponsTotals(mapId, gametypeId){
+
+
+    const gametypeData = await calcMapWeaponTotalsFromMatchTable(mapId, gametypeId);
+    const allData = await calcMapWeaponTotalsFromMatchTable(mapId, 0);
+
+    console.log(gametypeData);
+
+    process.exit();
+
+    const query = `SELECT weapon_id, SUM(kills) as kills, 
+    SUM(deaths) as deaths, 
+    SUM(team_kills) as team_kills, 
+    SUM(suicides) as suicides 
     FROM nstats_match_weapon_stats WHERE map_id=? GROUP BY weapon_id`;
 
     const result = await simpleQuery(query, [mapId]);

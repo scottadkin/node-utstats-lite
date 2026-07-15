@@ -244,7 +244,7 @@ export class MatchParser{
         ]);
 
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
-        await this.map.updateTotals(this.gametype.id);
+        await this.map.updateTotals();
        
         const uniquePlayerIds = this.players.getUniquePlayerIds();
 
@@ -277,7 +277,7 @@ export class MatchParser{
         
         await this.players.updateMapAverages(this.gametype.id, this.map.id, this.ctf.bMatchCTF, this.dom.bAnyData);
   
-        await this.weapons.updateMapTotals(this.map.id);
+        await this.weapons.updateMapTotals(this.map.id, this.gametype.id);
 
         if(this.classicWeaponStats.lines.length > 0){
             await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);

@@ -660,6 +660,10 @@ PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_
         team_kills_per_min FLOAT NOT NULL,
         suicides_per_min FLOAT NOT NULL, 
         gametype_id int(11) NOT NULL,
+        max_kills int(11) NOT NULL,
+        max_deaths int(11) NOT NULL,
+        max_suicides int(11) NOT NULL,
+        max_team_kills int(11) NOT NULL,  
         UNIQUE INDEX mgw_idx (map_id,weapon_id)
     ,PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
@@ -1081,6 +1085,12 @@ async function updateMapWeaponTotalsTable(){
 
 
     await addColumn("nstats_map_weapon_totals", "gametype_id", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_map_weapon_totals", "max_kills", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_map_weapon_totals", "max_deaths", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_map_weapon_totals", "max_suicides", "INT NOT NULL DEFAULT 0");
+    await addColumn("nstats_map_weapon_totals", "max_team_kills", "INT NOT NULL DEFAULT 0");
+
+    
 
     if(await bIndexExists("nstats_map_weapon_totals", "mgw_idx", true)){
         await dropIndex("nstats_map_weapon_totals", "mgw_idx");
