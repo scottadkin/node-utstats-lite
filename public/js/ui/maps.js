@@ -709,7 +709,6 @@ class UIMapPlayerAverages{
 
             const req = await fetch(`/json/map-player-averages/?id=${urlParts}`);
 
-
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
@@ -742,69 +741,63 @@ class UIMapPlayerAverages{
 
     renderTable(){
 
-        this.table = document.createElement("table");
-        this.table.className = `t-width-3`;
-
         const headers = ["Place", "Player", "Playtime", this.title];
 
-        const headerRow = document.createElement("tr");
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": headers.map((h) =>{ return {"display": h}}),
+            "bNoSort": true
+        };
 
-        for(let i = 0; i < headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.append(headerRow);
-
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            const row = document.createElement("tr");
-
-            const ordinal = UITableCell({
-                "content": i + 1 + (this.perPage * (this.page - 1)), 
-                "parse": ["ordinal"], 
-                "className": "ordinal"}
-            );
-
-            row.append(ordinal);
-
-            row.append(UIPlayerLink({
-                "playerId": d.player_id, 
-                "name": d.name, 
-                "country": d.country, 
-                "bTableElem": true, 
-                "className": "text-left"
-            }));
-
-            row.append(UITableCell({
-                "content": d.total_playtime, 
-                "parse": ["playtime"], 
-                "className": "playtime"
-            }));
-
-
+            const place = i + 1 + (this.perPage * (this.page - 1));  
             const typeSettings = this.getTypeSettings();
-  
-            row.append(UITableCell({
-                "content": d.target_value.toFixed(3), 
-                "className": typeSettings?.className ?? null
-            }));
 
-            this.table.append(row);
+            const row = [
+                {
+                    "display": `${place}${getOrdinal(place)}`,
+                    "className": "ordinal"
+                },
+                {
+                    "bSkipTD": true, 
+                    "display": UIPlayerLink({
+                        "playerId": d.player_id, 
+                        "name": d.name, 
+                        "country": d.country, 
+                        "bTableElem": true, 
+                        "className": "text-left"
+                    })
+                }, 
+                {
+                    "display": toPlaytime(d.total_playtime),
+                    "className": "playtime"
+                },
+                {
+                    "display": d.target_value.toFixed(3),
+                    "className": typeSettings?.className ?? null
+                }
+            ];
+            rows.push(row);
         }
 
-        this.content.append(this.table);
+        if(this.table === undefined){
+
+            this.table = new TESTUITable(this.content, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows, tableOptions.headers);
+        }
+
     }
 
     createOptions(){
 
         const row = UIDiv("form-row");
         row.append(UILabel("Category","map-average-cat"));
-
-        const select = document.createElement("select");
-        select.id = select.name = "map-average-cat";
 
         this.validTypes.sort((a, b) =>{
             a = a.display.toLowerCase();
@@ -815,29 +808,17 @@ class UIMapPlayerAverages{
             return 0;
         });
 
-        for(let i = 0; i < this.validTypes.length; i++){
 
-            const {value, display} = this.validTypes[i];
-
-            const option = document.createElement("option");
-            option.value = value;
-            option.innerHTML = display;
-            option.selected = value === this.cat;
-            select.append(option);
-        }
-
-        row.append(select);
-        select.addEventListener("change", (e) =>{
-            this.cat = e.target.value;
+        this.select = new UISelect(row, this.validTypes, this.cat, (e) =>{
+            this.cat = e;
+            this.page = 1;
             this.loadData();
-        });
+        }, "map-average-cat", "map-average-cat");
+
         this.wrapper.append(row);
     }
 
     render(){
-
-        
-        this.content.innerHTML = ``;
 
         this.renderTable();
     }
