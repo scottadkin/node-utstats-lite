@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 :root {
-	--bg-color-light:rgb(54,54,54);
-	--bg-color-mid:rgb(46,46,46);
+	--bg-color-light:rgb(50,50,50);
+	--bg-color-mid:rgb(42,42,42);
 	--bg-color-dark:rgb(32,32,32);
 	--bg-header-color:rgb(27,45,59);
 	--button-hover-color:rgb(56,56,56);
@@ -970,13 +970,13 @@ ul{
 
 .match-basic-info-wrapper-info{
 	padding-top:var(--padding-2);
-	font-size: var(--font-size-70);
 	line-height: var(--line-height-1);
 }
 
 .mb-info{
 	display:grid;
 	grid-template-columns: 1fr 1fr;
+    font-size:var(--font-size-80);
 }
 
 .mb-info div:nth-child(1){

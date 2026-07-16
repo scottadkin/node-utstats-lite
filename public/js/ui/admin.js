@@ -1293,7 +1293,6 @@ class AdminSiteSettingsManager{
 
             const res = await req.json();
 
-
             if(res.error !== undefined) throw new Error(res.error);
 
             new UINotification(

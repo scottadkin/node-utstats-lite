@@ -236,13 +236,14 @@ export async function savePageLayoutChanges(data){
 
         if(d.pageIndex === undefined) continue;
 
-        const result = await simpleQuery(query, [d.pageIndex, d.id]);
-
-        if(result.affectedRows > 0){
+        try{
+            await simpleQuery(query, [d.pageIndex, d.id]);
             passed++;
-        }else{
+        }catch(err){
+            console.trace(err);
             failed++;
         }
+
 
     }
 
