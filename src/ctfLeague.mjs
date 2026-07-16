@@ -33,6 +33,9 @@ async function bCTFSettingExist(name, category){
 
     const result = await simpleQuery(query, [name, category]);
 
+    //console.log("result");
+   // console.log(result);
+
     return result[0].total_rows > 0;
 }
 

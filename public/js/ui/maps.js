@@ -417,14 +417,15 @@ class UIMapWeaponsSummary{
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
+            const gametypeId = d.gametype_id;
 
-            if(!uniqueGametypes.has(d.gametype_id)){
-                uniqueGametypes.add(d.gametype_id);
-                this.gametypes.push({"display": d.gametype_name, "value": d.gametype_id});
+            if(!uniqueGametypes.has(gametypeId)){
+                uniqueGametypes.add(gametypeId);
+                this.gametypes.push({"display": d.gametype_name, "value": gametypeId});
             }
 
-            if(this.totals[d.gametype_id] === undefined){
-                this.totals[d.gametype_id] = {
+            if(this.totals[gametypeId] === undefined){
+                this.totals[gametypeId] = {
                     "kills": 0,
                     "deaths": 0,
                     "suicides": 0,
@@ -432,9 +433,10 @@ class UIMapWeaponsSummary{
                 };
             }
 
-            this.updateTotal(d.gametype_id, d);
+            this.updateTotal(gametypeId, d);
     
         }
+
 
     }
 

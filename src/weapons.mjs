@@ -424,6 +424,7 @@ async function bulkInsertMapWeaponTotals(totals){
         ]);
     }
 
+   // console.log(insertVars);
 
     const columns = [
         "map_id", "total_matches", "total_playtime", "weapon_id", "kills", 
@@ -632,6 +633,8 @@ async function bAnyWeaponTotalsData(){
 
 export async function setAllMapTotals(){
 
+
+    await simpleQuery(`DELETE FROM nstats_map_weapon_totals`);
 
     const mapIds = await getAllMapIds();
     

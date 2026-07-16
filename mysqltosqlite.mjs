@@ -6,6 +6,7 @@ import { toMYSQLDateTime } from "./src/generic.mjs";
 import { sqliteInstall } from "./src/sqliteInstall.mjs";
 import { closeDatabase, createNewDatabase, bulkInsert } from "./src/database.mjs";
 import { mysqlInstall } from "./src/mysqlInstall.mjs";
+import { setAllMapTotals } from "./src/weapons.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 new Message(`MYSQL database must be from node-ustats-lite v2.5.0`,"warning");
@@ -289,7 +290,6 @@ async function backupSQLiteExistingFile(backupName){
             
             new Message(`SQLite Database file already in data directory, moving existing file to backups folder.`,"note");
 
-            console.log("rename");
             await rename("./data/main.db", `./backups/sqlite/${backupName}.db`);
         }
 
@@ -350,6 +350,7 @@ async function init(){
     await sqliteInstall(true);
 
     await restoreDatabase(backupName);
+    await setAllMapTotals();
 
     new Message(`MYSQL To SQlite transfer complete.`,"progress");
     process.exit();
