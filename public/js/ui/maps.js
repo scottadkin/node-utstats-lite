@@ -866,15 +866,7 @@ class UIMapCTFLeague{
         UIHeader(this.wrapper, "Player CTF League");
         
         this.parent.append(this.wrapper);
-        this.updateSelect();
-        this.createTable();
-
-        this.pagination = new UIPagination(this.wrapper, (newPage) =>{
-
-            this.page = newPage;
-            this.loadData();
-
-        }, this.totalResults, this.perPage, this.page);
+        
         
 
         this.loadData();
@@ -882,36 +874,28 @@ class UIMapCTFLeague{
 
 
     updateSelect(){
+        
+        const gametypeOptions = this.gametypes.map((g) =>{ return {
+            "display": (g.name === null) ? "All Time" : g.name, 
+            "value": g.id
+        }});
 
-        if(this.select !== undefined){
+        if(this.gametypeSelect === undefined){
 
-            for(let i = 0; i < this.gametypes.length; i++){
+            const row = UIDiv("form-row");
+            this.wrapper.append(row);
 
-                const {id, name} = this.gametypes[i];
+            row.append(UILabel("Gametype", "league-selected-gametype"));
 
-                const option = document.createElement("option");
-                option.value = id;
-                option.append(document.createTextNode((name === null) ? "All Time" : name));
-                this.select.append(option);
-            }
+            this.gametypeSelect = new UISelect(row, gametypeOptions, this.gametypeId, (e) =>{
+                this.gametypeId = parseInt(e);
+                this.page = 1;
+                this.loadData();
+            }, "league-selected-gametype", "league-selected-gametype");
+        }else{
 
-            return;
+            this.gametypeSelect.updateOptions(gametypeOptions, this.gametypeId);
         }
-        const row = UIDiv("form-row");
-        this.select = document.createElement("select");
-        this.select.id = this.select.name = "league-selected-gametype";
-
-        row.append(UILabel("Gametype", "league-selected-gametype"));
-        row.append(this.select);
-
-        this.select.addEventListener("change", (e) =>{
-            this.gametypeId = e.target.value;
-            this.page = 1;
-            this.loadData();
-        });
-
-        this.wrapper.append(row);
-
     }
 
     async loadGametypes(){
@@ -958,7 +942,7 @@ class UIMapCTFLeague{
             if(res.error !== undefined) throw new Error(res.error);
             this.data = res.data.data;
             this.totalResults = res.data.totalResults;
-            this.pagination.updateResults(this.page, this.totalResults, this.perPage);
+            
             this.render();
 
         }catch(err){
@@ -969,65 +953,83 @@ class UIMapCTFLeague{
         }
     }
 
-    createTable(){
 
-        this.table = document.createElement("table");
-        this.table.className = "t-width-1";
-    
+    updatePagination(){
 
-        this.wrapper.append(this.table);
+        if(this.pagination === undefined){
+
+            this.pagination = new UIPagination(this.wrapper, (newPage) =>{
+
+                this.page = newPage;
+                this.loadData();
+
+            }, this.totalResults, this.perPage, this.page);
+
+        }else{
+
+            this.pagination.updateResults(this.page, this.totalResults, this.perPage);
+        }
     }
 
     render(){
 
-        this.table.innerHTML = ``;
-
-
-
-        const headers = [
-            "Place", "Player", "Played", "Wins",
-            "Draws", "Losses", "Caps For", "Caps Against",
-            "Caps Offset", "Points"
-        ];
-
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.append(headerRow);
+        this.updateSelect();
+        
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            const row = document.createElement("tr");
-            
-            row.append(UITableCell({
-                "content": i + 1 + (this.perPage * (this.page - 1)), 
-                "parse": ["ordinal"],
-                "className": "ordinal"
-            }));
 
-            row.append(UIPlayerLink({
-                "playerId": d.player_id, 
-                "name": d.name, 
-                "country": d.country,
-                "bTableElem": true
-            }));
-            
+            const place = i + 1 + (this.perPage * (this.page - 1));
+            const row = [
+                {
+                    "display": `${place}${getOrdinal(place)}`,
+                    "className": "ordinal"
+                },
+                {
+                    "display": UIPlayerLink({
+                        "playerId": d.player_id, 
+                        "name": d.name, 
+                        "country": d.country,
+                        "bTableElem": true
+                    })
+                },
+                {"display": d.total_matches},
+                {"display": ignore0(d.wins)},
+                {"display": ignore0(d.draws)},
+                {"display": ignore0(d.losses)},
+                {"display": ignore0(d.cap_for)},
+                {"display": ignore0(d.cap_against)},
+                {"display": ignore0((d.cap_offset > 0) ? `+${d.cap_offset}` : d.cap_offset)},
+                {"display": ignore0(d.points)}
+            ];
 
-            row.append(UITableCell({"content": d.total_matches}));
-            row.append(UITableCell({"content": d.wins, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.draws, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.losses, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.cap_for, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.cap_against, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": (d.cap_offset > 0) ? `+${d.cap_offset}` : d.cap_offset, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.points, "parse": ["ignore0"]}));
 
-            this.table.append(row);
+            rows.push(row);
         }
+
+        if(this.table === undefined){
+
+            const headers = [
+                "Place", "Player", "Played", "Wins",
+                "Draws", "Losses", "Caps For", "Caps Against",
+                "Caps Offset", "Points"
+            ];
+
+            const tableOptions = {
+                "headers": headers.map((h) => { return {"display": h}}),
+                "bNoSort": true,
+                "className": "t-width-1"
+            };
+
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+        }else{
+
+            this.table.updateRows(rows);
+        }
+
+        this.updatePagination();
     }
 }

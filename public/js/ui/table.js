@@ -420,6 +420,7 @@ class TESTUITable{
             end = start + this.perPage;
         }
 
+
         for(let i = start; i < end; i++){
 
             const data = this.data[i];
