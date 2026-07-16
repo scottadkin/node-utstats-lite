@@ -683,6 +683,7 @@ class UIMapPlayerAverages{
         this.parent.append(this.wrapper);
 
         UIHeader(this.wrapper, "Top Player Averages");
+        new UIInfo(this.wrapper, ["Averages are based on events per minute."]);
         this.createOptions();
         this.content = UIDiv();
         this.wrapper.append(this.content);

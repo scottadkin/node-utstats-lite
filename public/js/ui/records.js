@@ -9,7 +9,7 @@ class RecordsSearchForm{
         this.selectedGametype = selectedGametype;
         this.selectedCat = selectedCat;
 
-        this.wrapper = document.createElement("div");
+        this.wrapper = UIDiv();
         this.parent.append(this.wrapper);
 
         this.mode = mode;
@@ -37,15 +37,13 @@ class RecordsSearchForm{
 
         this.form = document.createElement("form");
         this.form.className = "form";
+        
 
         this.parent.append(this.form);
 
-        const typeRow = document.createElement("div");
-        typeRow.className = "form-row";
+        const typeRow = UIDiv("form-row");
 
-        const tLabel = document.createElement("label");
-        tLabel.htmlFor = "cat";
-        tLabel.innerHTML = "Record Type";
+        const tLabel = UILabel("Record Type", "cat");
         typeRow.append(tLabel);
 
         const tSelect = new UIRecordsTypeSelect(
@@ -67,36 +65,19 @@ class RecordsSearchForm{
         
         this.form.append(typeRow);
 
-        const gametypeRow = document.createElement("div");
-        gametypeRow.className = "form-row";
-        const gLable = document.createElement("label");
-        gLable.htmlFor = "g";
-        gLable.innerHTML = `Gametype`;
+        const gametypeRow = UIDiv("form-row");
+        const gLable = UILabel("Gametype", "g");
         gametypeRow.append(gLable);
 
-        const gSelect = document.createElement("select");
-        gSelect.id = "g";
-        gSelect.name = "g";
 
+        const gametypeOptions = this.gametypeNames.map((g) =>{ return {"display": g.name, "value": g.id}});
 
-        for(let i = 0; i < this.gametypeNames.length; i++){
-
-            const {id, name} = this.gametypeNames[i];
-
-            const option = document.createElement("option");
-            option.value = id;
-            option.innerHTML = name;
-            if(id == this.selectedGametype) option.selected = true;
-            gSelect.append(option);
-        }
-
-        gametypeRow.append(gSelect);
-
-        gSelect.addEventListener("change", (e) =>{
-         
-            this.selectedGametype = e.target.value;
+        const gSelect = new UISelect(gametypeRow, gametypeOptions, this.selectedGametype, (e) =>{
+            this.selectedGametype = parseInt(e);
             this.updateUrl();
-        });
+        }, "g", "g");
+
+
 
         this.form.append(gametypeRow);
     }
@@ -125,10 +106,6 @@ class RecordsDataDisplay{
         this.currentPage = page;
 
         UIHeader(this.parent, `${title} - ${(mode === "match") ? "Single Match" : "Lifetime"} Records`);
-
-        this.table = document.createElement("table");
-        this.table.className = `t-width-1`;
-        this.parent.append(this.table);
 
         if(this.mode === "match"){
             this.renderMatch();
@@ -163,39 +140,42 @@ class RecordsDataDisplay{
             "Place", "Player", "Last Active", "Gametype",  "Playtime", "Value"
         ];
 
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.append(headerRow);
-
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            const row = document.createElement("tr");
-
             const place = i + 1 + (this.perPage * (this.currentPage - 1));
 
-            row.append(UITableCell({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
-            row.append(UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}));
-            row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
-            row.append(UITableCell({"content": this.getGametypeName(d.gametype_id)}));
-            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
-
-            let valueOptions = {"content": d.record_value};
+            const row = [
+                {"display": `${place}${getOrdinal(place)}`, "className": "ordinal"},
+                {"display": UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}), "bSkipTD": true},
+                {"display": toDateString(d.last_active, true), "className": "date"},
+                {"display": this.getGametypeName(d.gametype_id)},
+                {"display": toPlaytime(d.playtime), "className": "playtime"},
+            ];
 
             if(this.cat === "playtime" || this.cat === "ttl"){
-                valueOptions.parse = ["playtime"];
-                valueOptions.className = "playtime";
+                row.push({"display": toPlaytime(d.record_value), "className": "playtime"});
+            }else{
+                row.push({"display": d.record_value});
             }
 
-            row.append(UITableCell(valueOptions));
 
-            this.table.append(row);
+            rows.push(row);
+        }
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "bNoSort": true,
+            "headers": headers.map((h) =>{ return {"display": h}})
+        };
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.parent, tableOptions, rows)
+        }else{
+            this.table.updateRows(rows, tableOptions.headers);
         }
     }
 
@@ -205,38 +185,44 @@ class RecordsDataDisplay{
             "Place", "Player", "Date", "Playtime", "Gametype", "Map", "Value"
         ];
 
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
-
-        this.table.append(headerRow);
+        const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
-            const row = document.createElement("tr");
             const place = i + 1 + (this.perPage * (this.currentPage - 1));
 
-            row.append(UITableCell({"content": place, "parse": ["ordinal"], "className": "ordinal"}));
-            row.append(UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}));
-            row.append(UITableCell({"content": d.match_date, "parse": ["date"], "className": "date"}));
-            row.append(UITableCell({"content": d.time_on_server, "parse": ["playtime"], "className": "playtime"}));
-            row.append(UITableCell({"content": d.gametype_name}));
-            row.append(UITableCell({"content": d.map_name}));
 
-            let valueOptions = {"content": d.record_type};
+            const row = [
+                {"display": `${place}${getOrdinal(place)}`, "className": "ordinal"},
+                {"display": UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}), "bSkipTD": true},
+                {"display": toDateString(d.match_date, true), "className": "date"},
+                {"display": toPlaytime(d.time_on_server), "className": "playtime"},
+                {"display": d.gametype_name},
+                {"display": d.map_name},
+            ];
+
 
             if(this.cat === "time_on_server" || this.cat === "ttl"){
-                valueOptions.parse = ["playtime"];
-                valueOptions.className = "playtime";
+                row.push({"display": toPlaytime(d.record_type), "className": "playtime"});
+            }else{
+                row.push({"display": d.record_type});
             }
-            row.append(UITableCell(valueOptions));
 
-            this.table.append(row);
+            rows.push(row);
+        }
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "bNoSort": true,
+            "headers": headers.map((h) =>{ return {"display": h}})
+        };
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.parent, tableOptions, rows)
+        }else{
+            this.table.updateRows(rows, tableOptions.headers);
         }
     }
 }
