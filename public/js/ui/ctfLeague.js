@@ -24,15 +24,10 @@ class CTFLeagueFilterForm{
         this.mode = mode;
         this.gametypeNames = gametypeNames;
         this.mapNames = mapNames;
-        this.id = id;
-        this.gId = gId;
+        this.id = parseInt(id);
+        this.gId = parseInt(gId);
 
-
-        this.wrapper = document.createElement("form");
-        this.wrapper.className = "form";
-        this.wrapper.action = `/ctfleague/`;
-        this.wrapper.method = "GET";
-
+        this.wrapper = UIDiv("form");
         this.parent.append(this.wrapper);
 
         this.createForm();
@@ -51,56 +46,19 @@ class CTFLeagueFilterForm{
 
     createDropDown(type){
 
-        const row = document.createElement("div");
-        row.className = "form-row";
-        const label = document.createElement("label");
-        label.htmlFor = (type === "gametypes") ? "gametype" : "map";
-        label.innerHTML =  (type === "gametypes") ? "Gametype" : "Map";
-        label.className = "form-label";
+        const row = UIDiv("form-row");
+
+
+        const labelFor = (type === "gametypes") ? "gametype" : "map";
+        const labelDisplay = (type === "gametypes") ? "Gametype" : "Map";
+
+        const label = UILabel(labelDisplay, labelFor)
+
         row.append(label);
         this.wrapper.append(row);
 
-        const select = document.createElement("select");
-
-        select.addEventListener("change", (e) =>{
-
-            if(this.mode === "gametypes"){
-
-                this.id = e.target.value;
-
-            }else if(this.mode === "maps"){
-
-                const targetKey = (type === "gametypes") ? "gId" : "id";
-
-                this[targetKey] = e.target.value;
-            }
-
-            
-            let newUrl = `/ctfleague/?mode=${this.mode}`;
-
-            if(this.mode === "maps"){
-                newUrl+=`&id=${this.id}&gid=${this.gId}`;
-            }else{
-                newUrl+=`&id=${this.id}`;
-            }
-            window.location = newUrl;
-
-        });
-
-        if(this.mode === "gametypes"){
-
-            select.id = "id";
-
-        }else if(this.mode === "maps"){
-
-            select.id = (type === "gametypes") ? "gid" : "id";
-        }
-
-        select.name = select.id;
-
         const names = (type === "gametypes") ? this.gametypeNames : this.mapNames;
-
-        const orderedNames= [];
+        const orderedNames = [];
 
         for(const [id, name] of Object.entries(names)){
             orderedNames.push({id, name});
@@ -112,28 +70,42 @@ class CTFLeagueFilterForm{
             orderedNames.unshift({"id": "0", "name": "Any"});
         }
 
-        for(let i = 0; i < orderedNames.length; i++){
+        const selectOptions = [];
 
-            const {id, name} = orderedNames[i];
+        let currentValue = this.id;
 
-            const option = document.createElement("option");
 
-            if(this.mode === "gametypes" && type === "gametypes"){
+        if(type === "gametypes" && this.mode === "maps"){
 
-                if(id == this.id) option.selected = true;
+            currentValue = this.gId;
+        }
+
+        const select = new UISelect(row, orderedNames.map((o) =>{ return {"display": o.name, "value": parseInt(o.id)}}),
+            currentValue,
+        (e) =>{
+
+            if(this.mode === "gametypes"){
+
+                this.id = parseInt(e);
 
             }else if(this.mode === "maps"){
 
-                if(id == this.gId && type === "gametypes") option.selected = true;
-                if(id == this.id && type === "maps") option.selected = true;
+                const targetKey = (type === "gametypes") ? "gId" : "id";
+
+                this[targetKey] = parseInt(e);
             }
 
-            option.value = id;
-            option.append(document.createTextNode(name));
-            select.append(option);
-        }
+            
+            let newUrl = `/ctfleague/?mode=${this.mode}`;
 
-        row.append(select);
+            if(this.mode === "maps"){
+                newUrl+=`&id=${this.id}&gid=${this.gId}`;
+            }else{
+                newUrl+=`&id=${this.id}`;
+            }
+
+            window.location = newUrl;
+        }, labelFor, labelFor);
     }
 
     createForm(){
