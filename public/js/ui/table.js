@@ -20,7 +20,7 @@ class TESTUITable{
 
         this.bNoSort = options.bNoSort ?? false;
 
-        this.bAscOrder = true;
+        this.bAscOrder = options.bAscOrder ?? true;
         
         this.sortBy = options.sortBy ?? 0;
         this.lastSortBy = this.sortBy;
@@ -76,6 +76,9 @@ class TESTUITable{
             cell.append(h.display);
 
             
+            if(h.className !== undefined){
+                cell.className = h.className;
+            }
 
 
             
@@ -467,7 +470,7 @@ class TESTUITable{
                     if(d.id !== undefined){
                         currentCellData.id = d.id;
                     }
-                    
+
                     row.append(currentCellData);
                 }
 

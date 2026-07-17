@@ -196,6 +196,8 @@ function renderFragsTables(parent, totalTeams, playerData){
 
         const tableOptions = {
             "className": "t-width-1", 
+            "sortBy": 2,
+            "bAscOrder": false,
             "headers": [
                 {"display": "Player"},
                 {"display": "Playtime"},
@@ -895,6 +897,16 @@ class MatchDominationSummary{
 }
 
 
+function bPlayerHaveAnyMatchingCTFEvents(player, targetKeys){
+
+    for(let i = 0; i < targetKeys.length; i++){
+
+        if(player[targetKeys[i]] !== 0 && targetKeys[i] !== "flag_carry_time_min") return true;
+    }
+
+    return false;
+}
+
 function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKeys){
 
     const playtimeTypes = [
@@ -908,7 +920,7 @@ function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKe
         headers, 
         "className": "t-width-1",
         "footer": [
-            {"display": "Player"},
+            {"display": "Totals"},
         ]
     }
 
@@ -947,6 +959,9 @@ function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKe
             const player = players?.[p.player_id] ?? {"name": "Not Found", "country": "xx", "team": 255};
 
             if(player.team !== i) continue;
+
+            //skip players with no matching events
+            if(!bPlayerHaveAnyMatchingCTFEvents(p, dataKeys)) continue;
 
             row.push({
                 "value": player.name.toLowerCase(), 
@@ -1838,7 +1853,7 @@ class MatchWeaponSummary{
                 img.className = "weapon-icon"; 
                 img.title = weaponName;
    
-                headers.push({"display": img});
+                headers.push({"display": img, "className": "team-none"});
                 
             }else{
                headers.push({"display": weaponName.toUpperCase(), "className":"tiny-font white team-none" });
