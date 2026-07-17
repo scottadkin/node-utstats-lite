@@ -541,7 +541,7 @@ option{
 }
 
 .match-sshot{
-	max-width:66%;
+	max-width:50%;
 }
 .social-media-icon{
 	width:64px;
@@ -1241,10 +1241,11 @@ code{
 	background-color:rgba(0,0,0,0.25);
 	display:block;
 	white-space:preserve;
-	font-size:var(--font-size-60);
+	font-size:var(--font-size-70);
 	padding:var(--padding-1);
 	font-family: monospace;
 	border:1px solid var(--border-color-1);
+    line-height: 1.25em;
 }
 
 .json-example{
@@ -1284,7 +1285,6 @@ code{
 .json-link-example{
 	font-family: monospace;
 	color:var(--font-color-blue);
-	padding:5px 0px;
 }
 
 
