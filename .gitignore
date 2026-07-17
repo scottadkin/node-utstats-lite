@@ -18,3 +18,5 @@ logs/*.zip
 logs/imported/*.log
 logs/rejected/*.log
 GITHUB.lnk
+uploads/*
+!uploads/DELETE ME.txt

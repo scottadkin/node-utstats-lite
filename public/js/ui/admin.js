@@ -592,12 +592,6 @@ class AdminFTPManager{
     renderDeleteServer(){
 
         const wrapper = UIDiv("form");
-        wrapper.className = "form";
-
-        const info = UIDiv("info");
-        info.innerHTML = `Delete selected server from importer list.`;
-
-        wrapper.append(info);
 
         const button = document.createElement("button");
         button.className = "button delete-button";
@@ -608,10 +602,9 @@ class AdminFTPManager{
             this.deleteFTPServer();
         });
 
-        wrapper.append(button);
-
-
-        this.content.append(wrapper);
+        
+        new UIInfo(this.content, [`Delete selected server from importer list.`, UIBr(), button]);
+        
     }
 
     renderEditFTPSettings(){
@@ -1025,29 +1018,19 @@ class AdminMapsManager{
 
         this.renderScreenshotsInfo();
 
-        const table = document.createElement("table");
-        table.className = "t-width-1";
-
         const headers = ["Name", "Latest Match", "Total Playtime", "Required Image Name", "Image Status", "Upload"];
 
-        const headerRow = document.createElement("tr");
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": headers.map((h) => { return {"display": h}})
+        };
 
-        for(let i = 0; i < headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
 
-        table.append(headerRow);
+        const rows = [];
 
         for(let i = 0; i < this.mapList.length; i++){
 
             const m = this.mapList[i];
-
-            const row = document.createElement("tr");
-
-            row.append(UITableCell({"content": m.name, "className": "text-left"}));
-            row.append(UITableCell({"content": m.last_match, "parse": ["date"], "className": "date"}));
-            row.append(UITableCell({"content": m.playtime, "parse": ["playtime"], "className": "playtime"}));
-            row.append(UITableCell({"content": m.targetImage}));
 
             const imageStatus = this.getImageStatus(m.targetImage);
 
@@ -1059,22 +1042,37 @@ class AdminMapsManager{
                 statusClass = "team-yellow";
             }
 
-            // form.id = targetFileName;
-            row.append(UITableCell({
-                "content": imageStatus, 
-                "className": `dummy-map-name ${statusClass}`, 
-                "id": stripFileExtension(m.targetImage),
-                "url": `/images/maps/${m.targetImage}`,
-                "urlTarget": "_blank"
-            }));
+            const row = [
 
-            const form = this.createUploadForm(m.targetImage);
+                {"display": m.name, "className": "text-left", "value": m.name.toLowerCase()},
+                {"display": toDateString(m.last_match, true), "className": "date", "value": m.last_match},
+                {"display": toPlaytime(m.playtime), "className": "playtime", "value": m.playtime},
+                {"display": m.targetImage, "value":m.targetImage.toLowerCase()},
+                {
+                    "display": imageStatus, 
+                    "className": `dummy-map-name ${statusClass}`, 
+                    "id": stripFileExtension(m.targetImage),
+                    "url": `/images/maps/${m.targetImage}`,
+                    "urlTarget": "_blank",
+                    "value": imageStatus
+                },
+                {
+                    "display": this.createUploadForm(m.targetImage),
+                    "value": 0
+                }
 
-            row.append(UITableCell({"content": form}));
-            table.append(row);
+            ];
+
+    
+
+            //const form = this.createUploadForm(m.targetImage);
+
+            //row.append(UITableCell({"content": form}));
+            rows.push(row);
         }
 
-        this.wrapper.append(table);
+
+        new TESTUITable(this.wrapper, tableOptions, rows);
     }
 
     render(){

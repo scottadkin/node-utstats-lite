@@ -438,6 +438,8 @@ class TESTUITable{
                     const a = document.createElement("a");
                     a.href = d.url;
 
+                    if(d.urlTarget !== undefined) a.target = d.urlTarget;
+
                     a.append(currentCellData);
 
                     currentCellData = a;
