@@ -445,17 +445,29 @@ class TESTUITable{
                     currentCellData = a;
                 }
 
+
+                
+
                 if(!d.bSkipTD){
 
                     const cell = document.createElement("td");
         
                     cell.append(currentCellData);
                     if(d.className !== undefined) cell.className = d.className;
+
+                    if(d.id !== undefined){
+                        cell.id = d.id;
+                    }
                     row.append(cell);
 
                 }else{
 
                     //don't allow className for override TD
+
+                    if(d.id !== undefined){
+                        currentCellData.id = d.id;
+                    }
+                    
                     row.append(currentCellData);
                 }
 

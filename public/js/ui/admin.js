@@ -876,6 +876,17 @@ class AdminMapsManager{
         }
     }
 
+    sanatizeMapNameForQuerySelector(name){
+
+        const firstChar = parseInt(name[0]);
+        if(firstChar === firstChar){
+            return  `num_start_${name}`;
+            //throw new Error("is a number");
+        }else{
+            return name;
+        }
+    }
+
     async uploadImage(e){
 
         try{
@@ -884,9 +895,18 @@ class AdminMapsManager{
 
             const fileElem = e.target[0];
 
+            const reg = /^num_start_(.+)$/i;
+
             formData.append("mode", "upload-map-sshot");
             formData.append("map-sshot", fileElem.files[0]);
-            formData.append("map-name", e.target[2].value);
+
+            const nameResult = reg.exec(e.target[2].value);
+
+            if(nameResult === null){
+                formData.append("map-name", e.target[2].value);
+            }else{
+                formData.append("map-name", nameResult[1]);
+            }
 
 
             const req = await fetch("/admin", {
@@ -897,7 +917,7 @@ class AdminMapsManager{
             const res = await req.json();
   
             if(res.error !== undefined) throw new Error(res.error);
-            this.updateMapImages(res.fileName);
+            this.updateMapImages(this.sanatizeMapNameForQuerySelector(res.fileName));
             new UINotification(this.parent, "pass", `Map Image Uploaded`, `Image uploaded successfully, Saved as ${res.fileName}`);
             
         }catch(err){
@@ -936,6 +956,10 @@ class AdminMapsManager{
         const name = document.createElement("input");
         name.type = "hidden";
         name.name = name.id = "file-name";
+        
+
+        targetFileName = this.sanatizeMapNameForQuerySelector(targetFileName);
+
         name.value = targetFileName;
         form.append(name);
 
@@ -951,24 +975,21 @@ class AdminMapsManager{
 
     renderScreenshotsInfo(){
 
-        //image/png, image/x-ms-bmp, image/bmp, image/gif, image/jpeg, image/tiff
 
         const content = [];
 
         content.push(
-            `- This is where you can upload map screenshots that are used in various areas of the site.`,
+            `- File names are automatically assigned to match the selected map, and images are converted to .jpg format.`,
             UIBr(),
-            `- File names are automatically assigned to match the selected map so the website can recognize the image.`,
-            UIBr(),
-            `- Images are automatically converted to .jpg format, you can upload the following image types: `
+            `- You can upload the following image types: `
         );
 
         for(let i = 0; i < this.validScreenshotTypes.length; i++){
 
             const v = this.validScreenshotTypes[i];
-            const item = UIB();
+            const item = UIB(v);
 
-            item.append(v);
+    
 
             if(i < this.validScreenshotTypes.length - 1){
                 item.append(", ");
@@ -1051,7 +1072,7 @@ class AdminMapsManager{
                 {
                     "display": imageStatus, 
                     "className": `dummy-map-name ${statusClass}`, 
-                    "id": stripFileExtension(m.targetImage),
+                    "id": this.sanatizeMapNameForQuerySelector(stripFileExtension(m.targetImage)),
                     "url": `/images/maps/${m.targetImage}`,
                     "urlTarget": "_blank",
                     "value": imageStatus
@@ -1060,14 +1081,8 @@ class AdminMapsManager{
                     "display": this.createUploadForm(m.targetImage),
                     "value": 0
                 }
-
             ];
 
-    
-
-            //const form = this.createUploadForm(m.targetImage);
-
-            //row.append(UITableCell({"content": form}));
             rows.push(row);
         }
 
