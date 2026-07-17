@@ -164,12 +164,13 @@ class AdminFTPManager{
         this.content.append(wrapper);
 
         const tableOptions = {
-            "width": 1,
+            "className": "t-width-1",
+            "bNoSort": true,
             "headers": [
                 "Name", "Address", "User", "Target Folder",
                 "Ignore Values", "Minimum Requirements",
                 "Total Imports", "SFTP", "Enabled"
-            ]
+            ].map((h) =>{ return {"display": h}})
         };
 
         const rows = [];
@@ -204,23 +205,22 @@ class AdminFTPManager{
             );
 
             row.push(
-                {"content": s.name},
-                {"content": `${s.host}:${s.port}`},
-                {"content": s.user},
-                {"content": s.target_folder},
-                {"content": ignoreWrapper},
-                {"content": minWrapper},
-                {"content": totalWrapper},
-                {"content": UIStaticTrueFalse(s.sftp, true)},
-                {"content": UIStaticTrueFalse(s.enabled, true)},
+                {"display": s.name},
+                {"display": `${s.host}:${s.port}`},
+                {"display": s.user},
+                {"display": s.target_folder},
+                {"display": ignoreWrapper},
+                {"display": minWrapper},
+                {"display": totalWrapper},
+                {"display": UIStaticTrueFalse(s.sftp, true), "bSkipTD": true},
+                {"display": UIStaticTrueFalse(s.enabled, true), "bSkipTD": true},
             );
             
 
             rows.push(row);
         }
 
-        const table = new UITable(this.content, tableOptions, rows);
-
+        this.currentFTPSettingsTable = new TESTUITable(this.content, tableOptions, rows);
     }
 
     renderCurrentSettings(){
@@ -239,45 +239,24 @@ class AdminFTPManager{
 
         const selectRow = UIDiv("form-row");
 
-        const selectLabel = document.createElement("label");
-        selectLabel.htmlFor = "selected-ftp-server";
-        selectLabel.append = "Selected Server";
+        const selectLabel = UILabel("Selected Server", "selected-ftp-server");
         selectRow.append(selectLabel);
 
-        const select = document.createElement("select");
-        select.id = select.name = "selected-ftp-server";
+        const options = [
+            {"display": "- Please Select An FTP Server -", "value": ""},
+            ...this.ftpServers.map((s) =>{
+                return {"display": `${s.name} (${s.host}:${s.port})`, "value": s.id}
+            })
+        ];
 
-        select.addEventListener("change", (e) =>{
+        const select = new UISelect(selectRow, options, this.selectedFTPServer, (e) =>{
 
-            this.selectedFTPServer = e.target.value;
+            this.selectedFTPServer = e;
             this.render();
-        });
-        
+        }, "selected-ftp-server", "selected-ftp-server");
 
-        const noneSelected = document.createElement("option");
-        noneSelected.value = "";
-        noneSelected.innerHTML = `- Please Select An FTP Server -`;
-        select.append(noneSelected);
-
-        for(let i = 0; i < this.ftpServers.length; i++){
-
-            const s = this.ftpServers[i];
-
-            const option = document.createElement("option");
-            option.value = s.id;
-
-            if(option.value == this.selectedFTPServer) option.selected = true;
-
-            option.append(`${s.name} (${s.host}:${s.port})`);
-            select.append(option);
-        }
-
-        selectRow.append(select); 
         selectArea.append(selectRow);
-
-        this.fart = selectArea;
-
-        this.content.append(this.fart);
+        this.content.append(selectArea);
     }
 
     async createFTPServer(){
