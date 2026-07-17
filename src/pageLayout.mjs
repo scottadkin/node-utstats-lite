@@ -77,6 +77,11 @@ async function getLastIndex(page){
 export async function addPageLayout(page, item, pageOrder){
 
     page = page.toLowerCase();
+
+    if(await bPageOrderItemExists(page, item)){
+        new Message(`Page Layout for page ${page} with item ${item} already exists, skipping`, "warning");
+        return;
+    }
     
     const query = `INSERT INTO nstats_page_layout VALUES(NULL,?,?,?)`;
 

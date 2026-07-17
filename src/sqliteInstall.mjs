@@ -3,7 +3,7 @@ import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
 import { restoreDefaultSettings as restoreDefaultSiteSettings } from "./siteSettings.mjs";
-import { restoreDefaultLayouts as restoreDefaultPageLayouts} from "./pageLayout.mjs";
+import { addPageLayout, restoreDefaultLayouts as restoreDefaultPageLayouts} from "./pageLayout.mjs";
 import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./ctfLeague.mjs";
 import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
@@ -873,6 +873,10 @@ export async function sqliteInstall(bOnlyCreateTables){
     await updatePlayerWeaponTotalsTable();
     //2.6.0
     await updateMapWeaponTotalsTable();
+
+
+    //2.6.0
+    await addPageLayout("player", "Basic Totals", -2);
 
 
     if(!bOnlyCreateTables){
