@@ -4,40 +4,37 @@
 
 .page-layout-editor-box{
     background-color:var(--bg-color-mid);
-    max-width:500px;
     margin-left:auto;
     margin-right:auto;
     text-align: center;
     border:2px solid var(--border-color-5);
     margin-bottom:var(--margin-2);
+    max-width:75%;
+    font-size:var(--font-size-80);
+	color:var(--font-color-1);
 }
 
-.page-layout-editor-title{
-    padding:5px;
-    font-size:var(--font-size-1);
-	color:var(--font-color-1);
-    font-weight: 600;
-	background-color: var(--bg-header-color);
+.admin-page-layout-title{
+    color:var(--font-color-blue);
+    font-weight: bold;
 }
+
 
 .page-layout-editor-options{
     display:grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
 }
 
 .page-layout-editor-options button{
     background-color:var(--bg-color-mid);
-    padding:5px;
-    border:2px solid var(--border-color-5);
     color:white;
     transition: all 0.5s;
-	margin-bottom:-2px;
+    border:1px solid var(--border-color-1);
 }
 
 .page-layout-editor-options button:hover{
-    background-color:var(--bg-color-mid);
+    background-color:var(--bg-color-light);
     color:yellow;
-    font-weight:bold;
 
 }
 

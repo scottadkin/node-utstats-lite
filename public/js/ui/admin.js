@@ -1111,10 +1111,6 @@ class UIPageEditorBox{
         this.settings = itemSettings;
 
         this.wrapper = UIDiv("page-layout-editor-box");
-        this.title = UIDiv("page-layout-editor-title");
-        this.title.append(this.settings.item);
-        this.wrapper.append(this.title);
-        
         this.parent.append(this.wrapper);
 
         this.createButtons()
@@ -1129,6 +1125,11 @@ class UIPageEditorBox{
 
         const buttons = [];
         const values = ["To Bottom", "Move Down", "Move Up", "To Top"];
+
+        const title = UIDiv("admin-page-layout-title");
+        title.append(this.settings.item);
+
+        elem.append(title);
 
         for(let i = 0; i < values.length; i++){
 
