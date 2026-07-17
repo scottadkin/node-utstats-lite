@@ -637,7 +637,6 @@ export async function setAllMapTotals(){
     await simpleQuery(`DELETE FROM nstats_map_weapon_totals`);
 
     const mapIds = await getAllMapIds();
-    
 
     for(let i = 0; i < mapIds.length; i++){
 
@@ -646,6 +645,7 @@ export async function setAllMapTotals(){
         const current = await getAllMapData(m);
         const uniqueGametypes = await getAllUniquePlayedGametypes(m);
 
+        new Message(`Attempting to calculate map weapon totals for mapId=${m} (All time totals)`,"note");
         //all time map totals
         const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(m, 0);
         const mapAllTimeData = await calcMapWeaponTotalsFromMatchTable(m, 0);
@@ -657,12 +657,16 @@ export async function setAllMapTotals(){
 
             const g = uniqueGametypes[x];
 
+            new Message(`Attempting to calculate map weapon totals for mapId=${m} and gametypeId=${g}`,"note");
+
             const {playtime, matches} = await getTotalPlaytimeAndMatches(m,g);
             const mapGametypeData = await calcMapWeaponTotalsFromMatchTable(m, g);
             setXPH(mapGametypeData, matches, playtime, m, g);
             await bulkInsertMapWeaponTotals(mapGametypeData);
         }   
     }
+
+    new Message(`Set all map weapon totals completed.`,"pass");
 }
 
 

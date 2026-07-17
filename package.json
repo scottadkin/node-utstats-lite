@@ -1,6 +1,6 @@
 {
   "name": "node-ustats-lite",
-  "version": "2.2.0",
+  "version": "2.6.0",
   "description": "UTStats built using node.js",
   "repository": {
     "type": "git",

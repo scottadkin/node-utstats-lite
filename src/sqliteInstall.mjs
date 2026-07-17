@@ -9,7 +9,7 @@ import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
 import { installPlayerSettings } from "./players.mjs";
-import { setAllMapTotals } from "./weapons.mjs";
+import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllMapTotals } from "./weapons.mjs";
 
 const queries = [
     `CREATE TABLE IF NOT EXISTS nstats_sessions(
@@ -830,12 +830,16 @@ async function updatePlayerWeaponTotalsTable(){
 
     new Message("Attempting to update nstats_player_totals_weapons table.","note");
 
+
     await addColumn("nstats_player_totals_weapons", "map_id", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "max_kills", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "max_deaths", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "max_suicides", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "max_team_kills", "INTEGER NOT NULL DEFAULT 0");
-    new Message("Updated nstats_player_totals_weapons.","pass");
+
+    new Message("Updated nstats_player_totals_weapons table.","pass");
+
+    
 }
 
 async function updateMapWeaponTotalsTable(){

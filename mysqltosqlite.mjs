@@ -6,7 +6,7 @@ import { toMYSQLDateTime } from "./src/generic.mjs";
 import { sqliteInstall } from "./src/sqliteInstall.mjs";
 import { closeDatabase, createNewDatabase, bulkInsert } from "./src/database.mjs";
 import { mysqlInstall } from "./src/mysqlInstall.mjs";
-import { setAllMapTotals } from "./src/weapons.mjs";
+import { recalculateAllPlayerTotals, setAllMapTotals } from "./src/weapons.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 new Message(`MYSQL database must be from node-ustats-lite v2.5.0`,"warning");
@@ -350,7 +350,10 @@ async function init(){
     await sqliteInstall(true);
 
     await restoreDatabase(backupName);
+    new Message("Attempting to set all map weapon totals", "note");
     await setAllMapTotals();
+    new Message("Attempting to set all player map weapon totals", "note");
+    await recalculateAllPlayerTotals();
 
     new Message(`MYSQL To SQlite transfer complete.`,"progress");
     process.exit();

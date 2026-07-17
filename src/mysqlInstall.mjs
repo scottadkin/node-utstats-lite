@@ -1155,8 +1155,8 @@ export async function mysqlInstall(mysqlSettings){
 
        
         
-        new Message("Calculating Map Weapon Totals", "note");
-        await setAllMapWeaponTotals();
+        //new Message("Calculating Map Weapon Totals", "note");
+       // await setAllMapWeaponTotals();
 
         new Message("Setting damage match map & gametypeIds.", "note");
         await damageSetMatchMapGametypeIds();
