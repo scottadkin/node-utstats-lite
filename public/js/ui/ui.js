@@ -842,17 +842,44 @@ class UISelect{
 
     createOptions(){
 
+        const groups = {};
+        let bFoundGroups = false;
+
         for(let i = 0; i < this.options.length; i++){
 
-            const {value, display} = this.options[i];
+            const {value, display, group} = this.options[i];
 
             const elem = document.createElement("option");
             elem.value = value;
             elem.append(display);
             if(value == this.initialValue) elem.selected = true;
-            this.select.append(elem);
+
+            if(group === undefined){
+                this.select.append(elem);
+            }
+
+            if(group !== undefined){
+
+                if(groups[group] === undefined) groups[group] = [];
+                bFoundGroups = true;
+                groups[group].push(elem);
+            }
         }
+
+        if(!bFoundGroups) return;
         
+        for(const [group, options] of Object.entries(groups)){
+
+            const og = document.createElement("optgroup");
+            og.label = group;
+
+            for(let i = 0; i < options.length; i++){
+                og.append(options[i]);
+            }
+
+            this.select.append(og);
+        }
+
     }
 
     updateOptions(newOptions, selectedValue){

@@ -186,23 +186,6 @@ async function bulkInsertEntries(mapId, gametypeId, tableData){
 
     const t = "nstats_player_ctf_league";
 
-    /*const query = `INSERT INTO ${t} (player_id,gametype_id,map_id,first_match,last_match,
-    total_matches,playtime,wins,draws,losses,winrate,cap_for,cap_against,cap_offset,points) VALUES ? as new
-    ON DUPLICATE KEY UPDATE
-    ${t}.first_match = new.first_match,
-    ${t}.last_match = new.last_match,
-    ${t}.total_matches = new.total_matches,
-    ${t}.playtime = new.playtime,
-    ${t}.wins = new.wins,
-    ${t}.draws = new.draws,
-    ${t}.losses = new.losses,
-    ${t}.winrate = new.winrate,
-    ${t}.cap_for = new.cap_for,
-    ${t}.cap_against = new.cap_against,
-    ${t}.cap_offset = new.cap_offset,
-    ${t}.points = new.points
-    `;*/
-
     const columns = [
         "player_id","gametype_id","map_id","first_match","last_match",
         "total_matches","playtime","wins","draws","losses","winrate",
@@ -259,10 +242,6 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
             }
         }  
     }
-
-
-
-    //await deleteAllEntries(mapId, gametypeId);
 
     await bulkInsertEntries(mapId, gametypeId, table);
 }
