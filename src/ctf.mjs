@@ -140,6 +140,7 @@ function createEmptyTotal(){
 
         current[k] = 0;
         current[`max_${k}`] = 0;
+        current[`avg_${k}`] = 0;
     }
 
     return current;
@@ -212,8 +213,15 @@ function _updatePlayerTotals(totals, matchData){
 
             const k = CTF_TOTAL_KEYS[i];
             const mk = `max_${k}`;
+            const avgK = `avg_${k}`;
 
             t[k] += parseInt(matchData[k]);
+
+            if(t[k] > 0){
+                t[avgK] = t[k] / t.matches;
+            }else{
+                t[avgK] = 0;
+            }
 
             if(matchData[mk] > t[mk]){
                 t[mk] = matchData[mk];
@@ -223,6 +231,86 @@ function _updatePlayerTotals(totals, matchData){
 
 
 }
+
+//slower than previous method
+/*async function testGetPlayerMatchesData(playerIds, type){
+
+    if(playerIds.length === 0) return [];
+
+    const validTypes = ["all", "gametypes", "maps", "both"];
+
+    type = type.toLowerCase();
+
+    let groupBy = "GROUP BY player_id";
+    let selectText = "player_id";
+    if(validTypes.indexOf(type) === -1) throw new Error("Not a valid type for getPlayerMatchesData");
+
+
+    if(type === "gametypes"){
+
+        groupBy = "GROUP BY player_id,gametype_id";
+        selectText = "player_id,gametype_id";
+
+    }else if(type === "maps"){
+
+        groupBy = "GROUP BY player_id,map_id";
+        selectText = "player_id,map_id";
+
+    }else if(type === "both"){
+
+        groupBy = "GROUP BY player_id,gametype_id,map_id";
+        selectText = "player_id,gametype_id,map_id";
+
+    }
+
+
+    const query = `SELECT ${selectText},
+    COUNT(*) as total_matches,
+    SUM(flag_taken) as flag_taken,
+    MAX(flag_taken) as max_flag_taken,
+    AVG(flag_taken) as avg_flag_taken,
+    SUM(flag_pickup) as flag_pickup,
+    MAX(flag_pickup) as max_flag_pickup,
+    AVG(flag_pickup) as avg_flag_pickup,
+    SUM(flag_drop) as flag_drop,
+    MAX(flag_drop) as max_flag_drop,
+    AVG(flag_drop) as avg_flag_drop,
+    SUM(flag_assist) as flag_assist,
+    MAX(flag_assist) as max_flag_assist,
+    AVG(flag_assist) as avg_flag_assist,
+    SUM(flag_cover) as flag_cover,
+    MAX(flag_cover) as max_flag_cover,
+    AVG(flag_cover) as avg_flag_cover,
+    SUM(flag_seal) as flag_seal,
+    MAX(flag_seal) as max_flag_seal,
+    AVG(flag_seal) as avg_flag_seal,
+    SUM(flag_cap) as flag_cap,
+    MAX(flag_cap) as max_flag_cap,
+    AVG(flag_cap) as avg_flag_cap,
+    SUM(flag_kill) as flag_kill,
+    MAX(flag_kill) as max_flag_kill,
+    AVG(flag_kill) as avg_flag_kill,
+    SUM(flag_return) as flag_return,
+    MAX(flag_return) as max_flag_return,
+    AVG(flag_return) as avg_flag_return,
+    SUM(flag_return_base) as flag_return_base,
+    MAX(flag_return_base) as max_flag_return_base,
+    AVG(flag_return_base) as avg_flag_return_base,
+    SUM(flag_return_mid) as flag_return_mid,
+    MAX(flag_return_mid) as max_flag_return_mid,
+    AVG(flag_return_mid) as avg_flag_return_mid,
+    SUM(flag_return_enemy_base) as flag_return_enemy_base,
+    MAX(flag_return_enemy_base) as max_flag_return_enemy_base,
+    AVG(flag_return_enemy_base) as avg_flag_return_enemy_base,
+    SUM(flag_return_save) as flag_return_save,
+    MAX(flag_return_save) as max_flag_return_save,
+    AVG(flag_return_save) as avg_flag_return_save
+    FROM nstats_match_ctf WHERE player_id IN (?)
+    ${groupBy}`;
+
+
+    return await simpleQuery(query, [playerIds]);
+}*/
 
 async function getPlayersMatchesData(playerIds){
 
@@ -261,8 +349,11 @@ async function getPlayersMatchesData(playerIds){
 }
 
 async function calcPlayerTotals(playerIds){
+
+    const start = performance.now();
   
     const result = await getPlayersMatchesData(playerIds);
+    
 
     const totals = {};
 
@@ -272,16 +363,8 @@ async function calcPlayerTotals(playerIds){
 
         //all time totals
         _updatePlayerTotals(totals, r);
-
-        //gametype totals
-        //_updatePlayerTotals(totals, r.gametype_id, 0, r);
-
-        //map totals
-        //_updatePlayerTotals(totals, 0, r.map_id, r);
-
-        //map gametype totals
-        //_updatePlayerTotals(totals, r.gametype_id, r.map_id, r);
     }
+
 
     return totals;
 }
@@ -351,8 +434,21 @@ async function insertPlayerTotals(insertVars){
         "flag_kill", "max_flag_kill", "flag_return", "max_flag_return",
         "flag_return_base", "max_flag_return_base", "flag_return_mid",
         "max_flag_return_mid", "flag_return_enemy_base", "max_flag_return_enemy_base",
-        "flag_return_save", "max_flag_return_save"
+        "flag_return_save", "max_flag_return_save", "avg_flag_taken",
+                    "avg_flag_pickup",
+                    "avg_flag_drop",
+                    "avg_flag_assist",
+                    "avg_flag_cover",
+                    "avg_flag_seal",
+                    "avg_flag_cap",
+                    "avg_flag_kill",
+                    "avg_flag_return",
+                    "avg_flag_return_base",
+                    "avg_flag_return_mid",
+                    "avg_flag_return_enemy_base",
+                    "avg_flag_return_save"
     ];
+
 
     return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id", "gametype_id", "map_id"]);
     //return await bulkInsert(query, insertVars);
@@ -386,7 +482,20 @@ export async function updatePlayerTotals(playerIds){
                     d.flag_return_base, d.max_flag_return_base,
                     d.flag_return_mid, d.max_flag_return_mid,
                     d.flag_return_enemy_base, d.max_flag_return_enemy_base,
-                    d.flag_return_save, d.max_flag_return_save
+                    d.flag_return_save, d.max_flag_return_save,
+                    d.avg_flag_taken,
+                    d.avg_flag_pickup,
+                    d.avg_flag_drop,
+                    d.avg_flag_assist,
+                    d.avg_flag_cover,
+                    d.avg_flag_seal,
+                    d.avg_flag_cap,
+                    d.avg_flag_kill,
+                    d.avg_flag_return,
+                    d.avg_flag_return_base,
+                    d.avg_flag_return_mid,
+                    d.avg_flag_return_enemy_base,
+                    d.avg_flag_return_save
                 ]);
             }
         }

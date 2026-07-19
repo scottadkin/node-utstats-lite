@@ -399,7 +399,20 @@ const queries = [
             flag_return_enemy_base INTEGER NOT NULL,
             max_flag_return_enemy_base INTEGER NOT NULL,
             flag_return_save INTEGER NOT NULL,
-            max_flag_return_save INTEGER NOT NULL
+            max_flag_return_save INTEGER NOT NULL,
+            avg_flag_taken REAL NOT NULL,
+            avg_flag_pickup REAL NOT NULL,
+            avg_flag_drop REAL NOT NULL,
+            avg_flag_assist REAL NOT NULL,
+            avg_flag_cover REAL NOT NULL,
+            avg_flag_seal REAL NOT NULL,
+            avg_flag_cap REAL NOT NULL,
+            avg_flag_kill REAL NOT NULL,
+            avg_flag_return REAL NOT NULL,
+            avg_flag_return_base REAL NOT NULL,
+            avg_flag_return_mid REAL NOT NULL,
+            avg_flag_return_enemy_base REAL NOT NULL,
+            avg_flag_return_save REAL NOT NULL
         ) STRICT`,
 
 		`CREATE UNIQUE INDEX IF NOT EXISTS nptc_pgm_idx ON nstats_player_totals_ctf(player_id, gametype_id, map_id)`,
@@ -410,14 +423,6 @@ const queries = [
             password TEXT COLLATE NOCASE ,
             activated INTEGER NOT NULL
         ) STRICT`,
-
-        /*`CREATE TABLE IF NOT EXISTS nstats_sessions (
-        session_id TEXT COLLATE utf8mb4_bin ,
-        expires INTEGER unsigned ,
-        user_id INTEGER unsigned DEFAULT 0,
-        data mediumtext COLLATE utf8mb4_bin,
-        PRIMARY KEY (session_id)
-        ) ENGINE=InnoDB`,*/
 
         `CREATE TABLE IF NOT EXISTS nstats_logs_downloads (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -855,6 +860,37 @@ async function updateMapWeaponTotalsTable(){
     new Message("Updated nstats_map_weapon_totals", "pass");
 }
 
+
+async function updatePlayerCTFTotalsTable(){
+
+    new Message("Attempting to update nstats_player_totals_ctf table.", "note");
+
+    const columns = [
+        "avg_flag_taken",
+        "avg_flag_pickup",
+        "avg_flag_drop",
+        "avg_flag_assist",
+        "avg_flag_cover",
+        "avg_flag_seal",
+        "avg_flag_cap",
+        "avg_flag_kill",
+        "avg_flag_return",
+        "avg_flag_return_base",
+        "avg_flag_return_mid",
+        "avg_flag_return_enemy_base",
+        "avg_flag_return_save",
+    ];
+
+    const table = "nstats_player_totals_ctf";
+
+    for(let i = 0; i < columns.length; i++){
+
+        const c = columns[i];
+
+        await addColumn(table, c, "REAL NOT NULL DEFAULT 0");
+    }
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -877,6 +913,10 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     //2.6.0
     await addPageLayout("player", "Basic Totals", -2);
+
+
+    //2.6.1
+    await updatePlayerCTFTotalsTable();
 
 
     if(!bOnlyCreateTables){
