@@ -447,7 +447,7 @@ class MatchScreenshot{
 
             found[d.point_id] = {
    
-                "control_point_score": d.control_point_score,
+                "control_point_score": d.control_point_score.toFixed(1),
                 "total_control_time": d.total_control_time,
             };
 
