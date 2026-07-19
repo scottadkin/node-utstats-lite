@@ -800,15 +800,6 @@ class UIMapPlayerAverages{
         const row = UIDiv("form-row");
         row.append(UILabel("Category","map-average-cat"));
 
-        this.validTypes.sort((a, b) =>{
-            a = a.display.toLowerCase();
-            b = b.display.toLowerCase();
-
-            if(a < b) return -1;
-            if(a > b) return 1;
-            return 0;
-        });
-
 
         this.select = new UISelect(row, this.validTypes, this.cat, (e) =>{
             this.cat = e;

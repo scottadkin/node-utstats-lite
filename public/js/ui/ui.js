@@ -878,6 +878,7 @@ class UISelect{
             }
 
             this.select.append(og);
+            this.select.append(document.createElement("hr"));
         }
 
     }

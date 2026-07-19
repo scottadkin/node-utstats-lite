@@ -472,6 +472,7 @@ option{
 }
 
 
+
 .true, .false{
 	padding:var(--padding-2);
 	border:1px solid var(--border-color-5);
