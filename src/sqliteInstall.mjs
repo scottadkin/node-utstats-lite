@@ -412,7 +412,21 @@ const queries = [
             avg_flag_return_base REAL NOT NULL,
             avg_flag_return_mid REAL NOT NULL,
             avg_flag_return_enemy_base REAL NOT NULL,
-            avg_flag_return_save REAL NOT NULL
+            avg_flag_return_save REAL NOT NULL,
+            playtime REAL NOT NULL,
+            epm_flag_taken REAL NOT NULL,
+            epm_flag_pickup REAL NOT NULL,
+            epm_flag_drop REAL NOT NULL,
+            epm_flag_assist REAL NOT NULL,
+            epm_flag_cover REAL NOT NULL,
+            epm_flag_seal REAL NOT NULL,
+            epm_flag_cap REAL NOT NULL,
+            epm_flag_kill REAL NOT NULL,
+            epm_flag_return REAL NOT NULL,
+            epm_flag_return_base REAL NOT NULL,
+            epm_flag_return_mid REAL NOT NULL,
+            epm_flag_return_enemy_base REAL NOT NULL,
+            epm_flag_return_save REAL NOT NULL
         ) STRICT`,
 
 		`CREATE UNIQUE INDEX IF NOT EXISTS nptc_pgm_idx ON nstats_player_totals_ctf(player_id, gametype_id, map_id)`,
@@ -879,6 +893,20 @@ async function updatePlayerCTFTotalsTable(){
         "avg_flag_return_mid",
         "avg_flag_return_enemy_base",
         "avg_flag_return_save",
+        "playtime",
+        "epm_flag_taken",
+        "epm_flag_pickup",
+        "epm_flag_drop",
+        "epm_flag_assist",
+        "epm_flag_cover",
+        "epm_flag_seal",
+        "epm_flag_cap",
+        "epm_flag_kill",
+        "epm_flag_return",
+        "epm_flag_return_base",
+        "epm_flag_return_mid",
+        "epm_flag_return_enemy_base",
+        "epm_flag_return_save",
     ];
 
     const table = "nstats_player_totals_ctf";

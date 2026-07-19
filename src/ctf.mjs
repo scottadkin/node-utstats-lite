@@ -36,7 +36,21 @@ const PLAYER_PROFILE_CTF_COLUMNS = [
     "avg_flag_return_base",
     "avg_flag_return_mid",
     "avg_flag_return_enemy_base",
-    "avg_flag_return_save"
+    "avg_flag_return_save",
+    "playtime",
+    "epm_flag_taken",
+    "epm_flag_pickup",
+    "epm_flag_drop",
+    "epm_flag_assist",
+    "epm_flag_cover",
+    "epm_flag_seal",
+    "epm_flag_cap",
+    "epm_flag_kill",
+    "epm_flag_return",
+    "epm_flag_return_base",
+    "epm_flag_return_mid",
+    "epm_flag_return_enemy_base",
+    "epm_flag_return_save"
     
 ];
 
@@ -145,7 +159,8 @@ export async function getMatchData(matchId, bReturnJSON){
 function createEmptyTotal(){
 
     const current = {
-        "matches": 0
+        "matches": 0,
+        "playtime": 0
     };
 
     for(let i = 0; i < CTF_TOTAL_KEYS.length; i++){
@@ -155,6 +170,7 @@ function createEmptyTotal(){
         current[k] = 0;
         current[`max_${k}`] = 0;
         current[`avg_${k}`] = 0;
+        current[`epm_${k}`] = 0;
     }
 
     return current;
@@ -222,12 +238,15 @@ function _updatePlayerTotals(totals, matchData){
 
         const t = pTotals[x];
         t.matches += matchData.total_matches;
+        t.playtime += matchData.total_playtime;
+
 
         for(let i = 0; i < CTF_TOTAL_KEYS.length; i++){
 
             const k = CTF_TOTAL_KEYS[i];
             const mk = `max_${k}`;
             const avgK = `avg_${k}`;
+            const epmK = `epm_${k}`;
 
             t[k] += parseInt(matchData[k]);
 
@@ -236,6 +255,20 @@ function _updatePlayerTotals(totals, matchData){
             }else{
                 t[avgK] = 0;
             }
+
+            if(t.playtime > 0){
+
+                if(t[k] > 0){
+
+                    const mins = t.playtime / 60;
+                    
+                    t[epmK] = t[k] / mins;
+                    //console.log(`played for ${mins} mins, ${t.playtime}, ${t.matches}`);
+                }else{
+                    t[k] = 0;
+                }
+            }
+            //console.log(t);
 
             if(matchData[mk] > t[mk]){
                 t[mk] = matchData[mk];
@@ -328,7 +361,8 @@ function _updatePlayerTotals(totals, matchData){
 
 async function getPlayersMatchesData(playerIds){
 
-    const query = `SELECT map_id,gametype_id,player_id,
+    const query = `SELECT nstats_match_ctf.map_id,nstats_match_ctf.gametype_id,nstats_match_ctf.player_id,
+    SUM(nstats_match_players.time_on_server) as total_playtime,
     COUNT(*) as total_matches,
     SUM(flag_taken) as flag_taken,
     MAX(flag_taken) as max_flag_taken,
@@ -356,8 +390,10 @@ async function getPlayersMatchesData(playerIds){
     MAX(flag_return_enemy_base) as max_flag_return_enemy_base,
     SUM(flag_return_save) as flag_return_save,
     MAX(flag_return_save) as max_flag_return_save
-    FROM nstats_match_ctf WHERE player_id IN (?)
-    GROUP BY player_id,gametype_id,map_id`;
+    FROM nstats_match_ctf 
+    LEFT JOIN nstats_match_players ON nstats_match_ctf.player_id = nstats_match_players.player_id AND nstats_match_ctf.match_id = nstats_match_players.match_id
+    WHERE nstats_match_ctf.player_id IN (?)
+    GROUP BY nstats_match_ctf.player_id,nstats_match_ctf.gametype_id,nstats_match_ctf.map_id`;
 
     return await simpleQuery(query, [playerIds]);
 }
@@ -460,7 +496,22 @@ async function insertPlayerTotals(insertVars){
                     "avg_flag_return_base",
                     "avg_flag_return_mid",
                     "avg_flag_return_enemy_base",
-                    "avg_flag_return_save"
+                    "avg_flag_return_save",
+
+                    "playtime",
+                    "epm_flag_taken",
+                    "epm_flag_pickup",
+                    "epm_flag_drop",
+                    "epm_flag_assist",
+                    "epm_flag_cover",
+                    "epm_flag_seal",
+                    "epm_flag_cap",
+                    "epm_flag_kill",
+                    "epm_flag_return",
+                    "epm_flag_return_base",
+                    "epm_flag_return_mid",
+                    "epm_flag_return_enemy_base",
+                    "epm_flag_return_save"
     ];
 
 
@@ -509,7 +560,21 @@ export async function updatePlayerTotals(playerIds){
                     d.avg_flag_return_base,
                     d.avg_flag_return_mid,
                     d.avg_flag_return_enemy_base,
-                    d.avg_flag_return_save
+                    d.avg_flag_return_save,
+                    d.playtime,
+                    d.epm_flag_taken,
+                    d.epm_flag_pickup,
+                    d.epm_flag_drop,
+                    d.epm_flag_assist,
+                    d.epm_flag_cover,
+                    d.epm_flag_seal,
+                    d.epm_flag_cap,
+                    d.epm_flag_kill,
+                    d.epm_flag_return,
+                    d.epm_flag_return_base,
+                    d.epm_flag_return_mid,
+                    d.epm_flag_return_enemy_base,
+                    d.epm_flag_return_save
                 ]);
             }
         }
