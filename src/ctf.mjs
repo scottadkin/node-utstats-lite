@@ -23,7 +23,21 @@ const PLAYER_PROFILE_CTF_COLUMNS = [
     "flag_return_base","max_flag_return_base",
     "flag_return_mid","max_flag_return_mid",
     "flag_return_enemy_base","max_flag_return_enemy_base",
-    "flag_return_save","max_flag_return_save"
+    "flag_return_save","max_flag_return_save",
+    "avg_flag_taken",
+    "avg_flag_pickup",
+    "avg_flag_drop",
+    "avg_flag_assist",
+    "avg_flag_cover",
+    "avg_flag_seal",
+    "avg_flag_cap",
+    "avg_flag_kill",
+    "avg_flag_return",
+    "avg_flag_return_base",
+    "avg_flag_return_mid",
+    "avg_flag_return_enemy_base",
+    "avg_flag_return_save"
+    
 ];
 
 function getPlayerCTFProfileColumns(){

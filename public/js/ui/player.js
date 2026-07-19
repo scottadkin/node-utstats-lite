@@ -482,7 +482,6 @@ class PlayerCTFSummary{
         this.data = data;
         this.type = "gametypes";
         this.mode = "general";
-
     
         UIHeader(this.parent, "Capture The Flag Summary");
         
@@ -512,6 +511,8 @@ class PlayerCTFSummary{
             {"display": "Returns Totals", "value": "returns"},
             {"display": "Match General Records", "value": "general-records"},
             {"display": "Match Return Records", "value": "return-records"},
+            {"display": "General Averages", "value": "general-averages"},
+            {"display": "Return Averages", "value": "returns-averages"},
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode);
@@ -532,9 +533,8 @@ class PlayerCTFSummary{
         return "Error";
     }
 
-    createGeneralRow(data, bMax){
+    createGeneralRow(data, type){
 
-        if(bMax === undefined) bMax = false;
 
         const row = [];
 
@@ -555,18 +555,32 @@ class PlayerCTFSummary{
             });
 
         for(let i = 0; i < ignore0Keys.length; i++){
+            
+            let key = `flag_${ignore0Keys[i]}`;
 
-            const key = `${(bMax) ? "max_" : "" }flag_${ignore0Keys[i]}`;
+            if(type === "max"){
+                key = `max_${key}`
+            }else if(type === "avg"){
+                key = `avg_${key}`;
+            }
 
-            row.push({"display": ignore0(data[key]), "value": data[key]});
+            let value = data[key];
+
+            if(type !== "avg"){
+                value = ignore0(data[key]);
+            }else{
+                value = data[key].toFixed(2);
+                if(value == 0) value = "";
+            }
+
+
+            row.push({"display": value, "value": data[key]});
         }
 
         return row;
     }
 
-    createReturnsRow(data, bMax){
-
-        if(bMax === undefined) bMax = false;
+    createReturnsRow(data, type){
 
         const ignore0Keys = [
             "", "_base", "_mid", "_enemy_base", "_save"
@@ -586,8 +600,25 @@ class PlayerCTFSummary{
 
         for(let i = 0; i < ignore0Keys.length; i++){
 
-            const key = `${(bMax) ? "max_" : "" }flag_return${ignore0Keys[i]}`;
-            row.push({"display": ignore0(data[key]), "value": data[key]});
+            let key = `flag_return${ignore0Keys[i]}`;
+
+            if(type === "max"){
+                key = `max_${key}`
+            }else if(type === "avg"){
+                key = `avg_${key}`;
+            }
+
+            let value = data[key];
+
+            if(type !== "avg"){
+                value = data[key];
+            }else{
+                value = parseFloat(data[key].toFixed(2));
+
+                if(value == 0) value = "";
+            }
+
+            row.push({"display": value, "value": data[key]});
         }
 
         return row;
@@ -606,9 +637,10 @@ class PlayerCTFSummary{
             "Return Enemy Base", "Return Close Save"
         ];
 
-        
 
-        let headers = (this.mode !== "returns" && this.mode !== "return-records") ? generalHeaders : returnHeaders;
+        const returnModes = ["returns", "return-records", "returns-averages"];
+
+        let headers = (returnModes.indexOf(this.mode) === -1) ? generalHeaders : returnHeaders;
 
         
         if(this.type === "maps") headers[0] = "Map";
@@ -617,12 +649,17 @@ class PlayerCTFSummary{
 
         const footer = [];
 
-        for(let i = 0; i < headers.length; i++){
+        if(this.mode !== "returns-averages" && this.mode !== "general-averages"){
+            for(let i = 0; i < headers.length; i++){
 
-            if(i === 0){
-                footer.push({"display": "Total", "className": "text-left"});
-            }else{
-                footer.push({"display": "SUM", "dataType": "INT", "callback": ignore0});
+                if(i === 0){
+                    footer.push({"display": "Total", "className": "text-left"});
+                }else{
+
+
+                    footer.push({"display": "SUM", "dataType": "INT", "callback": ignore0});
+                    
+                }
             }
         }
   
@@ -637,13 +674,17 @@ class PlayerCTFSummary{
             if(this.type === "lifetime" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
 
             if(this.mode === "general"){
-                rows.push(this.createGeneralRow(d));
+                rows.push(this.createGeneralRow(d, "totals"));
             }else if(this.mode === "returns"){
-                rows.push(this.createReturnsRow(d));
+                rows.push(this.createReturnsRow(d, "totals"));
             }else if(this.mode === "general-records"){
-                rows.push(this.createGeneralRow(d, true));
+                rows.push(this.createGeneralRow(d, "max"));
             }else if(this.mode === "return-records"){
-                rows.push(this.createReturnsRow(d, true));
+                rows.push(this.createReturnsRow(d, "max"));
+            }else if(this.mode === "general-averages"){
+                rows.push(this.createGeneralRow(d, "avg"));
+            }else if(this.mode === "returns-averages"){
+                rows.push(this.createReturnsRow(d, "avg"));
             }
         }
 
