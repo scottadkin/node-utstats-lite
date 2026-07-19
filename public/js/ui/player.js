@@ -482,7 +482,7 @@ class PlayerCTFSummary{
         this.data = data;
         this.type = "gametypes";
         this.mode = "general";
-    
+
         UIHeader(this.parent, "Capture The Flag Summary");
         
         this.createTabs();
@@ -513,6 +513,8 @@ class PlayerCTFSummary{
             {"display": "Match Return Records", "value": "return-records"},
             {"display": "General Averages", "value": "general-averages"},
             {"display": "Return Averages", "value": "returns-averages"},
+            {"display": "General EPM", "value": "general-epm"},
+            {"display": "Returns EPM", "value": "returns-epm"},
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode);
@@ -531,6 +533,20 @@ class PlayerCTFSummary{
         if(this.type === "lifetime") return "All";
 
         return "Error";
+    }
+
+
+    updateKey(type, key){
+
+        if(type === "max"){
+            key = `max_${key}`
+        }else if(type === "avg"){
+            key = `avg_${key}`;
+        }else if(type === "epm"){
+            key = `epm_${key}`;
+        }
+
+        return key;
     }
 
     createGeneralRow(data, type){
@@ -556,17 +572,12 @@ class PlayerCTFSummary{
 
         for(let i = 0; i < ignore0Keys.length; i++){
             
-            let key = `flag_${ignore0Keys[i]}`;
 
-            if(type === "max"){
-                key = `max_${key}`
-            }else if(type === "avg"){
-                key = `avg_${key}`;
-            }
+            const key = this.updateKey(type, `flag_${ignore0Keys[i]}`);
 
             let value = data[key];
 
-            if(type !== "avg"){
+            if(type !== "avg" && type !== "epm"){
                 value = ignore0(data[key]);
             }else{
                 value = data[key].toFixed(2);
@@ -600,18 +611,12 @@ class PlayerCTFSummary{
 
         for(let i = 0; i < ignore0Keys.length; i++){
 
-            let key = `flag_return${ignore0Keys[i]}`;
-
-            if(type === "max"){
-                key = `max_${key}`
-            }else if(type === "avg"){
-                key = `avg_${key}`;
-            }
+            const key = this.updateKey(type, `flag_return${ignore0Keys[i]}`);
 
             let value = data[key];
 
-            if(type !== "avg"){
-                value = data[key];
+            if(type !== "avg" && type !== "epm"){
+                value = ignore0(data[key]);
             }else{
                 value = parseFloat(data[key].toFixed(2));
 
@@ -638,7 +643,7 @@ class PlayerCTFSummary{
         ];
 
 
-        const returnModes = ["returns", "return-records", "returns-averages"];
+        const returnModes = ["returns", "return-records", "returns-averages", "returns-epm"];
 
         let headers = (returnModes.indexOf(this.mode) === -1) ? generalHeaders : returnHeaders;
 
@@ -649,7 +654,11 @@ class PlayerCTFSummary{
 
         const footer = [];
 
-        if(this.mode !== "returns-averages" && this.mode !== "general-averages"){
+        const ignoreFooterTypes = [
+            "returns-averages", "general-averages", "returns-epm", "general-epm"
+        ];
+
+        if(ignoreFooterTypes.indexOf(this.mode) === -1){
             for(let i = 0; i < headers.length; i++){
 
                 if(i === 0){
@@ -685,6 +694,10 @@ class PlayerCTFSummary{
                 rows.push(this.createGeneralRow(d, "avg"));
             }else if(this.mode === "returns-averages"){
                 rows.push(this.createReturnsRow(d, "avg"));
+            }else if(this.mode === "general-epm"){
+                rows.push(this.createGeneralRow(d, "epm"));
+            }else if(this.mode === "returns-epm"){
+                rows.push(this.createReturnsRow(d, "epm"));
             }
         }
 
