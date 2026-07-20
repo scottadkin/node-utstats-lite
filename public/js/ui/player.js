@@ -473,6 +473,8 @@ class PlayerSpecialEvents{
         this.data = data;
         UIHeader(parent, "Special Events");
         this.mode = "all";
+        this.dataCat = "totals";
+
 
         this.createTabs();
         
@@ -494,8 +496,39 @@ class PlayerSpecialEvents{
             this.mode = e.detail.newTab;
             this.render();
         });
+
+
+        const modeOptions = [
+            {"display": "Totals", "value": "totals"},
+            {"display": "Match Averages", "value": "averages"},
+            {"display": "Events Per Minute", "value": "epm"},
+        ];
+
+        this.modeTabs = new UITabs(this.parent, modeOptions, this.dataCat);
+
+        this.modeTabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.dataCat = e.detail.newTab;
+            this.render();
+        }); 
     }
 
+
+    bDataMatchFilter(gametypeId, mapId){
+
+         if(this.mode === "all" && (gametypeId !== 0 || mapId !== 0)){    
+            return false;
+        }
+
+        if(this.mode === "gametypes" && (mapId !== 0 || gametypeId === 0)){
+            return false;
+        }
+
+        if(this.mode === "maps" && (gametypeId !== 0 || mapId === 0)){
+            return false;
+        }
+
+        return true;
+    }
 
     renderTable(table, headers, keys){
 
@@ -512,28 +545,16 @@ class PlayerSpecialEvents{
             const d = this.data[i];
            // console.log(d);
 
-            if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)){    
-                continue;
-            }
-
-            if(this.mode === "gametypes" && (d.map_id !== 0 || d.gametype_id === 0)){
-                continue;
-            }
-
-            if(this.mode === "maps" && (d.gametype_id !== 0 || d.map_id === 0)){
-                continue;
-            }
-
-
+            if(!this.bDataMatchFilter(d.gametype_id, d.map_id)) continue;
 
             let total = 0;
 
             for(let x = 0; x < keys.length; x++){
                 total += d[keys[x]];
             }
-
+            
             if(total === 0) continue;
-
+       
             const row = []
 
             let currentName = (this.mode === "gametypes") ? d.gametype_name : d.map_name;
@@ -543,43 +564,102 @@ class PlayerSpecialEvents{
             }
 
             for(let x = 0; x < keys.length; x++){
-                row.push({"value": d[keys[x]], "display": ignore0(d[keys[x]])});
+
+                const value = d[keys[x]];
+
+                let display = (this.dataCat === "totals") ? ignore0(value) : value.toFixed(3);
+
+                if(this.dataCat === "averages" && x === keys.length - 1){
+                    display = value.toFixed(2);
+                }
+
+                if(display === "0.000") display = "";
+                row.push({value, display});
             }
 
-         
-
-            //if((d.gametype_id !== 0 && d.map_id !== 0) || this.mode === "all"){
-                rows.push(row);
-            //}else{
-           //     footer = row;
-            //}
+            rows.push(row);
+  
         }
 
         table.updateRows(rows, headers.map((h) =>{ return {"display": h}}), footer);
 
     }
 
+
+    getHeadersKeys(){
+
+
+        if(this.dataCat === "totals"){
+
+            return { 
+                "multiHeaders": [
+                    "Double Kill",
+                    "Multi Kill",
+                    "Ultra Kill",
+                    "Monster Kill",
+                    "Best Multi Kill"
+                ], 
+                "spreeHeaders": [
+                    "Killing Spree",
+                    "Rampage",
+                    "Dominating",
+                    "Unstoppable",
+                    "Godlike",
+                    "Best Spree"
+                ],
+                "multiKeys": ["multi_1", "multi_2", "multi_3", "multi_4", "multi_best"],
+                "spreeKeys": ["spree_1", "spree_2", "spree_3", "spree_4", "spree_5", "spree_best"]
+            }
+
+        }else if(this.dataCat === "averages"){
+
+            return { 
+                "multiHeaders": [
+                    "Double Kill",
+                    "Multi Kill",
+                    "Ultra Kill",
+                    "Monster Kill",
+                    "AVG Best Multi Kill"
+                ], 
+                "spreeHeaders": [
+                    "Killing Spree",
+                    "Rampage",
+                    "Dominating",
+                    "Unstoppable",
+                    "Godlike",
+                    "AVG Best Spree"
+                ],
+                "multiKeys": ["avg_multi_1", "avg_multi_2", "avg_multi_3", "avg_multi_4", "avg_multi_best"],
+                "spreeKeys": ["avg_spree_1", "avg_spree_2", "avg_spree_3", "avg_spree_4", "avg_spree_5", "avg_spree_best"]
+            }
+
+        }else if(this.dataCat === "epm"){
+
+            return { 
+                "multiHeaders": [
+                    "Double Kill",
+                    "Multi Kill",
+                    "Ultra Kill",
+                    "Monster Kill",
+                ], 
+                "spreeHeaders": [
+                    "Killing Spree",
+                    "Rampage",
+                    "Dominating",
+                    "Unstoppable",
+                    "Godlike",
+                ],
+                "multiKeys": ["epm_multi_1", "epm_multi_2", "epm_multi_3", "epm_multi_4"],
+                "spreeKeys": ["epm_spree_1", "epm_spree_2", "epm_spree_3", "epm_spree_4", "epm_spree_5"]
+            }
+        }
+
+
+    }
+
     render(){
 
-        const multiHeaders = [
-            "Double Kill",
-            "Multi Kill",
-            "Ultra Kill",
-            "Monster Kill",
-            "Best Multi Kill",
-        ];
-
-        const multiKeys = ["multi_1", "multi_2", "multi_3", "multi_4", "multi_best"];
-        const spreeKeys = ["spree_1", "spree_2", "spree_3", "spree_4", "spree_5", "spree_best"];
-
-        const spreeHeaders = [
-            "Killing Spree",
-            "Rampage",
-            "Dominating",
-            "Unstoppable",
-            "Godlike",
-            "Best Spree"
-        ];
+        const {multiHeaders, spreeHeaders, multiKeys, spreeKeys} = this.getHeadersKeys();
 
         if(this.multisTable === undefined){
             this.multisTable = new TESTUITable(this.parent, {"className": "t-width-1", "headers": multiHeaders.map((h) =>{ return {"display": h}})}, []);
