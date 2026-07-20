@@ -69,6 +69,32 @@ export const VALID_PLAYER_SORT_BYS = [
     "suicides", "efficiency", "matches", "playtime"
 ];
 
+const AVERAGE_TYPES = [
+    "score",
+    "frags",
+    "kills",
+    "deaths",
+    "suicides",
+    "team_kills",
+    "spree_1",
+    "spree_2",
+    "spree_3",
+    "spree_4",
+    "spree_5",
+    "multi_1",
+    "multi_2",
+    "multi_3",
+    "multi_4",
+    "headshots",
+    "item_amp",
+    "item_belt",
+    "item_boots",
+    "item_body",
+    "item_pads",
+    "item_invis",
+    "item_shp",
+];
+
 function getPlayerTotalsColumnsProfile(){
 
     const pT = "nstats_player_totals";
@@ -587,7 +613,55 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
         "item_body": 0,
         "item_pads": 0,
         "item_invis": 0,
-        "item_shp": 0
+        "item_shp": 0,
+        "avg_score": 0,
+        "avg_frags": 0,
+        "avg_kills": 0,
+        "avg_deaths": 0,
+        "avg_suicides": 0,
+        "avg_team_kills": 0,
+        "avg_spree_1": 0,
+        "avg_spree_2": 0,
+        "avg_spree_3": 0,
+        "avg_spree_4": 0,
+        "avg_spree_5": 0,
+        "avg_multi_1": 0,
+        "avg_multi_2": 0,
+        "avg_multi_3": 0,
+        "avg_multi_4": 0,
+        "avg_headshots": 0,
+        "avg_item_amp": 0,
+        "avg_item_belt": 0,
+        "avg_item_boots": 0,
+        "avg_item_body": 0,
+        "avg_item_pads": 0,
+        "avg_item_invis": 0,
+        "avg_item_shp": 0,
+        "epm_score": 0,
+        "epm_frags": 0,
+        "epm_kills": 0,
+        "epm_deaths": 0,
+        "epm_suicides": 0,
+        "epm_team_kills": 0,
+        "epm_spree_1": 0,
+        "epm_spree_2": 0,
+        "epm_spree_3": 0,
+        "epm_spree_4": 0,
+        "epm_spree_5": 0,
+        "epm_multi_1": 0,
+        "epm_multi_2": 0,
+        "epm_multi_3": 0,
+        "epm_multi_4": 0,
+        "epm_headshots": 0,
+        "epm_item_amp": 0,
+        "epm_item_belt": 0,
+        "epm_item_boots": 0,
+        "epm_item_body": 0,
+        "epm_item_pads": 0,
+        "epm_item_invis": 0,
+        "epm_item_shp": 0
+
+        
     };
 }
 
@@ -657,7 +731,9 @@ function _updateTotals(totals, playerData){
 
     const floatTypes = ["playtime"];
 
-   const pTotals = [
+
+
+    const pTotals = [
         allTimeTotals,
         gametypeTotals,
         mapTotals,
@@ -687,10 +763,6 @@ function _updateTotals(totals, playerData){
 
         const h = higherBetter[i];
 
-        
-
-        
-
         for(let x = 0; x < pTotals.length; x++){
 
             if(h === "last_active"){
@@ -709,9 +781,9 @@ function _updateTotals(totals, playerData){
         }
     }
 
-    for(let x = 0; x < pTotals.length; x++){
+    for(let i = 0; i < pTotals.length; i++){
 
-        const t = pTotals[x];
+        const t = pTotals[i];
 
         t.totalTtl += playerData.ttl;
 
@@ -737,6 +809,28 @@ function _updateTotals(totals, playerData){
         if(t.wins > 0){
             t.winRate = t.wins / t.matches * 100;
         }
+
+        for(let x = 0; x < AVERAGE_TYPES.length; x++){
+
+            const type = AVERAGE_TYPES[x];
+            const value = t[type];
+            
+            
+            if(value !== 0 && t.matches !== 0){
+
+                const averageKey = `avg_${type}`;
+      
+                t[averageKey] = value / t.matches;
+            }
+
+            if(value !== 0 && t.playtime > 0){
+
+                const epmKey = `epm_${type}`;
+                const mins = t.playtime / 60;
+                t[epmKey] = value / mins;
+            }
+
+        }
     }
 }
 
@@ -749,14 +843,8 @@ function createPlayerTotalsFromData(result){
 
         const r = result[i];
 
-        //gametype map combos
         _updateTotals(totals, r);
-        //gametype totals
-       /* _updateTotals(totals, r, r.gametype_id, 0);
-        //map totals
-        _updateTotals(totals, r, 0, r.map_id);
-        //all time totals
-        _updateTotals(totals, r, 0, 0);*/
+
     }
 
     return totals;
@@ -821,7 +909,8 @@ async function insertPlayerGametypeTotals(data){
 
             for(const [mapId, p] of Object.entries(maps)){
 
-                insertVars.push([
+
+                const currentVars = [
                     playerId, gametypeId, mapId, p.last_active, p.playtime, p.matches, 
                     p.wins, p.draws, p.losses, p.winRate, p.score,
                     p.frags, p.kills, p.deaths, p.suicides, p.team_kills,
@@ -830,59 +919,26 @@ async function insertPlayerGametypeTotals(data){
                     p.multi_2, p.multi_3, p.multi_4, p.multi_best, p.headshots,
                     p.item_amp, p.item_belt, p.item_boots, p.item_body, p.item_pads,
                     p.item_invis, p.item_shp
-                ]);
+                ];
+
+                const averages = [];
+                const epms = [];
+
+                for(let i = 0; i < AVERAGE_TYPES.length; i++){
+
+                    const key = AVERAGE_TYPES[i];
+                    averages.push(p[`avg_${key}`]);
+                    epms.push(p[`epm_${key}`]);
+                }
+
+                currentVars.push(...averages, ...epms);
+
+                insertVars.push(currentVars);
             }
         }
     }
 
-    //await deleteMultiplePlayerTotals([...playerIds]);
-
     const t = `nstats_player_totals`;
-
-    /*const query = `INSERT INTO ${t} (player_id,gametype_id,map_id,last_active,playtime,total_matches,
-    wins,draws,losses,winrate,score,
-    frags,kills,deaths,suicides,team_kills,
-    efficiency,ttl, first_blood, spree_1,spree_2,
-    spree_3,spree_4, spree_5, spree_best, multi_1,
-    multi_2,multi_3,multi_4,multi_best,headshots,
-    item_amp, item_belt, item_boots, item_body, item_pads,
-    item_invis, item_shp ) VALUES ? as new ON DUPLICATE KEY UPDATE
-    ${t}.last_active=new.last_active,
-    ${t}.playtime=new.playtime,
-    ${t}.total_matches=new.total_matches,
-    ${t}.wins=new.wins,
-    ${t}.draws=new.draws,
-    ${t}.losses=new.losses,
-    ${t}.winrate=new.winrate,
-    ${t}.score=new.score,
-    ${t}.frags=new.frags,
-    ${t}.kills=new.kills,
-    ${t}.deaths=new.deaths,
-    ${t}.suicides=new.suicides,
-    ${t}.efficiency=new.efficiency,
-    ${t}.ttl=new.ttl,
-    ${t}.first_blood=new.first_blood,
-    ${t}.spree_1=new.spree_1,
-    ${t}.spree_2=new.spree_2,
-    ${t}.spree_3=new.spree_3,
-    ${t}.spree_4=new.spree_4,
-    ${t}.spree_5=new.spree_5,
-    ${t}.spree_best=new.spree_best,
-    ${t}.multi_1=new.multi_1,
-    ${t}.multi_2=new.multi_2,
-    ${t}.multi_3=new.multi_3,
-    ${t}.multi_4=new.multi_4,
-    ${t}.multi_best=new.multi_best,
-    ${t}.headshots=new.headshots,
-    ${t}.item_amp=new.item_amp,
-    ${t}.item_belt=new.item_belt,
-    ${t}.item_boots=new.item_boots,
-    ${t}.item_body=new.item_body,
-    ${t}.item_pads=new.item_pads,
-    ${t}.item_invis=new.item_invis,
-    ${t}.item_shp=new.item_shp`;*/
-
-
 
     const columns = [
         "player_id","gametype_id","map_id","last_active","playtime","total_matches",
@@ -895,7 +951,8 @@ async function insertPlayerGametypeTotals(data){
         "item_invis", "item_shp"
     ];
 
-
+    columns.push(...AVERAGE_TYPES.map((v) =>{ return `avg_${v}`} ));
+    columns.push(...AVERAGE_TYPES.map((v) =>{ return `epm_${v}`} ));
 
     await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, ["player_id", "gametype_id", "map_id"]);
 

@@ -343,7 +343,53 @@ const queries = [
             item_body INTEGER NOT NULL,
             item_pads INTEGER NOT NULL,
             item_invis INTEGER NOT NULL,
-            item_shp INTEGER NOT NULL
+            item_shp INTEGER NOT NULL,
+            avg_score REAL NOT NULL,
+            avg_frags REAL NOT NULL,
+            avg_kills REAL NOT NULL,
+            avg_deaths REAL NOT NULL,
+            avg_suicides REAL NOT NULL,
+            avg_team_kills REAL NOT NULL,
+            avg_spree_1 REAL NOT NULL,
+            avg_spree_2 REAL NOT NULL,
+            avg_spree_3 REAL NOT NULL,
+            avg_spree_4 REAL NOT NULL,
+            avg_spree_5 REAL NOT NULL,
+            avg_multi_1 REAL NOT NULL,
+            avg_multi_2 REAL NOT NULL,
+            avg_multi_3 REAL NOT NULL,
+            avg_multi_4 REAL NOT NULL,
+            avg_headshots REAL NOT NULL,
+            avg_item_amp REAL NOT NULL,
+            avg_item_belt REAL NOT NULL,
+            avg_item_boots REAL NOT NULL,
+            avg_item_body REAL NOT NULL,
+            avg_item_pads REAL NOT NULL,
+            avg_item_invis REAL NOT NULL,
+            avg_item_shp REAL NOT NULL,
+            epm_score REAL NOT NULL,
+            epm_frags REAL NOT NULL,
+            epm_kills REAL NOT NULL,
+            epm_deaths REAL NOT NULL,
+            epm_suicides REAL NOT NULL,
+            epm_team_kills REAL NOT NULL,
+            epm_spree_1 REAL NOT NULL,
+            epm_spree_2 REAL NOT NULL,
+            epm_spree_3 REAL NOT NULL,
+            epm_spree_4 REAL NOT NULL,
+            epm_spree_5 REAL NOT NULL,
+            epm_multi_1 REAL NOT NULL,
+            epm_multi_2 REAL NOT NULL,
+            epm_multi_3 REAL NOT NULL,
+            epm_multi_4 REAL NOT NULL,
+            epm_headshots REAL NOT NULL,
+            epm_item_amp REAL NOT NULL,
+            epm_item_belt REAL NOT NULL,
+            epm_item_boots REAL NOT NULL,
+            epm_item_body REAL NOT NULL,
+            epm_item_pads REAL NOT NULL,
+            epm_item_invis REAL NOT NULL,
+            epm_item_shp REAL NOT NULL
         ) STRICT`,
 
 		`CREATE UNIQUE INDEX IF NOT EXISTS npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
@@ -919,6 +965,71 @@ async function updatePlayerCTFTotalsTable(){
     }
 }
 
+
+async function updatePlayerTotalsTable(){
+
+    new Message("Attempting to update nstats_player_totals table.", "note");
+
+    const columns = [
+        "avg_score",
+        "avg_frags",
+        "avg_kills",
+        "avg_deaths",
+        "avg_suicides",
+        "avg_team_kills",
+        "avg_spree_1",
+        "avg_spree_2",
+        "avg_spree_3",
+        "avg_spree_4",
+        "avg_spree_5",
+        "avg_multi_1",
+        "avg_multi_2",
+        "avg_multi_3",
+        "avg_multi_4",
+        "avg_headshots",
+        "avg_item_amp",
+        "avg_item_belt",
+        "avg_item_boots",
+        "avg_item_body",
+        "avg_item_pads",
+        "avg_item_invis",
+        "avg_item_shp",
+        "epm_score",
+        "epm_frags",
+        "epm_kills",
+        "epm_deaths",
+        "epm_suicides",
+        "epm_team_kills",
+        "epm_spree_1",
+        "epm_spree_2",
+        "epm_spree_3",
+        "epm_spree_4",
+        "epm_spree_5",
+        "epm_multi_1",
+        "epm_multi_2",
+        "epm_multi_3",
+        "epm_multi_4",
+        "epm_headshots",
+        "epm_item_amp",
+        "epm_item_belt",
+        "epm_item_boots",
+        "epm_item_body",
+        "epm_item_pads",
+        "epm_item_invis",
+        "epm_item_shp"
+    ];
+
+    const table = "nstats_player_totals";
+
+    for(let i = 0; i < columns.length; i++){
+
+        const c = columns[i];
+
+        await addColumn(table, c, "REAL NOT NULL DEFAULT 0");
+    }
+
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -945,6 +1056,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     //2.6.1
     await updatePlayerCTFTotalsTable();
+    await updatePlayerTotalsTable();
 
 
     if(!bOnlyCreateTables){
