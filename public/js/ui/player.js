@@ -251,8 +251,6 @@ class PlayerGeneralSummary{
         this.mode = "all";
         this.selectedType = "totals";
 
-        console.log(this.data);
-
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "General Summary");
 
@@ -281,7 +279,7 @@ class PlayerGeneralSummary{
         const typeOptions = [
             {"display": "Totals", "value": "totals"},
             {"display": "Averages Per Match", "value": "avg-per-match"},
-            {"display": "Events Per Minute", "value": "epm-per-match"},
+            {"display": "Events Per Minute", "value": "epm-per-min"},
         ];
 
         this.typeTabs = new UITabs(this.wrapper, typeOptions, this.selectedType);
@@ -302,6 +300,8 @@ class PlayerGeneralSummary{
 
         return true;
     }
+
+
 
     renderTotals(){
 
@@ -367,12 +367,33 @@ class PlayerGeneralSummary{
     }
 
 
-    renderAveragePerMatch(){
+    createTargetKeyColumns(targetKeys, d){
 
-        const headers = [
-            "Playtime", "Winrate", "Score", "Frags","Kills", "Deaths",
-            "Suicides", "Team Kills", "Headshots", "Best Spree"
-        ];
+        const cols = [];
+
+        const name = (this.mode === "gametypes") ? d.gametype_name : d.map_name;
+
+        for(let i = 0; i < targetKeys.length; i++){
+
+            const k = targetKeys[i];
+            const value = d[k]
+
+            cols.push({"display": (value === 0) ? "" : d[k].toFixed(2), value});
+        }
+
+        cols.unshift({"display": `${d.winrate.toFixed(2)}%`, "value": d.winrate});
+        cols.unshift({"display": toPlaytime(d.playtime), "value": d.playtime, "className": "playtime"});
+        
+
+        if(this.mode !== "all"){
+            cols.unshift({"display": name, "value": name.toLowerCase(), "className": "text-left"});
+        }
+
+        return cols;
+    }
+
+
+    renderAverage(headers, targetKeys){
 
         if(this.mode !== "all"){
             headers.unshift((this.mode === "maps") ? "Map" : "Gametype");
@@ -383,8 +404,6 @@ class PlayerGeneralSummary{
             "headers": headers.map((h) =>{ return {"display": h}} )
         };
 
-        const targetKeys = ["avg_score", "avg_frags", "avg_kills", "avg_deaths", "avg_suicides", "avg_team_kills", "avg_headshots", "avg_spree_best"];
-
         const rows = [];
 
         for(let i = 0; i < this.data.length; i++){
@@ -393,44 +412,7 @@ class PlayerGeneralSummary{
 
             if(!this.bMatchCurrentFilter(d.gametype_id, d.map_id)) continue;
 
-            const name = (this.mode === "gametypes") ? d.gametype_name : d.map_name;
-            
-
-            /*const row = [
-                {"display": toDateString(d.last_active, true), "value": d.last_active, "className": "date"},
-                {"display": ignore0(d.score), "value": d.score},
-                {"display": ignore0(d.frags), "value": d.frags},
-                {"display": ignore0(d.kills), "value": d.kills},
-                {"display": ignore0(d.deaths), "value": d.deaths},
-                {"display": ignore0(d.suicides), "value": d.suicides},
-                {"display": ignore0(d.team_kills), "value": d.team_kills},
-                {"display": `${d.efficiency.toFixed(2)}%`, "value": d.efficiency},
-                {"value": d.total_matches},
-                {"display": ignore0(d.wins), "value": d.wins},
-                {"display": `${d.winrate.toFixed(2)}%`, "value": d.winrate},
-                {"display": toPlaytime(d.playtime), "value": d.playtime, "className": "playtime"},
-            ];*/
-
-            const row = [];
-
-            for(let i = 0; i < targetKeys.length; i++){
-                const k = targetKeys[i];
-
-                const value = d[k]
-
-                row.push({"display": (value === 0) ? "" : d[k].toFixed(2), value});
-            }
-
-            
-            row.unshift({"display": `${d.winrate.toFixed(2)}%`, "value": d.winrate});
-            row.unshift({"display": toPlaytime(d.playtime), "value": d.playtime, "className": "playtime"});
-            
-
-            if(this.mode !== "all"){
-                row.unshift({"display": name, "value": name.toLowerCase(), "className": "text-left"});
-            }
-
-            
+            const row = [...this.createTargetKeyColumns(targetKeys, d)];
 
             if(this.mode !== "all" && (d.gametype_id === 0 && d.map_id === 0)){
                 tableOptions.footer = row;
@@ -450,10 +432,34 @@ class PlayerGeneralSummary{
 
     render(){
 
+
+        const avgHeaders = [
+            "Playtime", "Winrate", "Score", "Frags","Kills", "Deaths",
+            "Suicides", "Team Kills", "Headshots", "Best Spree"
+        ];
+
+
+        const avgKeys = [
+            "avg_score", "avg_frags", "avg_kills", "avg_deaths", 
+            "avg_suicides", "avg_team_kills", "avg_headshots", "avg_spree_best"
+        ];
+
+    
+        const epmHeaders = [
+            "Playtime", "Winrate", "Score", "Frags","Kills", "Deaths",
+            "Suicides", "Team Kills", "Headshots"
+        ];
+
+
+        const epmKeys = ["epm_score", "epm_frags", "epm_kills", "epm_deaths", "epm_suicides", "epm_team_kills", "epm_headshots"];
+
+
         if(this.selectedType === "totals"){
             this.renderTotals();
         }else if(this.selectedType === "avg-per-match"){
-            this.renderAveragePerMatch();
+            this.renderAverage(avgHeaders, avgKeys);
+        }else if(this.selectedType === "epm-per-min"){
+            this.renderAverage(epmHeaders, epmKeys);
         }
     }
 }
