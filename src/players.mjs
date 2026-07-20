@@ -105,13 +105,6 @@ function getPlayerTotalsColumnsProfile(){
 
     const pT = "nstats_player_totals";
 
-    const averageKeys = [
-        "score", "frags", "kills", "deaths", "suicides", "team_kills", "efficiency",
-        "ttl", "first_blood", "spree_1", "spree_2", "spree_3", "spree_4", "spree_5",
-        "multi_1", "multi_2", "multi_3", "multi_4", "headshots", "item_amp", "item_pads", 
-        "item_boots", "item_body", "item_pads", "item_invis", "item_shp", "item_belt"
-    ];
-
 
     const toGet = [
         "gametype_id", "map_id", "last_active", "playtime", "total_matches", "wins", "draws",
@@ -119,8 +112,21 @@ function getPlayerTotalsColumnsProfile(){
         "ttl", "first_blood", "spree_1", "spree_2", "spree_3", "spree_4", "spree_5", "spree_best",
         "multi_1", "multi_2", "multi_3", "multi_4", "multi_best", "headshots", "item_amp", "item_pads", 
         "item_boots", "item_body", "item_pads", "item_invis", "item_shp", "item_belt",
-
     ];
+
+    for(let i = 0; i < AVERAGE_TYPES.length; i++){
+
+        const k = AVERAGE_TYPES[i];
+
+        if(k === "avg_multi_best" || k == "avg_spree_best"){
+
+            toGet.push(k);
+        }else{
+
+            toGet.push(`avg_${k}`);
+            toGet.push(`epm_${k}`);
+        }
+    }
 
     let string = ``;
 
@@ -1063,7 +1069,7 @@ export async function getPlayerAllMapTotals(playerId){
  * @param {Number} playerId 
  * @returns All gametype and map totals, not including CTF totals
  */
-export async function getPlayerGeneralTotals(playerId){
+export async function getPlayerGeneralSummary(playerId){
 
     const query = `SELECT ${getPlayerTotalsColumnsProfile()}, 
     IF(nstats_player_totals.map_id = 0, 'All', nstats_maps.name) as map_name,

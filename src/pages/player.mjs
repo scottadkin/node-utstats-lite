@@ -4,7 +4,7 @@ import {
     getPlayerAllMapTotals,
     getPlayerProfileInfo,
     getUniquePlayedType,
-    getPlayerGeneralTotals
+    getPlayerGeneralSummary
  } from "../players.mjs";
 import { getPlayerCTFTotals } from "../ctf.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "../weapons.mjs";
@@ -44,7 +44,7 @@ export async function renderPlayerPage(req, res, userSession){
 
 
 
-        const generalTotals = await getPlayerGeneralTotals(playerId);
+        const generalTotals = await getPlayerGeneralSummary(playerId);
 
 
 
