@@ -291,7 +291,8 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate, gam
             p.stats.items.body,
             p.stats.items.pads,
             p.stats.items.invis,
-            p.stats.items.shp
+            p.stats.items.shp, 
+            p.stats.dom.totalCaps
         ]);
  
     }
@@ -305,7 +306,7 @@ export async function bulkInsertPlayerMatchData(players, matchId, matchDate, gam
         first_blood, spree_1, spree_2, spree_3, spree_4,
         spree_5, spree_best, multi_1, multi_2, multi_3,
         multi_4, multi_best, headshots, item_amp, item_belt,
-        item_boots, item_body, item_pads, item_invis, item_shp
+        item_boots, item_body, item_pads, item_invis, item_shp, dom_caps
     ) VALUES ?`;
 
 

@@ -90,6 +90,7 @@ export class Player{
                 }
             },
             "dom": {
+                "totalCaps": 0,
                 "controlPoints": {}
             },
             "items": {
@@ -300,6 +301,10 @@ export class Player{
 
         const d = this.stats.dom.controlPoints[pointId];
         d.caps++;
+
+        if(pointId === 0){
+            this.stats.dom.totalCaps++;
+        }
 
         if(d.shortestTimeControlled === null || timeHeld < d.shortestTimeControlled){
             d.shortestTimeControlled = timeHeld;
