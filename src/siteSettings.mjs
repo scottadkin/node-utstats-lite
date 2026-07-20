@@ -61,7 +61,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Match" ,"type": `bool`, "name": "Display JSON Links", "value": "1"},
     {"category": "Match" ,"type": `bool`, "name": "Display Damage Stats", "value": "1"},
 
-    {"category": "Player" ,"type": `bool`, "name": "Display Basic Totals", "value": "1"},
+    {"category": "Player" ,"type": `bool`, "name": "Display General Summary", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display CTF", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display CTF League", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Special Events", "value": "1"},

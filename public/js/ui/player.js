@@ -241,7 +241,7 @@ class PlayerRecentMatches{
 }
 
 
-class PlayerBasicTotals{
+class PlayerGeneralSummary{
 
     constructor(parent, data){
 
@@ -250,8 +250,10 @@ class PlayerBasicTotals{
 
         this.mode = "all";
 
+        console.log(this.data);
+
         this.wrapper = UIDiv();
-        UIHeader(this.wrapper, "Basic Totals");
+        UIHeader(this.wrapper, "General Summary");
 
         this.parent.append(this.wrapper);
 

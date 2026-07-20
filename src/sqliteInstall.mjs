@@ -357,10 +357,12 @@ const queries = [
             avg_spree_3 REAL NOT NULL,
             avg_spree_4 REAL NOT NULL,
             avg_spree_5 REAL NOT NULL,
+            avg_spree_best REAL NOT NULL,
             avg_multi_1 REAL NOT NULL,
             avg_multi_2 REAL NOT NULL,
             avg_multi_3 REAL NOT NULL,
             avg_multi_4 REAL NOT NULL,
+            avg_multi_best REAL NOT NULL,
             avg_headshots REAL NOT NULL,
             avg_item_amp REAL NOT NULL,
             avg_item_belt REAL NOT NULL,
@@ -987,10 +989,12 @@ async function updatePlayerTotalsTable(){
         "avg_spree_3",
         "avg_spree_4",
         "avg_spree_5",
+        "avg_spree_best",
         "avg_multi_1",
         "avg_multi_2",
         "avg_multi_3",
         "avg_multi_4",
+        "avg_multi_best",
         "avg_headshots",
         "avg_item_amp",
         "avg_item_belt",
@@ -1058,7 +1062,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
 
     //2.6.0
-    await addPageLayout("player", "Basic Totals", -2);
+    await addPageLayout("player", "General Summary", -3);
 
 
     //2.7.0

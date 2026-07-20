@@ -49,11 +49,13 @@ SUM(spree_3) as spree_3,
 SUM(spree_4) as spree_4,
 SUM(spree_5) as spree_5,
 MAX(spree_best) as spree_best,
+SUM(spree_best) as total_spree_best,
 SUM(multi_1) as multi_1,
 SUM(multi_2) as multi_2,
 SUM(multi_3) as multi_3,
 SUM(multi_4) as multi_4,
 MAX(multi_best) as multi_best,
+SUM(multi_best) as total_multi_best,
 SUM(headshots) as headshots,
 SUM(item_amp) as item_amp,
 SUM(item_belt) as item_belt,
@@ -82,10 +84,12 @@ const AVERAGE_TYPES = [
     "spree_3",
     "spree_4",
     "spree_5",
+    "avg_spree_best",
     "multi_1",
     "multi_2",
     "multi_3",
     "multi_4",
+    "avg_multi_best",
     "headshots",
     "item_amp",
     "item_belt",
@@ -101,13 +105,21 @@ function getPlayerTotalsColumnsProfile(){
 
     const pT = "nstats_player_totals";
 
+    const averageKeys = [
+        "score", "frags", "kills", "deaths", "suicides", "team_kills", "efficiency",
+        "ttl", "first_blood", "spree_1", "spree_2", "spree_3", "spree_4", "spree_5",
+        "multi_1", "multi_2", "multi_3", "multi_4", "headshots", "item_amp", "item_pads", 
+        "item_boots", "item_body", "item_pads", "item_invis", "item_shp", "item_belt"
+    ];
+
 
     const toGet = [
         "gametype_id", "map_id", "last_active", "playtime", "total_matches", "wins", "draws",
         "losses", "winrate", "score", "frags", "kills", "deaths", "suicides", "team_kills", "efficiency",
         "ttl", "first_blood", "spree_1", "spree_2", "spree_3", "spree_4", "spree_5", "spree_best",
         "multi_1", "multi_2", "multi_3", "multi_4", "multi_best", "headshots", "item_amp", "item_pads", 
-        "item_boots", "item_body", "item_pads", "item_invis", "item_shp", "item_belt"
+        "item_boots", "item_body", "item_pads", "item_invis", "item_shp", "item_belt",
+
     ];
 
     let string = ``;
@@ -125,6 +137,7 @@ function getPlayerTotalsColumnsProfile(){
     return string;
 
 }
+
 
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
@@ -507,7 +520,7 @@ export async function searchPlayers(name, sortBy, order, page, perPage){
 }
 
 
-async function getPlayersAllMatchData(playerIds, gametypeId, mapId){
+/*async function getPlayersAllMatchData(playerIds, gametypeId, mapId){
 
     if(playerIds.length === 0) return [];
     if(gametypeId === undefined) throw new Error(`getPlayersAllMatchData gametypeId is missing`);
@@ -570,7 +583,7 @@ async function getPlayersAllMatchData(playerIds, gametypeId, mapId){
 
 
     return {"data": result, "matchIds": matchIds}
-}
+}*/
 
 function _createNewTotals(totals, playerId, gametypeId, mapId){
 
@@ -603,11 +616,13 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
         "spree_4": 0,
         "spree_5": 0,
         "spree_best": 0,
+        "total_spree_best": 0,
         "multi_1": 0,
         "multi_2": 0,
         "multi_3": 0,
         "multi_4": 0,
         "multi_best": 0,
+        "total_multi_best": 0,
         "headshots": 0,
         "item_amp": 0,
         "item_belt": 0,
@@ -628,10 +643,12 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
         "avg_spree_3": 0,
         "avg_spree_4": 0,
         "avg_spree_5": 0,
+        "avg_spree_best": 0,
         "avg_multi_1": 0,
         "avg_multi_2": 0,
         "avg_multi_3": 0,
         "avg_multi_4": 0,
+        "avg_multi_best": 0,
         "avg_headshots": 0,
         "avg_item_amp": 0,
         "avg_item_belt": 0,
@@ -710,10 +727,12 @@ function _updateTotals(totals, playerData){
       "spree_4",
       "spree_5",
       //spree_best,
+      "total_spree_best",
       "multi_1",
       "multi_2",
       "multi_3",
       "multi_4",
+      "total_multi_best",
       //multi_best,
       "headshots",
       "item_amp",
@@ -726,7 +745,7 @@ function _updateTotals(totals, playerData){
       "wins",
       "draws",
       "losses",
-      "dom_caps"
+      "dom_caps",
     ];
 
     const higherBetter = [
@@ -814,6 +833,19 @@ function _updateTotals(totals, playerData){
 
         if(t.wins > 0){
             t.winRate = t.wins / t.matches * 100;
+        }
+
+        if(t.total_spree_best > 0 && t.matches > 0){
+            t.avg_spree_best = t.total_spree_best / t.matches;
+        }else{
+            t.total_spree_best = 0;
+        }
+
+
+        if(t.total_multi_best > 0 && t.matches > 0){
+            t.avg_multi_best = t.total_multi_best / t.matches;
+        }else{
+            t.total_multi_best = 0;
         }
 
         for(let x = 0; x < AVERAGE_TYPES.length; x++){
@@ -933,8 +965,15 @@ async function insertPlayerGametypeTotals(data){
                 for(let i = 0; i < AVERAGE_TYPES.length; i++){
 
                     const key = AVERAGE_TYPES[i];
-                    averages.push(p[`avg_${key}`]);
-                    epms.push(p[`epm_${key}`]);
+                    
+                    if(key === "avg_spree_best" || key === "avg_multi_best"){
+                        averages.push(p[key]);
+                    }else{
+                        
+                        epms.push(p[`epm_${key}`]);
+                        averages.push(p[`avg_${key}`]);
+                    }
+
                 }
 
                 currentVars.push(...averages, ...epms);
@@ -952,13 +991,35 @@ async function insertPlayerGametypeTotals(data){
         "frags","kills","deaths","suicides","team_kills",
         "efficiency","ttl", "first_blood", "spree_1","spree_2",
         "spree_3","spree_4", "spree_5", "spree_best", "multi_1",
-        "multi_2","multi_3","multi_4","multi_best","headshots",
+        "multi_2","multi_3","multi_4","multi_best", "headshots",
         "item_amp", "item_belt", "item_boots", "item_body", "item_pads",
         "item_invis", "item_shp", "dom_caps"
     ];
 
-    columns.push(...AVERAGE_TYPES.map((v) =>{ return `avg_${v}`} ));
-    columns.push(...AVERAGE_TYPES.map((v) =>{ return `epm_${v}`} ));
+
+    const avgColumns = [];
+    const epmColumns = [];
+
+    for(let i = 0; i < AVERAGE_TYPES.length; i++){
+
+        const c = AVERAGE_TYPES[i];
+
+        if(c === "avg_multi_best" || c === "avg_spree_best"){
+            avgColumns.push(c);
+            continue;
+        }
+
+        avgColumns.push(`avg_${c}`);
+        epmColumns.push(`epm_${c}`);
+
+    }
+
+    
+
+    columns.push(...avgColumns, ...epmColumns);
+
+    //console.log(columns);
+    //process.exit();
 
     await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, ["player_id", "gametype_id", "map_id"]);
 
