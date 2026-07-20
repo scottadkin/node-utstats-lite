@@ -61,7 +61,8 @@ SUM(item_boots) as item_boots,
 SUM(item_body) as item_body,
 SUM(item_pads) as item_pads,
 SUM(item_invis) as item_invis,
-SUM(item_shp) as item_shp`;
+SUM(item_shp) as item_shp,
+SUM(dom_caps) as dom_caps`;
 
 
 export const VALID_PLAYER_SORT_BYS = [
@@ -93,6 +94,7 @@ const AVERAGE_TYPES = [
     "item_pads",
     "item_invis",
     "item_shp",
+    "dom_caps"
 ];
 
 function getPlayerTotalsColumnsProfile(){
@@ -614,6 +616,7 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
         "item_pads": 0,
         "item_invis": 0,
         "item_shp": 0,
+        "dom_caps": 0,
         "avg_score": 0,
         "avg_frags": 0,
         "avg_kills": 0,
@@ -637,6 +640,7 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
         "avg_item_pads": 0,
         "avg_item_invis": 0,
         "avg_item_shp": 0,
+        "avg_dom_caps": 0,
         "epm_score": 0,
         "epm_frags": 0,
         "epm_kills": 0,
@@ -659,7 +663,8 @@ function _createNewTotals(totals, playerId, gametypeId, mapId){
         "epm_item_body": 0,
         "epm_item_pads": 0,
         "epm_item_invis": 0,
-        "epm_item_shp": 0
+        "epm_item_shp": 0,
+        "epm_dom_caps": 0
 
         
     };
@@ -721,6 +726,7 @@ function _updateTotals(totals, playerData){
       "wins",
       "draws",
       "losses",
+      "dom_caps"
     ];
 
     const higherBetter = [
@@ -918,7 +924,7 @@ async function insertPlayerGametypeTotals(data){
                     p.spree_3, p.spree_4, p.spree_5, p.spree_best, p.multi_1,
                     p.multi_2, p.multi_3, p.multi_4, p.multi_best, p.headshots,
                     p.item_amp, p.item_belt, p.item_boots, p.item_body, p.item_pads,
-                    p.item_invis, p.item_shp
+                    p.item_invis, p.item_shp, p.dom_caps
                 ];
 
                 const averages = [];
@@ -948,7 +954,7 @@ async function insertPlayerGametypeTotals(data){
         "spree_3","spree_4", "spree_5", "spree_best", "multi_1",
         "multi_2","multi_3","multi_4","multi_best","headshots",
         "item_amp", "item_belt", "item_boots", "item_body", "item_pads",
-        "item_invis", "item_shp"
+        "item_invis", "item_shp", "dom_caps"
     ];
 
     columns.push(...AVERAGE_TYPES.map((v) =>{ return `avg_${v}`} ));

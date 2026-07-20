@@ -214,7 +214,8 @@ const queries = [
             item_body INTEGER NOT NULL,
             item_pads INTEGER NOT NULL,
             item_invis INTEGER NOT NULL,
-            item_shp INTEGER NOT NULL
+            item_shp INTEGER NOT NULL,
+            dom_caps INTEGER NOT NULL
         ) STRICT`,
 
 		`CREATE INDEX IF NOT EXISTS nmp_match_idx ON nstats_match_players(match_id)`,
@@ -344,6 +345,7 @@ const queries = [
             item_pads INTEGER NOT NULL,
             item_invis INTEGER NOT NULL,
             item_shp INTEGER NOT NULL,
+            dom_caps INTEGER NOT NULL,
             avg_score REAL NOT NULL,
             avg_frags REAL NOT NULL,
             avg_kills REAL NOT NULL,
@@ -367,6 +369,7 @@ const queries = [
             avg_item_pads REAL NOT NULL,
             avg_item_invis REAL NOT NULL,
             avg_item_shp REAL NOT NULL,
+            avg_dom_caps REAL NOT NULL,
             epm_score REAL NOT NULL,
             epm_frags REAL NOT NULL,
             epm_kills REAL NOT NULL,
@@ -389,7 +392,8 @@ const queries = [
             epm_item_body REAL NOT NULL,
             epm_item_pads REAL NOT NULL,
             epm_item_invis REAL NOT NULL,
-            epm_item_shp REAL NOT NULL
+            epm_item_shp REAL NOT NULL,
+            epm_dom_caps REAL NOT NULL
         ) STRICT`,
 
 		`CREATE UNIQUE INDEX IF NOT EXISTS npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
@@ -971,6 +975,7 @@ async function updatePlayerTotalsTable(){
     new Message("Attempting to update nstats_player_totals table.", "note");
 
     const columns = [
+        "dom_caps",
         "avg_score",
         "avg_frags",
         "avg_kills",
@@ -994,6 +999,7 @@ async function updatePlayerTotalsTable(){
         "avg_item_pads",
         "avg_item_invis",
         "avg_item_shp",
+        "avg_dom_caps",
         "epm_score",
         "epm_frags",
         "epm_kills",
@@ -1016,7 +1022,8 @@ async function updatePlayerTotalsTable(){
         "epm_item_body",
         "epm_item_pads",
         "epm_item_invis",
-        "epm_item_shp"
+        "epm_item_shp",
+        "epm_dom_caps"
     ];
 
     const table = "nstats_player_totals";
@@ -1057,6 +1064,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.7.0
     await updatePlayerCTFTotalsTable();
     await updatePlayerTotalsTable();
+    await addColumn("nstats_match_players", "dom_caps", "INTEGER NOT NULL DEFAULT 0");
 
 
     if(!bOnlyCreateTables){
