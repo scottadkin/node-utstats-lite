@@ -399,8 +399,6 @@ async function getPlayersMatchesData(playerIds){
 }
 
 async function calcPlayerTotals(playerIds){
-
-    const start = performance.now();
   
     const result = await getPlayersMatchesData(playerIds);
     
@@ -411,7 +409,6 @@ async function calcPlayerTotals(playerIds){
 
         const r = result[i];
 
-        //all time totals
         _updatePlayerTotals(totals, r);
     }
 

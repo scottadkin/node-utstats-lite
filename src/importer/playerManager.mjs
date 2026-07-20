@@ -651,10 +651,15 @@ export class PlayerManager{
                 continue;
             }
 
-            new Message(`Force player name by HWID ${p.name} changed to ${hwidForceNames[p.hwid]}`,"note");
-            this.addNameOverrideHistory(p.name, hwidForceNames[p.hwid], "HWID");
-            this.updatePlayerNamesList(p.name, hwidForceNames[p.hwid]);
-            p.name = hwidForceNames[p.hwid];
+            //don't need to do anything is player already using same name
+            if(p.name !== hwidForceNames[p.hwid]){
+                new Message(`Force player name by HWID ${p.name} changed to ${hwidForceNames[p.hwid]}`,"note");
+                this.addNameOverrideHistory(p.name, hwidForceNames[p.hwid], "HWID");
+                this.updatePlayerNamesList(p.name, hwidForceNames[p.hwid]);
+                p.name = hwidForceNames[p.hwid];
+            }
+
+            
             p.bNameForcedByHWID = true;
            
         }
