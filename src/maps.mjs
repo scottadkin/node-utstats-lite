@@ -533,6 +533,7 @@ export async function deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapI
 }
 
 export async function updateCurrentPlayerMapAverages(players, gametypeId, mapId){
+    
 
     if(players.length === 0) return;
 

@@ -1375,6 +1375,9 @@ export async function setMatchMapGametypeIds(){
 
 export async function updateMapAverages(playerIds, gametypeId, mapId){
 
+    //not needed since 2.7.0 added averages and epm to player totals tables
+    return;
+
     //REMOVE THIS IF PEOPLE WANT MAP + GAMETYPE RANKINGS ADDED AS WELL
     gametypeId = 0;
 
@@ -1432,6 +1435,7 @@ export async function updateMapAverages(playerIds, gametypeId, mapId){
         //await deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapId);
         await updateCurrentPlayerMapAverages(data, gametypeId, mapId);
     }
+
 }
 
 

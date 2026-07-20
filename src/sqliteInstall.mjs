@@ -1054,7 +1054,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     await addPageLayout("player", "Basic Totals", -2);
 
 
-    //2.6.1
+    //2.7.0
     await updatePlayerCTFTotalsTable();
     await updatePlayerTotalsTable();
 
