@@ -987,7 +987,17 @@ class PlayerItemsSummary{
 
         for(let i = 0; i < keys.length; i++){
 
-            row.push({"display": ignore0(data[`item_${keys[i]}`]), "value": data[`item_${keys[i]}`]});
+            let key = `item_${keys[i]}`;
+            if(this.dataCat === "averages"){
+                key = `avg_${key}`;
+            }else if(this.dataCat === "epm"){
+                key = `epm_${key}`;
+            }
+
+            let display = (this.dataCat === "totals") ? ignore0(data[key]) :  data[key].toFixed(3);
+            if(display === "0.000") display = "";
+
+            row.push({display, "value": data[key]});
         }
 
         return row;
@@ -999,7 +1009,14 @@ class PlayerItemsSummary{
 
         for(let i = 0; i < keys.length; i++){
 
-            if(data[`item_${keys[i]}`] > 0) return true;
+            let key = `item_${keys[i]}`;
+            if(this.dataCat === "averages"){
+                key = `avg_${key}`;
+            }else if(this.dataCat === "epm"){
+                key = `epm_${key}`;
+            }
+
+            if(data[key] > 0) return true;
         }
 
         return false;
@@ -1013,18 +1030,30 @@ class PlayerItemsSummary{
 
         return true;
     }
+    
+    getHeaders(){
 
-    render(){
-
-        const headers = ["Playtime", "Jump Boots", "Body Armour", "Thigh Pads", "Invisibility", 
-            "Super Health Pack", "Shield Belt", "Damage Amplifier"				
+        const headers = [
+            "Playtime", "Jump Boots", "Body Armour", "Thigh Pads", "Invisibility", 
+            "Super Health Pack", "Shield Belt", "Damage Amplifier"
         ];
+
+        
+
 
         if(this.mode === "gametypes"){
             headers.unshift("Gametype");
         }else if(this.mode === "maps"){
             headers.unshift("Map");
         }
+
+        return headers;
+    }
+
+    render(){
+
+     
+        const headers = this.getHeaders();
 
         const rows = [];
         let footer = null;
@@ -1051,6 +1080,7 @@ class PlayerItemsSummary{
             this.table.updateRows(rows, headers.map((h) =>{ return {"display": h}}), footer);
         }
     }
+
 }
 
 
