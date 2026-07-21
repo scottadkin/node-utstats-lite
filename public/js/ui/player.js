@@ -926,6 +926,7 @@ class PlayerItemsSummary{
         this.parent = document.querySelector(parent);
         this.data = data;
         this.mode = "all";
+        this.dataCat = "totals";
 
         this.wrapper = UIDiv();
 
@@ -953,12 +954,24 @@ class PlayerItemsSummary{
             this.mode = e.detail.newTab;
 
             this.render();
-        })
+        });
+
+
+        const typeTabOptions = [
+            {"display": "Totals", "value": "totals"},
+            {"display": "Match Averages", "value": "averages"},
+            {"display": "Events Per Minute", "value": "epm"},
+        ];
+
+        this.typeTabs = new UITabs(this.wrapper, typeTabOptions, this.dataCat);
+
+        this.typeTabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.dataCat = e.detail.newTab;
+            this.render();
+        });
     }
 
     createRow(data){
-
-        
 
         const row = [];
 
@@ -969,6 +982,8 @@ class PlayerItemsSummary{
         }
 
         const keys = ["boots", "body", "pads", "invis", "shp", "belt", "amp"];
+
+        row.push({"display": toPlaytime(data.playtime), "value":data.playtime, "className": "playtime"});
 
         for(let i = 0; i < keys.length; i++){
 
@@ -990,9 +1005,18 @@ class PlayerItemsSummary{
         return false;
     }
 
+    bMatchDataFilter(gametypeId, mapId){
+
+        if(this.mode === "all" && (gametypeId !== 0 || mapId !== 0)) return false;
+        if(this.mode === "gametypes" && (gametypeId === 0 || mapId !== 0)) return false;
+        if(this.mode === "maps" && (mapId === 0 || gametypeId !== 0)) return false;
+
+        return true;
+    }
+
     render(){
 
-        const headers = ["Jump Boots", "Body Armour", "Thigh Pads", "Invisibility", 
+        const headers = ["Playtime", "Jump Boots", "Body Armour", "Thigh Pads", "Invisibility", 
             "Super Health Pack", "Shield Belt", "Damage Amplifier"				
         ];
 
@@ -1009,11 +1033,8 @@ class PlayerItemsSummary{
 
             const d = this.data[i];
 
-            if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
-            if(this.mode === "gametypes" && (d.gametype_id === 0 || d.map_id !== 0)) continue;
-            if(this.mode === "maps" && (d.map_id === 0 || d.gametype_id !== 0)) continue;
+            if(!this.bMatchDataFilter(d.gametype_id, d.map_id) || !this.bAnyData(d)) continue;
 
-            if(!this.bAnyData(d)) continue;
             rows.push(this.createRow(d));
           
         }
