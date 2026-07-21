@@ -278,6 +278,7 @@ const queries = [
         ) STRICT`,
 
 		`CREATE INDEX IF NOT EXISTS nmc_match_idx ON nstats_match_ctf(match_id)`,
+		`CREATE INDEX IF NOT EXISTS nmc_player_idx ON nstats_match_ctf(player_id)`,
 
         `CREATE TABLE IF NOT EXISTS nstats_dom_control_points (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -901,7 +902,7 @@ async function updatePlayerWeaponTotalsTable(){
 
     new Message("Attempting to update nstats_player_totals_weapons table.","note");
 
-
+    //2.6.0
     await addColumn("nstats_player_totals_weapons", "map_id", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "max_kills", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "max_deaths", "INTEGER NOT NULL DEFAULT 0");

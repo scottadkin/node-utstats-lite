@@ -239,11 +239,13 @@ export class MatchParser{
         
         
         await Promise.all([
-            this.players.updatePlayerTotals(this.match.date, this.gametype.id, this.map.id),
-            this.ctf.updatePlayerTotals(this.players.players)
+            this.players.updatePlayerTotals(),
+            this.ctf.updatePlayerTotals(this.players.players, this.gametype.id, this.map.id)
         ]);
 
+        
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
+        
         await this.map.updateTotals();
        
         const uniquePlayerIds = this.players.getUniquePlayerIds();

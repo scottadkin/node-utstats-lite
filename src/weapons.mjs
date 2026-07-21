@@ -151,7 +151,8 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
         SUM(team_kills) as team_kills,
         MAX(team_kills) as max_team_kills,
         SUM(suicides) as suicides,
-        MAX(suicides) as max_suicides`;
+        MAX(suicides) as max_suicides
+        `;
 
     let query = ``;
 
@@ -198,6 +199,8 @@ export async function updatePlayerTotals(playerIds){
     const allTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "all");
     const gametypeTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "gametypes");
     const mapTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "maps");
+
+    //console.log(allTotals);
 
 
     const promises = [

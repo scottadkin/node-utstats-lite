@@ -147,6 +147,7 @@ export class WeaponsManager{
         }
 
         await updatePlayerTotals(playerIds);
+ 
     }
 
     async updateMapTotals(mapId, gametypeId){

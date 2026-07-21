@@ -359,9 +359,9 @@ function _updatePlayerTotals(totals, matchData){
     return await simpleQuery(query, [playerIds]);
 }*/
 
-async function getPlayersMatchesData(playerIds){
+async function getPlayersMatchesData(playerIds, gametypeId, mapId){
 
-    const query = `SELECT nstats_match_ctf.map_id,nstats_match_ctf.gametype_id,nstats_match_ctf.player_id,
+    const query = `SELECT nstats_match_players.map_id,nstats_match_players.gametype_id,nstats_match_players.player_id,
     SUM(nstats_match_players.time_on_server) as total_playtime,
     COUNT(*) as total_matches,
     SUM(flag_taken) as flag_taken,
@@ -390,17 +390,18 @@ async function getPlayersMatchesData(playerIds){
     MAX(flag_return_enemy_base) as max_flag_return_enemy_base,
     SUM(flag_return_save) as flag_return_save,
     MAX(flag_return_save) as max_flag_return_save
-    FROM nstats_match_ctf 
-    LEFT JOIN nstats_match_players ON nstats_match_ctf.player_id = nstats_match_players.player_id AND nstats_match_ctf.match_id = nstats_match_players.match_id
-    WHERE nstats_match_ctf.player_id IN (?)
-    GROUP BY nstats_match_ctf.player_id,nstats_match_ctf.gametype_id,nstats_match_ctf.map_id`;
+    FROM nstats_match_players 
+    INNER JOIN nstats_match_ctf ON nstats_match_players.player_id = nstats_match_ctf.player_id  AND nstats_match_players.match_id = nstats_match_ctf.match_id
+    WHERE nstats_match_players.player_id IN (?)
+    GROUP BY nstats_match_players.player_id,nstats_match_players.gametype_id,nstats_match_players.map_id`;
 
     return await simpleQuery(query, [playerIds]);
 }
 
-async function calcPlayerTotals(playerIds){
+async function calcPlayerTotals(playerIds, gametypeId, mapId){
   
-    const result = await getPlayersMatchesData(playerIds);
+    const result = await getPlayersMatchesData(playerIds, gametypeId, mapId);
+
     
 
     const totals = {};
@@ -430,48 +431,6 @@ async function deleteMultiplePlayerTotals(playerIds){
 async function insertPlayerTotals(insertVars){
 
     const t = "nstats_player_totals_ctf";
-
-    /*const query = `INSERT INTO nstats_player_totals_ctf (
-        player_id, gametype_id, map_id, total_matches, flag_taken,
-        max_flag_taken, flag_pickup, max_flag_pickup, flag_drop,
-        max_flag_drop, flag_assist, max_flag_assist, flag_cover,
-        max_flag_cover, flag_seal, max_flag_seal, flag_cap, max_flag_cap,
-        flag_kill, max_flag_kill, flag_return, max_flag_return,
-        flag_return_base, max_flag_return_base, flag_return_mid,
-        max_flag_return_mid, flag_return_enemy_base, max_flag_return_enemy_base,
-        flag_return_save, max_flag_return_save
-    ) VALUES ? as new ON DUPLICATE KEY UPDATE
-    ${t}.total_matches=new.total_matches,
-    ${t}.flag_taken=new.flag_taken,
-    ${t}.max_flag_taken=new.max_flag_taken,
-    ${t}.flag_pickup=new.flag_pickup,
-    ${t}.max_flag_pickup=new.max_flag_pickup,
-    ${t}.flag_drop=new.flag_drop,
-    ${t}.max_flag_drop=new.max_flag_drop,
-    ${t}.flag_assist=new.flag_assist,
-    ${t}.max_flag_assist=new.max_flag_assist,
-    ${t}.flag_cover=new.flag_cover,
-    ${t}.max_flag_cover=new.max_flag_cover,
-    ${t}.flag_seal=new.flag_seal,
-    ${t}.max_flag_seal=new.max_flag_seal,
-    ${t}.flag_cap=new.flag_cap,
-    ${t}.max_flag_cap=new.max_flag_cap,
-    ${t}.flag_kill=new.flag_kill,
-    ${t}.max_flag_kill=new.max_flag_kill,
-    ${t}.flag_return=new.flag_return,
-    ${t}.max_flag_return=new.max_flag_return,
-
-
-    ${t}.flag_return_base=new.flag_return_base,
-    ${t}.max_flag_return_base=new.max_flag_return_base,
-    ${t}.flag_return_mid=new.flag_return_mid,
-    ${t}.max_flag_return_mid=new.max_flag_return_mid,
-    ${t}.flag_return_enemy_base=new.flag_return_enemy_base,
-    ${t}.max_flag_return_enemy_base=new.max_flag_return_enemy_base,
-    ${t}.flag_return_save=new.flag_return_save,
-    ${t}.max_flag_return_save=new.max_flag_return_save`;*/
-
-
 
     const columns = [
         "player_id", "gametype_id", "map_id", "total_matches", "flag_taken",
@@ -516,11 +475,11 @@ async function insertPlayerTotals(insertVars){
     //return await bulkInsert(query, insertVars);
 }
 
-export async function updatePlayerTotals(playerIds){
+export async function updatePlayerTotals(playerIds, gametypeId, mapId){
 
     if(playerIds.length === 0) return;
 
-    const data = await calcPlayerTotals(playerIds);
+    const data = await calcPlayerTotals(playerIds, gametypeId, mapId);
 
     const insertVars = [];
 
@@ -578,6 +537,7 @@ export async function updatePlayerTotals(playerIds){
     }
 
     await insertPlayerTotals(insertVars);  
+
     
 }
 
