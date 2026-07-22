@@ -395,14 +395,13 @@ async function getPlayersMatchesData(playerIds, gametypeId, mapId){
     WHERE nstats_match_players.player_id IN (?)
     GROUP BY nstats_match_players.player_id,nstats_match_players.gametype_id,nstats_match_players.map_id`;
 
+    
     return await simpleQuery(query, [playerIds]);
 }
 
 async function calcPlayerTotals(playerIds, gametypeId, mapId){
   
-    const result = await getPlayersMatchesData(playerIds, gametypeId, mapId);
-
-    
+    const result = await getPlayersMatchesData(playerIds);
 
     const totals = {};
 
