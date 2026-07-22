@@ -1062,8 +1062,8 @@ export async function sqliteInstall(bOnlyCreateTables){
     await updateMapWeaponTotalsTable();
 
 
-    //2.6.0
-    await addPageLayout("player", "General Summary", -3);
+    //2.6.0 doing this broke mysqltosqlite tool...
+    //await addPageLayout("player", "General Summary", -3);
 
 
     //2.7.0
