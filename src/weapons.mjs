@@ -321,6 +321,12 @@ function testUpdatePlayerTotalsObject(totals, matchData){
     mapTotals.matches++;
     gametypeMapComboTotals.matches++;
 
+    allTime.playtime+=matchData.playtime;
+    gametypeTotals.playtime+=matchData.playtime;
+    mapTotals.playtime+=matchData.playtime;
+    gametypeMapComboTotals.playtime+=matchData.playtime;
+
+
     const higherKeys = {
         "kills": "max_kills", 
         "deaths": "max_deaths", 
@@ -400,12 +406,33 @@ async function testBulkUpdatePlayerTotals(totals){
                         eff = 100;
                     }
 
+                 
+
+                    const mins = (weaponData.playtime > 0) ? weaponData.playtime / 60 : 0;
+
+                    weaponData.epm_kills = 0;
+                    weaponData.epm_deaths = 0;
+                    weaponData.epm_suicides = 0;
+                    weaponData.epm_team_kills = 0;
+
+                    if(mins > 0){
+
+                        if(weaponData.kills > 0) weaponData.epm_kills = weaponData.kills / mins;
+                        if(weaponData.deaths > 0) weaponData.epm_deaths = weaponData.deaths / mins;
+                        if(weaponData.suicides > 0) weaponData.epm_suicides = weaponData.suicides / mins;
+                        if(weaponData.team_kills > 0) weaponData.epm_team_kills = weaponData.team_kills / mins;
+                    }
+
                     insertVars.push([
                         playerId, gametypeId, weaponId, weaponData.matches, 
                         weaponData.kills, weaponData.deaths, weaponData.suicides, 
                         weaponData.team_kills,
                         eff, mapId, weaponData.max_kills, weaponData.max_deaths, 
-                        weaponData.max_suicides, weaponData.max_team_kills
+                        weaponData.max_suicides, weaponData.max_team_kills,
+                        weaponData.avg_kills, weaponData.avg_deaths, 
+                        weaponData.avg_suicides, weaponData.avg_team_kills,
+                        weaponData.epm_kills, weaponData.epm_deaths, 
+                        weaponData.epm_suicides, weaponData.epm_team_kills
                     ]);
                 }
             }
@@ -415,7 +442,9 @@ async function testBulkUpdatePlayerTotals(totals){
 
     const columns = [`player_id`, `gametype_id`, `weapon_id`,
             `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, 
-            `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`
+            `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`,
+            `avg_kills`, `avg_deaths`, `avg_suicides`, `avg_team_kills`,
+            `epm_kills`, `epm_deaths`, `epm_suicides`, `epm_team_kills`
         ];
 
     return await sqlInsertOnDuplicateUpdate("nstats_player_totals_weapons", columns, insertVars, ["player_id","gametype_id", "map_id", "weapon_id"]);
@@ -426,12 +455,12 @@ export async function updatePlayerTotals(playerIds){
     if(playerIds.length === 0) return null;
     
 
-    const start = performance.now();
 
     /*const allTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "all");
     const gametypeTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "gametypes");
     const mapTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "maps");*/
 
+    const start = performance.now();
     const test = await testCalculatePlayerTotalsFromMatchData(playerIds);
 
     //console.log(test);
@@ -449,9 +478,7 @@ export async function updatePlayerTotals(playerIds){
     //console.log(allTotals);
 
     await testBulkUpdatePlayerTotals(totals);
-
     const end = performance.now();
-
     console.log((end - start) * 0.001);
     return;
 
