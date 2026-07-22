@@ -1163,6 +1163,7 @@ class PlayerWeaponsSummary{
             {"display": "All Time", "value": "all"},
             {"display": "Gametypes", "value": "gametypes"},
             {"display": "Maps", "value": "maps"},
+            {"display": "Custom", "value": "custom"},
         ];
 
 
@@ -1172,13 +1173,13 @@ class PlayerWeaponsSummary{
 
             this.mode = e.detail.newTab;
 
-            this.gametypeRow.className = (this.mode === "gametypes") ? "form-row" : "hidden";
-            this.mapRow.className = (this.mode === "maps") ? "form-row" : "hidden";
+            this.gametypeRow.className = (this.mode === "gametypes" || this.mode === "custom") ? "form-row" : "hidden";
+            this.mapRow.className = (this.mode === "maps" || this.mode === "custom") ? "form-row" : "hidden";
             this.render();
         })
 
 
-        this.gametypeRow = UIDiv(`form-row ${(this.mode === "gametypes") ? "" : "hidden"}`);
+        this.gametypeRow = UIDiv(`form-row ${(this.mode === "gametypes" || this.mode === "custom") ? "" : "hidden"}`);
 
         this.gametypeRow.append(UILabel("Gametype"));
 
@@ -1191,7 +1192,7 @@ class PlayerWeaponsSummary{
         this.wrapper.append(this.gametypeRow);
 
 
-        this.mapRow = UIDiv(`form-row ${(this.mode === "maps") ? "" : "hidden"}`);
+        this.mapRow = UIDiv(`form-row ${(this.mode === "maps" || this.mode === "custom") ? "" : "hidden"}`);
         this.mapRow.append(UILabel("Map"));
 
         this.mapSelect = new UISelect(this.mapRow, this.mapNames, this.selectedMap, (e) =>{
@@ -1244,13 +1245,14 @@ class PlayerWeaponsSummary{
 
             const d = this.data[i];
 
-            //if(d.gametype_id !== this.mode) continue;
             if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
             if(this.mode === "gametypes" && d.map_id !== 0) continue;
             if(this.mode === "gametypes" && (this.selectedGametype === 0 || d.gametype_id !== this.selectedGametype)) continue;
 
             if(this.mode === "maps" && d.gametype_id !== 0) continue;
             if(this.mode === "maps" && (this.selectedMap === 0 || d.map_id !== this.selectedMap)) continue;
+
+            if(this.mode === "custom" && (d.gametype_id !== this.selectedGametype || d.map_id !== this.selectedMap)) continue;
 
             totals.teamKills += d.team_kills;
             totals.deaths += d.deaths;
