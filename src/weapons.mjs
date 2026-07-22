@@ -213,8 +213,8 @@ async function testCalculatePlayerTotalsFromMatchData(playerIds){
     ${wT}.team_kills,
     ${wT}.suicides 
     FROM ${mT} 
-    LEFT JOIN ${wT} on ${wT}.match_id = ${mT}.match_id AND ${wT}.player_id = ${mT}.player_id
-    WHERE ${mT}.player_id IN (?)`;
+    INNER JOIN ${wT} on ${wT}.match_id = ${mT}.match_id AND ${wT}.player_id = ${mT}.player_id
+    WHERE ${mT}.player_id IN (?) AND ${mT}.spectator=0`;
 
     return await simpleQuery(query, [playerIds]);
 }
@@ -233,7 +233,11 @@ function testCreateEmptyTotalsObj(){
         "max_kills": 0,
         "max_deaths": 0,
         "max_suicides": 0,
-        "max_team_kills": 0
+        "max_team_kills": 0,
+        "avg_kills": 0,
+        "avg_deaths": 0,
+        "avg_suicides": 0,
+        "avg_team_kills": 0,
     }
 }
 
@@ -242,8 +246,9 @@ function testUpdatePlayerTotalsObject(totals, matchData){
     const pId = matchData.player_id;
     const gId = matchData.gametype_id;
     const mId = matchData.map_id;
+    const wId = matchData.weapon_id;
 
-    // totals => playerId => gametypeId => mapId
+    // totals => playerId => gametypeId => mapId => weaponId
 
     if(totals[pId] === undefined){
         totals[pId] = {};
@@ -261,42 +266,80 @@ function testUpdatePlayerTotalsObject(totals, matchData){
 
     //all time totals
     if(totals[pId][0][0] === undefined){
-        totals[pId][0][0] = testCreateEmptyTotalsObj();
+        totals[pId][0][0] = {}//testCreateEmptyTotalsObj();
     }
 
     //gametype all time totals
     if(totals[pId][gId][0] === undefined){
-        totals[pId][gId][0] = testCreateEmptyTotalsObj();
+        totals[pId][gId][0] = {}//testCreateEmptyTotalsObj();
     }
 
     //all time map data
     if(totals[pId][0][mId] === undefined){
-        totals[pId][0][mId] = testCreateEmptyTotalsObj();
+        totals[pId][0][mId] = {}//testCreateEmptyTotalsObj();
     }
 
     //gametype => map totals
     if(totals[pId][gId][mId] === undefined){
-        totals[pId][gId][mId] = testCreateEmptyTotalsObj();
+        totals[pId][gId][mId] = {}//testCreateEmptyTotalsObj();
     }
 
+    //all time weapon totals
+  //  if(totals[pId][0][0][wId]){
+  //      totals[pId][0][0][wId] = {}//testCreateEmptyTotalsObj();
+  //  }
 
+    //all time weapons totals
+    if(totals[pId][0][0][wId] === undefined){
+        totals[pId][0][0][wId] = testCreateEmptyTotalsObj();
+    }
 
-    const allTime = totals[pId][0][0];
-    const gametypeTotals = totals[pId][gId][0];
-    const mapTotals = totals[pId][0][mId];
-    const gametypeMapComboTotals = totals[pId][gId][mId];
+    //gametype weapon totals
+    if(totals[pId][gId][0][wId] === undefined){
+        totals[pId][gId][0][wId] = testCreateEmptyTotalsObj();
+    }
+
+    //map weapon totals
+    if(totals[pId][0][mId][wId] === undefined){
+        totals[pId][0][mId][wId] = testCreateEmptyTotalsObj();
+    }
+
+    //gametype & map weapon totals
+    if(totals[pId][gId][mId][wId] === undefined){
+        totals[pId][gId][mId][wId] = testCreateEmptyTotalsObj();
+    }
+
+    const allTime = totals[pId][0][0][wId];
+    const gametypeTotals = totals[pId][gId][0][wId];
+    const mapTotals = totals[pId][0][mId][wId];
+    const gametypeMapComboTotals = totals[pId][gId][mId][wId];
 
     const totalKeys = ["playtime", "kills", "deaths", "suicides", "team_kills"];
+
+    allTime.matches++;
+    gametypeTotals.matches++;
+    mapTotals.matches++;
+    gametypeMapComboTotals.matches++;
+
+    const higherKeys = {
+        "kills": "max_kills", 
+        "deaths": "max_deaths", 
+        "suicides": "max_suicides", 
+        "team_kills": "max_team_kills"
+    };
+
+    for(const [dataKey, maxKey] of Object.entries(higherKeys)){
+
+        if(matchData[dataKey] > allTime[maxKey]) allTime[maxKey] = matchData[dataKey];
+        if(matchData[dataKey] > gametypeTotals[maxKey]) gametypeTotals[maxKey] = matchData[dataKey];
+        if(matchData[dataKey] > mapTotals[maxKey]) mapTotals[maxKey] = matchData[dataKey];
+        if(matchData[dataKey] > gametypeMapComboTotals[maxKey]) gametypeMapComboTotals[maxKey] = matchData[dataKey];
+    }
 
 
     for(let i = 0; i < totalKeys.length; i++){
 
         const k = totalKeys[i];
-
-        allTime[k].matches++;
-        gametypeTotals[k].matches++;
-        mapTotals[k].matches++;
-        gametypeMapComboTotals[k].matches++;
 
         allTime[k] += matchData[k]; 
         gametypeTotals[k] += matchData[k]; 
@@ -304,6 +347,78 @@ function testUpdatePlayerTotalsObject(totals, matchData){
         gametypeMapComboTotals[k] += matchData[k]; 
     }
 
+    const avgKeys = {
+        "kills": "avg_kills",
+        "deaths": "avg_deaths",
+        "suicides": "avg_team_kills",
+        "team_kills": "avg_team_kills",
+    };
+
+    for(const [dataKey, avgKey] of Object.entries(avgKeys)){
+
+
+        if(allTime.matches > 0 && allTime[dataKey] > 0){
+            allTime[avgKey] = allTime[dataKey] / allTime.matches;
+        }
+
+        if(gametypeTotals.matches > 0 && gametypeTotals[dataKey] > 0){
+            gametypeTotals[avgKey] = gametypeTotals[dataKey] / gametypeTotals.matches;
+        }
+
+        if(mapTotals.matches > 0 && mapTotals[dataKey] > 0){
+            mapTotals[avgKey] = mapTotals[dataKey] / mapTotals.matches;
+        }
+
+        if(gametypeMapComboTotals.matches > 0 && gametypeMapComboTotals[dataKey] > 0){
+            gametypeMapComboTotals[avgKey] = gametypeMapComboTotals[dataKey] / gametypeMapComboTotals.matches;
+        }
+
+    }
+
+}
+
+async function testBulkUpdatePlayerTotals(totals){
+
+    const insertVars = [];
+
+    for(const [playerId, playerData] of Object.entries(totals)){
+        
+        for(const [gametypeId, playerMapData] of Object.entries(playerData)){
+
+            for(const [mapId, mapTotals] of Object.entries(playerMapData)){
+                
+                for(const [weaponId, weaponData] of Object.entries(mapTotals)){
+
+                    let eff = 0;
+
+                    const neg = weaponData.deaths + weaponData.team_kills;
+
+                    if(neg > 0){
+                        eff = weaponData.kills / (weaponData.kills + neg) * 100;
+    
+                    }else if(weaponData.kills > 0){
+                        eff = 100;
+                    }
+
+                    insertVars.push([
+                        playerId, gametypeId, weaponId, weaponData.matches, 
+                        weaponData.kills, weaponData.deaths, weaponData.suicides, 
+                        weaponData.team_kills,
+                        eff, mapId, weaponData.max_kills, weaponData.max_deaths, 
+                        weaponData.max_suicides, weaponData.max_team_kills
+                    ]);
+                }
+            }
+        }
+    }
+
+
+    const columns = [`player_id`, `gametype_id`, `weapon_id`,
+            `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, 
+            `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`
+        ];
+
+    return await sqlInsertOnDuplicateUpdate("nstats_player_totals_weapons", columns, insertVars, ["player_id","gametype_id", "map_id", "weapon_id"]);
 }
 
 export async function updatePlayerTotals(playerIds){
@@ -328,13 +443,16 @@ export async function updatePlayerTotals(playerIds){
         testUpdatePlayerTotalsObject(totals, test[i]);
     }
 
-    console.log(totals);
+    //console.log(totals);
+
+    
+    //console.log(allTotals);
+
+    await testBulkUpdatePlayerTotals(totals);
 
     const end = performance.now();
 
     console.log((end - start) * 0.001);
-    //console.log(allTotals);
-
     return;
 
    // console.log(mapTotals);
