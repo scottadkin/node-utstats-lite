@@ -1091,9 +1091,11 @@ class PlayerWeaponsSummary{
         this.parent = document.querySelector(parent);
         this.data = data;
         this.mode = "all";
+        this.dataCat = "totals";
         this.selectedGametype = 0;
         this.selectedMap = 0;
 
+        console.log(data);
 
         this.wrapper = UIDiv();
 
@@ -1157,6 +1159,12 @@ class PlayerWeaponsSummary{
         }
     }
 
+    toggleDropDowns(){
+
+        this.gametypeRow.className = (this.mode === "gametypes" || this.mode === "custom") ? "form-row" : "hidden";
+        this.mapRow.className = (this.mode === "maps" || this.mode === "custom") ? "form-row" : "hidden"
+    }
+
     createTabs(){
 
         const options = [
@@ -1173,11 +1181,23 @@ class PlayerWeaponsSummary{
 
             this.mode = e.detail.newTab;
 
-            this.gametypeRow.className = (this.mode === "gametypes" || this.mode === "custom") ? "form-row" : "hidden";
-            this.mapRow.className = (this.mode === "maps" || this.mode === "custom") ? "form-row" : "hidden";
+            this.toggleDropDowns();
             this.render();
         })
 
+        const dataOptions = [
+            {"display": "Totals", "value": "totals"},
+            {"display": "Averages", "value": "averages"},
+            {"display": "Events Per Minute", "value": "epm"},
+        ];
+
+        this.dataTabs = new UITabs(this.wrapper, dataOptions, this.dataCat);
+
+        this.dataTabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.dataCat = e.detail.newTab;
+            this.toggleDropDowns();
+            this.render();
+        });
 
         this.gametypeRow = UIDiv(`form-row ${(this.mode === "gametypes" || this.mode === "custom") ? "" : "hidden"}`);
 
@@ -1209,27 +1229,122 @@ class PlayerWeaponsSummary{
 
         const row = [
             {"display": d.weapon_name, "value":d.weapon_name.toLowerCase(), "className": "text-left"},
-            {"value": d.total_matches},
-            {"display": ignore0(d.team_kills), "value": d.team_kills},
-            {"display": ignore0(d.max_team_kills), "value": d.max_team_kills},
-            {"display": ignore0(d.deaths), "value": d.deaths},
-            {"display": ignore0(d.max_deaths), "value": d.max_deaths},
-            {"display": ignore0(d.suicides), "value": d.suicides},
-            {"display": ignore0(d.max_suicides), "value": d.max_suicides},
-            {"display": ignore0(d.kills), "value": d.kills},
-            {"display": ignore0(d.max_kills), "value": d.max_kills},
-            {"display": `${d.eff.toFixed(2)}%`, "value": d.eff},   
+                {"value": d.total_matches},
         ];
-        return row;
+
+        if(this.dataCat === "totals"){
+
+            return [
+                ...row,
+                {"display": ignore0(d.team_kills), "value": d.team_kills},
+                {"display": ignore0(d.max_team_kills), "value": d.max_team_kills},
+                {"display": ignore0(d.deaths), "value": d.deaths},
+                {"display": ignore0(d.max_deaths), "value": d.max_deaths},
+                {"display": ignore0(d.suicides), "value": d.suicides},
+                {"display": ignore0(d.max_suicides), "value": d.max_suicides},
+                {"display": ignore0(d.kills), "value": d.kills},
+                {"display": ignore0(d.max_kills), "value": d.max_kills},
+                {"display": `${d.eff.toFixed(2)}%`, "value": d.eff},   
+            ];
+
+        }else if(this.dataCat === "averages"){
+
+
+            let tk = d.avg_team_kills.toFixed(2);
+            if(tk === "0.00") tk = "";
+
+            let deaths = d.avg_deaths.toFixed(2);
+            if(deaths === "0.00") deaths = "";
+
+            let suicides = d.avg_suicides.toFixed(2);
+            if(suicides === "0.00") suicides = "";
+
+            let kills = d.avg_kills.toFixed(2);
+            if(kills === "0.00") kills = "";
+
+            return [
+                ...row,
+                {"display": tk, "value": d.avg_team_kills},
+                {"display": deaths, "value": d.avg_deaths},
+                {"display": suicides, "value": d.avg_suicides},
+                {"display": kills, "value": d.avg_kills},
+            ];
+
+        }
+
+        return [];
     }
+
+    bDataMatchFilter(gametypeId, mapId){
+
+        if(this.mode === "all" && (gametypeId !== 0 || mapId !== 0)) return false;
+        if(this.mode === "gametypes" && mapId !== 0) return false;
+        if(this.mode === "gametypes" && (this.selectedGametype === 0 || gametypeId !== this.selectedGametype)) return false;
+
+        if(this.mode === "maps" && gametypeId !== 0) return false;
+        if(this.mode === "maps" && (this.selectedMap === 0 || mapId !== this.selectedMap)) return false;
+
+        if(this.mode === "custom" && (gametypeId !== this.selectedGametype || mapId !== this.selectedMap)) return false;
+
+        return true;
+    }
+
+
+    getTotalsFooter(rows, totals){
+
+        if(this.dataCat === "totals"){
+
+            if(rows.length > 1){
+
+                let eff = 0;
+
+                if(totals.kills > 0){
+
+                    if(totals.deaths === 0 && totals.teamKills === 0){
+                        eff = 100;
+                    }else{
+
+                        const t = totals.deaths + totals.teamKills;
+                        if(t !== 0){
+                            eff = (totals.kills / (t + totals.kills)) * 100;
+                        }
+                    }
+                }
+
+                return [
+                    {"display": "Totals"},
+                    {"display": `${totals.matches}(MAX)`},
+                    {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                    {"display": "MAX", "dataType": "INT", "callback": ignore0},
+                    {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                    {"display": "MAX", "dataType": "INT", "callback": ignore0},
+                    {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                    {"display": "MAX", "dataType": "INT", "callback": ignore0},
+                    {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                    {"display": "MAX", "dataType": "INT", "callback": ignore0},
+                    {"display": `${eff.toFixed(2)}%`},
+                ];
+            }
+        }
+
+
+        return null;
+    }
+
+
 
     render(){
 
-        const headers = [
+        const totalHeaders = [
            "Name", "Matches", "Team Kills",
            "Worst Team Kills", "Deaths", "Worst Deaths", 
            "Suicides", "Most Suicides", "Kills", 
             "Best Kills", "Efficiency"
+        ];
+
+        const avgHeaders = [
+           "Name", "Matches", "Team Kills","Deaths", 
+           "Suicides", "Kills"
         ];
 
         const rows = [];
@@ -1245,14 +1360,7 @@ class PlayerWeaponsSummary{
 
             const d = this.data[i];
 
-            if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
-            if(this.mode === "gametypes" && d.map_id !== 0) continue;
-            if(this.mode === "gametypes" && (this.selectedGametype === 0 || d.gametype_id !== this.selectedGametype)) continue;
-
-            if(this.mode === "maps" && d.gametype_id !== 0) continue;
-            if(this.mode === "maps" && (this.selectedMap === 0 || d.map_id !== this.selectedMap)) continue;
-
-            if(this.mode === "custom" && (d.gametype_id !== this.selectedGametype || d.map_id !== this.selectedMap)) continue;
+            if(!this.bDataMatchFilter(d.gametype_id, d.map_id)) continue;
 
             totals.teamKills += d.team_kills;
             totals.deaths += d.deaths;
@@ -1263,49 +1371,33 @@ class PlayerWeaponsSummary{
 
         let footer = null;
 
-        if(rows.length > 1){
-
-            let eff = 0;
-
-            if(totals.kills > 0){
-
-                if(totals.deaths === 0 && totals.teamKills === 0){
-                    eff = 100;
-                }else{
-
-                    const t = totals.deaths + totals.teamKills;
-                    if(t !== 0){
-                        eff = (totals.kills / (t + totals.kills)) * 100;
-                    }
-                }
-            }
-
-            footer = [
-                {"display": "Totals"},
-                {"display": `${totals.matches}(MAX)`},
-                {"display": "SUM", "dataType": "INT", "callback": ignore0},
-                {"display": "MAX", "dataType": "INT", "callback": ignore0},
-                {"display": "SUM", "dataType": "INT", "callback": ignore0},
-                {"display": "MAX", "dataType": "INT", "callback": ignore0},
-                {"display": "SUM", "dataType": "INT", "callback": ignore0},
-                {"display": "MAX", "dataType": "INT", "callback": ignore0},
-                {"display": "SUM", "dataType": "INT", "callback": ignore0},
-                {"display": "MAX", "dataType": "INT", "callback": ignore0},
-                {"display": `${eff.toFixed(2)}%`},
-            ];
+        if(this.dataCat === "totals"){
+            footer = this.getTotalsFooter(rows, totals);
         }
 
-        const h = headers.map((h) =>{ return {"display": h}});
+        let h = [];
+
+        if(this.dataCat === "totals"){
+            h = totalHeaders.map((h) =>{ return {"display": h}});
+        }else if(this.dataCat === "averages"){
+            h = avgHeaders.map((h) =>{ return {"display": h}});
+        }
+
+        
 
         if(this.table === undefined){
 
             this.table = new TESTUITable(
+
                 this.parent, 
                 {
                     "className": "t-width-1",
                     "headers": h,
-                    footer},
-                    rows);
+                    footer
+                },
+                rows
+            );
+
         }else{
             this.table.updateRows(rows, h, footer);
         }
