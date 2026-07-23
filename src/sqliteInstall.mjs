@@ -1094,25 +1094,27 @@ export async function sqliteInstall(bOnlyCreateTables){
     await addColumn("nstats_match_players", "dom_caps", "INTEGER NOT NULL DEFAULT 0");
 
 
-    if(!bOnlyCreateTables){
-
-        new Message("Inserting Default Rankings Settings", "note");
-        await insertDefaultRankingSettings();
-        new Message("Inserting Default CTF League Settings", "note");
-        await insertDefaultCTFLeagueSettings();
-        new Message("Inserting Default Site Settings", "note");
-        await restoreDefaultSiteSettings();
-        new Message("Inserting Default Site Page Layout Settings", "note");
-        await restoreDefaultPageLayouts();
-        new Message("Creating Default Logs Folder Settings", "note");
-        await createDefaultLogsFolderSettings();
-        new Message("Creating JSON API Settings","note");
-        await updateJSONApiSettings();
-
-        await setAllMapTotals();
+    new Message("Inserting Default Rankings Settings", "note");
+    await insertDefaultRankingSettings();
+    new Message("Inserting Default CTF League Settings", "note");
+    await insertDefaultCTFLeagueSettings();
         
-        new Message("Inserting Default Player Settings", "note");
-        await installPlayerSettings();
+    new Message("Inserting Default Player Settings", "note");
+    await installPlayerSettings();
+
+    new Message("Inserting Default Site Settings", "note");
+    await restoreDefaultSiteSettings();
+    new Message("Inserting Default Site Page Layout Settings", "note");
+    await restoreDefaultPageLayouts();
+
+    new Message("Creating Default Logs Folder Settings", "note");
+    await createDefaultLogsFolderSettings();
+
+    new Message("Creating JSON API Settings","note");
+    await updateJSONApiSettings();
+
+    if(!bOnlyCreateTables){
+        await setAllMapTotals();   
     }
 
     if(!fs.existsSync("./salt.mjs")){
