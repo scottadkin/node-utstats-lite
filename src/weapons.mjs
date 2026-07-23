@@ -429,6 +429,7 @@ async function testBulkUpdatePlayerTotals(totals){
                         weaponData.team_kills,
                         eff, mapId, weaponData.max_kills, weaponData.max_deaths, 
                         weaponData.max_suicides, weaponData.max_team_kills,
+                        weaponData.playtime,
                         weaponData.avg_kills, weaponData.avg_deaths, 
                         weaponData.avg_suicides, weaponData.avg_team_kills,
                         weaponData.epm_kills, weaponData.epm_deaths, 
@@ -443,6 +444,7 @@ async function testBulkUpdatePlayerTotals(totals){
     const columns = [`player_id`, `gametype_id`, `weapon_id`,
             `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, 
             `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`,
+            `playtime`,
             `avg_kills`, `avg_deaths`, `avg_suicides`, `avg_team_kills`,
             `epm_kills`, `epm_deaths`, `epm_suicides`, `epm_team_kills`
         ];
@@ -597,6 +599,7 @@ export async function getPlayerTotals(playerId){
     nstats_player_totals_weapons.epm_deaths,
     nstats_player_totals_weapons.epm_suicides,
     nstats_player_totals_weapons.epm_team_kills,
+    nstats_player_totals_weapons.playtime,
     nstats_weapons.name as weapon_name,
     IF(nstats_player_totals_weapons.gametype_id = 0, 'All Gametypes', nstats_gametypes.name) as gametype_name,
     IF(nstats_player_totals_weapons.map_id = 0, 'All Maps', nstats_maps.name) as map_name

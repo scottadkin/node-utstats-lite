@@ -417,6 +417,7 @@ const queries = [
             max_deaths INTEGER NOT NULL,
             max_suicides INTEGER NOT NULL,
             max_team_kills INTEGER NOT NULL,
+            playtime REAL NOT NULL,
             avg_kills REAL NOT NULL,
             avg_deaths REAL NOT NULL,
             avg_suicides REAL NOT NULL,
@@ -919,6 +920,8 @@ async function updatePlayerWeaponTotalsTable(){
 
 
     //2.7.0
+
+    await addColumn("nstats_player_totals_weapons", "playtime", "REAL NOT NULL DEFAULT 0");
 
     await addColumn("nstats_player_totals_weapons", "avg_kills", "REAL NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "avg_deaths", "REAL NOT NULL DEFAULT 0");

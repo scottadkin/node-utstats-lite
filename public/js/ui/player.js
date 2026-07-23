@@ -1229,8 +1229,15 @@ class PlayerWeaponsSummary{
 
         const row = [
             {"display": d.weapon_name, "value":d.weapon_name.toLowerCase(), "className": "text-left"},
-                {"value": d.total_matches},
+            
         ];
+
+
+        if(this.dataCat !== "epm"){
+            row.push({"value": d.total_matches});
+        }else{
+            row.push({"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime"});
+        }
 
         if(this.dataCat === "totals"){
 
@@ -1270,6 +1277,20 @@ class PlayerWeaponsSummary{
                 {"display": kills, "value": d.avg_kills},
             ];
 
+        }else if(this.dataCat === "epm"){
+
+            let tk = d.epm_team_kills.toFixed(2);
+            let deaths = d.epm_deaths.toFixed(2);
+            let suicides = d.epm_suicides.toFixed(2);
+            let kills = d.epm_kills.toFixed(2);
+
+            return [
+                ...row,
+                {"value": d.epm_team_kills, "display": (tk !== "0.00") ? tk : ""},
+                {"value": d.epm_deaths, "display": (deaths !== "0.00") ? deaths : ""},
+                {"value": d.epm_suicides, "display": (suicides !== "0.00") ? suicides : ""},
+                {"value": d.epm_kills, "display": (kills !== "0.00") ? kills : ""},
+            ];
         }
 
         return [];
@@ -1336,15 +1357,19 @@ class PlayerWeaponsSummary{
     render(){
 
         const totalHeaders = [
-           "Name", "Matches", "Team Kills",
-           "Worst Team Kills", "Deaths", "Worst Deaths", 
-           "Suicides", "Most Suicides", "Kills", 
+            "Name", "Matches", "Team Kills",
+            "Worst Team Kills", "Deaths", "Worst Deaths", 
+            "Suicides", "Most Suicides", "Kills", 
             "Best Kills", "Efficiency"
         ];
 
         const avgHeaders = [
            "Name", "Matches", "Team Kills","Deaths", 
            "Suicides", "Kills"
+        ];
+
+        const epmHeaders = [
+            "Name", "Playtime", "Team Kills", "Deaths", "Suicides", "Kills"
         ];
 
         const rows = [];
@@ -1381,7 +1406,11 @@ class PlayerWeaponsSummary{
             h = totalHeaders.map((h) =>{ return {"display": h}});
         }else if(this.dataCat === "averages"){
             h = avgHeaders.map((h) =>{ return {"display": h}});
+        }else if(this.dataCat === "epm"){
+            h = epmHeaders.map((h) =>{ return {"display": h}});
         }
+
+        console.log(epmHeaders);
 
         
 

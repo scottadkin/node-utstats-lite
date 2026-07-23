@@ -58,7 +58,9 @@ export async function renderPlayerPage(req, res, userSession){
         let weaponTotals = [];
 
         if(pageSettings["Display Weapons"] === 1){
+  
             weaponTotals = await getPlayerWeaponTotals(playerId);    
+      
         }
 
 
