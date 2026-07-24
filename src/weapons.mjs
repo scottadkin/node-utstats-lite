@@ -203,7 +203,7 @@ async function testCalculatePlayerTotalsFromMatchData(playerIds){
     const wT = `nstats_match_weapon_stats`;
     const mT = `nstats_match_players`;
 
-    const query = `SELECT ${mT}.player_id,${mT}.time_on_server as playtime, 
+    /*const query = `SELECT ${mT}.player_id,${mT}.time_on_server as playtime, 
     ${mT}.match_id,
     ${mT}.map_id,
     ${mT}.gametype_id,
@@ -214,7 +214,24 @@ async function testCalculatePlayerTotalsFromMatchData(playerIds){
     ${wT}.suicides 
     FROM ${mT} 
     INNER JOIN ${wT} on ${wT}.match_id = ${mT}.match_id AND ${wT}.player_id = ${mT}.player_id
-    WHERE ${mT}.player_id IN (?) AND ${mT}.spectator=0`;
+    WHERE ${mT}.player_id IN (?) AND ${mT}.spectator=0`;*/
+
+    const query = `SELECT ${mT}.player_id,SUM(${mT}.time_on_server) as playtime, 
+    COUNT(*) as total_matches,
+    ${mT}.map_id,
+    ${mT}.gametype_id,
+    ${wT}.weapon_id,
+    SUM(${wT}.kills) as kills,
+    MAX(${wT}.kills) as max_kills,
+    SUM(${wT}.deaths) as deaths,
+    MAX(${wT}.deaths) as max_deaths,
+    SUM(${wT}.team_kills) as team_kills,
+    MAX(${wT}.team_kills) as max_team_kills,
+    SUM(${wT}.suicides) as suicides, 
+    MAX(${wT}.suicides) as max_suicides
+    FROM ${mT} 
+    INNER JOIN ${wT} on ${wT}.match_id = ${mT}.match_id AND ${wT}.player_id = ${mT}.player_id
+    WHERE ${mT}.player_id IN (?) AND ${mT}.spectator=0 GROUP BY ${mT}.player_id,${mT}.gametype_id,${mT}.map_id,${wT}.weapon_id`;
 
     return await simpleQuery(query, [playerIds]);
 }
@@ -316,10 +333,10 @@ function testUpdatePlayerTotalsObject(totals, matchData){
 
     const totalKeys = ["playtime", "kills", "deaths", "suicides", "team_kills"];
 
-    allTime.matches++;
-    gametypeTotals.matches++;
-    mapTotals.matches++;
-    gametypeMapComboTotals.matches++;
+    allTime.matches += matchData.total_matches;
+    gametypeTotals.matches+= matchData.total_matches;
+    mapTotals.matches+= matchData.total_matches;
+    gametypeMapComboTotals.matches+= matchData.total_matches;
 
     allTime.playtime+=matchData.playtime;
     gametypeTotals.playtime+=matchData.playtime;
@@ -456,16 +473,9 @@ export async function updatePlayerTotals(playerIds){
 
     if(playerIds.length === 0) return null;
     
-
-
-    /*const allTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "all");
-    const gametypeTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "gametypes");
-    const mapTotals = await calcPlayersTotalsFromMatchDataByGroup(playerIds, "maps");*/
-
     const start = performance.now();
     const test = await testCalculatePlayerTotalsFromMatchData(playerIds);
 
-    //console.log(test);
 
     const totals = {};
 
@@ -474,26 +484,12 @@ export async function updatePlayerTotals(playerIds){
         testUpdatePlayerTotalsObject(totals, test[i]);
     }
 
-    //console.log(totals);
-
-    
-    //console.log(allTotals);
 
     await testBulkUpdatePlayerTotals(totals);
     const end = performance.now();
     console.log((end - start) * 0.001);
     return;
 
-   // console.log(mapTotals);
-
-
-    const promises = [
-        bulkInsertPlayerTotalsNew(allTotals, "all", false), 
-        bulkInsertPlayerTotalsNew(gametypeTotals, "gametypes", false), 
-        bulkInsertPlayerTotalsNew(mapTotals, "maps", false)
-    ];
-
-    return await Promise.all(promises);
 
 
 }
