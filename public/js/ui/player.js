@@ -1199,10 +1199,17 @@ class PlayerWeaponsSummary{
 
             this.mapSelect.updateOptions(a, 0);
         }else{
+
             if(this.mode !== "maps"){
                 this.selectedMap = 0;
             }
-            this.mapSelect.updateOptions(this.mapNames, 0);
+
+
+            if(this.mapNames.length > 0){
+                this.selectedMap = this.mapNames[0].value;
+            }
+
+            this.mapSelect.updateOptions(this.mapNames, this.selectedMap);
         }
     }
 
