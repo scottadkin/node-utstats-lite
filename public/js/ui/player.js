@@ -1095,8 +1095,6 @@ class PlayerWeaponsSummary{
         this.selectedGametype = 0;
         this.selectedMap = 0;
 
-        console.log(data);
-
         this.wrapper = UIDiv();
 
         this.parent.append(this.wrapper);
@@ -1146,6 +1144,9 @@ class PlayerWeaponsSummary{
                 this.mapNames.push({"value": d.map_id, "display": d.map_name});
             }
         }
+
+        this.allMapNames = this.mapNames;
+        this.allGametypeNames = this.gametypeNames;
         
         this.gametypeNames.sort(this.sortByDisplayName);
         this.mapNames.sort(this.sortByDisplayName);
@@ -1159,10 +1160,50 @@ class PlayerWeaponsSummary{
         }
     }
 
+    filterMaps(gametype){
+
+        const found = [];
+        const usedIds = new Set();
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.gametype_id !== gametype) continue;
+            if(usedIds.has(d.map_id) || d.map_id === 0) continue;
+            usedIds.add(d.map_id);
+            found.push(d);
+        }
+
+        return found;
+    }
+
     toggleDropDowns(){
 
         this.gametypeRow.className = (this.mode === "gametypes" || this.mode === "custom") ? "form-row" : "hidden";
-        this.mapRow.className = (this.mode === "maps" || this.mode === "custom") ? "form-row" : "hidden"
+        this.mapRow.className = (this.mode === "maps" || this.mode === "custom") ? "form-row" : "hidden";
+
+
+        if(this.mode === "custom"){
+
+            const currentMaps = this.filterMaps(this.selectedGametype);
+
+            let selectedMap = 0;
+
+            const a = currentMaps.map((d, i) =>{
+                if(i === 0) selectedMap = d.map_id;
+                return {"value": d.map_id, "display": d.map_name};
+            });
+
+            this.selectedMap = selectedMap;
+
+            this.mapSelect.updateOptions(a, 0);
+        }else{
+            if(this.mode !== "maps"){
+                this.selectedMap = 0;
+            }
+            this.mapSelect.updateOptions(this.mapNames, 0);
+        }
     }
 
     createTabs(){
@@ -1205,7 +1246,7 @@ class PlayerWeaponsSummary{
 
         this.gametypeSelect = new UISelect(this.gametypeRow, this.gametypeNames, this.selectedGametype, (e) =>{
             this.selectedGametype = parseInt(e);
-       
+            this.toggleDropDowns();
             this.render();
         });
 
@@ -1409,11 +1450,7 @@ class PlayerWeaponsSummary{
         }else if(this.dataCat === "epm"){
             h = epmHeaders.map((h) =>{ return {"display": h}});
         }
-
-        console.log(epmHeaders);
-
         
-
         if(this.table === undefined){
 
             this.table = new TESTUITable(
