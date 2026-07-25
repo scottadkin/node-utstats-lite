@@ -39,7 +39,6 @@ export async function renderMapPage(req, res, userSession){
 
         const uniqueGametypes = await getAllUniquePlayedGametypes(basic.id, true);
         
-        console.log(uniqueGametypes);
         res.render("map.ejs",{
             "host": req.headers.host,
             userSession,

@@ -9,34 +9,34 @@ import Message from "./message.mjs";
 
 
 export const VALID_PLAYER_MAP_MINUTE_AVERAGES = [
-    {"value": "score", "display": "Score", "group": "General"}, 
-    {"value": "frags", "display": "Frags", "group": "General"}, 
-    {"value": "kills", "display": "Kills", "group": "General"}, 
-    {"value": "deaths", "display": "Deaths", "group": "General"}, 
-    {"value": "suicides", "display": "Suicides", "group": "General"}, 
-    {"value": "team_kills", "display": "Team Kills", "group": "General"},
-    {"value": "headshots", "display": "Headshots", "group": "General"}, 
-    {"value": "flag_taken", "display": "Flag Taken", "group": "CTF"}, 
-    {"value": "flag_pickup", "display": "Flag Pickups", "group": "CTF"}, 
-    {"value": "flag_drop", "display": "Flag Drops", "group": "CTF"}, 
-    {"value": "flag_assist", "display": "Flag Assists", "group": "CTF"}, 
-    {"value": "flag_cover", "display": "Flag Covers", "group": "CTF"}, 
-    {"value": "flag_seal", "display": "Flag Seals", "group": "CTF"}, 
-    {"value": "flag_cap", "display": "Flag Caps", "group": "CTF"}, 
-    {"value": "flag_kills", "display": "Flag Kills", "group": "CTF"}, 
-    {"value": "flag_return", "display": "Flag Returns", "group": "CTF"}, 
-    {"value": "flag_return_base", "display": "Flag Returns Base", "group": "CTF"}, 
-    {"value": "flag_return_mid", "display": "Flag Returns Mid", "group": "CTF"}, 
-    {"value": "flag_return_enemy_base", "display": "Flag Returns Enemy Base", "group": "CTF"}, 
-    {"value": "flag_return_save", "display": "Flag Returns Close Save", "group": "CTF"}, 
-    {"value": "dom_caps", "display": "Domination Caps", "group": "Domination"},
-    {"value": "item_amp", "display": "UDamage Taken", "group": "Items"}, 
-    {"value": "item_belt", "display": "Shield Belts Taken", "group": "Items"}, 
-    {"value": "item_boots", "display": "Jump Boots Taken", "group": "Items"}, 
-    {"value": "item_body", "display": "Body Armour Taken", "group": "Items"}, 
-    {"value": "item_pads", "display": "Thigh Pads Taken", "group": "Items"}, 
-    {"value": "item_invis", "display": "Invisibilities Taken", "group": "Items"}, 
-    {"value": "item_shp", "display": "Super Health Pack Taken", "group": "Items"},
+    {"value": "avg_score", "display": "Score", "group": "General"}, 
+    {"value": "avg_frags", "display": "Frags", "group": "General"}, 
+    {"value": "avg_kills", "display": "Kills", "group": "General"}, 
+    {"value": "avg_deaths", "display": "Deaths", "group": "General"}, 
+    {"value": "avg_suicides", "display": "Suicides", "group": "General"}, 
+    {"value": "avg_team_kills", "display": "Team Kills", "group": "General"},
+    {"value": "avg_headshots", "display": "Headshots", "group": "General"}, 
+    {"value": "avg_flag_taken", "display": "Flag Taken", "group": "CTF"}, 
+    {"value": "avg_flag_pickup", "display": "Flag Pickups", "group": "CTF"}, 
+    {"value": "avg_flag_drop", "display": "Flag Drops", "group": "CTF"}, 
+    {"value": "avg_flag_assist", "display": "Flag Assists", "group": "CTF"}, 
+    {"value": "avg_flag_cover", "display": "Flag Covers", "group": "CTF"}, 
+    {"value": "avg_flag_seal", "display": "Flag Seals", "group": "CTF"}, 
+    {"value": "avg_flag_cap", "display": "Flag Caps", "group": "CTF"}, 
+    {"value": "avg_flag_kills", "display": "Flag Kills", "group": "CTF"}, 
+    {"value": "avg_flag_return", "display": "Flag Returns", "group": "CTF"}, 
+    {"value": "avg_flag_return_base", "display": "Flag Returns Base", "group": "CTF"}, 
+    {"value": "avg_flag_return_mid", "display": "Flag Returns Mid", "group": "CTF"}, 
+    {"value": "avg_flag_return_enemy_base", "display": "Flag Returns Enemy Base", "group": "CTF"}, 
+    {"value": "avg_flag_return_save", "display": "Flag Returns Close Save", "group": "CTF"}, 
+    {"value": "avg_dom_caps", "display": "Domination Caps", "group": "Domination"},
+    {"value": "avg_item_amp", "display": "UDamage Taken", "group": "Items"}, 
+    {"value": "avg_item_belt", "display": "Shield Belts Taken", "group": "Items"}, 
+    {"value": "avg_item_boots", "display": "Jump Boots Taken", "group": "Items"}, 
+    {"value": "avg_item_body", "display": "Body Armour Taken", "group": "Items"}, 
+    {"value": "avg_item_pads", "display": "Thigh Pads Taken", "group": "Items"}, 
+    {"value": "avg_item_invis", "display": "Invisibilities Taken", "group": "Items"}, 
+    {"value": "avg_item_shp", "display": "Super Health Pack Taken", "group": "Items"},
 ];
 
 
@@ -618,11 +618,11 @@ export function bValidMinuteCategory(type){
     return false;
 } 
 
-export async function getMapPlayerAveragesTotalCount(mapId){
+export async function getMapPlayerAveragesTotalCount(mapId, gametypeId){
 
-    const query = `SELECT COUNT(*) as total_values FROM nstats_player_map_minute_averages WHERE map_id=?`;
+    const query = `SELECT COUNT(*) as total_values FROM nstats_player_totals WHERE map_id=? AND gametype_id=?`;
 
-    const result = await simpleQuery(query, [mapId]);
+    const result = await simpleQuery(query, [mapId, gametypeId]);
 
     return result[0].total_values;
 }
@@ -639,37 +639,48 @@ function getMapAverageTitle(target){
     return "Not Found";
 }
 
-export async function getMapPlayerAverages(mapId, category, initialPage, initialPerPage){
+export async function getMapPlayerAverages(mapId, gametypeId, category, initialPage, initialPerPage){
 
     const [page, perPage, start] = sanitizePagePerPage(initialPage, initialPerPage);
 
-    let title = "Kills";
+    let title = "Score";
 
     category = category.toLowerCase();
+
+    console.log(category);
 
     if(bValidMinuteCategory(category)){
         
         title = getMapAverageTitle(category);
         
     }else{
-        category = "kills";
+        category = "avg_score";
     }
 
+    const pTotals = "nstats_player_totals";
+    const pT = "nstats_players";
+
+
+    //need to add another join for ctf stuff
+
     const query = `SELECT 
-    nstats_player_map_minute_averages.player_id,
-    nstats_player_map_minute_averages.total_playtime,
-    nstats_players.name,
-    nstats_players.country,
-    ${category} as target_value 
-    FROM nstats_player_map_minute_averages 
-    LEFT JOIN nstats_players ON nstats_player_map_minute_averages.player_id = nstats_players.id
-    WHERE map_id=? ORDER BY target_value DESC LIMIT ?, ?`;
+    ${pTotals}.player_id,
+    ${pTotals}.last_active,
+    ${pTotals}.total_matches,
+    ${pTotals}.playtime,
+    ${pTotals}.${category} as target_value,
+    ${pT}.name,
+    ${pT}.country
+    FROM ${pTotals}
+    INNER JOIN ${pT} ON ${pT}.id = ${pTotals}.player_id
+    WHERE ${pTotals}.map_id=? AND gametype_id=? ORDER BY target_value DESC LIMIT ?, ?`;
+    
 
-    const result = await simpleQuery(query, [mapId, start, perPage]);
+    const data = await simpleQuery(query, [mapId, gametypeId, start, perPage]);
 
-    const totalEntries = await getMapPlayerAveragesTotalCount(mapId);
+    const totalEntries = await getMapPlayerAveragesTotalCount(mapId, gametypeId);
 
-    return {"data": result, "title": title, "totalEntries": totalEntries};
+    return {data, title, totalEntries}
 }
 
 

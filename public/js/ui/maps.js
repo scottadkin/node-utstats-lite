@@ -670,30 +670,81 @@ class UIMapPlayerAverages{
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
-        this.perPage = 10;
+        this.perPage = 25;
         this.page = 1;
         this.selectedGametype = 0;
         this.mode = "match-averages";
-        this.cat = "kills";
+        this.selectedCat = "avg_score";
         this.validTypes = validTypes;
         this.uniqueGametypes = uniqueGametypes;
     
-        console.log(this.uniqueGametypes);
-
         this.data = [];
         this.totalResults = 0;
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Top Player Averages");
         this.createTabs();
+        this.info = new UIInfo(this.wrapper, this.getInfoContent());
+        this.createGametypeSelect();
+        this.createTypesSelect();
+        
         
         this.parent.append(this.wrapper);
 
 
-        this.createPagination();
+        
 
         this.loadData();
 
+    }
+
+    createTypesSelect(){
+
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Type"));
+
+
+        new UISelect(row, this.validTypes, this.selectedCat, (e) =>{
+            this.selectedCat = e;
+            this.loadData();
+        }, "ma-type", "ma-type");
+        this.wrapper.append(row);
+    }
+
+    createGametypeSelect(){
+
+        const options = this.uniqueGametypes.map((g) =>{
+            return { "display": g.gametype_name, "value": g.gametype_id}
+        });
+
+        options.sort((a, b) =>{
+            a = a.gametype_name.toLowerCase();
+            b = b.gametype_name.toLowerCase();
+
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+            return 0;
+        });
+
+        options.unshift({
+            "display": "All Time", "value": 0
+        });
+
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Gametype"));
+
+        new UISelect(row, options, this.selectedGametype, (e) =>{
+           
+            this.selectedGametype = parseInt(e);
+            this.loadData();
+        }, "avg-gametype", "avg-gametype");
+
+        this.wrapper.append(row);
     }
 
     createPagination(){
@@ -727,18 +778,19 @@ class UIMapPlayerAverages{
         try{
 
 
-            const urlParts = `${this.mapId}&page=${this.page}&perPage=${this.perPage}&cat=${this.cat}`;
+            const urlParts = `${this.mapId}&page=${this.page}&perPage=${this.perPage}&cat=${this.selectedCat}`;
 
-            const req = await fetch(`/json/map-player-averages/?id=${urlParts}`);
+            const req = await fetch(`/json/map-player-averages/?id=${urlParts}&gid=${this.selectedGametype}`);
 
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
 
             this.data = res.data;
+            console.log(res);
             this.totalResults = res.totalEntries;
             this.title = res.title;
-            this.pagination.updateResults(this.page, this.totalResults, this.perPage);
+            
 
             this.render();
 
@@ -765,12 +817,69 @@ class UIMapPlayerAverages{
 
     render(){
 
+        this.info.updateContent(this.getInfoContent());
 
-        if(this.info === undefined){
-            this.info = new UIInfo(this.wrapper, this.getInfoContent());
+        const tableOptions = {
+            "className": "t-width-1",
+            "bNoSort": true,
+            "headers": [
+                {"display": "POS"},
+                {"display": "Player"},
+                {"display": "Last Active"},
+                {"display": "Matches Played"},
+                {"display": "Total Playtime"},
+                {"display": "Value"}
+            ]
+        };
+
+        const rows = this.data.map((d, i) =>{
+
+            const page = this.page - 1;
+
+            const place = i + 1 + (page * this.perPage);
+
+            const intValue = parseInt(d.target_value);
+
+            return [
+                {
+                    "display": `${place}${getOrdinal(place)}`,
+                    "className": "ordinal"
+                },
+                {
+                    "bSkipTD": true,
+                    "display": UIPlayerLink({
+                        "playerId": d.player_id, 
+                        "name": d.name, 
+                        "country": d.country,
+                        "bTableElem": true
+                    }),
+                },
+                {
+                    "display": toDateString(d.last_active, true),
+                    "className": "date"
+                },
+                {
+                    "display": d.total_matches
+                },
+                {"display": toPlaytime(d.playtime), "className": "playtime"},
+                {
+                    "display": (d.target_value % 1 !== 0) ? d.target_value.toFixed(2) :d.target_value
+                }
+            ]
+        });
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
         }else{
-            this.info.updateContent(this.getInfoContent());
+            this.table.updateRows(rows, tableOptions.headers);
         }
+
+        if(this.pagination === undefined){
+            this.createPagination();
+        }else{
+            this.pagination.updateResults(this.page, this.totalResults, this.perPage);
+        }
+        
     }
 }
 
