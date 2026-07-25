@@ -1,4 +1,4 @@
-import { getMapInfo } from "../maps.mjs";
+import { getAllUniquePlayedGametypes, getMapInfo } from "../maps.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getMapWeaponStats } from "../weapons.mjs";
@@ -35,7 +35,11 @@ export async function renderMapPage(req, res, userSession){
 
         const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
-    
+
+
+        const uniqueGametypes = await getAllUniquePlayedGametypes(basic.id, true);
+        
+        console.log(uniqueGametypes);
         res.render("map.ejs",{
             "host": req.headers.host,
             userSession,
@@ -45,6 +49,7 @@ export async function renderMapPage(req, res, userSession){
             pageOrder,
             weaponStats,
             ctfLeagueSettings,
+            uniqueGametypes,
             "validTypes": VALID_PLAYER_MAP_MINUTE_AVERAGES,
             "meta": {"description": description, "image": `images/maps/${basic.image}`},
         });

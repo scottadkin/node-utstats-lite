@@ -666,27 +666,37 @@ class UIMapPlayerRankings{
 
 class UIMapPlayerAverages{
 
-    constructor(parent, mapId, validTypes){
+    constructor(parent, mapId, validTypes, uniqueGametypes){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
         this.perPage = 10;
         this.page = 1;
+        this.selectedGametype = 0;
+        this.mode = "match-averages";
         this.cat = "kills";
-        this.title = "Kills";
         this.validTypes = validTypes;
+        this.uniqueGametypes = uniqueGametypes;
+    
+        console.log(this.uniqueGametypes);
 
         this.data = [];
         this.totalResults = 0;
 
         this.wrapper = UIDiv();
+        UIHeader(this.wrapper, "Top Player Averages");
+        this.createTabs();
+        
         this.parent.append(this.wrapper);
 
-        UIHeader(this.wrapper, "Top Player Averages");
-        new UIInfo(this.wrapper, ["Averages are based on events per minute."]);
-        this.createOptions();
-        this.content = UIDiv();
-        this.wrapper.append(this.content);
+
+        this.createPagination();
+
+        this.loadData();
+
+    }
+
+    createPagination(){
 
         this.pagination = new UIPagination(this.wrapper, async (newPage) =>{ 
 
@@ -696,9 +706,20 @@ class UIMapPlayerAverages{
             this.loadData();
 
         }, this.totalResults, this.perPage, this.page);
+    }
 
-        this.loadData();
+    createTabs(){
 
+        const options = [
+            {"display": "Match Averages", "value": "match-averages"},
+            {"display": "Events Per Minute", "value": "epm"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.loadData();
+        });
     }
 
     async loadData(){
@@ -728,91 +749,28 @@ class UIMapPlayerAverages{
     }
 
 
-    getTypeSettings(){
+    getInfoContent(){
 
-        for(let i = 0; i < this.validTypes.length; i++){
+        const content = [];
 
-            const t = this.validTypes[i];
 
-            if(t.value === this.cat) return t;
-        }
-
-        return null;
-    }
-
-    renderTable(){
-
-        const headers = ["Place", "Player", "Playtime", this.title];
-
-        const tableOptions = {
-            "className": "t-width-1",
-            "headers": headers.map((h) =>{ return {"display": h}}),
-            "bNoSort": true
-        };
-
-        const rows = [];
-
-        for(let i = 0; i < this.data.length; i++){
-
-            const d = this.data[i];
-
-            const place = i + 1 + (this.perPage * (this.page - 1));  
-            const typeSettings = this.getTypeSettings();
-
-            const row = [
-                {
-                    "display": `${place}${getOrdinal(place)}`,
-                    "className": "ordinal"
-                },
-                {
-                    "bSkipTD": true, 
-                    "display": UIPlayerLink({
-                        "playerId": d.player_id, 
-                        "name": d.name, 
-                        "country": d.country, 
-                        "bTableElem": true, 
-                        "className": "text-left"
-                    })
-                }, 
-                {
-                    "display": toPlaytime(d.total_playtime),
-                    "className": "playtime"
-                },
-                {
-                    "display": d.target_value.toFixed(3),
-                    "className": typeSettings?.className ?? null
-                }
-            ];
-            rows.push(row);
-        }
-
-        if(this.table === undefined){
-
-            this.table = new TESTUITable(this.content, tableOptions, rows);
+        if(this.mode === "match-averages"){
+            content.push(`Player Averages Per Match`);
         }else{
-            this.table.updateRows(rows, tableOptions.headers);
+            content.push(`Average of total events / minutes played.`);
         }
 
-    }
-
-    createOptions(){
-
-        const row = UIDiv("form-row");
-        row.append(UILabel("Category","map-average-cat"));
-
-
-        this.select = new UISelect(row, this.validTypes, this.cat, (e) =>{
-            this.cat = e;
-            this.page = 1;
-            this.loadData();
-        }, "map-average-cat", "map-average-cat");
-
-        this.wrapper.append(row);
+        return content;
     }
 
     render(){
 
-        this.renderTable();
+
+        if(this.info === undefined){
+            this.info = new UIInfo(this.wrapper, this.getInfoContent());
+        }else{
+            this.info.updateContent(this.getInfoContent());
+        }
     }
 }
 
