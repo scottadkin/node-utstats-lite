@@ -148,8 +148,9 @@ export default class JSONManager{
         const cat = this.querySanitizeString("cat", true);
         const {page, perPage} = this.getPageAndPerPage();
         const gid = this.querySanitizeInteger("gid");
+        const averageType = this.querySanitizeString("avgType");
 
-        this.res.status(200).json(await getMapPlayerAverages(id, gid, cat, page, perPage));
+        this.res.status(200).json(await getMapPlayerAverages(averageType, id, gid, cat, page, perPage));
     }
 
     async mapPlayerCTFLeague(){

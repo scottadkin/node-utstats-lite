@@ -704,9 +704,11 @@ class UIMapPlayerAverages{
         const row = UIDiv("form-row");
         row.append(UILabel("Type"));
 
+        const validTypes = (this.mode === "match-averages") ? this.validTypes["match-averages"] : this.validTypes["epm"];
 
-        new UISelect(row, this.validTypes, this.selectedCat, (e) =>{
+        this.catSelect = new UISelect(row, validTypes, this.selectedCat, (e) =>{
             this.selectedCat = e;
+            
             this.loadData();
         }, "ma-type", "ma-type");
         this.wrapper.append(row);
@@ -769,7 +771,12 @@ class UIMapPlayerAverages{
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
             this.mode = e.detail.newTab;
+
+            const validTypes = (this.mode === "match-averages") ? this.validTypes["match-averages"] : this.validTypes["epm"];
+
+            this.catSelect.updateOptions(validTypes, this.mode); 
             this.loadData();
         });
     }
@@ -781,11 +788,13 @@ class UIMapPlayerAverages{
 
             const urlParts = `${this.mapId}&page=${this.page}&perPage=${this.perPage}&cat=${this.selectedCat}`;
 
-            const req = await fetch(`/json/map-player-averages/?id=${urlParts}&gid=${this.selectedGametype}`);
+            const req = await fetch(`/json/map-player-averages/?id=${urlParts}&gid=${this.selectedGametype}&avgType=${this.mode}`);
 
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
+
+            
 
             this.data = res.data;
             this.totalResults = res.totalEntries;
@@ -818,6 +827,7 @@ class UIMapPlayerAverages{
     render(){
 
         this.info.updateContent(this.getInfoContent());
+
 
         const tableOptions = {
             "className": "t-width-1",

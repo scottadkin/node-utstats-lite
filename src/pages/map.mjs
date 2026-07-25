@@ -1,4 +1,4 @@
-import { getAllUniquePlayedGametypes, getMapInfo } from "../maps.mjs";
+import { getAllUniquePlayedGametypes, getMapInfo, VALID_PLAYER_EPM_AVERAGES } from "../maps.mjs";
 import { getCategorySettings } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getMapWeaponStats } from "../weapons.mjs";
@@ -49,7 +49,7 @@ export async function renderMapPage(req, res, userSession){
             weaponStats,
             ctfLeagueSettings,
             uniqueGametypes,
-            "validTypes": VALID_PLAYER_MAP_MINUTE_AVERAGES,
+            "validTypes": {"match-averages": VALID_PLAYER_MAP_MINUTE_AVERAGES, "epm": VALID_PLAYER_EPM_AVERAGES},
             "meta": {"description": description, "image": `images/maps/${basic.image}`},
         });
 
