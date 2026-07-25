@@ -23,7 +23,7 @@ export const VALID_PLAYER_MAP_MINUTE_AVERAGES = [
     {"value": "avg_flag_cover", "display": "Flag Covers", "group": "CTF"}, 
     {"value": "avg_flag_seal", "display": "Flag Seals", "group": "CTF"}, 
     {"value": "avg_flag_cap", "display": "Flag Caps", "group": "CTF"}, 
-    {"value": "avg_flag_kills", "display": "Flag Kills", "group": "CTF"}, 
+    {"value": "avg_flag_kill", "display": "Flag Kills", "group": "CTF"}, 
     {"value": "avg_flag_return", "display": "Flag Returns", "group": "CTF"}, 
     {"value": "avg_flag_return_base", "display": "Flag Returns Base", "group": "CTF"}, 
     {"value": "avg_flag_return_mid", "display": "Flag Returns Mid", "group": "CTF"}, 
@@ -639,6 +639,17 @@ function getMapAverageTitle(target){
     return "Not Found";
 }
 
+function getMapAverageType(target){
+
+    for(let i = 0; i < VALID_PLAYER_MAP_MINUTE_AVERAGES.length; i++){
+
+        const {value, display} = VALID_PLAYER_MAP_MINUTE_AVERAGES[i];
+
+        if(value === target) return VALID_PLAYER_MAP_MINUTE_AVERAGES[i];
+    }
+    return null;
+}
+
 export async function getMapPlayerAverages(mapId, gametypeId, category, initialPage, initialPerPage){
 
     const [page, perPage, start] = sanitizePagePerPage(initialPage, initialPerPage);
@@ -647,33 +658,43 @@ export async function getMapPlayerAverages(mapId, gametypeId, category, initialP
 
     category = category.toLowerCase();
 
-    console.log(category);
+    const typeInfo = getMapAverageType(category);
 
-    if(bValidMinuteCategory(category)){
-        
-        title = getMapAverageTitle(category);
+    if(typeInfo === null){
+        category = "avg_score";
         
     }else{
-        category = "avg_score";
+        category = typeInfo.value;
+        title = typeInfo.display;
     }
 
     const pTotals = "nstats_player_totals";
     const pT = "nstats_players";
 
-
     //need to add another join for ctf stuff
+
+    let targetCol = "";
+    let ctfJoin = "";
+
+    if(typeInfo.group === "CTF"){
+        targetCol = `nstats_player_totals_ctf.${category}`;
+        ctfJoin = `INNER JOIN nstats_player_totals_ctf ON nstats_player_totals_ctf.player_id = ${pTotals}.player_id AND nstats_player_totals_ctf.gametype_id = ${pTotals}.gametype_id AND nstats_player_totals_ctf.map_id = ${pTotals}.map_id`;
+    }else{
+        targetCol = `${pTotals}.${category}`;
+    }
 
     const query = `SELECT 
     ${pTotals}.player_id,
     ${pTotals}.last_active,
     ${pTotals}.total_matches,
     ${pTotals}.playtime,
-    ${pTotals}.${category} as target_value,
+    ${targetCol} as target_value,
     ${pT}.name,
     ${pT}.country
     FROM ${pTotals}
     INNER JOIN ${pT} ON ${pT}.id = ${pTotals}.player_id
-    WHERE ${pTotals}.map_id=? AND gametype_id=? ORDER BY target_value DESC LIMIT ?, ?`;
+    ${ctfJoin}
+    WHERE ${pTotals}.map_id=? AND ${pTotals}.gametype_id=? ORDER BY target_value DESC LIMIT ?, ?`;
     
 
     const data = await simpleQuery(query, [mapId, gametypeId, start, perPage]);

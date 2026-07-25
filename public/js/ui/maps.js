@@ -714,13 +714,14 @@ class UIMapPlayerAverages{
 
     createGametypeSelect(){
 
+
         const options = this.uniqueGametypes.map((g) =>{
             return { "display": g.gametype_name, "value": g.gametype_id}
         });
 
         options.sort((a, b) =>{
-            a = a.gametype_name.toLowerCase();
-            b = b.gametype_name.toLowerCase();
+            a = a.display.toLowerCase();
+            b = b.display.toLowerCase();
 
             if(a < b){
                 return -1;
@@ -787,7 +788,6 @@ class UIMapPlayerAverages{
             if(res.error !== undefined) throw new Error(res.error);
 
             this.data = res.data;
-            console.log(res);
             this.totalResults = res.totalEntries;
             this.title = res.title;
             
@@ -823,12 +823,12 @@ class UIMapPlayerAverages{
             "className": "t-width-1",
             "bNoSort": true,
             "headers": [
-                {"display": "POS"},
+                {"display": "Place"},
                 {"display": "Player"},
                 {"display": "Last Active"},
                 {"display": "Matches Played"},
                 {"display": "Total Playtime"},
-                {"display": "Value"}
+                {"display": this.title}
             ]
         };
 
