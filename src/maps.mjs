@@ -37,6 +37,19 @@ export const VALID_PLAYER_MAP_MINUTE_AVERAGES = [
     {"value": "avg_item_pads", "display": "Thigh Pads Taken", "group": "Items"}, 
     {"value": "avg_item_invis", "display": "Invisibilities Taken", "group": "Items"}, 
     {"value": "avg_item_shp", "display": "Super Health Pack Taken", "group": "Items"},
+
+    {"value": "avg_spree_1", "display": "Killing Sprees", "group": "Special Events"},
+    {"value": "avg_spree_2", "display": "Rampage", "group": "Special Events"},
+    {"value": "avg_spree_3", "display": "Dominating", "group": "Special Events"},
+    {"value": "avg_spree_4", "display": "Unstoppable", "group": "Special Events"},
+    {"value": "avg_spree_5", "display": "Godlike", "group": "Special Events"},
+    {"value": "avg_spree_best", "display": "Best Spree", "group": "Special Events"},
+
+    {"value": "avg_multi_1", "display": "Double Kill", "group": "Special Events"},
+    {"value": "avg_multi_2", "display": "Multi Kill", "group": "Special Events"},
+    {"value": "avg_multi_3", "display": "Ultra Kill", "group": "Special Events"},
+    {"value": "avg_multi_4", "display": "Monster Kill", "group": "Special Events"},
+    {"value": "avg_multi_best", "display": "Best Multi Kill", "group": "Special Events"},
 ];
 
 
