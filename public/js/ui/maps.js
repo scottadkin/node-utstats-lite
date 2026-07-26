@@ -1083,3 +1083,98 @@ class UIMapCTFLeague{
         this.updatePagination();
     }
 }
+
+class UIMapPlayerTotals{
+
+    constructor(parent, mapId, uniqueGametypes){
+
+        this.parent = document.querySelector(parent);
+        this.mapId = parseInt(mapId);
+
+        this.uniqueGametypes = uniqueGametypes;
+        this.selectedGametype = 0;
+
+        this.page = 1;
+        this.totalResults = 99999;
+        this.perPage = 25;
+
+        this.wrapper = UIDiv();
+        UIHeader(this.wrapper, "Player Totals");
+        this.parent.append(this.wrapper);
+
+        this.createGametypeSelect();
+        this.render();
+    }
+
+    createGametypeSelect(){
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Gametype"));
+
+        const options = this.uniqueGametypes.map((g) =>{
+            return {"display": g.gametype_name, "value": g.gametype_id};
+        });
+
+        options.unshift({"display": "All Time", "value": 0});
+
+        this.gametypeSelect = new UISelect(row, options, this.selectedGametype, (e) =>{
+            this.selectedGametype = parseInt(e);
+            this.render();
+        });
+        
+
+        this.wrapper.append(row);
+    }
+
+    async loadData(){
+
+        try{
+            
+            const req = await fetch();
+            const res = await req.json();
+
+
+        }catch(err){
+            console.trace(err);
+
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
+    }
+
+    render(){
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "bNoSort": true,
+            "headers": [
+                {"display": "Place"},
+                {"display": "Player"},
+                {"display": "Last Seen"},
+                {"display": "Matches Played"},
+                {"display": "Total Playtime"},
+            ]
+        };
+
+        const rows = [];
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+        }
+
+
+
+        if(this.pagination === undefined){
+
+            this.pagination = new UIPagination(
+                this.wrapper, 
+                (e) => { console.log(e);},
+                this.totalResults,
+                this.perPage,
+                this.page
+        );
+
+        }else{
+            //update
+        }
+    }
+}

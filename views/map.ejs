@@ -14,7 +14,13 @@
 </div>
 <div id="root">
 </div>
+
+
 <script>
+
+
+    new UIMapPlayerTotals("#root", "<%= basic.id %>", <%- JSON.stringify(uniqueGametypes) %>);
+
     const validTypes = <%- JSON.stringify(validTypes) %>;
     const pageSettings = <%- JSON.stringify(pageSettings) %>;
     const ctfLeagueSettings = <%- JSON.stringify(ctfLeagueSettings) %>
