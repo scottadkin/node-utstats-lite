@@ -19,11 +19,16 @@
 <script>
 
 
-    new UIMapPlayerTotals("#root", "<%= basic.id %>", <%- JSON.stringify(uniqueGametypes) %>);
+    
 
     const validTypes = <%- JSON.stringify(validTypes) %>;
     const pageSettings = <%- JSON.stringify(pageSettings) %>;
     const ctfLeagueSettings = <%- JSON.stringify(ctfLeagueSettings) %>
+
+
+    new UIMapPlayerTotals("#root", "<%= basic.id %>", <%- JSON.stringify(uniqueGametypes) %>, <%- JSON.stringify(validTypes.playerTotals) %>);
+
+
     <%
     for(let i = 0; i < pageOrder.length; i++){
 

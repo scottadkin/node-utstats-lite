@@ -1,6 +1,6 @@
 import { getPlayerActivityHeatmapData, getPlayerAllGametypesAndMaps, getPlayerRecentMatches } from "../players.mjs";
 import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData } from "../matches.mjs";
-import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages, searchMaps} from "../maps.mjs";
+import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages, searchMaps, getMapPlayerTotals} from "../maps.mjs";
 import { getRankingsWithPlayerNames } from "../rankings.mjs";
 import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
@@ -153,6 +153,17 @@ export default class JSONManager{
         this.res.status(200).json(await getMapPlayerAverages(averageType, id, gid, cat, page, perPage));
     }
 
+    async mapPlayerTotals(){
+
+        const id = this.querySanitizeInteger("id");
+        const cat = this.querySanitizeString("cat", true);
+        const gid = this.querySanitizeInteger("gid");
+        const {page, perPage} = this.getPageAndPerPage();
+
+        this.res.status(200).json(await getMapPlayerTotals(id, gid, cat, page, perPage));
+
+    }
+
     async mapPlayerCTFLeague(){
 
         const mapId = this.querySanitizeInteger("mapId");
@@ -287,6 +298,10 @@ export default class JSONManager{
 
                 //getMapPlayerAverages(mapId, category, initialPage, initialPerPage)
                 return await this.mapPlayerAverages();
+
+            }else if(this.mode === "map-player-totals"){
+
+                return await this.mapPlayerTotals();
 
             }else if(this.mode === "map-ctf-league-gametypes"){
 

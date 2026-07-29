@@ -1086,25 +1086,31 @@ class UIMapCTFLeague{
 
 class UIMapPlayerTotals{
 
-    constructor(parent, mapId, uniqueGametypes){
+    constructor(parent, mapId, uniqueGametypes, validTypes){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
 
         this.uniqueGametypes = uniqueGametypes;
         this.selectedGametype = 0;
+        this.validTypes = validTypes;
 
         this.page = 1;
         this.totalResults = 99999;
         this.perPage = 25;
+        this.mapId = mapId;
+        this.selectedCat = "kills";
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Totals");
         this.parent.append(this.wrapper);
 
         this.createGametypeSelect();
-        this.render();
+        this.createValidTypesSelect();
+        this.loadData();
     }
+
+
 
     createGametypeSelect(){
 
@@ -1126,18 +1132,47 @@ class UIMapPlayerTotals{
         this.wrapper.append(row);
     }
 
+    createValidTypesSelect(){
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Data Type"));
+
+       // c/onst options = this.validTypes.map((g) =>{
+        //    return {"display": g.gametype_name, "value": g.gametype_id};
+       // });
+
+        //options.unshift({"display": "All Time", "value": 0});
+
+        this.validTypesSelect = new UISelect(row, this.validTypes, this.selectedGametype, (e) =>{
+            this.selectedCat = e;
+            this.render();
+        });
+        
+
+        this.wrapper.append(row);
+    }
+
     async loadData(){
 
         try{
             
-            const req = await fetch();
+            let url = `/json/map-player-totals/`;
+            url += `?id=${this.mapId}&gid=${this.selectedGametype}&cat=${this.selectedCat}&page=${this.page}&perPage=${this.perPage}`
+
+
+            const req = await fetch(url);
             const res = await req.json();
+
+            console.log(res);
 
 
         }catch(err){
             console.trace(err);
 
             new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }finally{
+
+            this.render();
         }
     }
 

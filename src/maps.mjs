@@ -56,9 +56,7 @@ export const VALID_PLAYER_MAP_MINUTE_AVERAGES = [
         return {"value": `avg_${v.value}`, "display": v.display, "group": v.group}
     }),
     {"value": "avg_spree_best", "display": "Best Spree", "group": "Special Events"},
-    {"value": "avg_multi_best", "display": "Best Multi Kill", "group": "Special Events"},
-
-    
+    {"value": "avg_multi_best", "display": "Best Multi Kill", "group": "Special Events"}, 
 ];
 
 
@@ -70,6 +68,60 @@ export const VALID_PLAYER_EPM_AVERAGES = [
 
 
 export const VALID_MAP_SEARCH_BY = ["name", "first_match", "matches", "playtime", "last_match"];
+
+
+
+export const VALID_PLAYER_TOTALS = [
+    {"value": "winrate", "display": "Win Rate", "group": "Match Results"}, 
+    {"value": "wins", "display": "Wins", "group": "Match Results"}, 
+    {"value": "draws", "display": "Draws", "group": "Match Results"}, 
+    {"value": "losses", "display": "Losses", "group": "Match Results"}, 
+    {"value": "playtime", "display": "Playtime", "group": "General"}, 
+    {"value": "total_matches", "display": "Matches Played", "group": "General"}, 
+    {"value": "score", "display": "Score", "group": "General"}, 
+    {"value": "frags", "display": "Frags", "group": "General"}, 
+    {"value": "kills", "display": "Kills", "group": "General"}, 
+    {"value": "deaths", "display": "Deaths", "group": "General"}, 
+    {"value": "suicides", "display": "Suicides", "group": "General"}, 
+    {"value": "team_kills", "display": "Team Kills", "group": "General"},
+    {"value": "efficiency", "display": "Efficiency", "group": "General"},
+    {"value": "headshots", "display": "Headshots", "group": "General"}, 
+    {"value": "flag_taken", "display": "Flag Taken", "group": "CTF"}, 
+    {"value": "flag_pickup", "display": "Flag Pickups", "group": "CTF"}, 
+    {"value": "flag_drop", "display": "Flag Drops", "group": "CTF"}, 
+    {"value": "flag_assist", "display": "Flag Assists", "group": "CTF"}, 
+    {"value": "flag_cover", "display": "Flag Covers", "group": "CTF"}, 
+    {"value": "flag_seal", "display": "Flag Seals", "group": "CTF"}, 
+    {"value": "flag_cap", "display": "Flag Caps", "group": "CTF"}, 
+    {"value": "flag_kill", "display": "Flag Kills", "group": "CTF"}, 
+    {"value": "flag_return", "display": "Flag Returns", "group": "CTF"}, 
+    {"value": "flag_return_base", "display": "Flag Returns Base", "group": "CTF"}, 
+    {"value": "flag_return_mid", "display": "Flag Returns Mid", "group": "CTF"}, 
+    {"value": "flag_return_enemy_base", "display": "Flag Returns Enemy Base", "group": "CTF"}, 
+    {"value": "flag_return_save", "display": "Flag Returns Close Save", "group": "CTF"}, 
+    {"value": "dom_caps", "display": "Domination Caps", "group": "Domination"},
+    {"value": "item_amp", "display": "UDamage Taken", "group": "Items"}, 
+    {"value": "item_belt", "display": "Shield Belts Taken", "group": "Items"}, 
+    {"value": "item_boots", "display": "Jump Boots Taken", "group": "Items"}, 
+    {"value": "item_body", "display": "Body Armour Taken", "group": "Items"}, 
+    {"value": "item_pads", "display": "Thigh Pads Taken", "group": "Items"}, 
+    {"value": "item_invis", "display": "Invisibilities Taken", "group": "Items"}, 
+    {"value": "item_shp", "display": "Super Health Pack Taken", "group": "Items"},
+
+    {"value": "spree_1", "display": "Killing Sprees", "group": "Special Events"},
+    {"value": "spree_2", "display": "Rampage", "group": "Special Events"},
+    {"value": "spree_3", "display": "Dominating", "group": "Special Events"},
+    {"value": "spree_4", "display": "Unstoppable", "group": "Special Events"},
+    {"value": "spree_5", "display": "Godlike", "group": "Special Events"},
+    {"value": "spree_best", "display": "Best Spree", "group": "Special Events"},
+    
+
+    {"value": "multi_1", "display": "Double Kill", "group": "Special Events"},
+    {"value": "multi_2", "display": "Multi Kill", "group": "Special Events"},
+    {"value": "multi_3", "display": "Ultra Kill", "group": "Special Events"},
+    {"value": "multi_4", "display": "Monster Kill", "group": "Special Events"},
+    {"value": "multi_best", "display": "Best Multi Kill", "group": "Special Events"},
+];
 
 async function getMapId(name){
 
@@ -942,4 +994,45 @@ export async function getAllMaps(){
     const query = `SELECT * FROM nstats_maps ORDER BY name ASC`;
 
     return await simpleQuery(query);
+}
+
+export function bValidMapPlayerTotalType(type){
+
+    type = type.toLowerCase();
+
+    for(let i = 0; i < VALID_PLAYER_TOTALS.length; i++){
+
+        const v = VALID_PLAYER_TOTALS[i];
+
+        if(v.value === type) return true;
+    }
+
+    return false;
+}
+
+export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPerPage, dirtyPage){
+
+    const {start, page, perPage} = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+
+    category = category.toLowerCase();
+
+    if(!bValidMapPlayerTotalType(category)) throw new Error(`Note a valid player map total type.`);
+
+    
+    const pT = "nstats_player_totals";
+    const nameT = "nstats_players";
+
+    const query = `SELECT 
+    ${pT}.player_id,
+    ${nameT}.name as name,
+    ${nameT}.country as country,
+    ${pT}.last_active,
+    ${pT}.playtime,
+    ${pT}.total_matches 
+    FROM ${pT} 
+    INNER JOIN ${nameT} on ${nameT}.id = ${pT}.player_id
+    WHERE ${pT}.map_id=? AND ${pT}.gametype_id=? LIMIT 100`;
+
+
+    return await simpleQuery(query, [mapId, gametypeId]);
 }
