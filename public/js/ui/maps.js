@@ -1174,7 +1174,21 @@ class UIMapPlayerTotals{
         }
     }
 
+    getTitle(target){
+
+        for(let i = 0; i < this.validTypes.length; i++){
+
+            const {value, display} = this.validTypes[i];
+
+            if(value === target) return display;
+        }
+
+        return "NOT FOUND";
+    }
+
     render(){
+
+        const title = this.getTitle(this.selectedCat);
 
         const tableOptions = {
             "className": "t-width-1",
@@ -1185,13 +1199,25 @@ class UIMapPlayerTotals{
                 {"display": "Last Seen"},
                 {"display": "Matches Played"},
                 {"display": "Total Playtime"},
-                {"display": "VALUE TYPE HERE"},
+                {"display": title},
             ]
         };
 
         const rows = this.data.map((d, i) =>{
 
             const place = i + 1 + (this.page - 1) * this.perPage;
+
+
+            let value = d.total_value;
+            let className = "";
+
+            if(this.selectedCat === "playtime"){
+                value = toPlaytime(d.playtime);
+                className = "playtime";
+            }else if(this.selectedCat === "winrate" || this.selectedCat === "efficiency"){
+                value = `${value.toFixed(2)}%`;
+            }
+
             return [
                 {"display": `${place}${getOrdinal(place)}`, "value": i, "className": "ordinal"},
                 {
@@ -1208,7 +1234,7 @@ class UIMapPlayerTotals{
                 },
                 {"display": d.total_matches},
                 {"display": toPlaytime(d.playtime), "className": "playtime"},
-                {"display": d.total_value},
+                {"display": value, className},
             ];
         });
 
@@ -1217,7 +1243,7 @@ class UIMapPlayerTotals{
         if(this.table === undefined){
             this.table = new TESTUITable(this.wrapper, tableOptions, rows);
         }else{
-            this.table.updateRows(rows);
+            this.table.updateRows(rows, tableOptions.headers);
         }
 
 
