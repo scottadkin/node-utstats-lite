@@ -1010,14 +1010,22 @@ export function bValidMapPlayerTotalType(type){
     return false;
 }
 
-export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPerPage, dirtyPage){
+export async function getMapPlayerTotalsMaxResults(mapId, gametypeId){
 
-    const {start, page, perPage} = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+    const query = `SELECT COUNT(*) as total_results FROM nstats_player_totals WHERE map_id=? AND gametype_id=?`;
+
+    const result = await simpleQuery(query, [mapId, gametypeId]);
+
+    return result[0].total_results;
+}
+
+export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPage, dirtyPerPage){
+
+    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
     category = category.toLowerCase();
 
-    if(!bValidMapPlayerTotalType(category)) throw new Error(`Note a valid player map total type.`);
-
+    if(!bValidMapPlayerTotalType(category)) throw new Error(`Not a valid player map total type.`);
     
     const pT = "nstats_player_totals";
     const nameT = "nstats_players";
@@ -1028,11 +1036,17 @@ export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPerPa
     ${nameT}.country as country,
     ${pT}.last_active,
     ${pT}.playtime,
-    ${pT}.total_matches 
+    ${pT}.total_matches,
+    ${pT}.${category} as total_value 
     FROM ${pT} 
     INNER JOIN ${nameT} on ${nameT}.id = ${pT}.player_id
-    WHERE ${pT}.map_id=? AND ${pT}.gametype_id=? LIMIT 100`;
+    WHERE ${pT}.map_id=? AND ${pT}.gametype_id=? 
+    ORDER BY ${pT}.${category} DESC
+    LIMIT ${start}, ${perPage}`;
 
 
-    return await simpleQuery(query, [mapId, gametypeId]);
+    const data = await simpleQuery(query, [mapId, gametypeId]);
+    const totalResults = await getMapPlayerTotalsMaxResults(mapId, gametypeId);
+
+    return {data, totalResults};
 }

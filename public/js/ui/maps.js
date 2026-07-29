@@ -1096,10 +1096,11 @@ class UIMapPlayerTotals{
         this.validTypes = validTypes;
 
         this.page = 1;
-        this.totalResults = 99999;
+        this.totalResults = 0;
         this.perPage = 25;
         this.mapId = mapId;
         this.selectedCat = "kills";
+        this.data = [];
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Totals");
@@ -1125,7 +1126,7 @@ class UIMapPlayerTotals{
 
         this.gametypeSelect = new UISelect(row, options, this.selectedGametype, (e) =>{
             this.selectedGametype = parseInt(e);
-            this.render();
+            this.loadData();
         });
         
 
@@ -1137,15 +1138,9 @@ class UIMapPlayerTotals{
         const row = UIDiv("form-row");
         row.append(UILabel("Data Type"));
 
-       // c/onst options = this.validTypes.map((g) =>{
-        //    return {"display": g.gametype_name, "value": g.gametype_id};
-       // });
-
-        //options.unshift({"display": "All Time", "value": 0});
-
-        this.validTypesSelect = new UISelect(row, this.validTypes, this.selectedGametype, (e) =>{
+        this.validTypesSelect = new UISelect(row, this.validTypes, this.selectedCat, (e) =>{
             this.selectedCat = e;
-            this.render();
+            this.loadData();
         });
         
 
@@ -1163,7 +1158,10 @@ class UIMapPlayerTotals{
             const req = await fetch(url);
             const res = await req.json();
 
-            console.log(res);
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.data = res.data;
+            this.totalResults = res.totalResults;
 
 
         }catch(err){
@@ -1187,13 +1185,39 @@ class UIMapPlayerTotals{
                 {"display": "Last Seen"},
                 {"display": "Matches Played"},
                 {"display": "Total Playtime"},
+                {"display": "VALUE TYPE HERE"},
             ]
         };
 
-        const rows = [];
+        const rows = this.data.map((d, i) =>{
+
+            const place = i + 1 + (this.page - 1) * this.perPage;
+            return [
+                {"display": `${place}${getOrdinal(place)}`, "value": i, "className": "ordinal"},
+                {
+                    "display": UIPlayerLink({
+                        "playerId": d.player_id,
+                        "name": d.name,
+                        "country": d.country,
+                        "bTableElem": true
+                    }),
+                    "bSkipTD": true,
+                },
+                {
+                    "display": toDateString(d.last_active,true), "className": "playtime"
+                },
+                {"display": d.total_matches},
+                {"display": toPlaytime(d.playtime), "className": "playtime"},
+                {"display": d.total_value},
+            ];
+        });
+
+
 
         if(this.table === undefined){
             this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows);
         }
 
 
@@ -1202,7 +1226,10 @@ class UIMapPlayerTotals{
 
             this.pagination = new UIPagination(
                 this.wrapper, 
-                (e) => { console.log(e);},
+                (e) => { 
+                    this.page = e;
+                    this.loadData();
+                },
                 this.totalResults,
                 this.perPage,
                 this.page
