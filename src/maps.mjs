@@ -1010,6 +1010,26 @@ export function bValidMapPlayerTotalType(type){
     return false;
 }
 
+/**
+ * 
+ * @param {string} type 
+ * @returns matching setting or null if not found
+ */
+function getMapPlayerTotalInfo(type){
+
+    type = type.toLowerCase();
+
+    for(let i = 0; i < VALID_PLAYER_TOTALS.length; i++){
+
+        const v = VALID_PLAYER_TOTALS[i];
+
+        if(v.value === type) return v;
+
+    }
+
+    return null;
+}
+
 export async function getMapPlayerTotalsMaxResults(mapId, gametypeId){
 
     const query = `SELECT COUNT(*) as total_results FROM nstats_player_totals WHERE map_id=? AND gametype_id=?`;
@@ -1025,10 +1045,23 @@ export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPage,
 
     category = category.toLowerCase();
 
-    if(!bValidMapPlayerTotalType(category)) throw new Error(`Not a valid player map total type.`);
+    const setting = getMapPlayerTotalInfo(category);
+
+    if(setting === null) throw new Error(`Not a valid player map total type.`);
     
     const pT = "nstats_player_totals";
     const nameT = "nstats_players";
+    const ctfT = "nstats_player_totals_ctf";
+
+    const targetCol = (setting.group === "CTF") ? `${ctfT}.${category}` : `${pT}.${category}`;
+
+    let ctfJoin = "";
+
+    if(setting.group === "CTF"){
+        ctfJoin = `INNER JOIN ${ctfT} on ${ctfT}.player_id = ${pT}.player_id`;
+        ctfJoin += ` AND ${ctfT}.gametype_id=${pT}.gametype_id AND ${ctfT}.map_id = ${pT}.map_id`;
+    }
+
 
     const query = `SELECT 
     ${pT}.player_id,
@@ -1037,13 +1070,13 @@ export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPage,
     ${pT}.last_active,
     ${pT}.playtime,
     ${pT}.total_matches,
-    ${pT}.${category} as total_value 
+    ${targetCol} as total_value
     FROM ${pT} 
     INNER JOIN ${nameT} on ${nameT}.id = ${pT}.player_id
+    ${ctfJoin}
     WHERE ${pT}.map_id=? AND ${pT}.gametype_id=? 
-    ORDER BY ${pT}.${category} DESC
+    ORDER BY ${targetCol} DESC
     LIMIT ${start}, ${perPage}`;
-
 
     const data = await simpleQuery(query, [mapId, gametypeId]);
     const totalResults = await getMapPlayerTotalsMaxResults(mapId, gametypeId);
