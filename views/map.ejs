@@ -26,8 +26,6 @@
     const ctfLeagueSettings = <%- JSON.stringify(ctfLeagueSettings) %>
 
 
-    new UIMapPlayerTotals("#root", "<%= basic.id %>", <%- JSON.stringify(uniqueGametypes) %>, <%- JSON.stringify(validTypes.playerTotals) %>);
-
 
     <%
     for(let i = 0; i < pageOrder.length; i++){
@@ -77,6 +75,14 @@
                 );<%
                
             } break;
+            case "Display Player Totals": {
+                %>new UIMapPlayerTotals(
+                    "#root", 
+                    "<%= basic.id %>", 
+                    <%- JSON.stringify(uniqueGametypes) %>, 
+                    <%- JSON.stringify(validTypes.playerTotals) %>
+                );<%
+            }
         }
     }
     %>

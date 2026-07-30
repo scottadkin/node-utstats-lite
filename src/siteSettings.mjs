@@ -38,6 +38,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Map" ,"type": `bool`, "name": "Display Recent Matches", "value": "1"},
     {"category": "Map" ,"type": `bool`, "name": "Display Rankings", "value": "1"},
     {"category": "Map" ,"type": `bool`, "name": "Display Player Top Averages", "value": "1"},
+    {"category": "Map" ,"type": `bool`, "name": "Display Player Totals", "value": "1"},
     {"category": "Map" ,"type": `bool`, "name": "Display Weapon Statistics", "value": "1"},
     {"category": "Map" ,"type": `bool`, "name": "Display Activity Heatmap", "value": "1"},
     {"category": "Map" ,"type": `heatmapMode`, "name": "Activity Heatmap Default Mode", "value": "matches"},

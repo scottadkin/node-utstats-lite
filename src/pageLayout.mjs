@@ -2,11 +2,66 @@ import { simpleQuery } from "./database.mjs";
 import Message from "./message.mjs";
 
 const DEFAULT_PAGE_LAYOUTS = {
-    "home": ["Welcome Message", "Social Media","Latest Screenshot", "Recent Matches", "Activity Heatmap", "Most Played Maps", "Most Played Gametypes", "Most Active Players", "Servers"],
-    "map": ["Map Screenshot", "Basic Summary", "Activity Heatmap", "Recent Matches", "Rankings", "Weapon Statistics", "CTF League", "Player Top Averages"],
-    "match": ["Basic Info", "Screenshot", "Frags", "CTF", "CTF Caps", "DOM","Damage Stats","Classic Weapon Stats", "Weapons", "Items", "Special Events", "Kills", "Pings", "JSON Links"],
-    "player": ["General Summary","Activity Heatmap", "CTF","CTF League", "Special Events", "Weapons", "Rankings", "Items", "Recent Matches"],
-    "nav": ["Home", "Matches", "Players", "Rankings","CTF League", "Records", "Maps", "Admin", "Login/Register", "Watchlist"]
+    "home": [
+        "Welcome Message", 
+        "Social Media",
+        "Latest Screenshot", 
+        "Recent Matches", 
+        "Activity Heatmap", 
+        "Most Played Maps", 
+        "Most Played Gametypes", 
+        "Most Active Players", 
+        "Servers"],
+    "map": [
+        "Map Screenshot", 
+        "Basic Summary", 
+        "Activity Heatmap", 
+        "Recent Matches", 
+        "Rankings", 
+        "Weapon Statistics", 
+        "CTF League", 
+        "Player Top Averages",
+        "Player Totals"
+    ],
+    "match": [
+        "Basic Info", 
+        "Screenshot", 
+        "Frags", 
+        "CTF", 
+        "CTF Caps", 
+        "DOM",
+        "Damage Stats",
+        "Classic Weapon Stats", 
+        "Weapons", 
+        "Items", 
+        "Special Events", 
+        "Kills", 
+        "Pings", 
+        "JSON Links"
+    ],
+    "player": [
+        "General Summary",
+        "Activity Heatmap", 
+        "CTF",
+        "CTF League", 
+        "Special Events", 
+        "Weapons", 
+        "Rankings", 
+        "Items", 
+        "Recent Matches"
+    ],
+    "nav": [
+        "Home", 
+        "Matches", 
+        "Players", 
+        "Rankings",
+        "CTF League", 
+        "Records", 
+        "Maps", 
+        "Admin", 
+        "Login/Register", 
+        "Watchlist"
+    ]
 };
 
 function getNextAvailableIndex(usedIndexes, targetIndex){
