@@ -393,7 +393,9 @@ async function deleteSQLiteInstallSettings(){
         "nstats_ctf_league_settings", 
         "nstats_json_api", 
         "nstats_logs_folder",
-        "nstats_page_layout"
+        "nstats_page_layout",
+        "nstats_ranking_settings",
+        "nstats_site_settings",
     ];
 
     for(let i = 0; i < tables.length; i++){

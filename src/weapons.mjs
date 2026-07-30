@@ -135,6 +135,8 @@ async function deleteMultiplePlayerTotals(playerIds){
 
 async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
 
+    new Message(`deprecated function call calcPlayersTotalsFromMatchDataByGroup`,"error");
+    process.exit();
     if(playerIds !== null && playerIds.length === 0) return;
     const validTypes = ["all", "gametypes", "maps"];
 
@@ -198,23 +200,22 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
 
 async function testCalculatePlayerTotalsFromMatchData(playerIds){
 
-    if(playerIds.length === 0) return null;
+    if(playerIds !== null && playerIds.length === 0) return null;
 
     const wT = `nstats_match_weapon_stats`;
     const mT = `nstats_match_players`;
 
-    /*const query = `SELECT ${mT}.player_id,${mT}.time_on_server as playtime, 
-    ${mT}.match_id,
-    ${mT}.map_id,
-    ${mT}.gametype_id,
-    ${wT}.weapon_id,
-    ${wT}.kills,
-    ${wT}.deaths,
-    ${wT}.team_kills,
-    ${wT}.suicides 
-    FROM ${mT} 
-    INNER JOIN ${wT} on ${wT}.match_id = ${mT}.match_id AND ${wT}.player_id = ${mT}.player_id
-    WHERE ${mT}.player_id IN (?) AND ${mT}.spectator=0`;*/
+
+    let where = "WHERE ";
+
+    const vars = [];
+
+    if(playerIds === null){
+        where += ` ${mT}.spectator=0`;
+    }else{
+        where += ` ${mT}.player_id IN(?) AND ${mT}.spectator=0`;
+        vars.push(playerIds);
+    }
 
     const query = `SELECT ${mT}.player_id,SUM(${mT}.time_on_server) as playtime, 
     COUNT(*) as total_matches,
@@ -231,9 +232,9 @@ async function testCalculatePlayerTotalsFromMatchData(playerIds){
     MAX(${wT}.suicides) as max_suicides
     FROM ${mT} 
     INNER JOIN ${wT} on ${wT}.match_id = ${mT}.match_id AND ${wT}.player_id = ${mT}.player_id
-    WHERE ${mT}.player_id IN (?) AND ${mT}.spectator=0 GROUP BY ${mT}.player_id,${mT}.gametype_id,${mT}.map_id,${wT}.weapon_id`;
+    ${where} GROUP BY ${mT}.player_id,${mT}.gametype_id,${mT}.map_id,${wT}.weapon_id`;
 
-    return await simpleQuery(query, [playerIds]);
+    return await simpleQuery(query, vars);
 }
 
 
@@ -471,7 +472,7 @@ async function testBulkUpdatePlayerTotals(totals){
 
 export async function updatePlayerTotals(playerIds){
 
-    if(playerIds.length === 0) return null;
+    if(playerIds !== null && playerIds.length === 0) return null;
     
     const start = performance.now();
     const test = await testCalculatePlayerTotalsFromMatchData(playerIds);
@@ -969,17 +970,9 @@ async function deleteAllPlayerWeaponTotals(){
 
 export async function recalculateAllPlayerTotals(){
 
-    const all = await calcPlayersTotalsFromMatchDataByGroup(null, "all");
-    const gametypes = await calcPlayersTotalsFromMatchDataByGroup(null, "gametypes");
-    const maps = await calcPlayersTotalsFromMatchDataByGroup(null, "maps");
 
     await deleteAllPlayerWeaponTotals();
+    return await updatePlayerTotals(null);
 
-    const promises = [
-        bulkInsertPlayerTotalsNew(all, "all", true), 
-        bulkInsertPlayerTotalsNew(gametypes, "gametypes", true), 
-        bulkInsertPlayerTotalsNew(maps, "maps", true)
-    ];
-
-    return await Promise.all(promises);
+    
 }
