@@ -907,31 +907,34 @@ async function addColumn(tableName, columnName, columnType){
 }
 
 
+export const PLAYER_TOTAL_WEAPONS_COLUMNS_260 = [
+    "map_id", "max_kills", "max_deaths", "max_suicides", "max_team_kills"
+];
+export const PLAYER_TOTAL_WEAPONS_COLUMNS_270 = [
+    "playtime", "avg_kills", "avg_deaths", "avg_suicides", "avg_team_kills", 
+    "epm_kills", "epm_deaths", "epm_suicides", "epm_team_kills"
+];
+
 async function updatePlayerWeaponTotalsTable(){
 
     new Message("Attempting to update nstats_player_totals_weapons table.","note");
 
     //2.6.0
-    await addColumn("nstats_player_totals_weapons", "map_id", "INTEGER NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "max_kills", "INTEGER NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "max_deaths", "INTEGER NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "max_suicides", "INTEGER NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "max_team_kills", "INTEGER NOT NULL DEFAULT 0");
+    for(let i = 0; i < PLAYER_TOTAL_WEAPONS_COLUMNS_260.length; i++){
+
+        const c = PLAYER_TOTAL_WEAPONS_COLUMNS_260[i];
+
+        await addColumn("nstats_player_totals_weapons", c, "INTEGER NOT NULL DEFAULT 0");
+    }
 
 
     //2.7.0
 
-    await addColumn("nstats_player_totals_weapons", "playtime", "REAL NOT NULL DEFAULT 0");
+    for(let i = 0; i < PLAYER_TOTAL_WEAPONS_COLUMNS_270.length; i++){
 
-    await addColumn("nstats_player_totals_weapons", "avg_kills", "REAL NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "avg_deaths", "REAL NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "avg_suicides", "REAL NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "avg_team_kills", "REAL NOT NULL DEFAULT 0");
-
-    await addColumn("nstats_player_totals_weapons", "epm_kills", "REAL NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "epm_deaths", "REAL NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "epm_suicides", "REAL NOT NULL DEFAULT 0");
-    await addColumn("nstats_player_totals_weapons", "epm_team_kills", "REAL NOT NULL DEFAULT 0");
+        const c = PLAYER_TOTAL_WEAPONS_COLUMNS_270[i];
+        await addColumn("nstats_player_totals_weapons", c, "REAL NOT NULL DEFAULT 0"); 
+    }
 
 
     new Message("Updated nstats_player_totals_weapons table.","pass");
@@ -953,39 +956,41 @@ async function updateMapWeaponTotalsTable(){
 }
 
 
+export const PLAYER_TOTAL_CTF_COLUMNS_270_UPDATE = [
+    "avg_flag_taken",
+    "avg_flag_pickup",
+    "avg_flag_drop",
+    "avg_flag_assist",
+    "avg_flag_cover",
+    "avg_flag_seal",
+    "avg_flag_cap",
+    "avg_flag_kill",
+    "avg_flag_return",
+    "avg_flag_return_base",
+    "avg_flag_return_mid",
+    "avg_flag_return_enemy_base",
+    "avg_flag_return_save",
+    "playtime",
+    "epm_flag_taken",
+    "epm_flag_pickup",
+    "epm_flag_drop",
+    "epm_flag_assist",
+    "epm_flag_cover",
+    "epm_flag_seal",
+    "epm_flag_cap",
+    "epm_flag_kill",
+    "epm_flag_return",
+    "epm_flag_return_base",
+    "epm_flag_return_mid",
+    "epm_flag_return_enemy_base",
+    "epm_flag_return_save",
+];
+
 async function updatePlayerCTFTotalsTable(){
 
     new Message("Attempting to update nstats_player_totals_ctf table.", "note");
 
-    const columns = [
-        "avg_flag_taken",
-        "avg_flag_pickup",
-        "avg_flag_drop",
-        "avg_flag_assist",
-        "avg_flag_cover",
-        "avg_flag_seal",
-        "avg_flag_cap",
-        "avg_flag_kill",
-        "avg_flag_return",
-        "avg_flag_return_base",
-        "avg_flag_return_mid",
-        "avg_flag_return_enemy_base",
-        "avg_flag_return_save",
-        "playtime",
-        "epm_flag_taken",
-        "epm_flag_pickup",
-        "epm_flag_drop",
-        "epm_flag_assist",
-        "epm_flag_cover",
-        "epm_flag_seal",
-        "epm_flag_cap",
-        "epm_flag_kill",
-        "epm_flag_return",
-        "epm_flag_return_base",
-        "epm_flag_return_mid",
-        "epm_flag_return_enemy_base",
-        "epm_flag_return_save",
-    ];
+    const columns = PLAYER_TOTAL_CTF_COLUMNS_270_UPDATE;
 
     const table = "nstats_player_totals_ctf";
 
@@ -998,11 +1003,7 @@ async function updatePlayerCTFTotalsTable(){
 }
 
 
-async function updatePlayerTotalsTable(){
-
-    new Message("Attempting to update nstats_player_totals table.", "note");
-
-    const columns = [
+export const PLAYER_TOTAL_COLUMNS_270_UPDATE = [
         "dom_caps",
         "avg_score",
         "avg_frags",
@@ -1054,7 +1055,13 @@ async function updatePlayerTotalsTable(){
         "epm_item_invis",
         "epm_item_shp",
         "epm_dom_caps"
-    ];
+    ]
+
+async function updatePlayerTotalsTable(){
+
+    new Message("Attempting to update nstats_player_totals table.", "note");
+
+    const columns = PLAYER_TOTAL_COLUMNS_270_UPDATE;
 
     const table = "nstats_player_totals";
 

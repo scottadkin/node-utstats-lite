@@ -1097,6 +1097,15 @@ async function updateMapWeaponTotalsTable(){
     }
 }
 
+
+async function addDomCapsToMatchesTable(){
+
+    new Message("Attempting to add column dom_caps to nstats_match_players");
+
+    await addColumn("nstats_match_players", "dom_caps", "INT NOT NULL DEFAULT 0");
+    new Message(`Added dom_caps column to nstats_match_players successfully.`,"pass");
+}
+
 export async function mysqlInstall(mysqlSettings){
  
     try{
@@ -1146,6 +1155,10 @@ export async function mysqlInstall(mysqlSettings){
         await updateDominationTables();
 
         await updateMatchesTable();
+
+        //2.7.0 needed for mysqltosqlite.mjs
+        await addDomCapsToMatchesTable();
+
 
         new Message("Setting match map & gametype ids.", "note");
         await setMatchMapGametypeIds();

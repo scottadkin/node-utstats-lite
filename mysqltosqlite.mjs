@@ -3,8 +3,8 @@ import { readdir, readFile, mkdir, writeFile, copyFile, access, constants, renam
 import mysql from "mysql2/promise";
 import { createBackupDirName } from "./src/generic.mjs";
 import { toMYSQLDateTime } from "./src/generic.mjs";
-import { sqliteInstall } from "./src/sqliteInstall.mjs";
-import { closeDatabase, createNewDatabase, bulkInsert } from "./src/database.mjs";
+import { PLAYER_TOTAL_COLUMNS_270_UPDATE, PLAYER_TOTAL_CTF_COLUMNS_270_UPDATE, PLAYER_TOTAL_WEAPONS_COLUMNS_260, PLAYER_TOTAL_WEAPONS_COLUMNS_270, sqliteInstall } from "./src/sqliteInstall.mjs";
+import { closeDatabase, createNewDatabase, bulkInsert, simpleQuery } from "./src/database.mjs";
 import { mysqlInstall } from "./src/mysqlInstall.mjs";
 import { recalculateAllPlayerTotals, setAllMapTotals } from "./src/weapons.mjs";
 
@@ -181,6 +181,8 @@ function fixLogsDownloadDuplicates(data){
 }
 
 
+
+
 async function restoreTable(tableName, fileName){
 
     new Message(`Attempting to restore ${tableName} from ${fileName}`,"note");
@@ -188,11 +190,71 @@ async function restoreTable(tableName, fileName){
     const buffer = await readFile(fileName);
     const {columns, rows} = JSON.parse(buffer);
 
+    
+
+
+    if(tableName === "nstats_player_totals"){
+
+        //missing 2.7.0 columns
+        if(columns[columns.length - 1] === "item_shp"){
+
+            const newColumns = PLAYER_TOTAL_COLUMNS_270_UPDATE;
+
+            columns.push(...newColumns);
+            
+
+            for(let i = 0; i < rows.length; i++){
+
+                rows[i].push(...newColumns.map(() =>{ return 0;}));
+            }
+
+        }
+
+    }else if(tableName === "nstats_player_totals_ctf"){
+
+        //missing 2.7.0
+        if(columns[columns.length - 1] === "max_flag_return_save"){
+
+            columns.push(...PLAYER_TOTAL_CTF_COLUMNS_270_UPDATE);
+
+            for(let i = 0; i < rows.length; i++){
+
+                rows[i].push(...PLAYER_TOTAL_CTF_COLUMNS_270_UPDATE.map(() =>{ return 0}));
+            }
+        }
+
+    }else if(tableName === "nstats_player_totals_weapons"){
+
+        console.log(columns);
+        //missing 2.6.0
+        if(columns[columns.length - 1] === "eff"){
+
+            columns.push(...PLAYER_TOTAL_WEAPONS_COLUMNS_260);
+
+            for(let i = 0; i < rows.length; i++){
+
+                rows[i].push(...PLAYER_TOTAL_WEAPONS_COLUMNS_260.map(() => { return 0}));
+            }
+        }
+
+        //missing 2.7.0
+        if(columns[columns.length - 1] === "max_team_kills"){
+
+            columns.push(...PLAYER_TOTAL_WEAPONS_COLUMNS_270);
+
+            for(let i = 0; i < rows.length; i++){
+
+                rows[i].push(...PLAYER_TOTAL_WEAPONS_COLUMNS_270.map(() => { return 0}));
+            }
+        }
+    }
+
     const query = `INSERT INTO ${tableName} (${columns.toString()}) VALUES ?`;
 
     if(tableName === "nstats_logs_downloads"){
         await bulkInsert(query, fixLogsDownloadDuplicates(rows));
     }else{
+
         await bulkInsert(query, rows);
     }
 
@@ -200,6 +262,16 @@ async function restoreTable(tableName, fileName){
 
     return rows.length;
 
+}
+
+
+async function restoreCTFLeagueTable(fileName){
+
+    const buffer = await readFile(fileName);
+    const {columns, rows} = JSON.parse(buffer);
+
+    console.log(rows);
+    process.exit();
 }
 
 async function restoreDatabase(backupTarget){
@@ -251,10 +323,15 @@ async function restoreDatabase(backupTarget){
             
             //new Message(`Truncate table ${jResult[1]}.`,"note");
            // await truncateTable(jResult[1]);
-            
+           
+            console.log(jResult[1]);
+
+  
+
             const totalRows = await restoreTable(jResult[1], `${restoreDir}${f}`);
 
             rowsInserted.push({"table": jResult[1], "rows": totalRows});
+            
         }
 
         return rowsInserted;
@@ -308,6 +385,26 @@ async function backupSQLiteExistingFile(backupName){
     }
 }
 
+
+//lazy...
+async function deleteSQLiteInstallSettings(){
+
+    const tables = [
+        "nstats_ctf_league_settings", 
+        "nstats_json_api", 
+        "nstats_logs_folder",
+        "nstats_page_layout"
+    ];
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        await simpleQuery(`DELETE FROM ${t} WHERE id>=0`);
+        new Message(`Deleted sqliteInstall settings for table: ${t}`,"pass");
+    }
+}
+
 async function init(){
 
 
@@ -348,6 +445,9 @@ async function init(){
     
 
     await sqliteInstall(true);
+
+    //2.7.0 delete settings before inserting old ones
+    await deleteSQLiteInstallSettings();
 
     await restoreDatabase(backupName);
     new Message("Attempting to set all map weapon totals", "note");
