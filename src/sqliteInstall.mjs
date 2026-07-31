@@ -680,47 +680,6 @@ const queries = [
 		 
 		 `CREATE INDEX IF NOT EXISTS nccs_match_idx ON nstats_ctf_cap_suicides(match_id)`,
 
-
-        `CREATE TABLE IF NOT EXISTS nstats_player_map_minute_averages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        player_id INTEGER NOT NULL,
-        map_id INTEGER NOT NULL,
-        gametype_id INTEGER NOT NULL,
-        total_playtime REAL NOT NULL,
-        total_matches REAL NOT NULL,
-        score REAL NOT NULL,
-        frags REAL NOT NULL,
-        kills REAL NOT NULL,
-        deaths REAL NOT NULL,
-        suicides REAL NOT NULL,
-        team_kills REAL NOT NULL,
-        headshots REAL NOT NULL,
-        item_amp REAL NOT NULL,
-        item_belt REAL NOT NULL,
-        item_boots REAL NOT NULL,
-        item_body REAL NOT NULL,
-        item_pads REAL NOT NULL,
-        item_invis REAL NOT NULL,
-        item_shp REAL NOT NULL,
-        flag_taken REAL NOT NULL,
-        flag_pickup REAL NOT NULL,
-        flag_drop REAL NOT NULL,
-        flag_assist REAL NOT NULL,
-        flag_cover REAL NOT NULL,
-        flag_seal REAL NOT NULL,
-        flag_cap REAL NOT NULL,
-        flag_kills REAL NOT NULL,
-        flag_return REAL NOT NULL,
-        flag_return_base REAL NOT NULL,
-        flag_return_mid REAL NOT NULL,
-        flag_return_enemy_base REAL NOT NULL,
-        flag_return_save REAL NOT NULL,
-        dom_caps REAL NOT NULL
-        ) STRICT`,
-
-		`CREATE UNIQUE INDEX IF NOT EXISTS pmg_idx ON nstats_player_map_minute_averages(player_id,map_id,gametype_id)`,
-
-
         `CREATE TABLE IF NOT EXISTS nstats_map_weapon_totals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             map_id INTEGER NOT NULL,
@@ -1102,6 +1061,8 @@ export async function sqliteInstall(bOnlyCreateTables){
     await updatePlayerCTFTotalsTable();
     await updatePlayerTotalsTable();
     await addColumn("nstats_match_players", "dom_caps", "INTEGER NOT NULL DEFAULT 0");
+
+    await simpleQuery(`DROP TABLE IF EXISTS nstats_player_map_minute_averages`);
 
 
     new Message("Inserting Default Rankings Settings", "note");

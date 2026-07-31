@@ -4,7 +4,7 @@ import { getMapAndGametypeIds } from "./matches.mjs";
 import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
 import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./weapons.mjs";
-import { getPlayerMapTotals, deleteCurrentPlayerMapAverages, updateCurrentPlayerMapAverages, getUniquePlayerIdsOnMap, getAllMapIds} from "./maps.mjs";
+import { getPlayerMapTotals, getUniquePlayerIdsOnMap, getAllMapIds} from "./maps.mjs";
 import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";
@@ -1445,124 +1445,6 @@ export async function setMatchMapGametypeIds(){
 }
 
 
-
-
-export async function updateMapAverages(playerIds, gametypeId, mapId){
-
-    //not needed since 2.7.0 added averages and epm to player totals tables
-    return;
-
-    //REMOVE THIS IF PEOPLE WANT MAP + GAMETYPE RANKINGS ADDED AS WELL
-    gametypeId = 0;
-
-    const data = await getPlayerMapTotals(playerIds, mapId);
-
-    const keys = ["score", "frags", "kills", "deaths", "suicides", "team_kills",
-        "headshots", "item_amp", "item_belt", "item_boots", "item_body", "item_pads", 
-        "item_invis", "item_shp", "dom_caps","flag_taken",
-        "flag_pickup",
-        "flag_drop",
-        "flag_assist",
-        "flag_cover",
-        "flag_seal",
-        "flag_cap",
-        "flag_kill",
-        "flag_return",
-        "flag_return_base",
-        "flag_return_mid",
-        "flag_return_enemy_base",
-        "flag_return_save",
-    ];
-
-
-
-    
-    for(let i = 0; i < data.length; i++){
-
-        const t = data[i];
-
-        if(t.playtime <= 0){
-
-            t.bIgnore = true;
-            continue;
-        }
-
-        const minutes = t.playtime / 60;
-
-        for(let x = 0; x < keys.length; x++){
-
-            const k = keys[x];
-
-            if(t[k] === null) t[k] = 0;
-    
-            if(t[k] <= 0){
-                t[k] = 0;
-                continue;
-            }
-
-            //fix dom_caps issue if a player doesn't have any events
-            if(t[k] === undefined) continue;
-
-            t[k] = t[k] / minutes;
-        }
-
-        //await deleteCurrentPlayerMapAverages(playerIds, gametypeId, mapId);
-        await updateCurrentPlayerMapAverages(data, gametypeId, mapId);
-    }
-
-}
-
-
-async function bulkInsertPlayerMapAverages(data, mapId){
-
-    const insertVars = [];
-
-    for(let i = 0; i < data.length; i++){
-
-        const d = data[i];
-
-        insertVars.push([
-            d.player_id, mapId, 0, d.playtime, d.total_matches,
-            d.score, d.frags, d.kills, d.deaths, d.suicides, d.team_kills, d.headshots,
-            d.item_amp , d.item_belt , d.item_boots , d.item_body , d.item_pads , d.item_invis , d.item_shp ,
-            d.flag_taken ?? 0,  d.flag_pickup ?? 0,  d.flag_drop ?? 0,  d.flag_assist ?? 0,  d.flag_cover ?? 0,  d.flag_seal ?? 0, 
-            d.flag_cap ?? 0,  d.flag_kills ?? 0,  d.flag_return ?? 0,  d.flag_return_base ?? 0,  d.flag_return_mid ?? 0,  d.flag_return_enemy_base ?? 0, 
-            d.flag_return_save ?? 0, d.dom_caps ?? 0
-
-        ]);
-    }
-
-    const query = `INSERT INTO nstats_player_map_minute_averages (
-    player_id, map_id, gametype_id, total_playtime, total_matches,
-    score, frags, kills, deaths, suicides, team_kills, headshots,
-    item_amp , item_belt , item_boots , item_body , item_pads , item_invis , item_shp,
-    flag_taken,flag_pickup,flag_drop,flag_assist,flag_cover,flag_seal,
-    flag_cap,flag_kills,flag_return,flag_return_base,flag_return_mid,flag_return_enemy_base,
-    flag_return_save,dom_caps
-    ) VALUES ?`;
-
-
-    await bulkInsert(query, insertVars);
-}
-
-
-async function deleteMapMinuteAverages(mapId){
-
-    const query = `DELETE FROM nstats_player_map_minute_averages WHERE map_id=?`;
-
-    await simpleQuery(query, [mapId]);
-}
-
-async function bAnyMapAverageData(){
-
-    const query = `SELECT id FROM nstats_player_map_minute_averages LIMIT 1`;
-
-    const result = await simpleQuery(query);
-    
-    if(result.length === 0) return false;
-
-    return true;
-}
 //used for upgrade from earlier version
 export async function setAllPlayerMapAverages(){
 

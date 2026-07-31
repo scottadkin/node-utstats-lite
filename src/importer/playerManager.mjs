@@ -1,7 +1,7 @@
 import { Player } from "./player.mjs";
 import Message from "../message.mjs";
 import { updateMasterPlayers, 
-    updatePlayerTotals, bulkInsertPlayerMatchData, updateMapAverages, 
+    updatePlayerTotals, bulkInsertPlayerMatchData, 
     getMultiplePlayersMasterId,
     getHWIDForceNames,
     getForcedByMacNames,
@@ -1083,14 +1083,6 @@ export class PlayerManager{
         }
 
         return null;
-    }
-
-
-    async updateMapAverages(gametypeId, mapId, bCTF, bDom){
-
-        const playerIds = this.getUniquePlayerIds();
-
-        await updateMapAverages(playerIds, gametypeId, mapId, bCTF, bDom);
     }
 
 

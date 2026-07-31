@@ -277,8 +277,7 @@ export class MatchParser{
             await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
         }
         
-        await this.players.updateMapAverages(this.gametype.id, this.map.id, this.ctf.bMatchCTF, this.dom.bAnyData);
-  
+      
         await this.weapons.updateMapTotals(this.map.id, this.gametype.id);
 
         if(this.classicWeaponStats.lines.length > 0){

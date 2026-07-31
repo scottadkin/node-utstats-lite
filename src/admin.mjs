@@ -39,7 +39,6 @@ const DELETE_TABLES = [
     "match_weapon_stats",
     "players",
     "player_ctf_league",
-    "player_map_minute_averages",
     "player_totals",
     "player_totals_ctf",
     "player_totals_damage",

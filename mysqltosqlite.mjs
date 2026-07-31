@@ -7,6 +7,8 @@ import { PLAYER_TOTAL_COLUMNS_270_UPDATE, PLAYER_TOTAL_CTF_COLUMNS_270_UPDATE, P
 import { closeDatabase, createNewDatabase, bulkInsert, simpleQuery } from "./src/database.mjs";
 import { mysqlInstall } from "./src/mysqlInstall.mjs";
 import { recalculateAllPlayerTotals, setAllMapTotals } from "./src/weapons.mjs";
+import { restoreDefaultLayouts } from "./src/pageLayout.mjs";
+import { restoreDefaultSettings } from "./src/siteSettings.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 new Message(`MYSQL database must be from node-ustats-lite v2.5.0`,"warning");
@@ -456,6 +458,10 @@ async function init(){
     await setAllMapTotals();
     new Message("Attempting to set all player map weapon totals", "note");
     await recalculateAllPlayerTotals();
+
+
+    await restoreDefaultLayouts();
+    await restoreDefaultSettings();
 
     new Message(`MYSQL To SQlite transfer complete.`,"progress");
     process.exit();
