@@ -474,7 +474,6 @@ export async function updatePlayerTotals(playerIds){
 
     if(playerIds !== null && playerIds.length === 0) return null;
     
-    const start = performance.now();
     const test = await testCalculatePlayerTotalsFromMatchData(playerIds);
 
 
@@ -487,8 +486,7 @@ export async function updatePlayerTotals(playerIds){
 
 
     await testBulkUpdatePlayerTotals(totals);
-    const end = performance.now();
-    console.log((end - start) * 0.001);
+
     return;
 
 

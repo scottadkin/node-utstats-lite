@@ -399,7 +399,7 @@ async function getPlayersMatchesData(playerIds, gametypeId, mapId){
     return await simpleQuery(query, [playerIds]);
 }
 
-async function calcPlayerTotals(playerIds, gametypeId, mapId){
+async function calcPlayerTotals(playerIds){
   
     const result = await getPlayersMatchesData(playerIds);
 
@@ -474,11 +474,11 @@ async function insertPlayerTotals(insertVars){
     //return await bulkInsert(query, insertVars);
 }
 
-export async function updatePlayerTotals(playerIds, gametypeId, mapId){
+export async function updatePlayerTotals(playerIds){
 
     if(playerIds.length === 0) return;
 
-    const data = await calcPlayerTotals(playerIds, gametypeId, mapId);
+    const data = await calcPlayerTotals(playerIds);
 
     const insertVars = [];
 
@@ -535,9 +535,27 @@ export async function updatePlayerTotals(playerIds, gametypeId, mapId){
         }
     }
 
-    await insertPlayerTotals(insertVars);  
+    await insertPlayerTotals(insertVars);     
+}
 
-    
+
+async function getUniquePlayerIdsInTotals(){
+
+    const query = `SELECT DISTINCT player_id FROM nstats_player_totals_ctf`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) =>{ return r.player_id});
+}
+
+/**
+ * Recalculate player totals for the 2.7.0 update
+ */
+export async function recalculateAllPlayerTotals270(){
+
+    const playerIds = await getUniquePlayerIdsInTotals();
+
+    return await updatePlayerTotals(playerIds)
 }
 
 export async function getPlayerCTFTotals(playerId){

@@ -10,6 +10,7 @@ import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
 import { calculateAllPlayerTotals, installPlayerSettings } from "./players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllMapTotals } from "./weapons.mjs";
+import { recalculateAllPlayerTotals270 } from "./ctf.mjs";
 
 const queries = [
     `CREATE TABLE IF NOT EXISTS nstats_sessions(
@@ -1092,7 +1093,11 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     //2.7.0
     new Message(`Calculating player totals.`,"note");
-    const totals = await calculateAllPlayerTotals();
+    await calculateAllPlayerTotals();
+
+    new Message(`Calculating player ctf totals`, "note");
+    await recalculateAllPlayerTotals270();
+
 
 
     if(!fs.existsSync("./salt.mjs")){

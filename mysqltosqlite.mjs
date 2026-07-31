@@ -10,6 +10,7 @@ import { recalculateAllPlayerTotals, setAllMapTotals } from "./src/weapons.mjs";
 import { restoreDefaultLayouts } from "./src/pageLayout.mjs";
 import { restoreDefaultSettings } from "./src/siteSettings.mjs";
 import { calculateAllPlayerTotals } from "./src/players.mjs";
+import { recalculateAllPlayerTotals270 } from "./src/ctf.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 new Message(`MYSQL database must be from node-ustats-lite v2.5.0`,"warning");
@@ -462,6 +463,7 @@ async function init(){
 
     //2.7.0
     await calculateAllPlayerTotals();
+    await recalculateAllPlayerTotals270();
 
 
     await restoreDefaultLayouts();
