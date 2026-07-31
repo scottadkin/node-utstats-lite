@@ -13,8 +13,6 @@ import { calculateAllPlayerTotals } from "./src/players.mjs";
 import { recalculateAllPlayerTotals270 } from "./src/ctf.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
-new Message(`MYSQL database must be from node-ustats-lite v2.5.0`,"warning");
-new Message(`If the MYSQL database is from a version prior to v2.5.0 this process may fail.`,"warning");
 
 const mysqlSettings = {
     "host": "localhost",

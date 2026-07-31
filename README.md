@@ -3,6 +3,15 @@ Unreal Tournament stats website using express and SQLite for the https://github.
 
 # Main Features
 
+## Home Page 
+- **Welcome Message**: A component you can embed custom html or just write a general message.
+- **Latest Match Screenshot**: A recreated in game screenshot of the most recent match imported.
+- **Recent Matches**: A small list/cards of most recent matches.
+- **Activity HeatMap**: Calendar heatmap based on playti,e total matches, or total players.
+- **Most Played Maps**: A small list/cards of the most popular maps played.
+- **Most Played Gametypes**: A small list of the most popular gametypes.
+- **Our Servers**: Basic list of servers collected from importing stat logs.
+
 ## Match Reports 
 - **Basic Summary**: Displays final score, total players, time limit, mutators used and server settings. Includes add match to watchlist and copy match perma link buttons.
 - **Match Screenshot**: A recreated image of Unreal Tournaments scoreboard based on the match data, smartCTF and smartDOM are included.
@@ -33,15 +42,22 @@ Website pages can display screenshots based on match data to recreate the scoreb
 - **Recent Matches**: Seach a player's recent matches with filters for gametypes and maps.
 
 ## Players Page
-Search for players and order results by various options.
+- **Player Search**: Search for players by name and order results by name, last active, score, frags, kills, deaths, suicides, efficiency, matches, and playtime(ascending and descending order).
 ## Records Page
-There are numerous different record types for both lifetime totals and single match records, such as most kills, deaths, longest spree, best multi kill, headshots and more. Records are also split by gametype and lifetime for more useful data.
+- **Match Records**: View the top scores for each data type such as score, kills, headshots, best spree, best multi, total items picked up. Includes all time records and per gametype records.
+- **Lifetime Records**: View the totals for every player for all time and per gametype, includes total score, kills, deaths, wins, draws, losses, winrate, first bloods, best spree, best multi kill, and item stats.
 ## Maps Page
-Search for a map by name.
+- **Map Search**: Search for a map by name, and order results by name, last match, first match,  matches, or playtime(ascending amd descending order). Result are a basic list or a small card for each map including a screenshot.
 ## Map Page
-Each map has it's own page displaying items such as basic summary, weapons summary, player rankings, player ctf league, recent matches, top player averages based on events per minute.
-## Home Page 
-Displays recent matches, servers, maps, players, social media links, and a customizable welcome message.
+- **Match Screenshot**: will display the required file name in the event no full or partial matches are found for an image.
+- **Basic Summary**: First match date, last match data, total matches played, and total playtime.
+- **Activity HeatMap**: Calendar heatmap for playtime, total matches, and total players.
+- **Player Rankings**: View the classic utstats player rankings for the map.
+- **Weapons Summary**: View all the weapon stats such as total deaths, kills, suicides, max kills, max deaths, max suicides, kills percentage, and kills per minute. Stats are tracked for all time and per gametype. The max stats are based on the total of all the players kills/deaths in a single match.
+- **Player CTF League**: CTF league tables for each gametype and all time for the map.
+- **Top Player Averages**: Match averages, and events per minute averages for each gametype and all time, includes general stats such as score, kills, frags, deaths, CTF stats such as flags taken, kills, drops, caps, Domination stats, Item Pickups, and special events such as double kills, to monster kills, killing sprees, to godlikes.
+- **Player Totals**: All time, and per gametype includes, winrate, wins, draws, losses, playtime, matches played, frag stats, ctf stats, domination caps, item stats, and special events. 
+
 ## Watchlist Page
 Displays your saved matches and players, you can add matches or players by clicking add to my watchlist buttons on match reports or player profiles. Data is saved to your browsers localstorage.
 ## Player Rankings System 
