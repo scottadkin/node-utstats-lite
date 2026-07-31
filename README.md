@@ -4,7 +4,22 @@ Unreal Tournament stats website using express and SQLite for the https://github.
 # Main Features
 
 ## Match Reports 
-Covering various events like CTF summary, Domiation summary, Frags summary, Special events, Weapon events, Damage summary(requires optional mutator), Kills match up, and many more. 
+- **Basic Summary**: Displays final score, total players, time limit, mutators used and server settings. Includes add match to watchlist and copy match perma link buttons.
+- **Match Screenshot**: A recreated image of Unreal Tournaments scoreboard based on the match data, smartCTF and smartDOM are included.
+- **Frags Summary**: Each players' frag stats for the match, includes playtime, score, frags, deaths, efficiency, Net...
+- **Capture The Flag Summary**: Each players' ctf stats split into three tabs, general has the classic taken,pickup, flag kill, seals. Returns has returns by type suck as home base, enemy base, close save. Carry time has total time carrying flag, max time carrying flag, avg time carrying flag, and min time carrying flag.
+- **Capture The Flag Caps**: Each cap that occurred during the match, split into two different tabs with one being a basic summary such as taken by, capped by, total covers, and the second being detailed with each timestamp and playername for event such as covers, pickups, carry times. Includes a graph to view real score over time, importer score over time, and a comparison between the importer and UT score.
+- **Domination Summary**: View total caps, control time, control percent, score time, stolen caps, stolen score, improter score, and the final UT score.
+- **Domination Players Summary**: 9 different tabs, control percent(total percent of time the player had control of the point), control time, total caps, shortest time held, longest time held, total points(estimated), max points(estimated), stolen points(estimated), and stolen caps(estimated). Every tab displays all the players and each of the control points stats.
+- **Weapons Summary**: View kills, deaths, suicides for each weapon, and kills per minute in the totals tab.
+- **Items Summary**: View the total amount each player picked up body armour, udamage, jump boots.
+- **Special Events**: View the first blood player, killing sprees, and multi kills for each player, including each players' single best spree and mulit kill.
+- **Match Frags Graph**: View kills, deaths, team kills, and team deaths over time in an interactive graph.
+- **Kills Match Up**: Displays how many times each player killed each other.
+- **Players Ping Summary**: View each players' minimum, average, and max pings.
+- **Damage Summary**(Requires optional damage mutator): View each players' fall damage, drown damage, self damage, damage taken, and damage delt.
+- **Match JSON API Links**: Links for each of the available JSON fetch types.
+
 ## Match Screenshots System 
 Website pages can display screenshots based on match data to recreate the scoreboards in Unreal Tournament.
 ## Player Profiles 
