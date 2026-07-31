@@ -8,7 +8,15 @@ Covering various events like CTF summary, Domiation summary, Frags summary, Spec
 ## Match Screenshots System 
 Website pages can display screenshots based on match data to recreate the scoreboards in Unreal Tournament.
 ## Player Profiles 
-Displaying various detailed stats, from gametype totals, winrates, match records, ctf stats with various filtering options, ctf league, rankings, recent matches, item & weapon summaries.
+- **General Summary**: view basic totals, averages per match, and events per minute for All Time, Gametypes, and Maps. These are all generally frags related stats.
+- **Activity Heatmaps** for: playtime, total matches, winrate, wins, draws, losses.
+- **Capture The Flag Summary**: Lifetime, gametypes, map totals, match records(person best for each stat type), averages per match, and event per minute.  
+- **CTF League**: View a player's position in various ctf league tables for all time, gametypes, and maps.
+- **Special Events**: Multi kills, killing sprees, stats tracked for all time, per gametype, and per map. As well as the standard totals for each event type you can now also see the average per match, and events per minute for each multi kill and spree. Average best spree, and average best multi kill are available in the match averages tab.
+- **Weapons Summary**: Totals, averages per match, and events per minute for each weapon a player has used or been killed with. Stats also include most kills/deaths/suicides/team kills with each weapon. Data is tracked for all time, per gametype, per map, and per gametype + map combination.
+- **Items Summary**: View total times picked up, match averages, and events per minute. Stats are tracked for all time, per gametype, and per map.
+- **Recent Matches**: Seach a player's recent matches with filters for gametypes and maps.
+
 ## Players Page
 Search for players and order results by various options.
 ## Records Page
