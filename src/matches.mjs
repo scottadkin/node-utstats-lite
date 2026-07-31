@@ -5,7 +5,7 @@ import { getAllNames, getServerNames } from "./servers.mjs";
 import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
 import { 
     getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, 
-    setPlayerMapAverages, getPlayerIdsInMatch, updatePlayerTotals,
+    getPlayerIdsInMatch, updatePlayerTotals,
     getNamesAndHashesById
  } from "./players.mjs";
 import { 

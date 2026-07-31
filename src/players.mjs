@@ -917,11 +917,13 @@ export async function calculateAllPlayerTotals(){
 
     let query = `SELECT
     ${PLAYER_TOTALS_COLUMNS_MATCHES}
-    FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id,match_result`;
+    FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
 
-    const result = await simpleQuery(query, [playerIds]);
+    const result = await simpleQuery(query);
 
-    return createPlayerTotalsFromData(result);
+    const totals = createPlayerTotalsFromData(result);
+
+    return await insertPlayerGametypeTotals(totals);
 }
 
 
@@ -1443,45 +1445,6 @@ export async function setMatchMapGametypeIds(){
     await setWeaponStatsMatchMapGametypeIds(ids);
 
 }
-
-
-//used for upgrade from earlier version
-export async function setAllPlayerMapAverages(){
-
-    if(await bAnyMapAverageData()){ 
-
-        new Message(`Player Map Average data already exists, skipping.`, "note");
-        
-        return;
-    }
-    
-    const mapIds = await getAllMapIds();
-
-    for(let i = 0; i < mapIds.length; i++){
-
-        const mId = mapIds[i];
-
-        const playerIds = await getUniquePlayerIdsOnMap(mId);
-
-        const totals = await getPlayerMapTotals(playerIds, mId);
-
-        await deleteMapMinuteAverages(mId);
-        await bulkInsertPlayerMapAverages(totals, mId);
-    }
-}
-
-export async function setPlayerMapAverages(mapId){
-
-
-    const playerIds = await getUniquePlayerIdsOnMap(mapId);
-
-    const totals = await getPlayerMapTotals(playerIds, mapId);
-
-    await deleteMapMinuteAverages(mapId);
-    await bulkInsertPlayerMapAverages(totals, mapId);
-    
-}
-
 
 export async function getPlayerIdsInMatch(matchId){
 

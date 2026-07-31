@@ -1,5 +1,4 @@
 import { setMatchMapGametypeIds } from "./players.mjs";
-import { setAllPlayerMapAverages } from "./players.mjs";
 import { setAllMapTotals as setAllMapWeaponTotals } from "./weapons.mjs";
 import { setMatchMapGametypeIds as damageSetMatchMapGametypeIds } from "./damage.mjs";
 import Message from "./message.mjs";
@@ -1122,10 +1121,6 @@ export async function mysqlInstall(mysqlSettings){
 
         new Message("Setting match map & gametype ids.", "note");
         await setMatchMapGametypeIds();
-
-        new Message("Calculating Player Map Averages", "note");
-        await setAllPlayerMapAverages();
-
        
         
         //new Message("Calculating Map Weapon Totals", "note");

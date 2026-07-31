@@ -8,7 +8,7 @@ import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./ctfLeague.mj
 import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
-import { installPlayerSettings } from "./players.mjs";
+import { calculateAllPlayerTotals, installPlayerSettings } from "./players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllMapTotals } from "./weapons.mjs";
 
 const queries = [
@@ -1087,6 +1087,13 @@ export async function sqliteInstall(bOnlyCreateTables){
     if(!bOnlyCreateTables){
         await setAllMapTotals();   
     }
+
+
+
+    //2.7.0
+    new Message(`Calculating player totals.`,"note");
+    const totals = await calculateAllPlayerTotals();
+
 
     if(!fs.existsSync("./salt.mjs")){
 

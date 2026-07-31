@@ -9,6 +9,7 @@ import { mysqlInstall } from "./src/mysqlInstall.mjs";
 import { recalculateAllPlayerTotals, setAllMapTotals } from "./src/weapons.mjs";
 import { restoreDefaultLayouts } from "./src/pageLayout.mjs";
 import { restoreDefaultSettings } from "./src/siteSettings.mjs";
+import { calculateAllPlayerTotals } from "./src/players.mjs";
 
 new Message(`MYSQL To SQLite Database Tool`,"note");
 new Message(`MYSQL database must be from node-ustats-lite v2.5.0`,"warning");
@@ -227,7 +228,6 @@ async function restoreTable(tableName, fileName){
 
     }else if(tableName === "nstats_player_totals_weapons"){
 
-        console.log(columns);
         //missing 2.6.0
         if(columns[columns.length - 1] === "eff"){
 
@@ -325,10 +325,11 @@ async function restoreDatabase(backupTarget){
             
             //new Message(`Truncate table ${jResult[1]}.`,"note");
            // await truncateTable(jResult[1]);
-           
-            console.log(jResult[1]);
+
 
   
+            //deleted in 2.7.0
+            if(jResult[1] === "nstats_player_map_minute_averages") continue;
 
             const totalRows = await restoreTable(jResult[1], `${restoreDir}${f}`);
 
@@ -458,6 +459,9 @@ async function init(){
     await setAllMapTotals();
     new Message("Attempting to set all player map weapon totals", "note");
     await recalculateAllPlayerTotals();
+
+    //2.7.0
+    await calculateAllPlayerTotals();
 
 
     await restoreDefaultLayouts();
