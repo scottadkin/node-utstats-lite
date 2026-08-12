@@ -24,6 +24,7 @@ export class Match{
 
         this.timestamp = Math.floor(matchDate * 0.001);
         this.date = matchDate;
+        this.absoluteTime = line;
         //this.date = `${year}-${month}-${day}T${hour}:${min}:${sec}`;
     }
 }

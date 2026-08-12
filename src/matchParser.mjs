@@ -190,7 +190,8 @@ export class MatchParser{
             this.soloWinnerScore,
             this.gametype.targetScore,
             this.gametype.timeLimit,
-            this.gametype.mutators
+            this.gametype.mutators,
+            this.match.absoluteTime
         ); 
 
         if(this.matchId === null){

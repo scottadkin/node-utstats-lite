@@ -94,7 +94,8 @@ const queries = [
             target_score INTEGER NOT NULL,
             time_limit INTEGER NOT NULL,
             mutators TEXT NOT NULL,
-            hash TEXT NOT NULL
+            hash TEXT NOT NULL,
+            absolute_time TEXT NOT NULL
         ) STRICT`,
 
         `CREATE TABLE IF NOT EXISTS nstats_matches_dom (
@@ -1064,6 +1065,8 @@ export async function sqliteInstall(bOnlyCreateTables){
     await addColumn("nstats_match_players", "dom_caps", "INTEGER NOT NULL DEFAULT 0");
 
     await simpleQuery(`DROP TABLE IF EXISTS nstats_player_map_minute_averages`);
+
+    await addColumn("nstats_matches", "absolute_time", `TEXT NOT NULL DEFAULT "2026.11.22.01.01.01.000.0"`);
 
 
     new Message("Inserting Default Rankings Settings", "note");
