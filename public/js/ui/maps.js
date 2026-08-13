@@ -210,8 +210,8 @@ class MapListDisplay{
 
             rows.push([
                 {"display": d.name, "value": d.name.toLowerCase(), "className": "text-left", url},
-                {"value": d.first_match, "display": toDateString(d.first_match, true), "className": "date", url},
-                {"value": d.last_match, "display": toDateString(d.last_match, true), "className": "date", url},
+                {"value": d.first_match, "display": toDateString(d.first_match, TIME_ZONE, true), "className": "date", url},
+                {"value": d.last_match, "display": toDateString(d.last_match, TIME_ZONE, true), "className": "date", url},
                 {"value": d.matches, url},
                 {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime", url}
             ]);
@@ -304,8 +304,8 @@ function UIMapBasicSummary(parent, data){
     const headers = ["First Match", "Last Match", "Matches Played", "Playtime"];
 
     const row = [
-        {"display": toDateString(data.first_match), "value": data.first_match, "className": "date"},
-        {"display": toDateString(data.last_match), "value": data.last_match, "className": "date"},
+        {"display": toDateString(data.first_match, TIME_ZONE), "value": data.first_match, "className": "date"},
+        {"display": toDateString(data.last_match, TIME_ZONE), "value": data.last_match, "className": "date"},
         {"value": data.matches},
         {"display": toPlaytime(data.playtime), "value": data.playtime, "className": "date"},
     ];
@@ -622,7 +622,7 @@ class UIMapPlayerRankings{
                         }), 
                     "bSkipTD": true
                 },
-                {"display": toDateString(d.last_active), "className": "date"},
+                {"display": toDateString(d.last_active, TIME_ZONE), "className": "date"},
                 {"display": toPlaytime(d.playtime), "className": "playtime"},
                 {"display": d.matches},
                 {"display": `${d.score.toFixed(2)}`},
@@ -865,7 +865,7 @@ class UIMapPlayerAverages{
                     }),
                 },
                 {
-                    "display": toDateString(d.last_active, true),
+                    "display": toDateString(d.last_active, TIME_ZONE, true),
                     "className": "date"
                 },
                 {
@@ -1230,7 +1230,7 @@ class UIMapPlayerTotals{
                     "bSkipTD": true,
                 },
                 {
-                    "display": toDateString(d.last_active,true), "className": "playtime"
+                    "display": toDateString(d.last_active, TIME_ZONE,true), "className": "playtime"
                 },
                 {"display": d.total_matches},
                 {"display": toPlaytime(d.playtime), "className": "playtime"},

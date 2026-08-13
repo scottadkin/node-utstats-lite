@@ -5,7 +5,7 @@ import {
 } from "../rankings.mjs";
 import { getGametypeNames } from "../gametypes.mjs";
 import { getNamesByIds as getMapNames } from "../maps.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 export async function renderRankingsPage(req, res, userSession){
 
@@ -13,7 +13,7 @@ export async function renderRankingsPage(req, res, userSession){
 
 
         const pageSettings = await getCategorySettings("Rankings");
-
+        const timeZone = await getSiteWideTimeZone();
         const rankingSettings = await getRankingSettings(true);
 
         let mode = req?.query?.mode ?? "gametype";
@@ -102,7 +102,8 @@ export async function renderRankingsPage(req, res, userSession){
             userSession,
             pageSettings,
             rankingSettings,
-            minMatchesSetting
+            minMatchesSetting,
+            timeZone
         });
     }catch(err){
         res.send(err.toString());

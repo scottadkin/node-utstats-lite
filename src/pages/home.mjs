@@ -1,6 +1,6 @@
 
 import { getRecentMatches, getMatchData } from "../matches.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getBasicList as getBasicServerList } from "../servers.mjs";
 import { getMostPlayedGametypes } from "../gametypes.mjs";
@@ -12,6 +12,9 @@ export async function renderHomePage(req, res, userSession){
 
 
     try{
+
+        const timeZone = await getSiteWideTimeZone();
+       
 
         const pageSettings = await getCategorySettings("Home");
         const pageLayout = await getPageLayout("Home");
@@ -66,6 +69,7 @@ export async function renderHomePage(req, res, userSession){
 
         return res.render("home.ejs", {
             "title": `Home - ${title}`,
+            timeZone,
             "meta": {
                 "description": description,
                 "image": "images/maps/default.jpg"

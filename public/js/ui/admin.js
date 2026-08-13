@@ -136,8 +136,8 @@ class AdminFTPManager{
         content.push(
             UIAdminInfoRow("Total Imports", logs["total_imports"]),
             UIAdminInfoRow("Total Logs Imported", logs["total_logs_imported"]),
-            UIAdminInfoRow("Latest Import",  toDateString(logs["last"])),
-            UIAdminInfoRow("First Import", toDateString(logs["first"])),
+            UIAdminInfoRow("Latest Import",  toDateString(logs["last"], TIME_ZONE)),
+            UIAdminInfoRow("First Import", toDateString(logs["first"], TIME_ZONE)),
             UIAdminInfoRow("Ignore Bots", UIStaticTrueFalse(logs["ignore_bots"])),
             UIAdminInfoRow("Ignore Duplicate Logs", UIStaticTrueFalse(logs["ignore_duplicates"])),
             UIAdminInfoRow("Minimum Match Length", logs["min_playtime"])),
@@ -1066,7 +1066,7 @@ class AdminMapsManager{
             const row = [
 
                 {"display": m.name, "className": "text-left", "value": m.name.toLowerCase()},
-                {"display": toDateString(m.last_match, true), "className": "date", "value": m.last_match},
+                {"display": toDateString(m.last_match, TIME_ZONE, true), "className": "date", "value": m.last_match},
                 {"display": toPlaytime(m.playtime), "className": "playtime", "value": m.playtime},
                 {"display": m.targetImage, "value":m.targetImage.toLowerCase()},
                 {
@@ -2540,7 +2540,7 @@ class AdminCTFLeagueManager{
             if(s.type === "datetime"){
 
                 const elem = UIDiv("form-read-only");
-                elem.append(toDateString(s.value, true));
+                elem.append(toDateString(s.value, TIME_ZONE, true));
                 row.append(elem);
                 
             }else if(s.type === "bool"){
@@ -3898,7 +3898,7 @@ class AdminSQLiteBackupManager{
             UIB(data.name), 
             UIBr(), 
             UIBr(),
-            `Backup created ${toDateString(data.stats.birthtimeMs)}`,
+            `Backup created ${toDateString(data.stats.birthtimeMs, TIME_ZONE)}`,
             UIBr(),
             `Size ${toByteString(data.stats.size)}(compressed)`
         );

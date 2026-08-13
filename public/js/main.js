@@ -202,12 +202,15 @@ function toPlaytime(seconds, bIncludeMilliSeconds){
     }
 }
 
-function toDateString(dateTime, noDayName, noTime){
+function toDateString(dateTime, timeZone, noDayName, noTime){
+
+    
+    dateTime = dateTime.replace(/z$/i, "");
 
     noDayName = (noDayName !== undefined) ? noDayName : false;
     noTime = (noTime !== undefined) ? noTime : false;
 
-    const now = new Date(dateTime);
+    const now = new Date(`${dateTime}${timeZone}`);
 
     const year = now.getFullYear();
     const month = now.getMonth();

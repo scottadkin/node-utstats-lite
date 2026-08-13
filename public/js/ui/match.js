@@ -34,7 +34,7 @@ function renderBasicInfo(parent, data, players){
     const infoElems = UIDiv("match-basic-info-wrapper-info");
 
     infoElems.append(
-        UIMBInfo("Date", toDateString(data.date, false, false)),
+        UIMBInfo("Date", toDateString(data.date, TIME_ZONE, false, false)),
         UIMBInfo("Match Length", toPlaytime(data.playtime)),
         UIMBInfo("Players", data.players)
     );

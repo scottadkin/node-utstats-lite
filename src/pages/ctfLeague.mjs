@@ -3,12 +3,13 @@ import { convertTimestamp } from "../generic.mjs";
 import { getGametypeNames } from "../gametypes.mjs";
 import { getMapNames } from "../maps.mjs";
 import { getSingleCTFLeague } from "../ctfLeague.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 export async function renderCTFLeaguePage(req, res, userSession){
 
     try{
 
+        const timeZone = await getSiteWideTimeZone();
         const pageSettings = await getCategorySettings("CTF League");
 
         const mode = req.query?.mode ?? pageSettings["Default Mode"] ?? "gametypes";
@@ -110,6 +111,7 @@ export async function renderCTFLeaguePage(req, res, userSession){
 
         res.render("ctfLeague.ejs", {
             "host": req.headers.host,
+            timeZone,
             title,
             "meta": {"description": `View the top players for the ${title}`, "image": "images/maps/default.jpg"},
             mode,

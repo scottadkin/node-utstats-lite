@@ -1,5 +1,5 @@
 import { getAllUniquePlayedGametypes, getMapInfo, VALID_PLAYER_EPM_AVERAGES } from "../maps.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getMapWeaponStats } from "../weapons.mjs";
 import { VALID_PLAYER_MAP_MINUTE_AVERAGES, VALID_PLAYER_TOTALS } from "../maps.mjs";
@@ -10,7 +10,7 @@ export async function renderMapPage(req, res, userSession){
     try{
 
         if(req.params.id === undefined) throw new Error(`No map id found`);
-
+        const timeZone = await getSiteWideTimeZone();
         const basic = await getMapInfo(req.params.id);
 
         if(basic === null) throw new Error(`Map does not exist`);
@@ -41,6 +41,7 @@ export async function renderMapPage(req, res, userSession){
         
         res.render("map.ejs",{
             "host": req.headers.host,
+            timeZone,
             userSession,
             title,
             basic,

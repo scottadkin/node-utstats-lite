@@ -55,7 +55,7 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort){
         }
         row.push({"display": m.gametype_name, "value": m.gametype_name.toLowerCase(), "className": "font-small", url});
         row.push({"display": m.server_name, "value": m.server_name.toLowerCase(), "className": "font-small", url});
-        row.push({"display": toDateString(m.date), "value": m.date,  "className": "playtime", url});
+        row.push({"display": toDateString(m.date, TIME_ZONE), "value": m.date,  "className": "playtime", url});
         row.push({"value": m.players, url});
         row.push({"display": toPlaytime(m.playtime), "value": m.playtime,  "className": "playtime", url});
 
@@ -101,7 +101,7 @@ class MatchRichViewBox{
         gametype.append(UIB(d.gametype_name));
         info.append(gametype);
 
-        info.append(toDateString(d.date, true));
+        info.append(toDateString(d.date, TIME_ZONE, true));
 
         const players = document.createElement("div");
         players.className = "white";

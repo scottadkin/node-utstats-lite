@@ -116,9 +116,9 @@ function renderServerList(parent, servers){
         const url = `/matches/?s=${s.id}`;
 
         rows.push([
-            {"display": s.name, "value": s.name.toLowerCase(), "className": "text-left", url},
-            {"display": toDateString(s.first_match, true), "value": s.first_match, "className": "date", url},
-            {"display": toDateString(s.last_match, true), "value": s.last_match,"className": "date", url},
+            {"display": `${s.name} ${TIME_ZONE}`, "value": s.name.toLowerCase(), "className": "text-left", url},
+            {"display": toDateString(s.first_match, TIME_ZONE, true), "value": s.first_match, "className": "date", url},
+            {"display": toDateString(s.last_match, TIME_ZONE, true), "value": s.last_match,"className": "date", url},
             {"display": toPlaytime(s.playtime), "value": s.playtime,"className": "date", url},
             {"value": s.matches, url}
         ]);
@@ -200,8 +200,8 @@ function homeRenderMostPlayedGametypes(parent, data){
 
         rows.push([
             {"display": d.name, "value": d.name.toLowerCase(), "className": "text-left", url},
-            {"display": toDateString(d.first_match), "value": d.first_match, "className": "date", url},
-            {"display": toDateString(d.last_match), "value": d.last_match, "className": "date", url},
+            {"display": toDateString(d.first_match, TIME_ZONE), "value": d.first_match, "className": "date", url},
+            {"display": toDateString(d.last_match, TIME_ZONE), "value": d.last_match, "className": "date", url},
             {"value": d.matches, url},
             {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime", url}
         ]);
@@ -238,8 +238,8 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
 
             rows.push([
                 {"display": d.name, "value": d.name.toLowerCase(), "className": "text-left", url},
-                {"display": toDateString(d.first_match), "value": d.first_match,  "className": "date", url},
-                {"display": toDateString(d.last_match), "value": d.last_match,  "className": "date", url},
+                {"display": toDateString(d.first_match, TIME_ZONE), "value": d.first_match,  "className": "date", url},
+                {"display": toDateString(d.last_match, TIME_ZONE), "value": d.last_match,  "className": "date", url},
                 {"value": d.matches, url},
                 {"display": toPlaytime(d.playtime), "value": d.playtime, "className": "playtime", url},
             ]);
@@ -293,7 +293,7 @@ function homeRenderMostActivePlayers(parent, data){
 
         rows.push([
             {"value": d.name.toLowerCase(), "display": playerLink, "bSkipTD": true},
-            {"display": toDateString(d.last_active), "value": d.last_active, "className": "date"},
+            {"display": toDateString(d.last_active, TIME_ZONE), "value": d.last_active, "className": "date"},
             {"value": d.total_matches},
             {"value": ignore0(d.wins)},
             {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime"},

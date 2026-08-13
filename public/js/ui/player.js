@@ -209,7 +209,7 @@ class PlayerRecentMatches{
         }
 
         return [
-            {"display": toDateString(data.match_date), "className": "date", url},
+            {"display": toDateString(data.match_date, TIME_ZONE), "className": "date", url},
             {"display": data.gametype_name, url},
             {"display": data.map_name, url},
             {"display": MMSS(data.time_on_server), "className": "mmss", url},
@@ -332,7 +332,7 @@ class PlayerGeneralSummary{
             
 
             const row = [
-                {"display": toDateString(d.last_active, true), "value": d.last_active, "className": "date"},
+                {"display": toDateString(d.last_active, TIME_ZONE, true), "value": d.last_active, "className": "date"},
                 {"display": ignore0(d.score), "value": d.score},
                 {"display": ignore0(d.frags), "value": d.frags},
                 {"display": ignore0(d.kills), "value": d.kills},
@@ -1523,7 +1523,7 @@ class PlayerRankingSummary{
         return [
             {"display": `${data.position}${getOrdinal(data.position)}`, "value": data.position, "className": "ordinal"},
             {"display": data.name, "value": data.name.toLowerCase(), "className": "text-left"},
-            {"display": toDateString(data.last_active, true), "value": data.last_active, "className": "date"},
+            {"display": toDateString(data.last_active, TIME_ZONE, true), "value": data.last_active, "className": "date"},
             {"value": data.matches},
             {"display": toPlaytime(data.playtime), "value": data.playtime, "className": "playtime"},
             {"display": data.score.toFixed(2), "value": data.score}

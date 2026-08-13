@@ -2,7 +2,7 @@ import { getAllNames as getAllServerNames } from "../servers.mjs";
 import { getAllNames as getAllGametypeNames } from "../gametypes.mjs";
 import { getAllNames as getAllMapNames } from "../maps.mjs";
 import { getRecentMatches } from "../matches.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 export async function renderMatchesPage(req, res, userSession){
 
@@ -12,6 +12,7 @@ export async function renderMatchesPage(req, res, userSession){
         const gametypeNames = await getAllGametypeNames(true);
         const mapNames = await getAllMapNames(true);
         const pageSettings = await getCategorySettings("Matches");
+        const timeZone = await getSiteWideTimeZone();
         
         let perPage = pageSettings?.["Results Per Page"] ?? 25;
         perPage = parseInt(perPage);
@@ -55,7 +56,8 @@ export async function renderMatchesPage(req, res, userSession){
             pageSettings,
             displayMode,
             perPage,
-            userSession
+            userSession,
+            timeZone
         });
 
     }catch(err){

@@ -282,7 +282,7 @@ function UITableCell(params){
         }
 
         if(parse.indexOf("date") !== -1){
-            content = toDateString(content, true);
+            content = toDateString(content, TIME_ZONE, true);
         }
 
         if(parse.indexOf("ordinal") !== -1){
@@ -1092,7 +1092,7 @@ function UIMapRichBox(data){
         UIBr(), 
         `Playtime ${toPlaytime(data.playtime)}`,
         UIBr(),
-        `Last Match ${toDateString(data.last_match, true)}`
+        `Last Match ${toDateString(data.last_match, TIME_ZONE, true)}`
     )
 
     wrapper.append(info);

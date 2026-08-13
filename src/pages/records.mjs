@@ -1,7 +1,7 @@
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES, getTypeDisplayName } from "../validRecordTypes.mjs";
 import { getAllNames } from "../gametypes.mjs";
 import { getPlayersMatchRecords, getPlayersLifetimeRecords, getTotalPossibleLifetimeMatches, getTotalPossibleSingleMatchResults  } from "../records.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 export async function renderRecordsPage(req, res, userSession){
 
@@ -9,6 +9,7 @@ export async function renderRecordsPage(req, res, userSession){
         
         const pageSettings = await getCategorySettings("Records");
         const gametypeNames = await getAllNames(true);
+        const timeZone = await getSiteWideTimeZone();
 
         let mode = req.query?.mode ?? pageSettings["Default Mode"] ?? "match";
         mode = mode.toLowerCase();
@@ -77,6 +78,7 @@ export async function renderRecordsPage(req, res, userSession){
 
         res.render("records.ejs",{
             "host": req.headers.host,
+            timeZone,
             title,
             "meta": {"description": description, "image": "images/maps/default.jpg"},
             "validMatchTypes": VALID_PLAYER_MATCH_TYPES,

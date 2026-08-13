@@ -1,6 +1,4 @@
 <%
-
-
 const modes = [
     {
         "display": "Site Settings",
@@ -151,6 +149,7 @@ function renderCategory(mode){
     meta
     }) -%>
 <link rel="stylesheet" type="text/css" href="css/admin.css">
+<%- include("timeZone.ejs", {timeZone}); %>
 <script src="../js/ui/ui.js"></script>
 <script src="../js/ui/table.js"></script>
 <script src="../js/ui/admin.js"></script>

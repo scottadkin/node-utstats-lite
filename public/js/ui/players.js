@@ -198,7 +198,7 @@ class PlayersSearchForm{
             "className": "text-left"
         }));
 
-        row.append(UITableCell({"content": toDateString(player.last_active, true), "className": "date"}));
+        row.append(UITableCell({"content": toDateString(player.last_active, TIME_ZONE, true), "className": "date"}));
         row.append(UITableCell({"content": player.score, "parse": ["ignore0"]}));
         row.append(UITableCell({"content": player.frags, "parse": ["ignore0"]}));
         row.append(UITableCell({"content": player.kills, "parse": ["ignore0"]}));

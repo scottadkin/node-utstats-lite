@@ -1,11 +1,11 @@
 import { searchMaps, VALID_MAP_SEARCH_BY } from "../maps.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 
 export async function renderMapsPage(req, res, userSession){
 
     try{
-
+        const timeZone = await getSiteWideTimeZone();
         const pageSettings = await getCategorySettings("Maps");
 
         let title = "Maps";
@@ -60,6 +60,7 @@ export async function renderMapsPage(req, res, userSession){
 
         res.render("maps.ejs",{
             "host": req.headers.host,
+            timeZone,
             title,
             "meta": {"description": description, "image": "images/maps/default.jpg"},
             sortBy,

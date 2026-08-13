@@ -151,7 +151,7 @@ class RecordsDataDisplay{
             const row = [
                 {"display": `${place}${getOrdinal(place)}`, "className": "ordinal"},
                 {"display": UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}), "bSkipTD": true},
-                {"display": toDateString(d.last_active, true), "className": "date"},
+                {"display": toDateString(d.last_active, TIME_ZONE, true), "className": "date"},
                 {"display": this.getGametypeName(d.gametype_id)},
                 {"display": toPlaytime(d.playtime), "className": "playtime"},
             ];
@@ -197,7 +197,7 @@ class RecordsDataDisplay{
             const row = [
                 {"display": `${place}${getOrdinal(place)}`, "className": "ordinal"},
                 {"display": UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}), "bSkipTD": true},
-                {"display": toDateString(d.match_date, true), "className": "date"},
+                {"display": toDateString(d.match_date, TIME_ZONE, true), "className": "date"},
                 {"display": toPlaytime(d.time_on_server), "className": "playtime"},
                 {"display": d.gametype_name},
                 {"display": d.map_name},

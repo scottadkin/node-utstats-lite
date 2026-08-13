@@ -1,7 +1,7 @@
 import { getMatchData } from "../matches.mjs";
 import { getMatchData as getClassicStatsData } from "../classicWeaponStats.mjs";
 import { convertTimestamp, plural, toPlaytime } from "../generic.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 
 export async function renderMatchPage(req, res, userSession){
@@ -12,8 +12,9 @@ export async function renderMatchPage(req, res, userSession){
 
         if(matchId === null) throw new Error(`MatchId was not supplied`);
 
+        const timeZone = await getSiteWideTimeZone();
         let desc = `Match Doesn't Exist - Node UTStats Lite`;
-
+        
         const data = await getMatchData(matchId);
 
         if(data.error !== undefined) throw new Error(data.error);
@@ -45,7 +46,8 @@ export async function renderMatchPage(req, res, userSession){
             data,	
             classicWeaponStats,
             pageSettings,
-            pageLayout
+            pageLayout,
+            timeZone
 
         });
 

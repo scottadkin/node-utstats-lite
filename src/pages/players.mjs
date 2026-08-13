@@ -1,6 +1,6 @@
 import { PER_PAGE_OPTIONS } from "../generic.mjs";
 import { searchPlayers } from "../players.mjs";
-import { getCategorySettings } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 export async function renderPlayersPage(req, res, userSession){
 
@@ -15,6 +15,7 @@ export async function renderPlayersPage(req, res, userSession){
 
 
         const pageSettings = await getCategorySettings("Players");
+        const timeZone = await getSiteWideTimeZone();
 
         let searchName = req?.query?.name ?? "";
         let sortBy = req?.query?.sortBy ?? pageSettings["Default Sort By"] ?? "name";
@@ -62,7 +63,8 @@ export async function renderPlayersPage(req, res, userSession){
             "perPageOptions": PER_PAGE_OPTIONS,
             players,
             userSession,
-            siteName
+            siteName,
+            timeZone
         });
         
     }catch(err){

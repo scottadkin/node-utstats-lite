@@ -277,3 +277,15 @@ export async function restorePageSettings(page){
         await insertSetting(p.category, p.type, p.name, p.value);
     }
 }
+
+
+export async function getSiteWideTimeZone(){
+
+    const query = `SELECT setting_value FROM nstats_site_settings WHERE category='Date & Time' AND setting_name='Sitewide Time Zone'`;
+
+    const result = await simpleQuery(query);
+
+    if(result.length === 0) return null
+
+    return result[0].setting_value;
+}
