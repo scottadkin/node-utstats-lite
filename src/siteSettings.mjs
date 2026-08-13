@@ -3,7 +3,7 @@ import  Message from "./message.mjs";
 
 
 const DEFAULT_PAGE_SETTINGS = [
-    {"category": "Date & Time" ,"type": `timeZone`, "name": "Date Timezone", "value": "+00:00"},
+    {"category": "Date & Time" ,"type": `timeZone`, "name": "Sitewide Time Zone", "value": "+00:00"},
 
     {"category": "Matches" ,"type": `perPage`, "name": "Results Per Page", "value": "50"},
     {"category": "Matches" ,"type": `displayMode`, "name": "Default Display Mode", "value": "default"},

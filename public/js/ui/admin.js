@@ -1708,14 +1708,21 @@ class AdminSiteSettingsManager{
 
         if(changes.length === 0){
             this.saveButton.className = "hidden";
-            this.layoutSaveButton.className = "hidden";
+
+            if(this.layoutSaveButton !== undefined){
+                this.layoutSaveButton.className = "hidden";
+            }
+
             return;
         }
 
         this.warningElem.className = `warning`;
         this.warningElem.append(`You have ${changes.length} unsaved changes.`);
         this.saveButton.className = "submit-button";
-         this.layoutSaveButton.className = "submit-button";
+
+        if(this.layoutSaveButton !== undefined){
+            this.layoutSaveButton.className = "submit-button";
+        }
     }
 
     renderSettings(type){
@@ -1824,15 +1831,35 @@ class AdminSiteSettingsManager{
     renderDateTimeSettings(){
 
 
-        UIHeader(this.wrapper, "Date And Time Settings");
-
-        const row = UIDiv("form-row");
-
-        const testSelect = new UITimeZoneSelect(row, "+00:00", (e) =>{
-            console.log(e);
+        const settings = this.pageSettings.filter((obj) =>{
+            return obj.category === "Date & Time";
         });
 
-        this.wrapper.append(row);
+        UIHeader(this.wrapper, "Date And Time Settings");
+
+        const form = UIDiv("form");
+
+
+        for(let i = 0; i < settings.length; i++){
+
+            const s = settings[i];
+
+            const row = UIDiv("form-row");
+            row.append(UILabel(s.setting_name));
+
+            if(s.setting_type === "timeZone"){
+
+                new UITimeZoneSelect(row, s.setting_value, (e) =>{
+                    this.changePageSetting(s.id, e);  
+                });
+            }
+
+            form.append(row);
+        }
+
+        form.append(this.createSaveButton(false));
+
+        this.wrapper.append(form);
     }
     
     render(){
