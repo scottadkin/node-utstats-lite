@@ -109,7 +109,6 @@ class MatchRichViewBox{
         info.append(players);
 
         info.append(toPlaytime(d.playtime));
-        info.append(UIBr(), d.absolute_time);
 
         this.wrapper.append(info);
     }

@@ -183,6 +183,42 @@ function fixLogsDownloadDuplicates(data){
 }
 
 
+const MYSQL_DATE_COLUMN_NAMES = [
+    "created", "expires", "first", "last",
+    "date", "first_match", "last_match", "match_date",
+    "last_active", "date_added"
+];
+
+function convertMYSQLDateTimeToDate(columns, rows){
+
+    //2026-01-13 10:27:27
+
+    const targetIndexes = [];
+
+    for(let i = 0; i < columns.length; i++){
+
+        const c = columns[i];
+
+        const index = MYSQL_DATE_COLUMN_NAMES.indexOf(c);
+
+        if(index === -1) continue;
+        targetIndexes.push(i);
+
+    }
+
+    if(targetIndexes.length === 0) return;
+
+
+    for(let i = 0; i < rows.length; i++){
+
+        const row = rows[i];
+
+        for(let x = 0; x < targetIndexes.length; x++){
+            row[targetIndexes[x]] = new Date(row[targetIndexes[x]]);
+        }
+
+    }
+}
 
 
 async function restoreTable(tableName, fileName){
@@ -265,6 +301,9 @@ async function restoreTable(tableName, fileName){
     }
 
     const query = `INSERT INTO ${tableName} (${columns.toString()}) VALUES ?`;
+
+    convertMYSQLDateTimeToDate(columns, rows);
+
 
     if(tableName === "nstats_logs_downloads"){
         await bulkInsert(query, fixLogsDownloadDuplicates(rows));
