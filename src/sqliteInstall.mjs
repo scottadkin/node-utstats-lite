@@ -1066,7 +1066,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     await simpleQuery(`DROP TABLE IF EXISTS nstats_player_map_minute_averages`);
 
-    await addColumn("nstats_matches", "absolute_time", `TEXT NOT NULL DEFAULT "2026.11.22.01.01.01.000.0"`);
+    await addColumn("nstats_matches", "absolute_time", `TEXT NOT NULL DEFAULT "1999.11.22.01.01.01.000.0"`);
 
 
     new Message("Inserting Default Rankings Settings", "note");

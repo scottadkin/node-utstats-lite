@@ -248,6 +248,20 @@ async function restoreTable(tableName, fileName){
                 rows[i].push(...PLAYER_TOTAL_WEAPONS_COLUMNS_270.map(() => { return 0}));
             }
         }
+
+    }else if(tableName === "nstats_matches"){
+
+        //missing for 2.7.0
+        if(columns[columns.length - 1] === "hash"){
+
+            columns.push("absolute_time");
+
+            for(let i = 0; i < rows.length; i++){
+
+                rows[i].push("1999.11.22.01.01.01.000.0");
+            }
+        }
+        
     }
 
     const query = `INSERT INTO ${tableName} (${columns.toString()}) VALUES ?`;
