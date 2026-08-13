@@ -53,7 +53,9 @@ const MATCH_TABLE_COLUMNS_VERBOSE = `nstats_matches.id,
     nstats_matches.target_score,
     nstats_matches.time_limit,
     nstats_matches.mutators,
-    nstats_matches.hash`;
+    nstats_matches.hash,
+    nstats_matches.absolute_time
+    `;
 
 
 export async function createMatch(serverId, gametypeId, mapId, bHardcore, tournamentMode, gameSpeed, gameSpeedReal, bInsta, date, playtime, matchStart, matchEnd,

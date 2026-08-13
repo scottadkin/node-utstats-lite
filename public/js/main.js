@@ -213,10 +213,12 @@ function toDateString(dateTime, noDayName, noTime){
     const month = now.getMonth();
     const dayName = now.getDay();
     const day = now.getDate();
-    const hour = now.getHours();
+    let hour = now.getHours();
     let minute = now.getMinutes();
     
     if(minute < 10) minute = `0${minute}`;
+
+    if(hour < 10) hour = `0${hour}`;
 
     let dayNameString = "";
 

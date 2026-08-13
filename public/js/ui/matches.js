@@ -94,11 +94,9 @@ class MatchRichViewBox{
 
         const d = this.data;
 
-        const info = document.createElement("div");
-        info.className = "rich-info";
+        const info = UIDiv("rich-info");
 
-        const gametype = document.createElement("div");
-        gametype.className = "white";
+        const gametype = UIDiv("white");
 
         gametype.append(UIB(d.gametype_name));
         info.append(gametype);
@@ -110,7 +108,8 @@ class MatchRichViewBox{
         players.innerHTML = `${d.players} Player${(d.players === 1) ? "" : "s"}`;
         info.append(players);
 
-        info.append(document.createTextNode(toPlaytime(d.playtime)));
+        info.append(toPlaytime(d.playtime));
+        info.append(UIBr(), d.absolute_time);
 
         this.wrapper.append(info);
     }
@@ -119,7 +118,7 @@ class MatchRichViewBox{
 
         const title = document.createElement("div");
         title.className = "rich-title";
-        title.append(document.createTextNode(this.data.map_name));
+        title.append(this.data.map_name);
         this.wrapper.append(title);
 
         const image = document.createElement("img");
