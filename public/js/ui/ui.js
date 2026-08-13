@@ -1056,6 +1056,19 @@ class UIPlayerHeatmapModeSelect{
 }
 
 
+class UITimeZoneSelect{
+
+    constructor(parent, initialValue, callback){
+
+        const options = TIME_ZONES.map((t) =>{
+
+            return {"display": `${t.utc_offset} ${t.id} (${t.abbreviation})`, "value": t.utc_offset};
+        });
+
+        this.elem = new UISelect(parent, options, initialValue, callback);
+    }
+}
+
 function UIMapRichBox(data){
 
     const link = document.createElement("a");

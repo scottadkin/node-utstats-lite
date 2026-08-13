@@ -484,3 +484,51 @@ function sortByStringInsensitive(a, b){
     }
     return 0;
 }
+
+
+//from https://jsonlint.com/datasets
+const TIME_ZONES =  [
+    {"id": "America/New_York", "name": "Eastern Time", "abbreviation": "ET", "utc_offset": "-05:00",  "region": "North America"},
+    {"id": "America/Chicago", "name": "Central Time", "abbreviation": "CT", "utc_offset": "-06:00",  "region": "North America"},
+    {"id": "America/Denver", "name": "Mountain Time", "abbreviation": "MT", "utc_offset": "-07:00",  "region": "North America"},
+    {"id": "America/Los_Angeles", "name": "Pacific Time", "abbreviation": "PT", "utc_offset": "-08:00",  "region": "North America"},
+    {"id": "America/Anchorage", "name": "Alaska Time", "abbreviation": "AKT", "utc_offset": "-09:00",  "region": "North America"},
+    {"id": "Pacific/Honolulu", "name": "Hawaii Time", "abbreviation": "HST", "utc_offset": "-10:00",  "region": "Pacific"},
+    {"id": "America/Toronto", "name": "Eastern Time (Canada)", "abbreviation": "ET", "utc_offset": "-05:00",  "region": "North America"},
+    {"id": "America/Vancouver", "name": "Pacific Time (Canada)", "abbreviation": "PT", "utc_offset": "-08:00",  "region": "North America"},
+    {"id": "America/Sao_Paulo", "name": "Brasília Time", "abbreviation": "BRT", "utc_offset": "-03:00",  "region": "South America"},
+    {"id": "America/Buenos_Aires", "name": "Argentina Time", "abbreviation": "ART", "utc_offset": "-03:00",  "region": "South America"},
+    {"id": "America/Mexico_City", "name": "Central Time (Mexico)", "abbreviation": "CST", "utc_offset": "-06:00",  "region": "North America"},
+    {"id": "Europe/London", "name": "Greenwich Mean Time", "abbreviation": "GMT", "utc_offset": "+00:00",  "region": "Europe"},
+    {"id": "Europe/Paris", "name": "Central European Time", "abbreviation": "CET", "utc_offset": "+01:00",  "region": "Europe"},
+    {"id": "Europe/Berlin", "name": "Central European Time", "abbreviation": "CET", "utc_offset": "+01:00",  "region": "Europe"},
+    {"id": "Europe/Moscow", "name": "Moscow Time", "abbreviation": "MSK", "utc_offset": "+03:00",  "region": "Europe"},
+    {"id": "Europe/Istanbul", "name": "Turkey Time", "abbreviation": "TRT", "utc_offset": "+03:00",  "region": "Europe"},
+    {"id": "Asia/Dubai", "name": "Gulf Standard Time", "abbreviation": "GST", "utc_offset": "+04:00",  "region": "Asia"},
+    {"id": "Asia/Kolkata", "name": "India Standard Time", "abbreviation": "IST", "utc_offset": "+05:30",  "region": "Asia"},
+    {"id": "Asia/Bangkok", "name": "Indochina Time", "abbreviation": "ICT", "utc_offset": "+07:00",  "region": "Asia"},
+    {"id": "Asia/Singapore", "name": "Singapore Time", "abbreviation": "SGT", "utc_offset": "+08:00",  "region": "Asia"},
+    {"id": "Asia/Hong_Kong", "name": "Hong Kong Time", "abbreviation": "HKT", "utc_offset": "+08:00",  "region": "Asia"},
+    {"id": "Asia/Shanghai", "name": "China Standard Time", "abbreviation": "CST", "utc_offset": "+08:00",  "region": "Asia"},
+    {"id": "Asia/Tokyo", "name": "Japan Standard Time", "abbreviation": "JST", "utc_offset": "+09:00",  "region": "Asia"},
+    {"id": "Asia/Seoul", "name": "Korea Standard Time", "abbreviation": "KST", "utc_offset": "+09:00",  "region": "Asia"},
+    {"id": "Australia/Sydney", "name": "Australian Eastern Time", "abbreviation": "AET", "utc_offset": "+10:00",  "region": "Oceania"},
+    {"id": "Australia/Melbourne", "name": "Australian Eastern Time", "abbreviation": "AET", "utc_offset": "+10:00",  "region": "Oceania"},
+    {"id": "Australia/Perth", "name": "Australian Western Time", "abbreviation": "AWT", "utc_offset": "+08:00",  "region": "Oceania"},
+    {"id": "Pacific/Auckland", "name": "New Zealand Time", "abbreviation": "NZT", "utc_offset": "+12:00",  "region": "Oceania"},
+    {"id": "Africa/Cairo", "name": "Eastern European Time", "abbreviation": "EET", "utc_offset": "+02:00",  "region": "Africa"},
+    {"id": "Africa/Johannesburg", "name": "South Africa Time", "abbreviation": "SAST", "utc_offset": "+02:00",  "region": "Africa"},
+    {"id": "UTC", "name": "Coordinated Universal Time", "abbreviation": "UTC", "utc_offset": "+00:00",  "region": "Global"}
+].sort((a, b) =>{
+    a = a.utc_offset;
+    b = b.utc_offset;
+
+    if(a < b){
+        return -1;
+        
+    }else if(a > b){
+        return 1;
+    }
+
+    return 0;
+});

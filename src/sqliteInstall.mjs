@@ -13,6 +13,7 @@ import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllM
 import { recalculateAllPlayerTotals270 } from "./ctf.mjs";
 
 const queries = [
+
     `CREATE TABLE IF NOT EXISTS nstats_sessions(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         session_id TEXT NOT NULL,

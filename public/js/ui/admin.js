@@ -1167,7 +1167,7 @@ class AdminSiteSettingsManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "page-settings";
+        this.mode = "date-time-settings";
         
         this.pageSettings = [];
         this.pageLayouts = [];
@@ -1187,9 +1187,7 @@ class AdminSiteSettingsManager{
 
         this.warningElem = UIDiv("hidden");
 
-        this.parent.append(this.warningElem);
-
-        this.parent.append(this.wrapper);
+        this.parent.append(this.warningElem, this.wrapper);
 
         
 
@@ -1203,6 +1201,7 @@ class AdminSiteSettingsManager{
             {"display": "Page Settings", "value": "page-settings"},
             {"display": "Social Settings", "value": "social-settings"},
             {"display": "Welcome Message", "value": "welcome-message-settings"},
+            {"display": "Date & Time Settings", "value": "date-time-settings"},
         ];
 
         this.tabs = new UITabs(this.parent, tabs, this.mode);
@@ -1821,6 +1820,20 @@ class AdminSiteSettingsManager{
         this.wrapper.append(form);
     }
 
+
+    renderDateTimeSettings(){
+
+
+        UIHeader(this.wrapper, "Date And Time Settings");
+
+        const row = UIDiv("form-row");
+
+        const testSelect = new UITimeZoneSelect(row, "+00:00", (e) =>{
+            console.log(e);
+        });
+
+        this.wrapper.append(row);
+    }
     
     render(){
 
@@ -1835,7 +1848,13 @@ class AdminSiteSettingsManager{
             return this.renderSettings(this.mode);
 
         }else if(this.mode === "welcome-message-settings"){
+
             return this.renderWelcomeMessageSettings();
+
+        }else if(this.mode === "date-time-settings"){
+
+            return this.renderDateTimeSettings();
+
         }
         
     }
