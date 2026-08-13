@@ -1,6 +1,6 @@
 function renderWelcomeMessage(parent, title, message){
 
-    if(title === "" && message === "&#34;&#34;") return;
+    if(title === "" || message === "&#34;&#34;") return;
 
     const wrapper = document.createElement("div");
 
