@@ -122,7 +122,10 @@ export default class AdminJSONManager{
                     m.targetImage = `${getMapImageName(m.name)}.jpg`;
                 }
 
+
                 const mapImages = await getAllMapImages();
+
+      
 
                 return this.res.json({mapList, mapImages});
 

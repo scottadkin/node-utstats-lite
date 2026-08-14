@@ -21,8 +21,8 @@ export const websitePort = 3000;
 export const mapScreenshotQuality = 85;
 //Quality of the thumbnails of map screenshots
 export const mapThumbnailQuality = 60;
-export const mapThumbnailWidth = 480;
-export const mapThumbnailHeight = 270;
+export const mapThumbnailWidth = 384;
+export const mapThumbnailHeight = 216;
 
 //the maximum amount of failed login attempts before an ip is blocked from logging in.
 export const maxLoginAttempts = 5; 

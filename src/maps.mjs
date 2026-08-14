@@ -331,18 +331,29 @@ export async function getAllNames(bReturnArray, bIgnoreAny){
 
 export async function getAllMapImages(){
 
-    const files = await readdir("./public/images/maps/");
+    const [fullSize, thumbs] = await Promise.all([
+        readdir("./public/images/maps/"),
+        readdir("./public/images/maps/thumbs/")
+    ])
 
     const reg = /^.+?\.jpg$/i;
-    const valid = [];
+    const validFullSize = [];
+    const validThumbs = [];
 
-    for(let i = 0; i < files.length; i++){
 
-        const f = files[i];
-        if(reg.test(f)) valid.push(f);
+    for(let i = 0; i < fullSize.length; i++){
+
+        const f = fullSize[i];
+        if(reg.test(f)) validFullSize.push(f);
     }
 
-    return valid;
+    for(let i = 0; i < thumbs.length; i++){
+   
+        const f = thumbs[i];
+        if(reg.test(f)) validThumbs.push(f);
+    }
+
+    return {"fullSize": validFullSize, "thumbs": validThumbs};
 }
 
 async function getLatestMatchId(mapId){

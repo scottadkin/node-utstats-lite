@@ -594,17 +594,17 @@ function UIFormInputRow(labelString, id, type, value, placeholder, callback){
 }
 
 
-function UIStaticTrueFalse(value, bTableElem){
+function UIStaticTrueFalse(value, bTableElem, trueString, falseString){
 
     if(bTableElem === undefined) bTableElem = false;
 
     const elem = document.createElement((bTableElem) ? "td" : "div");
 
-    let string = "False";
+    let string = falseString ?? "False";
     let className = "false";
 
     if(value){
-        string = "True";
+        string = trueString ?? "True";
         className = "true";
     }
 

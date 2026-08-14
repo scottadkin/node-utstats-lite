@@ -754,7 +754,10 @@ class AdminMapsManager{
         this.mode = "thumbs";
 
         this.mapList = [];
-        this.mapImages = [];
+        this.mapImages = {
+            "fullSize": [],
+            "thumbs": []
+        };
 
         this.validScreenshotTypes = [
             "image/png", 
@@ -791,6 +794,7 @@ class AdminMapsManager{
             if(res.error !== undefined) throw new Error(res.error);
 
             this.mapList = res.mapList;
+
             this.mapImages = res.mapImages;
 
             this.render();
@@ -828,11 +832,11 @@ class AdminMapsManager{
 
     getImageStatus(targetImage){
 
-        const index = this.mapImages.indexOf(targetImage);
+        const index = this.mapImages.fullSize.indexOf(targetImage);
 
         if(index !== -1) return "Found";
 
-        const partial = getPartialNameMatchImage(this.mapImages, targetImage);
+        const partial = getPartialNameMatchImage(this.mapImages.fullSize, targetImage);
 
         if(partial === null) return "Missing";
 
@@ -841,8 +845,8 @@ class AdminMapsManager{
 
     updateMapImages(newImage){
 
-        if(this.mapImages.indexOf(newImage) === -1){
-            this.mapImages.push(newImage);
+        if(this.mapImages.fullSize.indexOf(newImage) === -1){
+            this.mapImages.fullSize.push(newImage);
         }
 
         const statusElem = document.querySelector(`#${stripFileExtension(newImage)}`);
@@ -1093,9 +1097,96 @@ class AdminMapsManager{
     }
 
 
+    async createThumbnail(fileName){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {
+                    "Content-type": "application/json"
+                },
+                "method": "POST",
+                "body": JSON.stringify({"mode": "create-map-thumbnail", "targetFile": fileName})
+            });
+
+            const res = await req.json();
+
+            //dont reload all map images data just update existing this.mapImages.thumbs
+            //need to update saved thumbnail list on success
+            //update missing/found columns
+
+
+
+        }catch(err){
+            console.trace(err);
+        }
+    }
+
     renderThumbnails(){
 
-        new UIInfo(this.wrapper, "Create thumbnails for all existing map screenshots.");
+        
+        const content = [
+            "Create thumbnails for all existing map screenshots.", UIBr(), UIBr(),
+            `Found a total of ${this.mapImages.fullSize.length} fullsize images.`, UIBr(),
+            `Found a total of ${this.mapImages.thumbs.length} thumbnail images.`
+        ];
+
+        new UIInfo(this.wrapper, content);
+
+        console.log(this.mapList);
+        console.log(this.mapImages);
+
+        const tableOptions = {
+            "className": "t-width-2",
+            "headers": [
+                {"display": "Fullsize Image Name"},
+                {"display": "Status"},
+                {"display": "Actions"},
+            ]
+        };
+
+        const rows = [];
+
+        for(let i = 0; i < this.mapImages.fullSize.length; i++){
+
+            const img = this.mapImages.fullSize[i];
+
+            const thumbIndex = this.mapImages.thumbs.indexOf(img)
+
+
+            const createForm = UIDiv();
+
+            const button = UIButton("Create Thumbnail", "small-button");
+
+            let loadingIcon = UILoading();
+
+            button.addEventListener("click", async () =>{
+                loadingIcon.className = "loading";
+                button.className = "hidden";
+
+                createForm.append(loadingIcon);
+                await this.createThumbnail(img);
+
+                loadingIcon.className = "hidden";
+
+                button.className = "small-button";
+            });
+
+            createForm.append(button);
+
+            rows.push([
+                {"display": img, "value": img.toLowerCase(), "className": "text-left"},
+                {
+                    "display": UIStaticTrueFalse(thumbIndex !== -1, true, "Found", "Missing"), 
+                    "value": thumbIndex !== -1, 
+                    "bSkipTD": true,
+                    "className": "text-left"
+                },
+                {"display": createForm, "value": null}
+            ]);
+        }
+
+        const table = new TESTUITable(this.wrapper, tableOptions, rows);
     }
 
     render(){
