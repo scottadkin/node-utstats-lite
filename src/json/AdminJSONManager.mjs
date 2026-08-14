@@ -5,7 +5,7 @@ import { getAllMaps, getAllMapImages, getAllNames as getAllMapNames} from "../ma
 import { getMapImageName, stripFileExtension } from "../generic.mjs";
 import { Jimp } from "jimp";
 import { writeFile, rm } from 'node:fs/promises';
-import { mapScreenshotQuality } from "../../config.mjs";
+import { mapScreenshotQuality, mapThumbnailHeight, mapThumbnailQuality, mapThumbnailWidth } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
 import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
@@ -451,5 +451,20 @@ export default class AdminJSONManager{
 
         return `${name}.jpg`;
         //await fart.write("./uploads/test.jpg", "image/jpeg");
+    }
+
+
+    async createMapThumbnail(file){
+
+        const inputDir = `./public/images/maps/`;
+        const outputDir = `./public/images/maps/thumbs/`;
+
+        const image = await Jimp.read(`${inputDir}${file}`);
+
+        await image.resize({"w": mapThumbnailWidth, "h": mapThumbnailHeight});
+
+        const buffer = await image.getBuffer("image/jpeg", {"quality": mapThumbnailQuality});
+
+        await writeFile(`${outputDir}${file}`, buffer);
     }
 }

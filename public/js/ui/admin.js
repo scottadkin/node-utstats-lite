@@ -751,7 +751,7 @@ class AdminMapsManager{
         this.parent = document.querySelector(parent);
         UIHeader(this.parent, "Map Manager");
        
-        this.mode = "sshots";
+        this.mode = "thumbs";
 
         this.mapList = [];
         this.mapImages = [];
@@ -804,7 +804,8 @@ class AdminMapsManager{
     createTabs(){
 
         const tabsOptions = [
-            {"value": "sshots", "display": "Screenshots"}
+            {"value": "sshots", "display": "Screenshots"},
+            {"value": "thumbs", "display": "Thumbnails"},
         ];
 
         this.tabs = new UITabs(this.parent, tabsOptions, this.mode);
@@ -819,6 +820,7 @@ class AdminMapsManager{
 
         switch(this.mode){
             case "sshots": return "Screenshot Manager";
+            case "thumbs": return "Thumbnails Creator";
         }
 
         return "Not Found";
@@ -1090,6 +1092,12 @@ class AdminMapsManager{
         new TESTUITable(this.wrapper, tableOptions, rows);
     }
 
+
+    renderThumbnails(){
+
+        new UIInfo(this.wrapper, "Create thumbnails for all existing map screenshots.");
+    }
+
     render(){
 
         this.wrapper.innerHTML = ``;
@@ -1098,6 +1106,8 @@ class AdminMapsManager{
 
         if(this.mode === "sshots"){
             this.renderScreenshots();
+        }else if(this.mode === "thumbs"){
+            this.renderThumbnails();
         }
     }
 }
