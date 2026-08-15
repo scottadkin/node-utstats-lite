@@ -19,10 +19,7 @@ export const websitePort = 3000;
 //What quality map screenshots are saved as when using admin upload tool 0-100
 //Higher the value the larger the file size of the screenshots
 export const mapScreenshotQuality = 85;
-//Quality of the thumbnails of map screenshots
-export const mapThumbnailQuality = 60;
-export const mapThumbnailWidth = 384;
-export const mapThumbnailHeight = 216;
+
 
 //the maximum amount of failed login attempts before an ip is blocked from logging in.
 export const maxLoginAttempts = 5; 

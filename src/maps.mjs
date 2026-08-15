@@ -1001,3 +1001,25 @@ export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPage,
 
     return {data, totalResults};
 }
+
+
+export async function getMapThumbnailSettings(){
+
+    const query = `SELECT name,value FROM nstats_map_thumbnail_settings`;
+
+    const result = await simpleQuery(query);
+
+    const obj = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        obj[r.name.toLowerCase()] = {
+            "value": r.value,
+            "name": r.name
+        };
+    }
+
+    return obj;
+}

@@ -839,6 +839,13 @@ const queries = [
             value TEXT COLLATE NOCASE NOT NULL
         ) STRICT`,
 
+
+        `CREATE TABLE IF NOT EXISTS nstats_map_thumbnail_settings(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT COLLATE NOCASE NOT NULL,
+            value TEXT COLLATE NOCASE NOT NULL
+        ) STRICT`
+
 ];
 
 
@@ -1036,6 +1043,42 @@ async function updatePlayerTotalsTable(){
 
 }
 
+
+async function bThumbnailSettingExist(name){
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_map_thumbnail_settings WHERE name=?`;
+
+    const result = await simpleQuery(query, [name]);
+
+    return result[0].total_rows > 0;
+}
+
+//2.7.0
+async function createThumbnailSettings(){
+
+    const settings = [
+        {"name": "Quality", "value": 60},
+        {"name": "Width", "value": 384},
+        {"name": "Height", "value": 216}
+    ];
+
+
+    for(let i = 0; i < settings.length; i++){
+
+        const {name, value} = settings[i];
+
+        if(!await bThumbnailSettingExist(name)){
+
+            new Message(`Creating missing thumbnail setting ${name}`,"note");
+
+            await simpleQuery(`INSERT INTO nstats_map_thumbnail_settings VALUES(NULL,?,?)`, [name, value]);
+            new Message(`Created thumbnail setting ${name}`,"pass");
+        }
+    }
+
+
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1102,6 +1145,10 @@ export async function sqliteInstall(bOnlyCreateTables){
     new Message(`Calculating player ctf totals`, "note");
     await recalculateAllPlayerTotals270();
 
+
+    new Message(`Checking for map image thumbnail settings`, "note");
+
+    await createThumbnailSettings();
 
 
     if(!fs.existsSync("./salt.mjs")){

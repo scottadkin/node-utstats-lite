@@ -1,11 +1,11 @@
 import { getSessionInfo } from "../authentication.mjs";
 import { getAllFTPSettings, addFTPServer, editFTPServer, deleteFTPServer } from "../ftp.mjs";
 import { updateLogsFolderSettings } from "../logsfoldersettings.mjs";
-import { getAllMaps, getAllMapImages, getAllNames as getAllMapNames} from "../maps.mjs";
+import { getAllMaps, getAllMapImages, getAllNames as getAllMapNames, getMapThumbnailSettings} from "../maps.mjs";
 import { getMapImageName, stripFileExtension } from "../generic.mjs";
 import { Jimp } from "jimp";
 import { writeFile, rm } from 'node:fs/promises';
-import { mapScreenshotQuality, mapThumbnailHeight, mapThumbnailQuality, mapThumbnailWidth } from "../../config.mjs";
+import { mapScreenshotQuality } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
 import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
@@ -474,15 +474,21 @@ export default class AdminJSONManager{
             throw new Error("Filename is an empty string.");
         }
 
+        const settings = await getMapThumbnailSettings();
+
+
+
         const inputDir = `./public/images/maps/`;
         const outputDir = `./public/images/maps/thumbs/`;
 
         const image = await Jimp.read(`${inputDir}${file}`);
 
-        await image.resize({"w": mapThumbnailWidth, "h": mapThumbnailHeight});
 
-        const buffer = await image.getBuffer("image/jpeg", {"quality": mapThumbnailQuality});
+        await image.resize({"w": parseInt(settings.width.value), "h": parseInt(settings.height.value)});
+
+        const buffer = await image.getBuffer("image/jpeg", {"quality": parseInt(settings.quality.value)});
 
         await writeFile(`${outputDir}${file}`, buffer);
+ 
     }
 }
