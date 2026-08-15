@@ -1135,7 +1135,11 @@ class AdminMapsManager{
             //need to update saved thumbnail list on success
             //update missing/found columns
 
-            this.mapImages.thumbs.push(fileName);
+            const thumbIndex = this.mapImages.thumbs.indexOf(fileName);
+
+            if(thumbIndex === -1){
+                this.mapImages.thumbs.push(fileName);
+            }
 
             
             
@@ -1217,6 +1221,45 @@ class AdminMapsManager{
         return rows;
     }
 
+    
+    renderCreateAll(){
+
+        const createAllContent = [];
+
+        UIHeader(this.wrapper, "Create All Thumbnails");
+
+        const createAllButton = UIButton("Create All Thumbnails", "submit-button");
+
+        createAllButton.addEventListener("click", async () =>{
+
+            createAllButton.className = "hidden";
+            this.createAllLoading.className = "loading";
+
+            for(let i = 0; i < this.mapImages.fullSize.length; i++){
+
+                const img = this.mapImages.fullSize[i];
+
+                await this.createThumbnail(img);
+            }
+
+            createAllButton.className = "submit-button";
+            this.createAllLoading.className = "hidden";
+        });
+
+        createAllContent.push(
+            `Create thumbnails for all existing map images, if one already exists it will be overwritten with a new one.`
+        );
+        
+
+        new UIInfo(this.wrapper, createAllContent);
+
+        const buttonForm = UIDiv("form");
+        this.createAllLoading = UILoading();
+        this.createAllLoading.className = "hidden";
+        buttonForm.append(createAllButton, this.createAllLoading);
+        this.wrapper.append(buttonForm);
+    }
+
     renderThumbnails(){
 
         this.fullSizeSpan = UISpan(this.mapImages.fullSize.length);
@@ -1232,9 +1275,11 @@ class AdminMapsManager{
 
         new UIInfo(this.wrapper, content);
 
-        console.log(this.mapList);
-        console.log(this.mapImages);
 
+
+        this.renderCreateAll();
+
+        UIHeader(this.wrapper, "Create Single Thumbnail");
         const tableOptions = {
             "className": "t-width-2",
             "headers": [
