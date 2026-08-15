@@ -152,6 +152,13 @@ export default class AdminJSONManager{
                 const uploadedName = await this.uploadMapScreenshot(fileInfo, mapName);
                 return this.res.json({"message": "uploaded", "fileName": uploadedName});
 
+            }else if(this.mode === "create-map-thumbnail"){
+                
+                
+
+                await this.createMapThumbnail(this.req.body.targetFile);
+                return this.res.json({"message": "done"});
+                
             }else if(this.mode === "get-all-page-settings"){
 
                 const settings = await getAllSiteSettings();
@@ -458,6 +465,14 @@ export default class AdminJSONManager{
 
 
     async createMapThumbnail(file){
+
+        if(file === undefined){
+            throw new Error("Missing File");
+        }
+
+        if(file.length === 0){
+            throw new Error("Filename is an empty string.");
+        }
 
         const inputDir = `./public/images/maps/`;
         const outputDir = `./public/images/maps/thumbs/`;

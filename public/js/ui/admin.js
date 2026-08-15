@@ -774,6 +774,8 @@ class AdminMapsManager{
         this.wrapper = UIDiv();
         this.parent.append(this.wrapper);
 
+        this.pendingThumbnails = [];
+
         this.render();
 
         this.loadData();
@@ -1099,7 +1101,21 @@ class AdminMapsManager{
 
     async createThumbnail(fileName){
 
+        
+    
         try{
+
+            if(this.pendingThumbnails.indexOf(fileName) !== -1){
+
+                throw new Error(`Thumbnail is already queued for creation.`);
+                //remove resolve after test
+                
+                return;
+            }
+
+            this.pendingThumbnails.push(fileName);
+            this.thumbnailTable.updateRows(this.createThumbnailRows());
+                    
 
             const req = await fetch("/admin", {
                 "headers": {
@@ -1111,22 +1127,102 @@ class AdminMapsManager{
 
             const res = await req.json();
 
+
+            if(res.error !== undefined){
+                throw new Error(res.error);
+            }
             //dont reload all map images data just update existing this.mapImages.thumbs
             //need to update saved thumbnail list on success
             //update missing/found columns
 
+            this.mapImages.thumbs.push(fileName);
 
+            
+            
+
+            new UINotification(this.parent, "pass", "Created Thumbnail", `Thumbnail created for ${fileName}`);
 
         }catch(err){
+
             console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Create Thumbnail", err.toString());
+
+        }finally{
+
+            const index = this.pendingThumbnails.indexOf(fileName);
+
+            if(index !== -1){
+                this.pendingThumbnails.splice(index, 1);
+            }
+            this.thumbnailTable.updateRows(this.createThumbnailRows());
+            
         }
+
+    }
+
+    createThumbnailRows(){
+
+        const rows = [];
+
+        for(let i = 0; i < this.mapImages.fullSize.length; i++){
+
+            const img = this.mapImages.fullSize[i];
+            
+
+            const thumbIndex = this.mapImages.thumbs.indexOf(img);
+
+            const createForm = UIDiv();
+
+            
+
+            if(this.pendingThumbnails.indexOf(img) !== -1){
+
+
+                let loadingIcon = UILoading();
+                createForm.className = "team-yellow";
+                loadingIcon.className = "loading";
+
+                createForm.append(loadingIcon);
+                createForm.append();
+
+            }else{
+
+                const button = UIButton("Create Thumbnail", "small-button");
+
+                button.addEventListener("click", async () =>{ 
+                    await this.createThumbnail(img);
+
+                });
+
+                createForm.append(button);
+                 
+            }
+
+            
+           
+
+            rows.push([
+                {"display": img, "value": img.toLowerCase(), "className": "text-left"},
+                {
+                    "display": UIStaticTrueFalse(thumbIndex !== -1, true, "Found", "Missing"), 
+                    "value": thumbIndex !== -1, 
+                    "bSkipTD": true,
+                    "className": "text-left"
+                },
+                {"display": createForm, "value": null}
+            ]);
+        }
+
+        return rows;
     }
 
     renderThumbnails(){
 
         
         const content = [
-            "Create thumbnails for all existing map screenshots.", UIBr(), UIBr(),
+            "Create thumbnails for all existing map screenshots.", UIBr(), 
+            `If a thumbnail for a map does not exist a fullsize one will be used instead.`,
+            UIBr(), UIBr(),
             `Found a total of ${this.mapImages.fullSize.length} fullsize images.`, UIBr(),
             `Found a total of ${this.mapImages.thumbs.length} thumbnail images.`
         ];
@@ -1145,48 +1241,11 @@ class AdminMapsManager{
             ]
         };
 
-        const rows = [];
+        const rows = this.createThumbnailRows();
 
-        for(let i = 0; i < this.mapImages.fullSize.length; i++){
+        
 
-            const img = this.mapImages.fullSize[i];
-
-            const thumbIndex = this.mapImages.thumbs.indexOf(img)
-
-
-            const createForm = UIDiv();
-
-            const button = UIButton("Create Thumbnail", "small-button");
-
-            let loadingIcon = UILoading();
-
-            button.addEventListener("click", async () =>{
-                loadingIcon.className = "loading";
-                button.className = "hidden";
-
-                createForm.append(loadingIcon);
-                await this.createThumbnail(img);
-
-                loadingIcon.className = "hidden";
-
-                button.className = "small-button";
-            });
-
-            createForm.append(button);
-
-            rows.push([
-                {"display": img, "value": img.toLowerCase(), "className": "text-left"},
-                {
-                    "display": UIStaticTrueFalse(thumbIndex !== -1, true, "Found", "Missing"), 
-                    "value": thumbIndex !== -1, 
-                    "bSkipTD": true,
-                    "className": "text-left"
-                },
-                {"display": createForm, "value": null}
-            ]);
-        }
-
-        const table = new TESTUITable(this.wrapper, tableOptions, rows);
+        this.thumbnailTable = new TESTUITable(this.wrapper, tableOptions, rows);
     }
 
     render(){
