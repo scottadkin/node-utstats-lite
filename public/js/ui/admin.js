@@ -1155,6 +1155,7 @@ class AdminMapsManager{
                 this.pendingThumbnails.splice(index, 1);
             }
             this.thumbnailTable.updateRows(this.createThumbnailRows());
+            this.thumbSpan.innerHTML = this.mapImages.thumbs.length;
             
         }
 
@@ -1218,13 +1219,15 @@ class AdminMapsManager{
 
     renderThumbnails(){
 
+        this.fullSizeSpan = UISpan(this.mapImages.fullSize.length);
+        this.thumbSpan = UISpan(this.mapImages.thumbs.length);
         
         const content = [
             "Create thumbnails for all existing map screenshots.", UIBr(), 
             `If a thumbnail for a map does not exist a fullsize one will be used instead.`,
             UIBr(), UIBr(),
-            `Found a total of ${this.mapImages.fullSize.length} fullsize images.`, UIBr(),
-            `Found a total of ${this.mapImages.thumbs.length} thumbnail images.`
+            `Found a total of `,this.fullSizeSpan , ` fullsize images.`, UIBr(),
+            `Found a total of `,this.thumbSpan ,` thumbnail images.`
         ];
 
         new UIInfo(this.wrapper, content);
