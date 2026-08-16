@@ -122,7 +122,7 @@ async function setMatchTypeNames(matches){
         m.server_name = serverNames[m.server_id];
         m.gametype_name = gametypeNames[m.gametype_id];
         m.map_name = mapNames[m.map_id];
-        m.map_image = mapImages[m.map_name.toLowerCase()];
+        m.image = mapImages[m.map_name.toLowerCase()];
     }
 
 }
@@ -255,11 +255,8 @@ export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype
 
         const r = result[i];
 
-        if(mapImages[r.image_name] !== undefined){
-            r.map_image = mapImages[r.image_name];
-        }else{
-            r.map_image = "default.jpg";
-        }
+        r.image = mapImages[r.image_name];
+      
     }
     
     const totalMatches = await getTotalMatches(server, gametype, map);

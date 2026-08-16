@@ -123,7 +123,7 @@ class MatchRichViewBox{
         const image = document.createElement("img");
         image.className = "rich-image";
         image.alt = "map-sshot";
-        image.src = `/images/maps/${this.data.map_image}`;
+        image.src = getMapThumbOrFullSize(this.data);
 
         this.wrapper.append(image);
         this.createInfoElems();
