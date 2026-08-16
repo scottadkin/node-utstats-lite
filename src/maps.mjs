@@ -491,11 +491,13 @@ export async function getMapInfo(mapId){
 
     if(result.length === 0) return null;
 
-    const imageName = result[0].name.toLowerCase();
+    const imageName = result[0].name;
 
     const images = await getMapImages([imageName]);
-    result[0].image = images[imageName] ?? "default.jpg";
-    result[0].requiredImageName = imageName;
+
+    result[0].image = images[Object.keys(images)[0]];
+    result[0].requiredImageName = getMapImageName(imageName);
+
     return result[0];
 }
 

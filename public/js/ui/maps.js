@@ -272,21 +272,38 @@ function UIMapImage(parent, image, requiredImageName){
 
     const wrapper = UIDiv("text-center");
 
-    if(image === "default.jpg"){
+    if(!image.bFoundFullSize){
 
-        wrapper.className = "error";
-        wrapper.append(
-            `Map doesn't have a screenshot, required screenshot name is:`, 
-            UIBr(), 
-            UIB(`${requiredImageName}.jpg`), 
-            UIBr()
-        );
+        if(!image.bPartialFullSize){
+
+            wrapper.className = "error";
+            wrapper.append(
+                `Map doesn't have a screenshot, required screenshot name is:`, 
+                UIBr(), 
+                UIB(`${requiredImageName}.jpg`), 
+                UIBr()
+            );
+
+        }else{
+            wrapper.className = "info";
+            wrapper.append(
+                `A partial match of `,UIB(image.fullSize),` was found and the website will use this image instead of default.jpg.`, 
+                UIBr(),
+                `If you wish to add an exact matching screenshot for this map the name required is `, UIB(`${requiredImageName}.jpg`)
+            );
+            const img = document.createElement("img");
+            img.className = "map-sshot";
+            img.src = `/images/maps/${image.fullSize}`;
+            img.alt = "Map Screenshot";
+
+            wrapper.append(img);
+        }
 
     }else{
 
         const img = document.createElement("img");
         img.className = "map-sshot";
-        img.src = `../images/maps/${image}`;
+        img.src = `/images/maps/${image.fullSize}`;
         img.alt = "Map Screenshot";
 
         wrapper.append(img);

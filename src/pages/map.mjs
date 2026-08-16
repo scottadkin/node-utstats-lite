@@ -13,6 +13,7 @@ export async function renderMapPage(req, res, userSession){
         const timeZone = await getSiteWideTimeZone();
         const basic = await getMapInfo(req.params.id);
 
+
         if(basic === null) throw new Error(`Map does not exist`);
 
         let title = basic.name;
@@ -56,7 +57,7 @@ export async function renderMapPage(req, res, userSession){
                 "playerTotals": VALID_PLAYER_TOTALS
             },
             
-            "meta": {"description": description, "image": `images/maps/${basic.image}`},
+            "meta": {"description": description, "image": `images/maps/${basic.image.fullSize}`},
         });
 
     }catch(err){

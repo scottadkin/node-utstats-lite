@@ -40,7 +40,7 @@
         switch(settingKey){
 
             case "Display Map Screenshot": {
-                %>UIMapImage("#root", "<%= basic.image %>", "<%= basic.requiredImageName %>");<%
+                %>UIMapImage("#root", <%- JSON.stringify(basic.image) %>, "<%= basic.requiredImageName %>");<%
             } break;
 
             case "Display Basic Summary":{
