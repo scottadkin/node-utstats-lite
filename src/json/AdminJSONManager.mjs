@@ -1,7 +1,7 @@
 import { getSessionInfo } from "../authentication.mjs";
 import { getAllFTPSettings, addFTPServer, editFTPServer, deleteFTPServer } from "../ftp.mjs";
 import { updateLogsFolderSettings } from "../logsfoldersettings.mjs";
-import { getAllMaps, getAllMapImages, getAllNames as getAllMapNames, getMapThumbnailSettings} from "../maps.mjs";
+import { getAllMaps, getAllMapImages, getAllNames as getAllMapNames, getMapThumbnailSettings, saveThumbnailSettings} from "../maps.mjs";
 import { getMapImageName, stripFileExtension } from "../generic.mjs";
 import { Jimp } from "jimp";
 import { writeFile, rm } from 'node:fs/promises';
@@ -161,6 +161,16 @@ export default class AdminJSONManager{
                 await this.createMapThumbnail(this.req.body.targetFile);
                 return this.res.json({"message": "done"});
                 
+            }else if(this.mode === "save-thumb-settings"){
+                
+                const settings = this.req.body?.settings ?? null;
+
+                if(settings === null) throw new Error("No settings supplied");
+
+                await saveThumbnailSettings(settings);
+
+                return this.res.json({"message": "passed"});
+
             }else if(this.mode === "get-all-page-settings"){
 
                 const settings = await getAllSiteSettings();

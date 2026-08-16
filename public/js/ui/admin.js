@@ -1296,10 +1296,50 @@ class AdminMapsManager{
 
         if(bAnyChanges){
             this.saveThumbnailSettingsButton.className = "submit-button";
+            this.thumbForm.className = "form team-yellow";
         }else{
             this.saveThumbnailSettingsButton.className = "hidden";
+            this.thumbForm.className = "form";
         }
 
+    }
+
+
+    async saveThumbnailSettings(){
+
+        try{
+
+            const settings = [];
+            
+            for(const [key, data] of Object.entries(this.thumbnailSettings)){
+
+                settings.push({"name": data.name, "value": data.value});
+            }
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "save-thumb-settings", settings})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.savedThumbnailSettings = JSON.parse(JSON.stringify(this.thumbnailSettings));
+            this.updateSaveThumbnailSettingsButton();
+
+            new UINotification(
+                this.parent, 
+                "pass", 
+                "Settings Saved", 
+                ["Settings saved successfully. You will need to click create all thumbnails to generate new ones."]
+            );
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Save Thumbnail Settings", err.toString());
+        }
     }
 
     renderThumbnailSettings(){
@@ -1319,7 +1359,7 @@ class AdminMapsManager{
         new UIInfo(this.wrapper, infoContent);
 
 
-        const thumbForm = UIDiv("form");
+        this.thumbForm = UIDiv("form");
 
 
         const qualityRow = UIDiv("form-row");
@@ -1364,12 +1404,16 @@ class AdminMapsManager{
         widthElem.min = 1;
         heightElem.min = 1;
 
-        thumbForm.append(qualityRow, widthRow, heightRow);
-        this.wrapper.append(thumbForm);
+        this.thumbForm.append(qualityRow, widthRow, heightRow);
+        this.wrapper.append(this.thumbForm);
 
         this.saveThumbnailSettingsButton = UIButton("Save Changes", "hidden");
+        this.saveThumbnailSettingsButton.addEventListener("click", () =>{
 
-        thumbForm.append(this.saveThumbnailSettingsButton);
+            this.saveThumbnailSettings();
+        });
+
+        this.thumbForm.append(this.saveThumbnailSettingsButton);
 
     }
 

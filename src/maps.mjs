@@ -1023,3 +1023,16 @@ export async function getMapThumbnailSettings(){
 
     return obj;
 }
+
+
+export async function saveThumbnailSettings(settings){
+
+    const query = `UPDATE nstats_map_thumbnail_settings SET value=? WHERE name=?`;
+
+    for(let i = 0; i < settings.length; i++){
+
+        const {name, value} = settings[i];
+
+        await simpleQuery(query, [value, name]);
+    }
+}
