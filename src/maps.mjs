@@ -218,26 +218,58 @@ export async function getMapImages(names){
         namesToImageNames[name.toLowerCase()] = getMapImageName(name);
     }
 
-    const files = await readdir("./public/images/maps/");
+    const [fullSize, thumbs] = await Promise.all([readdir("./public/images/maps/"), readdir("./public/images/maps/thumbs/")]);
 
     for(const [name, imageName] of Object.entries(namesToImageNames)){
 
+        let bFoundFullSize = false;
+        let bFoundThumb = false;
+        let bPartialFullSize = false;
+        let bPartialThumb = false;
+
         const currentTarget = `${imageName}.jpg`;
-        const index = files.indexOf(currentTarget);
+        const fullSizeIndex = fullSize.indexOf(currentTarget);
+        const thumbsIndex = thumbs.indexOf(currentTarget);
+
         let targetImageFile = "default.jpg";
-        if(index !== -1) targetImageFile = currentTarget;
+        let targetThumbFile = "default.jpg";
+
+        if(fullSizeIndex !== -1){
+            targetImageFile = currentTarget;
+            bFoundFullSize = true;
+        }
+
+        if(thumbsIndex !== -1){
+            targetThumbFile = currentTarget;
+            bFoundThumb = true;
+        }
 
         
-        if(index === -1){
+        if(fullSizeIndex === -1){
 
-            const partial = getPartialNameMatchImage(files, currentTarget);
+            const partial = getPartialNameMatchImage(fullSize, currentTarget);
 
             if(partial !== null){
                 targetImageFile = partial;
+                bPartialFullSize = true;
             }
         }
 
-        images[name] = targetImageFile;
+        if(thumbsIndex === -1){
+            const partial = getPartialNameMatchImage(thumbs, currentTarget);
+
+            if(partial !== null){
+                targetThumbFile = partial;
+                bPartialThumb = true;
+            }
+        }
+
+        //bFoundFullsize and bFoundThumb just incase mapname is really "default"
+        images[name] = {
+            "fullSize": targetImageFile, 
+            "thumb": targetThumbFile, 
+            bFoundFullSize, bFoundThumb, bPartialFullSize, bPartialThumb
+        };
     }
     
     return images;

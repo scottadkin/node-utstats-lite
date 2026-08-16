@@ -1068,6 +1068,52 @@ class UITimeZoneSelect{
         this.elem = new UISelect(parent, options, initialValue, callback);
     }
 }
+/**
+ * Get the thumbnail or fullsize map image from a getMapImages result
+ * @param {Object} data 
+ */
+function getMapThumbOrFullSize(data){
+
+    if(data.image === undefined){
+        throw new Error(`data must have a property called image`);
+    }
+
+    const requiredKeys = [
+        "fullSize", "thumb", "bFoundFullSize", 
+        "bFoundThumb", "bPartialThumb", "bPartialFullSize"
+    ];
+
+    const keys = Object.keys(data.image);
+
+    for(let i = 0; i < requiredKeys.length; i++){
+
+        if(keys.indexOf(requiredKeys[i]) === -1){
+            throw new Error(`data.image requires a key named ${requiredKeys[i]} for getMapThumbOrFullSize`);
+        }
+    }
+
+    if(data.image.bFoundThumb){
+
+        return `/images/maps/thumbs/${data.image.thumb}`;
+
+
+    }else{
+
+        if(data.image.bPartialThumb && !data.image.bFoundFullSize){
+
+            return `/images/maps/thumbs/${data.image.thumb}`;
+
+        }else if(!data.image.bPartialThumb && data.image.bFoundFullSize){
+            return `/images/maps/${data.image.fullSize}`;
+
+        }else if(!data.image.bPartialThumb && !data.image.bFoundFullSize){
+
+            return `/images/maps/thumbs/${data.image.fullSize}`;
+        }
+    }
+
+    return `/images/maps/default.jpg`;
+}
 
 function UIMapRichBox(data){
 
@@ -1083,7 +1129,10 @@ function UIMapRichBox(data){
 
     const image = document.createElement("img");
     image.className = "rich-image";
-    image.src = `/images/maps/${data.image}`;
+
+
+    image.src = getMapThumbOrFullSize(data);
+
     wrapper.append(image);
 
     const info = UIDiv("rich-info");
