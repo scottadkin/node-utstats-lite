@@ -290,7 +290,8 @@ export async function getMatch(id){
     const data = result[0];
 
     const mapImages = await getMapImages([data.map_name]);
-    data.mapImage = Object.values(mapImages)[0];
+
+    data.mapImage = Object.values(mapImages)[0].fullSize;
 
     return data;
 }
