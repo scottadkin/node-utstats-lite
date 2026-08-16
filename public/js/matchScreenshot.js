@@ -13,6 +13,7 @@ class MatchScreenshot{
 
     constructor(canvas, data){
 
+
         if(typeof canvas === "string"){
             this.canvas = document.querySelector(canvas);
         }else{
@@ -513,7 +514,7 @@ class MatchScreenshot{
         const fontSize = 1.5;
 
         const line1 = "[SmartCTF 4E {PiN}Kev | {DnF2}SiNiSTeR | [es]Rush | adminthis & The_Cowboy & Sp0ngeb0b]";
-        const line2 = `${toDateString(new Date(this.data.basic.date), TIME_ZONE)} | Elapsed Time: ${MMSS(this.data.basic.playtime)}`;
+        const line2 = `${toDateString(this.data.basic.date, TIME_ZONE)} | Elapsed Time: ${MMSS(this.data.basic.playtime)}`;
         const line3 = `Playing ${this.data.basic.map_name} on ${this.data.basic.server_name}`;
 
         this.fillText({
