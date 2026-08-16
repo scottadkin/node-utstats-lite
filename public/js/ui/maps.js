@@ -725,7 +725,7 @@ class UIMapPlayerAverages{
 
         this.catSelect = new UISelect(row, validTypes, this.selectedCat, (e) =>{
             this.selectedCat = e;
-            
+     
             this.loadData();
         }, "ma-type", "ma-type");
         this.wrapper.append(row);
@@ -787,13 +787,20 @@ class UIMapPlayerAverages{
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
+
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
             this.mode = e.detail.newTab;
 
+      
             const validTypes = (this.mode === "match-averages") ? this.validTypes["match-averages"] : this.validTypes["epm"];
 
-            this.catSelect.updateOptions(validTypes, this.mode); 
+            if(!this.catSelect.updateOptions(validTypes, this.mode)){
+
+                this.selectedCat = validTypes[0].value;
+                this.catSelect.changeSelected(this.selectedCat);
+            }
+
             this.loadData();
         });
     }

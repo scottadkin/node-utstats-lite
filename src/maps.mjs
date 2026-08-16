@@ -687,7 +687,6 @@ function getMapAverageType(averageType, target){
 
 export async function getMapPlayerAverages(averageType, mapId, gametypeId, category, initialPage, initialPerPage){
 
-
     averageType = averageType.toLowerCase();
 
     const averageTypes = ["match-averages", "epm"];

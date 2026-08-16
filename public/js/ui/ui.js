@@ -883,6 +883,12 @@ class UISelect{
 
     }
 
+    /**
+     * 
+     * @param {*} newOptions 
+     * @param {*} selectedValue 
+     * @returns true if selectedValue still exists in new options
+     */
     updateOptions(newOptions, selectedValue){
 
         this.options = newOptions;
