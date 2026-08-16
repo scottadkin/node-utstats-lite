@@ -45,6 +45,24 @@ export default class serverMatchScreenshot{
         this.playerData = await getOGImagePlayerMatchData(this.id);
 
 
+        this.playerData.sort((a, b) =>{
+
+            if(a.score > b.score){
+                return -1;
+            }else if(a.score < b.score){
+                return 1;
+            }
+
+            if(a.deaths < b.deaths){
+                return -1;
+            }else if(a.deaths > b.deaths){
+                return 1;
+            }
+
+            return 0;
+        });
+
+
     }
 
     fillText(text, x, y, maxWidth, fontSize, color, textAlign){
@@ -123,7 +141,7 @@ export default class serverMatchScreenshot{
             let y = startY + rowHeight + rowHeight * playerIndex; 
 
             this.fillText(p.name, x, y, 30, playerFontSize, fontColor, "left");
-            this.fillText(p.frags, x + scoreOffset, y, 9, playerFontSize, fontColor, "right");
+            this.fillText(p.score, x + scoreOffset, y, 9, playerFontSize, fontColor, "right");
 
             playerIndex++;
             if(playerIndex >= maxPlayersPerTeam) return;
