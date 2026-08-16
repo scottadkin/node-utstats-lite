@@ -759,6 +759,8 @@ class AdminMapsManager{
             "thumbs": []
         };
 
+        this.thumbnailSettings = {};
+
         this.validScreenshotTypes = [
             "image/png", 
             "image/x-ms-bmp", 
@@ -776,7 +778,6 @@ class AdminMapsManager{
 
         this.pendingThumbnails = [];
 
-        this.render();
 
         this.loadData();
     }
@@ -798,6 +799,19 @@ class AdminMapsManager{
             this.mapList = res.mapList;
 
             this.mapImages = res.mapImages;
+
+            this.thumbnailSettings = res.thumbnailSettings;
+
+            for(const [key, data] of Object.entries(this.thumbnailSettings)){
+
+                if(key === "quality" || key === "width" || key === "height"){
+                    this.thumbnailSettings[key].value = parseInt(data.value);
+                }
+            }
+
+            this.savedThumbnailSettings = JSON.parse(JSON.stringify(this.thumbnailSettings));
+
+
 
             this.render();
 
@@ -1260,6 +1274,105 @@ class AdminMapsManager{
         this.wrapper.append(buttonForm);
     }
 
+    updateSaveThumbnailSettingsButton(){
+
+        const current = this.thumbnailSettings;
+        const saved = this.savedThumbnailSettings;
+
+        const keys = Object.keys(current);
+
+        let bAnyChanges = false;
+
+        for(let i = 0; i < keys.length; i++){
+
+            const k = keys[i];
+
+            if(current[k].value !== saved[k].value){
+                bAnyChanges = true;
+                break;
+            }
+        }
+
+
+        if(bAnyChanges){
+            this.saveThumbnailSettingsButton.className = "submit-button";
+        }else{
+            this.saveThumbnailSettingsButton.className = "hidden";
+        }
+
+    }
+
+    renderThumbnailSettings(){
+
+
+        UIHeader(this.wrapper, "Thumbnail Settings");
+
+        const infoContent = [
+            `Adjust the settings for map screenshot thumbnails.`, UIBr(),
+            UIB("Quality "),`1 to 100, higher the value the better looking the images will be at the cost of larger file sizes.`,
+            UIBr(), UIB("Width "), `1px to Npx, the width of the thumbnails when a new batch is created.`,
+            UIBr(), UIB("Height "), `1px to Npx, the height of the thumbnails when a new batch is created.`,
+            UIBr(), `For best results use a 16:9 aspect ratio.`
+        ];
+
+
+        new UIInfo(this.wrapper, infoContent);
+
+
+        const thumbForm = UIDiv("form");
+
+
+        const qualityRow = UIDiv("form-row");
+        qualityRow.append(UILabel("Quality"));
+
+        const qualityElem =  UIInput("number", "t-quality", parseInt(this.thumbnailSettings.quality?.value ?? 0), "Image Quality", (e) =>{
+     
+            this.thumbnailSettings.quality.value = parseInt(e);
+            this.updateSaveThumbnailSettingsButton();
+
+        });
+
+        qualityElem.min = 1;
+        qualityElem.max = 100;
+
+        qualityRow.append(qualityElem);
+
+        const widthRow = UIDiv("form-row");
+        widthRow.append(UILabel("Width(PX)"));
+
+        const widthElem =  UIInput("number", "t-width", parseInt(this.thumbnailSettings.width?.value ?? 0), "Image Width", (e) =>{
+     
+            this.thumbnailSettings.width.value = parseInt(e);
+            this.updateSaveThumbnailSettingsButton();
+        });
+
+        widthElem.min = 1;
+        widthRow.append(widthElem);
+
+        const heightRow = UIDiv("form-row");
+        heightRow.append(UILabel("Height(PX)"));
+
+        const heightElem =  UIInput("number", "t-height", parseInt(this.thumbnailSettings.height?.value ?? 0), "Image Height", (e) =>{
+     
+            this.thumbnailSettings.height.value = parseInt(e);
+            this.updateSaveThumbnailSettingsButton();
+
+        });
+
+        heightRow.append(heightElem);
+
+        widthElem.min = 1;
+        heightElem.min = 1;
+
+        thumbForm.append(qualityRow, widthRow, heightRow);
+        this.wrapper.append(thumbForm);
+
+        this.saveThumbnailSettingsButton = UIButton("Save Changes", "hidden");
+
+        thumbForm.append(this.saveThumbnailSettingsButton);
+
+    }
+
     renderThumbnails(){
 
         this.fullSizeSpan = UISpan(this.mapImages.fullSize.length);
@@ -1276,7 +1389,7 @@ class AdminMapsManager{
         new UIInfo(this.wrapper, content);
 
 
-
+        this.renderThumbnailSettings();
         this.renderCreateAll();
 
         UIHeader(this.wrapper, "Create Single Thumbnail");

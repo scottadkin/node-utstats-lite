@@ -123,11 +123,13 @@ export default class AdminJSONManager{
                 }
 
 
+                const thumbnailSettings = await getMapThumbnailSettings();
+
                 const mapImages = await getAllMapImages();
 
       
 
-                return this.res.json({mapList, mapImages});
+                return this.res.json({mapList, mapImages, thumbnailSettings});
 
             }else if(this.mode === "upload-map-sshot"){
                 
