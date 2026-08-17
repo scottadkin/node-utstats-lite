@@ -471,6 +471,8 @@ export default class AdminJSONManager{
         await writeFile(`./public/images/maps/${name}.jpg`, imageBuffer);
         await rm(fileInfo.path);
 
+        await this.createMapThumbnail(`${name}.jpg`);
+
         return `${name}.jpg`;
         //await fart.write("./uploads/test.jpg", "image/jpeg");
     }
