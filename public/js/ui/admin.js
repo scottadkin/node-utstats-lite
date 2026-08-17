@@ -949,6 +949,12 @@ class AdminMapsManager{
             if(res.error !== undefined) throw new Error(res.error);
             this.updateMapImages(this.sanatizeMapNameForQuerySelector(res.fileName), res.fileName);
             new UINotification(this.parent, "pass", `Map Image Uploaded`, `Image uploaded successfully, Saved as ${res.fileName}`);
+
+            const thumbIndex = this.mapImages.thumbs.indexOf(res.fileName);
+
+            if(thumbIndex === -1){
+                this.mapImages.thumbs.push(res.fileName);
+            }
             
         }catch(err){
             console.trace(err);
