@@ -848,6 +848,14 @@ class AdminMapsManager{
 
     getImageStatus(targetImage){
 
+        const numStartReg = /^num_start_(.+)$/i;
+
+        const regResult = numStartReg.exec(targetImage);
+
+        if(regResult !== null){
+            targetImage = regResult[1];
+        }
+
         const index = this.mapImages.fullSize.indexOf(targetImage);
 
         if(index !== -1) return "Found";
@@ -859,10 +867,10 @@ class AdminMapsManager{
         return `Partial Match(${partial})`;
     }
 
-    updateMapImages(newImage){
+    updateMapImages(newImage, dirtyName){
 
-        if(this.mapImages.fullSize.indexOf(newImage) === -1){
-            this.mapImages.fullSize.push(newImage);
+        if(this.mapImages.fullSize.indexOf(dirtyName) === -1){
+            this.mapImages.fullSize.push(dirtyName);
         }
 
         const statusElem = document.querySelector(`#${stripFileExtension(newImage)}`);
@@ -939,7 +947,7 @@ class AdminMapsManager{
             const res = await req.json();
   
             if(res.error !== undefined) throw new Error(res.error);
-            this.updateMapImages(this.sanatizeMapNameForQuerySelector(res.fileName));
+            this.updateMapImages(this.sanatizeMapNameForQuerySelector(res.fileName), res.fileName);
             new UINotification(this.parent, "pass", `Map Image Uploaded`, `Image uploaded successfully, Saved as ${res.fileName}`);
             
         }catch(err){
@@ -1424,6 +1432,7 @@ class AdminMapsManager{
         
         const content = [
             "Create thumbnails for all existing map screenshots.", UIBr(), 
+            `If you use the main screenshot uploader tab a thumbnail will automatically be created on a successful upload.`, UIBr(),
             `If a thumbnail for a map does not exist a fullsize one will be used instead.`,
             UIBr(), UIBr(),
             `Found a total of `,this.fullSizeSpan , ` fullsize images.`, UIBr(),
