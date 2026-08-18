@@ -15,6 +15,7 @@ import {calculateRankings} from "./rankings.mjs";
 import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
 import { bImportRandomizeNames } from "../config.mjs";
+import TestWeaponDamage from "./importer/testWeaponDamage.mjs";
 
 
 export class MatchParser{
@@ -67,7 +68,8 @@ export class MatchParser{
         //check if utstats-lite log because stat_player behaves differently(merges player stats into one for multiple reconnects) 
         this.bUTStatsLiteLog = false;
         
-
+        
+        this.testWeaponDamage = new TestWeaponDamage(this.players);
     }
 
 
@@ -284,6 +286,9 @@ export class MatchParser{
         if(this.classicWeaponStats.lines.length > 0){
             await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
         }
+
+
+        await this.testWeaponDamage.insertPlayerMatchData(this.matchId, this.players);
 
         //this.players.debugListAllPlayers();
     }
@@ -569,6 +574,7 @@ export class MatchParser{
                     "score": scoreResult[2]
                 });
                 
+                continue;
                 
             }
 
@@ -589,6 +595,13 @@ export class MatchParser{
                 this.bLogHaveLiteDamageStats = true;
                 continue;
             }   
+
+
+            if(this.testWeaponDamage.parseLine(subString)){
+
+                continue;
+
+            }
         }
 
     }
