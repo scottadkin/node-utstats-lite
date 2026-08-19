@@ -80,6 +80,8 @@ export class WeaponsManager{
         }
 
 
+        console.log(this.weapons);
+
     }
 
     getPlayerWeaponStats(playerId, weaponId){

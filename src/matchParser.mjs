@@ -69,7 +69,7 @@ export class MatchParser{
         this.bUTStatsLiteLog = false;
         
         
-        this.testWeaponDamage = new TestWeaponDamage(this.players);
+        this.testWeaponDamage = new TestWeaponDamage(this.weapons);
     }
 
 
