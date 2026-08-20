@@ -1,10 +1,13 @@
+import Message from "../message.mjs";
 import { testInsertPlayerWeaponStats } from "../testWeaponDamage.mjs";
+import { removeDoubleEnforcer } from "../generic.mjs";
 
 export default class TestWeaponDamage{
 
-    constructor(weaponsManager){
+    constructor(playerManager, weaponsManager){
 
         this.uniqueWeapons = new Set(); 
+        this.playerManager = playerManager;
         this.weaponsManager = weaponsManager;
         this.playerStats = {};
     }
@@ -20,7 +23,8 @@ export default class TestWeaponDamage{
 
 
         const playerId = result[1];
-        const weaponName = result[2];
+        const weaponName = removeDoubleEnforcer(result[2]);
+
         const damage = parseInt(result[3]);
 
         this.weaponsManager.addWeaponToTempNames(weaponName);
@@ -42,28 +46,57 @@ export default class TestWeaponDamage{
         return true;
     }
 
-    async insertPlayerMatchData(matchId, playerManager){
+    /**
+     * merge duplicate match players into one object
+     */
+    createMasterPlayersData(){
 
-
-        /*const damageWeapons = [...this.uniqueWeapons];
-
-        
-
-        for(let i = 0; i < damageWeapons.length; i++){
-
-            console.log(weaponManager.getId(damageWeapons[i]), damageWeapons[i]);
-
-            thisaddWeaponToTempNames(damageWeapons[i]);
-        }*/
-
-       // await weaponManager.set
+        const masterData = {};
 
         for(const [playerId, playerStats] of Object.entries(this.playerStats)){
 
+            const player = this.playerManager.getPlayerById(playerId);
+
+            if(player === null) process.exit();
             
+            const pId = player.masterId;
+
+            if(masterData[pId] === undefined){
+
+                masterData[pId] = {};
+            }
+
+            for(const [weaponName, weaponData] of Object.entries(playerStats)){
+
+                const weaponId = this.weaponsManager.getId(weaponName);
+
+                if(weaponId === null){
+                    new Message(`weaponId is null createMasterPlayersData, looking for ${weaponName}`,"warning");
+                    continue;
+                }
+
+                //console.log(`weaponId ${weaponId}`);
+
+                if(masterData[pId][weaponId] === undefined){
+                    masterData[pId][weaponId] = weaponData;
+                    continue;
+                }
+
+                masterData[pId][weaponId].damage += weaponData.damage;
+                //console.log("merge", `added ${weaponData.damage} to weaponId ${weaponId}`);
+            }
         }
 
-        await testInsertPlayerWeaponStats(matchId, this.playerStats, playerManager);
+
+        return masterData;
+    }
+
+    async insertPlayerMatchData(matchId){
+
+
+        const finalData = this.createMasterPlayersData();
+
+        await testInsertPlayerWeaponStats(matchId, this.playerStats, this.playerManager);
 
     }
 }

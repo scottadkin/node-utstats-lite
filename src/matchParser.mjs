@@ -69,7 +69,7 @@ export class MatchParser{
         this.bUTStatsLiteLog = false;
         
         
-        this.testWeaponDamage = new TestWeaponDamage(this.weapons);
+        this.testWeaponDamage = new TestWeaponDamage(this.players, this.weapons);
     }
 
 
@@ -288,7 +288,7 @@ export class MatchParser{
         }
 
 
-        await this.testWeaponDamage.insertPlayerMatchData(this.matchId, this.players);
+        await this.testWeaponDamage.insertPlayerMatchData(this.matchId);
 
         //this.players.debugListAllPlayers();
     }

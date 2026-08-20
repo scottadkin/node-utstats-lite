@@ -157,6 +157,12 @@ export class WeaponsManager{
         await calcMapWeaponsTotals(mapId, gametypeId);
     }
 
+
+    /**
+     * 
+     * @param {String} name 
+     * @returns weaponId or null if not found
+     */
     getId(name){
         
         for(const [weaponId, weaponName] of Object.entries(this.weapons)){
