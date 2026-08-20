@@ -96,7 +96,7 @@ export default class TestWeaponDamage{
 
         const finalData = this.createMasterPlayersData();
 
-        await testInsertPlayerWeaponStats(matchId, this.playerStats, this.playerManager);
+        await testInsertPlayerWeaponStats(matchId, finalData);
 
     }
 }

@@ -18,6 +18,7 @@
     const basicPlayers = parsedData.basicPlayers;
     const classicWeaponData = <%- JSON.stringify(classicWeaponStats) -%>;
 
+    new MatchTestWeaponDamage("#root", basic.id, basicPlayers, parsedData.weaponStats.names);
     <%
 
     

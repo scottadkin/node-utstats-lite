@@ -2970,3 +2970,133 @@ class MatchJSONApiInfo{
     }
 }
 
+class MatchTestWeaponDamage{
+
+    constructor(parent, matchId, players, weaponNames){
+
+        this.parent = document.querySelector(parent);
+        this.matchId = matchId;
+        this.weaponNames = weaponNames;
+        this.players = players;
+        this.selectedWeapon = 0;
+
+        this.wrapper = new UISection(this.parent, "Test Weapon Damage");
+        
+        this.loadData();
+    }
+
+
+    bAnyData(weaponId){
+
+        for(let i = 0; i < this.weaponData.length; i++){
+
+            const id = this.weaponData[i].weapon_id;
+
+            if(id == weaponId) return true;
+        }
+
+        return false;
+    }
+    createTabs(){
+
+        const options = [];
+
+        for(const [id, name] of Object.entries(this.weaponNames)){
+
+            if(this.bAnyData(id) || id == 0){
+                options.push({"value": id, "display": name});
+            }
+        }
+
+        if(options.length >= 0){
+            this.selectedWeapon = options[0].value;
+        }
+
+        this.tabs = new UITabs(this.wrapper.elem, options, this.selectedWeapon);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.selectedWeapon = parseInt(e.detail.newTab);
+        
+            this.render();
+        });
+    }
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch(`/json/match-test-weapon-damage/?id=${this.matchId}`);
+
+            const res = await req.json();
+
+            this.weaponData = res;
+            this.createTabs();
+
+        }catch(err){
+            console.trace(err);
+        }finally{
+
+            this.render();
+        }
+    }
+
+    render(){
+
+
+        if(this.weaponData.length === 0){
+            this.wrapper.elem.className = "hidden";
+            return;
+        }
+
+        const tableOptions = {
+            "className": "t-width-3",
+            "sortBy": 2,
+            "bAscOrder": false,
+            "headers": [
+                {"display": "Player"},
+                {"display": "Weapon"},
+                {"display": "Damage"},
+            ]
+        };
+
+        const rows = [];
+
+        for(let i = 0; i < this.weaponData.length; i++){
+
+            const d = this.weaponData[i];
+
+            if(d.weapon_id !== this.selectedWeapon && this.selectedWeapon != 0) continue;
+
+            const player = this.players[d.player_id] ?? {"name": "Not Found", "team": 255};
+            const weapon = this.weaponNames[d.weapon_id] ?? "Not Found";
+
+            rows.push([
+                {
+                    "display": UIPlayerLink({
+                        "playerId": player.id, 
+                        "name": player.name, 
+                        "country": player.country, 
+                        "bTableElem": true,
+                        "className": getTeamColorClass(player.team),
+                    }),
+                    "value": player.name.toLowerCase(), 
+                    
+                    "bSkipTD": true
+                },
+                {"display": weapon, "value": weapon.toLowerCase()},
+                {"display": ignore0(d.damage), "value": d.damage}
+
+            ]);
+            
+        }
+
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.wrapper.elem, tableOptions, rows);
+        }else{
+
+            this.table.updateRows(rows, tableOptions.headers);
+        }
+    }
+}

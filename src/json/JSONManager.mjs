@@ -5,6 +5,7 @@ import { getRankingsWithPlayerNames } from "../rankings.mjs";
 import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
+import { getTestMatchWeaponData } from "../testWeaponDamage.mjs";
 
 export default class JSONManager{
 
@@ -274,6 +275,16 @@ export default class JSONManager{
         this.res.status(200).json(data);
     }
 
+    async testMatchWeaponDamage(){
+
+
+        const id = this.querySanitizeInteger("id");
+
+        const data = await getTestMatchWeaponData(id);
+
+        this.res.status(200).json(data);
+    }
+
     async init(){
 
         try{
@@ -337,6 +348,9 @@ export default class JSONManager{
 
             }else if(this.mode === "map-search"){
                 return await this.mapSearch();
+
+            }else if(this.mode === "match-test-weapon-damage"){
+                return await this.testMatchWeaponDamage();
             }
 
             console.log(this.mode);

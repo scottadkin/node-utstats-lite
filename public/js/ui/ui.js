@@ -1995,3 +1995,17 @@ class UIInfo{
         this.parent.append(this.wrapper);
     }
 }
+
+class UISection{
+
+    constructor(parent, title){
+
+        this.parent = parent;
+        this.title = title;
+
+        this.elem = document.createElement("section");
+        UIHeader(this.elem, this.title);
+        this.parent.append(this.elem);
+
+    }
+}
