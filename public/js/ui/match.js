@@ -3066,7 +3066,7 @@ class MatchTestWeaponDamage{
 
             const d = this.weaponData[i];
 
-            if(d.weapon_id !== this.selectedWeapon && this.selectedWeapon != 0) continue;
+            if(d.weapon_id != this.selectedWeapon) continue;
 
             const player = this.players[d.player_id] ?? {"name": "Not Found", "team": 255};
             const weapon = this.weaponNames[d.weapon_id] ?? "Not Found";

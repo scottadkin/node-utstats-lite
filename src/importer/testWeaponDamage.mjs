@@ -63,7 +63,9 @@ export default class TestWeaponDamage{
 
             if(masterData[pId] === undefined){
 
-                masterData[pId] = {};
+                masterData[pId] = {
+                    "0": {"damage": 0}
+                };
             }
 
             for(const [weaponName, weaponData] of Object.entries(playerStats)){
@@ -76,6 +78,9 @@ export default class TestWeaponDamage{
                 }
 
                 //console.log(`weaponId ${weaponId}`);
+
+                //combined total
+                masterData[pId][0].damage += weaponData.damage;
 
                 if(masterData[pId][weaponId] === undefined){
                     masterData[pId][weaponId] = weaponData;
