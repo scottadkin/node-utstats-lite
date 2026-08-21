@@ -1,14 +1,15 @@
 import Message from "../message.mjs";
-import { testInsertPlayerWeaponStats } from "../testWeaponDamage.mjs";
+import { insertPlayerDamageWeaponStats } from "../playerWeaponDamage.mjs";
 import { removeDoubleEnforcer } from "../generic.mjs";
 
-export default class TestWeaponDamage{
+export default class PlayerWeaponDamage{
 
     constructor(playerManager, weaponsManager){
 
         this.uniqueWeapons = new Set(); 
         this.playerManager = playerManager;
         this.weaponsManager = weaponsManager;
+        this.bFoundData = false;
         this.playerStats = {};
     }
 
@@ -21,7 +22,7 @@ export default class TestWeaponDamage{
 
         if(result === null) return false;
 
-
+        this.bFoundData = true;
         const playerId = result[1];
         const weaponName = removeDoubleEnforcer(result[2]);
 
@@ -99,9 +100,10 @@ export default class TestWeaponDamage{
     async insertPlayerMatchData(matchId){
 
 
+        if(!this.bFoundData) return;
         const finalData = this.createMasterPlayersData();
 
-        await testInsertPlayerWeaponStats(matchId, finalData);
+        await insertPlayerDamageWeaponStats(matchId, finalData);
 
     }
 }

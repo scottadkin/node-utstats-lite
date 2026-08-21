@@ -79,9 +79,6 @@ export class WeaponsManager{
             this.weapons[weapons[i].id] = weapons[i].name;
         }
 
-
-        console.log(this.weapons);
-
     }
 
     getPlayerWeaponStats(playerId, weaponId){

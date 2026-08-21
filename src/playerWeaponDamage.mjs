@@ -3,7 +3,7 @@ import { bulkInsert, simpleQuery } from "./database.mjs";
 
 async function createTableIfNotExists(){
 
-    const query = `CREATE TABLE IF NOT EXISTS nstats_test_weapon_damage (
+    const query = `CREATE TABLE IF NOT EXISTS nstats_match_player_weapon_damage (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         match_id INTEGER NOT NULL,
         player_id INTEGER NOT NULL,
@@ -14,7 +14,7 @@ async function createTableIfNotExists(){
     await simpleQuery(query);
 }
 
-export async function testInsertPlayerWeaponStats(matchId, playerStats){
+export async function insertPlayerDamageWeaponStats(matchId, playerStats){
 
 
     await createTableIfNotExists();
@@ -31,16 +31,16 @@ export async function testInsertPlayerWeaponStats(matchId, playerStats){
     }
 
 
-    const query = `INSERT INTO nstats_test_weapon_damage (match_id,player_id,weapon_id,damage) VALUES ?`;
+    const query = `INSERT INTO nstats_match_player_weapon_damage (match_id,player_id,weapon_id,damage) VALUES ?`;
 
     await bulkInsert(query, insertVars);
     
 }
 
 
-export async function getTestMatchWeaponData(matchId){
+export async function getMatchWeaponDamage(matchId){
 
-    const query = `SELECT * FROM nstats_test_weapon_damage WHERE match_id=?`;
+    const query = `SELECT * FROM nstats_match_player_weapon_damage WHERE match_id=?`;
 
     return await simpleQuery(query, [matchId]);
 }
