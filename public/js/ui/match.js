@@ -2970,7 +2970,7 @@ class MatchJSONApiInfo{
     }
 }
 
-class MatchTestWeaponDamage{
+class MatchPlayerWeaponDamage{
 
     constructor(parent, matchId, players, weaponNames){
 
@@ -2980,7 +2980,7 @@ class MatchTestWeaponDamage{
         this.players = players;
         this.selectedWeapon = 0;
 
-        this.wrapper = new UISection(this.parent, "Test Weapon Damage");
+        this.wrapper = new UISection(this.parent, "Player Weapon Damage");
         
         this.loadData();
     }
@@ -3049,15 +3049,21 @@ class MatchTestWeaponDamage{
             return;
         }
 
+        const footer =  [
+                {"display": "Total"},
+                {"display": "SUM", "dataType": "INT"}
+            ];
+
         const tableOptions = {
-            "className": "t-width-3",
-            "sortBy": 2,
+            "className": "t-width-4",
+            "sortBy": 1,
             "bAscOrder": false,
             "headers": [
                 {"display": "Player"},
-                {"display": "Weapon"},
+                //{"display": "Weapon"},
                 {"display": "Damage"},
-            ]
+            ],
+            footer
         };
 
         const rows = [];
@@ -3084,7 +3090,7 @@ class MatchTestWeaponDamage{
                     
                     "bSkipTD": true
                 },
-                {"display": weapon, "value": weapon.toLowerCase()},
+             //   {"display": weapon, "value": weapon.toLowerCase()},
                 {"display": ignore0(d.damage), "value": d.damage}
 
             ]);
@@ -3096,7 +3102,7 @@ class MatchTestWeaponDamage{
             this.table = new TESTUITable(this.wrapper.elem, tableOptions, rows);
         }else{
 
-            this.table.updateRows(rows, tableOptions.headers);
+            this.table.updateRows(rows, tableOptions.headers, footer, 1);
         }
     }
 }

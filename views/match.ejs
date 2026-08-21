@@ -18,7 +18,6 @@
     const basicPlayers = parsedData.basicPlayers;
     const classicWeaponData = <%- JSON.stringify(classicWeaponStats) -%>;
 
-    new MatchTestWeaponDamage("#root", basic.id, basicPlayers, parsedData.weaponStats.names);
     <%
 
     
@@ -114,6 +113,10 @@
 
             case "Display JSON Links": {
                 %>new MatchJSONApiInfo("#root", basic.hash,  <%- data.ctf.playerData.length > 0 %>);<%
+            }break;
+
+            case "Display Weapon Damage Stats": {
+                %>new MatchPlayerWeaponDamage("#root", basic.id, basicPlayers, parsedData.weaponStats.names);<%
             }
         }
     }

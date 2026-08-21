@@ -498,7 +498,7 @@ class TESTUITable{
         this.sortBy = parseInt(newSortBy);
     }
 
-    updateRows(newRows, newHeaders, newFooter){
+    updateRows(newRows, newHeaders, newFooter, newSortBy){
 
         this.tableBody.innerHTML = "";
 
@@ -512,6 +512,11 @@ class TESTUITable{
             this.options.headers = newHeaders;
             this.sortBy = 0;
             this.renderHeaders();
+        }
+
+        if(newSortBy !== undefined){
+            this.sortBy = newSortBy;
+            this.sortData();
         }
 
         if(newFooter !== undefined && newFooter !== null){

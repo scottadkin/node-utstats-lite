@@ -31,6 +31,7 @@ const DEFAULT_PAGE_LAYOUTS = {
         "CTF Caps", 
         "DOM",
         "Damage Stats",
+        "Weapon Damage Stats",
         "Classic Weapon Stats", 
         "Weapons", 
         "Items", 
