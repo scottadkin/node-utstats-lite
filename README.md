@@ -117,6 +117,12 @@ v1.8.0, v1.7.0_fix, v1.7.0, v1.6.0, v1.5.1, v1.5.0, v1.4.0, v1.3.0, v1.2.0
 - Run the command **node importer.mjs**.
 
 ## Optional Damage Mutator
+- Current test build(August 2026)
+The mutator now tracks weapon damage, it's most reliable for hitscan weapons with some additional simple checks for projectiles in the hope of not being too resource heavy for pug servers like the original utstats. Flak Cannon primary fire and Ripper primary fire both have the same damage type, if you shot one of these weapons and switched to the other it will be counted for that weapon instead. If you use a mutator that changes the damage type you can edit the utstatslitedamage config file and change their damage type to match the new ones.
+
+Mutator now includes options to only log weapon damage and skip the additional stats show below in v1.0 screenshot.
+
+- V1.0
 You can enable basic damage tracking for players by adding [this mutator](https://github.com/scottadkin/UTStats-Lite-Damage)
 So far there is only match player data displayed for damage, here is an example of what data is tracked.
 <img width="987" height="589" alt="image" src="https://github.com/user-attachments/assets/3c440825-24f5-451e-b427-b1fabd9c2178" />
