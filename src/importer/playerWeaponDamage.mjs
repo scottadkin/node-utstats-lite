@@ -65,7 +65,9 @@ export default class PlayerWeaponDamage{
             if(masterData[pId] === undefined){
 
                 masterData[pId] = {
-                    "0": {"damage": 0}
+                    "0": {
+                        "damage": 0
+                    }
                 };
             }
 
@@ -103,7 +105,7 @@ export default class PlayerWeaponDamage{
         if(!this.bFoundData) return;
         const finalData = this.createMasterPlayersData();
 
-        await insertPlayerDamageWeaponStats(matchId, gametypeId, mapId, finalData);
+        await insertPlayerDamageWeaponStats(matchId, gametypeId, mapId, finalData, this.playerManager);
 
     }
 }

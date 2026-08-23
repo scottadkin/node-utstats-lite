@@ -850,6 +850,7 @@ const queries = [
         `CREATE TABLE IF NOT EXISTS nstats_match_player_weapon_damage (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             match_id INTEGER NOT NULL,
+            playtime REAL NOT NULL,
             gametype_id INTEGER NOT NULL,
             map_id INTEGER NOT NULL,
             player_id INTEGER NOT NULL,
@@ -857,7 +858,23 @@ const queries = [
             damage INTEGER NOT NULL
         ) STRICT`,
 
-        `CREATE INDEX IF NOT EXISTS nstats_match_pgmwwd ON nstats_match_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`
+        `CREATE INDEX IF NOT EXISTS nstats_match_pmwd ON nstats_match_player_weapon_damage(match_id)`,
+
+        `CREATE TABLE IF NOT EXISTS nstats_totals_player_weapon_damage (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            player_id INTEGER NOT NULL,
+            total_matches INTEGER NOT NULL,
+            total_playtime REAL NOT NULL,
+            gametype_id INTEGER NOT NULL,
+            map_id INTEGER NOT NULL,
+            weapon_id INTEGER NOT NULL,
+            damage INTEGER NOT NULL,
+            max_damage INTEGER NOT NULL,
+            avg_damage REAL NOT NULL,
+            damage_per_minute REAL NOT NULL
+        ) STRICT`,
+
+        `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_pwd ON nstats_totals_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`,
 
 ];
 

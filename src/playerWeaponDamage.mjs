@@ -1,8 +1,8 @@
 import { bulkInsert, simpleQuery } from "./database.mjs";
+import Message from "./message.mjs";
 
 
-
-export async function insertPlayerDamageWeaponStats(matchId, gametypeId, mapId, playerStats){
+export async function insertPlayerDamageWeaponStats(matchId, gametypeId, mapId, playerStats, playerManager){
 
     const insertVars = [];
 
@@ -11,12 +11,16 @@ export async function insertPlayerDamageWeaponStats(matchId, gametypeId, mapId, 
 
         for(const [weaponId, damage] of Object.entries(stats)){
 
-            insertVars.push([matchId, gametypeId, mapId, playerId, weaponId, damage.damage ]);
+            const player = playerManager.getPlayerByMasterId(playerId);
+            if(player === null){
+                new Message(`Failed to getPlayer: playerWeaponDamage.insertPlayerDamageWeaponStats`, "warning");
+                continue;
+            }
+            insertVars.push([matchId, player.playtime, gametypeId, mapId, playerId, weaponId, damage.damage ]);
         }
     }
 
-
-    const query = `INSERT INTO nstats_match_player_weapon_damage (match_id, gametype_id, map_id, player_id,weapon_id,damage) VALUES ?`;
+    const query = `INSERT INTO nstats_match_player_weapon_damage (match_id, playtime, gametype_id, map_id, player_id,weapon_id,damage) VALUES ?`;
 
     await bulkInsert(query, insertVars);
     

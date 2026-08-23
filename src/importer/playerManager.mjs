@@ -1143,4 +1143,18 @@ export class PlayerManager{
         }
     }
 
+    getPlayerByMasterId(id){
+
+        id = parseInt(id);
+        
+        for(let i = 0; i < this.players.length; i++){
+
+            const p = this.players[i];
+
+            if(p.masterId === id) return p;
+        }
+
+        return null;
+    }
+
 }
