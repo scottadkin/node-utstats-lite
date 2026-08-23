@@ -288,7 +288,7 @@ export class MatchParser{
         }
 
 
-        await this.playerWeaponDamage.insertPlayerMatchData(this.matchId);
+        await this.playerWeaponDamage.insertPlayerMatchData(this.matchId, this.gametype.id, this.map.id);
 
         //this.players.debugListAllPlayers();
     }

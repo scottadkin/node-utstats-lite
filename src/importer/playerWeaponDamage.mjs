@@ -97,13 +97,13 @@ export default class PlayerWeaponDamage{
         return masterData;
     }
 
-    async insertPlayerMatchData(matchId){
+    async insertPlayerMatchData(matchId, gametypeId, mapId){
 
 
         if(!this.bFoundData) return;
         const finalData = this.createMasterPlayersData();
 
-        await insertPlayerDamageWeaponStats(matchId, finalData);
+        await insertPlayerDamageWeaponStats(matchId, gametypeId, mapId, finalData);
 
     }
 }

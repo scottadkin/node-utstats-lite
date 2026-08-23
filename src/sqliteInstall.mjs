@@ -844,7 +844,20 @@ const queries = [
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT COLLATE NOCASE NOT NULL,
             value TEXT COLLATE NOCASE NOT NULL
-        ) STRICT`
+        ) STRICT`,
+
+
+        `CREATE TABLE IF NOT EXISTS nstats_match_player_weapon_damage (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_id INTEGER NOT NULL,
+            gametype_id INTEGER NOT NULL,
+            map_id INTEGER NOT NULL,
+            player_id INTEGER NOT NULL,
+            weapon_id INTEGER NOT NULL,
+            damage INTEGER NOT NULL
+        ) STRICT`,
+
+        `CREATE INDEX IF NOT EXISTS nstats_match_pgmwwd ON nstats_match_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`
 
 ];
 
