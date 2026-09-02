@@ -12,6 +12,7 @@ import { getPlayerRankings } from "../rankings.mjs";
 import { getPlayerMapsLeagueData } from "../ctfLeague.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
+import { getPlayerWeaponDamageTotals } from "../playerWeaponDamage.mjs";
 
 
 export async function renderPlayerPage(req, res, userSession){
@@ -25,6 +26,11 @@ export async function renderPlayerPage(req, res, userSession){
         if(basicPlayerInfo === null) throw new Error(`Player does not exist!`);
         const timeZone = await getSiteWideTimeZone();
         let title = `${basicPlayerInfo.name} - Player Profile`;
+
+        const start = performance.now();
+        const testWeaponDamageDamage = await getPlayerWeaponDamageTotals(id);
+        const end = performance.now();
+        console.log((end - start) * 0.001);
 
         const lastSeenString = convertTimestamp(basicPlayerInfo.last_active, true, false, true);
         const playtimeString = toPlaytime(basicPlayerInfo.playtime);
@@ -105,7 +111,8 @@ export async function renderPlayerPage(req, res, userSession){
             userSession,
             pageSettings,
             pageLayout,
-            timeZone
+            timeZone,
+            testWeaponDamageDamage
         });
 
     }catch(err){

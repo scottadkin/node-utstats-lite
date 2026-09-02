@@ -1680,3 +1680,134 @@ function playerPermaLinks(parent, hash){
     new UIWatchlistButton(parent, "players", hash);
     UICopyURLToClipboard(parent, "Copy Player Perma Link To Clipboard", `/player/${hash}`);
 }
+
+class PlayerTestWeaponDamage{
+
+    constructor(parent, data){
+
+        this.parent = document.querySelector(parent);
+
+        this.wrapper = new UISection(this.parent, "Test Weapon Damage Totals");
+        this.data = data;
+
+        this.mode = "all";
+
+
+        this.createTabs();
+
+        this.renderTable();
+
+       // this.wrapper.setContent([UIB("test"), "aaa", UIB("aaaaaaaaaa")]);
+    }
+
+    createTabs(){
+
+        const options = [
+            {"display": "Lifetime", "value": "all"},
+            {"display": "Gametypes", "value": "gametypes"},
+            {"display": "Maps", "value": "maps"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper.elem, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.mode = e.detail.newTab;
+            this.renderTable();
+        });
+    }
+
+    renderTable(){
+
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": [
+                {"display": "Weapon"},
+                {"display": "Playtime"},
+                {"display": "Total Matches"},  
+                {"display": "Max Damage"},
+                {"display": "Total Damage"},
+                {"display": "Average Damage"},
+                {"display": "Damage Per Minute"},
+            ]
+        };
+
+        if(this.mode === "gametypes"){
+
+            tableOptions.headers.unshift({"display": "Gametype"});
+
+        }else if(this.mode === "maps"){
+
+            tableOptions.headers.unshift({"display": "Map"});
+
+        }else if(this.mode === "custom"){
+
+            tableOptions.headers.unshift({"display": "Gametype"},{"display": "Map"});
+        }
+
+
+        const rows = [];
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
+            if(this.mode === "gametypes" &&( d.gametype_id === 0 || d.map_id !== 0)) continue;
+            if(this.mode === "maps" &&( d.gametype_id !== 0 || d.map_id === 0)) continue;
+
+            const row = [];
+
+            if(this.mode === "custom"){
+
+                row.push({ 
+                    "value": d.gametype_name.toLowerCase(), 
+                    "display":d.gametype_name,
+                    "className": "text-left"
+                },
+                { 
+                    "value": d.map_name.toLowerCase(), 
+                    "display":d.map_name,
+                    "className": "text-left"
+                });
+
+            }else if(this.mode === "gametypes"){
+
+                row.push({ "value": d.gametype_name.toLowerCase(), "display":d.gametype_name,
+                    "className": "text-left"});
+
+            }else if(this.mode === "maps"){
+
+                row.push({ "value": d.map_name.toLowerCase(), "display":d.map_name,
+                    "className": "text-left"});
+            }
+
+            row.push(
+                
+                {"value": d.weapon_id, "display": d.weapon_name,"className": (row.length === 0) ? "text-left" : ""},
+                { "display": toPlaytime(d.total_playtime), "value": d.total_playtime, "className": "playtime"},
+                {"value": d.total_matches},
+               
+                {"value": d.max_damage},
+                {"value": d.damage},
+                 {"value": d.avg_damage, "display": d.avg_damage.toFixed(2)},
+                {"value": d.damage_per_minute, "display": d.damage_per_minute.toFixed(2)},
+            );
+    
+            
+
+
+            rows.push(row);
+        }
+
+
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.wrapper.elem, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows, tableOptions.headers);
+        }
+
+    }
+}

@@ -35,6 +35,35 @@ export async function getMatchWeaponDamage(matchId){
 }
 
 
+export async function getPlayerWeaponDamageTotals(playerId){
+
+    const dT = `nstats_totals_player_weapon_damage`;
+    const wT = `nstats_weapons`;
+    const gT = `nstats_gametypes`;
+    const mT = `nstats_maps`;
+
+    const query = `SELECT 
+    ${dT}.total_matches,
+    ${dT}.total_playtime,
+    ${dT}.gametype_id,
+    ${dT}.map_id,
+    ${dT}.weapon_id,
+    ${dT}.damage,
+    ${dT}.max_damage,
+    ${dT}.avg_damage,
+    ${dT}.damage_per_minute,
+    IF(${dT}.weapon_id = 0, 'All', ${wT}.name) as weapon_name, 
+    IF(${dT}.gametype_id = 0, 'All', ${gT}.name) as gametype_name, 
+    IF(${dT}.map_id = 0, 'All', ${mT}.name) as map_name 
+    FROM ${dT} 
+    LEFT JOIN ${wT} on ${wT}.id = ${dT}.weapon_id
+    LEFT JOIN ${gT} on ${gT}.id = ${dT}.gametype_id
+    LEFT JOIN ${mT} on ${mT}.id = ${dT}.map_id
+    WHERE ${dT}.player_id=?`;
+
+    return await simpleQuery(query, [playerId]);
+}
+
 class PlayerWeaponDamageTotals{
 
     constructor(playerIds, gametypeId, mapId){
@@ -93,7 +122,7 @@ class PlayerWeaponDamageTotals{
         if(t.playtime > 0 && t.damage > 0){
 
             
-            t.dpm = (t.playtime /t.damage) *  60;
+            t.dpm = t.damage /( t.playtime / 60);
         }
 
 

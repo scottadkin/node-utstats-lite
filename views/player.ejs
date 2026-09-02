@@ -21,6 +21,8 @@
 
 <script>
 
+    new PlayerTestWeaponDamage("#root",<%- JSON.stringify(testWeaponDamageDamage) %>);
+
     const weaponTotals = <%-  JSON.stringify(weaponTotals) %>;
     const generalTotals = <%- JSON.stringify(generalTotals) %>
     playerPermaLinks(".perma-links", "<%= basicPlayerInfo.hash %>");

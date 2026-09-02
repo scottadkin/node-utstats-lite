@@ -2005,7 +2005,17 @@ class UISection{
 
         this.elem = document.createElement("section");
         UIHeader(this.elem, this.title);
+
+        this.content = UIDiv();
+        this.elem.append(this.content);
         this.parent.append(this.elem);
 
+    }
+
+    setContent(content){
+
+        if(!Array.isArray(content)) throw new Error("Content must be an array of HTML doms or strings");
+        this.content.innerHTML = ``;
+        this.content.append(...content);
     }
 }
