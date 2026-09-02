@@ -27,10 +27,8 @@ export async function renderPlayerPage(req, res, userSession){
         const timeZone = await getSiteWideTimeZone();
         let title = `${basicPlayerInfo.name} - Player Profile`;
 
-        const start = performance.now();
         const testWeaponDamageDamage = await getPlayerWeaponDamageTotals(id);
-        const end = performance.now();
-        console.log((end - start) * 0.001);
+       
 
         const lastSeenString = convertTimestamp(basicPlayerInfo.last_active, true, false, true);
         const playtimeString = toPlaytime(basicPlayerInfo.playtime);

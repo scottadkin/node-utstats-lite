@@ -1687,15 +1687,18 @@ class PlayerTestWeaponDamage{
 
         this.parent = document.querySelector(parent);
 
-        this.wrapper = new UISection(this.parent, "Test Weapon Damage Totals");
+        this.wrapper = new UISection(this.parent, "Weapon Damage Totals");
         this.data = data;
 
         this.mode = "all";
+        this.selectedGametype = 0;
+        this.selectedMap = 0;
 
 
         this.createTabs();
+        this.createDropDowns();
 
-        this.renderTable();
+        this.render();
 
        // this.wrapper.setContent([UIB("test"), "aaa", UIB("aaaaaaaaaa")]);
     }
@@ -1706,6 +1709,7 @@ class PlayerTestWeaponDamage{
             {"display": "Lifetime", "value": "all"},
             {"display": "Gametypes", "value": "gametypes"},
             {"display": "Maps", "value": "maps"},
+            {"display": "Custom", "value": "custom"},
         ];
 
         this.tabs = new UITabs(this.wrapper.elem, options, this.mode);
@@ -1713,12 +1717,107 @@ class PlayerTestWeaponDamage{
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
             this.mode = e.detail.newTab;
-            this.renderTable();
+            this.render();
         });
     }
 
-    renderTable(){
 
+    getUniqueOptions(){
+
+        const gametypeOptions = [];
+        const mapOptions = [];
+
+        const gametypes = [];
+        const maps = [];
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+
+
+            if(d.gametype_id !== 0 && gametypes.indexOf(d.gametype_id) === -1){
+                gametypeOptions.push({"display": d.gametype_name, "value": d.gametype_id});
+                gametypes.push(d.gametype_id);
+            }
+
+            if(d.map_id !== 0 && maps.indexOf(d.map_id) === -1){
+
+                mapOptions.push({"display": d.map_name, "value": d.map_id});
+                maps.push(d.map_id);
+            }
+        }
+
+        const sortByName = (a, b) =>{
+            a = a.display;
+            b = b.display;
+
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+
+            return 0;
+        }
+
+        gametypeOptions.sort(sortByName);
+        mapOptions.sort(sortByName);
+
+
+        if(gametypeOptions.length > 0) this.selectedGametype = gametypeOptions[0].value;
+        if(mapOptions.length > 0) this.selectedMap = mapOptions[0].value;
+        
+       
+
+        return {gametypeOptions,  mapOptions}
+
+    }
+
+    createDropDowns(){
+
+        const {gametypeOptions, mapOptions} = this.getUniqueOptions();
+
+
+
+        this.gametypeSelectRow = UIDiv("hidden");
+        this.gametypeSelectRow.append(UILabel("Gametype"));
+
+        this.gametypeSelect = new UISelect(this.gametypeSelectRow, gametypeOptions, this.selectedGametype, (newValue) =>{
+
+            this.selectedGametype = parseInt(newValue);
+            this.render();
+        });
+
+        this.wrapper.elem.append(this.gametypeSelectRow);
+
+        this.mapSelectRow = UIDiv("hidden");
+        this.mapSelectRow.append(UILabel("Map"));
+        
+        this.mapSelect = new UISelect(this.mapSelectRow, mapOptions, this.selectedMap, (newValue) =>{
+
+            this.selectedMap = parseInt(newValue);
+            this.render();
+        });
+
+        this.wrapper.elem.append(this.mapSelectRow);
+    }
+
+    render(){
+
+        if(this.mode === "gametypes" || this.mode === "custom"){
+
+            this.gametypeSelectRow.className = "form-row";
+        }else{
+            this.gametypeSelectRow.className = "hidden";
+        }
+
+        if(this.mode !== "maps" && this.mode !== "custom"){
+
+            this.mapSelectRow.className = "hidden";
+        }else{
+            this.mapSelectRow.className = "form-row";
+        }
 
         const tableOptions = {
             "className": "t-width-1",
@@ -1733,19 +1832,6 @@ class PlayerTestWeaponDamage{
             ]
         };
 
-        if(this.mode === "gametypes"){
-
-            tableOptions.headers.unshift({"display": "Gametype"});
-
-        }else if(this.mode === "maps"){
-
-            tableOptions.headers.unshift({"display": "Map"});
-
-        }else if(this.mode === "custom"){
-
-            tableOptions.headers.unshift({"display": "Gametype"},{"display": "Map"});
-        }
-
 
         const rows = [];
 
@@ -1754,34 +1840,12 @@ class PlayerTestWeaponDamage{
             const d = this.data[i];
 
             if(this.mode === "all" && (d.gametype_id !== 0 || d.map_id !== 0)) continue;
-            if(this.mode === "gametypes" &&( d.gametype_id === 0 || d.map_id !== 0)) continue;
-            if(this.mode === "maps" &&( d.gametype_id !== 0 || d.map_id === 0)) continue;
+            if(this.mode === "gametypes" &&( d.gametype_id !== this.selectedGametype || d.map_id !== 0)) continue;
+            if(this.mode === "maps" &&( d.gametype_id !== 0 || d.map_id !== this.selectedMap)) continue;
+            if(this.mode === "custom" && (d.gametype_id !== this.selectedGametype || d.map_id !== this.selectedMap)) continue;
 
             const row = [];
 
-            if(this.mode === "custom"){
-
-                row.push({ 
-                    "value": d.gametype_name.toLowerCase(), 
-                    "display":d.gametype_name,
-                    "className": "text-left"
-                },
-                { 
-                    "value": d.map_name.toLowerCase(), 
-                    "display":d.map_name,
-                    "className": "text-left"
-                });
-
-            }else if(this.mode === "gametypes"){
-
-                row.push({ "value": d.gametype_name.toLowerCase(), "display":d.gametype_name,
-                    "className": "text-left"});
-
-            }else if(this.mode === "maps"){
-
-                row.push({ "value": d.map_name.toLowerCase(), "display":d.map_name,
-                    "className": "text-left"});
-            }
 
             row.push(
                 
