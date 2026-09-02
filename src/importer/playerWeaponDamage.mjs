@@ -1,5 +1,5 @@
 import Message from "../message.mjs";
-import { insertPlayerDamageWeaponStats } from "../playerWeaponDamage.mjs";
+import { calculatePlayerWeaponDamageTotals, insertPlayerDamageWeaponStats, updatePlayerWeaponDamageTotals } from "../playerWeaponDamage.mjs";
 import { removeDoubleEnforcer } from "../generic.mjs";
 
 export default class PlayerWeaponDamage{
@@ -54,6 +54,8 @@ export default class PlayerWeaponDamage{
 
         const masterData = {};
 
+        this.uniquePlayerIds = new Set();
+
         for(const [playerId, playerStats] of Object.entries(this.playerStats)){
 
             const player = this.playerManager.getPlayerById(playerId);
@@ -61,6 +63,8 @@ export default class PlayerWeaponDamage{
             if(player === null) process.exit();
             
             const pId = player.masterId;
+
+            this.uniquePlayerIds.add(pId);
 
             if(masterData[pId] === undefined){
 
@@ -107,6 +111,18 @@ export default class PlayerWeaponDamage{
 
         await insertPlayerDamageWeaponStats(matchId, gametypeId, mapId, finalData, this.playerManager);
 
+    }
+
+    async updatePlayerTotals(gametypeId, mapId){
+
+        if(!this.bFoundData) return;
+
+        const playerIds = [...this.uniquePlayerIds];
+
+        if(playerIds.length === 0) return;
+
+
+        await updatePlayerWeaponDamageTotals(playerIds, gametypeId, mapId)
     }
 }
 
