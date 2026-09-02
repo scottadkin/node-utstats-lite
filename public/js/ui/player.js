@@ -1700,7 +1700,6 @@ class PlayerTestWeaponDamage{
 
         this.render();
 
-       // this.wrapper.setContent([UIB("test"), "aaa", UIB("aaaaaaaaaa")]);
     }
 
     createTabs(){
@@ -1722,7 +1721,7 @@ class PlayerTestWeaponDamage{
     }
 
 
-    getUniqueOptions(){
+    getUniqueOptions(bInitialRender){
 
         const gametypeOptions = [];
         const mapOptions = [];
@@ -1734,12 +1733,26 @@ class PlayerTestWeaponDamage{
 
             const d = this.data[i];
 
-
-
             if(d.gametype_id !== 0 && gametypes.indexOf(d.gametype_id) === -1){
                 gametypeOptions.push({"display": d.gametype_name, "value": d.gametype_id});
                 gametypes.push(d.gametype_id);
             }
+
+            if(this.mode === "custom"){
+
+                if(d.map_id !== 0 && maps.indexOf(d.map_id) === -1 && d.gametype_id === this.selectedGametype){
+
+        
+                    
+                    mapOptions.push({"display": d.map_name, "value": d.map_id});
+                    maps.push(d.map_id);
+                    
+                }
+
+                continue;
+            }
+
+            
 
             if(d.map_id !== 0 && maps.indexOf(d.map_id) === -1){
 
@@ -1765,8 +1778,10 @@ class PlayerTestWeaponDamage{
         mapOptions.sort(sortByName);
 
 
-        if(gametypeOptions.length > 0) this.selectedGametype = gametypeOptions[0].value;
-        if(mapOptions.length > 0) this.selectedMap = mapOptions[0].value;
+        if(bInitialRender){
+            if(gametypeOptions.length > 0) this.selectedGametype = gametypeOptions[0].value;
+            if(mapOptions.length > 0) this.selectedMap = mapOptions[0].value;
+        }
         
        
 
@@ -1776,7 +1791,7 @@ class PlayerTestWeaponDamage{
 
     createDropDowns(){
 
-        const {gametypeOptions, mapOptions} = this.getUniqueOptions();
+        const {gametypeOptions, mapOptions} = this.getUniqueOptions(true);
 
 
 
@@ -1803,7 +1818,24 @@ class PlayerTestWeaponDamage{
         this.wrapper.elem.append(this.mapSelectRow);
     }
 
+
+    updateSelectOptions(){
+
+        const {gametypeOptions, mapOptions} = this.getUniqueOptions(false);
+
+        const bOptionStillExists = this.mapSelect.updateOptions(mapOptions, this.selectedMap);
+
+        if(!bOptionStillExists && mapOptions.length > 0){
+            this.selectedMap = parseInt(mapOptions[0].value);
+            this.mapSelect.changeSelected(this.selectedMap);
+        }
+
+    }
+
     render(){
+
+        this.updateSelectOptions();
+      
 
         if(this.mode === "gametypes" || this.mode === "custom"){
 
@@ -1859,12 +1891,8 @@ class PlayerTestWeaponDamage{
                 {"value": d.damage_per_minute, "display": d.damage_per_minute.toFixed(2)},
             );
     
-            
-
-
             rows.push(row);
         }
-
 
 
         if(this.table === undefined){
