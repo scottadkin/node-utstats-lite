@@ -79,10 +79,37 @@ class MatchFragsSummary{
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Frags Summary");
+        
 
+        this.tables = [];
         this.parent.append(this.wrapper);
 
-        this.renderTables();
+        this.createTabs();
+
+        this.content = UIDiv();
+        this.wrapper.append(this.content);
+
+        this.render();
+    }
+
+    createTabs(){
+
+        this.mode = "normal";
+
+        const options = [
+            {"display": "Final Score", "value": "normal"},
+            {"display": "Events Per Minute", "value": "epm"},
+        ];
+
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.mode = e.detail.newTab;
+            console.log(this.mode);
+            this.render();
+        });
     }
 
     getAverages(playerId){
@@ -92,7 +119,7 @@ class MatchFragsSummary{
 
     }
 
-    renderTables(){
+    renderNormalTables(){
 
         const tables = [];
         const totals = [];
@@ -201,32 +228,32 @@ class MatchFragsSummary{
                     {"display": totals[i].ttl, "callback": (v) =>{ return MMSS(v)}},
                 ]
             };
-            new TESTUITable(this.wrapper, tableOptions, tables[i])
+
+            new TESTUITable(this.content, tableOptions, tables[i])
+         
         }
     }
 
 
-    createAverageCompareTD(averageValue, value){
+    createAverageCompareTD(averageValue, value, bForceDecPlaces){
 
-        
-
+    
         averageValue = parseFloat(averageValue);
+        value = parseFloat(value);
 
         const icon = UIAveragesCompareIcon(averageValue, value);
 
-        let colorClass = "";
-        
         if(averageValue < value){
-            colorClass =  "above-average";
-            icon.title = "Above player's average";
+            icon.title = `Above player's average of ${averageValue}`;
         }else if(averageValue > value){
 
-            colorClass = "below-average";
-            icon.title = "Below player's average";
+            icon.title = `Below player's average of ${averageValue}`;
         }else{
             icon.title = "Matches player's average";
         }
 
+
+        if(bForceDecPlaces) value = value.toFixed(2);
         
 
         const elem = document.createElement("td");
@@ -246,12 +273,6 @@ class MatchFragsSummary{
         if(this.totalTeams >= 2){
             teamColorClass = getTeamColorClass(p.team);
         }
-
-        console.log(parseFloat(averages.avg_score) , p.score);
-
-
-        const a = document.createElement("td");
-
      
         const row =  [
                 {
@@ -289,8 +310,114 @@ class MatchFragsSummary{
         }
 
         return row;
+    }
 
-    
+    renderEPMTables(){
+
+        const tables = [];
+
+        const columnNames = ["score", "frags", "kills", "deaths", "suicides", "team_kills", "headshots"];
+
+        if(this.totalTeams < 2) this.totalTeams = 1;
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "sortBy": 1,
+            "bAscOrder": false,
+            "headers": [
+                {"display": "Player"},
+                {"display": "Score"},
+                {"display": "Frags"},
+                {"display": "Kills"},
+                {"display": "Deaths"},
+                {"display": "Suicides"},
+                {"display": "Team Kills"},
+                {"display": "Headshots"}
+            ]
+        };
+
+        for(let i = 0; i < this.totalTeams; i++){
+
+            tables.push([]);
+        }
+
+
+        for(let i = 0; i < this.playerData.length; i++){
+
+            const p = this.playerData[i];
+            if(p.bSpectator) continue;
+
+            let team = (this.totalTeams === 1) ? 0 : p.team;
+
+            if(this.totalTeams > 1 && team === 255) continue;
+
+            const stats = this.getAverages(p.player_id);
+
+            if(stats === null){
+                console.warn(`Failed to get player averages`);
+                continue;
+            }
+
+            const mins = (p.time_on_server > 0) ? p.time_on_server / 60 : 9999;
+            
+            const currentRow = [
+                {
+                    "bSkipTD": true,
+                    "display": UIPlayerLink({
+                        "bTableElem": true,
+                        "playerId": p.player_id,
+                        "name": p.name,
+                        "country": p.country,
+                        "className": getTeamColorClass(p.team)
+                    }), 
+                    "value": p.name.toLowerCase()
+                }
+             
+            ];
+
+            for(let x = 0; x < columnNames.length; x++){
+
+                const c = columnNames[x];
+                const matchValue = (p[c] > 0) ? p[c] / mins : 0;
+                const lifetimeValue = stats[`epm_${c}`];
+
+                let diff = matchValue - lifetimeValue;
+
+                if(diff > 0){
+                    diff = `+${diff.toFixed(2)}`;
+                }else{
+                    diff = diff.toFixed(2);
+                }
+
+               // this.createAverageCompareTD(matchValue, lifetimeValue);
+
+                currentRow.push({
+                    "display": this.createAverageCompareTD(lifetimeValue, matchValue, true),
+                    "bSkipTD": true,
+                    //"display": (matchValue > 0) ? `${(matchValue).toFixed(2)} ${lifetimeValue} ${diff}` : "",
+                    "value": (matchValue > 0) ? matchValue : 0
+                });
+            }
+            
+            tables[team].push(currentRow);
+        }
+
+        for(let i = 0; i < tables.length; i++){
+
+            new TESTUITable(this.content, tableOptions, tables[i]);
+        }
+
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        if(this.mode === "normal"){
+            this.renderNormalTables();
+        }else if(this.mode === "epm"){
+            this.renderEPMTables();
+        }
     }
 }
 
