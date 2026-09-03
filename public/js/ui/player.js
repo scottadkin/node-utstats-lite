@@ -1685,6 +1685,8 @@ class PlayerWeaponDamage{
 
     constructor(parent, data){
 
+        if(data.length === 0) return null;
+
         this.parent = document.querySelector(parent);
 
         this.wrapper = new UISection(this.parent, "Weapon Damage Totals");

@@ -1210,7 +1210,7 @@ export async function getPlayerRecentMatches(playerId, gametype, map, page, perP
     LEFT JOIN nstats_maps ON nstats_match_players.map_id = nstats_maps.id
     WHERE nstats_match_players.player_id=? AND nstats_match_players.spectator=0${where} 
     
-    ORDER BY nstats_match_players.match_date DESC LIMIT ?, ?`;
+    ORDER BY nstats_match_players.match_date DESC, nstats_match_players.match_id DESC LIMIT ?, ?`;
 
     const totalMatches = await getPlayerTotalMatches(playerId, where, vars);
 
