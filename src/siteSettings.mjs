@@ -70,6 +70,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Player" ,"type": `bool`, "name": "Display CTF League", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Special Events", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Weapons", "value": "1"},
+    {"category": "Player" ,"type": `bool`, "name": "Display Weapon Damage", "value": "1"},
     {"category": "Player" ,"type": `bool`, "name": "Display Rankings", "value": "1"},
     {"category": "Player" ,"type": `integer`, "name": "Rankings Activity Range", "value": "28"},
     {"category": "Player" ,"type": `bool`, "name": "Display Items", "value": "1"},

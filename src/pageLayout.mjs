@@ -47,6 +47,7 @@ const DEFAULT_PAGE_LAYOUTS = {
         "CTF League", 
         "Special Events", 
         "Weapons", 
+        "Weapon Damage",
         "Rankings", 
         "Items", 
         "Recent Matches"

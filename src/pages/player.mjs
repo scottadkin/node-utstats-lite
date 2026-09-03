@@ -27,7 +27,7 @@ export async function renderPlayerPage(req, res, userSession){
         const timeZone = await getSiteWideTimeZone();
         let title = `${basicPlayerInfo.name} - Player Profile`;
 
-        const testWeaponDamageDamage = await getPlayerWeaponDamageTotals(id);
+        
        
 
         const lastSeenString = convertTimestamp(basicPlayerInfo.last_active, true, false, true);
@@ -91,6 +91,13 @@ export async function renderPlayerPage(req, res, userSession){
         if(pageSettings["Display CTF League"] === 1){
             ctfLeagueData = await getPlayerMapsLeagueData(playerId);
         }
+
+        let weaponDamage = [];
+
+        if(pageSettings["Display Weapon Damage"] === 1){
+
+            weaponDamage = await getPlayerWeaponDamageTotals(id);
+        }
         
         
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
@@ -110,7 +117,7 @@ export async function renderPlayerPage(req, res, userSession){
             pageSettings,
             pageLayout,
             timeZone,
-            testWeaponDamageDamage
+            weaponDamage
         });
 
     }catch(err){

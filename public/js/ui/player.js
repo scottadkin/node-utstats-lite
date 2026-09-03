@@ -1681,7 +1681,7 @@ function playerPermaLinks(parent, hash){
     UICopyURLToClipboard(parent, "Copy Player Perma Link To Clipboard", `/player/${hash}`);
 }
 
-class PlayerTestWeaponDamage{
+class PlayerWeaponDamage{
 
     constructor(parent, data){
 
