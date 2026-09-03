@@ -2134,3 +2134,88 @@ export async function adminRenameForceHWIDToName(hwid, newName){
 
     return await simpleQuery(query, [newName, hwid]);
 }
+
+export async function getPlayersAverages(playerIds, gametypeId, mapId){
+
+    if(playerIds.length === 0) return [];
+
+    const t = "nstats_player_totals";
+  
+    const columns = [
+        "winrate",
+        "avg_score",
+        "avg_frags",
+        "avg_kills",
+        "avg_deaths",
+        "avg_suicides",
+        "avg_team_kills",
+        "avg_spree_1",
+        "avg_spree_2",
+        "avg_spree_3",
+        "avg_spree_4",
+        "avg_spree_5",
+        "avg_spree_best",
+        "avg_multi_1",
+        "avg_multi_2",
+        "avg_multi_3",
+        "avg_multi_4",
+        "avg_multi_best",
+        "avg_headshots",
+        "avg_item_amp",
+        "avg_item_belt",
+        "avg_item_boots",
+        "avg_item_body",
+        "avg_item_pads",
+        "avg_item_invis",
+        "avg_item_shp",
+        "epm_score",
+        "epm_frags",
+        "epm_kills",
+        "epm_deaths",
+        "epm_suicides",
+        "epm_team_kills",
+        "epm_spree_1",
+        "epm_spree_2",
+        "epm_spree_3",
+        "epm_spree_4",
+        "epm_spree_5",
+        "epm_multi_1",
+        "epm_multi_2",
+        "epm_multi_3",
+        "epm_multi_4",
+        "epm_headshots",
+        "epm_item_amp",
+        "epm_item_belt",
+        "epm_item_boots",
+        "epm_item_body",
+        "epm_item_pads",
+        "epm_item_invis",
+        "epm_item_shp",
+    ];
+
+    let query = `SELECT player_id,playtime,total_matches,wins,
+    draws,losses,spree_best,multi_best,`;
+   
+    for(let i = 0; i < columns.length; i++){
+
+        query += `printf('%.2f',${columns[i]}) as ${columns[i]}`;
+        if(i < columns.length - 1) query += `,`;
+    }
+
+    query += ` FROM ${t} WHERE player_id IN (?) AND gametype_id=? AND map_id=?`;
+
+    
+    const result = await simpleQuery(query, [playerIds, gametypeId, mapId]);
+    
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        //copy object ignoring the player_id key
+        data[r.player_id] = (({player_id, ...newData}) =>  newData)(r);
+    }
+
+    return data;
+}

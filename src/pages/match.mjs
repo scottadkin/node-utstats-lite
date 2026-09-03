@@ -18,7 +18,6 @@ export async function renderMatchPage(req, res, userSession){
         const data = await getMatchData(matchId);
 
         if(data.error !== undefined) throw new Error(data.error);
-
         const b = data.basic;
 
         let date = b.date;

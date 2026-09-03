@@ -6,7 +6,8 @@ import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
 import { 
     getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, 
     getPlayerIdsInMatch, updatePlayerTotals,
-    getNamesAndHashesById
+    getNamesAndHashesById,
+    getPlayersAverages
  } from "./players.mjs";
 import { 
     getMatchWeaponStats, getWeaponNames, 
@@ -431,12 +432,15 @@ export async function getMatchData(id){
             }
         }
 
+        const playerIds = new Set();
 
         for(let i = 0; i < playerData.length; i++){
 
             const p = playerData[i];
 
             playerNames[p.player_id] = p.name;
+
+            playerIds.add(p.player_id);
 
             basicPlayers[p.player_id] = {
                 "name": p.name,
@@ -447,15 +451,16 @@ export async function getMatchData(id){
         }
 
 
-        const [weaponStats, kills, ctf, dom] = await Promise.all([
+        const [weaponStats, kills, ctf, dom, playerAverages] = await Promise.all([
             getMatchWeaponStats(id), 
             getMatchKills(id), 
             ctfGetMatchData(id), 
-            domGetMatchData(id)
+            domGetMatchData(id),
+            getPlayersAverages([...playerIds], basic.gametype_id, basic.map_id)
         ]);
         
 
-        return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom};
+        return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom, playerAverages};
         
     }catch(err){
         console.trace(err);

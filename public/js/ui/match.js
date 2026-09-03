@@ -79,6 +79,8 @@ function createFragTableRow(p, totalTeams, bTotals){
         teamColorClass = getTeamColorClass(p.team);
     }
 
+    console.log(p);
+
     const row =  [
             {"value": p.time_on_server, "display": MMSS(p.time_on_server), "className": `${teamColorClass} playtime`, "parse": ["playtime"]},
             {"value": p.score, "display": ignore0(p.score)},
