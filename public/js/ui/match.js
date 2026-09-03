@@ -68,173 +68,231 @@ function renderBasicInfo(parent, data, players){
 }
 
 
-function createFragTableRow(p, totalTeams, bTotals){
+class MatchFragsSummary{
 
-    let net = p.kills - p.deaths;
-    if(net > 0) net = `+${net}`;
+    constructor(parent, totalTeams, playerData, playerAverages){
 
-    let teamColorClass = "team-none";
+        this.parent = document.querySelector(parent);
+        this.totalTeams = totalTeams;
+        this.playerData = playerData
+        this.playerAverages = playerAverages;
 
-    if(totalTeams >= 2){
-        teamColorClass = getTeamColorClass(p.team);
+        this.wrapper = UIDiv();
+        UIHeader(this.wrapper, "Frags Summary");
+
+        this.parent.append(this.wrapper);
+
+        this.renderTables();
     }
 
-    console.log(p);
+    getAverages(playerId){
 
-    const row =  [
-            {"value": p.time_on_server, "display": MMSS(p.time_on_server), "className": `${teamColorClass} playtime`, "parse": ["playtime"]},
-            {"value": p.score, "display": ignore0(p.score)},
-            {"value": p.frags, "display": ignore0(p.frags)}, 
-            {"value": p.kills, "display": ignore0(p.kills)},
-            {"value": p.deaths, "display": ignore0(p.deaths)},
-            {"display": net, "value": p.kills - p.deaths},
-            {"value": p.suicides, "display": ignore0(p.suicides)},
-            {"value": p.team_kills, "display": ignore0(p.team_kills)},
-            {"value": p.headshots, "display": ignore0(p.headshots)},
-            {"value": p.efficiency, "display": `${p.efficiency.toFixed(2)}%`},
-            {"value": p.ttl, "display": MMSS(p.ttl), "className": "playtime",}
-        ]
-    ;
 
-    if(!bTotals){
+        return this.playerAverages?.[playerId] ?? null;
 
-        row.unshift({"value": p.name.toLowerCase(), "display": UIPlayerLink(
-            {
-                "playerId": p.player_id, 
-                "name": p.name, 
-                "country": p.country,  
-                "bTableElem": true, 
-                "className": `text-left ${teamColorClass}`
-            }
-        ), "bSkipTD": true});
-        
-    }else{
-        row.unshift({"display": "Totals", "className": "team-none"});
     }
 
-    return row;
+    renderTables(){
 
-}
+        const tables = [];
+        const totals = [];
 
-function renderFragsTables(parent, totalTeams, playerData){
+        if(this.totalTeams < 2) this.totalTeams = 1;
 
-    parent = document.querySelector(parent);
+        for(let i = 0; i < this.totalTeams; i++){
 
-    const wrapper = UIDiv();
+            totals[i] = {
+                "time_on_server": 0,
+                "score": 0,
+                "frags": 0,
+                "kills": 0,
+                "deaths": 0,
+                "net": 0,
+                "suicides": 0,
+                "team_kills": 0,
+                "headshots": 0,
+                "efficiency": 0,
+                "ttl": 0,
+                "totalTTL": 0,
+                "players": 0
+            };
 
-    UIHeader(wrapper, "Frags Summary");
-
-    const tables = [];
-    const totals = [];
-
-    if(totalTeams < 2) totalTeams = 1;
-
-    for(let i = 0; i < totalTeams; i++){
-
-        totals[i] = {
-            "time_on_server": 0,
-            "score": 0,
-            "frags": 0,
-            "kills": 0,
-            "deaths": 0,
-            "net": 0,
-            "suicides": 0,
-            "team_kills": 0,
-            "headshots": 0,
-            "efficiency": 0,
-            "ttl": 0,
-            "totalTTL": 0,
-            "players": 0
-        };
-
-        tables.push([]);
-    }
-
-
-    for(let i = 0; i < playerData.length; i++){
-
-        const p = playerData[i];
-
-        if(p.spectator) continue;
-        if(totalTeams >= 2 && p.team === 255) continue;
-
-        const row = createFragTableRow(p, totalTeams, false);
-
-        let team = (totalTeams < 2) ? 0 : p.team;
-
-        totals[team].kills += p.kills;
-        totals[team].deaths += p.deaths;
-        totals[team].suicides += p.suicides;
-        totals[team].team_kills += p.team_kills;
-        totals[team].players++;
-        totals[team].totalTTL += p.ttl;
-
-        if(totals[team].players > 0 && totals[team].totalTTL > 0){
-            totals[team].ttl = totals[team].totalTTL / totals[team].players;
+            tables.push([]);
         }
 
-        if(totals[team].kills > 0){
 
-            if(totals[team].deaths === 0){
-                totals[team].efficiency = 100;
+        for(let i = 0; i < this.playerData.length; i++){
+
+            const p = this.playerData[i];
+
+            if(p.spectator) continue;
+            if(this.totalTeams >= 2 && p.team === 255) continue;
+
+            const avg = this.getAverages(p.player_id);
+
+            const row = this.createFragTableRow(p, false, avg);
+
+            let team = (this.totalTeams < 2) ? 0 : p.team;
+
+            totals[team].kills += p.kills;
+            totals[team].deaths += p.deaths;
+            totals[team].suicides += p.suicides;
+            totals[team].team_kills += p.team_kills;
+            totals[team].players++;
+            totals[team].totalTTL += p.ttl;
+
+            if(totals[team].players > 0 && totals[team].totalTTL > 0){
+                totals[team].ttl = totals[team].totalTTL / totals[team].players;
+            }
+
+            if(totals[team].kills > 0){
+
+                if(totals[team].deaths === 0){
+                    totals[team].efficiency = 100;
+                }else{
+
+                    const events = totals[team].kills + totals[team].deaths + totals[team].suicides + totals[team].team_kills;
+
+                    totals[team].efficiency = (totals[team].kills / (events)) * 100;
+                }
             }else{
-
-                const events = totals[team].kills + totals[team].deaths + totals[team].suicides + totals[team].team_kills;
-
-                totals[team].efficiency = (totals[team].kills / (events)) * 100;
+                totals[team].efficiency = 0;
             }
+
+            if(this.totalTeams >= 2 && team !== 255){
+                tables[team].push(row);
+            }else if(this.totalTeams < 2){
+                tables[0].push(row);
+            }
+        }
+
+        for(let i = 0; i < tables.length; i++){
+
+            const tableOptions = {
+                "className": "t-width-1", 
+                "sortBy": 2,
+                "bAscOrder": false,
+                "headers": [
+                    {"display": "Player"},
+                    {"display": "Playtime"},
+                    {"display": "Score"},
+                    {"display": "Frags"},
+                    {"display": "Kills"},
+                    {"display": "Deaths"},
+                    {"display": "Net"},
+                    {"display": "Suicides"},
+                    {"display": "Team Kills"},
+                    {"display": "Headshots"},
+                    {"display": "Efficiency"},
+                    {"display": "TTL"}
+                ],
+                "footer": [
+                    {"display": "Total|Max|Avg"},
+                    {"display": "SUM", "dataType": "FLOAT", "callback": (v) =>{ return MMSS(v)}},
+                    {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                    {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                    {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                    {"display": "SUM", "dataType": "INT",  "callback": (v) => ignore0(v)},
+                    {"display": "SUM", "dataType": "INT", "callback": (v) => { return (v > 0) ?  `+${v}`: v}},
+                    {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                    {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                    {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
+                    {"display": `${totals[i].efficiency.toFixed(2)}%`},
+                    {"display": totals[i].ttl, "callback": (v) =>{ return MMSS(v)}},
+                ]
+            };
+            new TESTUITable(this.wrapper, tableOptions, tables[i])
+        }
+    }
+
+
+    createAverageCompareTD(averageValue, value){
+
+        
+
+        averageValue = parseFloat(averageValue);
+
+        const icon = UIAveragesCompareIcon(averageValue, value);
+
+        let colorClass = "";
+        
+        if(averageValue < value){
+            colorClass =  "above-average";
+            icon.title = "Above player's average";
+        }else if(averageValue > value){
+
+            colorClass = "below-average";
+            icon.title = "Below player's average";
         }else{
-            totals[team].efficiency = 0;
+            icon.title = "Matches player's average";
         }
 
-        if(totalTeams >= 2 && team !== 255){
-            tables[team].push(row);
-        }else if(totalTeams < 2){
-            tables[0].push(row);
-        }
+        
+
+        const elem = document.createElement("td");
+
+        elem.append(value, icon);
+        return elem;
     }
 
-    for(let i = 0; i < tables.length; i++){
+    createFragTableRow(p, bTotals, averages){
 
-        const tableOptions = {
-            "className": "t-width-1", 
-            "sortBy": 2,
-            "bAscOrder": false,
-            "headers": [
-                {"display": "Player"},
-                {"display": "Playtime"},
-                {"display": "Score"},
-                {"display": "Frags"},
-                {"display": "Kills"},
-                {"display": "Deaths"},
-                {"display": "Net"},
-                {"display": "Suicides"},
-                {"display": "Team Kills"},
-                {"display": "Headshots"},
-                {"display": "Efficiency"},
-                {"display": "TTL"}
-            ],
-            "footer": [
-                {"display": "Total|Max|Avg"},
-                {"display": "SUM", "dataType": "FLOAT", "callback": (v) =>{ return MMSS(v)}},
-                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
-                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
-                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
-                {"display": "SUM", "dataType": "INT",  "callback": (v) => ignore0(v)},
-                {"display": "SUM", "dataType": "INT", "callback": (v) => { return (v > 0) ?  `+${v}`: v}},
-                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
-                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
-                {"display": "SUM", "dataType": "INT", "callback": (v) => ignore0(v)},
-                {"display": `${totals[i].efficiency.toFixed(2)}%`},
-                {"display": totals[i].ttl, "callback": (v) =>{ return MMSS(v)}},
+
+        let net = p.kills - p.deaths;
+        if(net > 0) net = `+${net}`;
+
+        let teamColorClass = "team-none";
+
+        if(this.totalTeams >= 2){
+            teamColorClass = getTeamColorClass(p.team);
+        }
+
+        console.log(parseFloat(averages.avg_score) , p.score);
+
+
+        const a = document.createElement("td");
+
+     
+        const row =  [
+                {
+                    "value": p.time_on_server, 
+                    "display": MMSS(p.time_on_server), 
+                    "className": `${teamColorClass} playtime`
+                },
+                {"value": p.score, "display": this.createAverageCompareTD(averages.avg_score, p.score), "bSkipTD": true},
+                {"value": p.frags, "display": this.createAverageCompareTD(averages.avg_frags, p.frags), "bSkipTD": true }, 
+                {"value": p.kills, "display": this.createAverageCompareTD(averages.avg_kills, p.kills), "bSkipTD": true },
+                {"value": p.deaths, "display": this.createAverageCompareTD(averages.avg_deaths, p.deaths), "bSkipTD": true },
+                {"display": net, "value": p.kills - p.deaths},
+                {"value": p.suicides, "display": this.createAverageCompareTD(averages.avg_suicides, p.suicides), "bSkipTD": true},
+                {"value": p.team_kills, "display": this.createAverageCompareTD(averages.avg_team_kills, p.team_kills), "bSkipTD": true},
+                {"value": p.headshots, "display": this.createAverageCompareTD(averages.avg_headshots, p.headshots), "bSkipTD": true},
+                {"value": p.efficiency, "display": `${p.efficiency.toFixed(2)}%` },
+                {"value": p.ttl, "display": MMSS(p.ttl), "className": "playtime"}
             ]
-        };
-        new TESTUITable(wrapper, tableOptions, tables[i])
+        ;
+
+        if(!bTotals){
+
+            row.unshift({"value": p.name.toLowerCase(), "display": UIPlayerLink(
+                {
+                    "playerId": p.player_id, 
+                    "name": p.name, 
+                    "country": p.country,  
+                    "bTableElem": true, 
+                    "className": `text-left ${teamColorClass}`
+                }
+            ), "bSkipTD": true});
+            
+        }else{
+            row.unshift({"display": "Totals", "className": "team-none"});
+        }
+
+        return row;
+
+    
     }
-
-    parent.append(wrapper);
 }
-
 
 function createSpreeRow(player, totalTeams){
 

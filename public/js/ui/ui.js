@@ -2019,3 +2019,28 @@ class UISection{
         this.content.append(...content);
     }
 }
+
+
+
+function UIAveragesCompareIcon(valueA, valueB){
+
+    valueA = parseFloat(valueA);
+
+
+    const img = document.createElement("img");
+    img.alt = "average icon";
+    img.className = "avg-icon";
+
+
+    if(valueA > valueB){
+        img.src = "/images/down.png";
+    }else if(valueA < valueB){
+
+        img.src = "/images/up.png";
+    }else{
+        img.src = "/images/nochange.png";
+    }
+
+    return img;
+
+}

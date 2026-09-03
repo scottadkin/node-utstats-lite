@@ -1349,3 +1349,18 @@ code{
 	cursor: pointer;
 	color:yellow;
 }
+
+
+.below-average{
+    color:red;
+}
+
+
+.above-average{
+    color:yellow
+}
+
+.avg-icon{
+    height:10px;
+    padding-left:5px;
+}
