@@ -101,6 +101,37 @@ const AVERAGE_TYPES = [
     "dom_caps"
 ];
 
+
+const PLAYER_TOTALS_MAX_COLUMNS = `
+MAX(time_on_server) as max_playtime,
+MAX(score) as max_score,
+MAX(frags) as max_frags,
+MAX(kills) as max_kills,
+MAX(deaths) as max_deaths,
+MAX(suicides) as max_suicides,
+MAX(team_kills) as max_team_kills,
+MAX(ttl) as max_ttl,
+MAX(spree_1) as max_spree_1,
+MAX(spree_2) as max_spree_2,
+MAX(spree_3) as max_spree_3,
+MAX(spree_4) as max_spree_4,
+MAX(spree_5) as max_spree_5,
+MAX(spree_best) as max_spree_best,
+MAX(multi_1) as max_multi_1,
+MAX(multi_2) as max_multi_2,
+MAX(multi_3) as max_multi_3,
+MAX(multi_4) as max_multi_4,
+MAX(multi_best) as max_multi_best,
+MAX(headshots) as max_headshots,
+MAX(item_amp) as max_item_amp,
+MAX(item_belt) as max_item_belt,
+MAX(item_boots) as max_item_boots,
+MAX(item_body) as max_item_body,
+MAX(item_pads) as max_item_pads,
+MAX(item_invis) as max_item_invis,
+MAX(item_shp) as max_item_shp,
+MAX(dom_caps) as max_dom_caps`;
+
 function getPlayerTotalsColumnsProfile(){
 
     const pT = "nstats_player_totals";
@@ -700,6 +731,9 @@ function _updateTotals(totals, playerData){
     const mapId = playerData.map_id;
     const playerId = playerData.player_id;
 
+
+    const maxKeys = Object.keys(playerData).filter((v, i) => v.startsWith("max_"))
+
     if(totals[playerId] === undefined){
         totals[playerId] = {};
     }
@@ -778,6 +812,8 @@ function _updateTotals(totals, playerData){
         pTotals[x].matches += playerData.total_matches;
     }
 
+
+
     for(let i = 0; i < mergeTypes.length; i++){
 
         const m = mergeTypes[i];
@@ -813,9 +849,30 @@ function _updateTotals(totals, playerData){
         }
     }
 
+    //2.8.1 keep track of max values for various player_totals
+    for(let i = 0; i < maxKeys.length; i++){
+
+        const maxKey = maxKeys[i];
+
+        for(let x =0; x < pTotals.length; x++){
+            
+
+            if(pTotals[x][maxKey] === undefined){
+                pTotals[x][maxKey] = playerData[maxKey];    
+            }else{
+
+                if(pTotals[x][maxKey] < playerData[maxKey]){
+
+                    pTotals[x][maxKey] = playerData[maxKey];
+                }
+            }
+        }
+    }
+
     for(let i = 0; i < pTotals.length; i++){
 
         const t = pTotals[i];
+
 
         t.totalTtl += playerData.ttl;
 
@@ -904,7 +961,8 @@ export async function calcPlayerTotals(playerIds){
     if(playerIds.length === 0) return [];
 
     let query = `SELECT
-    ${PLAYER_TOTALS_COLUMNS_MATCHES}
+    ${PLAYER_TOTALS_COLUMNS_MATCHES},
+    ${PLAYER_TOTALS_MAX_COLUMNS}
     FROM nstats_match_players WHERE spectator=0 AND player_id IN (?) GROUP BY player_id,gametype_id,map_id`;
 
     const result = await simpleQuery(query, [playerIds]);
@@ -923,8 +981,77 @@ export async function calculateAllPlayerTotals(){
 
     const totals = createPlayerTotalsFromData(result);
 
-    return await insertPlayerGametypeTotals(totals);
+    await insertPlayerGametypeTotals(totals);
+
+    return await insertPlayerGametypeMaxValues(totals);
 }
+
+//2.8.1
+async function insertPlayerGametypeMaxValues(data){
+
+
+    const columns = [
+        "max_playtime",
+        "max_score",
+        "max_frags",
+        "max_kills",
+        "max_deaths",
+        "max_suicides",
+        "max_team_kills",
+        "max_spree_1",
+        "max_spree_2",
+        "max_spree_3",
+        "max_spree_4",
+        "max_spree_5",
+        "max_spree_best",
+        "max_multi_1",
+        "max_multi_2",
+        "max_multi_3",
+        "max_multi_4",
+        "max_multi_best",
+        "max_headshots",
+        "max_item_amp",
+        "max_item_belt",
+        "max_item_boots",
+        "max_item_body",
+        "max_item_pads",
+        "max_item_invis",
+        "max_item_shp",
+        "max_dom_caps",
+    ];
+
+
+    const insertVars = [];
+
+    for(const [playerId, playerData] of Object.entries(data)){
+
+        for(const [gametypeId, mapList] of Object.entries(playerData)){
+
+            for(const [mapId, mapData] of Object.entries(mapList)){
+
+                const vars = [
+                    playerId, gametypeId, mapId
+                ];
+
+                for(let x = 0; x < columns.length; x++){
+
+                    vars.push(mapData[columns[x]]);
+                }
+
+                insertVars.push(vars)
+            }
+        }
+    }
+
+    return await sqlInsertOnDuplicateUpdate(
+        "nstats_player_totals_max", 
+        ["player_id", "gametype_id", "map_id", ...columns], 
+        insertVars, 
+        ["player_id", "gametype_id", "map_id"]
+    );
+
+}
+
 
 
 /**
@@ -1030,7 +1157,8 @@ async function insertPlayerGametypeTotals(data){
     //console.log(columns);
     //process.exit();
 
-    await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, ["player_id", "gametype_id", "map_id"]);
+    return await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, ["player_id", "gametype_id", "map_id"]);
+
 
     //await bulkInsert(query, insertVars);
 }
@@ -1040,7 +1168,9 @@ export async function updatePlayerTotals(playerIds){
 
     const totals = await calcPlayerTotals(playerIds);
 
-    return await insertPlayerGametypeTotals(totals);
+
+    await insertPlayerGametypeTotals(totals);
+    return await insertPlayerGametypeMaxValues(totals);
 }
 
 

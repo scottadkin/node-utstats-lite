@@ -876,6 +876,45 @@ const queries = [
 
         `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_pwd ON nstats_totals_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`,
 
+        `CREATE TABLE nstats_player_totals_max (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            player_id INTEGER NOT NULL,
+            gametype_id INTEGER NOT NULL,
+            map_id INTEGER NOT NULL,
+            max_playtime REAL NOT NULL,
+            max_score INTEGER NOT NULL,
+            max_frags INTEGER NOT NULL,
+            max_kills INTEGER NOT NULL,
+            max_deaths INTEGER NOT NULL,
+            max_suicides INTEGER NOT NULL,
+            max_team_kills INTEGER NOT NULL,
+            max_spree_1 INTEGER NOT NULL,
+            max_spree_2 INTEGER NOT NULL,
+            max_spree_3 INTEGER NOT NULL,
+            max_spree_4 INTEGER NOT NULL,
+            max_spree_5 INTEGER NOT NULL,
+            max_spree_best INTEGER NOT NULL,
+            max_multi_1 INTEGER NOT NULL,
+            max_multi_2 INTEGER NOT NULL,
+            max_multi_3 INTEGER NOT NULL,
+            max_multi_4 INTEGER NOT NULL,
+            max_multi_best INTEGER NOT NULL,
+            max_headshots INTEGER NOT NULL,
+            max_item_amp INTEGER NOT NULL,
+            max_item_belt INTEGER NOT NULL,
+            max_item_boots INTEGER NOT NULL,
+            max_item_body INTEGER NOT NULL,
+            max_item_pads INTEGER NOT NULL,
+            max_item_invis INTEGER NOT NULL,
+            max_item_shp INTEGER NOT NULL,
+            max_dom_caps INTEGER NOT NULL,
+            CONSTRAINT fk_player_totals_max_pgm
+            FOREIGN KEY(player_id, gametype_id, map_id)
+            REFERENCES nstats_player_totals(player_id, gametype_id, map_id)
+        ) STRICT`,
+
+        `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_pgm ON nstats_player_totals_max(player_id,gametype_id,map_id)`,
+
 ];
 
 

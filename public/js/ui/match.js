@@ -1285,7 +1285,7 @@ class MatchCTFSummary{
 
                 const  {value, key} = records[i];
                 
-                div.append(" ", key, " (", UIB(value),")");
+                div.append(" ", headers[dataKeys.indexOf(key) + 1].display, " (", UIB(value),")");
                 if(i === records.length - 1){
                     div.append(UIBr())
                 }else if(i === records.length - 2){
