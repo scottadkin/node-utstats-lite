@@ -59,7 +59,7 @@
 
             case "Display CTF": {
 
-                %>renderCTFSummary("#root", basic.total_teams, parsedData.ctf, basicPlayers);<%
+                %>new MatchCTFSummary("#root", basic.total_teams, parsedData.ctf, basicPlayers, playerAverages);<%
 
             } break;
 

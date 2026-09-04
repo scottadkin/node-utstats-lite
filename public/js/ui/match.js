@@ -333,6 +333,16 @@ class MatchFragsSummary{
                 {"display": "Suicides"},
                 {"display": "Team Kills"},
                 {"display": "Headshots"}
+            ],
+            "footer": [
+                {"display": "Totals"},
+                {"display": "SUM", "dataType": "float"},
+                {"display": "SUM", "dataType": "float"},
+                {"display": "SUM", "dataType": "float"},
+                {"display": "SUM", "dataType": "float"},
+                {"display": "SUM", "dataType": "float"},
+                {"display": "SUM", "dataType": "float"},
+                {"display": "SUM", "dataType": "float"},
             ]
         };
 
@@ -1084,225 +1094,240 @@ class MatchDominationSummary{
 }
 
 
-function bPlayerHaveAnyMatchingCTFEvents(player, targetKeys){
+class MatchCTFSummary{
 
-    for(let i = 0; i < targetKeys.length; i++){
+    constructor(parent, totalTeams, data, players, playerAverages){
 
-        if(player[targetKeys[i]] !== 0 && targetKeys[i] !== "flag_carry_time_min") return true;
-    }
+        if(data.playerData.length === 0) return;
 
-    return false;
-}
+        this.totalTeams = totalTeams;
+        this.players = players;
+        this.playerAverages = playerAverages;
+        this.data = data;
 
-function renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKeys){
+        this.parent = document.querySelector(parent);
 
-    const playtimeTypes = [
-        "flag_carry_time",
-        "flag_carry_time_max",
-        "flag_carry_time_avg",
-        "flag_carry_time_min"
-    ];
+        this.wrapper = UIDiv();
 
-    const tableOptions = {
-        headers, 
-        "className": "t-width-1",
-        "footer": [
-            {"display": "Totals"},
-        ]
-    }
+        UIHeader(this.wrapper, "Capture The Flag Summary");
 
-    for(let i = 0; i < dataKeys.length; i++){
+        this.createTabs();
+        this.content = UIDiv();
+        this.wrapper.append(this.content);
 
-        const current = {"display": "SUM", "dataType": "FLOAT"};
+        this.parent.append(this.wrapper);
 
-        if(playtimeTypes.indexOf(dataKeys[i]) !== -1){
-            current.callback = (v) => { return toPlaytime(v, true)};
-            current.className = "playtime";
-        }else{
-            current.callback = ignore0;
-        }
-        tableOptions.footer.push(current);
-    }
+        this.mode = "general";
 
-    
-    for(let i = 0; i < totalTeams; i++){
-
-        const totals = {};
         
-        for(let z = 0; z < dataKeys.length; z++){
-            totals[dataKeys[z]] = 0;
+
+        this.render();
+
+    }
+
+    createTabs(){
+
+        this.tabs = new UITabs(this.wrapper, [
+            {"display": "General", "value": "general"},
+            {"display": "Returns", "value": "returns"},
+            {"display": "Carry Time", "value": "carry time"}
+        ]);
+
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.mode = e.detail.newTab;
+            this.render();
+        });
+
+    }
+
+    bPlayerHaveAnyMatchingCTFEvents(player, targetKeys){
+
+        for(let i = 0; i < targetKeys.length; i++){
+
+            if(player[targetKeys[i]] !== 0 && targetKeys[i] !== "flag_carry_time_min") return true;
         }
 
-        const rows = [];
+        return false;
+    }
 
-        for(let x = 0; x < data.playerData.length; x++){
+    renderCTFSummaryType(headers, dataKeys){
 
-            const p = data.playerData[x];
+        const playtimeTypes = [
+            "flag_carry_time",
+            "flag_carry_time_max",
+            "flag_carry_time_avg",
+            "flag_carry_time_min"
+        ];
 
-            if(p.spectator) continue;
+        const tableOptions = {
+            headers, 
+            "className": "t-width-1",
+            "footer": [
+                {"display": "Totals"},
+            ]
+        }
 
-            const row = []
+        for(let i = 0; i < dataKeys.length; i++){
 
-            const player = players?.[p.player_id] ?? {"name": "Not Found", "country": "xx", "team": 255};
+            const current = {"display": "SUM", "dataType": "FLOAT"};
 
-            if(player.team !== i) continue;
+            if(playtimeTypes.indexOf(dataKeys[i]) !== -1){
+                current.callback = (v) => { return toPlaytime(v, true)};
+                current.className = "playtime";
+            }else{
+                current.callback = ignore0;
+            }
+            tableOptions.footer.push(current);
+        }
 
-            //skip players with no matching events
-            if(!bPlayerHaveAnyMatchingCTFEvents(p, dataKeys)) continue;
+        
+        for(let i = 0; i < this.totalTeams; i++){
 
-            row.push({
-                "value": player.name.toLowerCase(), 
-                "display": UIPlayerLink({
-                    "playerId": p.player_id,
-                    "className": getTeamColorClass(i), 
-                    "country": player.country, "bTableElem": "true", "name": player.name
-                }),
-                "bSkipTD": true
-            });
-
+            const totals = {};
+            
             for(let z = 0; z < dataKeys.length; z++){
+                totals[dataKeys[z]] = 0;
+            }
 
-                totals[dataKeys[z]] += p[dataKeys[z]];
+            const rows = [];
 
-                if(playtimeTypes.indexOf(dataKeys[z]) === -1){
-                    row.push({"value": p[dataKeys[z]], "display": ignore0(p[dataKeys[z]])});
-                }else{
-                    row.push({"value": p[dataKeys[z]], "display": toPlaytime(p[dataKeys[z]], true), "className": "playtime"});
+            for(let x = 0; x < this.data.playerData.length; x++){
+
+                const p = this.data.playerData[x];
+
+                if(p.spectator) continue;
+
+                const row = []
+
+                const player = this.players?.[p.player_id] ?? {"name": "Not Found", "country": "xx", "team": 255};
+
+                if(player.team !== i) continue;
+
+                //skip players with no matching events
+                if(!this.bPlayerHaveAnyMatchingCTFEvents(p, dataKeys)) continue;
+
+                row.push({
+                    "value": player.name.toLowerCase(), 
+                    "display": UIPlayerLink({
+                        "playerId": p.player_id,
+                        "className": getTeamColorClass(i), 
+                        "country": player.country, "bTableElem": "true", "name": player.name
+                    }),
+                    "bSkipTD": true
+                });
+
+                for(let z = 0; z < dataKeys.length; z++){
+
+                    totals[dataKeys[z]] += p[dataKeys[z]];
+
+                    if(playtimeTypes.indexOf(dataKeys[z]) === -1){
+                        row.push({"value": p[dataKeys[z]], "display": ignore0(p[dataKeys[z]])});
+                    }else{
+                        row.push({"value": p[dataKeys[z]], "display": toPlaytime(p[dataKeys[z]], true), "className": "playtime"});
+                    }
                 }
+
+
+                rows.push(row);
+
             }
 
 
-            rows.push(row);
-
+            new TESTUITable(this.content, tableOptions, rows);
         }
-
-
-        new TESTUITable(parent, tableOptions, rows);
     }
-}
 
-function renderGeneralCTFTab(parent, totalTeams, data, players){
+    renderGeneralCTFTab(){
 
-    parent.innerHTML = "";
+        let headers = [
+            "Player", "Taken", "Pickup", "Drop", "Assist", "Cover", 
+            "Seal", "Capture", "Kill", "Return", "Carry Time"
+        ];
 
-    let headers = [
-        "Player", "Taken", "Pickup", "Drop", "Assist", "Cover", 
-        "Seal", "Capture", "Kill", "Return", "Carry Time"
-    ];
+        headers = headers.map((h) =>{ return {"display": h}} );
 
-     headers = headers.map((h) =>{ return {"display": h}} );
+        const dataKeys = [
+            "flag_taken",
+            "flag_pickup",
+            "flag_drop",
+            "flag_assist",
+            "flag_cover",
+            "flag_seal",
+            "flag_cap",
+            "flag_kill",
+            "flag_return",
+            "flag_carry_time",
+        ];
 
-    const dataKeys = [
-        "flag_taken",
-        "flag_pickup",
-        "flag_drop",
-        "flag_assist",
-        "flag_cover",
-        "flag_seal",
-        "flag_cap",
-        "flag_kill",
-        "flag_return",
-        "flag_carry_time",
-    ];
-
-    renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKeys);
-}
+        this.renderCTFSummaryType(headers, dataKeys);
+    }
 
 
-function renderReturnCTFTab(parent, totalTeams, data, players){
-
-    parent.innerHTML = "";
-
-    let headers = [
-        "Player", "Return", "Return Base", "Return Mid", 
-        "Return Enemy Base", "Return Close Save"
-    ];
-
-    headers = headers.map((h) =>{ return {"display": h}} );
-
-    const dataKeys = [
-        "flag_return",
-        "flag_return_base",
-        "flag_return_mid",
-        "flag_return_enemy_base",
-        "flag_return_save"
-    ];
-
-    renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKeys);
-}
-
-function renderCarryTimeCTFTab(parent, totalTeams, data, players){
-
-    parent.innerHTML = "";
-
-    let headers = [
-        "Player", "Times Held", 
-        "Total Carry Time",
-        "Max Carry Time", 
-        "Avg Carry Time",
-        "Min Carry Time",
-    ];
-
-    headers = headers.map((h) =>{ return {"display": h}} );
-
-    const dataKeys = [
-        "times_held",
-        "flag_carry_time",
-        "flag_carry_time_max",
-        "flag_carry_time_avg",
-        "flag_carry_time_min"
-    ];
-
-    renderCTFSummaryType(parent, totalTeams, data, players, headers, dataKeys);
-}
+    renderReturnCTFTab(){
 
 
-function renderCTFSummary(parent, totalTeams, data, players){
+        let headers = [
+            "Player", "Return", "Return Base", "Return Mid", 
+            "Return Enemy Base", "Return Close Save"
+        ];
 
-    parent = document.querySelector(parent);
+        headers = headers.map((h) =>{ return {"display": h}} );
 
-    if(data.playerData.length === 0) return;
+        const dataKeys = [
+            "flag_return",
+            "flag_return_base",
+            "flag_return_mid",
+            "flag_return_enemy_base",
+            "flag_return_save"
+        ];
 
-    const wrapper = UIDiv();
+        this.renderCTFSummaryType(headers, dataKeys);
+    }
 
-    UIHeader(wrapper, "Capture The Flag Summary");
-  
-
-    const tabs = new UITabs(wrapper, [
-        {"display": "General", "value": "general"},
-        {"display": "Returns", "value": "returns"},
-        {"display": "Carry Time", "value": "carry time"}
-    ]);
+    renderCarryTimeCTFTab(){
 
 
-    const content = UIDiv();
-    wrapper.append(content);
+        let headers = [
+            "Player", "Times Held", 
+            "Total Carry Time",
+            "Max Carry Time", 
+            "Avg Carry Time",
+            "Min Carry Time",
+        ];
 
-    tabs.wrapper.addEventListener("tabChanged", (e) =>{
+        headers = headers.map((h) =>{ return {"display": h}} );
 
-        switch(e.detail.newTab){
-            
+        const dataKeys = [
+            "times_held",
+            "flag_carry_time",
+            "flag_carry_time_max",
+            "flag_carry_time_avg",
+            "flag_carry_time_min"
+        ];
+
+        this.renderCTFSummaryType(headers, dataKeys);
+    }
+
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        switch(this.mode){        
             case "general": {
-                renderGeneralCTFTab(content, totalTeams, data, players);
+                this.renderGeneralCTFTab();
             } break;
             case "returns": {
-                renderReturnCTFTab(content, totalTeams, data, players);
+                this.renderReturnCTFTab();
             } break;
             case "carry time": {
-                renderCarryTimeCTFTab(content, totalTeams, data, players);
-            }break;
-            default: {
-                content.innerHTML = "";
-            }
+                this.renderCarryTimeCTFTab();
+            }break;       
         }
-    });
-    
-    renderGeneralCTFTab(content, totalTeams, data, players);
-
-
-    parent.append(wrapper);
+    }
 }
-
 
 class CTFCaps{
 
