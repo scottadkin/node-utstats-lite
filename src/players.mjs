@@ -2137,7 +2137,7 @@ export async function adminRenameForceHWIDToName(hwid, newName){
 
 export async function getPlayersAverages(playerIds, gametypeId, mapId){
 
-    if(playerIds.length === 0) return [];
+    if(playerIds.length === 0) return {};
 
     const t = "nstats_player_totals";
   

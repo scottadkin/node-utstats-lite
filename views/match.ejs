@@ -18,6 +18,7 @@
     const basicPlayers = parsedData.basicPlayers;
     const classicWeaponData = <%- JSON.stringify(classicWeaponStats) -%>;
     const playerAverages = <%- JSON.stringify(data.playerAverages) %>;
+    const playerCTFAverages = <%- JSON.stringify(data.playerCTFAverages) %>;
 
     <%
 
@@ -59,7 +60,7 @@
 
             case "Display CTF": {
 
-                %>new MatchCTFSummary("#root", basic.total_teams, parsedData.ctf, basicPlayers, playerAverages);<%
+                %>new MatchCTFSummary("#root", basic.total_teams, parsedData.ctf, basicPlayers, playerCTFAverages);<%
 
             } break;
 

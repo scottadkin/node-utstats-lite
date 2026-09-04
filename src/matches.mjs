@@ -15,7 +15,7 @@ import {
     updatePlayerTotals as weaponUpdatePlayerTotals 
 } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
-import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch } from "./ctf.mjs";
+import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch, getCTFPlayersAverages } from "./ctf.mjs";
 import { getMatchData as domGetMatchData, getDOMMatchPlayersAPIJSON } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, 
@@ -451,16 +451,17 @@ export async function getMatchData(id){
         }
 
 
-        const [weaponStats, kills, ctf, dom, playerAverages] = await Promise.all([
+        const [weaponStats, kills, ctf, dom, playerAverages, playerCTFAverages] = await Promise.all([
             getMatchWeaponStats(id), 
             getMatchKills(id), 
             ctfGetMatchData(id), 
             domGetMatchData(id),
-            getPlayersAverages([...playerIds], basic.gametype_id, basic.map_id)
+            getPlayersAverages([...playerIds], basic.gametype_id, basic.map_id),
+            getCTFPlayersAverages([...playerIds], basic.gametype_id, basic.map_id)
         ]);
         
 
-        return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom, playerAverages};
+        return {basic, playerData, playerNames, weaponStats, basicPlayers, kills, ctf, dom, playerAverages, playerCTFAverages};
         
     }catch(err){
         console.trace(err);

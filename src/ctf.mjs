@@ -1548,3 +1548,57 @@ export async function getMatchLadderJSON(id){
 
     return {...match, players};
 }
+
+
+
+export async function getCTFPlayersAverages(playerIds, gametypeId, mapId){
+
+    if(playerIds.length === 0) return {};
+
+    const columns = [
+        "flag_taken",
+        "flag_pickup",
+        "flag_drop",
+        "flag_assist",
+        "flag_cover",
+        "flag_seal",
+        "flag_cap",
+        "flag_kill",
+        "flag_return",
+        "flag_return_base",
+        "flag_return_mid",
+        "flag_return_enemy_base",
+        "flag_return_save"
+    ];
+
+    let query = `SELECT player_id,playtime,total_matches,`;
+   // max_flag_taken,max_flag_pickup,max_flag_drop,max_flag_assist,max_flag_cover,
+    //max_flag_seal,max_flag_cap,max_flag_kill,max_flag_return,max_flag_return_base,
+    //max_flag_return_mid,max_flag_return_enemy_base,max_flag_return_save`;
+
+    for(let i = 0; i < columns.length; i++){
+
+        const c = columns[i];
+
+        query += `max_${c},avg_${c},epm_${c}`;
+        if(i < columns.length - 1) query += `,`;
+    }
+
+
+    query += ` FROM nstats_player_totals_ctf WHERE player_id IN (?) AND gametype_id=? AND map_id=?`;
+
+    const result = await simpleQuery(query, [playerIds, gametypeId, mapId]);
+
+    
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.player_id] = (({player_id,...newData}) => newData)(r)
+    }
+
+    return data;
+}
