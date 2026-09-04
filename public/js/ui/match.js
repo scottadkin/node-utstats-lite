@@ -1169,6 +1169,8 @@ class MatchCTFSummary{
             ]
         }
 
+        const recordsInfo = {};
+
         for(let i = 0; i < dataKeys.length; i++){
 
             const current = {"display": "SUM", "dataType": "FLOAT"};
@@ -1229,8 +1231,21 @@ class MatchCTFSummary{
 
                     let avgValue = 0;
 
-                    if(dataKeys[z] !== "times_held"){
+                    if(dataKeys[z] !== "times_held" && playtimeTypes.indexOf(dataKeys[z]) === -1){
+
                         avgValue =  avg[`avg_${dataKeys[z]}`] ?? 0;
+
+                        if(avgValue > 0 && avgValue >= avg[`max_${dataKeys[z]}`]){
+
+                            if(recordsInfo[p.player_id] === undefined){
+                                recordsInfo[p.player_id] = {
+                                    "name": player.name,
+                                    "records": []
+                                };
+                            }
+                            recordsInfo[p.player_id].records.push({"key": dataKeys[z], "value": avg[`max_${dataKeys[z]}`]});
+                        }
+
                     }else{
                         avgValue = (avg?.[`avg_flag_taken`] ?? 0) + (avg?.[`avg_flag_pickup`] ?? 0);
                     }
@@ -1244,9 +1259,54 @@ class MatchCTFSummary{
 
                 rows.push(row);
             }
-
+            
             new TESTUITable(this.content, tableOptions, rows);
         }
+        
+        //UIHeader(this.content, "Player CTF Personal Bests")
+
+        const test = UIDiv("personal-bests");
+
+        for(const [playerId, playerData] of Object.entries(recordsInfo)){
+
+            const {name, records} = playerData;
+            const player = getPlayer(this.players, playerId);
+
+
+            const div = UIDiv(getTeamColorClass(player.team));
+
+            div.append(UIPlayerLink({
+                "name": UIB(name),
+                "country": player.country,
+                "playerId": playerId,
+            }), " got their map personal best for ");
+
+            for(let i = 0; i < records.length; i++){
+
+                const  {value, key} = records[i];
+                
+                div.append(" ", key, " (", UIB(value),")");
+                if(i === records.length - 1){
+                    div.append(UIBr())
+                }else if(i === records.length - 2){
+                    div.append(", and ");
+                }else{
+                    div.append(", ")
+                }
+            }
+            
+
+            test.append(div);
+        }
+
+        for(let i = 0; i < recordsInfo.length; i++){
+
+            const {name, value, key} = recordsInfo[i];
+
+            test.append(UIB(name), " matched their personal best for ", UIB(key), " with ", UIB(value), UIBr());
+        }
+
+        this.content.append(test);
     }
 
     renderGeneralCTFTab(){
