@@ -68,6 +68,33 @@ function renderBasicInfo(parent, data, players){
 }
 
 
+function createAverageCompareTD(averageValue, value, bForceDecPlaces){
+
+
+    averageValue = parseFloat(averageValue);
+    value = parseFloat(value);
+
+    const icon = UIAveragesCompareIcon(averageValue, value);
+
+    if(averageValue < value){
+        icon.title = `Above player's average of ${averageValue.toFixed(2)}`;
+    }else if(averageValue > value){
+
+        icon.title = `Below player's average of ${averageValue.toFixed(2)}`;
+    }else{
+        icon.title = "Matches player's average";
+    }
+
+
+    if(bForceDecPlaces) value = value.toFixed(2);
+    
+
+    const elem = document.createElement("td");
+
+    elem.append(value, icon);
+    return elem;
+}
+
 class MatchFragsSummary{
 
     constructor(parent, totalTeams, playerData, playerAverages){
@@ -235,33 +262,6 @@ class MatchFragsSummary{
     }
 
 
-    createAverageCompareTD(averageValue, value, bForceDecPlaces){
-
-    
-        averageValue = parseFloat(averageValue);
-        value = parseFloat(value);
-
-        const icon = UIAveragesCompareIcon(averageValue, value);
-
-        if(averageValue < value){
-            icon.title = `Above player's average of ${averageValue}`;
-        }else if(averageValue > value){
-
-            icon.title = `Below player's average of ${averageValue}`;
-        }else{
-            icon.title = "Matches player's average";
-        }
-
-
-        if(bForceDecPlaces) value = value.toFixed(2);
-        
-
-        const elem = document.createElement("td");
-
-        elem.append(value, icon);
-        return elem;
-    }
-
     createFragTableRow(p, bTotals, averages){
 
 
@@ -280,14 +280,14 @@ class MatchFragsSummary{
                     "display": MMSS(p.time_on_server), 
                     "className": `${teamColorClass} playtime`
                 },
-                {"value": p.score, "display": this.createAverageCompareTD(averages.avg_score, p.score), "bSkipTD": true},
-                {"value": p.frags, "display": this.createAverageCompareTD(averages.avg_frags, p.frags), "bSkipTD": true }, 
-                {"value": p.kills, "display": this.createAverageCompareTD(averages.avg_kills, p.kills), "bSkipTD": true },
-                {"value": p.deaths, "display": this.createAverageCompareTD(averages.avg_deaths, p.deaths), "bSkipTD": true },
+                {"value": p.score, "display": createAverageCompareTD(averages.avg_score, p.score), "bSkipTD": true},
+                {"value": p.frags, "display": createAverageCompareTD(averages.avg_frags, p.frags), "bSkipTD": true }, 
+                {"value": p.kills, "display": createAverageCompareTD(averages.avg_kills, p.kills), "bSkipTD": true },
+                {"value": p.deaths, "display": createAverageCompareTD(averages.avg_deaths, p.deaths), "bSkipTD": true },
                 {"display": net, "value": p.kills - p.deaths},
-                {"value": p.suicides, "display": this.createAverageCompareTD(averages.avg_suicides, p.suicides), "bSkipTD": true},
-                {"value": p.team_kills, "display": this.createAverageCompareTD(averages.avg_team_kills, p.team_kills), "bSkipTD": true},
-                {"value": p.headshots, "display": this.createAverageCompareTD(averages.avg_headshots, p.headshots), "bSkipTD": true},
+                {"value": p.suicides, "display": createAverageCompareTD(averages.avg_suicides, p.suicides), "bSkipTD": true},
+                {"value": p.team_kills, "display": createAverageCompareTD(averages.avg_team_kills, p.team_kills), "bSkipTD": true},
+                {"value": p.headshots, "display": createAverageCompareTD(averages.avg_headshots, p.headshots), "bSkipTD": true},
                 {"value": p.efficiency, "display": `${p.efficiency.toFixed(2)}%` },
                 {"value": p.ttl, "display": MMSS(p.ttl), "className": "playtime"}
             ]
@@ -402,7 +402,7 @@ class MatchFragsSummary{
                // this.createAverageCompareTD(matchValue, lifetimeValue);
 
                 currentRow.push({
-                    "display": this.createAverageCompareTD(lifetimeValue, matchValue, true),
+                    "display": createAverageCompareTD(lifetimeValue, matchValue, true),
                     "bSkipTD": true,
                     //"display": (matchValue > 0) ? `${(matchValue).toFixed(2)} ${lifetimeValue} ${diff}` : "",
                     "value": (matchValue > 0) ? matchValue : 0
@@ -1204,9 +1204,12 @@ class MatchCTFSummary{
                 const player = this.players?.[p.player_id] ?? {"name": "Not Found", "country": "xx", "team": 255};
 
                 if(player.team !== i) continue;
+                
 
                 //skip players with no matching events
                 if(!this.bPlayerHaveAnyMatchingCTFEvents(p, dataKeys)) continue;
+
+                const avg = this.playerAverages[p.player_id] ?? {};
 
                 row.push({
                     "value": player.name.toLowerCase(), 
@@ -1222,18 +1225,25 @@ class MatchCTFSummary{
 
                     totals[dataKeys[z]] += p[dataKeys[z]];
 
+                    const value = (dataKeys[z] !== "times_held") ? p[dataKeys[z]] : p.flag_taken + p.flag_pickup;
+
+                    let avgValue = 0;
+
+                    if(dataKeys[z] !== "times_held"){
+                        avgValue =  avg[`avg_${dataKeys[z]}`] ?? 0;
+                    }else{
+                        avgValue = (avg?.[`avg_flag_taken`] ?? 0) + (avg?.[`avg_flag_pickup`] ?? 0);
+                    }
+
                     if(playtimeTypes.indexOf(dataKeys[z]) === -1){
-                        row.push({"value": p[dataKeys[z]], "display": ignore0(p[dataKeys[z]])});
+                        row.push({"value": p[dataKeys[z]], "bSkipTD": true, "display": createAverageCompareTD(avgValue, value)});
                     }else{
                         row.push({"value": p[dataKeys[z]], "display": toPlaytime(p[dataKeys[z]], true), "className": "playtime"});
                     }
                 }
 
-
                 rows.push(row);
-
             }
-
 
             new TESTUITable(this.content, tableOptions, rows);
         }
