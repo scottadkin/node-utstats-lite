@@ -1705,8 +1705,8 @@ export async function deleteMatch(id){
 
         await gametypeUpdateBasicTotals(basic.gametype_id); 
         await mapUpdateTotals(basic.map_id); 
-        await weaponCalcMapWeaponsTotals(basic.map_id); 
-        await setPlayerMapAverages(basic.map_id); 
+        await weaponCalcMapWeaponsTotals(basic.map_id, basic.gametype_id); 
+   
         await rankingRecalculateGametype(basic.gametype_id);
         await rankingRecalculateMap(basic.map_id);
 

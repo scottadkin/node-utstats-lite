@@ -752,7 +752,6 @@ async function calcMapWeaponTotalsFromMatchTable(mapId, gametypeId){
     MAX(suicides) as max_suicides
     FROM nstats_match_weapon_stats ${whereString} GROUP BY ${gametypeIdString}weapon_id`;
 
-
     return await simpleQuery(query, vars);
 }
 
