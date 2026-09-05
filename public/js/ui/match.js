@@ -2575,11 +2575,12 @@ class MatchKillsMatchUp{
 
 class MatchItemsSummary{
 
-    constructor(parent, playerData, totalTeams){
+    constructor(parent, playerData, totalTeams, playerAverages){
 
         this.parent = document.querySelector(parent);
         this.playerData = playerData;
         this.totalTeams = totalTeams;
+        this.playerAverages = playerAverages;
 
         this.headers = {
             "player": {"display": "Player"},
@@ -2638,6 +2639,8 @@ class MatchItemsSummary{
 
             if(!this.bPlayerAnyData(p)) continue;
 
+            const avg = this.playerAverages[p.player_id] ?? null;
+
             const row = [
                 {
                     "bSkipTD": true, 
@@ -2658,7 +2661,8 @@ class MatchItemsSummary{
 
                 row.push({
                     "value": p[`item_${columnName}`], 
-                    "display": ignore0(p[`item_${columnName}`])
+                    "display": createAverageCompareTD(avg[`avg_item_${columnName}`], p[`item_${columnName}`], false),
+                    "bSkipTD": true
                 });
             }
 
