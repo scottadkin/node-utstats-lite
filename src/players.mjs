@@ -1054,6 +1054,15 @@ async function insertPlayerGametypeMaxValues(data){
 
 
 
+async function deleteMultiplePlayerTotalsMax(playerIds){
+
+    if(playerIds.length === 0) return;
+
+    const query = `DELETE FROM nstats_player_totals_max WHERE player_id IN(?)`;
+
+    return await simpleQuery(query, [playerIds]);
+}
+
 /**
  * When we recalculate player totals we use this to delete all the previous player
  * all time totals, gametype totals, and map totals
@@ -1063,6 +1072,10 @@ async function insertPlayerGametypeMaxValues(data){
 export async function deleteMultiplePlayerTotals(playerIds){
 
     if(playerIds.length === 0) return;
+
+
+    //need to delete these first to prevent constraint error
+    await deleteMultiplePlayerTotalsMax(playerIds);
 
     const query = `DELETE FROM nstats_player_totals WHERE player_id IN(?)`;
 
