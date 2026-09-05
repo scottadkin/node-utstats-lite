@@ -20,6 +20,9 @@
     const playerAverages = <%- JSON.stringify(data.playerAverages) %>;
     const playerCTFAverages = <%- JSON.stringify(data.playerCTFAverages) %>;
 
+    console.log(playerData);
+    new MatchPlayerPersonalBests("#root", "frags", playerData, playerAverages);
+
     <%
 
     

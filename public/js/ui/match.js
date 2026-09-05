@@ -3393,17 +3393,27 @@ class MatchPlayerWeaponDamage{
 
 class MatchPlayerPersonalBests{
 
-    constructor(parent, type, players, playerData){
+    constructor(parent, type, playersMatchData, playerAverages){
 
         this.parent = document.querySelector(parent);
 
         if(!this.bValidType(type)) throw new Error(`Not a valid type for matchPlayerPersonalBests`); 
 
         this.type = type;
-        this.players = players;
-        this.playerData = playerData;
+        this.playersMatchData = playersMatchData;
+        this.playerAverages = playerAverages;
+
+        this.wrapper = UIDiv();
+        this.content = UIDiv();
+        UIHeader(this.wrapper, "Player Personal Bests");
+        this.wrapper.append(this.content);
+        this.parent.append(this.wrapper);
+
+        
 
         this.setDataTargets();
+
+        this.render();
 
     }
 
@@ -3415,7 +3425,7 @@ class MatchPlayerPersonalBests{
 
         this.dataTargets = {
             "frags": {
-                "max_playtime": { "display": "Longest Playtime", "type": "h"},
+                "max_playtime": { "display": "Longest Playtime", "type": "h", "matchColumn": "time_on_server"},
                 "max_score": { "display": "Highest Score", "type": "h"},
                 "max_frags": { "display": "Most Frags", "type": "h"},
                 "max_kills": { "display": "Most Kills", "type": "h"},
@@ -3451,6 +3461,135 @@ class MatchPlayerPersonalBests{
 
         const valid = ["frags", "ctf"];
         
-        return valid.indexOf(type);
+        return valid.indexOf(type) !== -1;
+    }
+
+
+    checkAgainstRecords(matchData, playerAverages){
+
+        const pbs = [];
+
+        const reg = /^max_(.+)$/i;
+
+        for(const [maxColumn, info] of Object.entries(this.dataTargets[this.type])){
+
+            const {display, type, matchColumn} = info;
+
+
+            if(matchColumn !== undefined){
+
+                if(type === "h"){
+
+                    if(matchData[matchColumn] >= playerAverages[maxColumn]){
+                        pbs.push({"display": display, "value": matchData[matchColumn], "bBad": false});
+                    }
+
+                }else if(type === "l"){
+
+                    if(matchData[matchColumn] >= playerAverages[maxColumn]){
+                        pbs.push({"display": display, "value": matchData[matchColumn], "bBad": true});
+                    }
+                }
+
+                
+                continue;
+            }
+
+            const regResult = reg.exec(maxColumn);
+
+            if(regResult === null){
+                console.warn(`checkAgainstPB regResult failed`);
+                continue;
+            }
+
+            const targetColumn = regResult[1];
+
+            if(matchData[targetColumn] === 0) continue;
+
+            if(type === "h"){
+
+                if(matchData[targetColumn] >= playerAverages[maxColumn]){
+                    pbs.push({"display": display, "value": matchData[targetColumn], "bBad": false});
+                }
+
+            }else if(type === "l"){
+                
+                if(matchData[targetColumn] >= playerAverages[maxColumn]){
+                    pbs.push({"display": display, "value": matchData[targetColumn], "bBad": true});
+                }
+            }else{
+                console.log("SIGH");
+            }
+        }
+
+
+        return pbs;
+    }
+
+
+    renderPlayerRecords(matchData, records){
+
+        const wrapper = UIDiv("player-record-wrapper");
+
+        wrapper.append(UIPlayerLink({
+            "playerId": matchData.player_id,
+            "name": matchData.name,
+            "country": matchData.country,
+            "className": getTeamColorClass(matchData.team)
+        }));
+        
+        console.log(records);
+
+        for(let i = 0; i < records.length; i++){
+
+            const r = records[i];
+
+            const elem = UIDiv(`player-record${(r.bBad) ? "  record-bad" : "  record-good"}`);
+            
+            let displayValue = r.value;
+
+            if(r.display === "Longest Playtime"){
+                displayValue = MMSS(r.value);
+            }
+
+            elem.append(`${r.display} `, UIB(displayValue));
+
+            wrapper.append(elem);
+        }
+
+        this.content.append(wrapper);
+
+
+    }
+
+    render(){
+
+        this.content.className = "players-records";
+        this.content.innerHTML = ``;
+
+
+       
+
+        for(let i = 0; i < this.playersMatchData.length; i++){
+
+            const md = this.playersMatchData[i];
+            if(md.bSpectator || md.time_on_server === 0) continue;
+            const pa = this.playerAverages[md.player_id] ?? null;
+
+            if(pa === null){
+                console.warn(`Failed to find player averages/best`);
+                continue;
+            }
+
+            const records = this.checkAgainstRecords(md, pa);
+
+            if(records.length === 0) continue;
+
+
+            this.renderPlayerRecords(md, records);
+
+
+        }
+
     }
 }
