@@ -3388,3 +3388,69 @@ class MatchPlayerWeaponDamage{
         }
     }
 }
+
+
+
+class MatchPlayerPersonalBests{
+
+    constructor(parent, type, players, playerData){
+
+        this.parent = document.querySelector(parent);
+
+        if(!this.bValidType(type)) throw new Error(`Not a valid type for matchPlayerPersonalBests`); 
+
+        this.type = type;
+        this.players = players;
+        this.playerData = playerData;
+
+        this.setDataTargets();
+
+    }
+
+
+    setDataTargets(){
+
+        //h higher is better
+        //l higher is worse
+
+        this.dataTargets = {
+            "frags": {
+                "max_playtime": { "display": "Longest Playtime", "type": "h"},
+                "max_score": { "display": "Highest Score", "type": "h"},
+                "max_frags": { "display": "Most Frags", "type": "h"},
+                "max_kills": { "display": "Most Kills", "type": "h"},
+                "max_deaths": { "display": "Most Deaths", "type": "l"},
+                "max_suicides": { "display": "Most Suicides", "type": "l"},
+                "max_team_kills": { "display": "Most Team Kills", "type": "l"},
+                "max_spree_1": { "display": "Most Killing Sprees", "type": "h"},
+                "max_spree_2": { "display": "Most Rampages", "type": "h"},
+                "max_spree_3": { "display": "Most Dominatings", "type": "h"},
+                "max_spree_4": { "display": "Most Unstoppables", "type": "h"},
+                "max_spree_5": { "display": "Most Godlikes", "type": "h"},
+                "max_spree_best": { "display": "Best Killing Spree", "type": "h"},
+                "max_multi_1": { "display": "Most Double Kills", "type": "h"},
+                "max_multi_2": { "display": "Most Multi Kills", "type": "h"},
+                "max_multi_3": { "display": "Most Ultra Kills", "type": "h"},
+                "max_multi_4": { "display": "Most Monster Kills", "type": "h"},
+                "max_multi_best": { "display": "Best Multi Kill", "type": "h"},
+                "max_headshots": { "display": "Most Headshots", "type": "h"},
+                "max_item_amps": { "display": "Most UDamage Pickups", "type": "h"},
+                "max_item_belt": { "display": "Most Shield Belt Pickups", "type": "h"},
+                "max_item_boots": { "display": "Most Jump Boots Pickups", "type": "h"},
+                "max_item_body": { "display": "Most Body Armor Pickups", "type": "h"},
+                "max_item_pads": { "display": "Most Thigh Pads Pickups", "type": "h"},
+                "max_item_invis": { "display": "Most Invisibility Pickups", "type": "h"},
+                "max_item_shp": { "display": "Most Super Health Pickups", "type": "h"},
+                "max_dom_caps": { "display": "Most Domination Caps", "type": "h"},
+            }
+        };
+
+    }
+
+    bValidType(type){
+
+        const valid = ["frags", "ctf"];
+        
+        return valid.indexOf(type);
+    }
+}
