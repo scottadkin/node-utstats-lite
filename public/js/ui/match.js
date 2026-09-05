@@ -2696,6 +2696,9 @@ class MatchDamageSummary{
         this.players = playerData;
         this.totalTeams = totalTeams;
 
+        this.damageTypes = ["fallDamage", "drownDamage", "selfDamage", "damageTaken", "damageDelt"];
+        this.teamDamageTypes = ["teamDamageTaken", "teamDamageDelt"];
+
         if(!this.bAnyData()) return;
 
         UIHeader(parent, "Damage Summary");
@@ -2705,19 +2708,30 @@ class MatchDamageSummary{
 
     bAnyData(){
 
+
+
         for(let i = 0; i < this.players.length; i++){
 
             const p = this.players[i];
-            if(p.damage !== undefined) return true;
+
+            if(p.damage !== undefined){
+
+                for(let x = 0; x < this.damageTypes.length; x++){
+
+                    if(p.damage[this.damageTypes[x]] > 0) return true;
+                }
+
+                for(let x = 0; x < this.teamDamageTypes.length; x++){
+                    if(p.damage[this.teamDamageTypes[x]] > 0) return true;
+                }
+         
+            }
         }
 
         return false;
     }
 
     createRow(player){
-
-       const damageTypes = ["fallDamage", "drownDamage", "selfDamage", "damageTaken", "damageDelt"];
-       const teamDamageTypes = ["teamDamageTaken", "teamDamageDelt"];
 
        const row = [
         {
@@ -2732,18 +2746,18 @@ class MatchDamageSummary{
             })
         }];
 
-        for(let i = 0; i < damageTypes.length; i++){
+        for(let i = 0; i < this.damageTypes.length; i++){
 
-            const t = damageTypes[i];
+            const t = this.damageTypes[i];
             row.push({"display": ignore0(player.damage[t]), "value": player.damage[t]});
         }
 
 
         if(this.bAnyTeamDamage()){
 
-            for(let i = 0; i < teamDamageTypes.length; i++){
+            for(let i = 0; i < this.teamDamageTypes.length; i++){
 
-                const t = teamDamageTypes[i];
+                const t = this.teamDamageTypes[i];
                 row.push({"display": ignore0(player.damage[t]), "value": player.damage[t]});
             }
 
