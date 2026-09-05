@@ -2283,6 +2283,7 @@ export async function getPlayersAverages(playerIds, gametypeId, mapId){
     if(playerIds.length === 0) return {};
 
     const t = "nstats_player_totals";
+    const mT = "nstats_player_totals_max"
   
     const columns = [
         "winrate",
@@ -2336,17 +2337,56 @@ export async function getPlayersAverages(playerIds, gametypeId, mapId){
         "epm_item_shp",
     ];
 
-    let query = `SELECT player_id,playtime,total_matches,wins,
-    draws,losses,spree_best,multi_best,`;
+    const maxColumns = [
+        "max_playtime",
+        "max_score",
+        "max_frags",
+        "max_kills",
+        "max_deaths",
+        "max_suicides",
+        "max_team_kills",
+        "max_spree_1",
+        "max_spree_2",
+        "max_spree_3",
+        "max_spree_4",
+        "max_spree_5",
+        "max_spree_best",
+        "max_multi_1",
+        "max_multi_2",
+        "max_multi_3",
+        "max_multi_4",
+        "max_multi_best",
+        "max_headshots",
+        "max_item_amp",
+        "max_item_belt",
+        "max_item_boots",
+        "max_item_body",
+        "max_item_pads",
+        "max_item_invis",
+        "max_item_shp",
+        "max_dom_caps"
+
+    ];
+
+    let query = `SELECT ${t}.player_id,${t}.playtime,${t}.total_matches,${t}.wins,
+    ${t}.draws,${t}.losses,${t}.spree_best,${t}.multi_best,`;
    
     for(let i = 0; i < columns.length; i++){
 
-        query += `printf('%.2f',${columns[i]}) as ${columns[i]}`;
-        if(i < columns.length - 1) query += `,`;
+        query += `${columns[i]},`;
+       // query += `printf('%.2f',${t}.${columns[i]}) as ${columns[i]},`;
+       // if(i < columns.length - 1) query += `,`;
     }
 
-    query += ` FROM ${t} WHERE player_id IN (?) AND gametype_id=? AND map_id=?`;
+    for(let i = 0; i < maxColumns.length; i++){
 
+        query += `${maxColumns[i]}`;
+        if(i < maxColumns.length - 1) query += `,`;
+    }
+
+    query += ` FROM ${t} 
+    INNER JOIN ${mT} ON (${t}.player_id = ${mT}.player_id AND ${t}.gametype_id= ${mT}.gametype_id AND ${t}.map_id = ${mT}.map_id)
+    WHERE ${t}.player_id IN (?) AND ${t}.gametype_id=? AND ${t}.map_id=?`;
     
     const result = await simpleQuery(query, [playerIds, gametypeId, mapId]);
     
