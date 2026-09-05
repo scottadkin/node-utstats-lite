@@ -1409,21 +1409,42 @@ code{
     flex-direction: row;
     flex-wrap: wrap;
     
+    
 }
 
 
-.record-list div, .record-bad div{
+/*.record-list div, .record-bad div{
     padding:5px;
     font-size:var(--font-size-70);
     border:1px solid var(--border-color-4);
+}*/
+
+.record-title{
+    font-weight:600;
+    padding:0px 5px;
+    text-align: center;
+    font-size: var(--font-size-70);
+    background-color: rgba(0,0,0,0.25);
+}
+
+.record-value{
+    text-align: center;
 }
 
 .record-good{
-    background: linear-gradient(to right, rgb(22, 70, 22), rgb(44, 92, 44));
+    border:1px solid var(--border-color-4);
+    background: linear-gradient(to bottom right, rgb(22, 70, 22), rgb(44, 92, 44));
+    margin-left:-1px;
+    margin-top:-1px;
+    flex-grow: 1;
 }
 
 .record-bad{
-    background: linear-gradient(to right, rgb(100, 10, 10), rgb(60, 20, 20));
+    background: linear-gradient(to bottom right, rgb(100, 10, 10), rgb(60, 20, 20));
+    border:1px solid var(--border-color-4);
+    margin-left:-1px; 
+    margin-top:-1px;
+    flex-grow: 1;
 }
 
 .player-record-name{

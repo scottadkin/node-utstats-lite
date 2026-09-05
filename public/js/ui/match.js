@@ -3393,7 +3393,7 @@ class MatchPlayerWeaponDamage{
 
 class MatchPlayerPersonalBests{
 
-    constructor(parent, type, playersMatchData, playerAverages){
+    constructor(parent, type, playersMatchData, playerAverages, totalTeams){
 
         this.parent = document.querySelector(parent);
 
@@ -3402,6 +3402,7 @@ class MatchPlayerPersonalBests{
         this.type = type;
         this.playersMatchData = playersMatchData;
         this.playerAverages = playerAverages;
+        this.totalTeams = totalTeams;
 
         this.wrapper = UIDiv("margin-bottom-1");
         this.content = UIDiv();
@@ -3531,7 +3532,7 @@ class MatchPlayerPersonalBests{
 
         const wrapper = UIDiv(`player-record-wrapper`);
 
-        const nameDiv = UIDiv(`player-record-name ${getTeamColorClass(matchData.team)}`);
+        const nameDiv = UIDiv(`player-record-name ${getTeamColorClass((this.totalTeams > 1) ? matchData.team: 255)}`);
 
         nameDiv.append(UICountryFlag(matchData.country));
 
@@ -3556,7 +3557,13 @@ class MatchPlayerPersonalBests{
 
             const elem = UIDiv(`${(r.bBad) ? "record-bad" : "record-good"}`);
 
-            elem.append(`${r.display} `, UIB(displayValue));
+            const titleElem = UIDiv("record-title");
+            const valueElem = UIDiv("record-value");
+
+            titleElem.append(r.display);
+            valueElem.append(displayValue);
+
+            elem.append(titleElem, valueElem);
 
  
             list.append(elem);
