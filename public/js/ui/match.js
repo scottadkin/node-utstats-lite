@@ -3403,9 +3403,9 @@ class MatchPlayerPersonalBests{
         this.playersMatchData = playersMatchData;
         this.playerAverages = playerAverages;
 
-        this.wrapper = UIDiv();
+        this.wrapper = UIDiv("margin-bottom-1");
         this.content = UIDiv();
-        UIHeader(this.wrapper, "Player Personal Bests");
+        UIHeader(this.wrapper, "Player Match Records");
         this.wrapper.append(this.content);
         this.parent.append(this.wrapper);
 
@@ -3437,12 +3437,12 @@ class MatchPlayerPersonalBests{
                 "max_spree_3": { "display": "Most Dominatings", "type": "h"},
                 "max_spree_4": { "display": "Most Unstoppables", "type": "h"},
                 "max_spree_5": { "display": "Most Godlikes", "type": "h"},
-                "max_spree_best": { "display": "Best Killing Spree", "type": "h"},
+                "max_spree_best": { "display": "Best Single Killing Spree", "type": "h"},
                 "max_multi_1": { "display": "Most Double Kills", "type": "h"},
                 "max_multi_2": { "display": "Most Multi Kills", "type": "h"},
                 "max_multi_3": { "display": "Most Ultra Kills", "type": "h"},
                 "max_multi_4": { "display": "Most Monster Kills", "type": "h"},
-                "max_multi_best": { "display": "Best Multi Kill", "type": "h"},
+                "max_multi_best": { "display": "Best Single Multi Kill", "type": "h"},
                 "max_headshots": { "display": "Most Headshots", "type": "h"},
                 "max_item_amps": { "display": "Most UDamage Pickups", "type": "h"},
                 "max_item_belt": { "display": "Most Shield Belt Pickups", "type": "h"},
@@ -3529,22 +3529,24 @@ class MatchPlayerPersonalBests{
 
     renderPlayerRecords(matchData, records){
 
-        const wrapper = UIDiv("player-record-wrapper");
+        const wrapper = UIDiv(`player-record-wrapper`);
 
-        wrapper.append(UIPlayerLink({
-            "playerId": matchData.player_id,
-            "name": matchData.name,
-            "country": matchData.country,
-            "className": getTeamColorClass(matchData.team)
-        }));
-        
-        console.log(records);
+        const nameDiv = UIDiv(`player-record-name ${getTeamColorClass(matchData.team)}`);
+
+        nameDiv.append(UICountryFlag(matchData.country));
+
+        const a = UIA(matchData.name, `/match/${matchData.player_id}`);
+        nameDiv.append(a);
+
+
+        wrapper.append(nameDiv);
+
+        const list = UIDiv("record-list");
 
         for(let i = 0; i < records.length; i++){
 
             const r = records[i];
 
-            const elem = UIDiv(`player-record${(r.bBad) ? "  record-bad" : "  record-good"}`);
             
             let displayValue = r.value;
 
@@ -3552,10 +3554,17 @@ class MatchPlayerPersonalBests{
                 displayValue = MMSS(r.value);
             }
 
+            const elem = UIDiv(`${(r.bBad) ? "record-bad" : "record-good"}`);
+
             elem.append(`${r.display} `, UIB(displayValue));
 
-            wrapper.append(elem);
+ 
+            list.append(elem);
+         
+
         }
+
+        wrapper.append(list);
 
         this.content.append(wrapper);
 

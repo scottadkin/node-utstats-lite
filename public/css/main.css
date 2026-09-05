@@ -1390,29 +1390,44 @@ code{
 }
 
 
+
 .player-record-wrapper{
-  
-    display:flex;
-    flex-wrap: wrap;
-    font-size:var(--font-size-70);
-    margin-bottom:10px;
-    width: var(--width-1);
-    max-width:var(--max-width-1);
-    margin-left:auto;
-    margin-right:auto;
+
+    display: grid;
+    grid-template-columns: var(--player-name-width) auto;
+    max-width: var(--max-width-1);
+    margin-left: auto;
+    margin-right: auto;
+    font-size:var(--font-size-80);
+    margin-bottom: var(--margin-2);
 
 }
 
-.player-record{
-    padding:0px 5px;
-    border:1px solid var(--border-color-4);
+
+.record-list{
+    display:flex;
+    flex-direction: row;
+    flex-wrap: wrap;
     
 }
 
+
+.record-list div, .record-bad div{
+    padding:5px;
+    font-size:var(--font-size-70);
+    border:1px solid var(--border-color-4);
+}
+
 .record-good{
-    background-color: rgba(43, 109, 47, 0.5);
+    background: linear-gradient(to right, rgb(22, 70, 22), rgb(44, 92, 44));
 }
 
 .record-bad{
-    background-color: rgba(100,0,0, 0.5);
+    background: linear-gradient(to right, rgb(100, 10, 10), rgb(60, 20, 20));
+}
+
+.player-record-name{
+    display:flex;
+    align-items: center;
+    justify-content: center;
 }
