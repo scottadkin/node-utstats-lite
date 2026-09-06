@@ -51,8 +51,6 @@ export async function renderPlayerPage(req, res, userSession){
         const generalTotals = await getPlayerGeneralSummary(playerId);
 
 
-
-
         let ctfTotals = [];
 
         if(pageSettings["Display CTF"] === 1){

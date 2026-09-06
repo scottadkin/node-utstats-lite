@@ -280,6 +280,7 @@ class PlayerGeneralSummary{
             {"display": "Totals", "value": "totals"},
             {"display": "Averages Per Match", "value": "avg-per-match"},
             {"display": "Events Per Minute", "value": "epm-per-min"},
+            {"display": "Match Records", "value": "records"},
         ];
 
         this.typeTabs = new UITabs(this.wrapper, typeOptions, this.selectedType);
@@ -430,6 +431,66 @@ class PlayerGeneralSummary{
     }
 
 
+    renderRecords(){
+
+        const headers = [
+            "Playtime", "Total Matches", "Score", "Frags", "Kills", "Deaths", "Team Kills", "Headshots", "Best Spree"
+        ];
+
+        if(this.mode === "gametypes"){
+            headers.unshift("Gametype");
+        }
+
+        if(this.mode === "maps"){
+            headers.unshift("Map");
+        }
+
+        const tableOptions = {
+            "headers": headers.map((h) => { return {"display": h}})
+        };
+
+
+        const rows = [];
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(!this.bMatchCurrentFilter(d.gametype_id, d.map_id)) continue;
+            if(this.mode === "gametypes" && d.gametype_id === 0) continue;
+            if(this.mode === "maps" && d.map_id === 0) continue;
+
+            const row = [
+                {"value": d.max_playtime, "display": MMSS(d.max_playtime)},
+                {"value": d.total_matches},
+                {"value": d.max_score, "display": ignore0(d.max_score)},
+                {"value": d.max_frags, "display": ignore0(d.max_frags)},
+                {"value": d.max_kills, "display": ignore0(d.max_kills)},
+                {"value": d.max_deaths, "display": ignore0(d.max_deaths)},
+                {"value": d.max_team_kills, "display": ignore0(d.max_team_kills)},
+                {"value": d.max_headshots, "display": ignore0(d.max_headshots)},
+                {"value": d.max_spree_best, "display": ignore0(d.max_spree_best)},
+            ];
+
+            if(this.mode === "gametypes"){
+                row.unshift({"value": d.gametype_name.toLowerCase(), "display": d.gametype_name, "className": "text-left"});
+            }
+
+            if(this.mode === "maps"){
+                row.unshift({"value": d.map_name.toLowerCase(), "display": d.map_name, "className": "text-left"});
+            }
+
+            rows.push(row);
+        }
+
+        if(this.table === undefined){
+
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows, tableOptions.headers, []);
+        }
+
+    }
     render(){
 
 
@@ -460,6 +521,9 @@ class PlayerGeneralSummary{
             this.renderAverage(avgHeaders, avgKeys);
         }else if(this.selectedType === "epm-per-min"){
             this.renderAverage(epmHeaders, epmKeys);
+        }else if(this.selectedType === "records"){
+
+            this.renderRecords();
         }
     }
 }

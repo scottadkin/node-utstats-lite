@@ -176,6 +176,28 @@ function getPlayerTotalsColumnsProfile(){
 }
 
 
+function getPlayerTotalsMaxColumns(){
+
+    const toGet = [
+        "playtime", "score", "frags", "kills", "deaths", "suicides",
+        "team_kills", "spree_1", "spree_2", "spree_3", "spree_4", "spree_5", "spree_best",
+        "multi_1", "multi_2", "multi_3", "multi_4", "multi_best", "headshots", "item_amp", "item_belt",
+        "item_boots", "item_body", "item_pads", "item_invis", "item_shp", "dom_caps"
+    ];
+
+    const table = "nstats_player_totals_max";
+
+    let string = ``;
+
+    for(let i = 0; i < toGet.length; i++){
+
+        string += `${table}.max_${toGet[i]}`;
+        if(i < toGet.length - 1) string += `,`;
+    }
+
+    return string;
+}
+
 export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
 
     //const query = `SELECT id FROM nstats_players WHERE name=? AND hwid=? AND mac1=? AND mac2=?`;
@@ -1217,13 +1239,18 @@ export async function getPlayerAllMapTotals(playerId){
  */
 export async function getPlayerGeneralSummary(playerId){
 
+    const t = "nstats_player_totals";
+    const maxT = "nstats_player_totals_max";
+
     const query = `SELECT ${getPlayerTotalsColumnsProfile()}, 
-    IF(nstats_player_totals.map_id = 0, 'All', nstats_maps.name) as map_name,
-    IF(nstats_player_totals.gametype_id = 0, 'All', nstats_gametypes.name) as gametype_name
-    FROM nstats_player_totals 
-    LEFT JOIN nstats_maps ON nstats_player_totals.map_id = nstats_maps.id 
-    LEFT JOIN nstats_gametypes ON nstats_player_totals.gametype_id = nstats_gametypes.id 
-    WHERE nstats_player_totals.player_id=?`;
+    ${getPlayerTotalsMaxColumns()},
+    IF(${t}.map_id = 0, 'All', nstats_maps.name) as map_name,
+    IF(${t}.gametype_id = 0, 'All', nstats_gametypes.name) as gametype_name
+    FROM ${t} 
+    LEFT JOIN ${maxT} ON ${t}.player_id = ${maxT}.player_id AND ${t}.gametype_id = ${maxT}.gametype_id AND ${t}.map_id = ${maxT}.map_id
+    LEFT JOIN nstats_maps ON ${t}.map_id = nstats_maps.id 
+    LEFT JOIN nstats_gametypes ON ${t}.gametype_id = nstats_gametypes.id 
+    WHERE ${t}.player_id=?`;
 
     return await simpleQuery(query, [playerId]);
 }

@@ -1401,6 +1401,7 @@ code{
     margin-right: auto;
     font-size:var(--font-size-80);
     margin-bottom: var(--margin-2);
+    box-shadow: var(--box-shadow-1);
 
 }
 
@@ -1408,17 +1409,9 @@ code{
 .record-list{
     display:flex;
     flex-direction: row;
-    flex-wrap: wrap;
-    
-    
+    flex-wrap: wrap; 
 }
 
-
-/*.record-list div, .record-bad div{
-    padding:5px;
-    font-size:var(--font-size-70);
-    border:1px solid var(--border-color-4);
-}*/
 
 .record-title{
     font-weight:600;
