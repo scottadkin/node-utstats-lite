@@ -1789,6 +1789,7 @@ class PlayerWeaponDamage{
 
     getUniqueOptions(bInitialRender){
 
+
         const gametypeOptions = [];
         const mapOptions = [];
 
@@ -1798,6 +1799,7 @@ class PlayerWeaponDamage{
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
+
 
             if(d.gametype_id !== 0 && gametypes.indexOf(d.gametype_id) === -1){
                 gametypeOptions.push({"display": d.gametype_name, "value": d.gametype_id});

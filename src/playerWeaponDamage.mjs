@@ -131,7 +131,6 @@ class PlayerWeaponDamageTotals{
     async calcAllTotals(){
 
 
-        const start = performance.now();
         for(let i = 0; i < this.rawData.length; i++){
 
             const d = this.rawData[i];
@@ -174,8 +173,6 @@ class PlayerWeaponDamageTotals{
         ["player_id", "total_matches", "total_playtime", "gametype_id", "map_id", "weapon_id", "damage", "max_damage", "avg_damage", "damage_per_minute"]
         , insertVars, "player_id,gametype_id,map_id,weapon_id")
         
-        const end = performance.now();
-        console.log((end - start) * 0.001);
     }
 
     async init(){

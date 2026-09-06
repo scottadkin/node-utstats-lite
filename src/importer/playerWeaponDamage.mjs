@@ -122,6 +122,7 @@ export default class PlayerWeaponDamage{
         if(playerIds.length === 0) return;
 
 
+
         await updatePlayerWeaponDamageTotals(playerIds, gametypeId, mapId)
     }
 }
