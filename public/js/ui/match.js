@@ -510,106 +510,161 @@ function getFirstBloodPlayer(players){
     return {"name": "Not Found", "country": "xx"};
 }
 
-function renderSpecialEvents(parent, totalTeams, players){
 
-    parent = document.querySelector(parent);
+class MatchSpecialEvents{
 
-    const wrapper = UIDiv();
-    const title = UIHeader(wrapper, "Special Events");
+    constructor(parent, basicMatchInfo, playerData, playerAverages){
 
-    const sprees = [];
+        this.parent = document.querySelector(parent);
+        this.basicMatchInfo = basicMatchInfo;
+        this.playerData = playerData;
+        this.playerAverages = playerAverages;
 
-    const spreeTableOptions = {
-        "className": "t-width-1",
-        "headers": [
-            {"display": "Player"}, 
-            {"display": "Killing Spree"}, 
-            {"display": "Rampage"}, 
-            {"display": "Dominating"}, 
-            {"display": "Unstoppable"}, 
-            {"display": "Godlike"}, 
-            {"display": "Best Spree"}
-        ],
-        "footer": [
-            {"display": "Total | Best"},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "MAX", "dataType": "INT", "callback": ignore0}
-        ]
-    };
+        this.mode = "match";
 
-    const multis = [];
+        this.wrapper = UIDiv();
+        
 
-    const multiTableOptions = {
-        "className": "t-width-1",
-        "headers": [
-            {"display": "Player"}, 
-            {"display": "Double Kill"}, 
-            {"display":"Multi Kill"}, 
-            {"display":"Ultra Kill"},
-            {"display": "Monster Kill"},
-            {"display":"Best Multi Kill"}
-        ],
-        "footer": [
-            {"display": "Total | Best"},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "SUM", "dataType": "INT", "callback": ignore0},
-            {"display": "MAX", "dataType": "INT", "callback": ignore0}
-        ]
-    };
+        UIHeader(this.wrapper, "Special Events");
 
-    const firstBlood = document.createElement("table");
+        this.createTabs();
 
-    const firstBloodRow = document.createElement("tr");
-    firstBloodRow.append(UITableCell({"content": "First Blood"}));
+        this.parent.append(this.wrapper);
+        this.content = UIDiv();
+        this.wrapper.append(this.content);
 
-    const firstBloodPlayer = getFirstBloodPlayer(players);
+        this.render();
+        
+    }
 
-    firstBloodRow.append(UIPlayerLink({
-        "playerId": firstBloodPlayer.player_id, 
-        "name": firstBloodPlayer.name, 
-        "country": firstBloodPlayer.country,
-        "className": (totalTeams >= 2) ? getTeamColorClass(firstBloodPlayer.team) : "team-none",
-        "bTableElem": true
-    }));
+    createTabs(){
 
-    firstBlood.append(firstBloodRow);
-    wrapper.append(firstBlood);
+        const options = [
+            {"display": "Match Result", "value": "match"},
+            {"display": "Player Match Records", "value": "records"},
+        ];
 
-    for(let i = 0; i < players.length; i++){
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
-        const p = players[i];
+            this.mode = e.detail.newTab;
+            this.render();
+        });
+    }
 
-        if(p.spectator) continue;
+    renderMatchResult(){
 
-        if(p.spree_best >= 5){
-            sprees.push(createSpreeRow(p, totalTeams));
+        const sprees = [];
+
+        const spreeTableOptions = {
+            "className": "t-width-1",
+            "headers": [
+                {"display": "Player"}, 
+                {"display": "Killing Spree"}, 
+                {"display": "Rampage"}, 
+                {"display": "Dominating"}, 
+                {"display": "Unstoppable"}, 
+                {"display": "Godlike"}, 
+                {"display": "Best Spree"}
+            ],
+            "footer": [
+                {"display": "Total | Best"},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0}
+            ]
+        };
+
+        const multis = [];
+
+        const multiTableOptions = {
+            "className": "t-width-1",
+            "headers": [
+                {"display": "Player"}, 
+                {"display": "Double Kill"}, 
+                {"display":"Multi Kill"}, 
+                {"display":"Ultra Kill"},
+                {"display": "Monster Kill"},
+                {"display":"Best Multi Kill"}
+            ],
+            "footer": [
+                {"display": "Total | Best"},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "SUM", "dataType": "INT", "callback": ignore0},
+                {"display": "MAX", "dataType": "INT", "callback": ignore0}
+            ]
+        };
+
+        const firstBlood = document.createElement("table");
+
+        const firstBloodRow = document.createElement("tr");
+        firstBloodRow.append(UITableCell({"content": "First Blood"}));
+
+        const firstBloodPlayer = getFirstBloodPlayer(this.playerData);
+
+        firstBloodRow.append(UIPlayerLink({
+            "playerId": firstBloodPlayer.player_id, 
+            "name": firstBloodPlayer.name, 
+            "country": firstBloodPlayer.country,
+            "className": (this.basicMatchInfo.total_teams >= 2) ? getTeamColorClass(firstBloodPlayer.team) : "team-none",
+            "bTableElem": true
+        }));
+
+        firstBlood.append(firstBloodRow);
+        this.content.append(firstBlood);
+
+        for(let i = 0; i < this.playerData.length; i++){
+
+            const p = this.playerData[i];
+
+            if(p.spectator) continue;
+
+            if(p.spree_best >= 5){
+                sprees.push(createSpreeRow(p, this.basicMatchInfo.total_teams));
+            }
+
+            if(p.multi_best >= 2){
+                multis.push(createMultiRow(p, this.basicMatchInfo.total_teams));
+            }
         }
 
-        if(p.multi_best >= 2){
-            multis.push(createMultiRow(p, totalTeams));
+    
+        if(sprees.length > 1){
+            new TESTUITable(this.content, spreeTableOptions, sprees);
+        }
+
+        if(multis.length > 1){
+            new TESTUITable(this.content, multiTableOptions, multis);
+        }
+
+        if(multis.length > 1 || sprees.length > 1){
+           // this.content.append(wrapper);
         }
     }
 
- 
-    if(sprees.length > 1){
-        new TESTUITable(wrapper, spreeTableOptions, sprees);
-    }
+    render(){
 
-    if(multis.length > 1){
-        new TESTUITable(wrapper, multiTableOptions, multis);
-    }
 
-    if(multis.length > 1 || sprees.length > 1){
-        parent.append(wrapper);
+        this.content.innerHTML = ``;
+
+        if(this.mode === "match"){
+
+            this.renderMatchResult();
+        }else if(this.mode === "records"){
+
+            new MatchPlayerPersonalBests(
+                this.content, "special-events", this.playerData, 
+                this.playerAverages, this.basicMatchInfo.total_teams, 
+                this.basicMatchInfo.gametype_name, this.basicMatchInfo.map_name
+            );
+        }
     }
 }
-
 
 function getPlayerDomPointCaps(playerId, pointId, capData){
 
