@@ -21,7 +21,7 @@
     const playerCTFAverages = <%- JSON.stringify(data.playerCTFAverages) %>;
 
     console.log(playerData);
-    new MatchPlayerPersonalBests("#root", "frags", playerData, playerAverages, basic.total_teams);
+    //new MatchPlayerPersonalBests("#root", "frags", playerData, playerAverages, basic.total_teams);
 
     <%
 
@@ -51,7 +51,7 @@
 
             case "Display Frags": {
 
-                %>new MatchFragsSummary("#root", basic.total_teams, playerData, playerAverages);<%
+                %>new MatchFragsSummary("#root", basic, playerData, playerAverages);<%
 
             } break;
 

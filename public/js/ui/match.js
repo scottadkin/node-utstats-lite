@@ -97,10 +97,13 @@ function createAverageCompareTD(averageValue, value, bForceDecPlaces){
 
 class MatchFragsSummary{
 
-    constructor(parent, totalTeams, playerData, playerAverages){
+    constructor(parent, matchBasicInfo, playerData, playerAverages){
 
         this.parent = document.querySelector(parent);
-        this.totalTeams = totalTeams;
+
+        this.totalTeams = matchBasicInfo.total_teams;
+        this.gametypeName = matchBasicInfo.gametype_name;
+        this.mapName = matchBasicInfo.map_name;
         this.playerData = playerData
         this.playerAverages = playerAverages;
 
@@ -126,6 +129,7 @@ class MatchFragsSummary{
         const options = [
             {"display": "Final Score", "value": "normal"},
             {"display": "Events Per Minute", "value": "epm"},
+            {"display": "Player Match Records", "value": "player-records"},
         ];
 
 
@@ -427,7 +431,11 @@ class MatchFragsSummary{
             this.renderNormalTables();
         }else if(this.mode === "epm"){
             this.renderEPMTables();
+        }else if(this.mode === "player-records"){
+            new MatchPlayerPersonalBests(this.content, "frags", this.playerData, this.playerAverages, this.totalTeams, this.gametypeName, this.mapName);
         }
+
+        
     }
 }
 
@@ -3411,9 +3419,9 @@ class MatchPlayerWeaponDamage{
 
 class MatchPlayerPersonalBests{
 
-    constructor(parent, type, playersMatchData, playerAverages, totalTeams){
+    constructor(parent, type, playersMatchData, playerAverages, totalTeams, gametypeName, mapName){
 
-        this.parent = document.querySelector(parent);
+        this.parent = parent;
 
         if(!this.bValidType(type)) throw new Error(`Not a valid type for matchPlayerPersonalBests`); 
 
@@ -3424,7 +3432,8 @@ class MatchPlayerPersonalBests{
 
         this.wrapper = UIDiv("margin-bottom-1");
         this.content = UIDiv();
-        UIHeader(this.wrapper, "Player Match Records");
+        new UIInfo(this.wrapper, `Player's personal best/worse for matching events for the ${gametypeName} and ${mapName}`);
+        //UIHeader(this.wrapper, "Player Match Records");
         this.wrapper.append(this.content);
         this.parent.append(this.wrapper);
 
@@ -3446,31 +3455,35 @@ class MatchPlayerPersonalBests{
             "frags": {
                 "max_playtime": { "display": "Longest Playtime", "type": "h", "matchColumn": "time_on_server"},
                 "max_score": { "display": "Highest Score", "type": "h"},
-                "max_frags": { "display": "Most Frags", "type": "h"},
-                "max_kills": { "display": "Most Kills", "type": "h"},
-                "max_deaths": { "display": "Most Deaths", "type": "l"},
-                "max_suicides": { "display": "Most Suicides", "type": "l"},
-                "max_team_kills": { "display": "Most Team Kills", "type": "l"},
-                "max_spree_1": { "display": "Most Killing Sprees", "type": "h"},
-                "max_spree_2": { "display": "Most Rampages", "type": "h"},
-                "max_spree_3": { "display": "Most Dominatings", "type": "h"},
-                "max_spree_4": { "display": "Most Unstoppables", "type": "h"},
-                "max_spree_5": { "display": "Most Godlikes", "type": "h"},
+                "max_frags": { "display": "Frags", "type": "h"},
+                "max_kills": { "display": "Kills", "type": "h"},
+                "max_deaths": { "display": "Deaths", "type": "l"},
+                "max_suicides": { "display": "Suicides", "type": "h"},
+                "max_team_kills": { "display": "Team Kills", "type": "l"},
+                "max_headshots": { "display": "Headshots", "type": "h"},
+            },
+            "special-events": {
+                "max_spree_1": { "display": "Killing Sprees", "type": "h"},
+                "max_spree_2": { "display": "Rampages", "type": "h"},
+                "max_spree_3": { "display": "Dominatings", "type": "h"},
+                "max_spree_4": { "display": "Unstoppables", "type": "h"},
+                "max_spree_5": { "display": "Godlikes", "type": "h"},
                 "max_spree_best": { "display": "Best Single Killing Spree", "type": "h"},
-                "max_multi_1": { "display": "Most Double Kills", "type": "h"},
-                "max_multi_2": { "display": "Most Multi Kills", "type": "h"},
-                "max_multi_3": { "display": "Most Ultra Kills", "type": "h"},
-                "max_multi_4": { "display": "Most Monster Kills", "type": "h"},
-                "max_multi_best": { "display": "Best Single Multi Kill", "type": "h"},
-                "max_headshots": { "display": "Most Headshots", "type": "h"},
-                "max_item_amps": { "display": "Most UDamage Pickups", "type": "h"},
-                "max_item_belt": { "display": "Most Shield Belt Pickups", "type": "h"},
-                "max_item_boots": { "display": "Most Jump Boots Pickups", "type": "h"},
-                "max_item_body": { "display": "Most Body Armor Pickups", "type": "h"},
-                "max_item_pads": { "display": "Most Thigh Pads Pickups", "type": "h"},
-                "max_item_invis": { "display": "Most Invisibility Pickups", "type": "h"},
-                "max_item_shp": { "display": "Most Super Health Pickups", "type": "h"},
-                "max_dom_caps": { "display": "Most Domination Caps", "type": "h"},
+                "max_multi_1": { "display": "Double Kills", "type": "h"},
+                "max_multi_2": { "display": "Multi Kills", "type": "h"},
+                "max_multi_3": { "display": "Ultra Kills", "type": "h"},
+                "max_multi_4": { "display": "Monster Kills", "type": "h"},
+                "max_multi_best": { "display": "Best Single Multi Kill", "type": "h"}
+            },
+            "items": {
+                "max_item_amps": { "display": "UDamage Pickups", "type": "h"},
+                "max_item_belt": { "display": "Shield Belt Pickups", "type": "h"},
+                "max_item_boots": { "display": "Jump Boots Pickups", "type": "h"},
+                "max_item_body": { "display": "Body Armor Pickups", "type": "h"},
+                "max_item_pads": { "display": "Thigh Pads Pickups", "type": "h"},
+                "max_item_invis": { "display": "Invisibility Pickups", "type": "h"},
+                "max_item_shp": { "display": "Super Health Pickups", "type": "h"},
+                "max_dom_caps": { "display": "Domination Caps", "type": "h"}
             }
         };
 
