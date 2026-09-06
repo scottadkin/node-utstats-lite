@@ -1158,11 +1158,12 @@ class MatchDominationSummary{
 
 class MatchCTFSummary{
 
-    constructor(parent, totalTeams, data, players, playerAverages){
+    constructor(parent, matchBasicInfo, data, players, playerAverages){
 
         if(data.playerData.length === 0) return;
 
-        this.totalTeams = totalTeams;
+        this.matchBasicInfo = matchBasicInfo;
+        this.totalTeams = matchBasicInfo.total_teams;
         this.players = players;
         this.playerAverages = playerAverages;
         this.data = data;
@@ -1181,10 +1182,33 @@ class MatchCTFSummary{
 
         this.mode = "general";
 
-        
+        this.setPlayersInfo();
 
         this.render();
 
+    }
+
+    setPlayersInfo(){
+
+  
+        for(let i = 0; i < this.data.playerData.length; i++){
+
+            const d = this.data.playerData[i];
+            
+            const info = this.players[d.player_id];
+
+            if(info === undefined){
+
+                d.name = "Not Found";
+                d.country = "xx";
+                d.team = 255;
+                continue;
+            }
+
+            d.name = info.name;
+            d.country = info.country;
+            d.team = info.team;
+        }
     }
 
     createTabs(){
@@ -1192,7 +1216,8 @@ class MatchCTFSummary{
         this.tabs = new UITabs(this.wrapper, [
             {"display": "General", "value": "general"},
             {"display": "Returns", "value": "returns"},
-            {"display": "Carry Time", "value": "carry time"}
+            {"display": "Carry Time", "value": "carry time"},
+            {"display": "Player Match Records", "value": "records"},
         ]);
 
 
@@ -1231,7 +1256,6 @@ class MatchCTFSummary{
             ]
         }
 
-        const recordsInfo = {};
 
         for(let i = 0; i < dataKeys.length; i++){
 
@@ -1297,16 +1321,7 @@ class MatchCTFSummary{
 
                         avgValue =  avg[`avg_${dataKeys[z]}`] ?? 0;
 
-                        if(avgValue > 0 && avgValue >= avg[`max_${dataKeys[z]}`]){
-
-                            if(recordsInfo[p.player_id] === undefined){
-                                recordsInfo[p.player_id] = {
-                                    "name": player.name,
-                                    "records": []
-                                };
-                            }
-                            recordsInfo[p.player_id].records.push({"key": dataKeys[z], "value": avg[`max_${dataKeys[z]}`]});
-                        }
+                      
 
                     }else{
                         avgValue = (avg?.[`avg_flag_taken`] ?? 0) + (avg?.[`avg_flag_pickup`] ?? 0);
@@ -1327,48 +1342,7 @@ class MatchCTFSummary{
         
         //UIHeader(this.content, "Player CTF Personal Bests")
 
-        const test = UIDiv("personal-bests");
-
-        for(const [playerId, playerData] of Object.entries(recordsInfo)){
-
-            const {name, records} = playerData;
-            const player = getPlayer(this.players, playerId);
-
-
-            const div = UIDiv(getTeamColorClass(player.team));
-
-            div.append(UIPlayerLink({
-                "name": UIB(name),
-                "country": player.country,
-                "playerId": playerId,
-            }), " got their map personal best for ");
-
-            for(let i = 0; i < records.length; i++){
-
-                const  {value, key} = records[i];
-                
-                div.append(" ", headers[dataKeys.indexOf(key) + 1].display, " (", UIB(value),")");
-                if(i === records.length - 1){
-                    div.append(UIBr())
-                }else if(i === records.length - 2){
-                    div.append(", and ");
-                }else{
-                    div.append(", ")
-                }
-            }
-            
-
-            test.append(div);
-        }
-
-        for(let i = 0; i < recordsInfo.length; i++){
-
-            const {name, value, key} = recordsInfo[i];
-
-            test.append(UIB(name), " matched their personal best for ", UIB(key), " with ", UIB(value), UIBr());
-        }
-
-        this.content.append(test);
+        
     }
 
     renderGeneralCTFTab(){
@@ -1456,7 +1430,15 @@ class MatchCTFSummary{
             } break;
             case "carry time": {
                 this.renderCarryTimeCTFTab();
-            }break;       
+            }break;   
+            case "records": {
+
+               
+                new MatchPlayerPersonalBests(
+                    this.content, "ctf", this.data.playerData, this.playerAverages, 
+                    this.totalTeams, this.matchBasicInfo.gametype_name, this.matchBasicInfo.map_name
+                );
+            }   break; 
         }
     }
 }
@@ -3549,7 +3531,7 @@ class MatchPlayerPersonalBests{
 
         this.wrapper = UIDiv("margin-bottom-1");
         this.content = UIDiv();
-        new UIInfo(this.wrapper, [`Player personal best/worse for matches played on `,  UIB(mapName), UIB(`(${gametypeName})`)]);
+        new UIInfo(this.wrapper, [`Player personal best/worse beaten during this match. `, UIBr(),  UIB(mapName), UIB(`(${gametypeName})`)]);
         //UIHeader(this.wrapper, "Player Match Records");
         this.wrapper.append(this.content);
         this.parent.append(this.wrapper);
@@ -3601,6 +3583,21 @@ class MatchPlayerPersonalBests{
                 "max_item_invis": { "display": "Invisibility Pickups", "type": "h"},
                 "max_item_shp": { "display": "Super Health Pickups", "type": "h"},
                 "max_dom_caps": { "display": "Domination Caps", "type": "h"}
+            },
+            "ctf": {
+                "max_flag_taken": {"display": "Grabs", "type": "h"},
+                "max_flag_pickup": {"display": "Pickups", "type": "h"},
+                "max_flag_drop": {"display": "Drops", "type": "l"},
+                "max_flag_assist": {"display": "Assists", "type": "h"},
+                "max_flag_cover": {"display": "Covers", "type": "h"},
+                "max_flag_seal": {"display": "Seals", "type": "h"},
+                "max_flag_cap": {"display": "Capture", "type": "h"},
+                "max_flag_kill": {"display": "Kill", "type": "h"},
+                "max_flag_return": {"display": "Return", "type": "h"},
+                "max_flag_return_base": {"display": "Return Home Base", "type": "h"},
+                "max_flag_return_mid": {"display": "Return Mid", "type": "h"},
+                "max_flag_return_enemy_base": {"display": "Return Enemy Base", "type": "h"},
+                "max_flag_return_save": {"display": "Return Close Save", "type": "h"},
             }
         };
 
@@ -3608,7 +3605,7 @@ class MatchPlayerPersonalBests{
 
     bValidType(type){
 
-        const valid = ["frags", "special-events", "items"];
+        const valid = ["frags", "special-events", "items", "ctf"];
         
         return valid.indexOf(type) !== -1;
     }

@@ -1394,9 +1394,9 @@ code{
 .player-record-wrapper{
 
     display: grid;
-    grid-template-columns: var(--player-name-width) auto;
+    grid-template-columns: 200px auto;
     max-width: var(--max-width-1);
-    width: var(--width-1);
+    width: var(--width-4);
     margin-left: auto;
     margin-right: auto;
     font-size:var(--font-size-80);
@@ -1451,5 +1451,6 @@ code{
 .player-record-name{
     display:flex;
     align-items: center;
-    justify-content: center;
+    justify-content: left;
+    padding-left:5px;
 }
