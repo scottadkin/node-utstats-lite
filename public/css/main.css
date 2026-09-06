@@ -1395,7 +1395,8 @@ code{
 
     display: grid;
     grid-template-columns: var(--player-name-width) auto;
-    max-width: var(--max-table-width-1);
+    max-width: var(--max-width-1);
+    width: var(--width-1);
     margin-left: auto;
     margin-right: auto;
     font-size:var(--font-size-80);

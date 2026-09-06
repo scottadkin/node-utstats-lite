@@ -138,7 +138,6 @@ class MatchFragsSummary{
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
             this.mode = e.detail.newTab;
-            console.log(this.mode);
             this.render();
         });
     }
@@ -2583,12 +2582,16 @@ class MatchKillsMatchUp{
 
 class MatchItemsSummary{
 
-    constructor(parent, playerData, totalTeams, playerAverages){
+    constructor(parent, playerData, matchBasicInfo, playerAverages){
 
         this.parent = document.querySelector(parent);
         this.playerData = playerData;
-        this.totalTeams = totalTeams;
+        this.totalTeams = matchBasicInfo.total_teams;
+        this.gametypeName = matchBasicInfo.gametype_name;
+        this.mapName = matchBasicInfo.map_name;
         this.playerAverages = playerAverages;
+
+        this.mode = "match";
 
         this.headers = {
             "player": {"display": "Player"},
@@ -2603,10 +2606,36 @@ class MatchItemsSummary{
 
         if(!this.bAnyData()) return;
 
-        UIHeader(parent, "Items Summary");
+        this.wrapper = UIDiv();
+        this.content = UIDiv();
+
+        
+        this.parent.append(this.wrapper);
+
+        UIHeader(this.wrapper, "Items Summary");
+        
      
+        this.createTabs();
+        this.wrapper.append(this.content);
         
         this.render();
+    }
+
+    createTabs(){
+
+        const options = [
+            {"display": "Match Result", "value": "match"},
+            {"display": "Player Match Records", "value": "records"}
+        ];
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+
+            this.mode = e.detail.newTab;
+
+            this.render();
+        });
     }
 
     bAnyData(){
@@ -2635,7 +2664,7 @@ class MatchItemsSummary{
         return false;
     }
 
-    render(){
+    renderMatchResults(){
 
         const headers = Object.values(this.headers);
 
@@ -2677,7 +2706,6 @@ class MatchItemsSummary{
             rows.push(row);
         }
 
-        if(this.table === undefined){
 
             const footer = [
                 {"display": "Total"}
@@ -2687,10 +2715,44 @@ class MatchItemsSummary{
                 footer.push({"display": "SUM", "callback": ignore0, "dataType": "INT"});
             }
 
-            this.table = new TESTUITable(this.parent, {"className": "t-width-1", headers, footer}, rows);
-        }else{
+             new TESTUITable(this.content, {"className": "t-width-1", headers, footer}, rows);
+      
+    }
 
-            this.table.updateRows(rows);
+    renderPlayerRecords(){
+
+
+        for(let i = 0; i < this.playerData.length; i++){
+
+            const p = this.playerData[i];
+
+            const avg = this.playerAverages[p.player_id];
+
+            if(avg === undefined){
+                console.warn(`failed to find player averages`);
+                continue;
+            }
+        }
+
+
+        new MatchPlayerPersonalBests(
+            this.content, "items", this.playerData, this.playerAverages, 
+            this.totalTeams, this.gametypeName, this.mapName
+        );
+
+    
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+        if(this.mode === "match"){
+
+            this.renderMatchResults();
+
+        }else if(this.mode === "records"){
+
+            this.renderPlayerRecords();
         }
     }
 }
@@ -3432,7 +3494,7 @@ class MatchPlayerPersonalBests{
 
         this.wrapper = UIDiv("margin-bottom-1");
         this.content = UIDiv();
-        new UIInfo(this.wrapper, `Player's personal best/worse for matching events for the ${gametypeName} and ${mapName}`);
+        new UIInfo(this.wrapper, [`Player personal best/worse for matches played on `,  UIB(mapName), UIB(`(${gametypeName})`)]);
         //UIHeader(this.wrapper, "Player Match Records");
         this.wrapper.append(this.content);
         this.parent.append(this.wrapper);
@@ -3491,7 +3553,7 @@ class MatchPlayerPersonalBests{
 
     bValidType(type){
 
-        const valid = ["frags", "ctf"];
+        const valid = ["frags", "special-events", "items"];
         
         return valid.indexOf(type) !== -1;
     }
@@ -3549,8 +3611,7 @@ class MatchPlayerPersonalBests{
                 if(matchData[targetColumn] >= playerAverages[maxColumn]){
                     pbs.push({"display": display, "value": matchData[targetColumn], "bBad": true});
                 }
-            }else{
-                console.log("SIGH");
+
             }
         }
 
@@ -3621,9 +3682,9 @@ class MatchPlayerPersonalBests{
 
             const md = this.playersMatchData[i];
             if(md.bSpectator || md.time_on_server === 0) continue;
-            const pa = this.playerAverages[md.player_id] ?? null;
+            const pa = this.playerAverages[md.player_id];
 
-            if(pa === null){
+            if(pa === undefined){
                 console.warn(`Failed to find player averages/best`);
                 continue;
             }
