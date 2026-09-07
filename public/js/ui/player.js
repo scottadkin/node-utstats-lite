@@ -566,6 +566,7 @@ class PlayerSpecialEvents{
             {"display": "Totals", "value": "totals"},
             {"display": "Match Averages", "value": "averages"},
             {"display": "Events Per Minute", "value": "epm"},
+            {"display": "Match Records", "value": "records"},
         ];
 
         this.modeTabs = new UITabs(this.parent, modeOptions, this.dataCat);
@@ -629,9 +630,10 @@ class PlayerSpecialEvents{
 
             for(let x = 0; x < keys.length; x++){
 
-                const value = d[keys[x]];
+                const value = d[`${(this.dataCat !== "records") ? keys[x] : `max_${keys[x]}`}`];
+                
 
-                let display = (this.dataCat === "totals") ? ignore0(value) : value.toFixed(3);
+                let display = (this.dataCat === "totals" || this.dataCat === "records") ? ignore0(value) : value.toFixed(3);
 
                 if(this.dataCat === "averages" && x === keys.length - 1){
                     display = value.toFixed(2);
@@ -653,7 +655,7 @@ class PlayerSpecialEvents{
     getHeadersKeys(){
 
 
-        if(this.dataCat === "totals"){
+        if(this.dataCat === "totals" || this.dataCat === "records"){
 
             return { 
                 "multiHeaders": [

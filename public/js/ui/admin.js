@@ -2258,7 +2258,9 @@ class AdminSiteSettingsManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Passed", "message");
+            new UINotification(this.parent, "pass", "Changes Saved", `Settings restored for page: ${pageName}`);
+
+            await this.loadData();
 
         }catch(err){
             console.trace(err);
