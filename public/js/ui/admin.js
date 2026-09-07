@@ -1547,7 +1547,7 @@ class AdminSiteSettingsManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "date-time-settings";
+        this.mode = "restore-page-settings";
         
         this.pageSettings = [];
         this.pageLayouts = [];
@@ -1579,6 +1579,7 @@ class AdminSiteSettingsManager{
         const tabs = [
             {"display": "Branding Settings", "value": "branding-settings"},
             {"display": "Page Settings", "value": "page-settings"},
+            {"display": "Restore Default Page Settings", "value": "restore-page-settings"},
             {"display": "Social Settings", "value": "social-settings"},
             {"display": "Welcome Message", "value": "welcome-message-settings"},
             {"display": "Date & Time Settings", "value": "date-time-settings"},
@@ -2241,6 +2242,96 @@ class AdminSiteSettingsManager{
 
         this.wrapper.append(form);
     }
+
+
+    async restorePageSettings(pageName, settingsType){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "restore-page-settings", "page": pageName, "type": settingsType})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Passed", "message");
+
+        }catch(err){
+            console.trace(err);
+
+            new UINotification(this.parent, "error", "Failed To Restore Page Layout", err.toString());
+        }
+    }
+
+    renderRestorePageSettings(){
+
+
+
+        UIHeader(this.wrapper, "Restore Default Page Settings");
+
+        new UIInfo(this.wrapper, [
+            "Restore page settings back to their defaults.", UIBr(),
+            "Restore Page Layout will restore the order of the page components.", UIBr(),
+            "Restore Page Components will restore the components back to their defaults, this includes per page, display type, max time frames..."
+        ]);
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "bNoSort": true,
+            "headers": [
+                {"display": "Page"},
+                {"display": "Page Layout"},
+                {"display": "Page Components Settings"},
+                {"display": "Restore Both"},
+            ]
+        };
+
+        const rows = this.pages.map((p) =>{
+
+            this.layoutButton = UIButton("Restore Defaults", "small-button");
+
+            this.layoutButton.addEventListener("click", async () =>{
+
+                await this.restorePageSettings(p, "layout");
+            });
+
+            const layoutTd = UITableCell({"content": [
+                this.layoutButton
+            ]});
+
+            this.compButton = UIButton("Restore Defaults", "small-button");
+
+            this.compButton.addEventListener("click", async () =>{
+                await this.restorePageSettings(p, "components");
+            });
+
+            const compTd = UITableCell({"content": [this.compButton]});
+
+            this.bothButton = UIButton("Restore Defaults", "small-button");
+
+            this.bothButton.addEventListener("click", async () =>{
+                await this.restorePageSettings(p, "both");
+            });
+
+            const bothTd = UITableCell({"content": [this.bothButton]});
+
+            return [
+                {"display": p, "className": "text-left"},
+                {"display": layoutTd, "bSkipTD": true},
+                {"display": compTd, "bSkipTD": true},
+                {"display": bothTd, "bSkipTD": true},
+            ];
+        });
+
+
+
+
+        new TESTUITable(this.wrapper, tableOptions, rows);
+    }
     
     render(){
 
@@ -2262,6 +2353,9 @@ class AdminSiteSettingsManager{
 
             return this.renderDateTimeSettings();
 
+        }else if(this.mode === "restore-page-settings"){
+
+            this.renderRestorePageSettings()
         }
         
     }

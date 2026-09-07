@@ -265,13 +265,17 @@ async function deletePageLayout(page){
     await simpleQuery(`DELETE FROM nstats_page_layout WHERE page=?`, [page]);
 }
 
-export async function restoreDefaultPageLayout(page){
+export async function restoreDefaultPageLayout(page, bThrowNoError){
 
     page = page.toLowerCase();
 
     const pages = Object.keys(DEFAULT_PAGE_LAYOUTS);
 
-    if(pages.indexOf(page) === -1) throw new Error(`There is no page called ${page}`);
+    if(pages.indexOf(page) === -1){
+
+        if(bThrowNoError) return;
+        throw new Error(`There is no page called ${page}`);
+    }
 
     await deletePageLayout(page);
 

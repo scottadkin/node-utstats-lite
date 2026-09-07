@@ -6,8 +6,8 @@ import { getMapImageName, stripFileExtension } from "../generic.mjs";
 import { Jimp } from "jimp";
 import { writeFile, rm } from 'node:fs/promises';
 import { mapScreenshotQuality } from "../../config.mjs";
-import { getAllSettings as getAllSiteSettings, updateSiteSettings } from "../siteSettings.mjs";
-import { getAllPagesLayout, savePageLayoutChanges } from "../pageLayout.mjs";
+import { getAllSettings as getAllSiteSettings, restorePageSettings, updateSiteSettings } from "../siteSettings.mjs";
+import { getAllPagesLayout, restoreDefaultPageLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
 import { 
     clearAllDataTables/*, createArchivedBackup, createDatabaseBackup*/, 
@@ -429,6 +429,31 @@ export default class AdminJSONManager{
             }else if(this.mode === "recalculate-player-weapon-totals"){
 
                 await recalculateAllPlayerWeaponTotals();
+
+                return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "restore-page-settings"){
+
+                const page = this.req.body.page;
+                const type = this.req.body.type;
+
+                if(page === undefined || type === undefined){
+                    throw new Error(`Both page and type must be defined`);
+                }
+
+                if(type === "layout"){
+
+                    await restoreDefaultPageLayout(page, true);
+
+                }else if(type === "components"){
+
+                    await restorePageSettings(page);
+
+                }else if(type === "both"){
+
+                    await Promise.all([restoreDefaultPageLayout(page, true), restorePageSettings(page)]);
+                }
+
 
                 return this.res.json({"message": "passed"});
             }
