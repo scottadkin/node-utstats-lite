@@ -250,6 +250,8 @@ class PlayerGeneralSummary{
 
         this.mode = "all";
         this.selectedType = "totals";
+        this.selectedGametype = 0;
+        this.selectedMap = 0;
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "General Summary");
@@ -257,7 +259,114 @@ class PlayerGeneralSummary{
         this.parent.append(this.wrapper);
 
         this.createTabs();
+        this.createDropDowns();
         this.render();
+    }
+
+
+    getUniqueGametypes(){
+
+        const found = new Set();
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.gametype_id === 0) continue;
+            found.add(d.gametype_id);
+        }
+        return [...found];
+    }
+
+    getDropDownOptions(){
+
+        const gametypes = {};
+        const maps = {};
+
+        
+        
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.gametype_id !== 0) gametypes[d.gametype_id] = d.gametype_name;
+
+            if(this.selectedGametype === 0 && d.gametype_id !== 0) this.selectedGametype = d.gametype_id;
+
+            if(this.selectedGametype === 0 || this.selectedGametype == d.gametype_id){
+                if(this.selectedMap === 0 && d.map_id !== 0) this.selectedMap = d.map_id;
+                if(d.map_id !== 0) maps[d.map_id] = d.map_name;
+            }
+        }
+
+
+        const gametypeOptions = [];
+
+ 
+        for(const [gametypeId, gametypeName] of Object.entries(gametypes)){
+            gametypeOptions.push({"display": gametypeName, "value": gametypeId});
+        }
+
+        const mapOptions = [];
+
+        for(const [mapId, mapName] of Object.entries(maps)){
+            mapOptions.push({"display": mapName, "value": mapId});
+        }
+
+        if(this.selectedGametype === 0 && gametypeOptions.length > 0){
+
+            this.selectedGametype = gametypeOptions[0].value;
+        }
+
+        return {gametypeOptions, mapOptions};
+
+    }
+
+    createDropDowns(){
+
+        const uniqueGametypes = this.getUniqueGametypes();
+
+        if(uniqueGametypes.length > 0){
+         
+            this.selectedGametype = uniqueGametypes[0];
+        }
+
+
+        const {gametypeOptions, mapOptions} = this.getDropDownOptions();
+        
+
+        this.gametypeRow = UIDiv((this.mode === "custom") ? "form-row" : "hidden");
+        this.gametypeRow.append(UILabel("Gametype"));
+        this.wrapper.append(this.gametypeRow);
+
+        if(this.gametypeSelect === undefined){
+
+            this.gametypeSelect = new UISelect(this.gametypeRow, gametypeOptions, this.selectedGametype, (e) =>{
+                this.selectedGametype = parseInt(e);
+
+                const {mapOptions} = this.getDropDownOptions();
+                this.mapSelect.updateOptions(mapOptions);
+                this.selectedMap = mapOptions[0].value;
+                this.mapSelect.changeSelected(this.selectedMap);
+                this.render();
+            });
+        }
+
+    
+        this.mapRow = UIDiv((this.mode === "custom") ? "form-row": "hidden");
+        this.mapRow.append(UILabel("Map"));
+        this.wrapper.append(this.mapRow);
+ 
+        
+        if(this.mapSelect === undefined){
+
+            this.mapSelect = new UISelect(this.mapRow, mapOptions, this.selectedMap, (e) =>{
+                this.selectedMap = parseInt(e);
+
+                this.render();
+            });
+
+        }
     }
 
     createTabs(){
@@ -266,12 +375,20 @@ class PlayerGeneralSummary{
             {"display": "All Time", "value": "all"},
             {"display": "Gametypes", "value": "gametypes"},
             {"display": "Maps", "value": "maps"},
+            {"display": "Custom", "value": "custom"},
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
             this.mode = e.detail.newTab;
+            if(this.mode !== "custom"){
+                this.gametypeRow.className = "hidden";
+                this.mapRow.className = "hidden";
+            }else{
+                this.gametypeRow.className = "form-row";
+                this.mapRow.className = "form-row";
+            }
             this.render();   
         })
 
@@ -297,6 +414,7 @@ class PlayerGeneralSummary{
         if(this.mode === "gametypes" && mapId !== 0) return false;
         if(this.mode === "maps" && gametypeId !== 0) return false;
         if(this.mode === "all" && (gametypeId !== 0 || mapId !== 0)) return false;
+        if(this.mode === "custom" && (gametypeId != this.selectedGametype || mapId != this.selectedMap)) return false;
         
 
         return true;
@@ -313,7 +431,12 @@ class PlayerGeneralSummary{
         ];
 
         if(this.mode !== "all"){
-            headers.unshift((this.mode === "maps") ? "Map" : "Gametype");
+
+            if(this.mode === "maps"){
+                headers.unshift("Map");
+            }else if(this.mode === "gametypes"){
+                headers.unshift("Gametype");
+            }
         }
 
         const tableOptions = {
@@ -329,9 +452,9 @@ class PlayerGeneralSummary{
 
             if(!this.bMatchCurrentFilter(d.gametype_id, d.map_id)) continue;
 
+
             const name = (this.mode === "gametypes") ? d.gametype_name : d.map_name;
             
-
             const row = [
                 {"display": toDateString(d.last_active, TIME_ZONE, true), "value": d.last_active, "className": "date"},
                 {"display": ignore0(d.score), "value": d.score},
@@ -347,9 +470,11 @@ class PlayerGeneralSummary{
                 {"display": toPlaytime(d.playtime), "value": d.playtime, "className": "playtime"},
             ];
 
-            if(this.mode !== "all"){
+            if(this.mode !== "all" && this.mode !== "custom"){
                 row.unshift({"display": name, "value": name.toLowerCase(), "className": "text-left"},);
             }
+
+         
 
             if(this.mode !== "all" && (d.gametype_id === 0 && d.map_id === 0)){
 
