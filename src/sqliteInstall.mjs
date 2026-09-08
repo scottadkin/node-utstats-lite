@@ -8,7 +8,7 @@ import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./ctfLeague.mj
 import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
-import { calculateAllPlayerTotals, installPlayerSettings } from "./players.mjs";
+import { calculateAllPlayerTotals, calculateAllPlayerTotalsMax, installPlayerSettings } from "./players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllMapTotals } from "./weapons.mjs";
 import { recalculateAllPlayerTotals270 } from "./ctf.mjs";
 
@@ -1144,9 +1144,8 @@ async function createThumbnailSettings(){
             new Message(`Created thumbnail setting ${name}`,"pass");
         }
     }
-
-
 }
+
 
 export async function sqliteInstall(bOnlyCreateTables){
 
@@ -1214,6 +1213,10 @@ export async function sqliteInstall(bOnlyCreateTables){
     new Message(`Calculating player ctf totals`, "note");
     await recalculateAllPlayerTotals270();
 
+
+    //2.9.0
+   // new Message(`Calculating player max values.`, "note");
+    //await calculateAllPlayerTotalsMax();
 
     new Message(`Checking for map image thumbnail settings`, "note");
 

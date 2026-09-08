@@ -2429,3 +2429,31 @@ export async function getPlayersAverages(playerIds, gametypeId, mapId){
 
     return data;
 }
+
+
+/*async function getAllPlayerIds(){
+
+    const query = `SELECT DISTINCT player_id FROM nstats_match_players`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) => { return r.player_id});
+}
+
+//2.9.0
+export async function calculateAllPlayerTotalsMax(){
+
+    const MAX_PLAYERS = 30;
+
+    const playerIds = await getAllPlayerIds();
+
+    console.log(playerIds);
+    let offset = 0;
+
+    while(offset < playerIds.length){
+
+        const test = playerIds.slice(offset, offset + MAX_PLAYERS);
+
+        offset += MAX_PLAYERS;
+    }
+}*/
