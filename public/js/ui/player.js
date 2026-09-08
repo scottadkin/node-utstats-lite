@@ -1756,19 +1756,28 @@ class PlayerRankingSummary{
 
 class PlayerCTFLeague{
 
-    constructor(parent, data){
+    constructor(parent, data, settings){
 
         if(data.length === 0) return;
         this.parent = document.querySelector(parent);
         this.data = data;
-
+        this.settings = settings;
 
         UIHeader(this.parent, "CTF League");
 
         this.mode = "gametypes";
         this.createTabs();
 
+        this.createInfo();
+
         this.render();
+    }
+
+    createInfo(){
+
+        this.info = new UIInfo(this.parent, []);
+
+
     }
 
     createTabs(){
@@ -1834,8 +1843,41 @@ class PlayerCTFLeague{
         return row;
     }
 
+
+    renderInfo(){
+
+
+        const content = [];
+
+        if(this.mode === "combined"){
+
+            content.push(`The Combined CTF League Table is based on any match that was ctf.`);
+
+        }else if(this.mode === "gametypes"){
+
+            content.push(`Gametype CTF League Tables are split by gametype, any map played with the matching gametype is counted.`);
+
+        }else if(this.mode === "maps"){
+
+            content.push(`Map CTF League Tables are split by map, any gametype played with the matching map is counted.`);
+        }
+
+        const maxSettings = this.settings[this.mode];
+
+        content.push(
+            UIBr(), "Only matches played within ", 
+            UIB(maxSettings["Maximum Match Age In Days"].value), " days since the last whole league refresh are counted.",
+            UIBr(), `Only ${maxSettings["Maximum Matches Per Player"].value} of the most recent matches are counted for each player, older matches are ignored.`, 
+            UIBr(), `Last Whole League Refresh was on ${toDateString(maxSettings["Last Whole League Refresh"].value, TIME_ZONE)}`
+        );
+
+        this.info.updateContent(content);
+    }
+
     render(){
 
+
+        this.renderInfo();
 
         const headers = [
             "Place", "Name", "Played", "Wins", "Draws", "Losses",

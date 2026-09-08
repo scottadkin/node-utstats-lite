@@ -9,7 +9,7 @@ import {
 import { getPlayerCTFTotals } from "../ctf.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "../weapons.mjs";
 import { getPlayerRankings } from "../rankings.mjs";
-import { getPlayerMapsLeagueData } from "../ctfLeague.mjs";
+import { getLeagueSiteSettings, getPlayerMapsLeagueData } from "../ctfLeague.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getPlayerWeaponDamageTotals } from "../playerWeaponDamage.mjs";
@@ -18,6 +18,8 @@ import { getPlayerWeaponDamageTotals } from "../playerWeaponDamage.mjs";
 export async function renderPlayerPage(req, res, userSession){
 
     try{
+
+        
 
         let id = req?.params?.id ?? "";
 
@@ -86,8 +88,11 @@ export async function renderPlayerPage(req, res, userSession){
         
         let ctfLeagueData = [];
 
+        let ctfLeagueSettings = {};
+
         if(pageSettings["Display CTF League"] === 1){
             ctfLeagueData = await getPlayerMapsLeagueData(playerId);
+            ctfLeagueSettings = await getLeagueSiteSettings();
         }
 
         let weaponDamage = [];
@@ -115,7 +120,8 @@ export async function renderPlayerPage(req, res, userSession){
             pageSettings,
             pageLayout,
             timeZone,
-            weaponDamage
+            weaponDamage,
+            ctfLeagueSettings
         });
 
     }catch(err){

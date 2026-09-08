@@ -42,7 +42,7 @@
                 %>new PlayerCTFSummary("#root", <%- JSON.stringify(ctfTotals) %>);<%
             } break;
             case "Display CTF League": {
-                %>new PlayerCTFLeague("#root", <%- JSON.stringify(ctfLeagueData) %>);<%
+                %>new PlayerCTFLeague("#root", <%- JSON.stringify(ctfLeagueData) %>, <%- JSON.stringify(ctfLeagueSettings) %>);<%
             } break;
             case "Display Rankings": {
                 %>new PlayerRankingSummary("#root", <%- JSON.stringify(rankings) %>);<%
