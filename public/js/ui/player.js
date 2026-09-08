@@ -1152,6 +1152,7 @@ class PlayerItemsSummary{
             {"display": "Totals", "value": "totals"},
             {"display": "Match Averages", "value": "averages"},
             {"display": "Events Per Minute", "value": "epm"},
+            {"display": "Match Records", "value": "records"},
         ];
 
         this.typeTabs = new UITabs(this.wrapper, typeTabOptions, this.dataCat);
@@ -1183,9 +1184,11 @@ class PlayerItemsSummary{
                 key = `avg_${key}`;
             }else if(this.dataCat === "epm"){
                 key = `epm_${key}`;
+            }else if(this.dataCat === "records"){
+                key = `max_${key}`;
             }
 
-            let display = (this.dataCat === "totals") ? ignore0(data[key]) :  data[key].toFixed(3);
+            let display = (this.dataCat === "totals" || this.dataCat === "records") ? ignore0(data[key]) :  data[key].toFixed(3);
             if(display === "0.000") display = "";
 
             row.push({display, "value": data[key]});
@@ -1735,6 +1738,16 @@ class PlayerRankingSummary{
         for(let i = 0; i < data.length; i++){
 
             rows.push(this.createRow(data[i]));
+        }
+
+        if(rows.length === 0){
+
+            const row = [];
+            for(let i = 0; i < headers.length; i++){
+
+                row.push({"display": "No Data", "value": null});
+            }
+            rows.push(row);
         }
 
         if(this.table === undefined){
