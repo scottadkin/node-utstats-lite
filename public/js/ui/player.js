@@ -733,7 +733,6 @@ class PlayerSpecialEvents{
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
-           // console.log(d);
 
             if(!this.bDataMatchFilter(d.gametype_id, d.map_id)) continue;
 
@@ -873,7 +872,7 @@ class PlayerCTFSummary{
         
         this.parent = document.querySelector(parent);
         this.data = data;
-        this.type = "gametypes";
+        this.type = "lifetime";
         this.mode = "general";
 
         UIHeader(this.parent, "Capture The Flag Summary");
@@ -1118,6 +1117,8 @@ class PlayerItemsSummary{
         this.data = data;
         this.mode = "all";
         this.dataCat = "totals";
+        this.selectedGametype = 0;
+        this.selectedMap = 0;
 
         this.wrapper = UIDiv();
 
@@ -1126,7 +1127,117 @@ class PlayerItemsSummary{
         UIHeader(this.wrapper, "Items Summary");
 
         this.createTabs();
+        this.createDropDowns();
         this.render();
+    }
+
+
+    getUniqueGametypes(){
+
+        const gametypes = new Set();
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.gametype_id !== 0) gametypes.add(d.gametype_id);
+        }
+
+        return [...gametypes]
+    }
+
+
+    getDropDownOptions(){
+
+        const gametypes = {};
+        const maps = {};
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(d.gametype_id !== 0){
+                gametypes[d.gametype_id] = d.gametype_name;
+            }
+            
+            if(d.map_id !== 0 && this.selectedGametype === d.gametype_id){
+
+                maps[d.map_id] = d.map_name;
+
+                if(this.selectedMap === 0 && this.selectedGametype !== 0){
+                    this.selectedMap = d.map_id;
+                }
+            }
+        }
+
+
+        const gametypeOptions = [];
+        const mapOptions = [];
+
+        for(const [gametypeId, gametypeName] of Object.entries(gametypes)){
+
+            gametypeOptions.push({
+                "display": gametypeName,
+                "value": gametypeId
+            });
+        }
+
+        for(const [mapId, mapName] of Object.entries(maps)){
+
+            mapOptions.push({
+                "display": mapName,
+                "value": mapId
+            });
+        }
+
+
+        return {gametypeOptions, mapOptions}
+    }
+
+    createDropDowns(){
+
+
+        const uniqueGametypes = this.getUniqueGametypes()
+
+        this.selectedGametype = uniqueGametypes[0] ?? 0;
+
+        const {gametypeOptions, mapOptions} = this.getDropDownOptions();
+
+
+        this.gametypeRow = UIDiv((this.mode !== "custom") ? "hidden" :"form-row");
+        this.gametypeRow.append(UILabel("Gametype"));
+
+        this.gametypeSelect = new UISelect(this.gametypeRow, gametypeOptions, this.selectedGametype, (e) =>{
+
+            this.selectedGametype = parseInt(e);
+
+            const {mapOptions} = this.getDropDownOptions();
+
+            this.mapSelect.updateOptions(mapOptions);
+
+            if(mapOptions.length > 0){
+
+                this.selectedMap = parseInt(mapOptions[0].value);
+                this.mapSelect.changeSelected(this.selectedMap);
+
+            }
+
+            this.render();
+        });
+
+
+        this.mapRow = UIDiv((this.mode !== "custom") ? "hidden" : "form-row");
+        this.mapRow.append(UILabel("Map"));
+
+        this.mapSelect = new UISelect(this.mapRow, mapOptions, this.selectedMap, (e) =>{
+   
+            this.selectedMap = parseInt(e);
+            this.render();
+        });
+
+
+        this.wrapper.append(this.gametypeRow, this.mapRow);
+        
     }
 
 
@@ -1136,6 +1247,7 @@ class PlayerItemsSummary{
             {"display": "All Time","value": "all"},
             {"display": "Gametypes","value": "gametypes"},
             {"display": "Maps","value": "maps"},
+            {"display": "Custom","value": "custom"},
         ];
 
         this.tabs = new UITabs(this.wrapper, tabOptions, this.mode);
@@ -1143,6 +1255,14 @@ class PlayerItemsSummary{
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
             this.mode = e.detail.newTab;
+
+            if(this.mode !== "custom"){
+                this.gametypeRow.className = "hidden";
+                this.mapRow.className = "hidden";
+            }else{
+                this.gametypeRow.className = "form-row";
+                this.mapRow.className = "form-row";
+            }
 
             this.render();
         });
@@ -1159,6 +1279,8 @@ class PlayerItemsSummary{
 
         this.typeTabs.wrapper.addEventListener("tabChanged", (e) =>{
             this.dataCat = e.detail.newTab;
+
+            
             this.render();
         });
     }
@@ -1167,7 +1289,7 @@ class PlayerItemsSummary{
 
         const row = [];
 
-        if(this.mode !== "all"){
+        if(this.mode !== "all" && this.mode !== "custom"){
 
             const name = (this.mode === "gametypes") ? data.gametype_name : data.map_name;
             row.unshift({"display": name, "value": name.toLowerCase(), "className": "text-left"});
@@ -1199,6 +1321,8 @@ class PlayerItemsSummary{
 
     bAnyData(data){
 
+        if(this.mode === "custom") return true;
+        
         const keys = ["boots", "body", "pads", "invis", "shp", "belt", "amp"];
 
         for(let i = 0; i < keys.length; i++){
@@ -1208,6 +1332,8 @@ class PlayerItemsSummary{
                 key = `avg_${key}`;
             }else if(this.dataCat === "epm"){
                 key = `epm_${key}`;
+            }else if(this.dataCat === "records"){
+                key = `max_${key}`;
             }
 
             if(data[key] > 0) return true;
@@ -1221,6 +1347,7 @@ class PlayerItemsSummary{
         if(this.mode === "all" && (gametypeId !== 0 || mapId !== 0)) return false;
         if(this.mode === "gametypes" && (gametypeId === 0 || mapId !== 0)) return false;
         if(this.mode === "maps" && (mapId === 0 || gametypeId !== 0)) return false;
+        if(this.mode === "custom" && (mapId !== this.selectedMap || gametypeId !== this.selectedGametype)) return false;
 
         return true;
     }
@@ -1245,7 +1372,6 @@ class PlayerItemsSummary{
     }
 
     render(){
-
      
         const headers = this.getHeaders();
 
