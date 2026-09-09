@@ -23,6 +23,8 @@ class RecordsPage{
         this.createTabs();
         this.createInfo();
         this.createDropDowns();
+
+        this.render();
     }
 
     createTabs(){
@@ -179,7 +181,65 @@ class RecordsPage{
 
     }
 
+
+    getDisplayName(name){
+
+        const options = this.validTypes[this.mode] ?? null;
+
+        if(options === null) throw new Error(`validTypes is null`);
+
+        for(let i = 0; i < options.length; i++){
+
+            const {display, value} = options[i];
+
+            if(value === name) return display;
+        }
+
+
+
+        return "Not Found";
+    }
+
     render(){
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "bNoSort": true,
+            "headers": [
+                {"display": "Player"},
+                {"display": "Last Seen"},
+                {"display": "Matches Played"},
+                {"display": "Total Playtime"},
+                {"display": this.getDisplayName(this.selectedRecordType)},
+            ]
+        };
+
+
+        const rows = this.data.map((d) =>{
+
+            return [
+                {"display": UIPlayerLink({
+                    "playerId": d.player_id,
+                    "country": d.country,
+                    "name": d.player_name,
+                    "bTableElem": true
+                }),
+                 "bSkipTD": true
+            },
+                {"display": toDateString(d.last_active, TIME_ZONE, true), "className": "date"},
+                {"display": d.total_matches},
+                {"display": toPlaytime(d.playtime), "className": "playtime"},
+                {"display": d.record_value},
+            ];
+        });
+
+        if(this.table === undefined){
+
+            this.table = new TESTUITable(this.parent, tableOptions, rows);
+        }else{
+
+            this.table.updateRows(rows, tableOptions.headers);
+        }
 
     }
 }

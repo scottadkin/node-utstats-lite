@@ -34,21 +34,11 @@ function bValidPlayerLifetimeType(type){
 
 }
 
+export async function getTotalPlayerMatchRecords(recordType, gametypeId, mapId){
 
-/*export async function getTotalMatchRecords(gametype){
+    recordType = recordType.toLowerCase();
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_match_players WHERE time_on_server>0 ${(gametype !== -1) ? "AND gametype_id=?" : ""}`;
-    const vars = [];
-    if(gametype !== -1) vars.push(gametype);
-
-    const result = await simpleQuery(query, vars);
-
-    if(result.length > 0) return result[0].total_rows;
-
-    return 0;
-}*/
-
-export async function getTotalPlayerMatchRecords(gametypeId, mapId){
+    if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record type`);
 
     gametypeId = parseInt(gametypeId);
     if(gametypeId !== gametypeId) gametypeId = 0;
@@ -56,33 +46,9 @@ export async function getTotalPlayerMatchRecords(gametypeId, mapId){
     mapId = parseInt(mapId);
     if(mapId !== mapId) mapId = 0;
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals_max WHERE gametype_id=? AND map_id=?`;
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals_max WHERE gametype_id=? AND map_id=? AND max_${recordType}!=0`;
 
     const vars = [gametypeId, mapId];
-
-    /*let where = ``;
-    const vars = [];
-
-    if(gametypeId !== 0){
-        where += ` gametype_id=?`;
-        vars.push(gametypeId);
-    }
-    
-    if(mapId !== 0){
-
-        if(where === ""){
-            where = ` map_id=?`
-        }else{
-            where += ` AND map_id=?`
-        }
-        vars.push(mapId);
-    }
-
-    if(where !== ""){
-        where = `WHERE${where}`;
-    }
-
-    query = `${query} ${where}`;*/
 
     const result = await simpleQuery(query, vars);
     
@@ -112,7 +78,7 @@ export async function getPlayerMatchRecords(recordType, gametypeId, mapId){
     LEFT JOIN ${nameT} ON ${mT}.player_id = ${nameT}.id
     LEFT JOIN ${pT} ON ${mT}.player_id = ${pT}.player_id AND ${mT}.gametype_id = ${pT}.gametype_id AND ${mT}.map_id = ${pT}.map_id
 
-    WHERE ${mT}.gametype_id=? AND ${mT}.map_id=? ORDER BY record_value DESC`;
+    WHERE ${mT}.gametype_id=? AND ${mT}.map_id=? AND record_value !=0 ORDER BY record_value DESC`;
 
     return await simpleQuery(query, [gametypeId, mapId])
 

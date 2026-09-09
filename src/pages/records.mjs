@@ -72,13 +72,11 @@ export async function renderRecordsPage(req, res, userSession){
 
         if(mode === "player-match"){
 
-            totalResults = await getTotalPlayerMatchRecords(selectedGametype, selectedMap);
+            totalResults = await getTotalPlayerMatchRecords(recordType, selectedGametype, selectedMap);
    
             data = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap);
 
-        }
-        
-        
+        }        
  
         const modeDisplayName = getTypeDisplayName(mode, recordType);
 
