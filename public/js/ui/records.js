@@ -1,20 +1,19 @@
 class RecordsPage{
 
-    constructor(parent, validTypes, gametypes, maps, gametypeMapCombos){
+    constructor(parent, mode, validTypes, modeTitles, gametypes, maps, gametypeMapCombos, selectedGametype, selectedMap){
 
         this.parent = document.querySelector(parent);
+        this.mode = mode;
         this.validTypes = validTypes;
+        this.modeTitles = modeTitles;
 
         this.gametypes = gametypes;
         this.maps = maps;
         this.gametypeMapCombos = gametypeMapCombos;
 
         this.selectedRecordType = "score";
-        this.selectedGametype = 0;
-        this.selectedMap = 0;
-
-        this.mode = "player-match";
-
+        this.selectedGametype = selectedGametype;
+        this.selectedMap = selectedMap;
 
         this.createTabs();
         this.createInfo();
@@ -34,6 +33,8 @@ class RecordsPage{
 
             this.mode = e.detail.newTab;
             this.updateInfoContent();
+
+            
             
             if(!this.recordSelect.updateOptions(this.getRecordOptions(), this.selectedRecordType)){
 
@@ -42,6 +43,8 @@ class RecordsPage{
                 this.recordSelect.changeSelected(newValue);
                 this.selectedRecordType = newValue;
             }
+
+            history.pushState({}, "", `/records?mode=${this.mode}&rec=${this.selectedRecordType}`);
             
             this.render();
         });

@@ -59,6 +59,12 @@ export const VALID_PLAYER_LIFETIME_TYPES = [
     {"display": "Super Health", "value": "item_shp", "parse": ["ignore0"], "group": "Items"},
 ];
 
+
+export const MODE_TITLES = {
+    "player-lifetime": "Player Lifetime Records",
+    "player-match": "Player Match Records"
+};
+
 export function bValidRecordType(mode, cat){
 
     mode = mode.toLowerCase();
@@ -66,13 +72,13 @@ export function bValidRecordType(mode, cat){
 
     let types = null;
 
-    if(mode === "match"){
+    if(mode === "player-match"){
 
         types = VALID_PLAYER_MATCH_TYPES.map((t) =>{
             return t.value;
         });
 
-    }else if(mode === "lifetime"){
+    }else if(mode === "player-lifetime"){
 
         types = VALID_PLAYER_LIFETIME_TYPES.map((t) =>{
             return t.value;
@@ -93,11 +99,11 @@ export function getTypeDisplayName(mode, cat){
 
     let types = null;
 
-    if(mode === "match"){
+    if(mode === "player-match"){
 
         types = VALID_PLAYER_MATCH_TYPES;
 
-    }else if(mode === "lifetime"){
+    }else if(mode === "player-lifetime"){
 
         types = VALID_PLAYER_LIFETIME_TYPES;
 

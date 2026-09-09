@@ -29,7 +29,17 @@
     const maps = <%- JSON.stringify(mapList) %>;
     const combos = <%- JSON.stringify(gametypeMapCombos) %>;
 
-    new RecordsPage("#root", validTypes, gametypes, maps, combos);
+    new RecordsPage(
+        "#root", 
+        "<%= mode %>", 
+        validTypes, 
+        <%- JSON.stringify(MODE_TITLES) %>, 
+        gametypes, 
+        maps, 
+        combos,
+        "<%= selectedGametype %>",
+        "<%= selectedMap %>"
+    );
 </script>
 
 
