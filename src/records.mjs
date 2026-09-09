@@ -35,7 +35,7 @@ function bValidPlayerLifetimeType(type){
 }
 
 
-export async function getTotalMatchRecords(gametype){
+/*export async function getTotalMatchRecords(gametype){
 
     const query = `SELECT COUNT(*) as total_rows FROM nstats_match_players WHERE time_on_server>0 ${(gametype !== -1) ? "AND gametype_id=?" : ""}`;
     const vars = [];
@@ -46,6 +46,78 @@ export async function getTotalMatchRecords(gametype){
     if(result.length > 0) return result[0].total_rows;
 
     return 0;
+}*/
+
+export async function getTotalPlayerMatchRecords(gametypeId, mapId){
+
+    gametypeId = parseInt(gametypeId);
+    if(gametypeId !== gametypeId) gametypeId = 0;
+
+    mapId = parseInt(mapId);
+    if(mapId !== mapId) mapId = 0;
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals_max WHERE gametype_id=? AND map_id=?`;
+
+    const vars = [gametypeId, mapId];
+
+    /*let where = ``;
+    const vars = [];
+
+    if(gametypeId !== 0){
+        where += ` gametype_id=?`;
+        vars.push(gametypeId);
+    }
+    
+    if(mapId !== 0){
+
+        if(where === ""){
+            where = ` map_id=?`
+        }else{
+            where += ` AND map_id=?`
+        }
+        vars.push(mapId);
+    }
+
+    if(where !== ""){
+        where = `WHERE${where}`;
+    }
+
+    query = `${query} ${where}`;*/
+
+    const result = await simpleQuery(query, vars);
+    
+    return result[0].total_rows;
+}
+
+
+export async function getPlayerMatchRecords(recordType, gametypeId, mapId){
+
+    recordType = recordType.toLowerCase();
+
+    if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record type`);
+
+
+    const nameT = "nstats_players";
+    const mT = "nstats_player_totals_max";
+    const pT = "nstats_player_totals";
+
+    const query = `SELECT ${mT}.player_id,
+    ${mT}.max_${recordType} as record_value,
+    ${pT}.last_active,
+    ${pT}.playtime,
+    ${pT}.total_matches,
+    ${nameT}.name as player_name,
+    ${nameT}.country as country
+    FROM ${mT} 
+    LEFT JOIN ${nameT} ON ${mT}.player_id = ${nameT}.id
+    LEFT JOIN ${pT} ON ${mT}.player_id = ${pT}.player_id AND ${mT}.gametype_id = ${pT}.gametype_id AND ${mT}.map_id = ${pT}.map_id
+
+    WHERE ${mT}.gametype_id=? AND ${mT}.map_id=? ORDER BY record_value DESC`;
+
+    return await simpleQuery(query, [gametypeId, mapId])
+
+ 
+
 }
 
 export async function getTotalLifetimeRecords(gametype){
@@ -73,7 +145,7 @@ export async function getTotalLifetimeRecords(gametype){
  * @param {*} bOnlyRecords set to false if you want player,map,gametype,server details
  * @returns 
  */
-export async function getPlayersMatchRecords(type, gametype, page, perPage, bOnlyRecords){
+/*export async function getPlayersMatchRecords(type, gametype, page, perPage, bOnlyRecords){
 
     if(bOnlyRecords === undefined) bOnlyRecords = true;
 
@@ -136,7 +208,7 @@ export async function getPlayersMatchRecords(type, gametype, page, perPage, bOnl
     }
 
     return result;
-}
+}*/
 
 
 export async function getDefaultMatchLists(){

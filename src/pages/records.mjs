@@ -4,7 +4,7 @@ import {
     bValidRecordType, getTypeDisplayName, MODE_TITLES 
 } from "../validRecordTypes.mjs";
 
-import { getUniqueGametypeMapCombinations } from "../records.mjs";
+import { getUniqueGametypeMapCombinations, getTotalPlayerMatchRecords, getPlayerMatchRecords } from "../records.mjs";
 
 const VALID_MODES = [
     "player-lifetime",
@@ -65,6 +65,20 @@ export async function renderRecordsPage(req, res, userSession){
         if(!bValidRecordType(mode, recordType)){
             recordType = "score";
         }
+
+        let totalResults = 0;
+        let data = [];
+
+
+        if(mode === "player-match"){
+
+            totalResults = await getTotalPlayerMatchRecords(selectedGametype, selectedMap);
+   
+            data = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap);
+
+        }
+        
+        
  
         const modeDisplayName = getTypeDisplayName(mode, recordType);
 
@@ -99,6 +113,9 @@ export async function renderRecordsPage(req, res, userSession){
             MODE_TITLES,
             selectedGametype,
             selectedMap,
+            recordType,
+            data,
+            totalResults,
     
             // data,
             // totalResults,

@@ -1,6 +1,7 @@
 class RecordsPage{
 
-    constructor(parent, mode, validTypes, modeTitles, gametypes, maps, gametypeMapCombos, selectedGametype, selectedMap){
+    constructor(parent, mode, validTypes, modeTitles, gametypes, maps, 
+        gametypeMapCombos, selectedGametype, selectedMap, recordType, data, totalResults){
 
         this.parent = document.querySelector(parent);
         this.mode = mode;
@@ -11,9 +12,13 @@ class RecordsPage{
         this.maps = maps;
         this.gametypeMapCombos = gametypeMapCombos;
 
-        this.selectedRecordType = "score";
+        this.selectedRecordType = recordType;
         this.selectedGametype = selectedGametype;
         this.selectedMap = selectedMap;
+        this.data = data;
+        this.totalResults = totalResults;
+
+        console.log(data, totalResults);
 
         this.createTabs();
         this.createInfo();
