@@ -298,3 +298,46 @@ export async function getDefaultLifetimeLists(){
         "playerData": playerData
     };
 }
+
+
+export async function getUniqueGametypeMapCombinations(){
+
+    const query = `SELECT DISTINCT nstats_player_totals.gametype_id,
+    nstats_player_totals.map_id,
+    nstats_maps.name as map_name,
+    nstats_gametypes.name as gametype_name
+    FROM nstats_player_totals 
+    LEFT JOIN nstats_gametypes ON nstats_player_totals.gametype_id = nstats_gametypes.id
+    LEFT JOIN nstats_maps ON nstats_player_totals.map_id = nstats_maps.id
+    WHERE nstats_player_totals.gametype_id!=0 AND nstats_player_totals.map_id!=0`;
+
+    const result = await simpleQuery(query);
+
+    const usedGametypes = new Set();
+    const gametypes = [];
+    const usedMaps = new Set();
+    const maps = [];
+
+    const combos = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(!usedGametypes.has(r.gametype_id)){
+            gametypes.push({"id": r.gametype_id, "name": r.gametype_name});
+            usedGametypes.add(r.gametype_id);
+        }
+
+        if(!usedMaps.has(r.map_id)){
+            maps.push({"id": r.map_id, "name": r.map_name});
+            usedMaps.add(r.map_id);
+        }
+
+        combos.push({"gId": r.gametype_id, "mId": r.map_id});
+    }
+
+  
+
+    return {gametypes, maps, combos};
+}

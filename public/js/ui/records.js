@@ -1,228 +1,66 @@
-class RecordsSearchForm{
+class RecordsPage{
 
-    constructor(parent, mode, validMatchTypes, validLifetimeTypes, gametypeNames, selectedGametype, selectedCat){
+    constructor(parent, validTypes, gametypes, maps, gametypeMapCombos){
 
         this.parent = document.querySelector(parent);
-        this.lifetimeTypes = validLifetimeTypes;
-        this.matchTypes = validMatchTypes;
-        this.gametypeNames = gametypeNames;
-        this.selectedGametype = selectedGametype;
-        this.selectedCat = selectedCat;
+        this.validTypes = validTypes;
 
-        this.wrapper = UIDiv();
-        this.parent.append(this.wrapper);
+        this.gametypes = gametypes;
+        this.maps = maps;
+        this.gametypeMapCombos = gametypeMapCombos;
 
-        this.mode = mode;
+        this.mode = "player-match";
+
+        console.log(this);
+
 
         this.createTabs();
-        this.createForm();
-
+        this.createInfo();
     }
 
     createTabs(){
 
         const options = [
-            {"display": "Match Records", "value": "match"},
-            {"display": "Lifetime Records", "value": "lifetime"},
+            {"display": "Player Match Records", "value": "player-match"},
+            {"display": "Lifetime Records", "value": "player-lifetime"},
         ];
 
-        this.tabs = new UITabs(this.parent, options, this.mode);
-        
+        this.tabs = new UITabs(this.parent, options, this.mode); 
+
+
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
-            window.location = `/records/?mode=${e.detail.newTab}`;
+
+            this.mode = e.detail.newTab;
+            this.updateInfoContent();
+            this.render();
         });
     }
 
-    createForm(){
+    updateInfoContent(){
 
-        this.form = document.createElement("form");
-        this.form.className = "form";
-        
+        const content = [];
 
-        this.parent.append(this.form);
+        if(this.mode === "player-match"){
 
-        const typeRow = UIDiv("form-row");
+            content.push(`Player match records are the highest values for a specific stat in a single match.`);
 
-        const tLabel = UILabel("Record Type", "cat");
-        typeRow.append(tLabel);
+        }else if(this.mode === "player-lifetime"){
 
-        const tSelect = new UIRecordsTypeSelect(
-            typeRow, 
-            this.mode, 
-            this.selectedCat, 
-            {"matches": this.matchTypes , "lifetime": this.lifetimeTypes}
-        );
+            content.push(`Player lifetime records are the total values for a specific stat.`);
+        }
 
-
-        tSelect.elem.select.id = tSelect.elem.select.name = "cat";
-
-        tSelect.elem.select.addEventListener("change", (e) =>{
-            this.selectedCat = e.target.value;
-            this.updateUrl();
-        });
-
-        typeRow.append(tSelect.elem.select);
-        
-        this.form.append(typeRow);
-
-        const gametypeRow = UIDiv("form-row");
-        const gLable = UILabel("Gametype", "g");
-        gametypeRow.append(gLable);
-
-
-        const gametypeOptions = this.gametypeNames.map((g) =>{ return {"display": g.name, "value": g.id}});
-
-        const gSelect = new UISelect(gametypeRow, gametypeOptions, this.selectedGametype, (e) =>{
-            this.selectedGametype = parseInt(e);
-            this.updateUrl();
-        }, "g", "g");
-
-
-
-        this.form.append(gametypeRow);
+        this.info.updateContent(content);
     }
 
-    updateUrl(){
+    createInfo(){
 
-        window.location = `/records/?mode=${this.mode}&cat=${this.selectedCat}&g=${this.selectedGametype}`;
-    }
-}
+        this.info = new UIInfo(this.parent, []);
 
-
-class RecordsDataDisplay{
-
-    constructor(parent, mode, cat, gametype, data, title, gametypeNames, totalResults, page, perPage){
-
-        if(data.length === 0) return;
-        
-        this.parent = document.querySelector(parent);
-        this.mode = mode;
-        this.cat = cat;
-        this.gametype = gametype;
-        this.data = data;
-        this.gametypeNames = gametypeNames;
-        this.totalResults = totalResults;
-        this.perPage = perPage;
-        this.currentPage = page;
-
-        UIHeader(this.parent, `${title} - ${(mode === "match") ? "Single Match" : "Lifetime"} Records`);
-
-        if(this.mode === "match"){
-            this.renderMatch();
-        }else if(this.mode === "lifetime"){
-            this.renderLifetime();
-        }
-
-        this.pagination = new UIPagination(
-            this.parent, 
-            `/records/?mode=${this.mode}&cat=${this.cat}&g=${this.gametype}&page=`, 
-            this.totalResults, 
-            this.perPage, 
-            this.currentPage
-        );
+        this.updateInfoContent();
     }
 
-    getGametypeName(id){
 
-        for(let i = 0; i < this.gametypeNames.length; i++){
+    render(){
 
-            const g = this.gametypeNames[i];
-            if(g.id == -1 && id == 0) return "All";
-            if(g.id == id) return g.name;
-        }
-
-        return "Not Found";
-    }
-
-    renderLifetime(){
-
-        const headers = [
-            "Place", "Player", "Last Active", "Gametype",  "Playtime", "Value"
-        ];
-
-        const rows = [];
-
-        for(let i = 0; i < this.data.length; i++){
-
-            const d = this.data[i];
-
-            const place = i + 1 + (this.perPage * (this.currentPage - 1));
-
-            const row = [
-                {"display": `${place}${getOrdinal(place)}`, "className": "ordinal"},
-                {"display": UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}), "bSkipTD": true},
-                {"display": toDateString(d.last_active, TIME_ZONE, true), "className": "date"},
-                {"display": this.getGametypeName(d.gametype_id)},
-                {"display": toPlaytime(d.playtime), "className": "playtime"},
-            ];
-
-            if(this.cat === "playtime" || this.cat === "ttl"){
-                row.push({"display": toPlaytime(d.record_value), "className": "playtime"});
-            }else{
-                row.push({"display": d.record_value});
-            }
-
-
-            rows.push(row);
-        }
-
-        const tableOptions = {
-            "className": "t-width-1",
-            "bNoSort": true,
-            "headers": headers.map((h) =>{ return {"display": h}})
-        };
-
-        if(this.table === undefined){
-            this.table = new TESTUITable(this.parent, tableOptions, rows)
-        }else{
-            this.table.updateRows(rows, tableOptions.headers);
-        }
-    }
-
-    renderMatch(){
-
-        const headers = [
-            "Place", "Player", "Date", "Playtime", "Gametype", "Map", "Value"
-        ];
-
-        const rows = [];
-
-        for(let i = 0; i < this.data.length; i++){
-
-            const d = this.data[i];
-
-            const place = i + 1 + (this.perPage * (this.currentPage - 1));
-
-
-            const row = [
-                {"display": `${place}${getOrdinal(place)}`, "className": "ordinal"},
-                {"display": UIPlayerLink({"playerId": d.player_id, "name": d.player_name, "country": d.player_country, "bTableElem": true}), "bSkipTD": true},
-                {"display": toDateString(d.match_date, TIME_ZONE, true), "className": "date"},
-                {"display": toPlaytime(d.time_on_server), "className": "playtime"},
-                {"display": d.gametype_name},
-                {"display": d.map_name},
-            ];
-
-
-            if(this.cat === "time_on_server" || this.cat === "ttl"){
-                row.push({"display": toPlaytime(d.record_type), "className": "playtime"});
-            }else{
-                row.push({"display": d.record_type});
-            }
-
-            rows.push(row);
-        }
-
-        const tableOptions = {
-            "className": "t-width-1",
-            "bNoSort": true,
-            "headers": headers.map((h) =>{ return {"display": h}})
-        };
-
-        if(this.table === undefined){
-            this.table = new TESTUITable(this.parent, tableOptions, rows)
-        }else{
-            this.table.updateRows(rows, tableOptions.headers);
-        }
     }
 }

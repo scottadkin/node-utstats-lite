@@ -20,28 +20,16 @@
 
 <script>
 
-    new RecordsSearchForm(
-        "#root", 
-        "<%= mode %>",
-        <%- JSON.stringify(validMatchTypes) %>, 
-        <%- JSON.stringify(validLifetimeTypes) %>, 
-        <%- JSON.stringify(gametypeNames) %>,
-        "<%= selectedGametype %>",
-        "<%= selectedCat %>"
-    );
+    const validTypes = {
+        "match": <%- JSON.stringify(validMatchTypes) %>,
+        "lifetime": <%- JSON.stringify(validLifetimeTypes) %>,
+    };
 
-    new RecordsDataDisplay(
-        "#root", 
-        "<%= mode %>", 
-        "<%= selectedCat %>", 
-        "<%= selectedGametype %>", 
-        <%- JSON.stringify(data) %>, 
-        "<%= catTitle %>", 
-        <%- JSON.stringify(gametypeNames) %>, 
-        <%= totalResults %>,
-        <%= page %>,
-        <%= perPage %>,
-        );
+    const gametypes = <%- JSON.stringify(gametypeList) %>;
+    const maps = <%- JSON.stringify(mapList) %>;
+    const combos = <%- JSON.stringify(gametypeMapCombos) %>;
+
+    new RecordsPage("#root", validTypes, gametypes, maps, combos);
 </script>
 
 
