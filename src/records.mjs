@@ -46,7 +46,7 @@ export async function getTotalPlayerMatchRecords(recordType, gametypeId, mapId){
     mapId = parseInt(mapId);
     if(mapId !== mapId) mapId = 0;
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals_max WHERE gametype_id=? AND map_id=? AND max_${recordType}!=0`;
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals_max WHERE gametype_id=? AND map_id=? AND ${recordType}!=0`;
 
     const vars = [gametypeId, mapId];
 
@@ -68,7 +68,7 @@ export async function getPlayerMatchRecords(recordType, gametypeId, mapId){
     const pT = "nstats_player_totals";
 
     const query = `SELECT ${mT}.player_id,
-    ${mT}.max_${recordType} as record_value,
+    ${mT}.${recordType} as record_value,
     ${pT}.last_active,
     ${pT}.playtime,
     ${pT}.total_matches,

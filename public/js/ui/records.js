@@ -13,12 +13,11 @@ class RecordsPage{
         this.gametypeMapCombos = gametypeMapCombos;
 
         this.selectedRecordType = recordType;
-        this.selectedGametype = selectedGametype;
-        this.selectedMap = selectedMap;
+        this.selectedGametype = parseInt(selectedGametype);
+        this.selectedMap = parseInt(selectedMap);
         this.data = data;
         this.totalResults = totalResults;
 
-        console.log(data, totalResults);
 
         this.createTabs();
         this.createInfo();
@@ -49,12 +48,44 @@ class RecordsPage{
 
                 this.recordSelect.changeSelected(newValue);
                 this.selectedRecordType = newValue;
+
+                
             }
 
-            history.pushState({}, "", `/records?mode=${this.mode}&rec=${this.selectedRecordType}`);
+            this.loadData();
             
             this.render();
         });
+    }
+
+    async loadData(){
+
+        try{
+            
+
+            this.updateHistory();
+
+            const req = await fetch(`/json/load-records/?cat=${this.mode}&rt=${this.selectedRecordType}&gid=${this.selectedGametype}&mid=${this.selectedMap}`);
+
+            const res = await req.json();
+
+            console.log(res);
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.data = res.data;
+            this.totalResults = res.totalResults;
+
+            this.render();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
+    }
+
+    updateHistory(){
+        history.pushState({}, "", `/records?mode=${this.mode}&rec=${this.selectedRecordType}&gid=${this.selectedGametype}&mid=${this.selectedMap}`);
     }
 
     updateInfoContent(){
@@ -140,7 +171,8 @@ class RecordsPage{
         this.recordSelect = new UISelect(this.recordRow, this.getRecordOptions(), this.selectedRecordType, (e) =>{
 
             this.selectedRecordType = e;
-            this.render();
+            this.loadData();
+        
         });
         
 
@@ -164,16 +196,22 @@ class RecordsPage{
         this.gametypeSelect = new UISelect(this.gametypeRow, gametypeOptions, this.selectedGametype, (e) =>{
 
             this.selectedGametype = parseInt(e);
-            this.mapSelect.updateOptions(this.getMapOptions());
-            this.mapSelect.changeSelected(this.mapSelect.options[0].value ?? 0);
-            this.render();
+            
+            if(!this.mapSelect.updateOptions(this.getMapOptions())){
+    
+                const newSel = this.mapSelect.options[0]?.value ?? 0;
+                this.mapSelect.changeSelected(newSel);
+                this.selectedMap = newSel
+            }
+            
+            this.loadData();
 
         });
 
         this.mapSelect = new UISelect(this.mapRow, this.getMapOptions(), this.selectedMap, (e) =>{
 
             this.selectedMap = parseInt(e);
-            this.render();
+            this.loadData();
         });
 
 

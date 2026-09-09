@@ -63,7 +63,12 @@ export async function renderRecordsPage(req, res, userSession){
         if(VALID_MODES.indexOf(mode) === -1) mode = "player-match";
 
         if(!bValidRecordType(mode, recordType)){
-            recordType = "score";
+
+            if(mode === "player-match"){
+                recordType = "max_score";
+            }else{
+                recordType = "score";
+            }
         }
 
         let totalResults = 0;
@@ -114,9 +119,6 @@ export async function renderRecordsPage(req, res, userSession){
             recordType,
             data,
             totalResults,
-    
-            // data,
-            // totalResults,
             // catTitle,
             // page,
             // perPage,

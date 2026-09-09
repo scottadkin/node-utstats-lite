@@ -6,6 +6,7 @@ import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
 import { getMatchWeaponDamage } from "../playerWeaponDamage.mjs";
+import { getTotalPlayerMatchRecords, getPlayerMatchRecords } from "../records.mjs";
 
 export default class JSONManager{
 
@@ -285,6 +286,21 @@ export default class JSONManager{
         this.res.status(200).json(data);
     }
 
+    async loadRecords(){
+
+        let cat = this.querySanitizeString("cat");
+        let gid = this.querySanitizeInteger("gid");
+        let mid = this.querySanitizeInteger("mid");
+        let recordType = this.querySanitizeString("rt");
+
+
+        const totalResults = await getTotalPlayerMatchRecords(recordType, gid, mid);
+           
+        const data = await getPlayerMatchRecords(recordType, gid, mid);
+
+        this.res.status(200).json({data, totalResults})
+    }
+
     async init(){
 
         try{
@@ -351,6 +367,10 @@ export default class JSONManager{
 
             }else if(this.mode === "match-test-weapon-damage"){
                 return await this.testMatchWeaponDamage();
+
+            }else if(this.mode === "load-records"){
+
+                return await this.loadRecords();
             }
 
             console.log(this.mode);
