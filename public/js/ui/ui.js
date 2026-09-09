@@ -2042,5 +2042,19 @@ function UIAveragesCompareIcon(valueA, valueB){
     }
 
     return img;
+}
 
+
+function sortUISelectOptionsByDisplay(a, b){
+
+    a = a.display.toLowerCase();
+    b = b.display.toLowerCase();
+
+    if(a < b){
+        return -1;
+    }else if(a > b){
+        return 1;
+    }
+    return 0;
+    
 }

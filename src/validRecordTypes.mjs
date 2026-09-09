@@ -34,6 +34,7 @@ export const VALID_PLAYER_LIFETIME_TYPES = [
     {"display": "Draws", "value": "draws", "parse": ["ignore0"], "group": "General"},
     {"display": "Losses", "value": "losses", "parse": ["ignore0"], "group": "General"},
     {"display": "WinRate", "value": "winrate", "parse": [], "group": "General"},
+    {"display": "Score", "value": "score", "parse": ["ignore0"], "group": "General"},
     {"display": "Frags", "value": "frags", "parse": ["ignore0"], "group": "General"},
     {"display": "Kills", "value": "kills", "parse": ["ignore0"], "group": "General"},
     {"display": "Deaths", "value": "deaths", "parse": ["ignore0"], "group": "General"},

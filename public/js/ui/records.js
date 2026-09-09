@@ -9,6 +9,7 @@ class RecordsPage{
         this.maps = maps;
         this.gametypeMapCombos = gametypeMapCombos;
 
+        this.selectedRecordType = "score";
         this.selectedGametype = 0;
         this.selectedMap = 0;
 
@@ -29,11 +30,19 @@ class RecordsPage{
 
         this.tabs = new UITabs(this.parent, options, this.mode); 
 
-
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
             this.mode = e.detail.newTab;
             this.updateInfoContent();
+            
+            if(!this.recordSelect.updateOptions(this.getRecordOptions(), this.selectedRecordType)){
+
+                const newValue = this.recordSelect.options[0]?.value ?? "score";
+
+                this.recordSelect.changeSelected(newValue);
+                this.selectedRecordType = newValue;
+            }
+            
             this.render();
         });
     }
@@ -91,6 +100,8 @@ class RecordsPage{
             }
         }
 
+        options.sort(sortUISelectOptionsByDisplay);
+
 
         options.unshift({"display": "Any", "value": 0});
 
@@ -99,7 +110,29 @@ class RecordsPage{
     }
 
 
+    getRecordOptions(){
+
+        if(this.validTypes[this.mode] === undefined){
+
+            throw new Error(`${this.mode} is no a valid record mode`);
+        }
+
+        
+
+        return this.validTypes[this.mode];
+    }
+
     createDropDowns(){
+
+
+        this.recordRow = UIDiv("form-row");
+        this.recordRow.append(UILabel("Record Type"));
+        this.recordSelect = new UISelect(this.recordRow, this.getRecordOptions(), this.selectedRecordType, (e) =>{
+
+            this.selectedRecordType = e;
+            this.render();
+        });
+        
 
         this.gametypeRow = UIDiv("form-row");
         this.mapRow = UIDiv("form-row");
@@ -113,7 +146,7 @@ class RecordsPage{
         });
 
         
-      
+        gametypeOptions.sort(sortUISelectOptionsByDisplay)
 
 
         gametypeOptions.unshift({"display": "Any", "value": 0});
@@ -134,7 +167,7 @@ class RecordsPage{
         });
 
 
-        this.parent.append(this.gametypeRow, this.mapRow);
+        this.parent.append(this.recordRow, this.gametypeRow, this.mapRow);
 
     }
 
