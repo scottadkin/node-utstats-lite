@@ -38,6 +38,7 @@ async function getTotalPlayerMatchRecords(recordType, gametypeId, mapId){
 
     recordType = recordType.toLowerCase();
 
+    //just incase im stupid and export this function at a later point
     if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record type`);
 
     gametypeId = parseInt(gametypeId);
@@ -56,6 +57,55 @@ async function getTotalPlayerMatchRecords(recordType, gametypeId, mapId){
 }
 
 
+async function getTotalPlayerMatchCTFRecords(recordType, gametypeId, mapId){
+
+    //just incase im stupid and export this function at a later point
+    if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record.(CTF)`);
+
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals_ctf WHERE nstats_player_totals_ctf.${recordType}!=0 AND gametype_id=? AND map_id=?`;
+
+    const result = await simpleQuery(query, [gametypeId, mapId]);
+
+    return result[0].total_rows;
+}
+
+async function getPlayerMatchCTFRecords(recordType, gametypeId, mapId, start, end){
+
+    //just incase im stupid and export this function at a later point
+    if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record.(CTF)`);
+
+    start = parseInt(start);
+    end = parseInt(end);
+
+    if(start !== start || end !== end) throw new Error(`Not a valid start or end`);
+
+    const nameT = "nstats_players"
+    const tT = "nstats_player_totals";
+    const cT = "nstats_player_totals_ctf";
+
+    const query = `SELECT 
+    
+    ${cT}.player_id,
+    ${cT}.gametype_id,
+    ${cT}.map_id,
+    ${nameT}.name as player_name,
+    ${nameT}.country as country,
+    ${tT}.last_active as last_active,
+    ${cT}.playtime,
+    ${cT}.total_matches,
+    ${cT}.${recordType} as record_value
+    FROM ${cT} 
+    LEFT JOIN ${nameT} ON ${cT}.player_id = ${nameT}.id
+    LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id
+    WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 ORDER BY ${cT}.${recordType} DESC LIMIT ${start}, ${end}`;
+
+
+    const [result, totalResults] = await Promise.all([simpleQuery(query, [gametypeId, mapId]), getTotalPlayerMatchCTFRecords(recordType, gametypeId, mapId)]);
+
+    return {"data": result, totalResults}
+}
+
+
 export async function getPlayerMatchRecords(recordType, gametypeId, mapId, dirtyPage, dirtyPerPage){
 
     recordType = recordType.toLowerCase();
@@ -66,12 +116,14 @@ export async function getPlayerMatchRecords(recordType, gametypeId, mapId, dirty
 
     if(recordInfo === null) throw new Error(`Not a valid player match record type`);
 
-    if(recordInfo.group === "CTF"){
-
-        return {"totalResults": 0, "data": []};
-    }
 
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+
+
+    if(recordInfo.group === "CTF"){
+
+        return await getPlayerMatchCTFRecords(recordType, gametypeId, mapId, start, perPage);
+    }
 
     const nameT = "nstats_players";
     const mT = "nstats_player_totals_max";
