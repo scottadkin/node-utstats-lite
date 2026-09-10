@@ -6,7 +6,7 @@ import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
 import { getMatchWeaponDamage } from "../playerWeaponDamage.mjs";
-import { getPlayerMatchRecords } from "../records.mjs";
+import { getPlayerLifetimeRecords, getPlayerMatchRecords } from "../records.mjs";
 
 export default class JSONManager{
 
@@ -288,7 +288,7 @@ export default class JSONManager{
 
     async loadRecords(){
 
-        //let cat = this.querySanitizeString("cat");
+        const cat = this.querySanitizeString("cat");
         const gid = this.querySanitizeInteger("gid");
         const mid = this.querySanitizeInteger("mid");
         const recordType = this.querySanitizeString("rt");
@@ -296,9 +296,22 @@ export default class JSONManager{
         const perPage = this.querySanitizeInteger("pp");
 
            
-        const {totalResults, data}  = await getPlayerMatchRecords(recordType, gid, mid, page, perPage);
+        if(cat === "player-match"){
 
-        this.res.status(200).json({data, totalResults})
+            const {totalResults, data}  = await getPlayerMatchRecords(recordType, gid, mid, page, perPage);
+            this.res.status(200).json({data, totalResults});
+            return;
+
+        }else if(cat === "player-lifetime"){
+
+            const {totalResults, data}  = await getPlayerLifetimeRecords(recordType, gid, mid, page, perPage);
+            this.res.status(200).json({data, totalResults});
+            return;
+        }
+
+
+        this.res.status(200).json({"error": "Unknown Category"});
+
     }
 
     async init(){

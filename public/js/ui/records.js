@@ -5,6 +5,7 @@ class RecordsPage{
         page, perPage
     ){
 
+
         this.parent = document.querySelector(parent);
         this.mode = mode;
         this.validTypes = validTypes;
