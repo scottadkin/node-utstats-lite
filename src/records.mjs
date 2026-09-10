@@ -56,12 +56,16 @@ export async function getTotalPlayerMatchRecords(recordType, gametypeId, mapId){
 }
 
 
-export async function getPlayerMatchRecords(recordType, gametypeId, mapId){
+export async function getPlayerMatchRecords(recordType, gametypeId, mapId, dirtyPage, dirtyPerPage){
 
     recordType = recordType.toLowerCase();
 
     if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record type`);
 
+
+    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+
+    console.log(page, perPage, start);
 
     const nameT = "nstats_players";
     const mT = "nstats_player_totals_max";
@@ -78,7 +82,7 @@ export async function getPlayerMatchRecords(recordType, gametypeId, mapId){
     LEFT JOIN ${nameT} ON ${mT}.player_id = ${nameT}.id
     LEFT JOIN ${pT} ON ${mT}.player_id = ${pT}.player_id AND ${mT}.gametype_id = ${pT}.gametype_id AND ${mT}.map_id = ${pT}.map_id
 
-    WHERE ${mT}.gametype_id=? AND ${mT}.map_id=? AND record_value !=0 ORDER BY record_value DESC`;
+    WHERE ${mT}.gametype_id=? AND ${mT}.map_id=? AND record_value !=0 ORDER BY record_value DESC LIMIT ${start}, ${perPage}`;
 
     return await simpleQuery(query, [gametypeId, mapId])
 

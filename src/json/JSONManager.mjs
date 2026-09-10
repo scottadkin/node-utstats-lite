@@ -288,15 +288,18 @@ export default class JSONManager{
 
     async loadRecords(){
 
-        let cat = this.querySanitizeString("cat");
-        let gid = this.querySanitizeInteger("gid");
-        let mid = this.querySanitizeInteger("mid");
-        let recordType = this.querySanitizeString("rt");
+        //let cat = this.querySanitizeString("cat");
+        const gid = this.querySanitizeInteger("gid");
+        const mid = this.querySanitizeInteger("mid");
+        const recordType = this.querySanitizeString("rt");
+        const page = this.querySanitizeInteger("p");
+        const perPage = this.querySanitizeInteger("pp");
 
+        console.log(page, perPage);
 
         const totalResults = await getTotalPlayerMatchRecords(recordType, gid, mid);
            
-        const data = await getPlayerMatchRecords(recordType, gid, mid);
+        const data = await getPlayerMatchRecords(recordType, gid, mid, page, perPage);
 
         this.res.status(200).json({data, totalResults})
     }

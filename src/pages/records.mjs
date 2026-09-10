@@ -5,6 +5,7 @@ import {
 } from "../validRecordTypes.mjs";
 
 import { getUniqueGametypeMapCombinations, getTotalPlayerMatchRecords, getPlayerMatchRecords } from "../records.mjs";
+import { sanitizePagePerPage } from "../generic.mjs";
 
 const VALID_MODES = [
     "player-lifetime",
@@ -48,6 +49,11 @@ export async function renderRecordsPage(req, res, userSession){
         let recordType = (req.query.rec !== undefined) ? req.query.rec.toLowerCase() : "score";
         let selectedGametype = (req.query.gid !== undefined) ? parseInt(req.query.gid) : 0;
         let selectedMap = (req.query.mid !== undefined) ? parseInt(req.query.mid) : 0;
+        let perPage = (req.query.pp !== undefined) ? parseInt(req.query.pp) : parseInt(pageSettings["Results Per Page"]);
+        let page = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
+        
+        if(perPage !== perPage) perPage = 25;
+        if(page !== page) page = 1;
         
         if(selectedGametype !== selectedGametype) selectedGametype = 0;
         if(selectedMap !== selectedMap) selectedMap = 0;
@@ -79,7 +85,7 @@ export async function renderRecordsPage(req, res, userSession){
 
             totalResults = await getTotalPlayerMatchRecords(recordType, selectedGametype, selectedMap);
    
-            data = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap);
+            data = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap, page, perPage);
 
         }        
  
@@ -119,6 +125,8 @@ export async function renderRecordsPage(req, res, userSession){
             recordType,
             data,
             totalResults,
+            perPage,
+            page,
             // catTitle,
             // page,
             // perPage,

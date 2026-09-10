@@ -1,7 +1,9 @@
 class RecordsPage{
 
     constructor(parent, mode, validTypes, modeTitles, gametypes, maps, 
-        gametypeMapCombos, selectedGametype, selectedMap, recordType, data, totalResults){
+        gametypeMapCombos, selectedGametype, selectedMap, recordType, data, totalResults,
+        page, perPage
+    ){
 
         this.parent = document.querySelector(parent);
         this.mode = mode;
@@ -17,6 +19,15 @@ class RecordsPage{
         this.selectedMap = parseInt(selectedMap);
         this.data = data;
         this.totalResults = totalResults;
+
+        page = parseInt(page);
+        if(page !== page) page = 1;
+
+        perPage = parseInt(perPage);
+        if(perPage !== perPage) perPage = 25;
+
+        this.page = page;
+        this.perPage = perPage;
 
 
         this.createTabs();
@@ -41,6 +52,8 @@ class RecordsPage{
 
             this.mode = e.detail.newTab;
             this.updateInfoContent();
+
+            this.page = 1;
 
             
             
@@ -67,11 +80,16 @@ class RecordsPage{
 
             this.updateHistory();
 
-            const req = await fetch(`/json/load-records/?cat=${this.mode}&rt=${this.selectedRecordType}&gid=${this.selectedGametype}&mid=${this.selectedMap}`);
+            let url = `/json/load-records/?cat=${this.mode}`;
+            url += `&rt=${this.selectedRecordType}`;
+            url += `&gid=${this.selectedGametype}`;
+            url += `&mid=${this.selectedMap}`;
+            url += `&p=${this.page}&pp=${this.perPage}`;
+
+            const req = await fetch(`${url}`);
 
             const res = await req.json();
 
-            console.log(res);
 
             if(res.error !== undefined) throw new Error(res.error);
 
@@ -86,8 +104,13 @@ class RecordsPage{
         }
     }
 
+    createUrl(){
+
+        return `/records?mode=${this.mode}&rec=${this.selectedRecordType}&gid=${this.selectedGametype}&mid=${this.selectedMap}`;
+    }
+
     updateHistory(){
-        history.pushState({}, "", `/records?mode=${this.mode}&rec=${this.selectedRecordType}&gid=${this.selectedGametype}&mid=${this.selectedMap}`);
+        history.pushState({}, "", this.createUrl());
     }
 
     updateInfoContent(){
@@ -177,6 +200,7 @@ class RecordsPage{
         this.recordSelect = new UISelect(this.recordRow, this.getRecordOptions(), this.selectedRecordType, (e) =>{
 
             this.selectedRecordType = e;
+            this.page = 1;
             this.loadData();
         
         });
@@ -207,8 +231,11 @@ class RecordsPage{
     
                 const newSel = this.mapSelect.options[0]?.value ?? 0;
                 this.mapSelect.changeSelected(newSel);
-                this.selectedMap = newSel
+                this.selectedMap = newSel;
+                this.page = 1;
             }
+
+            
             
             this.loadData();
 
@@ -217,6 +244,7 @@ class RecordsPage{
         this.mapSelect = new UISelect(this.mapRow, this.getMapOptions(), this.selectedMap, (e) =>{
 
             this.selectedMap = parseInt(e);
+            this.page = 1;
             this.loadData();
         });
 
@@ -247,8 +275,6 @@ class RecordsPage{
 
     updateHeader(){
 
-        console.log(this);
-
         const displayName = this.getDisplayName(this.selectedRecordType);
 
         let title = "";
@@ -261,18 +287,6 @@ class RecordsPage{
 
             title = "Player Lifetime Records";
         }
-
-        
-
-        /*if(this.selectedGametype !== 0){
-
-            title = `${this.getIdName("gametypes", this.selectedGametype)} ${title}`
-        }
-
-        if(this.selectedMap !== 0){
-
-            title = `${this.getIdName("maps", this.selectedMap)} - ${title}`;
-        }*/
 
         this.header.innerHTML = '';
         this.header.append(`${displayName} - ${title}`);
@@ -318,6 +332,13 @@ class RecordsPage{
         }else{
 
             this.table.updateRows(rows, tableOptions.headers);
+        }
+
+
+        if(this.pagination === undefined){
+            this.pagination = new UIPagination(this.parent, `${this.createUrl()}&page=`, this.totalResults, this.perPage, this.page);
+        }else{
+            this.pagination.updateResults(this.page, this.totalResults, this.perPage);
         }
 
     }
