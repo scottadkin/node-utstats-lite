@@ -23,6 +23,8 @@ class RecordsPage{
         this.createInfo();
         this.createDropDowns();
 
+        this.header = UIHeader(this.parent, "Records");
+
         this.render();
     }
 
@@ -112,11 +114,13 @@ class RecordsPage{
     }
 
 
-    getMapName(id){
+    getIdName(type, id){
 
-        for(let i = 0; i < this.maps.length; i++){
+        const options = (type === "gametypes") ? this.gametypes : this.maps;
 
-            const m = this.maps[i];
+        for(let i = 0; i < options.length; i++){
+
+            const m = options[i];
 
             if(m.id === id) return m.name;
         }
@@ -136,7 +140,7 @@ class RecordsPage{
 
             if(this.selectedGametype === 0 || this.selectedGametype === c.gId){
 
-                options.push({"display": this.getMapName(c.mId), "value": c.mId});
+                options.push({"display": this.getIdName("maps", c.mId), "value": c.mId});
 
             }
         }
@@ -165,6 +169,8 @@ class RecordsPage{
 
     createDropDowns(){
 
+
+        this.form = UIDiv("form");
 
         this.recordRow = UIDiv("form-row");
         this.recordRow.append(UILabel("Record Type"));
@@ -215,7 +221,8 @@ class RecordsPage{
         });
 
 
-        this.parent.append(this.recordRow, this.gametypeRow, this.mapRow);
+        this.form.append(this.recordRow, this.gametypeRow, this.mapRow);
+        this.parent.append(this.form);
 
     }
 
@@ -238,8 +245,42 @@ class RecordsPage{
         return "Not Found";
     }
 
+    updateHeader(){
+
+        console.log(this);
+
+        const displayName = this.getDisplayName(this.selectedRecordType);
+
+        let title = "";
+
+        if(this.mode === "player-match"){
+
+            title = "Player Single Match Records";
+
+        }else if(this.mode === "player-lifetime"){
+
+            title = "Player Lifetime Records";
+        }
+
+        
+
+        /*if(this.selectedGametype !== 0){
+
+            title = `${this.getIdName("gametypes", this.selectedGametype)} ${title}`
+        }
+
+        if(this.selectedMap !== 0){
+
+            title = `${this.getIdName("maps", this.selectedMap)} - ${title}`;
+        }*/
+
+        this.header.innerHTML = '';
+        this.header.append(`${displayName} - ${title}`);
+    }
+
     render(){
 
+        this.updateHeader();
         const tableOptions = {
             "className": "t-width-1",
             "bNoSort": true,

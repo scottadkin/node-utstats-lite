@@ -518,6 +518,9 @@ function UIHeader(parent, text, id){
     }
 
     parent.append(elem);
+
+
+    return elem;
 }
 
 

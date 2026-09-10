@@ -480,6 +480,17 @@ class TESTUITable{
             this.tableBody.append(row);
         }
 
+
+        if(this.tableBody.childElementCount === 0){
+
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = this.options?.headers?.length ?? 1;
+            cell.append("No data");
+            row.append(cell);
+            this.tableBody.append(row);
+        }
+
         this.renderFooterRow();
 
         if(bFirstRender){
