@@ -202,6 +202,8 @@ class RecordsPage{
             this.selectedRecordType = e;
             this.page = 1;
             this.loadData();
+            this.pagination.changeUrl(`${this.createUrl()}&page=`);
+            
         
         });
         
@@ -235,7 +237,7 @@ class RecordsPage{
                 this.page = 1;
             }
 
-            
+            this.pagination.changeUrl(`${this.createUrl()}&page=`);
             
             this.loadData();
 
@@ -245,6 +247,7 @@ class RecordsPage{
 
             this.selectedMap = parseInt(e);
             this.page = 1;
+            this.pagination.changeUrl(`${this.createUrl()}&page=`);
             this.loadData();
         });
 
@@ -299,6 +302,7 @@ class RecordsPage{
             "className": "t-width-1",
             "bNoSort": true,
             "headers": [
+                {"display": "Pos"},
                 {"display": "Player"},
                 {"display": "Last Seen"},
                 {"display": "Matches Played"},
@@ -308,9 +312,12 @@ class RecordsPage{
         };
 
 
-        const rows = this.data.map((d) =>{
-
+        const rows = this.data.map((d, i) =>{
+            const pos = i + 1 + (this.page - 1) * this.perPage;
             return [
+                {
+                    "display": `${pos}${getOrdinal(pos)}`, "className": "ordinal"
+                },
                 {"display": UIPlayerLink({
                     "playerId": d.player_id,
                     "country": d.country,

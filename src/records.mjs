@@ -65,8 +65,6 @@ export async function getPlayerMatchRecords(recordType, gametypeId, mapId, dirty
 
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
-    console.log(page, perPage, start);
-
     const nameT = "nstats_players";
     const mT = "nstats_player_totals_max";
     const pT = "nstats_player_totals";

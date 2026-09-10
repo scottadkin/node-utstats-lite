@@ -360,6 +360,14 @@ class UIPagination{
         this.render();
     }
 
+
+
+    changeUrl(newUrl){
+
+        this.url = newUrl;
+        this.render();
+    }
+
     updateResults(currentPage, totalResults, perPage){
 
         this.totalPages = 1;

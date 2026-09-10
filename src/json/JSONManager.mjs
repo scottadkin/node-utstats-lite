@@ -295,8 +295,6 @@ export default class JSONManager{
         const page = this.querySanitizeInteger("p");
         const perPage = this.querySanitizeInteger("pp");
 
-        console.log(page, perPage);
-
         const totalResults = await getTotalPlayerMatchRecords(recordType, gid, mid);
            
         const data = await getPlayerMatchRecords(recordType, gid, mid, page, perPage);
