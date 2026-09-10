@@ -4,7 +4,7 @@ import {
     bValidRecordType, getTypeDisplayName, MODE_TITLES 
 } from "../validRecordTypes.mjs";
 
-import { getUniqueGametypeMapCombinations, getTotalPlayerMatchRecords, getPlayerMatchRecords } from "../records.mjs";
+import { getUniqueGametypeMapCombinations, getPlayerMatchRecords } from "../records.mjs";
 import { sanitizePagePerPage } from "../generic.mjs";
 
 const VALID_MODES = [
@@ -83,10 +83,10 @@ export async function renderRecordsPage(req, res, userSession){
 
         if(mode === "player-match"){
 
-            totalResults = await getTotalPlayerMatchRecords(recordType, selectedGametype, selectedMap);
+            const result = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap, page, perPage);
    
-            data = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap, page, perPage);
-
+            totalResults = result.totalResults;
+            data = result.data;
         }        
  
         const modeDisplayName = getTypeDisplayName(mode, recordType);

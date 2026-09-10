@@ -2,7 +2,7 @@ import { simpleQuery } from "./database.mjs";
 import { getBasicPlayerInfo } from "./players.mjs";
 import { getBasicMatchesInfo } from "./matches.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
-import { VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES } from "./validRecordTypes.mjs";
+import { VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, getRecordTypeInfo } from "./validRecordTypes.mjs";
 
 function bValidPlayerMatchType(type){
 
@@ -34,7 +34,7 @@ function bValidPlayerLifetimeType(type){
 
 }
 
-export async function getTotalPlayerMatchRecords(recordType, gametypeId, mapId){
+async function getTotalPlayerMatchRecords(recordType, gametypeId, mapId){
 
     recordType = recordType.toLowerCase();
 
@@ -60,8 +60,16 @@ export async function getPlayerMatchRecords(recordType, gametypeId, mapId, dirty
 
     recordType = recordType.toLowerCase();
 
-    if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record type`);
+    //if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record type`);
 
+    const recordInfo = getRecordTypeInfo("player-match", recordType);
+
+    if(recordInfo === null) throw new Error(`Not a valid player match record type`);
+
+    if(recordInfo.group === "CTF"){
+
+        return {"totalResults": 0, "data": []};
+    }
 
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
@@ -82,7 +90,12 @@ export async function getPlayerMatchRecords(recordType, gametypeId, mapId, dirty
 
     WHERE ${mT}.gametype_id=? AND ${mT}.map_id=? AND record_value !=0 ORDER BY record_value DESC LIMIT ${start}, ${perPage}`;
 
-    return await simpleQuery(query, [gametypeId, mapId])
+    const [data, totalResults] = await Promise.all([
+        simpleQuery(query, [gametypeId, mapId]), 
+        getTotalPlayerMatchRecords(recordType, gametypeId, mapId)
+    ]);
+
+    return {data, totalResults};
 
  
 

@@ -6,7 +6,7 @@ import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
 import { getMatchWeaponDamage } from "../playerWeaponDamage.mjs";
-import { getTotalPlayerMatchRecords, getPlayerMatchRecords } from "../records.mjs";
+import { getPlayerMatchRecords } from "../records.mjs";
 
 export default class JSONManager{
 
@@ -295,9 +295,8 @@ export default class JSONManager{
         const page = this.querySanitizeInteger("p");
         const perPage = this.querySanitizeInteger("pp");
 
-        const totalResults = await getTotalPlayerMatchRecords(recordType, gid, mid);
            
-        const data = await getPlayerMatchRecords(recordType, gid, mid, page, perPage);
+        const {totalResults, data}  = await getPlayerMatchRecords(recordType, gid, mid, page, perPage);
 
         this.res.status(200).json({data, totalResults})
     }

@@ -26,6 +26,21 @@ export const VALID_PLAYER_MATCH_TYPES = [
     {"display": "Body Armor", "value": "max_item_body", "parse": ["ignore0"], "group": "Items"},
     {"display": "Thigh Pads", "value": "max_item_pads", "parse": ["ignore0"], "group": "Items"},
     {"display": "Jump Boots", "value": "max_item_boots", "parse": ["ignore0"], "group": "Items"},
+
+
+    {"display": "Flag Taken", "value": "max_flag_taken", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Pickup", "value": "max_flag_pickup", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Drop", "value": "max_flag_drop", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Assist", "value": "max_flag_assist", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Cover", "value": "max_flag_cover", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Seal", "value": "max_flag_seal", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Capture", "value": "max_flag_cap", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Kill", "value": "max_flag_kill", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Return", "value": "max_flag_return", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Return Home Base", "value": "max_flag_return_base", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Return Mid", "value": "max_flag_return_mid", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Return Enemy Base", "value": "max_flag_return_enemy_base", "parse": ["ignore0"], "group": "CTF"},
+    {"display": "Flag Return Save", "value": "max_flag_return_save", "parse": ["ignore0"], "group": "CTF"},
     
 ];
 
@@ -60,6 +75,8 @@ export const VALID_PLAYER_LIFETIME_TYPES = [
 ];
 
 
+export const VALID_RECORD_MODES = ["player-match", "player-lifetime"];
+
 export const MODE_TITLES = {
     "player-lifetime": "Player Lifetime Records",
     "player-match": "Player Match Records"
@@ -91,6 +108,31 @@ export function bValidRecordType(mode, cat){
     return types.indexOf(cat) !== -1;
 }
 
+
+export function getRecordTypeInfo(mode, targetType){
+
+    mode = mode.toLowerCase();
+    targetType = targetType.toLowerCase();
+
+    if(VALID_RECORD_MODES.indexOf(mode) === -1) return null;
+
+    let options = [];
+
+    if(mode === "player-match"){
+        options = VALID_PLAYER_MATCH_TYPES;
+    }else if(mode === "player-lifetime"){
+        options = VALID_PLAYER_LIFETIME_TYPES;
+    }
+
+    for(let i = 0; i < options.length; i++){
+
+        const o = options[i];
+
+        if(targetType === o.value) return o;
+    }
+
+    return null;
+}
 
 export function getTypeDisplayName(mode, cat){
 
