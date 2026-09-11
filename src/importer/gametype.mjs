@@ -1,4 +1,4 @@
-import { updateBasicTotals, updateGametype } from "../gametypes.mjs";
+import { gametypeSetBGametype, updateBasicTotals, updateGametype } from "../gametypes.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
 import { createRandomString } from "../generic.mjs";
 
@@ -111,5 +111,15 @@ export class Gametype{
     async updateTotals(){
 
         await updateBasicTotals(this.id);
+    }
+
+
+    async setBCTF(){
+
+        await gametypeSetBGametype("ctf", this.id, true);
+    }
+
+    async setBDom(){
+        await gametypeSetBGametype("dom", this.id, true);
     }
 }

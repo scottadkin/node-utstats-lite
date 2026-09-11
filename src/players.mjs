@@ -1009,7 +1009,7 @@ export async function calculateAllPlayerTotals(){
     return await insertPlayerGametypeMaxValues(totals);
 }
 
-//2.8.1
+//2.9.0
 async function insertPlayerGametypeMaxValues(data){
 
 

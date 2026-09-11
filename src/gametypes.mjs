@@ -20,11 +20,25 @@ async function bGametypeExist(name){
 
 async function createGametype(name){
 
-    const query = `INSERT INTO nstats_gametypes VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00')`;
+    const query = `INSERT INTO nstats_gametypes VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00', 0, 0)`;
 
     const result = await sqlInsertReturnRowId(query, [name]);
 
     return result;
+}
+
+
+export async function gametypeSetBGametype(type, gametypeId, value){
+
+    type = type.toLowerCase();
+
+    if(type !== "ctf" && type !== "dom") throw new Error(`Not a valid type for gametypeSetBGametype`);
+
+    if(value !== true && value !== false) throw new Error(`Not a valid value for gametypeSetBGametype`);
+
+    const query = `UPDATE nstats_gametypes SET b_${type}=? WHERE id=?`;
+
+    return await simpleQuery(query, [(value) ? 1 : 0, gametypeId]);
 }
 
 async function getGametypeId(name){

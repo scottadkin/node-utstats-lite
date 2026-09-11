@@ -291,6 +291,19 @@ export class MatchParser{
         await this.playerWeaponDamage.insertPlayerMatchData(this.matchId, this.gametype.id, this.map.id);
         await this.playerWeaponDamage.updatePlayerTotals(this.gametype.id, this.map.id);
 
+
+
+        if(this.ctf.bMatchCTF){
+            await this.map.setBCTF();
+            await this.gametype.setBCTF();
+        }
+
+        if(this.dom.bAnyData){
+
+            await this.map.setBDom();
+            await this.gametype.setBDom();
+        }
+
         //this.players.debugListAllPlayers();
     }
 

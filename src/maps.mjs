@@ -137,7 +137,7 @@ async function getMapId(name){
 
 async function createMap(name){
 
-    const query = `INSERT INTO nstats_maps VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00')`;
+    const query = `INSERT INTO nstats_maps VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00', 0, 0)`;
 
     const result = await sqlInsertReturnRowId(query, [name]);
 
@@ -145,6 +145,19 @@ async function createMap(name){
     return result;
 }
 
+export async function mapSetBGametype(type, mapId, value){
+
+    type = type.toLowerCase();
+
+    if(type !== "ctf" && type !== "dom") throw new Error(`not a valid type for mapSetBGametype`);
+
+    if(value !== true && value !== false) throw new Error(`value must be a bool`);
+
+    const query = `UPDATE nstats_maps SET b_${type}=? WHERE id=?`;
+
+    return await simpleQuery(query, [(value) ? 1 : 0, mapId]);
+
+}
 
 export async function updateMap(name){
 
