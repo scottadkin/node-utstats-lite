@@ -158,7 +158,9 @@ const queries = [
             matches INTEGER NOT NULL,
             playtime REAL NOT NULL,
             first_match TEXT NOT NULL,
-            last_match TEXT NOT NULL
+            last_match TEXT NOT NULL,
+            b_ctf INTEGER NOT NULL DEFAULT 0,
+            b_dom INTEGER NOT NULL DEFAULT 0
         ) STRICT`,
 
         `CREATE TABLE IF NOT EXISTS nstats_maps (
@@ -169,7 +171,7 @@ const queries = [
             first_match TEXT NOT NULL,
             last_match TEXT NOT NULL,
             b_ctf INTEGER NOT NULL DEFAULT 0,
-            c_dom INTEGER NOT NULL DEFAULT 0
+            b_dom INTEGER NOT NULL DEFAULT 0
         ) STRICT`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_players (     
@@ -1156,22 +1158,30 @@ async function createThumbnailSettings(){
 
 
 //2.9.0
-async function updateMapTable(){
+async function addBCTFBDOMMapGametypes(){
 
-    new Message(`Checking maps table for potential missing updated.`,"note");
 
-    const cols = [
-        {"name": "b_ctf", "type": "INTEGER NOT NULL DEFAULT 0"},
-        {"name": "b_dom", "type": "INTEGER NOT NULL DEFAULT 0"}
-    ];
+    const tables = ["maps", "gametypes"];
 
-    for(let i = 0; i < cols.length; i++){
+    for(let x = 0; x < tables.length; x++)
+        {
+        new Message(`Checking ${tables[x]} table for potential missing updated.`,"note");
 
-        await addColumn("nstats_maps", cols[i].name, cols[i].type)
+        const cols = [
+            {"name": "b_ctf", "type": "INTEGER NOT NULL DEFAULT 0"},
+            {"name": "b_dom", "type": "INTEGER NOT NULL DEFAULT 0"}
+        ];
+
+        for(let i = 0; i < cols.length; i++){
+
+            await addColumn(`nstats_${tables[x]}`, cols[i].name, cols[i].type)
+        }
+
+        new Message(`nstats_${tables[x]} is up to date.`,"pass");
     }
-
-    new Message(`nstats_maps is up to date.`,"pass");
 }
+
+
 
 export async function sqliteInstall(bOnlyCreateTables){
 
@@ -1209,7 +1219,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
 
     //2.9.0
-    await updateMapTable();
+    await addBCTFBDOMMapGametypes();
 
 
     new Message("Inserting Default Rankings Settings", "note");
