@@ -194,18 +194,53 @@ export async function getUniqueGametypeMapCombinations(){
     return {gametypes, maps, combos};
 }
 
-async function getTotalPlayerLifetimeRecords(recordType, gametypeId, mapId){
+async function getTotalPlayerLifetimeRecords(recordType, gametypeId, mapId, bCTF){
 
     //just in case im stupid and export this function in future
     if(!bValidPlayerLifetimeType(recordType)) throw new Error(`Not a valid player lifetime record`);
 
     recordType = recordType.toLowerCase();
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_player_totals WHERE gametype_id=? AND map_id=? AND ${recordType}!=0`;
+    const table = (bCTF) ? "nstats_player_totals_ctf" : "nstats_player_totals";
+
+    const query = `SELECT COUNT(*) as total_rows FROM ${table} WHERE gametype_id=? AND map_id=? AND ${recordType}!=0`;
 
     const result = await simpleQuery(query, [gametypeId, mapId]);
 
     return result[0].total_rows;
+}
+
+async function getPlayerLifetimeCTFRecords(recordType, gametypeId, mapId, start, cleanPerPage){
+
+    recordType = recordType.toLowerCase();
+
+    if(!bValidPlayerLifetimeType(recordType)) throw new Error(`Not a valid player ctf lifetime record type`);
+
+
+    const nameT = "nstats_players";
+    const tT = "nstats_player_totals";
+    const cT = "nstats_player_totals_ctf";
+
+    const query = `SELECT 
+    ${cT}.player_id,
+    ${tT}.total_matches,
+    ${tT}.playtime,
+    ${tT}.last_active,
+    ${cT}.${recordType} as record_value,
+    ${nameT}.name as player_name,
+    ${nameT}.country as country
+
+    FROM ${cT}
+    LEFT JOIN ${nameT} ON ${cT}.player_id = ${nameT}.id
+    LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id
+    WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 ORDER BY record_value DESC LIMIT ${start}, ${cleanPerPage}`;
+
+    const [data, totalResults] = await Promise.all([
+        simpleQuery(query, [gametypeId, mapId]), 
+        getTotalPlayerLifetimeRecords(recordType, gametypeId, mapId, true)
+    ]);
+
+    return {data, totalResults}
 }
 
 export async function getPlayerLifetimeRecords(recordType, gametypeId, mapId, dirtyPage, dirtyPerPage){
@@ -224,6 +259,10 @@ export async function getPlayerLifetimeRecords(recordType, gametypeId, mapId, di
     mapId = parseInt(mapId);
     if(mapId !== mapId) throw new Error("MapId must be a valid integer");
 
+    if(recordInfo.group === "CTF"){
+
+        return await getPlayerLifetimeCTFRecords(recordInfo.value, gametypeId, mapId, start, perPage);
+    }
 
     const nameT = "nstats_players";
     const tT = "nstats_player_totals";
@@ -243,7 +282,7 @@ export async function getPlayerLifetimeRecords(recordType, gametypeId, mapId, di
 
     const [data, totalResults] = await Promise.all([
         simpleQuery(query, [gametypeId, mapId]), 
-        getTotalPlayerLifetimeRecords(recordType, gametypeId, mapId)
+        getTotalPlayerLifetimeRecords(recordType, gametypeId, mapId, false)
     ]);
 
     return {data, totalResults};

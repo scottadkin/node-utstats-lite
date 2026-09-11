@@ -81,9 +81,6 @@ export async function renderRecordsPage(req, res, userSession){
         let data = [];
 
 
-
-        console.log(mode);
-
         if(mode === "player-match"){
 
             const result = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap, page, perPage);
