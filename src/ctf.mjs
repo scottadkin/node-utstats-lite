@@ -1602,3 +1602,40 @@ export async function getCTFPlayersAverages(playerIds, gametypeId, mapId){
 
     return data;
 }
+
+
+export async function ctfGetAllUniqueGametypesAndMaps(){
+
+    const gametypeQuery = `SELECT DISTINCT gametype_id FROM nstats_match_ctf`;
+    const mapQuery = `SELECT DISTINCT map_id FROM nstats_match_ctf`;
+
+    const [gametypeResult, mapResult] = await Promise.all([
+        simpleQuery(gametypeQuery), simpleQuery(mapQuery)
+    ]);
+
+    const gametypeIds = gametypeResult.map((r) => { return r.gametype_id});
+    const mapIds = mapResult.map((r) => { return r.map_id});
+
+    return {gametypeIds, mapIds}
+}
+
+
+/**
+ * Will mark any gametype or map as ctf if there is any ctf data for the match target
+ */
+export async function ctfSetGametypesMapsAsBCTF(){
+
+    const {gametypeIds: gametypes, mapIds: maps} = await ctfGetAllUniqueGametypesAndMaps();
+
+    if(gametypes.length > 0){
+        const gametypeQuery = "UPDATE nstats_gametypes SET b_ctf=1 WHERE id IN(?)";
+
+        await simpleQuery(gametypeQuery, [gametypes]);
+    }
+
+    if(maps.length > 0){
+        const mapQuery = "UPDATE nstats_maps SET b_ctf=1 WHERE id IN(?)";
+
+        await simpleQuery(mapQuery, [maps]);
+    }
+}

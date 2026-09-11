@@ -325,7 +325,41 @@ export async function getDOMMatchPlayersAPIJSON(matchId){
     }
 
     return data;
+}
 
-    
 
+export async function domGetAllUniqueGametypesAndMaps(){
+
+    const gametypeQuery = `SELECT DISTINCT gametype_id FROM nstats_match_dom`;
+    const mapQuery = `SELECT DISTINCT map_id FROM nstats_match_dom`;
+
+    const [gametypeResult, mapResult] = await Promise.all([
+        simpleQuery(gametypeQuery), simpleQuery(mapQuery)
+    ]);
+
+    const gametypeIds = gametypeResult.map((r) => { return r.gametype_id});
+    const mapIds = mapResult.map((r) => { return r.map_id});
+
+    return {gametypeIds, mapIds}
+}
+
+
+/**
+ * Will mark any gametype or map as ctf if there is any ctf data for the match target
+ */
+export async function domSetGametypesMapsAsBDOM(){
+
+    const {gametypeIds: gametypes, mapIds: maps} = await domGetAllUniqueGametypesAndMaps();
+
+    if(gametypes.length > 0){
+        const gametypeQuery = "UPDATE nstats_gametypes SET b_dom=1 WHERE id IN(?)";
+
+        await simpleQuery(gametypeQuery, [gametypes]);
+    }
+
+    if(maps.length > 0){
+        const mapQuery = "UPDATE nstats_maps SET b_dom=1 WHERE id IN(?)";
+
+        await simpleQuery(mapQuery, [maps]);
+    }
 }

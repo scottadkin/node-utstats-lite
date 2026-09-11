@@ -11,6 +11,7 @@ import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
 import { calculateAllPlayerTotals, installPlayerSettings } from "./players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllMapTotals } from "./weapons.mjs";
 import { recalculateAllPlayerTotals270 } from "./ctf.mjs";
+import { setAllBGametypeFlags } from "./matches.mjs";
 
 const queries = [
 
@@ -1182,7 +1183,6 @@ async function addBCTFBDOMMapGametypes(){
 }
 
 
-
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1253,6 +1253,11 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Calculating player ctf totals`, "note");
     await recalculateAllPlayerTotals270();
+
+
+    //2.9.0
+    new Message(`Marking Gametypes And Maps as BCTF or BDOM`, "note");
+    await setAllBGametypeFlags();
 
 
     //2.9.0

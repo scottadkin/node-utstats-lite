@@ -15,8 +15,8 @@ import {
     updatePlayerTotals as weaponUpdatePlayerTotals 
 } from "./weapons.mjs";
 import { getMatchKills, getMatchKillsBasic, deleteMatchKills } from "./kills.mjs";
-import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch, getCTFPlayersAverages } from "./ctf.mjs";
-import { getMatchData as domGetMatchData, getDOMMatchPlayersAPIJSON } from "./domination.mjs";
+import { getMatchData as ctfGetMatchData, deleteMatch as ctfDeleteMatch, getCTFPlayersAverages, ctfSetGametypesMapsAsBCTF } from "./ctf.mjs";
+import { getMatchData as domGetMatchData, domSetGametypesMapsAsBDOM, getDOMMatchPlayersAPIJSON } from "./domination.mjs";
 import md5 from "md5";
 import { getWinner, getTeamName, sanitizePagePerPage, 
     mysqlSetTotalsByDate, DAY, setInt, convertTimestamp, 
@@ -2238,4 +2238,12 @@ export async function getRecentActivityByDay(){
     });
 
     return arrayTest;
+}
+
+
+
+export async function setAllBGametypeFlags(){
+
+    await ctfSetGametypesMapsAsBCTF();
+    await domSetGametypesMapsAsBDOM();
 }
