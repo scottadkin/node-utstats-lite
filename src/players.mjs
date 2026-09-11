@@ -996,7 +996,8 @@ export async function calcPlayerTotals(playerIds){
 export async function calculateAllPlayerTotals(){
 
     let query = `SELECT
-    ${PLAYER_TOTALS_COLUMNS_MATCHES}
+    ${PLAYER_TOTALS_COLUMNS_MATCHES},
+    ${PLAYER_TOTALS_MAX_COLUMNS}
     FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
 
     const result = await simpleQuery(query);

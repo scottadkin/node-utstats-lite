@@ -8,7 +8,7 @@ import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./ctfLeague.mj
 import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
-import { calculateAllPlayerTotals, calculateAllPlayerTotalsMax, installPlayerSettings } from "./players.mjs";
+import { calculateAllPlayerTotals, installPlayerSettings } from "./players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllMapTotals } from "./weapons.mjs";
 import { recalculateAllPlayerTotals270 } from "./ctf.mjs";
 
@@ -167,7 +167,9 @@ const queries = [
             matches INTEGER NOT NULL,
             playtime REAL NOT NULL,
             first_match TEXT NOT NULL,
-            last_match TEXT NOT NULL
+            last_match TEXT NOT NULL,
+            b_ctf INTEGER NOT NULL DEFAULT 0,
+            c_dom INTEGER NOT NULL DEFAULT 0
         ) STRICT`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_players (     
@@ -876,7 +878,7 @@ const queries = [
 
         `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_pwd ON nstats_totals_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`,
 
-        `CREATE TABLE nstats_player_totals_max (
+        `CREATE TABLE IF NOT EXISTS nstats_player_totals_max (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id INTEGER NOT NULL,
             gametype_id INTEGER NOT NULL,
@@ -948,9 +950,14 @@ async function addColumn(tableName, columnName, columnType){
 export const PLAYER_TOTAL_WEAPONS_COLUMNS_260 = [
     "map_id", "max_kills", "max_deaths", "max_suicides", "max_team_kills"
 ];
+
 export const PLAYER_TOTAL_WEAPONS_COLUMNS_270 = [
     "playtime", "avg_kills", "avg_deaths", "avg_suicides", "avg_team_kills", 
     "epm_kills", "epm_deaths", "epm_suicides", "epm_team_kills"
+];
+
+export const MAP_COLUMNS_290 = [
+    "b_ctf", "b_dom"
 ];
 
 async function updatePlayerWeaponTotalsTable(){
@@ -1147,6 +1154,25 @@ async function createThumbnailSettings(){
 }
 
 
+
+//2.9.0
+async function updateMapTable(){
+
+    new Message(`Checking maps table for potential missing updated.`,"note");
+
+    const cols = [
+        {"name": "b_ctf", "type": "INTEGER NOT NULL DEFAULT 0"},
+        {"name": "b_dom", "type": "INTEGER NOT NULL DEFAULT 0"}
+    ];
+
+    for(let i = 0; i < cols.length; i++){
+
+        await addColumn("nstats_maps", cols[i].name, cols[i].type)
+    }
+
+    new Message(`nstats_maps is up to date.`,"pass");
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1179,6 +1205,11 @@ export async function sqliteInstall(bOnlyCreateTables){
     await simpleQuery(`DROP TABLE IF EXISTS nstats_player_map_minute_averages`);
 
     await addColumn("nstats_matches", "absolute_time", `TEXT NOT NULL DEFAULT "1999.11.22.01.01.01.000.0"`);
+
+
+
+    //2.9.0
+    await updateMapTable();
 
 
     new Message("Inserting Default Rankings Settings", "note");

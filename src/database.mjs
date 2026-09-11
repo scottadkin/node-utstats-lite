@@ -340,3 +340,14 @@ export async function sqlInsertOnDuplicateUpdate(tableName, columns, vars, confl
     prepare.run(...sqliteConvertDates(vars));
 
 }
+
+
+export async function getColumnNames(tableName){
+
+    const query = `PRAGMA table_info(${tableName})`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) => { return r.name });
+
+}
