@@ -172,9 +172,9 @@ class MatchesSearchForm{
         this.gametypes = gametypes;
         this.maps = maps;
 
-        this.selectedServer = selectedServer;
-        this.selectedGametype = selectedGametype;
-        this.selectedMap = selectedMap;
+        this.selectedServer = parseInt(selectedServer);
+        this.selectedGametype = parseInt(selectedGametype);
+        this.selectedMap = parseInt(selectedMap);
         this.selectedDisplayMode = selectedDisplayMode;
 
         UIHeader(this.parent, "Recent Matches");
@@ -195,7 +195,6 @@ class MatchesSearchForm{
 
         let title = "";
         let selectedKey = "";
-        let targetNames = [];
         let id = "";
 
         if(type === "servers"){
@@ -203,40 +202,120 @@ class MatchesSearchForm{
             selectedKey = "selectedServer";
             title = "Server";
             id = "s";
-            targetNames = this.servers;
 
         }else if(type === "gametypes"){
 
             selectedKey = "selectedGametype";
             title = "Gametype";
             id = "g";
-            targetNames = this.gametypes;
 
         }else if(type === "maps"){
 
             selectedKey = "selectedMap";
             title = "Map";
             id = "m";
-            targetNames = this.maps;
 
         }else if(type === "display"){
 
             selectedKey = "selectedDisplayMode";
             title = "Display Mode";
             id = "display";
+        }
 
-            targetNames = [
-                {"name": "Default View", "id": "default"},
-                {"name": "Table View", "id": "table"}
+
+        const row = UIDiv("form-row");
+        row.append(UILabel(title));
+
+        const select = new UISelect(
+            row, 
+            this.getNameOptions(type), 
+            this[selectedKey],
+            (newTab) => { 
+                this.changeSelected(selectedKey, newTab);
+            }
+        );
+
+        select.select.id = select.select.name = id;
+
+        return row;
+    }
+
+    getGametypeInfo(id){
+
+        if(id === 0) return {"bCTF": 1, "bDom": 1};
+
+        for(let i = 0; i < this.gametypes.length; i++){
+
+            const g = this.gametypes[i];
+    
+            if(g.id === id) return {"bCTF": g.b_ctf, "bDom": g.b_dom}
+        }
+
+        return null;
+    }
+
+    filterMaps(){
+
+        const valid = [];
+
+        const gametypeInfo = this.getGametypeInfo(this.selectedGametype);
+
+        for(let i = 0; i < this.maps.length; i++){
+
+            const m = this.maps[i];
+
+            if(this.selectedGametype === 0){
+
+                valid.push({"display": m.name, "value": m.id});
+                continue;
+            }
+
+
+            if(this.selectedGametype !== 0 && gametypeInfo.bDom === m.b_dom && gametypeInfo.bCTF === m.b_ctf){
+                valid.push({"display": m.name, "value": m.id});
+                continue;
+            }
+        }
+
+        valid.unshift({"display": "All", "value": 0});
+        return valid;
+    }
+
+    getNameOptions(type){
+
+
+        let targets = [];
+
+        if(type === "servers"){
+
+            targets = this.servers.map((s) =>{
+                return {"display": s.name, "value": s.id}
+            });
+        }else if(type === "gametypes"){
+
+            targets = this.gametypes.map((g) =>{
+                return {"display": g.name, "value": g.id}
+            });
+
+
+
+        }else if(type === "maps"){
+            targets = this.filterMaps();
+        }else if(type === "display"){
+            targets = [
+                {"display": "Default View", "value": "default"},
+                {"display": "Table View", "value": "table"}
             ];
         }
 
 
+
+
         if(type !== "display"){
 
-            targetNames.sort((a, b) =>{
-                a = a.name.toLowerCase();
-                b = b.name.toLowerCase();
+            targets.sort((a, b) =>{
+                a = a.display.toLowerCase();
+                b = b.display.toLowerCase();
 
                 if(a < b){
                     return -1;
@@ -247,23 +326,8 @@ class MatchesSearchForm{
             });
         }
 
-        const row = UIDiv("form-row");
-        row.append(UILabel(title));
 
-        const select = new UISelect(
-            row, 
-            targetNames.map((s) =>{
-                return {"display": s.name, "value": s.id};
-            }), 
-            this[selectedKey],
-            (newTab) => { 
-                this.changeSelected(selectedKey, newTab);
-            }
-        );
-
-        select.select.id = select.select.name = id;
-
-        return row;
+        return targets;
     }
 
     createFormElems(){
