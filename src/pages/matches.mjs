@@ -1,19 +1,25 @@
 import { getAllNames as getAllServerNames } from "../servers.mjs";
 import { getAllGametypesWithBGametype } from "../gametypes.mjs";
 import { getAllMapNamesWithBGametype } from "../maps.mjs";
-import { getRecentMatches } from "../matches.mjs";
+import { getAllUniqueGametypeMapCombinations, getRecentMatches } from "../matches.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 export async function renderMatchesPage(req, res, userSession){
 
     try{
 
-        const serverNames = await getAllServerNames(true);
-        const pageSettings = await getCategorySettings("Matches");
-        const timeZone = await getSiteWideTimeZone();
+        const [serverNames, pageSettings, timeZone, gametypeNames, mapNames, uniqueGametypeMapCombos] = await Promise.all([
+            getAllServerNames(true),
+            getCategorySettings("Matches"),
+            getSiteWideTimeZone(),
+            getAllGametypesWithBGametype(true),
+            getAllMapNamesWithBGametype(true),
+            getAllUniqueGametypeMapCombinations()
+        ]);
 
-        const gametypeNames = await getAllGametypesWithBGametype(true);
-        const mapNames = await getAllMapNamesWithBGametype(true);
+
+
+  
 
         
         let perPage = pageSettings?.["Results Per Page"] ?? 25;
@@ -50,6 +56,7 @@ export async function renderMatchesPage(req, res, userSession){
             serverNames,
             gametypeNames, 
             mapNames,
+            uniqueGametypeMapCombos,
             selectedServer,
             selectedGametype,
             selectedMap,

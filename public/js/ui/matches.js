@@ -164,13 +164,15 @@ class MatchesRichView{
 
 class MatchesSearchForm{
 
-    constructor(parent, servers, gametypes, maps, selectedServer, selectedGametype, selectedMap, selectedDisplayMode){
+    constructor(parent, servers, gametypes, maps, selectedServer, selectedGametype, selectedMap, 
+        selectedDisplayMode, uniqueGametypeMapCombos){
 
         this.parent = document.querySelector(parent);
 
         this.servers = servers;
         this.gametypes = gametypes;
         this.maps = maps;
+        this.uniqueGametypeMapCombos = uniqueGametypeMapCombos;
 
         this.selectedServer = parseInt(selectedServer);
         this.selectedGametype = parseInt(selectedGametype);
@@ -254,30 +256,36 @@ class MatchesSearchForm{
         return null;
     }
 
+    bMapUsedWithGametype(gametypeId, mapId){
+
+
+        return this.uniqueGametypeMapCombos?.[gametypeId]?.indexOf(mapId) !== -1;
+
+    }
+
     filterMaps(){
 
         const valid = [];
 
-        const gametypeInfo = this.getGametypeInfo(this.selectedGametype);
 
         for(let i = 0; i < this.maps.length; i++){
 
             const m = this.maps[i];
 
             if(this.selectedGametype === 0){
-
                 valid.push({"display": m.name, "value": m.id});
                 continue;
             }
 
+            if(!this.bMapUsedWithGametype(this.selectedGametype, m.id)) continue;
 
-            if(this.selectedGametype !== 0 && gametypeInfo.bDom === m.b_dom && gametypeInfo.bCTF === m.b_ctf){
-                valid.push({"display": m.name, "value": m.id});
-                continue;
-            }
+
+            valid.push({"display": m.name, "value": m.id});
+
         }
 
         valid.unshift({"display": "All", "value": 0});
+
         return valid;
     }
 

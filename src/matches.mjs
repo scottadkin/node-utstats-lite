@@ -2247,3 +2247,30 @@ export async function setAllBGametypeFlags(){
     await ctfSetGametypesMapsAsBCTF();
     await domSetGametypesMapsAsBDOM();
 }
+
+/**
+ * 
+ * @returns {Promise<Object>} GametypeID keys, mapIds as array values
+ */
+export async function getAllUniqueGametypeMapCombinations(){
+
+    const query = `SELECT DISTINCT gametype_id,map_id FROM nstats_matches ORDER BY gametype_id ASC, map_id ASC`;
+
+    const result = await simpleQuery(query);
+
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(data[r.gametype_id] === undefined){
+            data[r.gametype_id] = [];
+        }
+
+        data[r.gametype_id].push(r.map_id);
+    }
+
+    return data;
+}
