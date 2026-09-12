@@ -20,7 +20,7 @@ async function bGametypeExist(name){
 
 async function createGametype(name){
 
-    const query = `INSERT INTO nstats_gametypes VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00', 0, 0)`;
+    const query = `INSERT INTO nstats_gametypes VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00', 0, 0, 0, 0)`;
 
     const result = await sqlInsertReturnRowId(query, [name]);
 
@@ -32,7 +32,7 @@ export async function gametypeSetBGametype(type, gametypeId, value){
 
     type = type.toLowerCase();
 
-    if(type !== "ctf" && type !== "dom") throw new Error(`Not a valid type for gametypeSetBGametype`);
+    if(type !== "ctf" && type !== "dom" && type !== "as" && type !== "mh") throw new Error(`Not a valid type for gametypeSetBGametype`);
 
     if(value !== true && value !== false) throw new Error(`Not a valid value for gametypeSetBGametype`);
 
@@ -427,7 +427,7 @@ export async function getMostPlayedGametypes(limit){
  */
 export async function getAllGametypesWithBGametype(bReturnArray){
 
-    const query = `SELECT id,name,b_ctf,b_dom FROM nstats_gametypes ORDER BY name ASC`;
+    const query = `SELECT id,name,b_ctf,b_dom,b_as,b_mh FROM nstats_gametypes ORDER BY name ASC`;
 
     const result = await simpleQuery(query);
 

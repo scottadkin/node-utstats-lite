@@ -161,7 +161,9 @@ const queries = [
             first_match TEXT NOT NULL,
             last_match TEXT NOT NULL,
             b_ctf INTEGER NOT NULL DEFAULT 0,
-            b_dom INTEGER NOT NULL DEFAULT 0
+            b_dom INTEGER NOT NULL DEFAULT 0,
+            b_as INTEGER NOT NULL DEFAULT 0,
+            b_mh INTEGER NOT NULL DEFAULT 0
         ) STRICT`,
 
         `CREATE TABLE IF NOT EXISTS nstats_maps (
@@ -172,7 +174,9 @@ const queries = [
             first_match TEXT NOT NULL,
             last_match TEXT NOT NULL,
             b_ctf INTEGER NOT NULL DEFAULT 0,
-            b_dom INTEGER NOT NULL DEFAULT 0
+            b_dom INTEGER NOT NULL DEFAULT 0,
+            b_as INTEGER NOT NULL DEFAULT 0,
+            b_mh INTEGER NOT NULL DEFAULT 0
         ) STRICT`,
 
         `CREATE TABLE IF NOT EXISTS nstats_match_players (     
@@ -1170,7 +1174,9 @@ async function addBCTFBDOMMapGametypes(){
 
         const cols = [
             {"name": "b_ctf", "type": "INTEGER NOT NULL DEFAULT 0"},
-            {"name": "b_dom", "type": "INTEGER NOT NULL DEFAULT 0"}
+            {"name": "b_dom", "type": "INTEGER NOT NULL DEFAULT 0"},
+            {"name": "b_as", "type": "INTEGER NOT NULL DEFAULT 0"},
+            {"name": "b_mh", "type": "INTEGER NOT NULL DEFAULT 0"},
         ];
 
         for(let i = 0; i < cols.length; i++){

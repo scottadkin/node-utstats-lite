@@ -137,7 +137,7 @@ async function getMapId(name){
 
 async function createMap(name){
 
-    const query = `INSERT INTO nstats_maps VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00', 0, 0)`;
+    const query = `INSERT INTO nstats_maps VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00', 0, 0, 0 ,0)`;
 
     const result = await sqlInsertReturnRowId(query, [name]);
 
@@ -149,7 +149,7 @@ export async function mapSetBGametype(type, mapId, value){
 
     type = type.toLowerCase();
 
-    if(type !== "ctf" && type !== "dom") throw new Error(`not a valid type for mapSetBGametype`);
+    if(type !== "ctf" && type !== "dom" && type !== "as" && type !== "mh") throw new Error(`not a valid type for mapSetBGametype`);
 
     if(value !== true && value !== false) throw new Error(`value must be a bool`);
 
@@ -1086,7 +1086,7 @@ export async function saveThumbnailSettings(settings){
 
 export async function getAllMapNamesWithBGametype(bReturnArray){
 
-    const query = `SELECT id,name,b_ctf,b_dom FROM nstats_maps ORDER BY name ASC`;
+    const query = `SELECT id,name,b_ctf,b_dom,b_as,b_mh FROM nstats_maps ORDER BY name ASC`;
     
     const result = await simpleQuery(query);
 
@@ -1098,7 +1098,7 @@ export async function getAllMapNamesWithBGametype(bReturnArray){
 
         const r = result[i];
 
-        data[r.id] = {"name": r.name, "bCTF": r.b_ctf, "bDOM": r.b_dom}
+        data[r.id] = {"name": r.name, "bCTF": r.b_ctf, "bDOM": r.b_dom, "bAS": r.b_as, "bMH": r.b_mh}
     }
 
     return data;
