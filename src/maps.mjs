@@ -1082,3 +1082,24 @@ export async function saveThumbnailSettings(settings){
         await simpleQuery(query, [value, name]);
     }
 }
+
+
+export async function getAllMapNamesWithBGametype(bReturnArray){
+
+    const query = `SELECT id,name,b_ctf,b_dom FROM nstats_maps ORDER BY name ASC`;
+    
+    const result = await simpleQuery(query);
+
+    if(bReturnArray) return result;
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = {"name": r.name, "bCTF": r.b_ctf, "bDOM": r.b_dom}
+    }
+
+    return data;
+}

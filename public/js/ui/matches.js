@@ -231,6 +231,7 @@ class MatchesSearchForm{
             ];
         }
 
+
         if(type !== "display"){
 
             targetNames.sort((a, b) =>{

@@ -414,3 +414,35 @@ export async function getMostPlayedGametypes(limit){
 
     return await simpleQuery(query, [limit]);
 }
+
+/**
+ * 
+ * @returns {Promise<Object|Array>} { gametypeId: {id,name,bCTF,bDOM}...
+ */
+
+/**
+ * 
+ * @param {Boolean} bReturnArray 
+ * @returns {Promise<Object|Array>}
+ */
+export async function getAllGametypesWithBGametype(bReturnArray){
+
+    const query = `SELECT id,name,b_ctf,b_dom FROM nstats_gametypes ORDER BY name ASC`;
+
+    const result = await simpleQuery(query);
+
+    result.unshift({"id": 0, "name": "All"});
+
+    if(bReturnArray) return result;
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.id] = {"name": r.name, "bCTF": r.b_ctf, "bDom": r.b_dom}
+    }
+
+    return data;
+}

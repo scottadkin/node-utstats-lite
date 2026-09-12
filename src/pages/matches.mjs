@@ -1,6 +1,6 @@
 import { getAllNames as getAllServerNames } from "../servers.mjs";
-import { getAllNames as getAllGametypeNames } from "../gametypes.mjs";
-import { getAllNames as getAllMapNames } from "../maps.mjs";
+import { getAllGametypesWithBGametype } from "../gametypes.mjs";
+import { getAllMapNamesWithBGametype } from "../maps.mjs";
 import { getRecentMatches } from "../matches.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
@@ -9,10 +9,12 @@ export async function renderMatchesPage(req, res, userSession){
     try{
 
         const serverNames = await getAllServerNames(true);
-        const gametypeNames = await getAllGametypeNames(true);
-        const mapNames = await getAllMapNames(true);
         const pageSettings = await getCategorySettings("Matches");
         const timeZone = await getSiteWideTimeZone();
+
+        const gametypeNames = await getAllGametypesWithBGametype(true);
+        const mapNames = await getAllMapNamesWithBGametype(true);
+
         
         let perPage = pageSettings?.["Results Per Page"] ?? 25;
         perPage = parseInt(perPage);
@@ -45,7 +47,7 @@ export async function renderMatchesPage(req, res, userSession){
                 "description": "View recent matches played on our Unreal Tournament servers.",
                 "image": "/images/maps/default.jpg"
             },
-            serverNames, 
+            serverNames,
             gametypeNames, 
             mapNames,
             selectedServer,
