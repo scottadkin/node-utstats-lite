@@ -157,7 +157,11 @@ export async function getUniqueGametypeMapCombinations(){
     const query = `SELECT DISTINCT nstats_player_totals.gametype_id,
     nstats_player_totals.map_id,
     nstats_maps.name as map_name,
-    nstats_gametypes.name as gametype_name
+    nstats_maps.b_ctf as b_map_ctf,
+    nstats_maps.b_dom as b_map_dom,
+    nstats_gametypes.name as gametype_name,
+    nstats_gametypes.b_ctf as b_gametype_ctf,
+    nstats_gametypes.b_dom as b_gametype_dom
     FROM nstats_player_totals 
     LEFT JOIN nstats_gametypes ON nstats_player_totals.gametype_id = nstats_gametypes.id
     LEFT JOIN nstats_maps ON nstats_player_totals.map_id = nstats_maps.id
@@ -170,11 +174,32 @@ export async function getUniqueGametypeMapCombinations(){
     const usedMaps = new Set();
     const maps = [];
 
+    const ctfGametypes = new Set();
+    const ctfMaps = new Set();
+    const domGametypes = new Set();
+    const domMaps = new Set();
+
     const combos = [];
 
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
+
+        if(r.b_map_ctf){
+            ctfMaps.add(r.map_id);
+        }
+
+        if(r.b_map_dom){
+            domMaps.add(r.map_id);
+        }
+
+        if(r.b_gametype_ctf){
+            ctfGametypes.add(r.gametype_id);
+        }
+
+        if(r.b_gametype_dom){
+            domGametypes.add(r.gametype_id);
+        }
 
         if(!usedGametypes.has(r.gametype_id)){
             gametypes.push({"id": r.gametype_id, "name": r.gametype_name});
@@ -191,7 +216,12 @@ export async function getUniqueGametypeMapCombinations(){
 
   
 
-    return {gametypes, maps, combos};
+    return {
+        gametypes, maps, combos, 
+        "ctfGametypes": [...ctfGametypes], 
+        "ctfMaps": [...ctfMaps], 
+        "domGametypes": [...domGametypes], 
+        "domMaps": [...domMaps]};
 }
 
 async function getTotalPlayerLifetimeRecords(recordType, gametypeId, mapId, bCTF){

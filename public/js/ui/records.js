@@ -2,7 +2,7 @@ class RecordsPage{
 
     constructor(parent, mode, validTypes, modeTitles, gametypes, maps, 
         gametypeMapCombos, selectedGametype, selectedMap, recordType, data, totalResults,
-        page, perPage
+        page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps
     ){
 
 
@@ -29,6 +29,10 @@ class RecordsPage{
 
         this.page = page;
         this.perPage = perPage;
+        this.ctfGametypes = ctfGametypes;
+        this.ctfMaps = ctfMaps;
+        this.domGametypes = domGametypes;
+        this.domMaps = domMaps;
 
 
         this.createTabs();
@@ -57,16 +61,8 @@ class RecordsPage{
             this.page = 1;
 
             
-            
-            if(!this.recordSelect.updateOptions(this.getRecordOptions(), this.selectedRecordType)){
+            this.updateRecordsOptions();
 
-                const newValue = this.recordSelect.options[0]?.value ?? "score";
-
-                this.recordSelect.changeSelected(newValue);
-                this.selectedRecordType = newValue;
-
-                
-            }
 
             this.loadData();
             
@@ -90,7 +86,6 @@ class RecordsPage{
             const req = await fetch(`${url}`);
 
             const res = await req.json();
-
 
             if(res.error !== undefined) throw new Error(res.error);
 
@@ -191,23 +186,65 @@ class RecordsPage{
         return this.validTypes[this.mode];
     }
 
+    bGametypeCTF(gametypeId){
+
+        return this.ctfGametypes.indexOf(gametypeId) !== -1;
+    }
+
+    bMapCTF(mapId){
+
+        return this.ctfMaps.indexOf(mapId) !== -1;
+    }
+
+    updateRecordsOptions(){
+
+        const allOptions = this.getRecordOptions();
+
+
+        const options = [];
+
+        const bCTFGametype = this.bGametypeCTF(this.selectedGametype);
+        const bMapCTF = this.bMapCTF(this.selectedMap);
+
+        for(let i = 0; i < allOptions.length; i++){
+
+            const a = allOptions[i];
+
+            if(a.group === "CTF" && ((!bCTFGametype && this.selectedGametype !== 0) || (!bMapCTF && this.selectedMap !== 0)) ) continue;
+
+            options.push(a);
+        }
+
+        if(!this.recordSelect.updateOptions(options, this.selectedRecordType)){
+
+
+            this.recordSelect.changeSelected(options[0].value);
+            this.selectedRecordType = options[0].value;
+            //this.updateHistory();
+            this.render();
+        }
+        
+    }
+
     createDropDowns(){
 
 
         this.form = UIDiv("form");
 
+        
         this.recordRow = UIDiv("form-row");
         this.recordRow.append(UILabel("Record Type"));
-        this.recordSelect = new UISelect(this.recordRow, this.getRecordOptions(), this.selectedRecordType, (e) =>{
+        this.recordSelect = new UISelect(this.recordRow, [], this.selectedRecordType, (e) =>{
 
             this.selectedRecordType = e;
             this.page = 1;
             this.loadData();
-            this.pagination.changeUrl(`${this.createUrl()}&page=`);
+            this.updateRecordsOptions();
+            this.pagination.changeUrl(`${this.createUrl()}&page=`);  
             
-        
         });
         
+        this.updateRecordsOptions();
 
         this.gametypeRow = UIDiv("form-row");
         this.mapRow = UIDiv("form-row");
@@ -237,8 +274,11 @@ class RecordsPage{
                 this.selectedMap = newSel;
                 this.page = 1;
             }
+            this.updateRecordsOptions();
 
             this.pagination.changeUrl(`${this.createUrl()}&page=`);
+
+            
             
             this.loadData();
 
@@ -248,6 +288,7 @@ class RecordsPage{
 
             this.selectedMap = parseInt(e);
             this.page = 1;
+            this.updateRecordsOptions();
             this.pagination.changeUrl(`${this.createUrl()}&page=`);
             this.loadData();
         });

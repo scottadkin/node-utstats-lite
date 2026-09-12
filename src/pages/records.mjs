@@ -37,7 +37,7 @@ export async function renderRecordsPage(req, res, userSession){
     
     try{
         
-        const [pageSettings, brandingSettings, timeZone, {gametypes, maps, combos}] = await Promise.all([
+        const [pageSettings, brandingSettings, timeZone, {gametypes, maps, combos, ctfGametypes, ctfMaps, domGametypes, domMaps}] = await Promise.all([
             getCategorySettings("Records"),
             getCategorySettings("Branding"),
             getSiteWideTimeZone(),
@@ -79,6 +79,7 @@ export async function renderRecordsPage(req, res, userSession){
 
         let totalResults = 0;
         let data = [];
+
 
 
         if(mode === "player-match"){
@@ -134,6 +135,10 @@ export async function renderRecordsPage(req, res, userSession){
             totalResults,
             perPage,
             page,
+            ctfGametypes,
+            ctfMaps,
+            domGametypes,
+            domMaps,
             // catTitle,
             // page,
             // perPage,
