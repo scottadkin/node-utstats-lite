@@ -21,9 +21,9 @@ export async function renderRankingsPage(req, res, userSession){
 
         if(mode !== "gametype" && mode !== "map") mode = "gametype";
 
-        let page = (req.query?.p !== undefined) ? parseInt(req.query.p) : 1;
+        let page = (req.query.p !== undefined) ? parseInt(req.query.p) : 1;
         let perPage = req.query.pp ?? pageSettings["Results Per Page"] ?? 25;
-        let targetId = (req.query?.id !== undefined) ? parseInt(req.query.id) : 0;
+        let targetId = (req.query.id !== undefined) ? parseInt(req.query.id) : 0;
 
         let defaultLastActive = 28;
 
@@ -51,23 +51,37 @@ export async function renderRankingsPage(req, res, userSession){
         if(mode === "gametype"){
 
             
+            
+            
+            ids = await getUniqueGametypes();
+
+            if(targetId === 0 && ids.length > 0){
+                targetId = ids[0];
+            }
+
             if(targetId !== 0){
                 const names = await getGametypeNames(targetId, true);
-                typeName = `${names?.[targetId]} ` ?? "Not Found ";
+                typeName = `${names[targetId]}` ?? "Not Found ";
             }
-            
-            title = `${typeName}Player Gametype Rankings`;
-            ids = await getUniqueGametypes();
+            title = `${typeName} Player Gametype Rankings`;
+
 
         }else if(mode === "map"){
   
-            if(targetId !== 0){
-                const names = await getMapNames(targetId);
-                typeName = `${names?.[targetId]} ` ?? "Not Found ";
+            
+
+            
+            ids = await getUniqueMaps();
+
+            if(targetId === 0 && ids.length > 0){
+                targetId = ids[0];
             }
 
-            title = `${typeName}Player Map Rankings`;
-            ids = await getUniqueMaps();
+            if(targetId !== 0){
+                const names = await getMapNames(targetId);
+                typeName = `${names?.[targetId]}` ?? "Not Found ";
+            }
+            title = `${typeName} Player Map Rankings`;
         }
 
         const data = await getRankingsWithPlayerNames(targetId, page, perPage, timeRange, mode);
@@ -91,7 +105,7 @@ export async function renderRankingsPage(req, res, userSession){
         res.render("rankings.ejs",{
             "host": req.headers.host,
             "title": title,
-            "meta": {"description": "Player rankings", "image": "images/maps/default/jpg"},
+            "meta": {"description": `View player rankings for ${typeName}.`, "image": "images/maps/default/jpg"},
             mode,
             data,
             "names": itemNames,

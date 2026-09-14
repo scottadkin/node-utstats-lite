@@ -663,6 +663,7 @@ export async function getUniqueGametypes(){
 //use for rankings main page instead of just using the latest
 export async function getMostActiveInTimeRange(type, timeRange){
 
+
     const gametypeQuery = `SELECT gametype_id as id,COUNT(*) as total_players FROM nstats_rankings 
     WHERE last_active>=? GROUP BY gametype_id ORDER BY total_players DESC LIMIT 1`;
 
@@ -672,6 +673,7 @@ export async function getMostActiveInTimeRange(type, timeRange){
     const query = (type === "map") ? mapQuery : gametypeQuery;
 
     const minDate = new Date(Date.now() - 60 * 60 * 24 * 1000 * timeRange);
+
     const result = await simpleQuery(query, [minDate]);
 
     if(result.length === 0) return 0;
