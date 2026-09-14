@@ -4335,11 +4335,10 @@ class AdminSQLiteBackupManager{
         const rows = this.dbStats.backups.map((b) =>{
             return [
                 {"content": b.name, "className": "text-left"},
-                {"content": b.stats.mtimeMs, "parse": ["date"], "className": "date"},
+                {"content": new Date(b.stats.mtimeMs),  "className": "date"},
                 toByteString(b.stats.size),
             ];
         });
-        
 
         new UITable(this.content, tableOptions, rows);
     }
