@@ -40,19 +40,46 @@ export class SFTPImporter{
 
         let sftp = new Client();
 
-        return this.client.connect(config).then( () => {
+
+        try{
+
+            await this.client.connect(config);
+
+            this.client.on("close", () =>{
+
+                console.trace("HORSE NOUSE");
+                process.exit();
+            })
+            new Message(`Connected to ${this.host}:${this.port}(SFTP)`,"pass");
+            await this.downloadMatchLogs();
+
+        }catch(err){
+
+            new Message(err.toString(), "error");
+            console.trace(err);
+
+        }finally{
+
+            new Message(`Attempting to disconnect from ${this.host}(SFTP)`,"progress");
+            await sftp.end();
+            new Message(`Disconnected from ${this.host}(SFTP)`,"progress");
+        }
+
+        
+
+        /*return await this.client.connect(config).then(async () => {
 
             new Message(`Connected to ${this.host}:${this.port}(SFTP)`,"pass");
-            return this.downloadMatchLogs()
-        })
-        .then(() => {
-            sftp.end();
+            return await this.downloadMatchLogs();
         })
         .catch(err => {
             console.error(err.message);
-        }).finally(() =>{
-            new Message(`Disconnected from ${this.host}(SFTP)`,"progress");
-        });
+        }).finally(async () =>{
+
+            await sftp.end();
+            new Message(`Disconnecting from ${this.host}(SFTP)`,"progress");
+            
+        });*/
 
         
     }
