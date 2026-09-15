@@ -6,7 +6,6 @@ export const MODE_TITLES = {
     "player-epm": "Player Events Per Minute Records",
 };
 
-
 export const VALID_PLAYER_MATCH_TYPES = [
     {"display": "Score", "value": "max_score", "parse": ["ignore0"], "group": "General"},
     {"display": "Frags", "value": "max_frags", "parse": ["ignore0"], "group": "General"},
@@ -171,7 +170,7 @@ export function sanitizeRecordType(mode, recordType){
     }
 
     if(mode === "player-match"){
-        return "score";
+        return "max_score";
     }else if(mode === "player-lifetime"){
         return "wins";
     }else if(mode === "player-epm"){
@@ -214,7 +213,13 @@ export function bValidRecordType(mode, cat){
 
     const types = getRecordTypes(mode);
 
-    return types.indexOf(cat) !== -1;
+    for(let i = 0; i < types.length; i++){
+
+        if(types[i].value === cat) return true;
+    }
+
+    return false;
+
 }
 
 

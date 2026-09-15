@@ -65,6 +65,7 @@ export async function renderRecordsPage(req, res, userSession){
 
         mode = sanitizeRecordMode(mode);
         recordType = sanitizeRecordType(mode, recordType);
+
         
         let totalResults = 0;
         let data = [];
