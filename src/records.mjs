@@ -317,3 +317,68 @@ export async function getPlayerLifetimeRecords(recordType, gametypeId, mapId, di
 
     return {data, totalResults};
 }
+
+async function getTotalPlayerEPMRecords(recordType, gametypeId, mapId, bCTF){
+
+    //just in case im stupid and export this function in future
+    
+    recordType = recordType.toLowerCase();
+
+    const recordInfo = getRecordTypeInfo("player-epm", recordType);
+
+    if(recordInfo === null) throw new Error(`Not a valid player epm record type`);
+
+    const table = (bCTF) ? "nstats_player_totals_ctf" : "nstats_player_totals";
+
+    const query = `SELECT COUNT(*) as total_rows FROM ${table} WHERE gametype_id=? AND map_id=? AND ${recordType}!=0`;
+
+    const result = await simpleQuery(query, [gametypeId, mapId]);
+
+    return result[0].total_rows;
+}
+
+export async function getPlayerEPMRecords(recordType, gametypeId, mapId, dirtyPage, dirtyPerPage){
+
+    recordType = recordType.toLowerCase();
+
+    const recordInfo = getRecordTypeInfo("player-epm", recordType);
+    
+    if(recordInfo === null){
+        throw new Error(`Not a valid player EPM record type`);
+    }
+
+    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
+
+    gametypeId = parseInt(gametypeId);
+    mapId = parseInt(mapId);
+
+    if(gametypeId !== gametypeId || mapId !== mapId){
+        throw new Error(`Both gametypeId and mapId must be valid integers.`);
+    }
+
+    const nameT = "nstats_players";
+    const tT = "nstats_player_totals";
+
+    const query = `SELECT
+    ${tT}.player_id,
+    ${nameT}.name as player_name,
+    ${nameT}.country as country,
+    ${tT}.last_active,
+    ${tT}.playtime,
+    ${tT}.total_matches,
+    ${tT}.${recordType} as record_value
+    FROM ${tT} 
+    LEFT JOIN ${nameT} ON ${tT}.player_id = ${nameT}.id
+    WHERE ${tT}.gametype_id=? AND ${tT}.map_id=? AND record_value!=0
+    ORDER BY record_value DESC LIMIT ${start}, ${perPage}`;
+
+    const [data, totalResults] = await Promise.all([
+        simpleQuery(query, [gametypeId, mapId]), 
+        getTotalPlayerEPMRecords(recordType, gametypeId, mapId, false)
+    ]);
+
+
+    return {data, totalResults};
+
+
+}

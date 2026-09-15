@@ -6,7 +6,7 @@ import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
 import { getMatchWeaponDamage } from "../playerWeaponDamage.mjs";
-import { getPlayerLifetimeRecords, getPlayerMatchRecords } from "../records.mjs";
+import { getPlayerEPMRecords, getPlayerLifetimeRecords, getPlayerMatchRecords } from "../records.mjs";
 
 export default class JSONManager{
 
@@ -305,6 +305,12 @@ export default class JSONManager{
         }else if(cat === "player-lifetime"){
 
             const {totalResults, data}  = await getPlayerLifetimeRecords(recordType, gid, mid, page, perPage);
+            this.res.status(200).json({data, totalResults});
+            return;
+
+        }else if(cat === "player-epm"){
+
+            const {totalResults, data} = await getPlayerEPMRecords(recordType, gid, mid, page, perPage);
             this.res.status(200).json({data, totalResults});
             return;
         }

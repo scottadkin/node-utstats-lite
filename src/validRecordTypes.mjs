@@ -97,7 +97,6 @@ export const VALID_PLAYER_EPM_TYPES = [
     {"display": "Deaths", "value": "epm_deaths", "group": "General"},
     {"display": "Suicides", "value": "epm_suicides", "group": "General"},
     {"display": "Team Kills", "value": "epm_team_kills", "group": "General"},
-    {"display": "Playtime", "value": "epm_playtime", "parse": ["playtime"], "className": "playtime", "group": "General"},
     {"display": "Headshots", "value": "epm_headshots", "group": "General"},
     {"display": "Flag Taken", "value": "epm_flag_taken", "group": "CTF"},
     {"display": "Flag Pickup", "value": "epm_flag_pickup", "group": "CTF"},
@@ -131,7 +130,7 @@ export const VALID_PLAYER_EPM_TYPES = [
 ];
 
 
-export const VALID_RECORD_MODES = ["player-match", "player-lifetime"];
+export const VALID_RECORD_MODES = ["player-match", "player-lifetime", "player-epm"];
 
 export const MODE_TITLES = {
     "player-lifetime": "Player Lifetime Records",
@@ -184,6 +183,8 @@ export function getRecordTypeInfo(mode, targetType){
         options = VALID_PLAYER_MATCH_TYPES;
     }else if(mode === "player-lifetime"){
         options = VALID_PLAYER_LIFETIME_TYPES;
+    }else if(mode === "player-epm"){
+        options = VALID_PLAYER_EPM_TYPES;
     }
 
     for(let i = 0; i < options.length; i++){

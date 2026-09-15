@@ -5,7 +5,7 @@ import {
     VALID_PLAYER_EPM_TYPES
 } from "../validRecordTypes.mjs";
 
-import { getUniqueGametypeMapCombinations, getPlayerMatchRecords, getPlayerLifetimeRecords } from "../records.mjs";
+import { getUniqueGametypeMapCombinations, getPlayerMatchRecords, getPlayerLifetimeRecords, getPlayerEPMRecords } from "../records.mjs";
 import { sanitizePagePerPage } from "../generic.mjs";
 
 const VALID_MODES = [
@@ -96,6 +96,13 @@ export async function renderRecordsPage(req, res, userSession){
         }else if(mode === "player-lifetime"){
 
             const result = await getPlayerLifetimeRecords(recordType, selectedGametype, selectedMap, page, perPage);
+
+            totalResults = result.totalResults;
+            data = result.data;
+
+        }else if(mode === "player-epm"){
+
+            const result = await getPlayerEPMRecords(recordType, selectedGametype, selectedMap, page, perPage);
 
             totalResults = result.totalResults;
             data = result.data;

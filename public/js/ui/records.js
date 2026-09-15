@@ -363,7 +363,11 @@ class RecordsPage{
 
 
         const rows = this.data.map((d, i) =>{
+
             const pos = i + 1 + (this.page - 1) * this.perPage;
+
+            let value = (this.mode === "player-epm") ? d.record_value.toFixed(3) : d.record_value;
+
             return [
                 {
                     "display": `${pos}${getOrdinal(pos)}`, "className": "ordinal"
@@ -379,7 +383,7 @@ class RecordsPage{
                 {"display": toDateString(d.last_active, TIME_ZONE, true), "className": "date"},
                 {"display": d.total_matches},
                 {"display": toPlaytime(d.playtime), "className": "playtime"},
-                {"display": d.record_value},
+                {"display": value},
             ];
         });
 
