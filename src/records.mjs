@@ -1,38 +1,7 @@
 import { simpleQuery } from "./database.mjs";
-import { getBasicPlayerInfo } from "./players.mjs";
-import { getBasicMatchesInfo } from "./matches.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
-import { VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, getRecordTypeInfo } from "./validRecordTypes.mjs";
+import { getRecordTypeInfo, bValidPlayerLifetimeType, bValidPlayerMatchType } from "./validRecordTypes.mjs";
 
-function bValidPlayerMatchType(type){
-
-    type = type.toLowerCase();
-
-    for(let i = 0; i < VALID_PLAYER_MATCH_TYPES.length; i++){
-
-        const v = VALID_PLAYER_MATCH_TYPES[i];
-
-        if(v.value === type) return true;
-    }
-
-    return false;
-
-}
-
-function bValidPlayerLifetimeType(type){
-
-    type = type.toLowerCase();
-
-    for(let i = 0; i < VALID_PLAYER_LIFETIME_TYPES.length; i++){
-
-        const v = VALID_PLAYER_LIFETIME_TYPES[i];
-        
-        if(v.value === type) return true;
-    }
-
-    return false;
-
-}
 
 async function getTotalPlayerMatchRecords(recordType, gametypeId, mapId){
 

@@ -1,18 +1,13 @@
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { 
     VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, 
-    bValidRecordType, getTypeDisplayName, MODE_TITLES, 
-    VALID_PLAYER_EPM_TYPES
+    getTypeDisplayName, MODE_TITLES, 
+    VALID_PLAYER_EPM_TYPES,
+    sanitizeRecordType,
+    sanitizeRecordMode
 } from "../validRecordTypes.mjs";
-
 import { getUniqueGametypeMapCombinations, getPlayerMatchRecords, getPlayerLifetimeRecords, getPlayerEPMRecords } from "../records.mjs";
-import { sanitizePagePerPage } from "../generic.mjs";
 
-const VALID_MODES = [
-    "player-lifetime",
-    "player-match",
-    "player-epm"
-];
 
 function bIdExists(data, id){
 
@@ -68,22 +63,11 @@ export async function renderRecordsPage(req, res, userSession){
             selectedMap = 0;
         }
 
-        if(VALID_MODES.indexOf(mode) === -1) mode = "player-match";
-
-        if(!bValidRecordType(mode, recordType)){
-
-            if(mode === "player-match"){
-                recordType = "max_score";
-            }else if(mode === "player-lifetime"){
-                recordType = "score";
-            }else{
-                recordType = "epm_score";
-            }
-        }
-
+        mode = sanitizeRecordMode(mode);
+        recordType = sanitizeRecordType(mode, recordType);
+        
         let totalResults = 0;
         let data = [];
-
 
 
         if(mode === "player-match"){
@@ -151,9 +135,6 @@ export async function renderRecordsPage(req, res, userSession){
             ctfMaps,
             domGametypes,
             domMaps,
-            // catTitle,
-            // page,
-            // perPage,
             userSession
         });
         

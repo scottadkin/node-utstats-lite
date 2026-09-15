@@ -1,3 +1,12 @@
+export const VALID_RECORD_MODES = ["player-match", "player-lifetime", "player-epm"];
+
+export const MODE_TITLES = {
+    "player-lifetime": "Player Lifetime Records",
+    "player-match": "Player Match Records",
+    "player-epm": "Player Events Per Minute Records",
+};
+
+
 export const VALID_PLAYER_MATCH_TYPES = [
     {"display": "Score", "value": "max_score", "parse": ["ignore0"], "group": "General"},
     {"display": "Frags", "value": "max_frags", "parse": ["ignore0"], "group": "General"},
@@ -130,41 +139,80 @@ export const VALID_PLAYER_EPM_TYPES = [
 ];
 
 
-export const VALID_RECORD_MODES = ["player-match", "player-lifetime", "player-epm"];
+/**
+ * return a valid record mode
+ * @param {string} mode 
+ * @returns string
+ */
+export function sanitizeRecordMode(mode){
 
-export const MODE_TITLES = {
-    "player-lifetime": "Player Lifetime Records",
-    "player-match": "Player Match Records",
-    "player-epm": "Player Events Per Minute Records",
-};
+    mode = mode.toLowerCase();
+
+    if(VALID_RECORD_MODES.indexOf(mode) === -1){
+        return "player-match";
+    }
+
+    return mode;
+}
+/**
+ * 
+ * @param {string} mode Record Mode 
+ * @param {string} recordType e.g score
+ * @returns {string} valid recordType for matching method, or score if none found.
+ */
+export function sanitizeRecordType(mode, recordType){
+
+
+    mode = mode.toLowerCase();
+    recordType = recordType.toLowerCase();
+
+    if(bValidRecordType(mode, recordType)){
+        return recordType;
+    }
+
+    if(mode === "player-match"){
+        return "score";
+    }else if(mode === "player-lifetime"){
+        return "wins";
+    }else if(mode === "player-epm"){
+        return "epm_score";
+    }
+
+    return "score";
+
+}
+
+/**
+ * 
+ * @param {string} mode 
+ * @returns All available record types
+ */
+export function getRecordTypes(mode){
+
+    mode = mode.toLowerCase();
+
+    if(mode === "player-match"){
+
+        return VALID_PLAYER_MATCH_TYPES;
+
+    }else if(mode === "player-lifetime"){
+
+        return VALID_PLAYER_LIFETIME_TYPES;
+
+    }else if(mode === "player-epm"){
+        return VALID_PLAYER_EPM_TYPES;
+    }
+
+    throw new Error(`${mode} is not a valid record mode`);
+    
+}
 
 export function bValidRecordType(mode, cat){
 
     mode = mode.toLowerCase();
     cat = cat.toLowerCase();
 
-    let types = null;
-
-    if(mode === "player-match"){
-
-        types = VALID_PLAYER_MATCH_TYPES.map((t) =>{
-            return t.value;
-        });
-
-    }else if(mode === "player-lifetime"){
-
-        types = VALID_PLAYER_LIFETIME_TYPES.map((t) =>{
-            return t.value;
-        });
-
-    }else if(mode === "player-epm"){
-        
-        types = VALID_PLAYER_EPM_TYPES.map((t) =>{
-            return t.value;
-        });
-    }else{
-        throw new Error(`${mode} is not a valid record mode`);
-    }
+    const types = getRecordTypes(mode);
 
     return types.indexOf(cat) !== -1;
 }
@@ -177,15 +225,7 @@ export function getRecordTypeInfo(mode, targetType){
 
     if(VALID_RECORD_MODES.indexOf(mode) === -1) return null;
 
-    let options = [];
-
-    if(mode === "player-match"){
-        options = VALID_PLAYER_MATCH_TYPES;
-    }else if(mode === "player-lifetime"){
-        options = VALID_PLAYER_LIFETIME_TYPES;
-    }else if(mode === "player-epm"){
-        options = VALID_PLAYER_EPM_TYPES;
-    }
+    let options = getRecordTypes(mode);
 
     for(let i = 0; i < options.length; i++){
 
@@ -202,21 +242,7 @@ export function getTypeDisplayName(mode, cat){
     mode = mode.toLowerCase();
     cat = cat.toLowerCase();
 
-    let types = null;
-
-    if(mode === "player-match"){
-
-        types = VALID_PLAYER_MATCH_TYPES;
-
-    }else if(mode === "player-lifetime"){
-
-        types = VALID_PLAYER_LIFETIME_TYPES;
-
-    }else if(mode === "player-epm"){
-        types = VALID_PLAYER_EPM_TYPES;
-    }else{
-        throw new Error(`${mode} is not a valid record mode`);
-    }
+    let types = getRecordTypes(mode);
 
     for(let i = 0; i < types.length; i++){
 
@@ -226,4 +252,34 @@ export function getTypeDisplayName(mode, cat){
     }
 
     return null;
+}
+
+export function bValidPlayerMatchType(type){
+
+    type = type.toLowerCase();
+
+    for(let i = 0; i < VALID_PLAYER_MATCH_TYPES.length; i++){
+
+        const v = VALID_PLAYER_MATCH_TYPES[i];
+
+        if(v.value === type) return true;
+    }
+
+    return false;
+
+}
+
+export function bValidPlayerLifetimeType(type){
+
+    type = type.toLowerCase();
+
+    for(let i = 0; i < VALID_PLAYER_LIFETIME_TYPES.length; i++){
+
+        const v = VALID_PLAYER_LIFETIME_TYPES[i];
+        
+        if(v.value === type) return true;
+    }
+
+    return false;
+
 }
