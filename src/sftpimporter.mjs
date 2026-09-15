@@ -17,8 +17,8 @@ export class SFTPImporter{
         this.user = user;
         this.password = password;
         this.secure = secure;
-        this.targetFolder = path.join("./", targetFolder);
-        this.logsFolder = path.join(this.targetFolder, "Logs");
+        this.targetFolder = `./${targetFolder}`;
+        this.logsFolder = `${this.targetFolder}/Logs`;
         this.bIgnoreDuplicates = bIgnoreDuplicates;
         this.bDeleteAfterImport = bDeleteAfterImport;
         this.bDeleteTmpFiles = bDeleteTmpFiles;
@@ -38,18 +38,16 @@ export class SFTPImporter{
             "password": this.password
         };
 
-        let sftp = new Client();
+        this.client.on("close", () =>{
 
+            new Message(`Disconnected from ${this.host}(SFTP)`,"progress");
+        })
 
         try{
 
             await this.client.connect(config);
 
-            this.client.on("close", () =>{
-
-                console.trace("HORSE NOUSE");
-                process.exit();
-            })
+            
             new Message(`Connected to ${this.host}:${this.port}(SFTP)`,"pass");
             await this.downloadMatchLogs();
 
@@ -61,27 +59,9 @@ export class SFTPImporter{
         }finally{
 
             new Message(`Attempting to disconnect from ${this.host}(SFTP)`,"progress");
-            await sftp.end();
-            new Message(`Disconnected from ${this.host}(SFTP)`,"progress");
-        }
-
-        
-
-        /*return await this.client.connect(config).then(async () => {
-
-            new Message(`Connected to ${this.host}:${this.port}(SFTP)`,"pass");
-            return await this.downloadMatchLogs();
-        })
-        .catch(err => {
-            console.error(err.message);
-        }).finally(async () =>{
-
-            await sftp.end();
-            new Message(`Disconnecting from ${this.host}(SFTP)`,"progress");
+            await this.client.end();
             
-        });*/
-
-        
+        }
     }
 
     async deleteTmpFile(file){
@@ -100,7 +80,7 @@ export class SFTPImporter{
 
         if(!bValid) return;
 
-        const dest = path.join(this.logsFolder, file.name);
+        const dest = `${this.logsFolder}/${file.name}`;
         
         await this.client.delete(dest);
         new Message(`Deleting tmp file ${file.name}`, "note");
@@ -109,7 +89,7 @@ export class SFTPImporter{
 
     async downloadMatchLogs(){
 
-        const test = path.join(this.targetFolder, "Logs");
+        const test = `${this.targetFolder}/Logs`;
 
         const files = await this.client.list(test);
 
@@ -146,9 +126,10 @@ export class SFTPImporter{
                 }else{
 
                     let dst = createWriteStream(`${importedLogsFolder}/${f.name}`);
-
-                    const targetFile = path.join(this.logsFolder, f.name);
+                      
+                    const targetFile = `${this.logsFolder}/${f.name}`;
                     await this.client.get(targetFile, dst);
+
                     new Message(`Downloaded file ${importedLogsFolder}/${f.name}`,"pass"); 
 
                     const fileStats = await fs.stat(`${importedLogsFolder}/${f.name}`).catch((err) =>{
@@ -167,6 +148,7 @@ export class SFTPImporter{
             }catch(err){
                 console.log(`---`);
                 new Message(err.toString(),"error");
+                console.trace(err);
             }
         }
 
