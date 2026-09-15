@@ -87,7 +87,47 @@ export const VALID_PLAYER_LIFETIME_TYPES = [
     {"display": "Thigh Pads", "value": "item_pads", "parse": ["ignore0"], "group": "Items"},
     {"display": "Invisibility", "value": "item_invis", "parse": ["ignore0"], "group": "Items"},
     {"display": "Super Health", "value": "item_shp", "parse": ["ignore0"], "group": "Items"},
+];
 
+
+export const VALID_PLAYER_EPM_TYPES = [
+    {"display": "Score", "value": "epm_score", "group": "General"},
+    {"display": "Frags", "value": "epm_frags", "group": "General"},
+    {"display": "Kills", "value": "epm_kills", "group": "General"},
+    {"display": "Deaths", "value": "epm_deaths", "group": "General"},
+    {"display": "Suicides", "value": "epm_suicides", "group": "General"},
+    {"display": "Team Kills", "value": "epm_team_kills", "group": "General"},
+    {"display": "Playtime", "value": "epm_playtime", "parse": ["playtime"], "className": "playtime", "group": "General"},
+    {"display": "Headshots", "value": "epm_headshots", "group": "General"},
+    {"display": "Flag Taken", "value": "epm_flag_taken", "group": "CTF"},
+    {"display": "Flag Pickup", "value": "epm_flag_pickup", "group": "CTF"},
+    {"display": "Flag Drop", "value": "epm_flag_drop", "group": "CTF"},
+    {"display": "Flag Assist", "value": "epm_flag_assist", "group": "CTF"},
+    {"display": "Flag Cover", "value": "epm_flag_cover", "group": "CTF"},
+    {"display": "Flag Seal", "value": "epm_flag_seal", "group": "CTF"},
+    {"display": "Flag Capture", "value": "epm_flag_cap", "group": "CTF"},
+    {"display": "Flag Kill", "value": "epm_flag_kill", "group": "CTF"},
+    {"display": "Flag Return", "value": "epm_flag_return", "group": "CTF"},
+    {"display": "Flag Return Home Base", "value": "epm_flag_return_base", "group": "CTF"},
+    {"display": "Flag Return Mid", "value": "epm_flag_return_mid", "group": "CTF"},
+    {"display": "Flag Return Enemy Base", "value": "epm_flag_return_enemy_base", "group": "CTF"},
+    {"display": "Flag Return Close Save", "value": "epm_flag_return_save", "group": "CTF"},
+    {"display": "Killing Sprees", "value": "epm_spree_1", "group": "Sprees"},
+    {"display": "Rampages", "value": "epm_spree_2", "group": "Sprees"},
+    {"display": "Dominatings", "value": "epm_spree_3", "group": "Sprees"},
+    {"display": "Unstoppables", "value": "epm_spree_4", "group": "Sprees"},
+    {"display": "Godlikes", "value": "epm_spree_5", "group": "Sprees"},
+    {"display": "Double Kills", "value": "epm_multi_1", "group": "Multis"},
+    {"display": "Multi Kills", "value": "epm_multi_2", "group": "Multis"},
+    {"display": "Ultra Kills", "value": "epm_multi_3", "group": "Multis"},
+    {"display": "Monster Kills", "value": "epm_multi_4", "group": "Multis"},
+    {"display": "UDamage", "value": "epm_item_amp", "group": "Items"},
+    {"display": "Shield Belt", "value": "epm_item_belt", "group": "Items"},
+    {"display": "Jump Boots", "value": "epm_item_boots", "group": "Items"},
+    {"display": "Body Armour", "value": "epm_item_body", "group": "Items"},
+    {"display": "Thigh Pads", "value": "epm_item_pads", "group": "Items"},
+    {"display": "Invisibility", "value": "epm_item_invis", "group": "Items"},
+    {"display": "Super Health", "value": "epm_item_shp", "group": "Items"},
 ];
 
 
@@ -95,7 +135,8 @@ export const VALID_RECORD_MODES = ["player-match", "player-lifetime"];
 
 export const MODE_TITLES = {
     "player-lifetime": "Player Lifetime Records",
-    "player-match": "Player Match Records"
+    "player-match": "Player Match Records",
+    "player-epm": "Player Events Per Minute Records",
 };
 
 export function bValidRecordType(mode, cat){
@@ -117,6 +158,11 @@ export function bValidRecordType(mode, cat){
             return t.value;
         });
 
+    }else if(mode === "player-epm"){
+        
+        types = VALID_PLAYER_EPM_TYPES.map((t) =>{
+            return t.value;
+        });
     }else{
         throw new Error(`${mode} is not a valid record mode`);
     }
@@ -165,6 +211,8 @@ export function getTypeDisplayName(mode, cat){
 
         types = VALID_PLAYER_LIFETIME_TYPES;
 
+    }else if(mode === "player-epm"){
+        types = VALID_PLAYER_EPM_TYPES;
     }else{
         throw new Error(`${mode} is not a valid record mode`);
     }

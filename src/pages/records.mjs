@@ -1,7 +1,8 @@
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { 
     VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, 
-    bValidRecordType, getTypeDisplayName, MODE_TITLES 
+    bValidRecordType, getTypeDisplayName, MODE_TITLES, 
+    VALID_PLAYER_EPM_TYPES
 } from "../validRecordTypes.mjs";
 
 import { getUniqueGametypeMapCombinations, getPlayerMatchRecords, getPlayerLifetimeRecords } from "../records.mjs";
@@ -9,7 +10,8 @@ import { sanitizePagePerPage } from "../generic.mjs";
 
 const VALID_MODES = [
     "player-lifetime",
-    "player-match"
+    "player-match",
+    "player-epm"
 ];
 
 function bIdExists(data, id){
@@ -72,8 +74,10 @@ export async function renderRecordsPage(req, res, userSession){
 
             if(mode === "player-match"){
                 recordType = "max_score";
-            }else{
+            }else if(mode === "player-lifetime"){
                 recordType = "score";
+            }else{
+                recordType = "epm_score";
             }
         }
 
@@ -123,6 +127,7 @@ export async function renderRecordsPage(req, res, userSession){
             recordType,
             "validMatchTypes": VALID_PLAYER_MATCH_TYPES,
             "validLifetimeTypes": VALID_PLAYER_LIFETIME_TYPES,
+            "validEPMTypes": VALID_PLAYER_EPM_TYPES,
             "gametypeList": gametypes,
             "mapList": maps,
             "gametypeMapCombos": combos,

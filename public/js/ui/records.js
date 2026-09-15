@@ -49,6 +49,7 @@ class RecordsPage{
         const options = [
             {"display": "Player Match Records", "value": "player-match"},
             {"display": "Player Lifetime Records", "value": "player-lifetime"},
+            {"display": "Player Events Per Minute Records", "value": "player-epm"},
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode); 
@@ -120,6 +121,10 @@ class RecordsPage{
         }else if(this.mode === "player-lifetime"){
 
             content.push(`Player lifetime records are the total values for a specific stat.`);
+
+        }else if(this.mode === "player-epm"){
+
+            content.push(`Player event per minute records are the player's totals divided by playtime.`);
         }
 
         this.info.updateContent(content);
@@ -178,7 +183,7 @@ class RecordsPage{
 
         if(this.validTypes[this.mode] === undefined){
 
-            throw new Error(`${this.mode} is no a valid record mode`);
+            throw new Error(`${this.mode} is not a valid record mode`);
         }
 
         
@@ -331,6 +336,9 @@ class RecordsPage{
         }else if(this.mode === "player-lifetime"){
 
             title = "Player Lifetime Records";
+
+        }else if(this.mode === "player-epm"){
+            title = "Player Events Per Minute Records";
         }
 
         this.header.innerHTML = '';
