@@ -337,6 +337,42 @@ async function getTotalPlayerEPMRecords(recordType, gametypeId, mapId, bCTF){
     return result[0].total_rows;
 }
 
+
+async function getPlayerEPMCTFRecords(recordType, gametypeId, mapId, start, cleanPerPage){
+
+    recordType = recordType.toLowerCase();
+
+    const recordInfo = getRecordTypeInfo("player-epm", recordType);
+
+    if(recordInfo === null) throw new Error(`Not a valid player epm record type`);
+
+
+    const nameT = "nstats_players";
+    const tT = "nstats_player_totals";
+    const cT = "nstats_player_totals_ctf";
+
+    const query = `SELECT 
+    ${cT}.player_id,
+    ${tT}.total_matches,
+    ${tT}.playtime,
+    ${tT}.last_active,
+    ${cT}.${recordType} as record_value,
+    ${nameT}.name as player_name,
+    ${nameT}.country as country
+
+    FROM ${cT}
+    LEFT JOIN ${nameT} ON ${cT}.player_id = ${nameT}.id
+    LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id
+    WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 ORDER BY record_value DESC LIMIT ${start}, ${cleanPerPage}`;
+
+    const [data, totalResults] = await Promise.all([
+        simpleQuery(query, [gametypeId, mapId]), 
+        getTotalPlayerEPMRecords(recordType, gametypeId, mapId, true)
+    ]);
+
+    return {data, totalResults}
+}
+
 export async function getPlayerEPMRecords(recordType, gametypeId, mapId, dirtyPage, dirtyPerPage){
 
     recordType = recordType.toLowerCase();
@@ -354,6 +390,12 @@ export async function getPlayerEPMRecords(recordType, gametypeId, mapId, dirtyPa
 
     if(gametypeId !== gametypeId || mapId !== mapId){
         throw new Error(`Both gametypeId and mapId must be valid integers.`);
+    }
+
+
+    if(recordInfo.group === "CTF"){
+
+        return await getPlayerEPMCTFRecords(recordType, gametypeId, mapId, dirtyPage, dirtyPerPage);
     }
 
     const nameT = "nstats_players";
