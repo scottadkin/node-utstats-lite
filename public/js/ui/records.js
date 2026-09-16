@@ -50,6 +50,7 @@ class RecordsPage{
             {"display": "Player Match Records", "value": "player-match"},
             {"display": "Player Lifetime Records", "value": "player-lifetime"},
             {"display": "Player Events Per Minute Records", "value": "player-epm"},
+            {"display": "Player Match Average Records", "value": "player-avg"},
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode); 
@@ -125,6 +126,9 @@ class RecordsPage{
         }else if(this.mode === "player-epm"){
 
             content.push(`Player event per minute records are the player's totals divided by playtime.`);
+
+        }else if(this.mode === "player-avg"){
+            content.push(`Player averages are based on total values divided by total matches.`);
         }
 
         this.info.updateContent(content);
@@ -339,6 +343,8 @@ class RecordsPage{
 
         }else if(this.mode === "player-epm"){
             title = "Player Events Per Minute Records";
+        }else if(this.mode === "player-avg"){
+            title = "Player Match Average Records";
         }
 
         this.header.innerHTML = '';

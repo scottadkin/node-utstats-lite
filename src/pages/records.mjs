@@ -3,6 +3,7 @@ import {
     VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, 
     getTypeDisplayName, MODE_TITLES, 
     VALID_PLAYER_EPM_TYPES,
+    VALID_PLAYER_MATCH_AVG_TYPES,
     sanitizeRecordType,
     sanitizeRecordMode
 } from "../validRecordTypes.mjs";
@@ -120,6 +121,7 @@ export async function renderRecordsPage(req, res, userSession){
             "validMatchTypes": VALID_PLAYER_MATCH_TYPES,
             "validLifetimeTypes": VALID_PLAYER_LIFETIME_TYPES,
             "validEPMTypes": VALID_PLAYER_EPM_TYPES,
+            "validAvgTypes": VALID_PLAYER_MATCH_AVG_TYPES,
             "gametypeList": gametypes,
             "mapList": maps,
             "gametypeMapCombos": combos,

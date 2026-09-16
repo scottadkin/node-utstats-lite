@@ -4,6 +4,7 @@ export const MODE_TITLES = {
     "player-lifetime": "Player Lifetime Records",
     "player-match": "Player Match Records",
     "player-epm": "Player Events Per Minute Records",
+    "player-avg": "Player Match Average Records",
 };
 
 export const VALID_PLAYER_MATCH_TYPES = [
@@ -138,6 +139,48 @@ export const VALID_PLAYER_EPM_TYPES = [
 ];
 
 
+export const VALID_PLAYER_MATCH_AVG_TYPES = [
+    {"display": "Score", "value": "avg_score", "group": "General"},
+    {"display": "Frags", "value": "avg_frags", "group": "General"},
+    {"display": "Kills", "value": "avg_kills", "group": "General"},
+    {"display": "Deaths", "value": "avg_deaths", "group": "General"},
+    {"display": "Suicides", "value": "avg_suicides", "group": "General"},
+    {"display": "Team Kills", "value": "avg_team_kills", "group": "General"},
+    {"display": "Headshots", "value": "avg_headshots", "group": "General"},
+    {"display": "Flag Taken", "value": "avg_flag_taken", "group": "CTF"},
+    {"display": "Flag Pickup", "value": "avg_flag_pickup", "group": "CTF"},
+    {"display": "Flag Drop", "value": "avg_flag_drop", "group": "CTF"},
+    {"display": "Flag Assist", "value": "avg_flag_assist", "group": "CTF"},
+    {"display": "Flag Cover", "value": "avg_flag_cover", "group": "CTF"},
+    {"display": "Flag Seal", "value": "avg_flag_seal", "group": "CTF"},
+    {"display": "Flag Capture", "value": "avg_flag_cap", "group": "CTF"},
+    {"display": "Flag Kill", "value": "avg_flag_kill", "group": "CTF"},
+    {"display": "Flag Return", "value": "avg_flag_return", "group": "CTF"},
+    {"display": "Flag Return Home Base", "value": "avg_flag_return_base", "group": "CTF"},
+    {"display": "Flag Return Mid", "value": "avg_flag_return_mid", "group": "CTF"},
+    {"display": "Flag Return Enemy Base", "value": "avg_flag_return_enemy_base", "group": "CTF"},
+    {"display": "Flag Return Close Save", "value": "avg_flag_return_save", "group": "CTF"},
+    {"display": "Best Average Spree", "value": "avg_spree_best", "group": "Sprees"},
+    {"display": "Killing Sprees", "value": "avg_spree_1", "group": "Sprees"},
+    {"display": "Rampages", "value": "avg_spree_2", "group": "Sprees"},
+    {"display": "Dominatings", "value": "avg_spree_3", "group": "Sprees"},
+    {"display": "Unstoppables", "value": "avg_spree_4", "group": "Sprees"},
+    {"display": "Godlikes", "value": "avg_spree_5", "group": "Sprees"},
+    {"display": "Best Average Multi Kill", "value": "avg_multi_best", "group": "Multis"},
+    {"display": "Double Kills", "value": "avg_multi_1", "group": "Multis"},
+    {"display": "Multi Kills", "value": "avg_multi_2", "group": "Multis"},
+    {"display": "Ultra Kills", "value": "avg_multi_3", "group": "Multis"},
+    {"display": "Monster Kills", "value": "avg_multi_4", "group": "Multis"},
+    {"display": "UDamage", "value": "avg_item_amp", "group": "Items"},
+    {"display": "Shield Belt", "value": "avg_item_belt", "group": "Items"},
+    {"display": "Jump Boots", "value": "avg_item_boots", "group": "Items"},
+    {"display": "Body Armour", "value": "avg_item_body", "group": "Items"},
+    {"display": "Thigh Pads", "value": "avg_item_pads", "group": "Items"},
+    {"display": "Invisibility", "value": "avg_item_invis", "group": "Items"},
+    {"display": "Super Health", "value": "avg_item_shp", "group": "Items"},
+];
+
+
 /**
  * return a valid record mode
  * @param {string} mode 
@@ -175,6 +218,8 @@ export function sanitizeRecordType(mode, recordType){
         return "wins";
     }else if(mode === "player-epm"){
         return "epm_score";
+    }else if(mode === "player-avg"){
+        return "avg_score";
     }
 
     return "score";
@@ -200,6 +245,8 @@ export function getRecordTypes(mode){
 
     }else if(mode === "player-epm"){
         return VALID_PLAYER_EPM_TYPES;
+    }else if(mode === "player-avg"){
+        return VALID_PLAYER_MATCH_AVG_TYPES;
     }
 
     throw new Error(`${mode} is not a valid record mode`);
