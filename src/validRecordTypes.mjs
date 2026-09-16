@@ -249,8 +249,16 @@ export function getRecordTypes(mode){
         return VALID_PLAYER_MATCH_AVG_TYPES;
     }
 
-    throw new Error(`${mode} is not a valid record mode`);
-    
+    throw new Error(`${mode} is not a valid record mode`);   
+}
+
+export function bValidRecordMode(mode){
+
+    mode = mode.toLowerCase();
+
+    if(VALID_RECORD_MODES.indexOf(mode) === -1) return false;
+
+    return true;
 }
 
 export function bValidRecordType(mode, cat){

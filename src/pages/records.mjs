@@ -7,7 +7,7 @@ import {
     sanitizeRecordType,
     sanitizeRecordMode
 } from "../validRecordTypes.mjs";
-import { getUniqueGametypeMapCombinations, getPlayerMatchRecords, getPlayerLifetimeRecords, getPlayerEPMRecords, getPlayerAVGRecords, getTotalEntries } from "../records.mjs";
+import { getUniqueGametypeMapCombinations, getRecords } from "../records.mjs";
 
 
 function bIdExists(data, id){
@@ -47,11 +47,11 @@ export async function renderRecordsPage(req, res, userSession){
         let recordType = (req.query.rec !== undefined) ? req.query.rec.toLowerCase() : "score";
         let selectedGametype = (req.query.gid !== undefined) ? parseInt(req.query.gid) : 0;
         let selectedMap = (req.query.mid !== undefined) ? parseInt(req.query.mid) : 0;
-        let perPage = (req.query.pp !== undefined) ? parseInt(req.query.pp) : parseInt(pageSettings["Results Per Page"]);
-        let page = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
+        let dirtyPerPage = (req.query.pp !== undefined) ? parseInt(req.query.pp) : parseInt(pageSettings["Results Per Page"]);
+        let dirtyPage = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
         
-        if(perPage !== perPage) perPage = 25;
-        if(page !== page) page = 1;
+        if(dirtyPerPage !== dirtyPerPage) dirtyPerPage = 25;
+        if(dirtyPage !== dirtyPage) dirtyPage = 1;
         
         if(selectedGametype !== selectedGametype) selectedGametype = 0;
         if(selectedMap !== selectedMap) selectedMap = 0;
@@ -67,41 +67,11 @@ export async function renderRecordsPage(req, res, userSession){
         mode = sanitizeRecordMode(mode);
         recordType = sanitizeRecordType(mode, recordType);
 
-        
-        let totalResults = 0;
-        let data = [];
 
+        const {page, perPage, totalResults, data} = await getRecords(mode, recordType, selectedGametype, selectedMap, dirtyPage, dirtyPerPage);
 
-        await getTotalEntries(mode, recordType, selectedGametype, selectedMap);
-       // throw new Error("test");
-        //return;
+        console.log(page, perPage);
 
-        if(mode === "player-match"){
-
-            const result = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap, page, perPage);
-   
-            totalResults = result.totalResults;
-            data = result.data;
-
-        }else if(mode === "player-lifetime"){
-
-            const result = await getPlayerLifetimeRecords(recordType, selectedGametype, selectedMap, page, perPage);
-
-            totalResults = result.totalResults;
-            data = result.data;
-
-        }else if(mode === "player-epm"){
-
-            const result = await getPlayerEPMRecords(recordType, selectedGametype, selectedMap, page, perPage);
-
-            totalResults = result.totalResults;
-            data = result.data;
-        }else if(mode === "player-avg"){
-
-            const result = await getPlayerAVGRecords(recordType, selectedGametype, selectedMap, page, perPage);
-            totalResults = result.totalResults;
-            data = result.data;
-        }   
  
         const modeDisplayName = getTypeDisplayName(mode, recordType);
 

@@ -6,7 +6,7 @@ import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, VALID_PLAYER_SORT_BYS, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
 import { getMatchWeaponDamage } from "../playerWeaponDamage.mjs";
-import { getPlayerEPMRecords, getPlayerLifetimeRecords, getPlayerMatchRecords } from "../records.mjs";
+//import { getPlayerEPMRecords, getPlayerLifetimeRecords, getPlayerMatchRecords } from "../records.mjs";
 
 export default class JSONManager{
 
@@ -296,7 +296,7 @@ export default class JSONManager{
         const perPage = this.querySanitizeInteger("pp");
 
            
-        if(cat === "player-match"){
+        /*if(cat === "player-match"){
 
             const {totalResults, data}  = await getPlayerMatchRecords(recordType, gid, mid, page, perPage);
             this.res.status(200).json({data, totalResults});
@@ -313,7 +313,7 @@ export default class JSONManager{
             const {totalResults, data} = await getPlayerEPMRecords(recordType, gid, mid, page, perPage);
             this.res.status(200).json({data, totalResults});
             return;
-        }
+        }*/
 
 
         this.res.status(200).json({"error": "Unknown Category"});
