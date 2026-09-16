@@ -67,6 +67,7 @@ class RecordsPage{
 
 
             this.loadData();
+            this.pagination.changeUrl(`${this.createUrl()}&page=`);  
             
             this.render();
         });
