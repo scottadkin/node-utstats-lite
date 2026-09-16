@@ -7,7 +7,7 @@ import {
     sanitizeRecordType,
     sanitizeRecordMode
 } from "../validRecordTypes.mjs";
-import { getUniqueGametypeMapCombinations, getPlayerMatchRecords, getPlayerLifetimeRecords, getPlayerEPMRecords } from "../records.mjs";
+import { getUniqueGametypeMapCombinations, getPlayerMatchRecords, getPlayerLifetimeRecords, getPlayerEPMRecords, getPlayerAVGRecords, getTotalEntries } from "../records.mjs";
 
 
 function bIdExists(data, id){
@@ -72,6 +72,10 @@ export async function renderRecordsPage(req, res, userSession){
         let data = [];
 
 
+        await getTotalEntries(mode, recordType, selectedGametype, selectedMap);
+       // throw new Error("test");
+        //return;
+
         if(mode === "player-match"){
 
             const result = await getPlayerMatchRecords(recordType, selectedGametype, selectedMap, page, perPage);
@@ -92,7 +96,12 @@ export async function renderRecordsPage(req, res, userSession){
 
             totalResults = result.totalResults;
             data = result.data;
-        }        
+        }else if(mode === "player-avg"){
+
+            const result = await getPlayerAVGRecords(recordType, selectedGametype, selectedMap, page, perPage);
+            totalResults = result.totalResults;
+            data = result.data;
+        }   
  
         const modeDisplayName = getTypeDisplayName(mode, recordType);
 

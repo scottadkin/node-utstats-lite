@@ -1,4 +1,4 @@
-export const VALID_RECORD_MODES = ["player-match", "player-lifetime", "player-epm"];
+export const VALID_RECORD_MODES = ["player-match", "player-lifetime", "player-epm", "player-avg"];
 
 export const MODE_TITLES = {
     "player-lifetime": "Player Lifetime Records",
