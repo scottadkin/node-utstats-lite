@@ -1,6 +1,6 @@
 import { simpleQuery } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
-import { getRecordTypeInfo, bValidPlayerLifetimeType, bValidPlayerMatchType, sanitizeRecordType, sanitizeRecordMode, bValidRecordType, bValidRecordMode } from "./validRecordTypes.mjs";
+import { getRecordTypeInfo,  bValidPlayerMatchType, bValidRecordMode } from "./validRecordTypes.mjs";
 
 /**
  * parseInt, if NaN return 0
@@ -17,15 +17,8 @@ function sanitizeId(value){
 }
 
 
-async function getPlayerMatchCTFRecords(recordType, gametypeId, mapId, start, end){
+async function getPlayerMatchCTFRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage){
 
-    //just incase im stupid and export this function at a later point
-    if(!bValidPlayerMatchType(recordType)) throw new Error(`Not a valid player match record.(CTF)`);
-
-    start = parseInt(start);
-    end = parseInt(end);
-
-    if(start !== start || end !== end) throw new Error(`Not a valid start or end`);
 
     const nameT = "nstats_players"
     const tT = "nstats_player_totals";
@@ -41,14 +34,17 @@ async function getPlayerMatchCTFRecords(recordType, gametypeId, mapId, start, en
     ${tT}.last_active as last_active,
     ${cT}.playtime,
     ${cT}.total_matches,
-    ${cT}.${recordType} as record_value
+    ${cT}.${recordInfo.value} as record_value
     FROM ${cT} 
     LEFT JOIN ${nameT} ON ${cT}.player_id = ${nameT}.id
     LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id
-    WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 ORDER BY ${cT}.${recordType} DESC LIMIT ${start}, ${end}`;
+    WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 ORDER BY ${cT}.${recordInfo.value} DESC LIMIT ${cleanStart}, ${cleanPerPage}`;
 
 
-    const [result, totalResults] = await Promise.all([simpleQuery(query, [gametypeId, mapId]), getTotalEntries("player-match",recordType, gametypeId, mapId)]);
+    const [result, totalResults] = await Promise.all([
+        simpleQuery(query, [gametypeId, mapId]), 
+        getTotalEntries("player-match", recordInfo, gametypeId, mapId)
+    ]);
 
     return {"data": result, totalResults}
 }
@@ -278,7 +274,7 @@ async function getPlayerEPMCTFRecords(recordInfo, gametypeId, mapId, cleanStart,
     return {data, totalResults}
 }
 
-export async function getPlayerEPMRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage){
+async function getPlayerEPMRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage){
 
     if(recordInfo.group === "CTF"){
 

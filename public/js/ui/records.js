@@ -27,6 +27,8 @@ class RecordsPage{
         perPage = parseInt(perPage);
         if(perPage !== perPage) perPage = 25;
 
+        page++;
+
         this.page = page;
         this.perPage = perPage;
         this.ctfGametypes = ctfGametypes;
@@ -94,6 +96,9 @@ class RecordsPage{
 
             this.data = res.data;
             this.totalResults = res.totalResults;
+            this.page = res.page + 1;
+            this.perPage = res.perPage;
+
 
             this.render();
 
@@ -369,11 +374,25 @@ class RecordsPage{
         };
 
 
+        const floatModes = ["player-epm", "player-avg"];
+
         const rows = this.data.map((d, i) =>{
 
             const pos = i + 1 + (this.page - 1) * this.perPage;
 
-            let value = (this.mode === "player-epm") ? d.record_value.toFixed(3) : d.record_value;
+            let value = d.record_value//;(floatModes.indexOf(this.mode) !== -1) ? d.record_value.toFixed(3) : d.record_value;
+
+            if(this.mode === "player-epm"){
+               
+                if(value % 1 != 0){
+                    value = value.toFixed(3);
+                }
+            }else if(this.mode === "player-avg"){
+                if(value % 1 != 0){
+                    value = value.toFixed(2);
+                }
+            }
+
 
             return [
                 {

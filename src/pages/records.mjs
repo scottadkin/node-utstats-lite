@@ -70,8 +70,6 @@ export async function renderRecordsPage(req, res, userSession){
 
         const {page, perPage, totalResults, data} = await getRecords(mode, recordType, selectedGametype, selectedMap, dirtyPage, dirtyPerPage);
 
-        console.log(page, perPage);
-
  
         const modeDisplayName = getTypeDisplayName(mode, recordType);
 
