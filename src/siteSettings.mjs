@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { bulkInsert, simpleQuery } from "./database.mjs";
 import  Message from "./message.mjs";
 
 
@@ -229,7 +229,10 @@ async function deleteDeprecatedSettings(){
     }
 }
 
-export async function restoreDefaultSettings(){
+/**
+ * Adds missing page settings and deletes ones that no longer exist.
+ */
+export async function cleanPageSettings(){
     
 
 
@@ -250,6 +253,12 @@ async function deletePageSettings(page){
     const query = `DELETE FROM nstats_site_settings WHERE category=?`;
 
     await simpleQuery(query, [page]);
+}
+
+async function deleteAllPageSettings(){
+    const query = `DELETE FROM nstats_site_settings WHERE id>=0`;
+
+    await simpleQuery(query);
 }
 
 export async function restorePageSettings(page){
@@ -278,6 +287,26 @@ export async function restorePageSettings(page){
 
         await insertSetting(p.category, p.type, p.name, p.value);
     }
+}
+
+
+export async function restoreAllPageSettings(){
+
+
+    await deleteAllPageSettings();
+
+    const insertVars = [];
+
+    for(let i = 0; i < DEFAULT_PAGE_SETTINGS.length; i++){
+
+        const {category, type, value, name} = DEFAULT_PAGE_SETTINGS[i];
+
+        insertVars.push([
+            category, type, name, value
+        ]);
+    }
+
+    await bulkInsert(`INSERT INTO nstats_site_settings (category, setting_type, setting_name, setting_value) VALUES ?`, insertVars);
 }
 
 

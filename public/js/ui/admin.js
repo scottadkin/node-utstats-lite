@@ -1569,6 +1569,10 @@ class AdminSiteSettingsManager{
 
         this.parent.append(this.warningElem, this.wrapper);
 
+        this.bRestoreAllPageSettingsInProgress = false;
+        this.bRestoreAllLayoutsInProgress = false;
+        this.bRestoreAllCompInProgress = false;
+
         
 
         this.loadData();
@@ -2269,6 +2273,80 @@ class AdminSiteSettingsManager{
         }
     }
 
+
+    async restoreAllPageComponents(){
+
+        try{
+
+            if(this.bRestoreAllCompInProgress){
+
+                new UINotification(this.parent, "error", "Please Wait...", "Action is already in progress.");
+                return;
+            }
+
+            this.bRestoreAllCompInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {
+                    "Content-type": "application/json",
+                },
+                "method": "POST",
+                "body": JSON.stringify({"mode": "restore-all-page-components"})
+            });
+
+            const res = await req.json();
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Changes Saved", "Restored All Page Component Settings");
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Restore All Page Component Settings", err.toString());
+        }finally{
+
+            this.bRestoreAllCompInProgress = false;
+        }
+    }
+
+    renderRestoreAllPageSettings(){
+
+        
+
+        const allWrapper = UIDiv("form");
+        new UIInfo(allWrapper, [`Restore all the page layouts and component settings.`]);
+        const buttonAll = UIButton("Restore All Page Settings","submit-button");
+        allWrapper.append(buttonAll);
+
+        this.wrapper.append(allWrapper)//, layoutWrapper);
+
+        UIHeader(this.wrapper, `Restore All Page Layouts`);
+        const layoutWrapper = UIDiv("form");
+        const buttonLayout = UIButton("Restore All Page Layouts","submit-button");
+
+        new UIInfo(layoutWrapper, [
+            `Restore all page layouts without changing component settings.`
+        ]);
+        layoutWrapper.append(buttonLayout);
+        this.wrapper.append(layoutWrapper);
+
+        const buttonComp = UIButton("Restore All Page Component Settings","submit-button");
+
+        buttonComp.addEventListener("click", () =>{
+
+            this.restoreAllPageComponents();
+        });
+
+        UIHeader(this.wrapper, `Restore All Page Component Settings`);
+        const compWrapper = UIDiv("form");
+
+        new UIInfo(compWrapper, [
+            `Restore all page component settings without changing the page layout.`
+        ]);
+        compWrapper.append(buttonComp);
+
+        this.wrapper.append(compWrapper);
+    }
+
     renderRestorePageSettings(){
 
 
@@ -2280,6 +2358,12 @@ class AdminSiteSettingsManager{
             "Restore Page Layout will restore the order of the page components.", UIBr(),
             "Restore Page Components will restore the components back to their defaults, this includes per page, display type, max time frames..."
         ]);
+
+        UIHeader(this.wrapper, "Restore All Page Settings");
+
+        this.renderRestoreAllPageSettings();
+
+        UIHeader(this.wrapper, "Restore Individual Pages");
 
         const tableOptions = {
             "className": "t-width-1",

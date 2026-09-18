@@ -6,7 +6,7 @@ import { getMapImageName, stripFileExtension } from "../generic.mjs";
 import { Jimp } from "jimp";
 import { writeFile, rm } from 'node:fs/promises';
 import { mapScreenshotQuality } from "../../config.mjs";
-import { getAllSettings as getAllSiteSettings, restorePageSettings, updateSiteSettings } from "../siteSettings.mjs";
+import { getAllSettings as getAllSiteSettings, restoreAllPageSettings, restorePageSettings, updateSiteSettings } from "../siteSettings.mjs";
 import { getAllPagesLayout, restoreDefaultPageLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
 import { 
@@ -456,6 +456,13 @@ export default class AdminJSONManager{
 
 
                 return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "restore-all-page-components"){
+
+                await restoreAllPageSettings();
+
+                return this.res.json({"message": "passed"});
+
             }
 
 

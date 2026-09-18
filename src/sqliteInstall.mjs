@@ -2,7 +2,7 @@ import { simpleQuery } from "./database.mjs";
 import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
-import { restoreDefaultSettings as restoreDefaultSiteSettings } from "./siteSettings.mjs";
+import { cleanPageSettings } from "./siteSettings.mjs";
 import { addPageLayout, restoreDefaultLayouts as restoreDefaultPageLayouts} from "./pageLayout.mjs";
 import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./ctfLeague.mjs";
 import {insertDefaultRankingSettings } from "./rankings.mjs";
@@ -1237,7 +1237,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     await installPlayerSettings();
 
     new Message("Inserting Default Site Settings", "note");
-    await restoreDefaultSiteSettings();
+    await cleanPageSettings();
     new Message("Inserting Default Site Page Layout Settings", "note");
     await restoreDefaultPageLayouts();
 

@@ -8,7 +8,7 @@ import { closeDatabase, createNewDatabase, bulkInsert, simpleQuery } from "./src
 import { mysqlInstall } from "./src/mysqlInstall.mjs";
 import { recalculateAllPlayerTotals, setAllMapTotals } from "./src/weapons.mjs";
 import { restoreDefaultLayouts } from "./src/pageLayout.mjs";
-import { restoreDefaultSettings } from "./src/siteSettings.mjs";
+import { cleanPageSettings } from "./src/siteSettings.mjs";
 import { calculateAllPlayerTotals } from "./src/players.mjs";
 import { recalculateAllPlayerTotals270 } from "./src/ctf.mjs";
 
@@ -518,7 +518,7 @@ async function init(){
 
 
     await restoreDefaultLayouts();
-    await restoreDefaultSettings();
+    await cleanPageSettings();
 
     new Message(`MYSQL To SQlite transfer complete.`,"progress");
     process.exit();
