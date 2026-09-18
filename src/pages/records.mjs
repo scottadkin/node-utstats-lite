@@ -115,7 +115,8 @@ export async function renderRecordsPage(req, res, userSession){
             ctfMaps,
             domGametypes,
             domMaps,
-            userSession
+            userSession,
+            "siteName": brandingSettings["Site Name"]
         });
         
     }catch(err){

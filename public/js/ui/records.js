@@ -1,11 +1,11 @@
 class RecordsPage{
 
-    constructor(parent, mode, validTypes, modeTitles, gametypes, maps, 
+    constructor(siteName, parent, mode, validTypes, modeTitles, gametypes, maps, 
         gametypeMapCombos, selectedGametype, selectedMap, recordType, data, totalResults,
         page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps
     ){
 
-
+        this.siteName = siteName;
         this.parent = document.querySelector(parent);
         this.mode = mode;
         this.validTypes = validTypes;
@@ -352,6 +352,8 @@ class RecordsPage{
         }else if(this.mode === "player-avg"){
             title = "Player Match Average Records";
         }
+
+        document.title = `${displayName} - ${title} - ${this.siteName}`;
 
         this.header.innerHTML = '';
         this.header.append(`${displayName} - ${title}`);
