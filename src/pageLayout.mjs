@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { bulkInsert, simpleQuery } from "./database.mjs";
 import Message from "./message.mjs";
 
 const DEFAULT_PAGE_LAYOUTS = {
@@ -244,7 +244,10 @@ async function deleteDeprecatedSettings(){
     }
 }
 
-export async function restoreDefaultLayouts(){
+/**
+ * add any missing page layout settings and deletes any old ones
+ */
+export async function cleanDefaultPageLayouts(){
 
     for(const [page, data] of Object.entries(DEFAULT_PAGE_LAYOUTS)){
 
@@ -257,6 +260,25 @@ export async function restoreDefaultLayouts(){
     }
 
     await deleteDeprecatedSettings();
+}
+
+export async function restoreAllPageLayouts(){
+
+    await deleteAllPageLayouts();
+
+    const insertVars = [];
+
+    for(const [page, itemNames] of Object.entries(DEFAULT_PAGE_LAYOUTS)){
+
+        for(let i = 0; i < itemNames.length; i++){
+
+            insertVars.push([page, itemNames[i], i + 1]);
+        }
+    }
+
+    console.log(insertVars);
+
+    await bulkInsert(`INSERT INTO nstats_page_layout (page,item,page_order) VALUES ?`, insertVars);
 }
 
 

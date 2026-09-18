@@ -7,7 +7,7 @@ import { PLAYER_TOTAL_COLUMNS_270_UPDATE, PLAYER_TOTAL_CTF_COLUMNS_270_UPDATE, P
 import { closeDatabase, createNewDatabase, bulkInsert, simpleQuery } from "./src/database.mjs";
 import { mysqlInstall } from "./src/mysqlInstall.mjs";
 import { recalculateAllPlayerTotals, setAllMapTotals } from "./src/weapons.mjs";
-import { restoreDefaultLayouts } from "./src/pageLayout.mjs";
+import { cleanDefaultPageLayouts } from "./src/pageLayout.mjs";
 import { cleanPageSettings } from "./src/siteSettings.mjs";
 import { calculateAllPlayerTotals } from "./src/players.mjs";
 import { recalculateAllPlayerTotals270 } from "./src/ctf.mjs";
@@ -517,7 +517,7 @@ async function init(){
     await recalculateAllPlayerTotals270();
 
 
-    await restoreDefaultLayouts();
+    await cleanDefaultPageLayouts();
     await cleanPageSettings();
 
     new Message(`MYSQL To SQlite transfer complete.`,"progress");

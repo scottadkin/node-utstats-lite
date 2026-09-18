@@ -3,7 +3,7 @@ import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
 import { cleanPageSettings } from "./siteSettings.mjs";
-import { addPageLayout, restoreDefaultLayouts as restoreDefaultPageLayouts} from "./pageLayout.mjs";
+import { addPageLayout, cleanDefaultPageLayouts} from "./pageLayout.mjs";
 import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./ctfLeague.mjs";
 import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
@@ -1239,7 +1239,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     new Message("Inserting Default Site Settings", "note");
     await cleanPageSettings();
     new Message("Inserting Default Site Page Layout Settings", "note");
-    await restoreDefaultPageLayouts();
+    await cleanDefaultPageLayouts();
 
     new Message("Creating Default Logs Folder Settings", "note");
     await createDefaultLogsFolderSettings();

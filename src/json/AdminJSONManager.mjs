@@ -7,7 +7,7 @@ import { Jimp } from "jimp";
 import { writeFile, rm } from 'node:fs/promises';
 import { mapScreenshotQuality } from "../../config.mjs";
 import { getAllSettings as getAllSiteSettings, restoreAllPageSettings, restorePageSettings, updateSiteSettings } from "../siteSettings.mjs";
-import { getAllPagesLayout, restoreDefaultPageLayout, savePageLayoutChanges } from "../pageLayout.mjs";
+import { getAllPagesLayout, restoreAllPageLayouts, restoreDefaultPageLayout, savePageLayoutChanges } from "../pageLayout.mjs";
 import { getAllSettings as getAllRankingSettings, updateRankingSettings, recalculateAllRankings} from "../rankings.mjs";
 import { 
     clearAllDataTables/*, createArchivedBackup, createDatabaseBackup*/, 
@@ -463,6 +463,16 @@ export default class AdminJSONManager{
 
                 return this.res.json({"message": "passed"});
 
+            }else if(this.mode === "restore-all-page-layouts"){
+
+                await restoreAllPageLayouts();
+
+                return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "restore-all-page-settings"){
+
+                await restoreAllPageSettings();
+                return this.res.json({"message": "passed"});
             }
 
 

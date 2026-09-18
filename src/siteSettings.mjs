@@ -292,7 +292,6 @@ export async function restorePageSettings(page){
 
 export async function restoreAllPageSettings(){
 
-
     await deleteAllPageSettings();
 
     const insertVars = [];

@@ -2298,6 +2298,7 @@ class AdminSiteSettingsManager{
             if(res.error !== undefined) throw new Error(res.error);
 
             new UINotification(this.parent, "pass", "Changes Saved", "Restored All Page Component Settings");
+            await this.loadData();
 
         }catch(err){
             console.trace(err);
@@ -2308,6 +2309,76 @@ class AdminSiteSettingsManager{
         }
     }
 
+    async restoreAllPageLayouts(){
+
+        try{
+
+            if(this.bRestoreAllLayoutsInProgress){
+
+                new UINotification(this.parent, "error", "Please Wait...", "Action is already in progress.");
+                return;
+            }
+
+            this.bRestoreAllLayoutsInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {
+                    "Content-type": "application/json",
+                },
+                "method": "POST",
+                "body": JSON.stringify({"mode": "restore-all-page-layouts"})
+            });
+
+            const res = await req.json();
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Changes Saved", "Restored All Page Layout Settings");
+            await this.loadData();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Restore All Page Layout Settings", err.toString());
+        }finally{
+
+            this.bRestoreAllLayoutsInProgress = false;
+        }
+    }
+
+    async restoreAllPageSettings(){
+
+        try{
+
+            if(this.bRestoreAllPageSettingsInProgress){
+
+                new UINotification(this.parent, "error", "Please Wait...", "Action is already in progress.");
+                return;
+            }
+
+            this.bRestoreAllPageSettingsInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {
+                    "Content-type": "application/json",
+                },
+                "method": "POST",
+                "body": JSON.stringify({"mode": "restore-all-page-settings"})
+            });
+
+            const res = await req.json();
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Changes Saved", "Restored All Page Layout Settings, and Component settings.");
+            await this.loadData();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Restore All Page Settings", err.toString());
+        }finally{
+
+            this.bRestoreAllPageSettingsInProgress = false;
+        }
+    }
+
     renderRestoreAllPageSettings(){
 
         
@@ -2315,6 +2386,11 @@ class AdminSiteSettingsManager{
         const allWrapper = UIDiv("form");
         new UIInfo(allWrapper, [`Restore all the page layouts and component settings.`]);
         const buttonAll = UIButton("Restore All Page Settings","submit-button");
+
+        buttonAll.addEventListener("click", () =>{
+
+            this.restoreAllPageSettings();
+        })
         allWrapper.append(buttonAll);
 
         this.wrapper.append(allWrapper)//, layoutWrapper);
@@ -2322,6 +2398,11 @@ class AdminSiteSettingsManager{
         UIHeader(this.wrapper, `Restore All Page Layouts`);
         const layoutWrapper = UIDiv("form");
         const buttonLayout = UIButton("Restore All Page Layouts","submit-button");
+
+        buttonLayout.addEventListener("click", () =>{
+
+            this.restoreAllPageLayouts();
+        });
 
         new UIInfo(layoutWrapper, [
             `Restore all page layouts without changing component settings.`
