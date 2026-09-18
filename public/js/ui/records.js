@@ -373,26 +373,39 @@ class RecordsPage{
             ]
         };
 
+        const timeParseKeys = ["playtime", "max_playtime"];
 
-        const floatModes = ["player-epm", "player-avg"];
+        const bNeedTimeParse = timeParseKeys.indexOf(this.selectedRecordType) !== -1;
 
         const rows = this.data.map((d, i) =>{
 
             const pos = i + 1 + (this.page - 1) * this.perPage;
 
-            let value = d.record_value//;(floatModes.indexOf(this.mode) !== -1) ? d.record_value.toFixed(3) : d.record_value;
+            let value = d.record_value;
 
-            if(this.mode === "player-epm"){
-               
-                if(value % 1 != 0){
-                    value = value.toFixed(3);
+            let valueClassName = "";
+
+            
+            if(!bNeedTimeParse){
+
+                if(this.mode === "player-epm"){
+                
+                    if(value % 1 != 0){
+                        value = value.toFixed(3);
+                    }
+
+                }else if(this.mode === "player-avg"){
+
+                    if(value % 1 != 0){
+                        value = value.toFixed(2);
+                    }
                 }
-            }else if(this.mode === "player-avg"){
-                if(value % 1 != 0){
-                    value = value.toFixed(2);
-                }
+
+            }else{
+
+                value = toPlaytime(value);
+                valueClassName = "playtime";
             }
-
 
             return [
                 {
@@ -409,7 +422,7 @@ class RecordsPage{
                 {"display": toDateString(d.last_active, TIME_ZONE, true), "className": "date"},
                 {"display": d.total_matches},
                 {"display": toPlaytime(d.playtime), "className": "playtime"},
-                {"display": value},
+                {"display": value, "className": valueClassName},
             ];
         });
 
