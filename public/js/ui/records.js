@@ -88,6 +88,7 @@ class RecordsPage{
             url += `&gid=${this.selectedGametype}`;
             url += `&mid=${this.selectedMap}`;
             url += `&p=${this.page}&pp=${this.perPage}`;
+            url += `&mm=${this.selectedMinimumMatches}`;
 
             const req = await fetch(`${url}`);
 
@@ -111,7 +112,7 @@ class RecordsPage{
 
     createUrl(){
 
-        return `/records?mode=${this.mode}&rec=${this.selectedRecordType}&gid=${this.selectedGametype}&mid=${this.selectedMap}`;
+        return `/records?mode=${this.mode}&rec=${this.selectedRecordType}&gid=${this.selectedGametype}&mid=${this.selectedMap}&mm=${this.selectedMinimumMatches}`;
     }
 
     updateHistory(){
@@ -310,7 +311,22 @@ class RecordsPage{
         });
 
 
-        this.form.append(this.recordRow, this.gametypeRow, this.mapRow);
+        this.minMatchesRow = UIDiv("form-row");
+        this.minMatchesRow.append(UILabel("Minimum Matches Played"));
+
+        const minMatchesOptions = [0, 5, 10, 15, 20, 25, 50, 75, 100, 200, 250, 500, 1000].map((v) =>{
+            return {"display": v, "value": v};
+        });
+
+        this.minMatchesSelect = new UISelect(this.minMatchesRow, minMatchesOptions, this.selectedMinimumMatches, (e) =>{
+
+            this.selectedMinimumMatches = parseInt(e);
+            this.page = 1;
+            this.pagination.changeUrl(`${this.createUrl()}&page=`);
+            this.loadData();
+        });
+
+        this.form.append(this.recordRow, this.gametypeRow, this.mapRow, this.minMatchesRow);
         this.parent.append(this.form);
 
     }

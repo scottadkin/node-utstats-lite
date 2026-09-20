@@ -294,8 +294,9 @@ export default class JSONManager{
         const recordType = this.querySanitizeString("rt");
         const page = this.querySanitizeInteger("p");
         const perPage = this.querySanitizeInteger("pp");
+        const minMatches = this.querySanitizeInteger("mm");
 
-        const data = await getRecords(cat, recordType, gid, mid, page, perPage);
+        const data = await getRecords(cat, recordType, gid, mid, page, perPage, minMatches);
            
         this.res.status(200).json(data);
 
