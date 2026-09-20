@@ -1,7 +1,7 @@
 class RecordsPage{
 
     constructor(siteName, parent, mode, validTypes, modeTitles, gametypes, maps, 
-        gametypeMapCombos, selectedGametype, selectedMap, recordType, data, totalResults,
+        gametypeMapCombos, selectedGametype, selectedMap, recordType, minimumMatchesPlayed, data, totalResults,
         page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps
     ){
 
@@ -18,6 +18,7 @@ class RecordsPage{
         this.selectedRecordType = recordType;
         this.selectedGametype = parseInt(selectedGametype);
         this.selectedMap = parseInt(selectedMap);
+        this.selectedMinimumMatches = parseInt(minimumMatchesPlayed);
         this.data = data;
         this.totalResults = totalResults;
 

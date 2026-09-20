@@ -49,6 +49,9 @@ export async function renderRecordsPage(req, res, userSession){
         let selectedMap = (req.query.mid !== undefined) ? parseInt(req.query.mid) : 0;
         let dirtyPerPage = (req.query.pp !== undefined) ? parseInt(req.query.pp) : parseInt(pageSettings["Results Per Page"]);
         let dirtyPage = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
+        let selectedMinimumMatchesPlayed = (req.query.mm !== undefined) ? parseInt(req.query.mm) : 0;
+
+        if(selectedMinimumMatchesPlayed !== selectedMinimumMatchesPlayed) selectedMinimumMatchesPlayed = 0;
         
         if(dirtyPerPage !== dirtyPerPage) dirtyPerPage = 25;
         if(dirtyPage !== dirtyPage) dirtyPage = 1;
@@ -68,7 +71,10 @@ export async function renderRecordsPage(req, res, userSession){
         recordType = sanitizeRecordType(mode, recordType);
 
 
-        const {page, perPage, totalResults, data} = await getRecords(mode, recordType, selectedGametype, selectedMap, dirtyPage, dirtyPerPage);
+        const {page, perPage, totalResults, data} = await getRecords(
+            mode, recordType, selectedGametype, selectedMap, dirtyPage, dirtyPerPage,
+            selectedMinimumMatchesPlayed
+        );
 
  
         const modeDisplayName = getTypeDisplayName(mode, recordType);
@@ -116,7 +122,8 @@ export async function renderRecordsPage(req, res, userSession){
             domGametypes,
             domMaps,
             userSession,
-            "siteName": brandingSettings["Site Name"]
+            "siteName": brandingSettings["Site Name"],
+            "selectedMinimumMatchesPlayed": selectedMinimumMatchesPlayed
         });
         
     }catch(err){
