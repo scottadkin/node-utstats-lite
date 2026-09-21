@@ -2,9 +2,10 @@ import { DatabaseSync } from 'node:sqlite';
 import { rename } from "node:fs/promises";
 import { access } from 'node:fs/promises';
 import path from 'node:path';
+import Message from './message.mjs';
 
 
-let database = new DatabaseSync("./data/main_test8.db");
+let database = new DatabaseSync("./data/test_main_1234.db");
 database.exec("PRAGMA jounral_mode = WAL;");
 database.exec("PRAGMA busy_timeout = 15000;");
 
@@ -379,14 +380,20 @@ export async function bDatabaseConnected(databaseName){
     return false;
 }
 
-async function bDatabaseFileExist(fileName){
+export async function bDatabaseFileExist(fileName){
 
     try{
 
-        const result = await access(fileName);
-        if(result === undefined) return false;
+        const fileUrl = path.join("data", `${fileName}.db`);
+        console.log(`.\\${fileUrl}`);
+        const result = await access(`.\\${fileUrl}`);
+        console.log(`result = ${result}`);
+        if(result === undefined) return true;
 
     }catch(err){
+
+        console.log(`################################################`);
+        console.trace(err);
 
         if(err.code !== "ENOENT") console.trace(err);
         return false;
@@ -398,9 +405,9 @@ export async function createDatabase(databaseName){
 
     const fileUrl = path.join("data", `${databaseName}.db`);
 
-    const realFileName = `./${fileUrl}`;
+    const realFileName = `.\\${fileUrl}`;
 
-    if(await bDatabaseFileExist(realFileName)){
+    if(await bDatabaseFileExist(databaseName)){
          if(result === undefined) throw new Error(`Database already exists`);
     }
 
@@ -414,11 +421,27 @@ export async function createDatabase(databaseName){
 }
 
 
-export async function attachDatabase(databaseName){
+export async function attachDatabase(fileName){
 
-    if(!await bDatabaseConnected(databaseName)){
-        database.exec(`ATTACH DATABASE '.\\data\\${databaseName}.db' as ${databaseName}`);
+    if(!await bDatabaseConnected(fileName)){
+        database.exec(`ATTACH DATABASE '.\\data\\${fileName}.db' as '${fileName}'`);
+        console.log("ok");
     }else{
         console.log(`already connected`);
     }
+}
+
+
+export async function changeActiveDatabase(toRemove, toReplace){
+
+    database.exec(`DETACH ACTIVE DATABASE ${toRemove}`);
+    return await attachDatabase(toReplace);
+}
+
+
+export async function detachDatabase(fileName){
+
+    
+    new Message(`Attempting to detach database ${fileName}`,"note");
+    return database.exec(`DETACH DATABASE ${fileName}`);
 }

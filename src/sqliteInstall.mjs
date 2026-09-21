@@ -207,6 +207,7 @@ export function createTableQueries(databaseName){
             start_date TEXT NOT NULL,
             end_date TEXT NOT NULL,
             name TEXT NOT NULL COLLATE NOCASE,
+            file_name TEXT NOT NULL,
             total_matches INTEGER NOT NULL,
             total_players INTEGER NOT NULL
             ) STRICT`
@@ -1247,7 +1248,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     await createMainTable();
 
-    const testDBName = "test_8";
+    const testDBName = "test_season_1";
     await createDatabase(testDBName);
     const queries = createTableQueries(testDBName);//"farts");
     await attachDatabase(testDBName);
@@ -1256,7 +1257,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     for(let i = 0; i < queries.length; i++){
 
         new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
-     
+        console.log(queries[i]);
         await simpleQuery(queries[i]);
         new Message(`Query passed`,"pass");
     }

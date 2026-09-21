@@ -1,5 +1,5 @@
 import Message from "./src/message.mjs";
-import {simpleQuery} from "./src/database.mjs";
+import {detachDatabase, simpleQuery} from "./src/database.mjs";
 import { FTPImporter } from "./src/ftpimporter.mjs";
 import { SFTPImporter } from "./src/sftpimporter.mjs";
 import { readFile, readdir, rename } from 'node:fs/promises';
@@ -158,9 +158,14 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         data = data.toString().replace(/\u0000/ig, '');
 
+
+        
+
         const m = new MatchParser(data, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, bAutoAssignHWIDToName);
 
         await m.main();
+
+        
 
         new Message(`MatchId: ${m.matchId}, Server: ${m.server.name}, Gametype: ${m.gametype.name}, Map: ${m.map.name}`,"note");
 
@@ -170,6 +175,11 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
         }
 
         await InsertLogHistory(file, m.matchId);
+
+        if(m.attachedDatabase !== undefined){
+            await detachDatabase(m.attachedDatabase);
+            new Message(`Detached database ${m.attachedDatabase}`,"pass");
+        }
 
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
         
