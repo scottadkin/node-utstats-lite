@@ -35,6 +35,8 @@ const upload = multer({ dest: 'uploads/' })
 
 import ApiJSON from './src/json/apiJSON.mjs';
 import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
+//import { renderSeasonsPage } from './src/pages/seasons.mjs';
+//import { renderSeasonPage } from './src/pages/season.mjs';
 
 new Message("Attempting To Start Node UTStats Lite Website","progress");
 
@@ -271,3 +273,29 @@ app.listen(websitePort, () => {
 	new Message(`Node UTStats Lite running on port ${websitePort}`,"pass");
 	new Message(`Edit websitePort in config.mjs if you wish to change ports`,"note");
 })
+
+/*
+app.get("/test/seasons", async (req, res) =>{
+
+    try{
+
+        return renderSeasonsPage(req, res);
+
+    }catch(err){
+        res.json({"error": err.toString()});
+    }
+});
+
+app.get("/season/:season", (req, res) =>{
+
+
+    console.log(req);
+    try{
+
+        return renderSeasonPage(req, res, req.userSession);
+
+    }catch(err){
+        res.json({"error": err.toString()});
+    }
+    
+});*/

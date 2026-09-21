@@ -9,6 +9,7 @@ export async function renderRegisterPage(req, res, userSession){
         const timeZone = await getSiteWideTimeZone();
 
         res.render("register.ejs",{
+            req,
             "host": req.headers.host,
             timeZone,
             title,

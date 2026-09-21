@@ -14,10 +14,10 @@ import Items from "./importer/items.mjs";
 import {calculateRankings} from "./rankings.mjs";
 import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
-import { bImportRandomizeNames } from "../config.mjs";
+//import { bImportRandomizeNames } from "../config.mjs";
 import PlayerWeaponDamage from "./importer/playerWeaponDamage.mjs";
-import { attachDatabase, bDatabaseConnected, bDatabaseFileExist, changeActiveDatabase, createDatabase, detachDatabase, simpleQuery } from "./database.mjs";
-import { getSeasonByMatchDate } from "./seasons.mjs";
+//import { attachDatabase, bDatabaseConnected, bDatabaseFileExist, changeActiveDatabase, createDatabase, detachDatabase, simpleQuery } from "./database.mjs";
+//import { getSeasonByMatchDate } from "./seasons.mjs";
 
 
 export class MatchParser{
@@ -108,7 +108,7 @@ export class MatchParser{
 
         console.log(this.match.date);
 
-        const testSeason = await getSeasonByMatchDate(this.match.date);
+        /*const testSeason = await getSeasonByMatchDate(this.match.date);
         
 
         if(testSeason === null) throw new Error(`No Matching Season Found`);
@@ -125,7 +125,7 @@ export class MatchParser{
             
         }
 
-        this.attachedDatabase = testSeason.file_name;
+        this.attachedDatabase = testSeason.file_name;*/
       
         
 
@@ -134,8 +134,6 @@ export class MatchParser{
        // await changeActiveDatabase( testSeason.file_name);
         await this.players.setPlayerMasterIds();
 
-
-        console.log(testSeason);
   
         this.kills.setAllDeaths();
         //append (insta) if game is instagib

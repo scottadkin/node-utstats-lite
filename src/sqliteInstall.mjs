@@ -15,7 +15,7 @@ import { setAllBGametypeFlags } from "./matches.mjs";
 
 
 
-export function createTableQueries(databaseName){
+export function createTableQueries(){
 
     
     const mainTableQueries = [
@@ -202,7 +202,7 @@ export function createTableQueries(databaseName){
                 value TEXT COLLATE NOCASE NOT NULL
             ) STRICT`,
 
-            `CREATE TABLE IF NOT EXISTS nstats_season_databases (
+            /*`CREATE TABLE IF NOT EXISTS nstats_season_databases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             start_date TEXT NOT NULL,
             end_date TEXT NOT NULL,
@@ -210,23 +210,24 @@ export function createTableQueries(databaseName){
             file_name TEXT NOT NULL,
             total_matches INTEGER NOT NULL,
             total_players INTEGER NOT NULL
-            ) STRICT`
+            ) STRICT`*/
     ];
 
 
    // let bAddMainQueries = false;
 
-    if(databaseName === null){
-        return mainTableQueries;
+    //if(databaseName === null){
+       // return mainTableQueries;
        // databaseName = "";
         //bAddMainQueries = true;
-    }else{
-        databaseName = `${databaseName}.`;
-    }
+    //}else{
+    //    databaseName = `${databaseName}.`;
+    //}
 
+    const databaseName = "";
     const queries = [
         
-
+        ...mainTableQueries,
             `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_players (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE ,
@@ -1246,14 +1247,15 @@ export async function sqliteInstall(bOnlyCreateTables){
 
 
 
-    await createMainTable();
+    //await createMainTable();
 
-    const testDBName = "test_season_1";
-    await createDatabase(testDBName);
-    const queries = createTableQueries(testDBName);//"farts");
-    await attachDatabase(testDBName);
+    //const testDBName = "test_season_1";
+   // await createDatabase(testDBName);
+    //const queries = createTableQueries(testDBName);
+   // await attachDatabase(testDBName);
 
 
+   const queries = createTableQueries("");
     for(let i = 0; i < queries.length; i++){
 
         new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");

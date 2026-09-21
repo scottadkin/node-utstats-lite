@@ -5,7 +5,7 @@ import path from 'node:path';
 import Message from './message.mjs';
 
 
-let database = new DatabaseSync("./data/test_main_1234.db");
+let database = new DatabaseSync("./data/main.db");
 database.exec("PRAGMA jounral_mode = WAL;");
 database.exec("PRAGMA busy_timeout = 15000;");
 
@@ -385,14 +385,13 @@ export async function bDatabaseFileExist(fileName){
     try{
 
         const fileUrl = path.join("data", `${fileName}.db`);
-        console.log(`.\\${fileUrl}`);
+     
         const result = await access(`.\\${fileUrl}`);
-        console.log(`result = ${result}`);
+     
         if(result === undefined) return true;
 
     }catch(err){
 
-        console.log(`################################################`);
         console.trace(err);
 
         if(err.code !== "ENOENT") console.trace(err);
