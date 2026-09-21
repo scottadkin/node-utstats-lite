@@ -4,7 +4,7 @@ import { access } from 'node:fs/promises';
 import path from 'node:path';
 
 
-let database = new DatabaseSync("./data/main.db");
+let database = new DatabaseSync("./data/main_test8.db");
 database.exec("PRAGMA jounral_mode = WAL;");
 database.exec("PRAGMA busy_timeout = 15000;");
 
@@ -393,16 +393,32 @@ async function bDatabaseFileExist(fileName){
     }
 }
 
-export async function createDatabase(databaseName, fileName){
+export async function createDatabase(databaseName){
 
 
-    const fileUrl = path.join("data", `${fileName}.db`);
+    const fileUrl = path.join("data", `${databaseName}.db`);
 
     const realFileName = `./${fileUrl}`;
 
     if(await bDatabaseFileExist(realFileName)){
          if(result === undefined) throw new Error(`Database already exists`);
     }
-   
 
+
+    const db = new DatabaseSync(realFileName);
+    db.exec("PRAGMA jounral_mode = WAL;");
+    db.exec("PRAGMA busy_timeout = 15000;");
+
+    db.close();
+
+}
+
+
+export async function attachDatabase(databaseName){
+
+    if(!await bDatabaseConnected(databaseName)){
+        database.exec(`ATTACH DATABASE '.\\data\\${databaseName}.db' as ${databaseName}`);
+    }else{
+        console.log(`already connected`);
+    }
 }

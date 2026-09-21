@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { attachDatabase, createDatabase, simpleQuery } from "./database.mjs";
 import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
@@ -13,581 +13,702 @@ import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllM
 import { recalculateAllPlayerTotals270 } from "./ctf.mjs";
 import { setAllBGametypeFlags } from "./matches.mjs";
 
-const queries = [
 
-    `CREATE TABLE IF NOT EXISTS nstats_sessions(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        session_id TEXT NOT NULL,
-        created TEXT NOT NULL,
-        expires TEXT NOT NULL,
-        user_id INTEGER NOT NULL,
-        user_ip TEXT NOT NULL,
-        session_data TEXT DEFAULT '{}'
-    ) STRICT`,
-     `CREATE UNIQUE INDEX IF NOT EXISTS ns_s_idx ON nstats_sessions(session_id)`,
-  	`CREATE TABLE IF NOT EXISTS nstats_ftp (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        host TEXT NOT NULL,
-        port INTEGER NOT NULL,
-        user TEXT NOT NULL,
-        password TEXT NOT NULL,
-        target_folder TEXT NOT NULL,
-        delete_after_import INTEGER NOT NULL,
-        first TEXT NOT NULL,
-        last TEXT NOT NULL,
-        total_imports INTEGER NOT NULL,
-        total_logs_imported INTEGER NOT NULL,
-        ignore_bots INTEGER NOT NULL,
-        ignore_duplicates INTEGER NOT NULL,
-        min_players INTEGER NOT NULL,
-        min_playtime INTEGER NOT NULL,
-        sftp INTEGER NOT NULL,
-        enabled INTEGER NOT NULL,
-        delete_tmp_files INTEGER NOT NULL,
-        append_team_sizes INTEGER NOT NULL
-      ) STRICT`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_logs_folder (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        first TEXT NOT NULL,
-        last TEXT NOT NULL,
-        total_imports INTEGER NOT NULL,
-        total_logs_imported INTEGER NOT NULL,
-        ignore_bots INTEGER NOT NULL,
-        ignore_duplicates INTEGER NOT NULL,
-        min_players INTEGER NOT NULL,
-        min_playtime INTEGER NOT NULL,
-        append_team_sizes INTEGER NOT NULL
-        ) STRICT`,  
+export function createTableQueries(databaseName){
 
-        `CREATE TABLE IF NOT EXISTS nstats_players (
+    
+    const mainTableQueries = [
+        `CREATE TABLE IF NOT EXISTS nstats_sessions(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT COLLATE NOCASE ,
-            country TEXT NOT NULL,
-            hash TEXT COLLATE NOCASE NOT NULL
+            session_id TEXT NOT NULL,
+            created TEXT NOT NULL,
+            expires TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            user_ip TEXT NOT NULL,
+            session_data TEXT DEFAULT '{}'
         ) STRICT`,
-
-		`CREATE INDEX IF NOT EXISTS np_name_idx ON nstats_players(name)`,
-		`CREATE INDEX IF NOT EXISTS np_hash_idx ON nstats_players(hash)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_matches (
+        `CREATE UNIQUE INDEX IF NOT EXISTS ns_s_idx ON nstats_sessions(session_id)`,
+        `CREATE TABLE IF NOT EXISTS nstats_ftp (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            server_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            hardcore INTEGER NOT NULL,
-            tournament_mode INTEGER DEFAULT 0,
-            gamespeed INTEGER DEFAULT 100,
-            gamespeed_real INTEGER DEFAULT 100,
-            insta INTEGER NOT NULL,
-            date TEXT NOT NULL,
-            playtime REAL NOT NULL,
-            match_start REAL NOT NULL,
-            match_end REAL NOT NULL,
-            players INTEGER NOT NULL,
-            total_teams INTEGER NOT NULL,
-            team_0_score INTEGER NOT NULL,   
-            team_1_score INTEGER NOT NULL,   
-            team_2_score INTEGER NOT NULL,   
-            team_3_score INTEGER NOT NULL,   
-            solo_winner INTEGER NOT NULL,
-            solo_winner_score INTEGER NOT NULL,
-            target_score INTEGER NOT NULL,
-            time_limit INTEGER NOT NULL,
-            mutators TEXT NOT NULL,
-            hash TEXT NOT NULL,
-            absolute_time TEXT NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_matches_dom (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            real_total_score REAL NOT NULL,
-            importer_total_score REAL NOT NULL,
-            total_control_time REAL NOT NULL,
-            total_score_time REAL NOT NULL,
-            team_0_real_score REAL NOT NULL,
-            team_1_real_score REAL NOT NULL,
-            team_2_real_score REAL NOT NULL,
-            team_3_real_score REAL NOT NULL,
-            team_0_importer_score REAL NOT NULL,
-            team_1_importer_score REAL NOT NULL,
-            team_2_importer_score REAL NOT NULL,
-            team_3_importer_score REAL NOT NULL,
-            team_0_control_time REAL NOT NULL,
-            team_1_control_time REAL NOT NULL,
-            team_2_control_time REAL NOT NULL,
-            team_3_control_time REAL NOT NULL,
-            team_0_control_percent REAL NOT NULL,
-            team_1_control_percent REAL NOT NULL,
-            team_2_control_percent REAL NOT NULL,
-            team_3_control_percent REAL NOT NULL,
-            team_0_caps INTEGER NOT NULL,
-            team_1_caps INTEGER NOT NULL,
-            team_2_caps INTEGER NOT NULL,
-            team_3_caps INTEGER NOT NULL,
-            team_0_score_time REAL NOT NULL,
-            team_1_score_time REAL NOT NULL,
-            team_2_score_time REAL NOT NULL,
-            team_3_score_time REAL NOT NULL,
-            team_0_stolen_points REAL NOT NULL,
-            team_1_stolen_points REAL NOT NULL,
-            team_2_stolen_points REAL NOT NULL,
-            team_3_stolen_points REAL NOT NULL,
-            team_0_stolen_caps INTEGER NOT NULL,
-            team_1_stolen_caps INTEGER NOT NULL,
-            team_2_stolen_caps INTEGER NOT NULL,
-            team_3_stolen_caps INTEGER NOT NULL
-        ) STRICT`,
-		`CREATE INDEX IF NOT EXISTS match_idx ON nstats_matches_dom(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_servers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT COLLATE NOCASE ,
-            ip TEXT NOT NULL,
+            name TEXT NOT NULL,
+            host TEXT NOT NULL,
             port INTEGER NOT NULL,
-            matches INTEGER NOT NULL,
-            playtime REAL NOT NULL,
-            first_match TEXT NOT NULL,
-            last_match TEXT NOT NULL
+            user TEXT NOT NULL,
+            password TEXT NOT NULL,
+            target_folder TEXT NOT NULL,
+            delete_after_import INTEGER NOT NULL,
+            first TEXT NOT NULL,
+            last TEXT NOT NULL,
+            total_imports INTEGER NOT NULL,
+            total_logs_imported INTEGER NOT NULL,
+            ignore_bots INTEGER NOT NULL,
+            ignore_duplicates INTEGER NOT NULL,
+            min_players INTEGER NOT NULL,
+            min_playtime INTEGER NOT NULL,
+            sftp INTEGER NOT NULL,
+            enabled INTEGER NOT NULL,
+            delete_tmp_files INTEGER NOT NULL,
+            append_team_sizes INTEGER NOT NULL
         ) STRICT`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_gametypes (
+            `CREATE TABLE IF NOT EXISTS nstats_logs_folder (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT COLLATE NOCASE ,
-            matches INTEGER NOT NULL,
-            playtime REAL NOT NULL,
-            first_match TEXT NOT NULL,
-            last_match TEXT NOT NULL,
-            b_ctf INTEGER NOT NULL DEFAULT 0,
-            b_dom INTEGER NOT NULL DEFAULT 0,
-            b_as INTEGER NOT NULL DEFAULT 0,
-            b_mh INTEGER NOT NULL DEFAULT 0
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_maps (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT COLLATE NOCASE ,
-            matches INTEGER NOT NULL,
-            playtime REAL NOT NULL,
-            first_match TEXT NOT NULL,
-            last_match TEXT NOT NULL,
-            b_ctf INTEGER NOT NULL DEFAULT 0,
-            b_dom INTEGER NOT NULL DEFAULT 0,
-            b_as INTEGER NOT NULL DEFAULT 0,
-            b_mh INTEGER NOT NULL DEFAULT 0
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_match_players (     
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER NOT NULL,
-            spectator INTEGER NOT NULL,
-            ip TEXT NOT NULL,
-            country TEXT NOT NULL,
-            hwid TEXT NOT NULL,
-            mac1 TEXT NOT NULL,
-            mac2 TEXT NOT NULL,
-            match_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            match_date TEXT NOT NULL,
-            match_result TEXT NOT NULL,
-            bot INTEGER NOT NULL,
-            ping_min INTEGER NOT NULL,
-            ping_avg INTEGER NOT NULL,
-            ping_max INTEGER NOT NULL,
-            team INTEGER NOT NULL,
-            score INTEGER NOT NULL,
-            frags INTEGER NOT NULL,
-            kills INTEGER NOT NULL,
-            deaths INTEGER NOT NULL,
-            suicides INTEGER NOT NULL,
-            team_kills INTEGER NOT NULL,
-            efficiency REAL NOT NULL,
-            time_on_server REAL NOT NULL,
-            ttl REAL NOT NULL,
-            first_blood INTEGER NOT NULL,
-            spree_1 INTEGER NOT NULL,
-            spree_2 INTEGER NOT NULL,
-            spree_3 INTEGER NOT NULL,
-            spree_4 INTEGER NOT NULL,
-            spree_5 INTEGER NOT NULL,
-            spree_best INTEGER NOT NULL,
-            multi_1 INTEGER NOT NULL,
-            multi_2 INTEGER NOT NULL,
-            multi_3 INTEGER NOT NULL,
-            multi_4 INTEGER NOT NULL,
-            multi_best INTEGER NOT NULL,
-            headshots INTEGER NOT NULL,
-            item_amp INTEGER NOT NULL,
-            item_belt INTEGER NOT NULL,
-            item_boots INTEGER NOT NULL,
-            item_body INTEGER NOT NULL,
-            item_pads INTEGER NOT NULL,
-            item_invis INTEGER NOT NULL,
-            item_shp INTEGER NOT NULL,
-            dom_caps INTEGER NOT NULL
-        ) STRICT`,
-
-		`CREATE INDEX IF NOT EXISTS nmp_match_idx ON nstats_match_players(match_id)`,
-		`CREATE INDEX IF NOT EXISTS nmp_player_idx ON nstats_match_players(player_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            player_id INTEGER NOT NULL,
-            weapon_id INTEGER NOT NULL,
-            kills INTEGER NOT NULL,
-            deaths INTEGER NOT NULL,
-            team_kills INTEGER NOT NULL,
-            suicides INTEGER NOT NULL
-        ) STRICT`,
-
-		`CREATE INDEX IF NOT EXISTS nmws_match_idx ON nstats_match_weapon_stats(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_weapons (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT COLLATE NOCASE NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_kills (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            timestamp REAL NOT NULL,
-            kill_type INTEGER NOT NULL,
-            killer_id INTEGER NOT NULL,
-            killer_weapon INTEGER NOT NULL,
-            victim_id INTEGER NOT NULL,
-            victim_weapon INTEGER NOT NULL
-        ) STRICT`,
-		 `CREATE INDEX IF NOT EXISTS nk_match_idx ON nstats_kills(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_match_ctf (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,     
-            map_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            player_id INTEGER NOT NULL,
-            flag_taken INTEGER NOT NULL,
-            flag_pickup INTEGER NOT NULL,
-            flag_drop INTEGER NOT NULL,
-            flag_assist INTEGER NOT NULL,
-            flag_cover INTEGER NOT NULL,
-            flag_seal INTEGER NOT NULL,
-            flag_cap INTEGER NOT NULL,
-            flag_kill INTEGER NOT NULL,
-            flag_return INTEGER NOT NULL,
-            flag_return_base INTEGER NOT NULL,
-            flag_return_mid INTEGER NOT NULL,
-            flag_return_enemy_base INTEGER NOT NULL,
-            flag_return_save INTEGER NOT NULL,
-            flag_carry_time REAL NOT NULL,
-            flag_carry_time_min REAL NOT NULL,
-            flag_carry_time_max REAL NOT NULL
-        ) STRICT`,
-
-		`CREATE INDEX IF NOT EXISTS nmc_match_idx ON nstats_match_ctf(match_id)`,
-		`CREATE INDEX IF NOT EXISTS nmc_player_idx ON nstats_match_ctf(player_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_dom_control_points (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT COLLATE NOCASE NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_match_dom (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,  
-            map_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            player_id INTEGER NOT NULL,
-            point_id INTEGER NOT NULL,
-            total_caps INTEGER NOT NULL,
-            total_control_time REAL NOT NULL,
-            longest_control_time REAL NOT NULL,
-            shortest_control_time REAL NOT NULL,
-            control_percent REAL NOT NULL,
-            control_point_score REAL NOT NULL,
-            max_control_point_score REAL NOT NULL,
-            total_score_time REAL NOT NULL,
-            max_total_score_time REAL NOT NULL,
-            stolen_points REAL NOT NULL,
-            stolen_caps INTEGER NOT NULL
-        ) STRICT`,
-		 `CREATE INDEX IF NOT EXISTS nmd_match_idx ON nstats_match_dom(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_player_totals (     
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            last_active TEXT NOT NULL,
-            playtime REAL NOT NULL,
-            total_matches INTEGER NOT NULL,
-            wins INTEGER NOT NULL,
-            draws INTEGER NOT NULL,
-            losses INTEGER NOT NULL,
-            winrate REAL NOT NULL,
-            score INTEGER NOT NULL,
-            frags INTEGER NOT NULL,
-            kills INTEGER NOT NULL,
-            deaths INTEGER NOT NULL,
-            suicides INTEGER NOT NULL,
-            team_kills INTEGER NOT NULL,
-            efficiency REAL NOT NULL,
-            ttl REAL NOT NULL,
-            first_blood INTEGER NOT NULL,
-            spree_1 INTEGER NOT NULL,
-            spree_2 INTEGER NOT NULL,
-            spree_3 INTEGER NOT NULL,
-            spree_4 INTEGER NOT NULL,
-            spree_5 INTEGER NOT NULL,
-            spree_best INTEGER NOT NULL,
-            multi_1 INTEGER NOT NULL,
-            multi_2 INTEGER NOT NULL,
-            multi_3 INTEGER NOT NULL,
-            multi_4 INTEGER NOT NULL,
-            multi_best INTEGER NOT NULL,
-            headshots INTEGER NOT NULL,
-            item_amp INTEGER NOT NULL,
-            item_belt INTEGER NOT NULL,
-            item_boots INTEGER NOT NULL,
-            item_body INTEGER NOT NULL,
-            item_pads INTEGER NOT NULL,
-            item_invis INTEGER NOT NULL,
-            item_shp INTEGER NOT NULL,
-            dom_caps INTEGER NOT NULL,
-            avg_score REAL NOT NULL,
-            avg_frags REAL NOT NULL,
-            avg_kills REAL NOT NULL,
-            avg_deaths REAL NOT NULL,
-            avg_suicides REAL NOT NULL,
-            avg_team_kills REAL NOT NULL,
-            avg_spree_1 REAL NOT NULL,
-            avg_spree_2 REAL NOT NULL,
-            avg_spree_3 REAL NOT NULL,
-            avg_spree_4 REAL NOT NULL,
-            avg_spree_5 REAL NOT NULL,
-            avg_spree_best REAL NOT NULL,
-            avg_multi_1 REAL NOT NULL,
-            avg_multi_2 REAL NOT NULL,
-            avg_multi_3 REAL NOT NULL,
-            avg_multi_4 REAL NOT NULL,
-            avg_multi_best REAL NOT NULL,
-            avg_headshots REAL NOT NULL,
-            avg_item_amp REAL NOT NULL,
-            avg_item_belt REAL NOT NULL,
-            avg_item_boots REAL NOT NULL,
-            avg_item_body REAL NOT NULL,
-            avg_item_pads REAL NOT NULL,
-            avg_item_invis REAL NOT NULL,
-            avg_item_shp REAL NOT NULL,
-            avg_dom_caps REAL NOT NULL,
-            epm_score REAL NOT NULL,
-            epm_frags REAL NOT NULL,
-            epm_kills REAL NOT NULL,
-            epm_deaths REAL NOT NULL,
-            epm_suicides REAL NOT NULL,
-            epm_team_kills REAL NOT NULL,
-            epm_spree_1 REAL NOT NULL,
-            epm_spree_2 REAL NOT NULL,
-            epm_spree_3 REAL NOT NULL,
-            epm_spree_4 REAL NOT NULL,
-            epm_spree_5 REAL NOT NULL,
-            epm_multi_1 REAL NOT NULL,
-            epm_multi_2 REAL NOT NULL,
-            epm_multi_3 REAL NOT NULL,
-            epm_multi_4 REAL NOT NULL,
-            epm_headshots REAL NOT NULL,
-            epm_item_amp REAL NOT NULL,
-            epm_item_belt REAL NOT NULL,
-            epm_item_boots REAL NOT NULL,
-            epm_item_body REAL NOT NULL,
-            epm_item_pads REAL NOT NULL,
-            epm_item_invis REAL NOT NULL,
-            epm_item_shp REAL NOT NULL,
-            epm_dom_caps REAL NOT NULL
-        ) STRICT`,
-
-		`CREATE UNIQUE INDEX IF NOT EXISTS npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_player_totals_weapons (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            weapon_id INTEGER NOT NULL,
-            total_matches INTEGER NOT NULL,
-            kills INTEGER NOT NULL,
-            deaths INTEGER NOT NULL,
-            suicides INTEGER NOT NULL,
-            team_kills INTEGER NOT NULL,
-            eff REAL NOT NULL,
-            map_id INTEGER NOT NULL,
-            max_kills INTEGER NOT NULL,
-            max_deaths INTEGER NOT NULL,
-            max_suicides INTEGER NOT NULL,
-            max_team_kills INTEGER NOT NULL,
-            playtime REAL NOT NULL,
-            avg_kills REAL NOT NULL,
-            avg_deaths REAL NOT NULL,
-            avg_suicides REAL NOT NULL,
-            avg_team_kills REAL NOT NULL,
-            epm_kills REAL NOT NULL,
-            epm_deaths REAL NOT NULL,
-            epm_suicides REAL NOT NULL,
-            epm_team_kills REAL NOT NULL
-        ) STRICT`,
-         `DROP INDEX IF EXISTS pgw_idx`, //replaced with pgmw idx below
-		 `CREATE UNIQUE INDEX IF NOT EXISTS pgmw_idx ON nstats_player_totals_weapons(player_id, gametype_id, map_id, weapon_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_player_totals_ctf (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            total_matches INTEGER NOT NULL,
-            flag_taken INTEGER NOT NULL,
-            max_flag_taken INTEGER NOT NULL,
-            flag_pickup INTEGER NOT NULL,
-            max_flag_pickup INTEGER NOT NULL,
-            flag_drop INTEGER NOT NULL,
-            max_flag_drop INTEGER NOT NULL,
-            flag_assist INTEGER NOT NULL,
-            max_flag_assist INTEGER NOT NULL,
-            flag_cover INTEGER NOT NULL,
-            max_flag_cover INTEGER NOT NULL,
-            flag_seal INTEGER NOT NULL,
-            max_flag_seal INTEGER NOT NULL,
-            flag_cap INTEGER NOT NULL,
-            max_flag_cap INTEGER NOT NULL,
-            flag_kill INTEGER NOT NULL,
-            max_flag_kill INTEGER NOT NULL,
-            flag_return INTEGER NOT NULL,
-            max_flag_return INTEGER NOT NULL,
-            flag_return_base INTEGER NOT NULL,
-            max_flag_return_base INTEGER NOT NULL,
-            flag_return_mid INTEGER NOT NULL,
-            max_flag_return_mid INTEGER NOT NULL,
-            flag_return_enemy_base INTEGER NOT NULL,
-            max_flag_return_enemy_base INTEGER NOT NULL,
-            flag_return_save INTEGER NOT NULL,
-            max_flag_return_save INTEGER NOT NULL,
-            avg_flag_taken REAL NOT NULL,
-            avg_flag_pickup REAL NOT NULL,
-            avg_flag_drop REAL NOT NULL,
-            avg_flag_assist REAL NOT NULL,
-            avg_flag_cover REAL NOT NULL,
-            avg_flag_seal REAL NOT NULL,
-            avg_flag_cap REAL NOT NULL,
-            avg_flag_kill REAL NOT NULL,
-            avg_flag_return REAL NOT NULL,
-            avg_flag_return_base REAL NOT NULL,
-            avg_flag_return_mid REAL NOT NULL,
-            avg_flag_return_enemy_base REAL NOT NULL,
-            avg_flag_return_save REAL NOT NULL,
-            playtime REAL NOT NULL,
-            epm_flag_taken REAL NOT NULL,
-            epm_flag_pickup REAL NOT NULL,
-            epm_flag_drop REAL NOT NULL,
-            epm_flag_assist REAL NOT NULL,
-            epm_flag_cover REAL NOT NULL,
-            epm_flag_seal REAL NOT NULL,
-            epm_flag_cap REAL NOT NULL,
-            epm_flag_kill REAL NOT NULL,
-            epm_flag_return REAL NOT NULL,
-            epm_flag_return_base REAL NOT NULL,
-            epm_flag_return_mid REAL NOT NULL,
-            epm_flag_return_enemy_base REAL NOT NULL,
-            epm_flag_return_save REAL NOT NULL
-        ) STRICT`,
-
-		`CREATE UNIQUE INDEX IF NOT EXISTS nptc_pgm_idx ON nstats_player_totals_ctf(player_id, gametype_id, map_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT COLLATE NOCASE ,
-            password TEXT COLLATE NOCASE ,
-            activated INTEGER NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_logs_downloads (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_name TEXT COLLATE NOCASE ,
-            date TEXT NOT NULL,
-            importer_id INTEGER NOT NULL,
-            ftp_ip TEXT NOT NULL,
-            file_size INTEGER NOT NULL
-        ) STRICT`,
-
-		`CREATE UNIQUE INDEX IF NOT EXISTS nld_name_idx ON nstats_logs_downloads(file_name)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_name TEXT COLLATE NOCASE ,
-            date TEXT NOT NULL,
-            match_id INTEGER NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_logs_rejected (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            file_name TEXT COLLATE NOCASE,
-            date TEXT NOT NULL,
-            reason TEXT NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_site_settings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            category TEXT COLLATE NOCASE,
-            setting_type TEXT COLLATE NOCASE,
-            setting_name TEXT COLLATE NOCASE,
-            setting_value text NOT NULL
-        ) STRICT`,
-
-
-        `CREATE TABLE IF NOT EXISTS nstats_importer_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            importer_id INTEGER NOT NULL,
-            date TEXT NOT NULL,
-            logs_found INTEGER NOT NULL,
-            imported INTEGER NOT NULL,
-            failed INTEGER NOT NULL,
-            total_time REAL NOT NULL
+            first TEXT NOT NULL,
+            last TEXT NOT NULL,
+            total_imports INTEGER NOT NULL,
+            total_logs_imported INTEGER NOT NULL,
+            ignore_bots INTEGER NOT NULL,
+            ignore_duplicates INTEGER NOT NULL,
+            min_players INTEGER NOT NULL,
+            min_playtime INTEGER NOT NULL,
+            append_team_sizes INTEGER NOT NULL
+            ) STRICT`,  
+             `CREATE TABLE IF NOT EXISTS nstats_users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT COLLATE NOCASE ,
+                password TEXT COLLATE NOCASE ,
+                activated INTEGER NOT NULL
             ) STRICT`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_rankings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            matches INTEGER NOT NULL,
-            playtime REAL NOT NULL,
-            score REAL NOT NULL,
-            last_active TEXT NOT NULL
+            `CREATE TABLE IF NOT EXISTS nstats_logs_downloads (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_name TEXT COLLATE NOCASE ,
+                date TEXT NOT NULL,
+                importer_id INTEGER NOT NULL,
+                ftp_ip TEXT NOT NULL,
+                file_size INTEGER NOT NULL
             ) STRICT`,
-			 `CREATE UNIQUE INDEX IF NOT EXISTS pg_idx ON nstats_rankings(player_id,gametype_id)`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_ranking_settings (
+            `CREATE UNIQUE INDEX IF NOT EXISTS nld_name_idx ON nstats_logs_downloads(file_name)`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_name TEXT COLLATE NOCASE ,
+                date TEXT NOT NULL,
+                match_id INTEGER NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_logs_rejected (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                file_name TEXT COLLATE NOCASE,
+                date TEXT NOT NULL,
+                reason TEXT NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_site_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category TEXT COLLATE NOCASE,
+                setting_type TEXT COLLATE NOCASE,
+                setting_name TEXT COLLATE NOCASE,
+                setting_value text NOT NULL
+            ) STRICT`,
+
+
+            `CREATE TABLE IF NOT EXISTS nstats_importer_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                importer_id INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                logs_found INTEGER NOT NULL,
+                imported INTEGER NOT NULL,
+                failed INTEGER NOT NULL,
+                total_time REAL NOT NULL
+                ) STRICT`,
+                 `CREATE TABLE IF NOT EXISTS nstats_ranking_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category TEXT NOT NULL,
+                name TEXT COLLATE NOCASE ,
+                display_name TEXT COLLATE NOCASE ,
+                points REAL NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_page_layout (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                page TEXT NOT NULL,
+                item TEXT NOT NULL,
+                page_order INTEGER NOT NULL
+            ) STRICT`,
+             `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            category TEXT NOT NULL,
+            category TEXT COLLATE NOCASE ,
             name TEXT COLLATE NOCASE ,
-            display_name TEXT COLLATE NOCASE ,
-            points REAL NOT NULL
-        ) STRICT`,
+            type TEXT COLLATE NOCASE ,
+            value TEXT NOT NULL
+            ) STRICT`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_page_layout (
+        `CREATE TABLE IF NOT EXISTS nstats_user_login_attempts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            page TEXT NOT NULL,
-            item TEXT NOT NULL,
-            page_order INTEGER NOT NULL
-        ) STRICT`,
+            date TEXT NOT NULL,
+            target_username TEXT COLLATE NOCASE,
+            ip TEXT NOT NULL
+            ) STRICT`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_damage_match (
+            `CREATE TABLE IF NOT EXISTS nstats_json_api(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            category TEXT COLLATE NOCASE ,
+            setting_name TEXT COLLATE NOCASE ,
+            setting_type TEXT COLLATE NOCASE ,
+            setting_value TEXT NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date_added TEXT NOT NULL,
+                hwid TEXT COLLATE NOCASE NOT NULL,
+                name TEXT NOT NULL
+            ) STRICT`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS nfnh_hidx ON nstats_force_name_hwid(hwid)`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_force_name_mac(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date_added TEXT NOT NULL,
+                mac1 TEXT COLLATE NOCASE NOT NULL,
+                mac2 TEXT COLLATE NOCASE NOT NULL,
+                name TEXT NOT NULL
+            ) STRICT`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS nfnm_midx ON nstats_force_name_mac(mac1,mac2)`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid_and_mac(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date_added TEXT NOT NULL,
+                hwid TEXT COLLATE NOCASE NOT NULL,
+                mac1 TEXT COLLATE NOCASE NOT NULL,
+                mac2 TEXT COLLATE NOCASE NOT NULL,
+                name TEXT NOT NULL
+            ) STRICT`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS nfnhm_midx ON nstats_force_name_hwid_and_mac(hwid,mac1,mac2)`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_force_name_history(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,
+                player_id INTEGER NOT NULL,
+                force_type TEXT NOT NULL,
+                original_name TEXT COLLATE NOCASE NOT NULL,
+                new_name TEXT COLLATE NOCASE NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_players_settings(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                category TEXT COLLATE NOCASE NOT NULL,
+                name TEXT COLLATE NOCASE NOT NULL,
+                value_type TEXT COLLATE NOCASE NOT NULL,
+                value TEXT COLLATE NOCASE NOT NULL
+            ) STRICT`,
+
+
+            `CREATE TABLE IF NOT EXISTS nstats_map_thumbnail_settings(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT COLLATE NOCASE NOT NULL,
+                value TEXT COLLATE NOCASE NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_season_databases (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            start_date TEXT NOT NULL,
+            end_date TEXT NOT NULL,
+            name TEXT NOT NULL COLLATE NOCASE,
+            total_matches INTEGER NOT NULL,
+            total_players INTEGER NOT NULL
+            ) STRICT`
+    ];
+
+
+   // let bAddMainQueries = false;
+
+    if(databaseName === null){
+        return mainTableQueries;
+       // databaseName = "";
+        //bAddMainQueries = true;
+    }else{
+        databaseName = `${databaseName}.`;
+    }
+
+    const queries = [
+        
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_players (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT COLLATE NOCASE ,
+                country TEXT NOT NULL,
+                hash TEXT COLLATE NOCASE NOT NULL
+            ) STRICT`,
+
+            `CREATE INDEX IF NOT EXISTS ${databaseName}np_name_idx ON nstats_players(name)`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}np_hash_idx ON nstats_players(hash)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_matches (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                server_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                hardcore INTEGER NOT NULL,
+                tournament_mode INTEGER DEFAULT 0,
+                gamespeed INTEGER DEFAULT 100,
+                gamespeed_real INTEGER DEFAULT 100,
+                insta INTEGER NOT NULL,
+                date TEXT NOT NULL,
+                playtime REAL NOT NULL,
+                match_start REAL NOT NULL,
+                match_end REAL NOT NULL,
+                players INTEGER NOT NULL,
+                total_teams INTEGER NOT NULL,
+                team_0_score INTEGER NOT NULL,   
+                team_1_score INTEGER NOT NULL,   
+                team_2_score INTEGER NOT NULL,   
+                team_3_score INTEGER NOT NULL,   
+                solo_winner INTEGER NOT NULL,
+                solo_winner_score INTEGER NOT NULL,
+                target_score INTEGER NOT NULL,
+                time_limit INTEGER NOT NULL,
+                mutators TEXT NOT NULL,
+                hash TEXT NOT NULL,
+                absolute_time TEXT NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_matches_dom (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,
+                real_total_score REAL NOT NULL,
+                importer_total_score REAL NOT NULL,
+                total_control_time REAL NOT NULL,
+                total_score_time REAL NOT NULL,
+                team_0_real_score REAL NOT NULL,
+                team_1_real_score REAL NOT NULL,
+                team_2_real_score REAL NOT NULL,
+                team_3_real_score REAL NOT NULL,
+                team_0_importer_score REAL NOT NULL,
+                team_1_importer_score REAL NOT NULL,
+                team_2_importer_score REAL NOT NULL,
+                team_3_importer_score REAL NOT NULL,
+                team_0_control_time REAL NOT NULL,
+                team_1_control_time REAL NOT NULL,
+                team_2_control_time REAL NOT NULL,
+                team_3_control_time REAL NOT NULL,
+                team_0_control_percent REAL NOT NULL,
+                team_1_control_percent REAL NOT NULL,
+                team_2_control_percent REAL NOT NULL,
+                team_3_control_percent REAL NOT NULL,
+                team_0_caps INTEGER NOT NULL,
+                team_1_caps INTEGER NOT NULL,
+                team_2_caps INTEGER NOT NULL,
+                team_3_caps INTEGER NOT NULL,
+                team_0_score_time REAL NOT NULL,
+                team_1_score_time REAL NOT NULL,
+                team_2_score_time REAL NOT NULL,
+                team_3_score_time REAL NOT NULL,
+                team_0_stolen_points REAL NOT NULL,
+                team_1_stolen_points REAL NOT NULL,
+                team_2_stolen_points REAL NOT NULL,
+                team_3_stolen_points REAL NOT NULL,
+                team_0_stolen_caps INTEGER NOT NULL,
+                team_1_stolen_caps INTEGER NOT NULL,
+                team_2_stolen_caps INTEGER NOT NULL,
+                team_3_stolen_caps INTEGER NOT NULL
+            ) STRICT`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}match_idx ON nstats_matches_dom(match_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_servers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT COLLATE NOCASE ,
+                ip TEXT NOT NULL,
+                port INTEGER NOT NULL,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                first_match TEXT NOT NULL,
+                last_match TEXT NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_gametypes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT COLLATE NOCASE ,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                first_match TEXT NOT NULL,
+                last_match TEXT NOT NULL,
+                b_ctf INTEGER NOT NULL DEFAULT 0,
+                b_dom INTEGER NOT NULL DEFAULT 0,
+                b_as INTEGER NOT NULL DEFAULT 0,
+                b_mh INTEGER NOT NULL DEFAULT 0
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_maps (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT COLLATE NOCASE ,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                first_match TEXT NOT NULL,
+                last_match TEXT NOT NULL,
+                b_ctf INTEGER NOT NULL DEFAULT 0,
+                b_dom INTEGER NOT NULL DEFAULT 0,
+                b_as INTEGER NOT NULL DEFAULT 0,
+                b_mh INTEGER NOT NULL DEFAULT 0
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_players (     
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                spectator INTEGER NOT NULL,
+                ip TEXT NOT NULL,
+                country TEXT NOT NULL,
+                hwid TEXT NOT NULL,
+                mac1 TEXT NOT NULL,
+                mac2 TEXT NOT NULL,
+                match_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                match_date TEXT NOT NULL,
+                match_result TEXT NOT NULL,
+                bot INTEGER NOT NULL,
+                ping_min INTEGER NOT NULL,
+                ping_avg INTEGER NOT NULL,
+                ping_max INTEGER NOT NULL,
+                team INTEGER NOT NULL,
+                score INTEGER NOT NULL,
+                frags INTEGER NOT NULL,
+                kills INTEGER NOT NULL,
+                deaths INTEGER NOT NULL,
+                suicides INTEGER NOT NULL,
+                team_kills INTEGER NOT NULL,
+                efficiency REAL NOT NULL,
+                time_on_server REAL NOT NULL,
+                ttl REAL NOT NULL,
+                first_blood INTEGER NOT NULL,
+                spree_1 INTEGER NOT NULL,
+                spree_2 INTEGER NOT NULL,
+                spree_3 INTEGER NOT NULL,
+                spree_4 INTEGER NOT NULL,
+                spree_5 INTEGER NOT NULL,
+                spree_best INTEGER NOT NULL,
+                multi_1 INTEGER NOT NULL,
+                multi_2 INTEGER NOT NULL,
+                multi_3 INTEGER NOT NULL,
+                multi_4 INTEGER NOT NULL,
+                multi_best INTEGER NOT NULL,
+                headshots INTEGER NOT NULL,
+                item_amp INTEGER NOT NULL,
+                item_belt INTEGER NOT NULL,
+                item_boots INTEGER NOT NULL,
+                item_body INTEGER NOT NULL,
+                item_pads INTEGER NOT NULL,
+                item_invis INTEGER NOT NULL,
+                item_shp INTEGER NOT NULL,
+                dom_caps INTEGER NOT NULL
+            ) STRICT`,
+
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nmp_match_idx ON nstats_match_players(match_id)`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nmp_player_idx ON nstats_match_players(player_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_weapon_stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                player_id INTEGER NOT NULL,
+                weapon_id INTEGER NOT NULL,
+                kills INTEGER NOT NULL,
+                deaths INTEGER NOT NULL,
+                team_kills INTEGER NOT NULL,
+                suicides INTEGER NOT NULL
+            ) STRICT`,
+
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nmws_match_idx ON nstats_match_weapon_stats(match_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_weapons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT COLLATE NOCASE NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_kills (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,
+                timestamp REAL NOT NULL,
+                kill_type INTEGER NOT NULL,
+                killer_id INTEGER NOT NULL,
+                killer_weapon INTEGER NOT NULL,
+                victim_id INTEGER NOT NULL,
+                victim_weapon INTEGER NOT NULL
+            ) STRICT`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nk_match_idx ON nstats_kills(match_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_ctf (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,     
+                map_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                player_id INTEGER NOT NULL,
+                flag_taken INTEGER NOT NULL,
+                flag_pickup INTEGER NOT NULL,
+                flag_drop INTEGER NOT NULL,
+                flag_assist INTEGER NOT NULL,
+                flag_cover INTEGER NOT NULL,
+                flag_seal INTEGER NOT NULL,
+                flag_cap INTEGER NOT NULL,
+                flag_kill INTEGER NOT NULL,
+                flag_return INTEGER NOT NULL,
+                flag_return_base INTEGER NOT NULL,
+                flag_return_mid INTEGER NOT NULL,
+                flag_return_enemy_base INTEGER NOT NULL,
+                flag_return_save INTEGER NOT NULL,
+                flag_carry_time REAL NOT NULL,
+                flag_carry_time_min REAL NOT NULL,
+                flag_carry_time_max REAL NOT NULL
+            ) STRICT`,
+
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nmc_match_idx ON nstats_match_ctf(match_id)`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nmc_player_idx ON nstats_match_ctf(player_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_dom_control_points (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT COLLATE NOCASE NOT NULL
+            ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_dom (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,  
+                map_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                player_id INTEGER NOT NULL,
+                point_id INTEGER NOT NULL,
+                total_caps INTEGER NOT NULL,
+                total_control_time REAL NOT NULL,
+                longest_control_time REAL NOT NULL,
+                shortest_control_time REAL NOT NULL,
+                control_percent REAL NOT NULL,
+                control_point_score REAL NOT NULL,
+                max_control_point_score REAL NOT NULL,
+                total_score_time REAL NOT NULL,
+                max_total_score_time REAL NOT NULL,
+                stolen_points REAL NOT NULL,
+                stolen_caps INTEGER NOT NULL
+            ) STRICT`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nmd_match_idx ON nstats_match_dom(match_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals (     
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                last_active TEXT NOT NULL,
+                playtime REAL NOT NULL,
+                total_matches INTEGER NOT NULL,
+                wins INTEGER NOT NULL,
+                draws INTEGER NOT NULL,
+                losses INTEGER NOT NULL,
+                winrate REAL NOT NULL,
+                score INTEGER NOT NULL,
+                frags INTEGER NOT NULL,
+                kills INTEGER NOT NULL,
+                deaths INTEGER NOT NULL,
+                suicides INTEGER NOT NULL,
+                team_kills INTEGER NOT NULL,
+                efficiency REAL NOT NULL,
+                ttl REAL NOT NULL,
+                first_blood INTEGER NOT NULL,
+                spree_1 INTEGER NOT NULL,
+                spree_2 INTEGER NOT NULL,
+                spree_3 INTEGER NOT NULL,
+                spree_4 INTEGER NOT NULL,
+                spree_5 INTEGER NOT NULL,
+                spree_best INTEGER NOT NULL,
+                multi_1 INTEGER NOT NULL,
+                multi_2 INTEGER NOT NULL,
+                multi_3 INTEGER NOT NULL,
+                multi_4 INTEGER NOT NULL,
+                multi_best INTEGER NOT NULL,
+                headshots INTEGER NOT NULL,
+                item_amp INTEGER NOT NULL,
+                item_belt INTEGER NOT NULL,
+                item_boots INTEGER NOT NULL,
+                item_body INTEGER NOT NULL,
+                item_pads INTEGER NOT NULL,
+                item_invis INTEGER NOT NULL,
+                item_shp INTEGER NOT NULL,
+                dom_caps INTEGER NOT NULL,
+                avg_score REAL NOT NULL,
+                avg_frags REAL NOT NULL,
+                avg_kills REAL NOT NULL,
+                avg_deaths REAL NOT NULL,
+                avg_suicides REAL NOT NULL,
+                avg_team_kills REAL NOT NULL,
+                avg_spree_1 REAL NOT NULL,
+                avg_spree_2 REAL NOT NULL,
+                avg_spree_3 REAL NOT NULL,
+                avg_spree_4 REAL NOT NULL,
+                avg_spree_5 REAL NOT NULL,
+                avg_spree_best REAL NOT NULL,
+                avg_multi_1 REAL NOT NULL,
+                avg_multi_2 REAL NOT NULL,
+                avg_multi_3 REAL NOT NULL,
+                avg_multi_4 REAL NOT NULL,
+                avg_multi_best REAL NOT NULL,
+                avg_headshots REAL NOT NULL,
+                avg_item_amp REAL NOT NULL,
+                avg_item_belt REAL NOT NULL,
+                avg_item_boots REAL NOT NULL,
+                avg_item_body REAL NOT NULL,
+                avg_item_pads REAL NOT NULL,
+                avg_item_invis REAL NOT NULL,
+                avg_item_shp REAL NOT NULL,
+                avg_dom_caps REAL NOT NULL,
+                epm_score REAL NOT NULL,
+                epm_frags REAL NOT NULL,
+                epm_kills REAL NOT NULL,
+                epm_deaths REAL NOT NULL,
+                epm_suicides REAL NOT NULL,
+                epm_team_kills REAL NOT NULL,
+                epm_spree_1 REAL NOT NULL,
+                epm_spree_2 REAL NOT NULL,
+                epm_spree_3 REAL NOT NULL,
+                epm_spree_4 REAL NOT NULL,
+                epm_spree_5 REAL NOT NULL,
+                epm_multi_1 REAL NOT NULL,
+                epm_multi_2 REAL NOT NULL,
+                epm_multi_3 REAL NOT NULL,
+                epm_multi_4 REAL NOT NULL,
+                epm_headshots REAL NOT NULL,
+                epm_item_amp REAL NOT NULL,
+                epm_item_belt REAL NOT NULL,
+                epm_item_boots REAL NOT NULL,
+                epm_item_body REAL NOT NULL,
+                epm_item_pads REAL NOT NULL,
+                epm_item_invis REAL NOT NULL,
+                epm_item_shp REAL NOT NULL,
+                epm_dom_caps REAL NOT NULL
+            ) STRICT`,
+
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_weapons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                weapon_id INTEGER NOT NULL,
+                total_matches INTEGER NOT NULL,
+                kills INTEGER NOT NULL,
+                deaths INTEGER NOT NULL,
+                suicides INTEGER NOT NULL,
+                team_kills INTEGER NOT NULL,
+                eff REAL NOT NULL,
+                map_id INTEGER NOT NULL,
+                max_kills INTEGER NOT NULL,
+                max_deaths INTEGER NOT NULL,
+                max_suicides INTEGER NOT NULL,
+                max_team_kills INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                avg_kills REAL NOT NULL,
+                avg_deaths REAL NOT NULL,
+                avg_suicides REAL NOT NULL,
+                avg_team_kills REAL NOT NULL,
+                epm_kills REAL NOT NULL,
+                epm_deaths REAL NOT NULL,
+                epm_suicides REAL NOT NULL,
+                epm_team_kills REAL NOT NULL
+            ) STRICT`,
+            `DROP INDEX IF EXISTS pgw_idx`, //replaced with pgmw idx below
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}pgmw_idx ON nstats_player_totals_weapons(player_id, gametype_id, map_id, weapon_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_ctf (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                total_matches INTEGER NOT NULL,
+                flag_taken INTEGER NOT NULL,
+                max_flag_taken INTEGER NOT NULL,
+                flag_pickup INTEGER NOT NULL,
+                max_flag_pickup INTEGER NOT NULL,
+                flag_drop INTEGER NOT NULL,
+                max_flag_drop INTEGER NOT NULL,
+                flag_assist INTEGER NOT NULL,
+                max_flag_assist INTEGER NOT NULL,
+                flag_cover INTEGER NOT NULL,
+                max_flag_cover INTEGER NOT NULL,
+                flag_seal INTEGER NOT NULL,
+                max_flag_seal INTEGER NOT NULL,
+                flag_cap INTEGER NOT NULL,
+                max_flag_cap INTEGER NOT NULL,
+                flag_kill INTEGER NOT NULL,
+                max_flag_kill INTEGER NOT NULL,
+                flag_return INTEGER NOT NULL,
+                max_flag_return INTEGER NOT NULL,
+                flag_return_base INTEGER NOT NULL,
+                max_flag_return_base INTEGER NOT NULL,
+                flag_return_mid INTEGER NOT NULL,
+                max_flag_return_mid INTEGER NOT NULL,
+                flag_return_enemy_base INTEGER NOT NULL,
+                max_flag_return_enemy_base INTEGER NOT NULL,
+                flag_return_save INTEGER NOT NULL,
+                max_flag_return_save INTEGER NOT NULL,
+                avg_flag_taken REAL NOT NULL,
+                avg_flag_pickup REAL NOT NULL,
+                avg_flag_drop REAL NOT NULL,
+                avg_flag_assist REAL NOT NULL,
+                avg_flag_cover REAL NOT NULL,
+                avg_flag_seal REAL NOT NULL,
+                avg_flag_cap REAL NOT NULL,
+                avg_flag_kill REAL NOT NULL,
+                avg_flag_return REAL NOT NULL,
+                avg_flag_return_base REAL NOT NULL,
+                avg_flag_return_mid REAL NOT NULL,
+                avg_flag_return_enemy_base REAL NOT NULL,
+                avg_flag_return_save REAL NOT NULL,
+                playtime REAL NOT NULL,
+                epm_flag_taken REAL NOT NULL,
+                epm_flag_pickup REAL NOT NULL,
+                epm_flag_drop REAL NOT NULL,
+                epm_flag_assist REAL NOT NULL,
+                epm_flag_cover REAL NOT NULL,
+                epm_flag_seal REAL NOT NULL,
+                epm_flag_cap REAL NOT NULL,
+                epm_flag_kill REAL NOT NULL,
+                epm_flag_return REAL NOT NULL,
+                epm_flag_return_base REAL NOT NULL,
+                epm_flag_return_mid REAL NOT NULL,
+                epm_flag_return_enemy_base REAL NOT NULL,
+                epm_flag_return_save REAL NOT NULL
+            ) STRICT`,
+
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nptc_pgm_idx ON nstats_player_totals_ctf(player_id, gametype_id, map_id)`,
+
+            
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_rankings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                score REAL NOT NULL,
+                last_active TEXT NOT NULL
+                ) STRICT`,
+                `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}pg_idx ON nstats_rankings(player_id,gametype_id)`,
+
+            
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_damage_match (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                match_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                damage_delt INTEGER NOT NULL,
+                damage_taken INTEGER NOT NULL,
+                self_damage INTEGER NOT NULL,
+                team_damage_delt INTEGER NOT NULL,
+                team_damage_taken INTEGER NOT NULL,
+                fall_damage INTEGER NOT NULL,
+                drown_damage INTEGER NOT NULL,
+                cannon_damage INTEGER NOT NULL
+                ) STRICT`,
+
+            `CREATE INDEX IF NOT EXISTS ${databaseName}ndm_match_idx ON nstats_damage_match(match_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_damage (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id INTEGER NOT NULL,
-            match_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
             gametype_id INTEGER NOT NULL,
+            total_matches INTEGER NOT NULL,
+            playtime REAL NOT NULL,
             damage_delt INTEGER NOT NULL,
             damage_taken INTEGER NOT NULL,
             self_damage INTEGER NOT NULL,
@@ -598,342 +719,250 @@ const queries = [
             cannon_damage INTEGER NOT NULL
             ) STRICT`,
 
-		`CREATE INDEX IF NOT EXISTS ndm_match_idx ON nstats_damage_match(match_id)`,
 
-        `CREATE TABLE IF NOT EXISTS nstats_player_totals_damage (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        player_id INTEGER NOT NULL,
-        gametype_id INTEGER NOT NULL,
-        total_matches INTEGER NOT NULL,
-        playtime REAL NOT NULL,
-        damage_delt INTEGER NOT NULL,
-        damage_taken INTEGER NOT NULL,
-        self_damage INTEGER NOT NULL,
-        team_damage_delt INTEGER NOT NULL,
-        team_damage_taken INTEGER NOT NULL,
-        fall_damage INTEGER NOT NULL,
-        drown_damage INTEGER NOT NULL,
-        cannon_damage INTEGER NOT NULL
-        ) STRICT`,
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_caps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_id INTEGER NOT NULL,
+            map_id INTEGER NOT NULL,
+            gametype_id INTEGER NOT NULL,
+            cap_type INTEGER NOT NULL,
+            flag_team INTEGER NOT NULL,
+            capping_team INTEGER NOT NULL,
+            taken_timestamp REAL NOT NULL,
+            taken_player INTEGER NOT NULL,
+            cap_timestamp REAL NOT NULL,
+            cap_player INTEGER NOT NULL,
+            cap_time REAL NOT NULL,
+            carry_time REAL NOT NULL,
+            drop_time REAL NOT NULL,
+            total_drops INTEGER NOT NULL,
+            total_covers INTEGER NOT NULL,
+            unique_carriers INTEGER NOT NULL,
+            red_kills INTEGER NOT NULL,
+            blue_kills INTEGER NOT NULL,
+            green_kills INTEGER NOT NULL,
+            yellow_kills INTEGER NOT NULL,
+            red_suicides INTEGER NOT NULL,
+            blue_suicides INTEGER NOT NULL,
+            green_suicides INTEGER NOT NULL,
+            yellow_suicides INTEGER NOT NULL
+            ) STRICT`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nccaps_match_idx ON nstats_ctf_caps(match_id)`,
 
 
-        `CREATE TABLE IF NOT EXISTS nstats_ctf_caps (
+        `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_covers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         match_id INTEGER NOT NULL,
-        map_id INTEGER NOT NULL,
-        gametype_id INTEGER NOT NULL,
-        cap_type INTEGER NOT NULL,
-        flag_team INTEGER NOT NULL,
-        capping_team INTEGER NOT NULL,
-        taken_timestamp REAL NOT NULL,
-        taken_player INTEGER NOT NULL,
-        cap_timestamp REAL NOT NULL,
-        cap_player INTEGER NOT NULL,
-        cap_time REAL NOT NULL,
-        carry_time REAL NOT NULL,
-        drop_time REAL NOT NULL,
-        total_drops INTEGER NOT NULL,
-        total_covers INTEGER NOT NULL,
-        unique_carriers INTEGER NOT NULL,
-        red_kills INTEGER NOT NULL,
-        blue_kills INTEGER NOT NULL,
-        green_kills INTEGER NOT NULL,
-        yellow_kills INTEGER NOT NULL,
-        red_suicides INTEGER NOT NULL,
-        blue_suicides INTEGER NOT NULL,
-        green_suicides INTEGER NOT NULL,
-        yellow_suicides INTEGER NOT NULL
+        cap_id INTEGER NOT NULL,
+        timestamp REAL NOT NULL,
+        player_id INTEGER NOT NULL
         ) STRICT`,
-		`CREATE INDEX IF NOT EXISTS nccaps_match_idx ON nstats_ctf_caps(match_id)`,
+        `CREATE INDEX IF NOT EXISTS ${databaseName}nccovers_match_idx ON nstats_ctf_covers(match_id)`,
+
+        
+        `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_carry_times (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_id INTEGER NOT NULL,
+            map_id INTEGER NOT NULL,
+            gametype_id INTEGER NOT NULL,
+            cap_id INTEGER NOT NULL,
+            player_id INTEGER NOT NULL,
+            start_timestamp REAL NOT NULL,
+            end_timestamp REAL NOT NULL,
+            carry_time REAL NOT NULL
+            ) STRICT`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}ncct_match_idx ON nstats_ctf_carry_times(match_id)`,
 
 
-    `CREATE TABLE IF NOT EXISTS nstats_ctf_covers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    match_id INTEGER NOT NULL,
-    cap_id INTEGER NOT NULL,
-    timestamp REAL NOT NULL,
-    player_id INTEGER NOT NULL
-    ) STRICT`,
-	 `CREATE INDEX IF NOT EXISTS nccovers_match_idx ON nstats_ctf_covers(match_id)`,
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_cap_kills (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_id INTEGER NOT NULL,
+            cap_id INTEGER NOT NULL,
+            timestamp REAL NOT NULL,
+            killer_id INTEGER NOT NULL,
+            killer_team INTEGER NOT NULL
+            ) STRICT`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}ncck_match_idx ON nstats_ctf_cap_kills(match_id)`,
 
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_cap_suicides (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_id INTEGER NOT NULL,
+            cap_id INTEGER NOT NULL,
+            timestamp REAL NOT NULL,
+            player_id INTEGER NOT NULL,
+            player_team INTEGER NOT NULL
+            ) STRICT`,
+            
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nccs_match_idx ON nstats_ctf_cap_suicides(match_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_map_weapon_totals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                map_id INTEGER NOT NULL,
+                total_matches INTEGER NOT NULL,
+                total_playtime REAL NOT NULL,
+                weapon_id INTEGER NOT NULL,
+                kills INTEGER NOT NULL,
+                deaths INTEGER NOT NULL,
+                suicides INTEGER NOT NULL,
+                team_kills INTEGER NOT NULL,
+                kills_per_min REAL NOT NULL,
+                deaths_per_min REAL NOT NULL,
+                team_kills_per_min REAL NOT NULL,
+                suicides_per_min REAL NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                max_kills INTEGER NOT NULL,
+                max_deaths INTEGER NOT NULL,
+                max_suicides INTEGER NOT NULL,
+                max_team_kills INTEGER NOT NULL
+            ) STRICT`,
+            `DROP INDEX IF EXISTS mw_idx`,//replaced with mgw_idx below
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}mgw_idx ON nstats_map_weapon_totals(map_id,gametype_id,weapon_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_map_rankings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                score REAL NOT NULL,
+                last_active TEXT NOT NULL
+                ) STRICT`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}pm_idx ON nstats_map_rankings(player_id, map_id)`,
+
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_classic_weapon_match_stats (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                player_id INTEGER NOT NULL,
+                weapon_id INTEGER NOT NULL,
+                kills INTEGER NOT NULL,
+                deaths INTEGER NOT NULL,
+                shots INTEGER NOT NULL,
+                hits INTEGER NOT NULL,
+                accuracy REAL NOT NULL,
+                damage INTEGER NOT NULL
+                ) STRICT`,
+                `CREATE INDEX IF NOT EXISTS ${databaseName}ncwms_match_idx ON nstats_classic_weapon_match_stats(match_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_ctf_league (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            player_id INTEGER NOT NULL,
+            gametype_id INTEGER NOT NULL,
+            map_id INTEGER NOT NULL,
+            first_match TEXT NOT NULL,
+            last_match TEXT NOT NULL,
+            playtime REAL NOT NULL,
+            total_matches INTEGER NOT NULL,
+            wins INTEGER NOT NULL,
+            draws INTEGER NOT NULL,
+            losses INTEGER NOT NULL,
+            winrate REAL NOT NULL,
+            cap_for INTEGER NOT NULL,
+            cap_against INTEGER NOT NULL,
+            cap_offset INTEGER NOT NULL,
+            points INTEGER NOT NULL
+            ) STRICT`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}npcl_mgp_idx ON nstats_player_ctf_league(map_id, gametype_id, player_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npcl_pgm_idx ON nstats_player_ctf_league(player_id,gametype_id,map_id)`,
+
+            
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_dom_team_score_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_id INTEGER NOT NULL,
+            timestamp REAL NOT NULL,
+            real_total_score REAL NOT NULL,
+            real_team_0_score REAL NOT NULL,
+            real_team_1_score REAL NOT NULL,
+            real_team_2_score REAL NOT NULL,
+            real_team_3_score REAL NOT NULL,
+            importer_total_score REAL NOT NULL,
+            importer_team_0_score REAL NOT NULL,
+            importer_team_1_score REAL NOT NULL,
+            importer_team_2_score REAL NOT NULL,
+            importer_team_3_score REAL NOT NULL
+            ) STRICT`,
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nmdtsh_match_idx ON nstats_match_dom_team_score_history(match_id)`,
+
+            
+
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_player_weapon_damage (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                match_id INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                player_id INTEGER NOT NULL,
+                weapon_id INTEGER NOT NULL,
+                damage INTEGER NOT NULL
+            ) STRICT`,
+
+            `CREATE INDEX IF NOT EXISTS ${databaseName}nstats_match_pmwd ON nstats_match_player_weapon_damage(match_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_totals_player_weapon_damage (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                total_matches INTEGER NOT NULL,
+                total_playtime REAL NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                weapon_id INTEGER NOT NULL,
+                damage INTEGER NOT NULL,
+                max_damage INTEGER NOT NULL,
+                avg_damage REAL NOT NULL,
+                damage_per_minute REAL NOT NULL
+            ) STRICT`,
+
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nstats_totals_pwd ON nstats_totals_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`,
+
+            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_max (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                max_playtime REAL NOT NULL,
+                max_score INTEGER NOT NULL,
+                max_frags INTEGER NOT NULL,
+                max_kills INTEGER NOT NULL,
+                max_deaths INTEGER NOT NULL,
+                max_suicides INTEGER NOT NULL,
+                max_team_kills INTEGER NOT NULL,
+                max_spree_1 INTEGER NOT NULL,
+                max_spree_2 INTEGER NOT NULL,
+                max_spree_3 INTEGER NOT NULL,
+                max_spree_4 INTEGER NOT NULL,
+                max_spree_5 INTEGER NOT NULL,
+                max_spree_best INTEGER NOT NULL,
+                max_multi_1 INTEGER NOT NULL,
+                max_multi_2 INTEGER NOT NULL,
+                max_multi_3 INTEGER NOT NULL,
+                max_multi_4 INTEGER NOT NULL,
+                max_multi_best INTEGER NOT NULL,
+                max_headshots INTEGER NOT NULL,
+                max_item_amp INTEGER NOT NULL,
+                max_item_belt INTEGER NOT NULL,
+                max_item_boots INTEGER NOT NULL,
+                max_item_body INTEGER NOT NULL,
+                max_item_pads INTEGER NOT NULL,
+                max_item_invis INTEGER NOT NULL,
+                max_item_shp INTEGER NOT NULL,
+                max_dom_caps INTEGER NOT NULL,
+                CONSTRAINT fk_player_totals_max_pgm
+                FOREIGN KEY(player_id, gametype_id, map_id)
+                REFERENCES nstats_player_totals(player_id, gametype_id, map_id)
+            ) STRICT`,
+
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nstats_totals_max_pgm ON nstats_player_totals_max(player_id,gametype_id,map_id)`,
+
+    ];
+
+ 
     
-    `CREATE TABLE IF NOT EXISTS nstats_ctf_carry_times (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        match_id INTEGER NOT NULL,
-        map_id INTEGER NOT NULL,
-        gametype_id INTEGER NOT NULL,
-        cap_id INTEGER NOT NULL,
-        player_id INTEGER NOT NULL,
-        start_timestamp REAL NOT NULL,
-        end_timestamp REAL NOT NULL,
-        carry_time REAL NOT NULL
-        ) STRICT`,
-		`CREATE INDEX IF NOT EXISTS ncct_match_idx ON nstats_ctf_carry_times(match_id)`,
-
-
-        `CREATE TABLE IF NOT EXISTS nstats_ctf_cap_kills (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        match_id INTEGER NOT NULL,
-        cap_id INTEGER NOT NULL,
-        timestamp REAL NOT NULL,
-        killer_id INTEGER NOT NULL,
-        killer_team INTEGER NOT NULL
-        ) STRICT`,
-		 `CREATE INDEX IF NOT EXISTS ncck_match_idx ON nstats_ctf_cap_kills(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_ctf_cap_suicides (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        match_id INTEGER NOT NULL,
-        cap_id INTEGER NOT NULL,
-        timestamp REAL NOT NULL,
-        player_id INTEGER NOT NULL,
-        player_team INTEGER NOT NULL
-        ) STRICT`,
-		 
-		 `CREATE INDEX IF NOT EXISTS nccs_match_idx ON nstats_ctf_cap_suicides(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_map_weapon_totals (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            map_id INTEGER NOT NULL,
-            total_matches INTEGER NOT NULL,
-            total_playtime REAL NOT NULL,
-            weapon_id INTEGER NOT NULL,
-            kills INTEGER NOT NULL,
-            deaths INTEGER NOT NULL,
-            suicides INTEGER NOT NULL,
-            team_kills INTEGER NOT NULL,
-            kills_per_min REAL NOT NULL,
-            deaths_per_min REAL NOT NULL,
-            team_kills_per_min REAL NOT NULL,
-            suicides_per_min REAL NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            max_kills INTEGER NOT NULL,
-            max_deaths INTEGER NOT NULL,
-            max_suicides INTEGER NOT NULL,
-            max_team_kills INTEGER NOT NULL
-        ) STRICT`,
-         `DROP INDEX IF EXISTS mw_idx`,//replaced with mgw_idx below
-		 `CREATE UNIQUE INDEX IF NOT EXISTS mgw_idx ON nstats_map_weapon_totals(map_id,gametype_id,weapon_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            matches INTEGER NOT NULL,
-            playtime REAL NOT NULL,
-            score REAL NOT NULL,
-            last_active TEXT NOT NULL
-            ) STRICT`,
-		`CREATE UNIQUE INDEX IF NOT EXISTS pm_idx ON nstats_map_rankings(player_id, map_id)`,
-
-
-        `CREATE TABLE IF NOT EXISTS nstats_classic_weapon_match_stats (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            player_id INTEGER NOT NULL,
-            weapon_id INTEGER NOT NULL,
-            kills INTEGER NOT NULL,
-            deaths INTEGER NOT NULL,
-            shots INTEGER NOT NULL,
-            hits INTEGER NOT NULL,
-            accuracy REAL NOT NULL,
-            damage INTEGER NOT NULL
-            ) STRICT`,
-			 `CREATE INDEX IF NOT EXISTS ncwms_match_idx ON nstats_classic_weapon_match_stats(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_player_ctf_league (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        player_id INTEGER NOT NULL,
-        gametype_id INTEGER NOT NULL,
-        map_id INTEGER NOT NULL,
-        first_match TEXT NOT NULL,
-        last_match TEXT NOT NULL,
-        playtime REAL NOT NULL,
-        total_matches INTEGER NOT NULL,
-        wins INTEGER NOT NULL,
-        draws INTEGER NOT NULL,
-        losses INTEGER NOT NULL,
-        winrate REAL NOT NULL,
-        cap_for INTEGER NOT NULL,
-        cap_against INTEGER NOT NULL,
-        cap_offset INTEGER NOT NULL,
-        points INTEGER NOT NULL
-        ) STRICT`,
-		 `CREATE INDEX IF NOT EXISTS npcl_mgp_idx ON nstats_player_ctf_league(map_id, gametype_id, player_id)`,
-		 `CREATE UNIQUE INDEX IF NOT EXISTS npcl_pgm_idx ON nstats_player_ctf_league(player_id,gametype_id,map_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category TEXT COLLATE NOCASE ,
-        name TEXT COLLATE NOCASE ,
-        type TEXT COLLATE NOCASE ,
-        value TEXT NOT NULL
-        ) STRICT`,
-
-       `CREATE TABLE IF NOT EXISTS nstats_user_login_attempts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT NOT NULL,
-        target_username TEXT COLLATE NOCASE,
-        ip TEXT NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_match_dom_team_score_history (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        match_id INTEGER NOT NULL,
-        timestamp REAL NOT NULL,
-        real_total_score REAL NOT NULL,
-        real_team_0_score REAL NOT NULL,
-        real_team_1_score REAL NOT NULL,
-        real_team_2_score REAL NOT NULL,
-        real_team_3_score REAL NOT NULL,
-        importer_total_score REAL NOT NULL,
-        importer_team_0_score REAL NOT NULL,
-        importer_team_1_score REAL NOT NULL,
-        importer_team_2_score REAL NOT NULL,
-        importer_team_3_score REAL NOT NULL
-        ) STRICT`,
-		 `CREATE INDEX IF NOT EXISTS nmdtsh_match_idx ON nstats_match_dom_team_score_history(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_json_api(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category TEXT COLLATE NOCASE ,
-        setting_name TEXT COLLATE NOCASE ,
-        setting_type TEXT COLLATE NOCASE ,
-        setting_value TEXT NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date_added TEXT NOT NULL,
-            hwid TEXT COLLATE NOCASE NOT NULL,
-            name TEXT NOT NULL
-        ) STRICT`,
-        `CREATE UNIQUE INDEX IF NOT EXISTS nfnh_hidx ON nstats_force_name_hwid(hwid)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_force_name_mac(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date_added TEXT NOT NULL,
-            mac1 TEXT COLLATE NOCASE NOT NULL,
-            mac2 TEXT COLLATE NOCASE NOT NULL,
-            name TEXT NOT NULL
-        ) STRICT`,
-        `CREATE UNIQUE INDEX IF NOT EXISTS nfnm_midx ON nstats_force_name_mac(mac1,mac2)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_force_name_hwid_and_mac(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date_added TEXT NOT NULL,
-            hwid TEXT COLLATE NOCASE NOT NULL,
-            mac1 TEXT COLLATE NOCASE NOT NULL,
-            mac2 TEXT COLLATE NOCASE NOT NULL,
-            name TEXT NOT NULL
-        ) STRICT`,
-        `CREATE UNIQUE INDEX IF NOT EXISTS nfnhm_midx ON nstats_force_name_hwid_and_mac(hwid,mac1,mac2)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_force_name_history(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            player_id INTEGER NOT NULL,
-            force_type TEXT NOT NULL,
-            original_name TEXT COLLATE NOCASE NOT NULL,
-            new_name TEXT COLLATE NOCASE NOT NULL
-        ) STRICT`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_players_settings(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            category TEXT COLLATE NOCASE NOT NULL,
-            name TEXT COLLATE NOCASE NOT NULL,
-            value_type TEXT COLLATE NOCASE NOT NULL,
-            value TEXT COLLATE NOCASE NOT NULL
-        ) STRICT`,
-
-
-        `CREATE TABLE IF NOT EXISTS nstats_map_thumbnail_settings(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT COLLATE NOCASE NOT NULL,
-            value TEXT COLLATE NOCASE NOT NULL
-        ) STRICT`,
-
-
-        `CREATE TABLE IF NOT EXISTS nstats_match_player_weapon_damage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            match_id INTEGER NOT NULL,
-            playtime REAL NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            player_id INTEGER NOT NULL,
-            weapon_id INTEGER NOT NULL,
-            damage INTEGER NOT NULL
-        ) STRICT`,
-
-        `CREATE INDEX IF NOT EXISTS nstats_match_pmwd ON nstats_match_player_weapon_damage(match_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_totals_player_weapon_damage (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER NOT NULL,
-            total_matches INTEGER NOT NULL,
-            total_playtime REAL NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            weapon_id INTEGER NOT NULL,
-            damage INTEGER NOT NULL,
-            max_damage INTEGER NOT NULL,
-            avg_damage REAL NOT NULL,
-            damage_per_minute REAL NOT NULL
-        ) STRICT`,
-
-        `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_pwd ON nstats_totals_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_player_totals_max (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            player_id INTEGER NOT NULL,
-            gametype_id INTEGER NOT NULL,
-            map_id INTEGER NOT NULL,
-            max_playtime REAL NOT NULL,
-            max_score INTEGER NOT NULL,
-            max_frags INTEGER NOT NULL,
-            max_kills INTEGER NOT NULL,
-            max_deaths INTEGER NOT NULL,
-            max_suicides INTEGER NOT NULL,
-            max_team_kills INTEGER NOT NULL,
-            max_spree_1 INTEGER NOT NULL,
-            max_spree_2 INTEGER NOT NULL,
-            max_spree_3 INTEGER NOT NULL,
-            max_spree_4 INTEGER NOT NULL,
-            max_spree_5 INTEGER NOT NULL,
-            max_spree_best INTEGER NOT NULL,
-            max_multi_1 INTEGER NOT NULL,
-            max_multi_2 INTEGER NOT NULL,
-            max_multi_3 INTEGER NOT NULL,
-            max_multi_4 INTEGER NOT NULL,
-            max_multi_best INTEGER NOT NULL,
-            max_headshots INTEGER NOT NULL,
-            max_item_amp INTEGER NOT NULL,
-            max_item_belt INTEGER NOT NULL,
-            max_item_boots INTEGER NOT NULL,
-            max_item_body INTEGER NOT NULL,
-            max_item_pads INTEGER NOT NULL,
-            max_item_invis INTEGER NOT NULL,
-            max_item_shp INTEGER NOT NULL,
-            max_dom_caps INTEGER NOT NULL,
-            CONSTRAINT fk_player_totals_max_pgm
-            FOREIGN KEY(player_id, gametype_id, map_id)
-            REFERENCES nstats_player_totals(player_id, gametype_id, map_id)
-        ) STRICT`,
-
-        `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_pgm ON nstats_player_totals_max(player_id,gametype_id,map_id)`,
-
-        `CREATE TABLE IF NOT EXISTS nstats_season_databases (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        start_date TEXT NOT NULL,
-        end_date TEXT NOT NULL,
-        name TEXT NOT NULL COLLATE NOCASE,
-        total_matches INTEGER NOT NULL,
-        total_players INTEGER NOT NULL
-        ) STRICT`
-
-];
+    return queries;
+}
 
 
 async function bColumnExist(tableName, columnName){
@@ -1198,15 +1227,36 @@ async function addBCTFBDOMMapGametypes(){
 }
 
 
+async function createMainTable(){
+
+    const queries = createTableQueries(null);
+
+    for(let i = 0; i < queries.length; i++){
+
+        new Message(`Attempting Query ${i + 1} out of ${queries.length} (Main Table)`,"note");
+        await simpleQuery(queries[i]);
+        new Message(`Query passed`,"pass");
+    }
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
 
 
 
+    await createMainTable();
+
+    const testDBName = "test_8";
+    await createDatabase(testDBName);
+    const queries = createTableQueries(testDBName);//"farts");
+    await attachDatabase(testDBName);
+
+
     for(let i = 0; i < queries.length; i++){
 
         new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
+     
         await simpleQuery(queries[i]);
         new Message(`Query passed`,"pass");
     }
