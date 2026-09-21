@@ -924,6 +924,15 @@ const queries = [
 
         `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_pgm ON nstats_player_totals_max(player_id,gametype_id,map_id)`,
 
+        `CREATE TABLE IF NOT EXISTS nstats_season_databases (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        start_date TEXT NOT NULL,
+        end_date TEXT NOT NULL,
+        name TEXT NOT NULL COLLATE NOCASE,
+        total_matches INTEGER NOT NULL,
+        total_players INTEGER NOT NULL
+        ) STRICT`
+
 ];
 
 

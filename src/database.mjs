@@ -1,5 +1,8 @@
 import { DatabaseSync } from 'node:sqlite';
 import { rename } from "node:fs/promises";
+import { access } from 'node:fs/promises';
+import path from 'node:path';
+
 
 let database = new DatabaseSync("./data/main.db");
 database.exec("PRAGMA jounral_mode = WAL;");
@@ -349,5 +352,57 @@ export async function getColumnNames(tableName){
     const result = await simpleQuery(query);
 
     return result.map((r) => { return r.name });
+
+}
+
+
+export async function getConnectedDatabases(){
+
+    const query = `PRAGMA database_list`;
+
+    const result = await simpleQuery(query);
+
+    return result;
+}
+
+export async function bDatabaseConnected(databaseName){
+
+    const connected = await getConnectedDatabases();
+
+    for(let i = 0; i < connected.length; i++){
+
+        const {name} = connected[i];
+
+        if(name === databaseName) return true;
+    }
+
+    return false;
+}
+
+async function bDatabaseFileExist(fileName){
+
+    try{
+
+        const result = await access(fileName);
+        if(result === undefined) return false;
+
+    }catch(err){
+
+        if(err.code !== "ENOENT") console.trace(err);
+        return false;
+    }
+}
+
+export async function createDatabase(databaseName, fileName){
+
+
+    const fileUrl = path.join("data", `${fileName}.db`);
+
+    const realFileName = `./${fileUrl}`;
+
+    if(await bDatabaseFileExist(realFileName)){
+         if(result === undefined) throw new Error(`Database already exists`);
+    }
+   
 
 }
