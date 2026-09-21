@@ -16,6 +16,7 @@ import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
 //import { bImportRandomizeNames } from "../config.mjs";
 import PlayerWeaponDamage from "./importer/playerWeaponDamage.mjs";
+import { getSeasonByMatchDate } from "./seasons.mjs";
 //import { attachDatabase, bDatabaseConnected, bDatabaseFileExist, changeActiveDatabase, createDatabase, detachDatabase, simpleQuery } from "./database.mjs";
 //import { getSeasonByMatchDate } from "./seasons.mjs";
 
@@ -106,7 +107,8 @@ export class MatchParser{
             throw new Error("MIN PLAYTIME");
         }   
 
-        console.log(this.match.date);
+
+        
 
         /*const testSeason = await getSeasonByMatchDate(this.match.date);
         
@@ -196,6 +198,19 @@ export class MatchParser{
             this.map.setId(),
         ]);
 
+     
+
+        const seasonInfo = await getSeasonByMatchDate(this.match.date);
+
+        if(seasonInfo === null){
+
+            new Message(`No season was found, setting id to 0.`,"note");
+            
+
+        }
+
+
+
         this.matchId = await createMatch(
             this.server.id, 
             this.gametype.id, 
@@ -220,7 +235,8 @@ export class MatchParser{
             this.gametype.targetScore,
             this.gametype.timeLimit,
             this.gametype.mutators,
-            this.match.absoluteTime
+            this.match.absoluteTime,
+            seasonInfo?.id ?? 0
         ); 
 
         if(this.matchId === null){

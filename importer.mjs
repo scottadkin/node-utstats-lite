@@ -176,6 +176,9 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         await InsertLogHistory(file, m.matchId);
 
+    
+        
+
         /*if(m.attachedDatabase !== undefined){
             await detachDatabase(m.attachedDatabase);
             new Message(`Detached database ${m.attachedDatabase}`,"pass");

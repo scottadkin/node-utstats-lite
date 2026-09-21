@@ -202,6 +202,13 @@ export function createTableQueries(){
                 value TEXT COLLATE NOCASE NOT NULL
             ) STRICT`,
 
+            `CREATE TABLE IF NOT EXISTS nstats_seasons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                start_date TEXT NOT NULL,
+                end_date TEXT NOT NULL,
+                name TEXT NOT NULL COLLATE NOCASE
+            ) STRICT`
+
             /*`CREATE TABLE IF NOT EXISTS nstats_season_databases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             start_date TEXT NOT NULL,
@@ -264,7 +271,8 @@ export function createTableQueries(){
                 time_limit INTEGER NOT NULL,
                 mutators TEXT NOT NULL,
                 hash TEXT NOT NULL,
-                absolute_time TEXT NOT NULL
+                absolute_time TEXT NOT NULL,
+                season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
 
             `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_matches_dom (
@@ -1241,6 +1249,13 @@ async function createMainTable(){
     }
 }
 
+//2.10.0
+async function addSeasonColumnToMatches(){
+
+    new Message(`Checking for season_id column in matches table.`,"note");
+    await addColumn("nstats_matches", "season_id", "INTEGER NOT NULL DEFAULT 0");
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1326,6 +1341,11 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.9.0
     new Message(`Marking Gametypes And Maps as BCTF or BDOM`, "note");
     await setAllBGametypeFlags();
+
+
+
+    //2.10.0
+    await addSeasonColumnToMatches();
 
 
     //2.9.0
