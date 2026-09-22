@@ -967,6 +967,50 @@ export function createTableQueries(){
 
             `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nstats_totals_max_pgm ON nstats_player_totals_max(player_id,gametype_id,map_id)`,
 
+
+
+            `CREATE TABLE IF NOT EXISTS nstats_seasons_servers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                season_id INTEGER NOT NULL,
+                server_id INTEGER NOT NULL,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                first_match TEXT NOT NULL,
+                last_match TEXT NOT NULL,
+                CONSTRAINT fk_seasons_servers_si
+                FOREIGN KEY(server_id)
+                REFERENCES nstats_servers(id)
+            ) STRICT`,
+             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_servers_sidx ON nstats_seasons_servers(season_id,server_id)`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_seasons_gametypes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                season_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                first_match TEXT NOT NULL,
+                last_match TEXT NOT NULL,
+                CONSTRAINT fk_seasons_gametypes_gi
+                FOREIGN KEY(gametype_id)
+                REFERENCES nstats_gametypes(id)
+            ) STRICT`,
+             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_gametypes_gidx ON nstats_seasons_gametypes(season_id,gametype_id)`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_seasons_maps (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                season_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                first_match TEXT NOT NULL,
+                last_match TEXT NOT NULL,
+                CONSTRAINT fk_seasons_maps_mi
+                FOREIGN KEY(map_id)
+                REFERENCES nstats_maps(id)
+            ) STRICT`,
+             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_maps_midx ON nstats_seasons_maps(season_id,map_id)`
+
     ];
 
  
@@ -1274,7 +1318,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     for(let i = 0; i < queries.length; i++){
 
         new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
-        console.log(queries[i]);
+ 
         await simpleQuery(queries[i]);
         new Message(`Query passed`,"pass");
     }

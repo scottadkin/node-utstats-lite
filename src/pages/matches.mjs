@@ -4,7 +4,7 @@ import { getAllMapNamesWithBGametype } from "../maps.mjs";
 import { getAllUniqueGametypeMapCombinations, getRecentMatches } from "../matches.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { bUseSeasons } from "../../config.mjs";
-import { getAllSeasons } from "../seasons.mjs";
+import { getAllSeasons, getSeasonMatchesData } from "../seasons.mjs";
 
 export async function renderMatchesPage(req, res, userSession){
 
@@ -49,9 +49,18 @@ export async function renderMatchesPage(req, res, userSession){
         displayMode = displayMode.toLowerCase();
 
 
+       
+
         let selectedSeason = (req.query.season !== undefined) ? parseInt(req.query.season) : 0;
 
         if(selectedSeason !== selectedSeason) selectedSeason = 0;
+
+        if(selectedSeason !== 0){
+
+            const test = await getSeasonMatchesData(selectedSeason);
+            console.log(test);
+        }
+
 
         const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap);
   

@@ -100,3 +100,11 @@ export async function getSeasonByFileName(name){
 
     return null;
 }*/
+
+
+export async function getSeasonMatchesData(seasonId){
+
+    const query = `SELECT * FROM nstats_matches WHERE season_id=? ORDER BY date DESC, id DESC`;
+
+    return await simpleQuery(query,[seasonId]);
+}
