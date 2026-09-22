@@ -6822,8 +6822,8 @@ class AdminSeasonsManager{
 
             return [
                 {"display": s.name, "value": s.name.toLowerCase()},
-                {"display": toDateString(s.start_date, TIME_ZONE, true), "value": s.start_date},
-                {"display": toDateString(s.end_date, TIME_ZONE, true), "value": s.end_date},
+                {"display": toDateString(s.start_date, TIME_ZONE, true), "value": s.start_date, "className": "date"},
+                {"display": toDateString(s.end_date, TIME_ZONE, true), "value": s.end_date, "className": "date"},
             ];
         });
 
@@ -6868,7 +6868,10 @@ class AdminSeasonsManager{
                 throw new Error(res.error);
             }
 
+            
+
             new UINotification(this.parent, "pass", "Season Created", `Season successfully created.`);
+            await this.loadData();
 
         }catch(err){
             console.trace(err);

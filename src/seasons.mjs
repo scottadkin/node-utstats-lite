@@ -26,9 +26,10 @@ async function getSeasonConflicts(startDate, endDate){
 
 
     const query = `SELECT * FROM nstats_seasons WHERE 
-    (start_date>=? OR end_date<=?) AND (start_date>=? OR end_date<=?)`;
+    (start_date>=? AND start_date<=?) OR (end_date>=? AND end_date<=?)`;
 
-    return await simpleQuery(query, [startDate, startDate, endDate, endDate]);
+
+    return await simpleQuery(query, [startDate, endDate, startDate, endDate]);
 }
 
 
@@ -48,7 +49,7 @@ export async function createSeason(name, startDate, endDate){
     
     const conficts = await getSeasonConflicts(startDate, endDate);
 
-    console.log(conficts);
+  
     if(conficts.length > 0){
 
         return {
@@ -61,12 +62,13 @@ export async function createSeason(name, startDate, endDate){
 
     const bNameAlreadyInUse = await bSeasonNameExists(name);
 
-    if(bNameAlreadyInUse) throw new Error(`There is already a season called ${name}`);
+    if(bNameAlreadyInUse) return {"error": `There is already a season called ${name}`};
 
     const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?)`;
 
     await simpleQuery(query, [startDate, endDate, name]);
 
+    return {"message": "passed"}
 }
 
 /*export async function getSeasonByMatchDate(matchDate){
