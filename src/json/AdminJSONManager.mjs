@@ -29,7 +29,7 @@ import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
 import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, adminRenameForceHWIDToName, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
-import { getAllSeasons } from "../seasons.mjs";
+import { createSeason, getAllSeasons } from "../seasons.mjs";
 
 
 
@@ -480,6 +480,20 @@ export default class AdminJSONManager{
                 const data = await getAllSeasons();
 
                 return this.res.json({data});
+
+            }else if(this.mode === "create-season"){
+
+                const name = this.req.body.name ?? null;
+                const startDate = this.req.body.startDate ?? null;
+                const endDate = this.req.body.endDate ?? null;
+
+                if(name === null) throw new Error(`Name is undefined`);
+                if(startDate === null || endDate === null) throw new Error(`Start or End Date is undefined`);
+   
+
+                const result = await createSeason(name, startDate, endDate);
+
+                return this.res.json(result);
             }
 
 

@@ -6756,6 +6756,9 @@ class AdminSeasonsManager{
         this.createStartDate = new Date().toISOString();
         this.createEndDate = new Date().toISOString();
 
+
+        this.bActionInProgress = false;
+
         
         this.createTabs();
         this.wrapper.append(this.content);
@@ -6828,6 +6831,54 @@ class AdminSeasonsManager{
 
     }
 
+
+    async createSeason(){
+
+        try{
+
+            if(this.bActionInProgress){
+                new UINotification(this.parent, "warning", "Please Wait", `A previous action is still being processed.`);
+                return;
+            }
+
+            if(this.createName === "") throw new Error(`Season name can't be an empty string`);
+
+            if(this.createEndDate <= this.createStartDate){
+                throw new Error(`The season end date must be later than the start date.`);
+            }
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "create-season",
+                    "name": this.createName,
+                    "startDate": this.createStartDate,
+                    "endDate": this.createEndDate
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+
+                if(res.conflicts !== undefined) console.log(res.conflicts);
+                throw new Error(res.error);
+            }
+
+            new UINotification(this.parent, "pass", "Season Created", `Season successfully created.`);
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Create Season", err.toString());
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     renderCreateSeason(){
 
         if(this.mode !== "create") return;
@@ -6879,6 +6930,13 @@ class AdminSeasonsManager{
 
         form.append(nameRow, startRow, endRow);
 
+
+        const button = UIButton("Create Season", "submit-button");
+
+        button.addEventListener("click", () =>{
+            this.createSeason();
+        });
+        form.append(button);
         this.content.append(form);
     }
 
