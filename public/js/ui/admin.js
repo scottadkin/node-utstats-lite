@@ -6741,7 +6741,7 @@ class AdminSeasonsManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "list";
+        this.mode = "create";
 
         this.data = {
             "seasons": []
@@ -6751,6 +6751,11 @@ class AdminSeasonsManager{
         this.content = UIDiv();
         
         this.parent.append(this.wrapper);
+
+        this.createName = "";
+        this.createStartDate = new Date().toISOString();
+        this.createEndDate = new Date().toISOString();
+
         
         this.createTabs();
         this.wrapper.append(this.content);
@@ -6819,15 +6824,68 @@ class AdminSeasonsManager{
             ];
         });
 
-
-
-
         new TESTUITable(this.content, tableOptions, rows);
 
     }
+
+    renderCreateSeason(){
+
+        if(this.mode !== "create") return;
+
+        new UIInfo(this.content, [`Create a new season`]);
+
+        const form = UIDiv("form");
+
+        const nameRow = UIDiv("form-row");
+        nameRow.append(UILabel("Season Name"));
+
+
+        const nameInput = UIInput("text", "season-name", this.createName, "Season Name", (e) =>{
+    
+            this.createName = e;
+        });
+
+        nameRow.append(nameInput);
+
+
+        const startRow = UIDiv("form-row");
+
+        startRow.append(UILabel("Start Date"));
+
+
+        const startInput = UIInput("datetime-local", "start-date", stripISOSecondsAndMS(this.createStartDate), "start date", (e) =>{
+            
+            const value = new Date(`${e}:00Z`).toISOString();
+
+            this.createStartDate = value;
+        
+        });
+
+        startRow.append(startInput);
+
+
+        const endInput = UIInput("datetime-local", "end-date", stripISOSecondsAndMS(this.createEndDate), "end date", (e) =>{
+            
+            const value = new Date(`${e}:59.999Z`).toISOString();
+
+            this.createEndDate = value;
+
+        });
+
+        
+        
+        const endRow = UIDiv("form-row");
+        endRow.append(UILabel("End Date"), endInput);
+
+        form.append(nameRow, startRow, endRow);
+
+        this.content.append(form);
+    }
+
     render(){
 
         this.content.innerHTML = ``;
         this.renderSeasonsList();
+        this.renderCreateSeason();
     }
 }

@@ -535,3 +535,14 @@ const TIME_ZONES =  [
 
     return 0;
 });
+
+
+function stripISOSecondsAndMS(isoString){
+    
+    const reg = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}).+$/i;
+
+    const result = reg.exec(isoString);
+
+    if(result === null) throw new Error(`Not a valid iso string provided`);
+    return result[1];
+}

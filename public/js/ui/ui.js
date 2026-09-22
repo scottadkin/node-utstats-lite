@@ -555,7 +555,7 @@ function UIInput(type, name, initialValue, placeholder, callback){
 
     let className = "";
 
-    if(type === "text" || type === "number" || type === "password"){
+    if(type === "text" || type === "number" || type === "password" || type === "date" || type === "datetime-local"){
         className = "textbox";
     }
 
