@@ -206,9 +206,7 @@ export class MatchParser{
 
             new Message(`No season was found, setting id to 0.`,"note");
             
-
         }
-
 
 
         this.matchId = await createMatch(

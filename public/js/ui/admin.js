@@ -6732,3 +6732,102 @@ class AdminPlayersManager{
         this.renderRecalculateWeapons();
     }
 }
+
+
+class AdminSeasonsManager{
+
+    constructor(parent){
+
+        this.parent = document.querySelector(parent);
+
+        this.wrapper = UIDiv();
+        this.mode = "list";
+
+        this.data = {
+            "seasons": []
+        };
+
+        UIHeader(this.wrapper, "Seasons Manager");
+        this.content = UIDiv();
+        
+        this.parent.append(this.wrapper);
+        
+        this.createTabs();
+        this.wrapper.append(this.content);
+        this.loadData();
+        
+    }
+
+    createTabs(){
+
+        const options = [
+            {"display": "List", "value": "list"},
+            {"display": "Create Season", "value": "create"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.render();
+        });
+    }
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-seasons"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+            this.data.seasons = res.data;
+            console.log(res);
+            this.render();
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
+    }
+
+    renderSeasonsList(){
+
+        if(this.mode !== "list") return;
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": [
+                {"display": "Name"},
+                {"display": "Start Date"},
+                {"display": "End Date"},
+            ]
+        };
+
+        const rows = this.data.seasons.map((s) =>{
+
+            return [
+                {"display": s.name, "value": s.name.toLowerCase()},
+                {"display": toDateString(s.start_date, TIME_ZONE, true), "value": s.start_date},
+                {"display": toDateString(s.end_date, TIME_ZONE, true), "value": s.end_date},
+            ];
+        });
+
+
+
+
+        new TESTUITable(this.content, tableOptions, rows);
+
+    }
+    render(){
+
+        this.content.innerHTML = ``;
+        this.renderSeasonsList();
+    }
+}

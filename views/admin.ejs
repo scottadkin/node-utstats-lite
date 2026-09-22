@@ -51,6 +51,11 @@ const modes = [
         "value": "players",
         "description": "Force Player Name By HWID, MAC Addresses, Enabled Auto Assign HWID To First Used Name, Recalculate Player Weapon Totals"
     },
+    { 
+        "display": "Seasons Manager",
+        "value": "seasons",
+        "description": "Assign date ranges to a season name"
+    }
 ];
 
 modes.sort((a, b) =>{
@@ -136,8 +141,9 @@ function renderCategory(mode){
         %><script>new AdminSQLiteBackupManager("#root")</script><%
     }else if(mode === "players"){
         %><script>new AdminPlayersManager("#root")</script><%
-
-    }
+    }else if(mode === "seasons"){
+        %><script>new AdminSeasonsManager("#root")</script><%
+    }   
 }
 
 %>

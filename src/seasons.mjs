@@ -12,6 +12,16 @@ export async function getSeasonByMatchDate(matchDate){
 }
 
 
+export async function getAllSeasons(){
+
+    const query = `SELECT * FROM nstats_seasons ORDER BY end_date DESC, start_date DESC`;
+
+    const result = await simpleQuery(query);
+
+    return result;
+}
+
+
 
 /*export async function getSeasonByMatchDate(matchDate){
 

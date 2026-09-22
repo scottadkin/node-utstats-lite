@@ -29,6 +29,7 @@ import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
 import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, adminRenameForceHWIDToName, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
+import { getAllSeasons } from "../seasons.mjs";
 
 
 
@@ -473,6 +474,12 @@ export default class AdminJSONManager{
 
                 await restoreAllPageSettings();
                 return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "load-seasons"){
+
+                const data = await getAllSeasons();
+
+                return this.res.json({data});
             }
 
 
