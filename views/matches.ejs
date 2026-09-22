@@ -19,7 +19,10 @@
         <%- JSON.stringify(mapNames)%>,
         "<%= selectedServer %>", "<%= selectedGametype %>", "<%= selectedMap %>",
         "<%= displayMode %>",  
-        <%- JSON.stringify(uniqueGametypeMapCombos) %>
+        <%- JSON.stringify(uniqueGametypeMapCombos) %>,
+        <%= bUseSeasons %>,
+        <%- JSON.stringify(seasonsData)%>,
+        "<%= selectedSeason %>"
     );
 </script>
 

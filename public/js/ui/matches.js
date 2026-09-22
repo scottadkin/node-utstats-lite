@@ -165,9 +165,14 @@ class MatchesRichView{
 class MatchesSearchForm{
 
     constructor(parent, servers, gametypes, maps, selectedServer, selectedGametype, selectedMap, 
-        selectedDisplayMode, uniqueGametypeMapCombos){
+        selectedDisplayMode, uniqueGametypeMapCombos, bUseSeasons, seasonsData, selectedSeason){
 
         this.parent = document.querySelector(parent);
+
+        this.bUseSeasons = bUseSeasons;
+        this.seasonsData = seasonsData;
+
+        console.log(seasonsData);
 
         this.servers = servers;
         this.gametypes = gametypes;
@@ -178,6 +183,7 @@ class MatchesSearchForm{
         this.selectedGametype = parseInt(selectedGametype);
         this.selectedMap = parseInt(selectedMap);
         this.selectedDisplayMode = selectedDisplayMode;
+        this.selectedSeason = parseInt(selectedSeason);
 
         UIHeader(this.parent, "Recent Matches");
         this.wrapper = UIDiv("form");
@@ -189,7 +195,7 @@ class MatchesSearchForm{
     changeSelected(key, value){
 
         this[key] = value;
-        const url = `/matches/?s=${this.selectedServer}&g=${this.selectedGametype}&m=${this.selectedMap}&display=${this.selectedDisplayMode}`;
+        const url = `/matches/?s=${this.selectedServer}&g=${this.selectedGametype}&m=${this.selectedMap}&display=${this.selectedDisplayMode}&season=${this.selectedSeason}`;
         window.location.href = url;
     }
 
@@ -222,6 +228,11 @@ class MatchesSearchForm{
             selectedKey = "selectedDisplayMode";
             title = "Display Mode";
             id = "display";
+
+        }else if(type === "seasons"){
+            selectedKey = "selectedSeason";
+            title = "Season";
+            id = "season";
         }
 
 
@@ -308,12 +319,22 @@ class MatchesSearchForm{
 
 
         }else if(type === "maps"){
+
             targets = this.filterMaps();
+
         }else if(type === "display"){
+
             targets = [
                 {"display": "Default View", "value": "default"},
                 {"display": "Table View", "value": "table"}
             ];
+
+        }else if(type === "seasons"){
+
+            targets = this.seasonsData.map((s) =>{
+                return {"display": s.name, "value": s.id};
+            });
+
         }
 
 
@@ -340,6 +361,9 @@ class MatchesSearchForm{
 
     createFormElems(){
 
+        if(this.bUseSeasons){
+            this.wrapper.append(this.createSelect("seasons"));
+        }
         this.wrapper.append(this.createSelect("servers"));
         this.wrapper.append(this.createSelect("gametypes"));
         this.wrapper.append(this.createSelect("maps"));
