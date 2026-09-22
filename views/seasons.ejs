@@ -1,0 +1,24 @@
+<%- include("header.ejs", {
+    "mode": "season", 
+    "host": host,
+    "userSession": userSession,
+    meta
+    }) -%>
+
+<%- include("timeZone.ejs", {timeZone})%>
+
+<script src="../js/ui/ui.js"></script>
+<script src="../js/ui/table.js"></script>
+<script src="../js/ui/seasons.js"></script>
+
+
+<div id="root"></div>
+
+<script>
+    new SeasonsPage(
+        <%- JSON.stringify(seasonsData) %>
+    );
+</script>
+
+
+<%- include('footer.ejs') -%>

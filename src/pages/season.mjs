@@ -1,38 +1,32 @@
-import { attachDatabase, simpleQuery } from "../database.mjs";
-import { getSeasonByFileName } from "../seasons.mjs";
+import { getSeasonBasicObjectStats, getSeasonById } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
-export async function renderSeasonPage(req, res, userSession){
+export async function renderSeasonPage(req, res){
 
     const brandingSettings = await getCategorySettings("Branding");
     const title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
     const timeZone = await getSiteWideTimeZone();
 
-    const seasonInfo = await getSeasonByFileName(req.params.season);
- 
-    if(seasonInfo === null){
-        throw new Error(`Season doesn't exist`);
-    }
+    let seasonId = req.params.season ?? 0;
 
-    console.log(seasonInfo);
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) seasonId = 0;
 
-    await attachDatabase(seasonInfo.file_name);
+    const basicSeasonInfo = await getSeasonById(seasonId);
 
-    const query = `SELECT * FROM nstats_matches ORDER BY id DESC`;
+    if(basicSeasonInfo === null) throw new Error(`Season doesn't exist`);
 
-    const result = await simpleQuery(query);
-
-    console.log(result);
-
+    const objectStats = await getSeasonBasicObjectStats(seasonId);
     
-
     res.render("season.ejs",{
         req,
             "host": req.headers.host,
             timeZone,
             title,
             "meta": {"description": "Login", "image": "images/maps/default.jpg"},
-            userSession
+            "userSession": req.userSession,
+            basicSeasonInfo,
+            objectStats
         });
     //res.json({"test": "test"});
 }

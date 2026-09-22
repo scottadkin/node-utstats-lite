@@ -24,7 +24,7 @@ export async function renderMatchesPage(req, res, userSession){
         let seasonsData = [];
         if(bUseSeasons){
 
-            seasonsData = await getAllSeasons();
+           // seasonsData = await getAllSeasons();
         }
   
 
@@ -55,12 +55,7 @@ export async function renderMatchesPage(req, res, userSession){
 
         if(selectedSeason !== selectedSeason) selectedSeason = 0;
 
-        if(selectedSeason !== 0){
-
-            const test = await getSeasonMatchesData(selectedSeason);
-            console.log(test);
-        }
-
+   
 
         const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap);
   

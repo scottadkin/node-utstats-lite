@@ -11,12 +11,20 @@
 <%- include("timeZone.ejs", {timeZone})%>
 
 <script src="../js/ui/ui.js"></script>
+<script src="../js/ui/table.js"></script>
+<script src="../js/ui/seasons.js"></script>
 
-<div class="header-wrapper">
-    season
-</div>
+
 <div id="root">
 </div>
+
+<script>
+
+    new SeasonPage(
+        <%- JSON.stringify(basicSeasonInfo) %>,
+        <%- JSON.stringify(objectStats)%>
+        );
+</script>
 
 
 <%- include("footer.ejs") %>

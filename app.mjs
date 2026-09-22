@@ -27,6 +27,7 @@ import { renderWatchlistPage } from './src/pages/watchlist.mjs';
 import Message from './src/message.mjs';
 import { renderMapsPage } from './src/pages/maps.mjs';
 import { createRandomString } from './src/generic.mjs';
+import {renderSeasonsPage} from "./src/pages/seasons.mjs";
 
 import cookieParser from 'cookie-parser';
 
@@ -35,6 +36,7 @@ const upload = multer({ dest: 'uploads/' })
 
 import ApiJSON from './src/json/apiJSON.mjs';
 import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
+import { renderSeasonPage } from './src/pages/season.mjs';
 //import { renderSeasonsPage } from './src/pages/seasons.mjs';
 //import { renderSeasonPage } from './src/pages/season.mjs';
 
@@ -274,8 +276,8 @@ app.listen(websitePort, () => {
 	new Message(`Edit websitePort in config.mjs if you wish to change ports`,"note");
 })
 
-/*
-app.get("/test/seasons", async (req, res) =>{
+
+app.get("/seasons", async (req, res) =>{
 
     try{
 
@@ -288,14 +290,13 @@ app.get("/test/seasons", async (req, res) =>{
 
 app.get("/season/:season", (req, res) =>{
 
-
-    console.log(req);
     try{
 
-        return renderSeasonPage(req, res, req.userSession);
+        
+        return renderSeasonPage(req, res);
 
     }catch(err){
         res.json({"error": err.toString()});
     }
     
-});*/
+});

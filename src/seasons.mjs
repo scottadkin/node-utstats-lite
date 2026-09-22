@@ -1,4 +1,10 @@
-import { simpleQuery } from "./database.mjs";
+import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
+
+export const VALID_OBJECT_TYPES = {
+        "gametypes": "gametype_id",
+        "maps": "map_id",
+        "servers": "server_id"
+    };
 
 export async function getSeasonByMatchDate(matchDate){
 
@@ -11,6 +17,21 @@ export async function getSeasonByMatchDate(matchDate){
     return result[0];
 }
 
+
+export async function getSeasonById(id){
+
+    id = parseInt(id);
+
+    if(id !== id) throw new Error(`id must be a valid integer`);
+
+    const query = `SELECT * FROM nstats_seasons WHERE id=?`;
+
+    const result =  await simpleQuery(query, [id]);
+
+    if(result.length === 0) return null;
+
+    return result[0];
+}
 
 export async function getAllSeasons(){
 
@@ -72,39 +93,121 @@ export async function createSeason(name, startDate, endDate){
     return {"message": "passed"}
 }
 
-/*export async function getSeasonByMatchDate(matchDate){
-
-    const query = `SELECT * FROM nstats_season_databases WHERE end_date >=? AND start_date <=? ORDER BY id ASC`;
-
-    const result = await simpleQuery(query, [matchDate, matchDate]);
-
-    if(result.length === 0) return null;
-    return result[0];
-}
-
-
-export async function getAllSeasons(){
-
-    const query = `SELECT * FROM nstats_season_databases ORDER BY end_date DESC, start_date DESC`
-
-    return await simpleQuery(query);
-}
-
-export async function getSeasonByFileName(name){
-
-    const query = `SELECT * FROM nstats_season_databases WHERE file_name=?`;
-
-    const result = await simpleQuery(query, [name]);
-
-    if(result.length > 0) return result[0];
-
-    return null;
-}*/
-
 
 export async function getSeasonMatchesData(seasonId){
 
     const query = `SELECT * FROM nstats_matches WHERE season_id=? ORDER BY date DESC, id DESC`;
 
     return await simpleQuery(query,[seasonId]);
+}
+
+/**
+ * 
+ * @param {Number} seasonId 
+ * @param {String} objectName gametypes,servers,maps
+ */
+async function calculateSeasonObjectStats(seasonId, objectName){
+
+
+    if(VALID_OBJECT_TYPES[objectName] === undefined) throw new Error(`Not a valid object for calculate object stats`);
+
+    const targetCol = VALID_OBJECT_TYPES[objectName];
+
+
+    const query = `SELECT ${targetCol} as target_id,
+    COUNT(*) as total_matches,
+    SUM(playtime) as total_playtime,
+    MIN(date) as first_match,
+    MAX(date) as last_match FROM nstats_matches WHERE season_id=? GROUP BY target_id`;
+
+    return await simpleQuery(query, [seasonId]);
+
+}
+
+
+async function updateSeasonObjectStats(seasonId, data, objectName){
+
+    if(VALID_OBJECT_TYPES[objectName] === undefined) throw new Error(`Not a valid object for calculate object stats`);
+
+    const targetCol = VALID_OBJECT_TYPES[objectName];
+
+    const insertVars = data.map((d) =>{
+
+        return [seasonId, d.target_id, d.total_matches, d.total_playtime, d.first_match, d.last_match]
+    });
+
+    console.log(insertVars);
+
+    const columns = ["season_id", targetCol, "matches", "playtime", "first_match", "last_match"];
+    const conflicts = ["season_id",targetCol];
+    await sqlInsertOnDuplicateUpdate(`nstats_seasons_${objectName}`, columns, insertVars, conflicts);
+}
+
+export async function calculateSeasonStats(seasonId){
+
+    const [serverTotals, gametypeTotals, mapTotals] = await Promise.all([
+        calculateSeasonObjectStats(seasonId, "servers"),
+        calculateSeasonObjectStats(seasonId, "gametypes"),
+        calculateSeasonObjectStats(seasonId, "maps"),
+    ]);
+
+    console.log(`SEASON ID = ${seasonId}`);
+    
+    return await Promise.all([
+        updateSeasonObjectStats(seasonId, serverTotals, "servers"),
+        updateSeasonObjectStats(seasonId, gametypeTotals, "gametypes"),
+        updateSeasonObjectStats(seasonId, mapTotals, "maps"),
+    ]);
+}
+
+
+async function getSeasonObjectStats(seasonId, type){
+
+    if(VALID_OBJECT_TYPES[type] === undefined) throw new Error(`Not a valid type for getSeasonObjectStats`);
+
+    const seasonTable = `nstats_seasons_${type}`
+    let joinTable = ``;
+    let joinColumn = ``;
+
+    if(type === "servers"){
+
+        joinTable = "nstats_servers";
+        joinColumn = "server_id";
+
+    }else if(type === "maps"){
+
+        joinTable = "nstats_maps";
+        joinColumn = "map_id";
+
+    }else if(type === "gametypes"){
+
+        joinTable = "nstats_gametypes";
+        joinColumn = "gametype_id";
+
+    }else{
+
+        throw new Error(`missing option`);
+    }
+
+    const query = `SELECT ${seasonTable}.*,${joinTable}.name as object_name FROM nstats_seasons_${type} 
+    LEFT JOIN ${joinTable} on ${seasonTable}.${joinColumn} = ${joinTable}.id
+    WHERE season_id=? ORDER BY matches DESC`;
+
+    return await simpleQuery(query, [seasonId]);
+}
+
+
+export async function getSeasonBasicObjectStats(seasonId){
+
+    seasonId = parseInt(seasonId);
+
+    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
+
+    const [servers, gametypes, maps] = await Promise.all([
+        getSeasonObjectStats(seasonId, "servers"),
+        getSeasonObjectStats(seasonId, "gametypes"),
+        getSeasonObjectStats(seasonId, "maps"),
+    ]);
+
+    return {servers, gametypes, maps}
 }
