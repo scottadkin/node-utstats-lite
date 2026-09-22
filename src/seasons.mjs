@@ -18,6 +18,11 @@ export async function getSeasonByMatchDate(matchDate){
 }
 
 
+/**
+ * 
+ * @param {Number} id 
+ * @returns sql row, or null if no match found
+ */
 export async function getSeasonById(id){
 
     id = parseInt(id);

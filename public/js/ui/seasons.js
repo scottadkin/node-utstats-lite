@@ -4,8 +4,8 @@ function mapObjectStats(s){
         {"display": s.object_name, "value": s.object_name.toLowerCase(), "className": "text-left"},
         {"value": s.matches},
         {"display": toPlaytime(s.playtime), "value": s.playtime, "className": "playtime"},
-        {"display": toDateString(s.first_match, TIME_ZONE, true),"value": s.first_match},
-        {"display": toDateString(s.last_match, TIME_ZONE, true),"value": s.last_match}
+        {"display": toDateString(s.first_match, TIME_ZONE, true),"value": s.first_match, "className": "date"},
+        {"display": toDateString(s.last_match, TIME_ZONE, true),"value": s.last_match, "className": "date"}
     ];
 }
 
@@ -52,17 +52,7 @@ class SeasonPage{
 
         new UIHeader(this.wrapper, "Servers");
 
-        const test = (s) =>{
-
-            return [
-                {"display": s.object_name, "value": s.object_name.toLowerCase(), "className": "text-left"},
-                {"value": s.matches},
-                {"display": toPlaytime(s.playtime), "value": s.playtime, "className": "playtime"},
-                {"display": toDateString(s.first_match, TIME_ZONE, true),"value": s.first_match, "className": "date"},
-                {"display": toDateString(s.last_match, TIME_ZONE, true),"value": s.last_match, "className": "date"}
-            ];
-        }
-
+ 
 
         const serversRows = this.objectStats.servers.map(mapObjectStats)
         const gametypeRows = this.objectStats.gametypes.map(mapObjectStats)

@@ -37,6 +37,7 @@ const upload = multer({ dest: 'uploads/' })
 import ApiJSON from './src/json/apiJSON.mjs';
 import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
 import { renderSeasonPage } from './src/pages/season.mjs';
+import { renderSeasonMatchesPage } from './src/pages/seasons/matches.mjs';
 //import { renderSeasonsPage } from './src/pages/seasons.mjs';
 //import { renderSeasonPage } from './src/pages/season.mjs';
 
@@ -281,22 +282,35 @@ app.get("/seasons", async (req, res) =>{
 
     try{
 
-        return renderSeasonsPage(req, res);
+        renderSeasonsPage(req, res);
 
     }catch(err){
         res.json({"error": err.toString()});
     }
 });
 
-app.get("/season/:season", (req, res) =>{
+app.get("/season/:season", async (req, res) =>{
 
     try{
 
-        
-        return renderSeasonPage(req, res);
+        await renderSeasonPage(req, res);
 
     }catch(err){
         res.json({"error": err.toString()});
     }
     
+});
+
+app.get("/season/:season/matches", async (req, res) =>{
+
+    try{
+
+        console.log(req.params);
+
+        await renderSeasonMatchesPage(req, res);
+
+    
+    }catch(err){
+        res.json({"error": err.toString()});
+    }
 });
