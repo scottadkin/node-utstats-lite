@@ -194,8 +194,6 @@ export async function calculateSeasonStats(seasonId){
         calculateSeasonObjectStats(seasonId, "gametypes"),
         calculateSeasonObjectStats(seasonId, "maps"),
     ]);
-
-    console.log(`SEASON ID = ${seasonId}`);
     
     return await Promise.all([
         updateSeasonUniqueCombinations(seasonId),
@@ -255,4 +253,31 @@ export async function getSeasonBasicObjectStats(seasonId){
     ]);
 
     return {servers, gametypes, maps}
+}
+
+
+export async function getSeasonUniqueMatchCombinations(seasonId){
+
+    seasonId = parseInt(seasonId);
+
+    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
+
+    const mT = `nstats_seasons_unique_match_combinations`;
+
+    const query = `SELECT ${mT}.*,
+    nstats_servers.name as server_name,
+    nstats_gametypes.name as gametype_name,
+    nstats_maps.name as map_name
+    FROM ${mT}
+    LEFT JOIN nstats_servers ON nstats_servers.id = ${mT}.server_id
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = ${mT}.gametype_id
+    LEFT JOIN nstats_maps ON nstats_maps.id = ${mT}.map_id
+    WHERE ${mT}.season_id=? ORDER BY map_name ASC`;
+
+   
+    return await simpleQuery(query, [seasonId]);
+   
+
+  
+
 }

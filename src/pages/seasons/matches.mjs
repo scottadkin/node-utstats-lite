@@ -1,5 +1,5 @@
 
-import { getSeasonBasicObjectStats, getSeasonById } from "../../seasons.mjs";
+import { getSeasonBasicObjectStats, getSeasonById, getSeasonUniqueMatchCombinations } from "../../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 
 
@@ -10,11 +10,14 @@ export async function renderSeasonMatchesPage(req, res){
     const timeZone = await getSiteWideTimeZone();
 
 
+   
+
     const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : null;
 
     if(seasonId === null) throw new Error(`Season missing`);
     if(seasonId !== seasonId) throw new Error(`Season must be a valid integer.`);
     
+     await getSeasonUniqueMatchCombinations(seasonId);
     const basicSeasonInfo = await getSeasonById(seasonId);
 
     if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
