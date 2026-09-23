@@ -1017,6 +1017,10 @@ export function createTableQueries(){
                 server_id INTEGER NOT NULL,
                 gametype_id INTEGER NOT NULL,
                 map_id INTEGER NOT NULL,
+                matches INTEGER NOT NULL,
+                playtime REAL NOT NULL,
+                first_match TEXT NOT NULL,
+                last_match TEXT NOT NULL,
                 CONSTRAINT kf_seasons_umc_si FOREIGN KEY(server_id) REFERENCES nstats_servers(id)
                 CONSTRAINT kf_seasons_umc_gi FOREIGN KEY(gametype_id) REFERENCES nstats_gametypes(id)
                 CONSTRAINT kf_seasons_umc_mi FOREIGN KEY(map_id) REFERENCES nstats_maps(id)

@@ -141,11 +141,50 @@ async function updateSeasonObjectStats(seasonId, data, objectName){
         return [seasonId, d.target_id, d.total_matches, d.total_playtime, d.first_match, d.last_match]
     });
 
-    console.log(insertVars);
-
     const columns = ["season_id", targetCol, "matches", "playtime", "first_match", "last_match"];
     const conflicts = ["season_id",targetCol];
+
     await sqlInsertOnDuplicateUpdate(`nstats_seasons_${objectName}`, columns, insertVars, conflicts);
+}
+
+
+async function calculateSeasonUniqueCombinations(seasonId){
+
+    const query = `SELECT server_id,gametype_id,map_id,SUM(playtime) as total_playtime,
+    COUNT(*) as total_matches,
+    MAX(date) as last_match,
+    MIN(date) as first_match 
+    FROM nstats_matches WHERE season_id=? GROUP BY server_id,gametype_id,map_id`;
+
+    return await simpleQuery(query, [seasonId]);
+}
+
+export async function updateSeasonUniqueCombinations(seasonId){
+
+    
+    const totals = await calculateSeasonUniqueCombinations(seasonId);
+
+    const insertVars = totals.map((t) =>{
+
+        return [
+            seasonId,
+            t.server_id,
+            t.gametype_id,
+            t.map_id,
+            t.total_matches,
+            t.total_playtime,
+            t.first_match,
+            t.last_match
+        ];
+    });
+
+
+    const columns = ["season_id", "server_id", "gametype_id", "map_id", "matches", "playtime", "first_match", "last_match"];
+    const conflicts = ["season_id","server_id","gametype_id", "map_id"];
+
+    await sqlInsertOnDuplicateUpdate("nstats_seasons_unique_match_combinations", columns, insertVars, conflicts);
+
+    
 }
 
 export async function calculateSeasonStats(seasonId){
@@ -159,6 +198,7 @@ export async function calculateSeasonStats(seasonId){
     console.log(`SEASON ID = ${seasonId}`);
     
     return await Promise.all([
+        updateSeasonUniqueCombinations(seasonId),
         updateSeasonObjectStats(seasonId, serverTotals, "servers"),
         updateSeasonObjectStats(seasonId, gametypeTotals, "gametypes"),
         updateSeasonObjectStats(seasonId, mapTotals, "maps"),
