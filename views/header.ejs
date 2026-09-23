@@ -3,6 +3,7 @@ const test = ["a","b","c"];
 
 const options = [
     {"name": "Home", "url": "/", "highlight": ["home"]},
+    {"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]},
     {"name": "Matches", "url": "/matches", "highlight": ["match"]},
     {"name": "Players", "url": "/players", "highlight": ["player", "players"]},
     {"name": "Rankings", "url": "/rankings", "highlight": ["rankings"]},
@@ -38,6 +39,15 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 </head>
 <body> 
     <nav>
+
+        <%
+        if(locals.bSeasonPage){
+            %><div id="nav-season">You are on a season page, to return back to main website click <a href="/">here</a></div><%
+        }
+
+        %>
+
+        
         <%
         for(let i = 0; i < options.length; i++){
 

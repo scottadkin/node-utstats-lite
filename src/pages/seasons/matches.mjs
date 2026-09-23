@@ -56,6 +56,7 @@ export async function renderSeasonMatchesPage(req, res){
             seasonId,
             matches,
             page,
-            perPage
+            perPage,
+            "bSeasonPage": true
         });
 }
