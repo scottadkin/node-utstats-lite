@@ -1,5 +1,5 @@
 
-import { getSeasonBasicObjectStats, getSeasonById, getSeasonUniqueMatchCombinations } from "../../seasons.mjs";
+import { getSeasonBasicObjectStats, getSeasonById, getSeasonUniqueMatchCombinations, searchSeasonMatches } from "../../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 
 
@@ -9,8 +9,6 @@ export async function renderSeasonMatchesPage(req, res){
     const title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
     const timeZone = await getSiteWideTimeZone();
 
-
-   
 
     const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : null;
 
@@ -31,6 +29,7 @@ export async function renderSeasonMatchesPage(req, res){
     if(selectedGametype !== selectedGametype) throw new Error(`GametypeId must be a valid integer`);
     if(selectedMap !== selectedMap) throw new Error(`MapId must be a valid integer`);
 
+    const matches = await searchSeasonMatches(seasonId, selectedServer, selectedGametype, selectedMap);
 
     res.render("seasons/matches.ejs",{
         req,
@@ -44,6 +43,7 @@ export async function renderSeasonMatchesPage(req, res){
             selectedServer,
             selectedGametype,
             selectedMap,
-            seasonId
+            seasonId,
+            matches
         });
 }

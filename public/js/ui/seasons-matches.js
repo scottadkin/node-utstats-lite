@@ -1,9 +1,10 @@
 class SeasonMatches{
 
-    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap){
+    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, matches){
 
         this.seasonId = seasonId;
         this.uniqueCombinations = uniqueCombinations;
+        this.matches = matches;
 
         this.selectedServer = parseInt(selectedServer);
         this.selectedGametype = parseInt(selectedGametype);
@@ -17,8 +18,10 @@ class SeasonMatches{
 
         this.parent.append(this.wrapper);
 
-
         this.createForm();
+
+
+        new MatchesRichView("#root",  {"data": this.matches});
     }
     
     getIdKeyNameKey(type){

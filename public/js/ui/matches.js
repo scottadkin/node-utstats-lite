@@ -86,7 +86,7 @@ class MatchRichViewBox{
         this.wrapper.className = "rich-wrapper";
         this.parent.append(this.wrapper);
 
-        this.createElems()
+        this.createElems();
         
     }
 

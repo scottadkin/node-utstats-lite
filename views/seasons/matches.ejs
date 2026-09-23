@@ -12,6 +12,7 @@
 
 <script src="/js/ui/ui.js"></script>
 <script src="/js/ui/table.js"></script>
+<script src="/js/ui/matches.js"></script>
 <script src="/js/ui/seasons.js"></script>
 <script src="/js/ui/seasons-matches.js"></script>
 
@@ -27,6 +28,7 @@
         "<%= selectedServer %>",
         "<%= selectedGametype %>",
         "<%= selectedMap %>",
+        <%- JSON.stringify(matches)%>
     );
 </script>
 

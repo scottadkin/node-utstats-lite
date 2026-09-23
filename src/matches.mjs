@@ -1,5 +1,5 @@
 import {simpleQuery, sqlInsertReturnRowId} from "./database.mjs";
-import {getMapNames, getNameById} from "./maps.mjs";
+import {getMapNames, getNameById, setMatchResultsMapImages} from "./maps.mjs";
 import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
 import { getAllNames, getServerNames } from "./servers.mjs";
 import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
@@ -235,30 +235,7 @@ export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype
 
     const result = await simpleQuery(query, [...vars, start, perPage]);
 
-    const mapNames = new Set();
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        if(typeof r.map_name === "string"){
-            mapNames.add(r.map_name);
-            r.image_name = r.map_name.toLowerCase();
-        }else{
-            r.image_name = "default";
-        }
-
-    }
-
-    const mapImages = await getMapImages([...mapNames]);
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        r.image = mapImages[r.image_name];
-      
-    }
+    await setMatchResultsMapImages(result);
     
     const totalMatches = await getTotalMatches(server, gametype, map);
 

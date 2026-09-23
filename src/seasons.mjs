@@ -1,4 +1,5 @@
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
+import { setMatchResultsMapImages } from "./maps.mjs";
 
 export const VALID_OBJECT_TYPES = {
         "gametypes": "gametype_id",
@@ -277,7 +278,68 @@ export async function getSeasonUniqueMatchCombinations(seasonId){
    
     return await simpleQuery(query, [seasonId]);
    
+}
 
-  
+export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId){
 
+    serverId = parseInt(serverId);
+    if(serverId !== serverId) throw new Error(`ServerId must be a valid integer`);
+
+    gametypeId = parseInt(gametypeId);
+    if(gametypeId !== gametypeId) throw new Error(`gametypeId must be a valid integer`);
+
+    mapId = parseInt(mapId);
+    if(mapId !== mapId) throw new Error(`mapId must be a valid integer`);
+    //AND server_id=? AND gametype_id=? AND map_id=?
+    const vars = [seasonId];
+
+    let where = ``;
+
+    if(serverId !== 0){
+        where += ` AND server_id=?`;
+        vars.push(serverId);
+    }
+
+    if(gametypeId !== 0){
+        where += ` AND gametype_id=?`;
+        vars.push(gametypeId);
+    }
+
+    if(mapId !== 0){
+        where += ` AND map_id=?`;
+        vars.push(mapId);
+    }
+
+    const query = `SELECT nstats_matches.id,
+    gametype_id,
+    nstats_gametypes.name as gametype_name,
+    map_id,
+    nstats_maps.name as map_name,
+    date,
+    nstats_matches.playtime,
+    players,
+    total_teams,
+    team_0_score,
+    team_1_score,
+    team_2_score,
+    team_3_score,
+    solo_winner,
+    solo_winner_score,
+    IF(solo_winner != 0, nstats_players.name, '') as solo_winner_name,
+    IF(solo_winner != 0, nstats_players.country, '') as solo_winner_country
+    
+    FROM nstats_matches 
+    LEFT JOIN nstats_players ON nstats_players.id = solo_winner
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = gametype_id
+    LEFT JOIN nstats_maps ON nstats_maps.id = map_id
+    WHERE season_id=? ${where} ORDER BY date DESC, nstats_matches.id DESC`;
+
+    
+
+    const result = await simpleQuery(query, vars);
+
+
+    await setMatchResultsMapImages(result);
+
+    return result;
 }

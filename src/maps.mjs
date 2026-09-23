@@ -1103,3 +1103,35 @@ export async function getAllMapNamesWithBGametype(bReturnArray){
 
     return data;
 }
+
+
+/**
+ * 
+ * @param {Array} match search result 
+ */
+export async function setMatchResultsMapImages(result){
+
+    const mapNames = new Set();
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(typeof r.map_name === "string"){
+            mapNames.add(r.map_name);
+            r.image_name = r.map_name.toLowerCase();
+        }else{
+            r.image_name = "default";
+        }
+
+    }
+
+    const mapImages = await getMapImages([...mapNames]);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        r.image = mapImages[r.image_name];
+
+    }
+}
