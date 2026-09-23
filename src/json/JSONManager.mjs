@@ -7,6 +7,7 @@ import { getPlayersByHashes, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
 import { getMatchWeaponDamage } from "../playerWeaponDamage.mjs";
 import { getRecords } from "../records.mjs";
+import { searchSeasonMatches } from "../seasons.mjs";
 
 export default class JSONManager{
 
@@ -302,6 +303,19 @@ export default class JSONManager{
 
     }
 
+
+    async seasonSearchMatches(){
+
+        const seasonId = this.querySanitizeInteger("season");
+        const serverId = this.querySanitizeInteger("sid");
+        const gametypeId = this.querySanitizeInteger("gid");
+        const mapId = this.querySanitizeInteger("mid");
+        const page = this.querySanitizeInteger("page");
+
+        const result = await searchSeasonMatches(seasonId, serverId, gametypeId, mapId);
+        this.res.status(200).json(result);
+    }
+
     async init(){
 
         try{
@@ -372,6 +386,11 @@ export default class JSONManager{
             }else if(this.mode === "load-records"){
 
                 return await this.loadRecords();
+
+            }else if(this.mode === "season-search-matches"){
+
+                return await this.seasonSearchMatches();
+
             }
 
             console.log(this.mode);

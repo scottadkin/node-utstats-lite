@@ -280,20 +280,11 @@ export async function getSeasonUniqueMatchCombinations(seasonId){
    
 }
 
-export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId){
 
-    serverId = parseInt(serverId);
-    if(serverId !== serverId) throw new Error(`ServerId must be a valid integer`);
-
-    gametypeId = parseInt(gametypeId);
-    if(gametypeId !== gametypeId) throw new Error(`gametypeId must be a valid integer`);
-
-    mapId = parseInt(mapId);
-    if(mapId !== mapId) throw new Error(`mapId must be a valid integer`);
-    //AND server_id=? AND gametype_id=? AND map_id=?
-    const vars = [seasonId];
+function setSearchWhereAndVars(serverId, gametypeId, mapId){
 
     let where = ``;
+    const vars = [];
 
     if(serverId !== 0){
         where += ` AND server_id=?`;
@@ -309,6 +300,42 @@ export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId)
         where += ` AND map_id=?`;
         vars.push(mapId);
     }
+
+
+    return {where, vars}
+    
+}
+
+async function getTotalPossibleMatches(seasonId, serverId, gametypeId, mapId){
+
+    const {where, vars} = setSearchWhereAndVars(serverId, gametypeId, mapId);
+
+    vars.unshift(seasonId);
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_matches WHERE season_id=?${where}`;
+
+
+    const result = await simpleQuery(query, vars);
+
+
+    return result[0].total_matches;
+
+}
+
+export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId){
+
+    serverId = parseInt(serverId);
+    if(serverId !== serverId) throw new Error(`ServerId must be a valid integer`);
+
+    gametypeId = parseInt(gametypeId);
+    if(gametypeId !== gametypeId) throw new Error(`gametypeId must be a valid integer`);
+
+    mapId = parseInt(mapId);
+    if(mapId !== mapId) throw new Error(`mapId must be a valid integer`);
+
+
+    const {where, vars} = setSearchWhereAndVars(serverId, gametypeId, mapId);
+
+    vars.unshift(seasonId);
 
     const query = `SELECT nstats_matches.id,
     gametype_id,
@@ -336,10 +363,12 @@ export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId)
 
     
 
-    const result = await simpleQuery(query, vars);
-
+    const [result, totalResults] = await  Promise.all([simpleQuery(query, vars), getTotalPossibleMatches(seasonId, serverId, gametypeId, mapId)]);
+    
 
     await setMatchResultsMapImages(result);
 
-    return result;
+
+
+    return {"data": result, totalResults};
 }

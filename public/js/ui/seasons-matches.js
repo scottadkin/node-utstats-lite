@@ -1,10 +1,15 @@
 class SeasonMatches{
 
-    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, matches){
+    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, matches, page){
 
         this.seasonId = seasonId;
         this.uniqueCombinations = uniqueCombinations;
         this.matches = matches;
+        this.page = parseInt(page);
+        if(this.page !== this.page) this.page = 1;
+        if(this.page < 1) this.page = 1;
+
+        this.perPage = 25;
 
         this.selectedServer = parseInt(selectedServer);
         this.selectedGametype = parseInt(selectedGametype);
@@ -21,7 +26,15 @@ class SeasonMatches{
         this.createForm();
 
 
-        new MatchesRichView("#root",  {"data": this.matches});
+        this.content = UIDiv();
+        this.content.id = "matches-content";
+
+        this.wrapper.append(this.content);
+
+        this.richView = new MatchesRichView("#matches-content",  this.matches);
+  
+        this.pagination = new UIPagination(this.parent, `${this.getURL()}&page=`, this.matches.totalResults, this.perPage, this.page);
+        
     }
     
     getIdKeyNameKey(type){
@@ -79,13 +92,66 @@ class SeasonMatches{
         return found;
     }
 
-    updateURL(){
+    getURL(){
 
         let url = `/season/${this.seasonId}/matches?sid=${this.selectedServer}`;
         url += `&gid=${this.selectedGametype}`;
         url += `&mid=${this.selectedMap}`;
 
+        return url;
+    }
+
+    updateURL(){
+
+        const url = this.getURL();
+
+        this.pagination.changeUrl(`${url}&page=`);
+
         history.pushState({}, "", url);
+    }
+
+
+    async loadData(){
+
+        try{
+
+            if(this.abortController === undefined){
+
+                this.abortController = new AbortController();
+            }else{
+
+                this.abortController.abort("New input");
+                this.abortController = new AbortController();
+            }
+
+            let url = `/json/season-search-matches/`;
+            url += `?season=${this.seasonId}&sid=${this.selectedServer}&gid=${this.selectedGametype}`;
+            url += `&mid=${this.selectedMap}&page=${this.page}`;
+
+            const req = await fetch(url, {
+                "signal": this.abortController.signal
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.matches = res;
+            this.content.innerHTML = ``;
+
+   
+
+            this.richView = new MatchesRichView("#matches-content",  this.matches);
+            this.pagination.updateResults(this.page, this.matches.totalResults, this.perPage);
+
+
+        }catch(err){
+
+            if(err.name === "AbortError") return;
+            console.trace(err);
+
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
     }
 
     createForm(){
@@ -114,6 +180,7 @@ class SeasonMatches{
             }
 
             this.updateURL();
+            this.loadData();
         });
 
         this.gametypeRow = UIDiv("form-row");
@@ -129,6 +196,7 @@ class SeasonMatches{
                 this.mapSelect.changeSelected(this.selectedMap);
             }
             this.updateURL();
+            this.loadData();
         });
 
         this.mapRow = UIDiv("form-row");
@@ -137,6 +205,7 @@ class SeasonMatches{
         this.mapSelect = new UISelect(this.mapRow, this.getOptions("maps"), this.selectedMap, (e) =>{
             this.selectedMap = parseInt(e);
             this.updateURL();
+            this.loadData();
         });
 
         this.form.append(this.serverRow, this.gametypeRow, this.mapRow);

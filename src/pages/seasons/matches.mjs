@@ -29,6 +29,9 @@ export async function renderSeasonMatchesPage(req, res){
     if(selectedGametype !== selectedGametype) throw new Error(`GametypeId must be a valid integer`);
     if(selectedMap !== selectedMap) throw new Error(`MapId must be a valid integer`);
 
+    const page = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
+    if(page !== page) throw new Error(`page must be a valid integer`);
+
     const matches = await searchSeasonMatches(seasonId, selectedServer, selectedGametype, selectedMap);
 
     res.render("seasons/matches.ejs",{
@@ -44,6 +47,7 @@ export async function renderSeasonMatchesPage(req, res){
             selectedGametype,
             selectedMap,
             seasonId,
-            matches
+            matches,
+            page
         });
 }

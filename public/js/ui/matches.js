@@ -148,7 +148,6 @@ class MatchesRichView{
 
     }
 
-
     createElems(){
 
         this.elems = [];
