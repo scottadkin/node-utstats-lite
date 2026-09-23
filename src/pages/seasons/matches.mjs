@@ -1,7 +1,8 @@
 
-import { getSeasonBasicObjectStats, getSeasonById, getSeasonUniqueMatchCombinations, searchSeasonMatches } from "../../seasons.mjs";
+import { getSeasonById, getSeasonUniqueMatchCombinations, searchSeasonMatches } from "../../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 
+const DEFAULT_PER_PAGE = 25;
 
 export async function renderSeasonMatchesPage(req, res){
 
@@ -32,7 +33,13 @@ export async function renderSeasonMatchesPage(req, res){
     const page = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
     if(page !== page) throw new Error(`page must be a valid integer`);
 
-    const matches = await searchSeasonMatches(seasonId, selectedServer, selectedGametype, selectedMap);
+    let perPage = (req.query.pp !== undefined) ? parseInt(req.query.pp): DEFAULT_PER_PAGE;
+
+    if(perPage !== perPage) perPage = DEFAULT_PER_PAGE;
+
+    if(perPage < 5 || perPage > 100) perPage = DEFAULT_PER_PAGE;
+
+    const matches = await searchSeasonMatches(seasonId, selectedServer, selectedGametype, selectedMap, page, perPage);
 
     res.render("seasons/matches.ejs",{
         req,
@@ -48,6 +55,7 @@ export async function renderSeasonMatchesPage(req, res){
             selectedMap,
             seasonId,
             matches,
-            page
+            page,
+            perPage
         });
 }

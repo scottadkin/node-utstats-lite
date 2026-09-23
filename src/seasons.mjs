@@ -1,4 +1,5 @@
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
+import { sanitizePagePerPage } from "./generic.mjs";
 import { setMatchResultsMapImages } from "./maps.mjs";
 
 export const VALID_OBJECT_TYPES = {
@@ -321,7 +322,7 @@ async function getTotalPossibleMatches(seasonId, serverId, gametypeId, mapId){
 
 }
 
-export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId){
+export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId, dirtyPage, dirtyPerPage){
 
     serverId = parseInt(serverId);
     if(serverId !== serverId) throw new Error(`ServerId must be a valid integer`);
@@ -332,6 +333,7 @@ export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId)
     mapId = parseInt(mapId);
     if(mapId !== mapId) throw new Error(`mapId must be a valid integer`);
 
+    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
     const {where, vars} = setSearchWhereAndVars(serverId, gametypeId, mapId);
 
@@ -359,11 +361,16 @@ export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId)
     LEFT JOIN nstats_players ON nstats_players.id = solo_winner
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = gametype_id
     LEFT JOIN nstats_maps ON nstats_maps.id = map_id
-    WHERE season_id=? ${where} ORDER BY date DESC, nstats_matches.id DESC`;
+    WHERE season_id=? ${where} ORDER BY date DESC, nstats_matches.id DESC LIMIT ?, ?`;
 
+
+    vars.push(start, perPage);
     
 
-    const [result, totalResults] = await  Promise.all([simpleQuery(query, vars), getTotalPossibleMatches(seasonId, serverId, gametypeId, mapId)]);
+    const [result, totalResults] = await  Promise.all([
+        simpleQuery(query, vars), 
+        getTotalPossibleMatches(seasonId, serverId, gametypeId, mapId)
+    ]);
     
 
     await setMatchResultsMapImages(result);

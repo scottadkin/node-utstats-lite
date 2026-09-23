@@ -1,6 +1,6 @@
 class SeasonMatches{
 
-    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, matches, page){
+    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, matches, page, perPage){
 
         this.seasonId = seasonId;
         this.uniqueCombinations = uniqueCombinations;
@@ -9,7 +9,10 @@ class SeasonMatches{
         if(this.page !== this.page) this.page = 1;
         if(this.page < 1) this.page = 1;
 
-        this.perPage = 25;
+
+        this.perPage = parseInt(perPage);
+        if(this.perPage !== this.perPage) this.perPage = 25;
+        if(this.perPage < 5 || this.perPage > 100) this.perPage = 25;
 
         this.selectedServer = parseInt(selectedServer);
         this.selectedGametype = parseInt(selectedGametype);
@@ -96,7 +99,7 @@ class SeasonMatches{
 
         let url = `/season/${this.seasonId}/matches?sid=${this.selectedServer}`;
         url += `&gid=${this.selectedGametype}`;
-        url += `&mid=${this.selectedMap}`;
+        url += `&mid=${this.selectedMap}&pp=${this.perPage}`;
 
         return url;
     }
@@ -126,7 +129,7 @@ class SeasonMatches{
 
             let url = `/json/season-search-matches/`;
             url += `?season=${this.seasonId}&sid=${this.selectedServer}&gid=${this.selectedGametype}`;
-            url += `&mid=${this.selectedMap}&page=${this.page}`;
+            url += `&mid=${this.selectedMap}&page=${this.page}&pp=${this.perPage}`;
 
             const req = await fetch(url, {
                 "signal": this.abortController.signal
@@ -179,6 +182,7 @@ class SeasonMatches{
                 this.mapSelect.changeSelected(this.selectedMap);
             }
 
+            this.page = 1;
             this.updateURL();
             this.loadData();
         });
@@ -195,6 +199,7 @@ class SeasonMatches{
                 this.selectedMap = newOptions[0].value;
                 this.mapSelect.changeSelected(this.selectedMap);
             }
+            this.page = 1;
             this.updateURL();
             this.loadData();
         });
@@ -204,6 +209,7 @@ class SeasonMatches{
 
         this.mapSelect = new UISelect(this.mapRow, this.getOptions("maps"), this.selectedMap, (e) =>{
             this.selectedMap = parseInt(e);
+            this.page = 1;
             this.updateURL();
             this.loadData();
         });

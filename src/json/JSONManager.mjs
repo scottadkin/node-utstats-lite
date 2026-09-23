@@ -311,8 +311,9 @@ export default class JSONManager{
         const gametypeId = this.querySanitizeInteger("gid");
         const mapId = this.querySanitizeInteger("mid");
         const page = this.querySanitizeInteger("page");
+        const perPage = this.querySanitizeInteger("pp");
 
-        const result = await searchSeasonMatches(seasonId, serverId, gametypeId, mapId);
+        const result = await searchSeasonMatches(seasonId, serverId, gametypeId, mapId, page, perPage);
         this.res.status(200).json(result);
     }
 

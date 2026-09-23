@@ -373,7 +373,12 @@ export function removeDoubleEnforcer(name){
 }
 
 
-
+/**
+ * 
+ * @param {*} page 
+ * @param {*} perPage 
+ * @returns Array page, perPage, start
+ */
 export function sanitizePagePerPage(page, perPage){
 
     page = parseInt(page);
