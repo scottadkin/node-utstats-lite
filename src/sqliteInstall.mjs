@@ -1009,7 +1009,20 @@ export function createTableQueries(){
                 FOREIGN KEY(map_id)
                 REFERENCES nstats_maps(id)
             ) STRICT`,
-             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_maps_midx ON nstats_seasons_maps(season_id,map_id)`
+             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_maps_midx ON nstats_seasons_maps(season_id,map_id)`,
+
+             `CREATE TABLE IF NOT EXISTS nstats_seasons_unique_match_combinations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                season_id INTEGER NOT NULL,
+                server_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                CONSTRAINT kf_seasons_umc_si FOREIGN KEY(server_id) REFERENCES nstats_servers(id)
+                CONSTRAINT kf_seasons_umc_gi FOREIGN KEY(gametype_id) REFERENCES nstats_gametypes(id)
+                CONSTRAINT kf_seasons_umc_mi FOREIGN KEY(map_id) REFERENCES nstats_maps(id)
+             ) STRICT`,
+
+            `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_unique_match_combinations_idx ON nstats_seasons_unique_match_combinations(season_id,server_id,gametype_id,map_id)`
 
     ];
 

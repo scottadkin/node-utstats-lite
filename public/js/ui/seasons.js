@@ -28,11 +28,18 @@ class SeasonPage{
 
     renderInfo(){
 
+        const link = document.createElement("a");
+        link.href = `/season/${this.basicInfo.id}/matches`;
+        link.append("Matches");
+
         this.info = new UIInfo(this.wrapper, [
 
             `Start Date ${toDateString(this.basicInfo.start_date, TIME_ZONE, true)}`,
             UIBr(),
-            `End Date ${toDateString(this.basicInfo.end_date, TIME_ZONE, true)}`
+            `End Date ${toDateString(this.basicInfo.end_date, TIME_ZONE, true)}`,
+            UIBr(),
+            UIBr(),
+            link
         ]);
     }
 
