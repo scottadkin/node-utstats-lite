@@ -17,10 +17,19 @@ export async function renderSeasonMatchesPage(req, res){
     if(seasonId === null) throw new Error(`Season missing`);
     if(seasonId !== seasonId) throw new Error(`Season must be a valid integer.`);
     
-     await getSeasonUniqueMatchCombinations(seasonId);
+    const uniqueCombinations = await getSeasonUniqueMatchCombinations(seasonId);
     const basicSeasonInfo = await getSeasonById(seasonId);
 
     if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
+
+
+    const selectedServer = (req.query.sid !== undefined) ? parseInt(req.query.sid) : 0;
+    const selectedGametype = (req.query.gid !== undefined) ? parseInt(req.query.gid) : 0;
+    const selectedMap = (req.query.mid !== undefined) ? parseInt(req.query.mid) : 0;
+
+    if(selectedServer !== selectedServer) throw new Error(`ServerId must be a valid integer`);
+    if(selectedGametype !== selectedGametype) throw new Error(`GametypeId must be a valid integer`);
+    if(selectedMap !== selectedMap) throw new Error(`MapId must be a valid integer`);
 
 
     res.render("seasons/matches.ejs",{
@@ -30,6 +39,11 @@ export async function renderSeasonMatchesPage(req, res){
             title,
             "meta": {"description": "Login", "image": "images/maps/default.jpg"},
             "userSession": req.userSession,
-            basicSeasonInfo
+            basicSeasonInfo,
+            uniqueCombinations,
+            selectedServer,
+            selectedGametype,
+            selectedMap,
+            seasonId
         });
 }

@@ -21,6 +21,13 @@
 
 <script>
 
+    new SeasonMatches(
+        "<%= seasonId %>",
+        <%- JSON.stringify(uniqueCombinations) %>,
+        "<%= selectedServer %>",
+        "<%= selectedGametype %>",
+        "<%= selectedMap %>",
+    );
 </script>
 
 

@@ -902,9 +902,8 @@ class UISelect{
      */
     updateOptions(newOptions, selectedValue){
 
+        if(selectedValue === undefined) throw new Error(`You have not provided a selectedValue`);
         this.options = newOptions;
-
-
 
         this.select.innerHTML = "";
         this.createOptions();
@@ -914,7 +913,6 @@ class UISelect{
         for(let i = 0; i < this.options.length; i++){
 
             const o = this.options[i];
-
 
             if(o.value == selectedValue){
                 bSelectedStillExist = true;
