@@ -1,4 +1,4 @@
-import { attachDatabase, createDatabase, simpleQuery } from "./database.mjs";
+import { attachDatabase, bulkInsert, createDatabase, simpleQuery } from "./database.mjs";
 import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
@@ -238,17 +238,17 @@ export function createTableQueries(){
     const queries = [
         
         ...mainTableQueries,
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_players (
+            `CREATE TABLE IF NOT EXISTS nstats_players (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE ,
                 country TEXT NOT NULL,
                 hash TEXT COLLATE NOCASE NOT NULL
             ) STRICT`,
 
-            `CREATE INDEX IF NOT EXISTS ${databaseName}np_name_idx ON nstats_players(name)`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}np_hash_idx ON nstats_players(hash)`,
+            `CREATE INDEX IF NOT EXISTS np_name_idx ON nstats_players(name)`,
+            `CREATE INDEX IF NOT EXISTS np_hash_idx ON nstats_players(hash)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_matches (
+            `CREATE TABLE IF NOT EXISTS nstats_matches (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 server_id INTEGER NOT NULL,
                 gametype_id INTEGER NOT NULL,
@@ -278,7 +278,7 @@ export function createTableQueries(){
                 season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_matches_dom (
+            `CREATE TABLE IF NOT EXISTS nstats_matches_dom (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER NOT NULL,
                 real_total_score REAL NOT NULL,
@@ -318,9 +318,9 @@ export function createTableQueries(){
                 team_2_stolen_caps INTEGER NOT NULL,
                 team_3_stolen_caps INTEGER NOT NULL
             ) STRICT`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}match_idx ON nstats_matches_dom(match_id)`,
+            `CREATE INDEX IF NOT EXISTS match_idx ON nstats_matches_dom(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_servers (
+            `CREATE TABLE IF NOT EXISTS nstats_servers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE ,
                 ip TEXT NOT NULL,
@@ -331,7 +331,7 @@ export function createTableQueries(){
                 last_match TEXT NOT NULL
             ) STRICT`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_gametypes (
+            `CREATE TABLE IF NOT EXISTS nstats_gametypes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE ,
                 matches INTEGER NOT NULL,
@@ -344,7 +344,7 @@ export function createTableQueries(){
                 b_mh INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_maps (
+            `CREATE TABLE IF NOT EXISTS nstats_maps (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE ,
                 matches INTEGER NOT NULL,
@@ -357,7 +357,7 @@ export function createTableQueries(){
                 b_mh INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_players (     
+            `CREATE TABLE IF NOT EXISTS nstats_match_players (     
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 spectator INTEGER NOT NULL,
@@ -408,10 +408,10 @@ export function createTableQueries(){
                 dom_caps INTEGER NOT NULL
             ) STRICT`,
 
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nmp_match_idx ON nstats_match_players(match_id)`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nmp_player_idx ON nstats_match_players(player_id)`,
+            `CREATE INDEX IF NOT EXISTS nmp_match_idx ON nstats_match_players(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nmp_player_idx ON nstats_match_players(player_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_weapon_stats (
+            `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER NOT NULL,
                 map_id INTEGER NOT NULL,
@@ -424,14 +424,14 @@ export function createTableQueries(){
                 suicides INTEGER NOT NULL
             ) STRICT`,
 
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nmws_match_idx ON nstats_match_weapon_stats(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nmws_match_idx ON nstats_match_weapon_stats(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_weapons (
+            `CREATE TABLE IF NOT EXISTS nstats_weapons (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE NOT NULL
             ) STRICT`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_kills (
+            `CREATE TABLE IF NOT EXISTS nstats_kills (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER NOT NULL,
                 timestamp REAL NOT NULL,
@@ -441,9 +441,9 @@ export function createTableQueries(){
                 victim_id INTEGER NOT NULL,
                 victim_weapon INTEGER NOT NULL
             ) STRICT`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nk_match_idx ON nstats_kills(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nk_match_idx ON nstats_kills(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_ctf (
+            `CREATE TABLE IF NOT EXISTS nstats_match_ctf (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER NOT NULL,     
                 map_id INTEGER NOT NULL,
@@ -467,15 +467,15 @@ export function createTableQueries(){
                 flag_carry_time_max REAL NOT NULL
             ) STRICT`,
 
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nmc_match_idx ON nstats_match_ctf(match_id)`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nmc_player_idx ON nstats_match_ctf(player_id)`,
+            `CREATE INDEX IF NOT EXISTS nmc_match_idx ON nstats_match_ctf(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nmc_player_idx ON nstats_match_ctf(player_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_dom_control_points (
+            `CREATE TABLE IF NOT EXISTS nstats_dom_control_points (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE NOT NULL
             ) STRICT`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_dom (
+            `CREATE TABLE IF NOT EXISTS nstats_match_dom (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER NOT NULL,  
                 map_id INTEGER NOT NULL,
@@ -494,9 +494,9 @@ export function createTableQueries(){
                 stolen_points REAL NOT NULL,
                 stolen_caps INTEGER NOT NULL
             ) STRICT`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nmd_match_idx ON nstats_match_dom(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nmd_match_idx ON nstats_match_dom(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals (     
+            `CREATE TABLE IF NOT EXISTS nstats_player_totals (     
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 gametype_id INTEGER NOT NULL,
@@ -590,11 +590,11 @@ export function createTableQueries(){
                 season_id NOT NULL DEFAULT 0
             ) STRICT`,
 
-            //`CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npt_psgm_idx ON nstats_player_totals(player_id,season_id,gametype_id,map_id)`,
+            //`CREATE UNIQUE INDEX IF NOT EXISTS npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS npt_psgm_idx ON nstats_player_totals(player_id,season_id,gametype_id,map_id)`,
             `DROP INDEX IF EXISTS npt_pgm_idx`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_weapons (
+            `CREATE TABLE IF NOT EXISTS nstats_player_totals_weapons (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 gametype_id INTEGER NOT NULL,
@@ -621,9 +621,9 @@ export function createTableQueries(){
                 epm_team_kills REAL NOT NULL
             ) STRICT`,
             `DROP INDEX IF EXISTS pgw_idx`, //replaced with pgmw idx below
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}pgmw_idx ON nstats_player_totals_weapons(player_id, gametype_id, map_id, weapon_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS pgmw_idx ON nstats_player_totals_weapons(player_id, gametype_id, map_id, weapon_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_ctf (
+            `CREATE TABLE IF NOT EXISTS nstats_player_totals_ctf (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 gametype_id INTEGER NOT NULL,
@@ -684,11 +684,11 @@ export function createTableQueries(){
                 epm_flag_return_save REAL NOT NULL
             ) STRICT`,
 
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nptc_pgm_idx ON nstats_player_totals_ctf(player_id, gametype_id, map_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS nptc_pgm_idx ON nstats_player_totals_ctf(player_id, gametype_id, map_id)`,
 
             
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_rankings (
+            `CREATE TABLE IF NOT EXISTS nstats_rankings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 gametype_id INTEGER NOT NULL,
@@ -697,11 +697,11 @@ export function createTableQueries(){
                 score REAL NOT NULL,
                 last_active TEXT NOT NULL
                 ) STRICT`,
-                `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}pg_idx ON nstats_rankings(player_id,gametype_id)`,
+                `CREATE UNIQUE INDEX IF NOT EXISTS pg_idx ON nstats_rankings(player_id,gametype_id)`,
 
             
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_damage_match (
+            `CREATE TABLE IF NOT EXISTS nstats_damage_match (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 match_id INTEGER NOT NULL,
@@ -717,9 +717,9 @@ export function createTableQueries(){
                 cannon_damage INTEGER NOT NULL
                 ) STRICT`,
 
-            `CREATE INDEX IF NOT EXISTS ${databaseName}ndm_match_idx ON nstats_damage_match(match_id)`,
+            `CREATE INDEX IF NOT EXISTS ndm_match_idx ON nstats_damage_match(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_damage (
+            `CREATE TABLE IF NOT EXISTS nstats_player_totals_damage (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id INTEGER NOT NULL,
             gametype_id INTEGER NOT NULL,
@@ -736,7 +736,7 @@ export function createTableQueries(){
             ) STRICT`,
 
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_caps (
+            `CREATE TABLE IF NOT EXISTS nstats_ctf_caps (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             match_id INTEGER NOT NULL,
             map_id INTEGER NOT NULL,
@@ -763,20 +763,20 @@ export function createTableQueries(){
             green_suicides INTEGER NOT NULL,
             yellow_suicides INTEGER NOT NULL
             ) STRICT`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nccaps_match_idx ON nstats_ctf_caps(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nccaps_match_idx ON nstats_ctf_caps(match_id)`,
 
 
-        `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_covers (
+        `CREATE TABLE IF NOT EXISTS nstats_ctf_covers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         match_id INTEGER NOT NULL,
         cap_id INTEGER NOT NULL,
         timestamp REAL NOT NULL,
         player_id INTEGER NOT NULL
         ) STRICT`,
-        `CREATE INDEX IF NOT EXISTS ${databaseName}nccovers_match_idx ON nstats_ctf_covers(match_id)`,
+        `CREATE INDEX IF NOT EXISTS nccovers_match_idx ON nstats_ctf_covers(match_id)`,
 
         
-        `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_carry_times (
+        `CREATE TABLE IF NOT EXISTS nstats_ctf_carry_times (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             match_id INTEGER NOT NULL,
             map_id INTEGER NOT NULL,
@@ -787,10 +787,10 @@ export function createTableQueries(){
             end_timestamp REAL NOT NULL,
             carry_time REAL NOT NULL
             ) STRICT`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}ncct_match_idx ON nstats_ctf_carry_times(match_id)`,
+            `CREATE INDEX IF NOT EXISTS ncct_match_idx ON nstats_ctf_carry_times(match_id)`,
 
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_cap_kills (
+            `CREATE TABLE IF NOT EXISTS nstats_ctf_cap_kills (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             match_id INTEGER NOT NULL,
             cap_id INTEGER NOT NULL,
@@ -798,9 +798,9 @@ export function createTableQueries(){
             killer_id INTEGER NOT NULL,
             killer_team INTEGER NOT NULL
             ) STRICT`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}ncck_match_idx ON nstats_ctf_cap_kills(match_id)`,
+            `CREATE INDEX IF NOT EXISTS ncck_match_idx ON nstats_ctf_cap_kills(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_ctf_cap_suicides (
+            `CREATE TABLE IF NOT EXISTS nstats_ctf_cap_suicides (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             match_id INTEGER NOT NULL,
             cap_id INTEGER NOT NULL,
@@ -809,9 +809,9 @@ export function createTableQueries(){
             player_team INTEGER NOT NULL
             ) STRICT`,
             
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nccs_match_idx ON nstats_ctf_cap_suicides(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nccs_match_idx ON nstats_ctf_cap_suicides(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_map_weapon_totals (
+            `CREATE TABLE IF NOT EXISTS nstats_map_weapon_totals (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 map_id INTEGER NOT NULL,
                 total_matches INTEGER NOT NULL,
@@ -832,9 +832,9 @@ export function createTableQueries(){
                 max_team_kills INTEGER NOT NULL
             ) STRICT`,
             `DROP INDEX IF EXISTS mw_idx`,//replaced with mgw_idx below
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}mgw_idx ON nstats_map_weapon_totals(map_id,gametype_id,weapon_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS mgw_idx ON nstats_map_weapon_totals(map_id,gametype_id,weapon_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_map_rankings (
+            `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 map_id INTEGER NOT NULL,
@@ -843,10 +843,10 @@ export function createTableQueries(){
                 score REAL NOT NULL,
                 last_active TEXT NOT NULL
                 ) STRICT`,
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}pm_idx ON nstats_map_rankings(player_id, map_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS pm_idx ON nstats_map_rankings(player_id, map_id)`,
 
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_classic_weapon_match_stats (
+            `CREATE TABLE IF NOT EXISTS nstats_classic_weapon_match_stats (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER NOT NULL,
                 gametype_id INTEGER NOT NULL,
@@ -860,9 +860,9 @@ export function createTableQueries(){
                 accuracy REAL NOT NULL,
                 damage INTEGER NOT NULL
                 ) STRICT`,
-                `CREATE INDEX IF NOT EXISTS ${databaseName}ncwms_match_idx ON nstats_classic_weapon_match_stats(match_id)`,
+                `CREATE INDEX IF NOT EXISTS ncwms_match_idx ON nstats_classic_weapon_match_stats(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_ctf_league (
+            `CREATE TABLE IF NOT EXISTS nstats_player_ctf_league (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             player_id INTEGER NOT NULL,
             gametype_id INTEGER NOT NULL,
@@ -880,12 +880,12 @@ export function createTableQueries(){
             cap_offset INTEGER NOT NULL,
             points INTEGER NOT NULL
             ) STRICT`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}npcl_mgp_idx ON nstats_player_ctf_league(map_id, gametype_id, player_id)`,
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npcl_pgm_idx ON nstats_player_ctf_league(player_id,gametype_id,map_id)`,
+            `CREATE INDEX IF NOT EXISTS npcl_mgp_idx ON nstats_player_ctf_league(map_id, gametype_id, player_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS npcl_pgm_idx ON nstats_player_ctf_league(player_id,gametype_id,map_id)`,
 
             
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_dom_team_score_history (
+            `CREATE TABLE IF NOT EXISTS nstats_match_dom_team_score_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             match_id INTEGER NOT NULL,
             timestamp REAL NOT NULL,
@@ -900,12 +900,12 @@ export function createTableQueries(){
             importer_team_2_score REAL NOT NULL,
             importer_team_3_score REAL NOT NULL
             ) STRICT`,
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nmdtsh_match_idx ON nstats_match_dom_team_score_history(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nmdtsh_match_idx ON nstats_match_dom_team_score_history(match_id)`,
 
             
 
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_match_player_weapon_damage (
+            `CREATE TABLE IF NOT EXISTS nstats_match_player_weapon_damage (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER NOT NULL,
                 playtime REAL NOT NULL,
@@ -916,9 +916,9 @@ export function createTableQueries(){
                 damage INTEGER NOT NULL
             ) STRICT`,
 
-            `CREATE INDEX IF NOT EXISTS ${databaseName}nstats_match_pmwd ON nstats_match_player_weapon_damage(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nstats_match_pmwd ON nstats_match_player_weapon_damage(match_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_totals_player_weapon_damage (
+            `CREATE TABLE IF NOT EXISTS nstats_totals_player_weapon_damage (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 total_matches INTEGER NOT NULL,
@@ -932,9 +932,9 @@ export function createTableQueries(){
                 damage_per_minute REAL NOT NULL
             ) STRICT`,
 
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nstats_totals_pwd ON nstats_totals_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_pwd ON nstats_totals_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`,
 
-            `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_max (
+            `CREATE TABLE IF NOT EXISTS nstats_player_totals_max (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 gametype_id INTEGER NOT NULL,
@@ -972,7 +972,8 @@ export function createTableQueries(){
                 REFERENCES nstats_player_totals(player_id,season_id, gametype_id, map_id)
             ) STRICT`,
 
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nstats_totals_max_psgm ON nstats_player_totals_max(player_id,season_id,gametype_id,map_id)`,
+            `DROP INDEX IF EXISTS nstats_totals_max_pgm`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_psgm ON nstats_player_totals_max(player_id,season_id,gametype_id,map_id)`,
 
 
 
@@ -1046,7 +1047,6 @@ export function createTableQueries(){
 async function bColumnExist(tableName, columnName){
 
     const result = await simpleQuery(`PRAGMA table_info(${tableName})`);
-
 
     for(let i = 0; i < result.length; i++){
 
@@ -1325,10 +1325,137 @@ async function addSeasonColumnToMatches(){
 }
 
 
+
+
 async function addSeasonColumnToPlayerTotals(){
+
+    //TODO MUST create new table without constraint
+
+    if(!await bColumnExist("nstats_player_totals", "fartseason_id")){
+
+
+        await simpleQuery(`DROP TABLE IF EXISTS nstats_player_totals_max`);
+
+
+        const createQuery = `CREATE TABLE IF NOT EXISTS nstats_player_totals_max (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                player_id INTEGER NOT NULL,
+                gametype_id INTEGER NOT NULL,
+                map_id INTEGER NOT NULL,
+                max_playtime REAL NOT NULL,
+                max_score INTEGER NOT NULL,
+                max_frags INTEGER NOT NULL,
+                max_kills INTEGER NOT NULL,
+                max_deaths INTEGER NOT NULL,
+                max_suicides INTEGER NOT NULL,
+                max_team_kills INTEGER NOT NULL,
+                max_spree_1 INTEGER NOT NULL,
+                max_spree_2 INTEGER NOT NULL,
+                max_spree_3 INTEGER NOT NULL,
+                max_spree_4 INTEGER NOT NULL,
+                max_spree_5 INTEGER NOT NULL,
+                max_spree_best INTEGER NOT NULL,
+                max_multi_1 INTEGER NOT NULL,
+                max_multi_2 INTEGER NOT NULL,
+                max_multi_3 INTEGER NOT NULL,
+                max_multi_4 INTEGER NOT NULL,
+                max_multi_best INTEGER NOT NULL,
+                max_headshots INTEGER NOT NULL,
+                max_item_amp INTEGER NOT NULL,
+                max_item_belt INTEGER NOT NULL,
+                max_item_boots INTEGER NOT NULL,
+                max_item_body INTEGER NOT NULL,
+                max_item_pads INTEGER NOT NULL,
+                max_item_invis INTEGER NOT NULL,
+                max_item_shp INTEGER NOT NULL,
+                max_dom_caps INTEGER NOT NULL,
+                season_id INTEGER NOT NULL DEFAULT 0,
+                CONSTRAINT fk_player_totals_max_psgm
+                FOREIGN KEY(player_id,season_id, gametype_id, map_id)
+                REFERENCES nstats_player_totals(player_id,season_id, gametype_id, map_id)
+            ) STRICT`;
+
+
+            await simpleQuery(createQuery);
+
+            await simpleQuery(`CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_psgm ON nstats_player_totals_max(player_id,season_id,gametype_id,map_id)`);
+
+            /*const columns = [
+                "player_id" ,
+                "gametype_id",
+                "map_id",
+                "max_playtime",
+                "max_score",
+                "max_frags",
+                "max_kills",
+                "max_deaths",
+                "max_suicides",
+                "max_team_kills",
+                "max_spree_1",
+                "max_spree_2",
+                "max_spree_3",
+                "max_spree_4",
+                "max_spree_5",
+                "max_spree_best",
+                "max_multi_1",
+                "max_multi_2" ,
+                "max_multi_3" ,
+                "max_multi_4" ,
+                "max_multi_best",
+                "max_headshots" ,
+                "max_item_amp",
+                "max_item_belt" ,
+                "max_item_boots",
+                "max_item_body" ,
+                "max_item_pads" ,
+                "max_item_invis" ,
+                "max_item_shp",
+                "max_dom_caps",
+                "season_id"
+            ];
+
+            const fetchQuery = `SELECT
+                ${columns}
+                FROM nstats_player_totals_max
+            `;
+
+            const fResult = await simpleQuery(fetchQuery);
+
+           // console.log(fResult);
+
+            const insertVars = fResult.map((r) =>{
+
+                const vars = [];
+
+                console.log(r.player_id, r.season_id, r.gametype_id, r.map_id);
+                for(let i = 0; i < columns.length; i++){
+
+                    const c = columns[i];
+
+                    vars.push(r[c]);
+
+                }
+                return vars;
+            });
+
+
+           // console.log(insertVars);
+
+          //  const insertQuery = `INSERT INTO nstats_player_totals_max_new (${columns}) VALUES ?`;
+
+          //  await bulkInsert(insertQuery, insertVars);
+      
+
+            
+           // await simpleQuery(`DROP TABLE nstats_player_totals_max`);
+           // await simpleQuery(`ALTER TABLE nstats_player_totals_max_new RENAME TO nstats_player_totals_max`);
+           // await simpleQuery(`CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_psgm ON nstats_player_totals_max(player_id,season_id,gametype_id,map_id)`);
+        */
+    }
 
     await addColumn("nstats_player_totals", "season_id", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_max", "season_id", "INTEGER NOT NULL DEFAULT 0");
+
 }
 
 export async function sqliteInstall(bOnlyCreateTables){
@@ -1403,6 +1530,7 @@ export async function sqliteInstall(bOnlyCreateTables){
         await setAllMapTotals();   
     }
 
+    
 
 
     //2.7.0
@@ -1418,10 +1546,11 @@ export async function sqliteInstall(bOnlyCreateTables){
     await setAllBGametypeFlags();
 
 
-
-    //2.10.0
+       //2.10.0
     await addSeasonColumnToMatches();
     await addSeasonColumnToPlayerTotals();
+
+    
 
 
     //2.9.0
