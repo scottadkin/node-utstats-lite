@@ -1043,18 +1043,6 @@ export async function calculateAllPlayerTotals(){
         await insertPlayerGametypeMaxValues(totals, sid);
     }
 
-    /*let query = `SELECT
-    ${PLAYER_TOTALS_COLUMNS_MATCHES},
-    ${PLAYER_TOTALS_MAX_COLUMNS}
-    FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
-
-    const result = await simpleQuery(query);
-
-    const totals = createPlayerTotalsFromData(result);
-
-    await insertPlayerGametypeTotals(totals);
-
-    return await insertPlayerGametypeMaxValues(totals);*/
 }
 
 //2.9.0
@@ -1254,7 +1242,6 @@ async function insertPlayerGametypeTotals(data, seasonId){
 
 export async function updatePlayerTotals(playerIds, seasonId){
 
-    console.log(`SEASON ID is ${seasonId}`);
 
     const totals = await calcPlayerTotals(playerIds, seasonId);
 

@@ -134,7 +134,7 @@ export class WeaponsManager{
         await bulkInsertMatchWeaponStats(this.playerStats, matchId, gametypeId, mapId);
     }
 
-    async updatePlayerTotals(players){
+    async updatePlayerTotals(players, seasonId){
 
         const playerIds = [];
 
@@ -145,7 +145,13 @@ export class WeaponsManager{
             playerIds.push(p.masterId);
         }
 
-        await updatePlayerTotals(playerIds);
+        const promises = [updatePlayerTotals(playerIds, seasonId)];
+  
+        if(seasonId !== 0){
+            promises.push(updatePlayerTotals(playerIds, 0))
+        }
+
+        await Promise.all(promises);
  
     }
 

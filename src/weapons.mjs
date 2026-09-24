@@ -198,7 +198,7 @@ async function calcPlayersTotalsFromMatchDataByGroup(playerIds, type){
 }
 
 
-async function testCalculatePlayerTotalsFromMatchData(playerIds){
+async function testCalculatePlayerTotalsFromMatchData(playerIds, seasonId){
 
     if(playerIds !== null && playerIds.length === 0) return null;
 
@@ -217,6 +217,18 @@ async function testCalculatePlayerTotalsFromMatchData(playerIds){
         vars.push(playerIds);
     }
 
+
+    if(seasonId !== 0){
+
+        where += ` AND EXISTS(
+        SELECT 1 FROM nstats_matches
+        WHERE nstats_matches.id = ${wT}.match_id AND nstats_matches.season_id=?
+        )`;
+
+        vars.push(seasonId);
+    }
+
+
     const query = `SELECT ${mT}.player_id,SUM(${mT}.time_on_server) as playtime, 
     COUNT(*) as total_matches,
     ${mT}.map_id,
@@ -232,7 +244,8 @@ async function testCalculatePlayerTotalsFromMatchData(playerIds){
     MAX(${wT}.suicides) as max_suicides
     FROM ${mT} 
     INNER JOIN ${wT} on ${wT}.match_id = ${mT}.match_id AND ${wT}.player_id = ${mT}.player_id
-    ${where} GROUP BY ${mT}.player_id,${mT}.gametype_id,${mT}.map_id,${wT}.weapon_id`;
+    ${where} 
+    GROUP BY ${mT}.player_id,${mT}.gametype_id,${mT}.map_id,${wT}.weapon_id`;
 
     return await simpleQuery(query, vars);
 }
@@ -401,7 +414,7 @@ function testUpdatePlayerTotalsObject(totals, matchData){
 
 }
 
-async function testBulkUpdatePlayerTotals(totals){
+async function testBulkUpdatePlayerTotals(totals, seasonId){
 
     const insertVars = [];
 
@@ -451,7 +464,8 @@ async function testBulkUpdatePlayerTotals(totals){
                         weaponData.avg_kills, weaponData.avg_deaths, 
                         weaponData.avg_suicides, weaponData.avg_team_kills,
                         weaponData.epm_kills, weaponData.epm_deaths, 
-                        weaponData.epm_suicides, weaponData.epm_team_kills
+                        weaponData.epm_suicides, weaponData.epm_team_kills,
+                        seasonId
                     ]);
                 }
             }
@@ -464,17 +478,22 @@ async function testBulkUpdatePlayerTotals(totals){
             `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`,
             `playtime`,
             `avg_kills`, `avg_deaths`, `avg_suicides`, `avg_team_kills`,
-            `epm_kills`, `epm_deaths`, `epm_suicides`, `epm_team_kills`
+            `epm_kills`, `epm_deaths`, `epm_suicides`, `epm_team_kills`, `season_id`
         ];
 
-    return await sqlInsertOnDuplicateUpdate("nstats_player_totals_weapons", columns, insertVars, ["player_id","gametype_id", "map_id", "weapon_id"]);
+    return await sqlInsertOnDuplicateUpdate(
+        "nstats_player_totals_weapons", 
+        columns, 
+        insertVars, 
+        ["player_id", "season_id", "gametype_id", "map_id", "weapon_id"]
+    );
 }
 
-export async function updatePlayerTotals(playerIds){
+export async function updatePlayerTotals(playerIds, seasonId){
 
     if(playerIds !== null && playerIds.length === 0) return null;
     
-    const test = await testCalculatePlayerTotalsFromMatchData(playerIds);
+    const test = await testCalculatePlayerTotalsFromMatchData(playerIds, seasonId);
 
 
     const totals = {};
@@ -485,7 +504,7 @@ export async function updatePlayerTotals(playerIds){
     }
 
 
-    await testBulkUpdatePlayerTotals(totals);
+    await testBulkUpdatePlayerTotals(totals, seasonId);
 
     return;
 

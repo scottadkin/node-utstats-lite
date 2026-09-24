@@ -605,10 +605,12 @@ export function createTableQueries(){
                 epm_kills REAL NOT NULL,
                 epm_deaths REAL NOT NULL,
                 epm_suicides REAL NOT NULL,
-                epm_team_kills REAL NOT NULL
+                epm_team_kills REAL NOT NULL,
+                season_id INTEGER NOT NULL
             ) STRICT`,
             `DROP INDEX IF EXISTS pgw_idx`, //replaced with pgmw idx below
-            `CREATE UNIQUE INDEX IF NOT EXISTS pgmw_idx ON nstats_player_totals_weapons(player_id, gametype_id, map_id, weapon_id)`,
+            `DROP INDEX IF EXISTS pgmw_idx`, //replaced with psgmw idx below
+            `CREATE UNIQUE INDEX IF NOT EXISTS psgmw_idx ON nstats_player_totals_weapons(player_id, season_id, gametype_id, map_id, weapon_id)`,
 
             `CREATE TABLE IF NOT EXISTS nstats_player_totals_ctf (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1367,82 +1369,11 @@ async function addSeasonColumnToPlayerTotals(){
             await simpleQuery(createQuery);
 
             await simpleQuery(`CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_psgm ON nstats_player_totals_max(player_id,season_id,gametype_id,map_id)`);
-
-            /*const columns = [
-                "player_id" ,
-                "gametype_id",
-                "map_id",
-                "max_playtime",
-                "max_score",
-                "max_frags",
-                "max_kills",
-                "max_deaths",
-                "max_suicides",
-                "max_team_kills",
-                "max_spree_1",
-                "max_spree_2",
-                "max_spree_3",
-                "max_spree_4",
-                "max_spree_5",
-                "max_spree_best",
-                "max_multi_1",
-                "max_multi_2" ,
-                "max_multi_3" ,
-                "max_multi_4" ,
-                "max_multi_best",
-                "max_headshots" ,
-                "max_item_amp",
-                "max_item_belt" ,
-                "max_item_boots",
-                "max_item_body" ,
-                "max_item_pads" ,
-                "max_item_invis" ,
-                "max_item_shp",
-                "max_dom_caps",
-                "season_id"
-            ];
-
-            const fetchQuery = `SELECT
-                ${columns}
-                FROM nstats_player_totals_max
-            `;
-
-            const fResult = await simpleQuery(fetchQuery);
-
-           // console.log(fResult);
-
-            const insertVars = fResult.map((r) =>{
-
-                const vars = [];
-
-                console.log(r.player_id, r.season_id, r.gametype_id, r.map_id);
-                for(let i = 0; i < columns.length; i++){
-
-                    const c = columns[i];
-
-                    vars.push(r[c]);
-
-                }
-                return vars;
-            });
-
-
-           // console.log(insertVars);
-
-          //  const insertQuery = `INSERT INTO nstats_player_totals_max_new (${columns}) VALUES ?`;
-
-          //  await bulkInsert(insertQuery, insertVars);
-      
-
-            
-           // await simpleQuery(`DROP TABLE nstats_player_totals_max`);
-           // await simpleQuery(`ALTER TABLE nstats_player_totals_max_new RENAME TO nstats_player_totals_max`);
-           // await simpleQuery(`CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_psgm ON nstats_player_totals_max(player_id,season_id,gametype_id,map_id)`);
-        */
     }
 
     await addColumn("nstats_player_totals", "season_id", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_max", "season_id", "INTEGER NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_weapons", "season_id", "INTEGER NOT NULL DEFAULT 0");
 
 }
 
@@ -1458,6 +1389,10 @@ export async function sqliteInstall(bOnlyCreateTables){
    // await createDatabase(testDBName);
     //const queries = createTableQueries(testDBName);
    // await attachDatabase(testDBName);
+
+    //2.10.0
+    await addSeasonColumnToMatches();
+    await addSeasonColumnToPlayerTotals();
 
 
    const queries = createTableQueries("");
@@ -1534,9 +1469,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     await setAllBGametypeFlags();
 
 
-       //2.10.0
-    await addSeasonColumnToMatches();
-    await addSeasonColumnToPlayerTotals();
+    
 
     
 

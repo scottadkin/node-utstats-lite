@@ -1012,6 +1012,13 @@ export class PlayerManager{
             }
         }
 
+
+        const promises = [
+            updateMasterPlayers(masterIds, idsToCountries), updatePlayerTotals(masterIds, seasonId)
+        ];
+
+        if(seasonId !== 0) promises.push(updatePlayerTotals(masterIds, 0));
+
         return await Promise.all([updateMasterPlayers(masterIds, idsToCountries), updatePlayerTotals(masterIds, seasonId)]);
         
     }
