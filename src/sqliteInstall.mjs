@@ -1331,10 +1331,11 @@ async function addSeasonColumnToPlayerTotals(){
 
     //TODO MUST create new table without constraint
 
-    if(!await bColumnExist("nstats_player_totals", "fartseason_id")){
+    if(!await bColumnExist("nstats_player_totals", "season_id")){
 
 
         await simpleQuery(`DROP TABLE IF EXISTS nstats_player_totals_max`);
+        await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_player_totals_max'`);
 
 
         const createQuery = `CREATE TABLE IF NOT EXISTS nstats_player_totals_max (

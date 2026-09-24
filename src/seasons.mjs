@@ -198,19 +198,35 @@ async function calculateSeasonBasicTotals(seasonId){
 
     if(result.length === 0) return null;
 
+    const totalPlayers = await getSeasonTotalPlayers(seasonId);
+
+    result[0].total_players = totalPlayers;
+
     return result[0];
 }
 
 async function updateSeasonBasicTotals(seasonId, data){
 
-    const query = `UPDATE nstats_seasons SET total_matches=?, total_playtime=? WHERE id=?`;
+    const query = `UPDATE nstats_seasons SET total_matches=?, total_playtime=?, total_players=? WHERE id=?`;
 
-    await simpleQuery(query, [data.total_matches, data.total_playtime, seasonId]);
+    await simpleQuery(query, [data.total_matches, data.total_playtime, data.total_players, seasonId]);
+}
+
+async function getSeasonTotalPlayers(seasonId){
+
+    const query = `SELECT COUNT(*) as total_players FROM nstats_player_totals WHERE season_id=? AND gametype_id=0 AND map_id=0`;
+
+    const result = await simpleQuery(query, [seasonId]);
+
+    if(result.length === 0) return 0;
+
+    return result[0].total_players;
 }
 
 export async function calculateSeasonStats(seasonId){
 
     const basicTotals = await calculateSeasonBasicTotals(seasonId);
+    
 
     if(basicTotals === null) throw new Error(`No season data found`);
 

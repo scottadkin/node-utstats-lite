@@ -65,10 +65,9 @@ export async function clearAllDataTables(){
     for(let i = 0; i < DELETE_TABLES.length; i++){
 
         const t = DELETE_TABLES[i];
-
-   
-            await simpleQuery(`DELETE FROM nstats_${t}`);
-            await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${t}'`);
+    
+        await simpleQuery(`DELETE FROM nstats_${t}`);
+        await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${t}'`);
         
     
     }   
