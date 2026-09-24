@@ -93,7 +93,7 @@ export async function createSeason(name, startDate, endDate){
 
     if(bNameAlreadyInUse) return {"error": `There is already a season called ${name}`};
 
-    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?)`;
+    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?,0,0,0)`;
 
     await simpleQuery(query, [startDate, endDate, name]);
 
@@ -189,7 +189,31 @@ export async function updateSeasonUniqueCombinations(seasonId){
     
 }
 
+
+async function calculateSeasonBasicTotals(seasonId){
+
+    const query = `SELECT COUNT(*) as total_matches,SUM(playtime) as total_playtime FROM nstats_matches WHERE season_id=?`;
+
+    const result = await simpleQuery(query, [seasonId]);
+
+    if(result.length === 0) return null;
+
+    return result[0];
+}
+
+async function updateSeasonBasicTotals(seasonId, data){
+
+    const query = `UPDATE nstats_seasons SET total_matches=?, total_playtime=? WHERE id=?`;
+
+    await simpleQuery(query, [data.total_matches, data.total_playtime, seasonId]);
+}
+
 export async function calculateSeasonStats(seasonId){
+
+    const basicTotals = await calculateSeasonBasicTotals(seasonId);
+
+    if(basicTotals === null) throw new Error(`No season data found`);
+
 
     const [serverTotals, gametypeTotals, mapTotals] = await Promise.all([
         calculateSeasonObjectStats(seasonId, "servers"),
@@ -202,6 +226,7 @@ export async function calculateSeasonStats(seasonId){
         updateSeasonObjectStats(seasonId, serverTotals, "servers"),
         updateSeasonObjectStats(seasonId, gametypeTotals, "gametypes"),
         updateSeasonObjectStats(seasonId, mapTotals, "maps"),
+        updateSeasonBasicTotals(seasonId, basicTotals)
     ]);
 }
 

@@ -102,6 +102,9 @@ class SeasonsPage{
                 {"display": "Name"},
                 {"display": "Start Date"},
                 {"display": "End Date"},
+                {"display": "Total Matches"},
+                {"display": "Total Players"},
+                {"display": "Total Playtime"},
             ]
         };
 
@@ -114,7 +117,10 @@ class SeasonsPage{
             return [
                 {"display": a, "value": d.name},
                 {"value": toDateString(d.start_date, TIME_ZONE, true)},
-                {"value": toDateString(d.end_date, TIME_ZONE, true)}
+                {"value": toDateString(d.end_date, TIME_ZONE, true)},
+                {"value": d.total_matches},
+                {"value": d.total_players},
+                {"value": d.total_playtime},
             ]
         });
 

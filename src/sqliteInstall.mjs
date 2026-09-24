@@ -206,7 +206,10 @@ export function createTableQueries(){
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 start_date TEXT NOT NULL,
                 end_date TEXT NOT NULL,
-                name TEXT NOT NULL COLLATE NOCASE
+                name TEXT NOT NULL COLLATE NOCASE,
+                total_matches INTEGER NOT NULL,
+                total_players INTEGER NOT NULL,
+                total_playtime REAL NOT NULL
             ) STRICT`
 
             /*`CREATE TABLE IF NOT EXISTS nstats_season_databases (
