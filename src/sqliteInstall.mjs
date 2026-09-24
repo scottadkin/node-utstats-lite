@@ -586,7 +586,8 @@ export function createTableQueries(){
                 epm_item_pads REAL NOT NULL,
                 epm_item_invis REAL NOT NULL,
                 epm_item_shp REAL NOT NULL,
-                epm_dom_caps REAL NOT NULL
+                epm_dom_caps REAL NOT NULL,
+                season_id NOT NULL DEFAULT 0
             ) STRICT`,
 
             `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
@@ -1320,6 +1321,12 @@ async function addSeasonColumnToMatches(){
     await addColumn("nstats_matches", "season_id", "INTEGER NOT NULL DEFAULT 0");
 }
 
+
+async function addSeasonColumnToPlayerTotals(){
+
+    await addColumn("nstats_player_totals", "season_id", "INTEGER NOT NULL DEFAULT 0");
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1410,6 +1417,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     //2.10.0
     await addSeasonColumnToMatches();
+    await addSeasonColumnToPlayerTotals();
 
 
     //2.9.0

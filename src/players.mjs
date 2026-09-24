@@ -1107,6 +1107,9 @@ export async function deleteMultiplePlayerTotals(playerIds){
 
 async function insertPlayerGametypeTotals(data){
 
+    //TODO: if seasons enabled do totals by season in addition to all time
+    const SEASON_ID = 0;
+
     const insertVars = [];
 
     const playerIds = new Set();
@@ -1128,7 +1131,7 @@ async function insertPlayerGametypeTotals(data){
                     p.spree_3, p.spree_4, p.spree_5, p.spree_best, p.multi_1,
                     p.multi_2, p.multi_3, p.multi_4, p.multi_best, p.headshots,
                     p.item_amp, p.item_belt, p.item_boots, p.item_body, p.item_pads,
-                    p.item_invis, p.item_shp, p.dom_caps
+                    p.item_invis, p.item_shp, p.dom_caps, SEASON_ID
                 ];
 
                 const averages = [];
@@ -1165,7 +1168,7 @@ async function insertPlayerGametypeTotals(data){
         "spree_3","spree_4", "spree_5", "spree_best", "multi_1",
         "multi_2","multi_3","multi_4","multi_best", "headshots",
         "item_amp", "item_belt", "item_boots", "item_body", "item_pads",
-        "item_invis", "item_shp", "dom_caps"
+        "item_invis", "item_shp", "dom_caps", "season_id"
     ];
 
 
