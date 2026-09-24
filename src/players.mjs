@@ -8,6 +8,7 @@ import { getPlayerMapTotals, getUniquePlayerIdsOnMap, getAllMapIds} from "./maps
 import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";
+import { getAllSeasonIds } from "./seasons.mjs";
 
 const DEFAULT_PLAYER_SETTINGS = [
     {"category": "Importer", "name": "Auto Assign HWID To First Used Name", "valueType": "bool", "value": "false"}
@@ -1000,7 +1001,49 @@ export async function calcPlayerTotals(playerIds, seasonId){
 
 export async function calculateAllPlayerTotals(){
 
-    let query = `SELECT
+
+    const seasonIds = await getAllSeasonIds(false);
+
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        const sid = seasonIds[i];
+
+        let result = [];
+
+        //all time totals
+        if(sid === 0){
+
+            const query = `SELECT
+            ${PLAYER_TOTALS_COLUMNS_MATCHES},
+            ${PLAYER_TOTALS_MAX_COLUMNS}
+            FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
+
+            result = await simpleQuery(query);
+
+        }else{
+            
+            const query = `SELECT
+            ${PLAYER_TOTALS_COLUMNS_MATCHES},
+            ${PLAYER_TOTALS_MAX_COLUMNS}
+            FROM nstats_match_players 
+            WHERE spectator=0 AND EXISTS(
+                SELECT 1 FROM nstats_matches
+                WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?
+            )
+            GROUP BY player_id,gametype_id,map_id`;
+
+            result = await simpleQuery(query, [sid]);
+        }
+
+        const totals = createPlayerTotalsFromData(result, sid);
+
+        await insertPlayerGametypeTotals(totals, sid);
+
+        await insertPlayerGametypeMaxValues(totals, sid);
+    }
+
+    /*let query = `SELECT
     ${PLAYER_TOTALS_COLUMNS_MATCHES},
     ${PLAYER_TOTALS_MAX_COLUMNS}
     FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
@@ -1011,7 +1054,7 @@ export async function calculateAllPlayerTotals(){
 
     await insertPlayerGametypeTotals(totals);
 
-    return await insertPlayerGametypeMaxValues(totals);
+    return await insertPlayerGametypeMaxValues(totals);*/
 }
 
 //2.9.0

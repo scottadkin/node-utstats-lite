@@ -18,7 +18,21 @@ import { setAllBGametypeFlags } from "./matches.mjs";
 export function createTableQueries(){
 
     
-    const mainTableQueries = [
+  
+
+   // let bAddMainQueries = false;
+
+    //if(databaseName === null){
+       // return mainTableQueries;
+       // databaseName = "";
+        //bAddMainQueries = true;
+    //}else{
+    //    databaseName = `${databaseName}.`;
+    //}
+
+    const databaseName = "";
+    const queries = [
+        
         `CREATE TABLE IF NOT EXISTS nstats_sessions(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             session_id TEXT NOT NULL,
@@ -210,34 +224,7 @@ export function createTableQueries(){
                 total_matches INTEGER NOT NULL,
                 total_players INTEGER NOT NULL,
                 total_playtime REAL NOT NULL
-            ) STRICT`
-
-            /*`CREATE TABLE IF NOT EXISTS nstats_season_databases (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            start_date TEXT NOT NULL,
-            end_date TEXT NOT NULL,
-            name TEXT NOT NULL COLLATE NOCASE,
-            file_name TEXT NOT NULL,
-            total_matches INTEGER NOT NULL,
-            total_players INTEGER NOT NULL
-            ) STRICT`*/
-    ];
-
-
-   // let bAddMainQueries = false;
-
-    //if(databaseName === null){
-       // return mainTableQueries;
-       // databaseName = "";
-        //bAddMainQueries = true;
-    //}else{
-    //    databaseName = `${databaseName}.`;
-    //}
-
-    const databaseName = "";
-    const queries = [
-        
-        ...mainTableQueries,
+            ) STRICT`,
             `CREATE TABLE IF NOT EXISTS nstats_players (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE ,

@@ -50,6 +50,22 @@ export async function getAllSeasons(){
     return result;
 }
 
+/**
+ * 
+ * @param {Boolean} bSkip0 ignore season 0(no season)
+ */
+export async function getAllSeasonIds(bSkip0){
+
+    const query = `SELECT id FROM nstats_seasons`;
+
+    const result = await simpleQuery(query);
+
+    const ids = result.map((r) => r.id);
+
+    if(!bSkip0) ids.push(0);
+
+    return ids;
+}
 
 async function getSeasonConflicts(startDate, endDate){
 
