@@ -590,7 +590,9 @@ export function createTableQueries(){
                 season_id NOT NULL DEFAULT 0
             ) STRICT`,
 
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
+            //`CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}npt_psgm_idx ON nstats_player_totals(player_id,season_id,gametype_id,map_id)`,
+            `DROP INDEX IF EXISTS npt_pgm_idx`,
 
             `CREATE TABLE IF NOT EXISTS ${databaseName}nstats_player_totals_weapons (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -964,12 +966,13 @@ export function createTableQueries(){
                 max_item_invis INTEGER NOT NULL,
                 max_item_shp INTEGER NOT NULL,
                 max_dom_caps INTEGER NOT NULL,
-                CONSTRAINT fk_player_totals_max_pgm
-                FOREIGN KEY(player_id, gametype_id, map_id)
-                REFERENCES nstats_player_totals(player_id, gametype_id, map_id)
+                season_id INTEGER NOT NULL DEFAULT 0,
+                CONSTRAINT fk_player_totals_max_psgm
+                FOREIGN KEY(player_id,season_id, gametype_id, map_id)
+                REFERENCES nstats_player_totals(player_id,season_id, gametype_id, map_id)
             ) STRICT`,
 
-            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nstats_totals_max_pgm ON nstats_player_totals_max(player_id,gametype_id,map_id)`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS ${databaseName}nstats_totals_max_psgm ON nstats_player_totals_max(player_id,season_id,gametype_id,map_id)`,
 
 
 
@@ -1325,6 +1328,7 @@ async function addSeasonColumnToMatches(){
 async function addSeasonColumnToPlayerTotals(){
 
     await addColumn("nstats_player_totals", "season_id", "INTEGER NOT NULL DEFAULT 0");
+    await addColumn("nstats_player_totals_max", "season_id", "INTEGER NOT NULL DEFAULT 0");
 }
 
 export async function sqliteInstall(bOnlyCreateTables){

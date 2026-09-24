@@ -21,6 +21,11 @@ const DELETE_TABLES = [
     "ctf_covers",
     "damage_match", 
     "dom_control_points",
+    "seasons",
+    "seasons_unique_match_combinations",
+    "seasons_servers",
+    "seasons_gametypes",
+    "seasons_maps",
     "gametypes",
     "importer_history",
     "kills",
@@ -62,9 +67,9 @@ export async function clearAllDataTables(){
         const t = DELETE_TABLES[i];
 
    
-
-        await simpleQuery(`DELETE FROM nstats_${t}`);
-        await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${t}'`);
+            await simpleQuery(`DELETE FROM nstats_${t}`);
+            await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${t}'`);
+        
     
     }   
 }

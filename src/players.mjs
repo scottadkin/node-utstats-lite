@@ -1015,7 +1015,7 @@ export async function calculateAllPlayerTotals(){
 }
 
 //2.9.0
-async function insertPlayerGametypeMaxValues(data){
+async function insertPlayerGametypeMaxValues(data, seasonId){
 
 
     const columns = [
@@ -1066,6 +1066,8 @@ async function insertPlayerGametypeMaxValues(data){
                     vars.push(mapData[columns[x]]);
                 }
 
+                vars.push(seasonId);
+
                 insertVars.push(vars)
             }
         }
@@ -1073,9 +1075,9 @@ async function insertPlayerGametypeMaxValues(data){
 
     return await sqlInsertOnDuplicateUpdate(
         "nstats_player_totals_max", 
-        ["player_id", "gametype_id", "map_id", ...columns], 
+        ["player_id", "gametype_id", "map_id", ...columns, "season_id"], 
         insertVars, 
-        ["player_id", "gametype_id", "map_id"]
+        ["player_id", "season_id", "gametype_id", "map_id"]
     );
 
 }
@@ -1200,7 +1202,7 @@ async function insertPlayerGametypeTotals(data, seasonId){
     //console.log(columns);
     //process.exit();
 
-    return await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, ["player_id", "gametype_id", "map_id"]);
+    return await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, ["player_id", "season_id", "gametype_id", "map_id"]);
 
 
     //await bulkInsert(query, insertVars);
@@ -1215,7 +1217,7 @@ export async function updatePlayerTotals(playerIds, seasonId){
 
 
     await insertPlayerGametypeTotals(totals, seasonId);
-    return await insertPlayerGametypeMaxValues(totals);
+    return await insertPlayerGametypeMaxValues(totals, seasonId);
 }
 
 
@@ -2467,3 +2469,15 @@ export async function calculateAllPlayerTotalsMax(){
         offset += MAX_PLAYERS;
     }
 }*/
+
+
+export async function getSeasonPlayers(seasonId){
+
+    const query = `SELECT nstats_player_totals.*,
+    nstats_players.name as name, nstats_players.country as country 
+    FROM nstats_player_totals 
+    LEFT JOIN nstats_players ON nstats_players.id = nstats_player_totals.player_id
+    WHERE season_id=? AND gametype_id=0 AND map_id=0 ORDER BY total_matches DESC`;
+
+    return await simpleQuery(query, [seasonId]);
+}

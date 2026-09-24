@@ -11,19 +11,47 @@ function mapObjectStats(s){
 
 class SeasonPage{
 
-    constructor(basicInfo, objectStats){
+    constructor(basicInfo, objectStats, testPlayers){
 
         this.parent = document.querySelector("#root");
         this.wrapper = UIDiv();
         this.basicInfo = basicInfo;
         this.objectStats = objectStats;
+        this.testPlayers =testPlayers;
+        console.log(testPlayers);
 
         UIHeader(this.wrapper, this.basicInfo.name);
 
         this.parent.append(this.wrapper);
 
+        this.renderPlayers();
         this.renderInfo();
         this.renderObjectStats();
+    }
+
+
+    renderPlayers(){
+
+        const tableOptions = {
+            "headers": [
+                {"display": "PlayerId"},
+                {"display": "Name"},
+                {"display": "Total Matches"},
+                {"display": "PlayerId"},
+                {"display": "PlayerId"},
+            ]
+        };
+
+        const rows = this.testPlayers.map((p) =>{
+
+            return [
+                {"value": p.player_id},
+                {"value": p.name},
+                {"value": p.total_matches},
+            ];
+        });
+
+        new TESTUITable(this.wrapper, tableOptions, rows);
     }
 
     renderInfo(){

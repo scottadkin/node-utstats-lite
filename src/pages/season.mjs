@@ -1,3 +1,4 @@
+import { getSeasonPlayers } from "../players.mjs";
 import { getSeasonBasicObjectStats, getSeasonById } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
@@ -17,6 +18,8 @@ export async function renderSeasonPage(req, res){
     if(basicSeasonInfo === null) throw new Error(`Season doesn't exist`);
 
     const objectStats = await getSeasonBasicObjectStats(seasonId);
+
+    const testPlayers = await getSeasonPlayers(seasonId);
     
     res.render("season.ejs",{
         req,
@@ -26,7 +29,7 @@ export async function renderSeasonPage(req, res){
             "meta": {"description": "Login", "image": "images/maps/default.jpg"},
             "userSession": req.userSession,
             basicSeasonInfo,
-            objectStats
+            objectStats, testPlayers
         });
     //res.json({"test": "test"});
 }

@@ -11,8 +11,6 @@ export async function renderSeasonsPage(req, res){
     const seasons = await getAllSeasons();
 
 
-
-
     return res.render("seasons.ejs", {
         req,
             "host": req.headers.host,
