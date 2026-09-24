@@ -208,6 +208,8 @@ export class MatchParser{
             
         }
 
+        const seasonId = seasonInfo?.id ?? 0;
+
 
         this.matchId = await createMatch(
             this.server.id, 
@@ -234,7 +236,7 @@ export class MatchParser{
             this.gametype.timeLimit,
             this.gametype.mutators,
             this.match.absoluteTime,
-            seasonInfo?.id ?? 0
+            seasonId
         ); 
 
         if(this.matchId === null){
@@ -283,7 +285,7 @@ export class MatchParser{
         
         
         await Promise.all([
-            this.players.updatePlayerTotals(),
+            this.players.updatePlayerTotals(seasonId),
             this.ctf.updatePlayerTotals(this.players.players, this.gametype.id, this.map.id)
         ]);
 

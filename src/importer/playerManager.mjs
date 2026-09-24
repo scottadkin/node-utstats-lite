@@ -997,7 +997,7 @@ export class PlayerManager{
         }
     }
 
-    async updatePlayerTotals(){
+    async updatePlayerTotals(seasonId){
 
         const masterIds = [];
         const idsToCountries = {};
@@ -1012,7 +1012,7 @@ export class PlayerManager{
             }
         }
 
-        return await Promise.all([updateMasterPlayers(masterIds, idsToCountries), updatePlayerTotals(masterIds)]);
+        return await Promise.all([updateMasterPlayers(masterIds, idsToCountries), updatePlayerTotals(masterIds, seasonId)]);
         
     }
 

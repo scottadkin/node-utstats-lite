@@ -773,6 +773,7 @@ function _updateTotals(totals, playerData){
     const gametypeTotals = totals[playerId][gametypeId][0];
     const mapTotals = totals[playerId][0][mapId];
     const mapGametypeTotals = totals[playerId][gametypeId][mapId];
+    
 
     const mergeTypes = [
       "score",
@@ -959,7 +960,7 @@ function _updateTotals(totals, playerData){
 }
 
 
-function createPlayerTotalsFromData(result){
+function createPlayerTotalsFromData(result, seasonId){
 
     const totals = {};
 
@@ -967,7 +968,7 @@ function createPlayerTotalsFromData(result){
 
         const r = result[i];
 
-        _updateTotals(totals, r);
+        _updateTotals(totals, r, seasonId);
 
     }
 
@@ -978,18 +979,22 @@ function createPlayerTotalsFromData(result){
  * @param {*} playerId 
  * @returns 
  */
-export async function calcPlayerTotals(playerIds){
+export async function calcPlayerTotals(playerIds, seasonId){
 
     if(playerIds.length === 0) return [];
 
     let query = `SELECT
     ${PLAYER_TOTALS_COLUMNS_MATCHES},
     ${PLAYER_TOTALS_MAX_COLUMNS}
-    FROM nstats_match_players WHERE spectator=0 AND player_id IN (?) GROUP BY player_id,gametype_id,map_id`;
+    FROM nstats_match_players 
+    WHERE spectator=0 AND player_id IN (?) 
+    AND EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id=nstats_match_players.match_id AND nstats_matches.season_id=?)
+    GROUP BY player_id,gametype_id,map_id`;
 
-    const result = await simpleQuery(query, [playerIds]);
+    const result = await simpleQuery(query, [playerIds, seasonId]);
 
-    return createPlayerTotalsFromData(result);
+
+    return createPlayerTotalsFromData(result, seasonId);
   
 }
 
@@ -1105,10 +1110,9 @@ export async function deleteMultiplePlayerTotals(playerIds){
     return await simpleQuery(query, [playerIds]);
 }
 
-async function insertPlayerGametypeTotals(data){
+async function insertPlayerGametypeTotals(data, seasonId){
 
-    //TODO: if seasons enabled do totals by season in addition to all time
-    const SEASON_ID = 0;
+
 
     const insertVars = [];
 
@@ -1131,7 +1135,7 @@ async function insertPlayerGametypeTotals(data){
                     p.spree_3, p.spree_4, p.spree_5, p.spree_best, p.multi_1,
                     p.multi_2, p.multi_3, p.multi_4, p.multi_best, p.headshots,
                     p.item_amp, p.item_belt, p.item_boots, p.item_body, p.item_pads,
-                    p.item_invis, p.item_shp, p.dom_caps, SEASON_ID
+                    p.item_invis, p.item_shp, p.dom_caps, seasonId
                 ];
 
                 const averages = [];
@@ -1203,12 +1207,14 @@ async function insertPlayerGametypeTotals(data){
 }
 
 
-export async function updatePlayerTotals(playerIds){
+export async function updatePlayerTotals(playerIds, seasonId){
 
-    const totals = await calcPlayerTotals(playerIds);
+    console.log(`SEASON ID is ${seasonId}`);
+
+    const totals = await calcPlayerTotals(playerIds, seasonId);
 
 
-    await insertPlayerGametypeTotals(totals);
+    await insertPlayerGametypeTotals(totals, seasonId);
     return await insertPlayerGametypeMaxValues(totals);
 }
 
