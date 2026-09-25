@@ -1,5 +1,5 @@
 import { getPlayerActivityHeatmapData, getPlayerAllGametypesAndMaps, getPlayerRecentMatches } from "../players.mjs";
-import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData } from "../matches.mjs";
+import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData, getRecentMatches } from "../matches.mjs";
 import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages, searchMaps, getMapPlayerTotals} from "../maps.mjs";
 import { getRankingsWithPlayerNames } from "../rankings.mjs";
 import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
@@ -305,7 +305,7 @@ export default class JSONManager{
     }
 
 
-    async seasonSearchMatches(){
+    async searchMatches(){
 
         const seasonId = this.querySanitizeInteger("season");
         const serverId = this.querySanitizeInteger("sid");
@@ -314,7 +314,7 @@ export default class JSONManager{
         const page = this.querySanitizeInteger("page");
         const perPage = this.querySanitizeInteger("pp");
 
-        const result = await searchSeasonMatches(seasonId, serverId, gametypeId, mapId, page, perPage);
+        const result = await getRecentMatches(page, perPage, serverId, gametypeId, mapId, false, seasonId);
         this.res.status(200).json(result);
     }
 
@@ -389,10 +389,12 @@ export default class JSONManager{
 
                 return await this.loadRecords();
 
-            }else if(this.mode === "season-search-matches"){
+            }/*else if(this.mode === "season-search-matches"){
 
                 return await this.seasonSearchMatches();
 
+            }*/else if(this.mode === "search-matches"){
+                return await this.searchMatches();
             }
 
             console.log(this.mode);

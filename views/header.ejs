@@ -13,7 +13,7 @@ options.push({"name": "Seasons", "url": "/seasons", "highlight": ["season", "sea
 
 if(!locals.bSeasonPage || (locals.seasonInfo === undefined || locals.seasonInfo === null)){
     options.push(
-        {"name": "Matches", "url": "/matches", "highlight": ["match"]},
+        {"name": "Matches", "url": "/matches", "highlight": ["matches", "match"]},
         {"name": "Players", "url": "/players", "highlight": ["player", "players"]},
         {"name": "Rankings", "url": "/rankings", "highlight": ["rankings"]},
         {"name": "CTF League", "url": "/ctfleague", "highlight": ["ctfleague"]},
@@ -30,7 +30,7 @@ if(locals.bSeasonPage){
 
         const seasonSubURL = `/season/${locals.seasonInfo.id}`;
         options.push({"name": "Season Home", "url": `${seasonSubURL}/`, "highlight": ["season-home"]});
-        options.push({"name": "Matches", "url": `${seasonSubURL}/matches`, "highlight": ["matches"]});
+        options.push({"name": "Matches", "url": `${seasonSubURL}/matches`, "highlight": ["matches", "match"]});
         options.push({"name": "Players", "url": `${seasonSubURL}/players`, "highlight": ["players"]});
     }
 }
