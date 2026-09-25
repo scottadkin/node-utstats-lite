@@ -149,7 +149,6 @@ class MatchesSearchForm{
 
     constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, displayMode, matches, page, perPage){
 
-        console.log(matches);
         this.seasonId = seasonId;
         this.uniqueCombinations = uniqueCombinations;
         this.matches = matches;
@@ -285,7 +284,7 @@ class MatchesSearchForm{
                 this.abortController = new AbortController();
             }
 
-            let url = `/json/season-search-matches/`;
+            let url = `/json/search-matches/`;
             url += `?season=${this.seasonId}&sid=${this.selectedServer}&gid=${this.selectedGametype}`;
             url += `&mid=${this.selectedMap}&page=${this.page}&pp=${this.perPage}`;
 
