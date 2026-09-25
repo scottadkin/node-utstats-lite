@@ -360,9 +360,9 @@ class MatchesSearchForm{
 
     createFormElems(){
 
-        if(this.bUseSeasons){
-            this.wrapper.append(this.createSelect("seasons"));
-        }
+       // if(this.bUseSeasons){
+        //    this.wrapper.append(this.createSelect("seasons"));
+       // }
         this.wrapper.append(this.createSelect("servers"));
         this.wrapper.append(this.createSelect("gametypes"));
         this.wrapper.append(this.createSelect("maps"));

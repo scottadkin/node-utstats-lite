@@ -1,8 +1,15 @@
 <% 
-const options = [
-    {"name": "Home", "url": "/", "highlight": ["home"]},
-    {"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]},
-];
+
+const options = [];
+
+if(locals.bSeasonPage && locals.seasonInfo !== undefined && locals.seasonInfo !== null){
+    options.push({"name": "Main Site", "url": "/", "highlight": ["home"]});
+}else{
+    options.push({"name": "Home", "url": "/", "highlight": ["home"]});
+}
+
+
+options.push({"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]});
 
 if(!locals.bSeasonPage || (locals.seasonInfo === undefined || locals.seasonInfo === null)){
     options.push(
@@ -24,6 +31,7 @@ if(locals.bSeasonPage){
         const seasonSubURL = `/season/${locals.seasonInfo.id}`;
         options.push({"name": "Season Home", "url": `${seasonSubURL}/`, "highlight": ["season-home"]});
         options.push({"name": "Matches", "url": `${seasonSubURL}/matches`, "highlight": ["matches"]});
+        options.push({"name": "Players", "url": `${seasonSubURL}/players`, "highlight": ["players"]});
     }
 }
 

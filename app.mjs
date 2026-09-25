@@ -38,6 +38,7 @@ import ApiJSON from './src/json/apiJSON.mjs';
 import { renderJSONExamples } from './src/pages/jsonExamples.mjs';
 import { renderSeasonPage } from './src/pages/season.mjs';
 import { renderSeasonMatchesPage } from './src/pages/seasons/matches.mjs';
+import { renderSeasonPlayersPage } from './src/pages/seasons/players.mjs';
 //import { renderSeasonsPage } from './src/pages/seasons.mjs';
 //import { renderSeasonPage } from './src/pages/season.mjs';
 
@@ -305,9 +306,23 @@ app.get("/season/:season/matches", async (req, res) =>{
 
     try{
 
-        console.log(req.params);
 
         await renderSeasonMatchesPage(req, res);
+
+    
+    }catch(err){
+        res.json({"error": err.toString()});
+    }
+});
+
+
+app.get("/season/:season/players", async (req, res) =>{
+
+    try{
+
+        console.log(req.params);
+
+        await renderSeasonPlayersPage(req, res);
 
     
     }catch(err){

@@ -723,3 +723,7 @@ export function sortByName(a, b){
 }
 
 
+export const DEFAULT_ORDER_OPTIONS = [
+    {"value": "ASC", "display": "Ascending"}, 
+    {"value": "DESC", "display": "Descending"}, 
+];

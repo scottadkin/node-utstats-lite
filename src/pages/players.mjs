@@ -1,60 +1,28 @@
-import { PER_PAGE_OPTIONS } from "../generic.mjs";
-import { searchPlayers } from "../players.mjs";
+import { DEFAULT_ORDER_OPTIONS, PER_PAGE_OPTIONS } from "../generic.mjs";
+import { sanitizePlayersPageParams, searchPlayers, setPlayersPageMetaData } from "../players.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
+const DEFAULT_PER_PAGE = 25;
 
 export async function renderPlayersPage(req, res, userSession){
 
     try{
 
-        const orderOptions = [
-            {"value": "ASC", "display": "Ascending"}, 
-            {"value": "DESC", "display": "Descending"}, 
-        ];
-
-        const DEFAULT_PER_PAGE = 25;
-
-
+        const brandingSettings = await getCategorySettings("Branding");
         const pageSettings = await getCategorySettings("Players");
         const timeZone = await getSiteWideTimeZone();
 
-        let searchName = req?.query?.name ?? "";
-        let sortBy = req?.query?.sortBy ?? pageSettings["Default Sort By"] ?? "name";
-        let order = req?.query?.order  ?? pageSettings["Default Order"] ?? "ASC";
-        let perPage = req?.query?.perPage ?? pageSettings["Results Per Page"] ?? DEFAULT_PER_PAGE;
-        if(perPage != perPage) perPage = DEFAULT_PER_PAGE;
-        if(perPage < 5 || perPage > 100) perPage = DEFAULT_PER_PAGE;
+        const {searchName, sortBy, order, perPage, page} = sanitizePlayersPageParams(req, pageSettings, DEFAULT_PER_PAGE);
 
-        let page = req?.query?.page ?? 1;
-        page = parseInt(page);
-        if(page !== page) page = 1;
-
-
-        let description = "Search for a player that has been active on one of our servers";
-        let title = "Player Search";
-
-        if(searchName !== ""){
-            title =  `${searchName} - Player Search `;
-            description = `Search result for player's named "${searchName}"`;
-        }
-
-        description += `, sorted by ${sortBy} in ${order} order`;
-
-
-
+    
         const players = await searchPlayers(searchName, sortBy, order, page, perPage, 0);
 
-
-        
-        const brandingSettings = await getCategorySettings("Branding");
-        const siteName = brandingSettings?.["Site Name"] ?? "Node UTStats Lite";
-        
-        title = `${title} - ${siteName}`;
+        const {title, description, siteName} = setPlayersPageMetaData(brandingSettings, searchName, sortBy, order);
 
         res.render("players.ejs", {
             "host": req.headers.host,
             "title": title,
             "meta": {"description": description, "image": "images/maps/default.jpg"},
-            orderOptions,
+            "orderOptions": DEFAULT_ORDER_OPTIONS,
             searchName,
             sortBy,
             order,
@@ -64,7 +32,9 @@ export async function renderPlayersPage(req, res, userSession){
             players,
             userSession,
             siteName,
-            timeZone
+            timeZone,
+            "bSeasonPage": false,
+            "seasonInfo": null
         });
         
     }catch(err){

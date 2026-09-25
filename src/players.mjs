@@ -2518,3 +2518,44 @@ export async function getSeasonPlayers(seasonId){
 
     return await simpleQuery(query, [seasonId]);
 }
+
+
+export function sanitizePlayersPageParams(req, pageSettings, defaultPerPage){
+
+    if(req.query === undefined) throw new Error(`Query is undefined`);
+
+    let searchName = req.query?.name ?? "";
+    let sortBy = req.query?.sortBy ?? pageSettings["Default Sort By"] ?? "name";
+    let order = req.query?.order  ?? pageSettings["Default Order"] ?? "ASC";
+    let perPage = req.query?.perPage ?? pageSettings["Results Per Page"] ?? defaultPerPage;
+    if(perPage != perPage) perPage = defaultPerPage;
+    if(perPage < 5 || perPage > 100) perPage = defaultPerPage;
+
+    let page = req.query?.page ?? 1;
+    page = parseInt(page);
+    if(page !== page) page = 1;
+
+
+    return {searchName, sortBy, order, perPage, page}
+}
+
+
+export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, order){
+
+    let description = "Search for a player that has been active on one of our servers";
+    let title = "Player Search";
+
+    if(searchName !== ""){
+        title =  `${searchName} - Player Search `;
+        description = `Search result for player's named "${searchName}"`;
+    }
+
+    description += `, sorted by ${sortBy} in ${order} order`;
+
+
+    const siteName = brandingSettings?.["Site Name"] ?? "Node UTStats Lite";
+    
+    title = `${title} - ${siteName}`;
+
+    return {description, title, siteName}
+}
