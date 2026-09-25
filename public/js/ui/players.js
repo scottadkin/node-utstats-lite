@@ -59,10 +59,11 @@ class PlayersSearchList{
 
 class PlayersSearchForm{
 
-    constructor(parent, searchName, sortBy, order, perPage, page, siteName){
+    constructor(parent, seasonId, searchName, sortBy, order, perPage, page, siteName){
 
         this.parent = document.querySelector(parent);
-
+        
+        this.seasonId = parseInt(seasonId);
         this.searchName = searchName;
         this.sortBy = sortBy;
         this.order = order;
@@ -110,8 +111,9 @@ class PlayersSearchForm{
 
         try{
 
-            let slug = `?name=${encodeURIComponent(this.searchName)}&sortBy=${this.sortBy}`;
+            let slug = `?name=${encodeURIComponent(this.searchName)}&season=${this.seasonId}&sortBy=${this.sortBy}`;
             slug += `&order=${this.order}&perPage=${this.perPage}&page=${this.page}`;
+            console.log(`/json/player-search/${slug}`);
             const req = await fetch(`/json/player-search/${slug}`);
 
             const res = await req.json();
@@ -130,7 +132,10 @@ class PlayersSearchForm{
 
     changeSelected(){
 
-        const url = `/players/?name=${this.searchName}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}`;
+
+        const baseURL = (this.seasonId === 0) ? `/players/` : `/season/${this.seasonId}/players/`
+
+        const url = `${baseURL}?name=${this.searchName}&season=${this.seasonId}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}`;
 
         history.pushState(null, "", url);
 

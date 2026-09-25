@@ -38,6 +38,7 @@ export async function renderSeasonPlayersPage(req, res){
             order,
             perPage,
             page,
-            siteName
+            siteName,
+            seasonId
         });
 }

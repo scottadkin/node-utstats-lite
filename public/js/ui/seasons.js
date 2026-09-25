@@ -11,63 +11,32 @@ function mapObjectStats(s){
 
 class SeasonPage{
 
-    constructor(basicInfo, objectStats, testPlayers){
+    constructor(basicInfo, objectStats){
 
         this.parent = document.querySelector("#root");
         this.wrapper = UIDiv();
         this.basicInfo = basicInfo;
         this.objectStats = objectStats;
-        this.testPlayers =testPlayers;
-        console.log(testPlayers);
+
 
         UIHeader(this.wrapper, this.basicInfo.name);
 
         this.parent.append(this.wrapper);
 
-        this.renderPlayers();
         this.renderInfo();
         this.renderObjectStats();
     }
 
 
-    renderPlayers(){
-
-        const tableOptions = {
-            "headers": [
-                {"display": "PlayerId"},
-                {"display": "Name"},
-                {"display": "Total Matches"},
-                {"display": "PlayerId"},
-                {"display": "PlayerId"},
-            ]
-        };
-
-        const rows = this.testPlayers.map((p) =>{
-
-            return [
-                {"value": p.player_id},
-                {"value": p.name},
-                {"value": p.total_matches},
-            ];
-        });
-
-        new TESTUITable(this.wrapper, tableOptions, rows);
-    }
-
     renderInfo(){
 
-        const link = document.createElement("a");
-        link.href = `/season/${this.basicInfo.id}/matches`;
-        link.append("Matches");
 
         this.info = new UIInfo(this.wrapper, [
 
             `Start Date ${toDateString(this.basicInfo.start_date, TIME_ZONE, true)}`,
             UIBr(),
             `End Date ${toDateString(this.basicInfo.end_date, TIME_ZONE, true)}`,
-            UIBr(),
-            UIBr(),
-            link
+            UIBr()
         ]);
     }
 

@@ -250,6 +250,7 @@ export default class JSONManager{
 
         const {page, perPage} = this.getPageAndPerPage();
         const order = this.querySanatizeOrder("order");
+        const season = this.querySanitizeInteger("season");
 
         this.throwErrorIfQueryMissingKey("sortBy");
         this.throwErrorIfQueryMissingKey("name");
@@ -257,7 +258,7 @@ export default class JSONManager{
         const sortBy = this.req.query.sortBy.toLowerCase();
         const searchName = this.req.query.name;
 
-        const data = await searchPlayers(searchName, sortBy, order, page, perPage);
+        const data = await searchPlayers(searchName, sortBy, order, page, perPage, season);
         this.res.status(200).json(data);
     }
 

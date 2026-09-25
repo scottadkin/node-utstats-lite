@@ -2508,6 +2508,7 @@ export async function calculateAllPlayerTotalsMax(){
 }*/
 
 
+/*
 export async function getSeasonPlayers(seasonId){
 
     const query = `SELECT nstats_player_totals.*,
@@ -2517,7 +2518,7 @@ export async function getSeasonPlayers(seasonId){
     WHERE season_id=? AND gametype_id=0 AND map_id=0 ORDER BY total_matches DESC`;
 
     return await simpleQuery(query, [seasonId]);
-}
+}*/
 
 
 export function sanitizePlayersPageParams(req, pageSettings, defaultPerPage){

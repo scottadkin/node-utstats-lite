@@ -34,7 +34,8 @@ export async function renderPlayersPage(req, res, userSession){
             siteName,
             timeZone,
             "bSeasonPage": false,
-            "seasonInfo": null
+            "seasonInfo": null,
+            "seasonId": 0
         });
         
     }catch(err){

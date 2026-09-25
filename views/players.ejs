@@ -7,11 +7,25 @@
     seasonInfo
     }) -%>
 <%- include("timeZone.ejs", {timeZone})%>
-<script src="../js/ui/ui.js"></script>
-<script src="../js/ui/players.js"></script>
+
+<%
+const jsBase = (locals.bSeasonPage) ? "../../js/" : "../js/";
+%>
+
+<script src="<%- jsBase %>ui/ui.js"></script>
+<script src="<%- jsBase %>ui/players.js"></script>
 
 <div id="root"></div>
 <script>
-    new PlayersSearchForm("#root", "<%= searchName %>", "<%= sortBy %>", "<%= order %>", "<%= perPage %>", "<%= page %>", "<%= siteName %>");
+    new PlayersSearchForm(
+        "#root", 
+        "<%= seasonId %>",
+        "<%= searchName %>", 
+        "<%= sortBy %>", 
+        "<%= order %>", 
+        "<%= perPage %>", 
+        "<%= page %>", 
+        "<%= siteName %>"
+    );
 </script>
 <%- include('footer.ejs') -%>
