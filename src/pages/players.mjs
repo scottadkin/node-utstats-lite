@@ -41,7 +41,7 @@ export async function renderPlayersPage(req, res, userSession){
 
 
 
-        const players = await searchPlayers(searchName, sortBy, order, page, perPage);
+        const players = await searchPlayers(searchName, sortBy, order, page, perPage, 0);
 
 
         

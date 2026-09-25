@@ -500,24 +500,30 @@ export function applyBasicPlayerInfoToObjects(playerInfos, targetData){
     }
 }
 
-export async function getTotalPlayers(name){
+export async function getTotalPlayers(name, seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) seasonId = 0;
 
     const query = `SELECT COUNT(*) as total_players 
     FROM nstats_player_totals
     LEFT JOIN nstats_players ON nstats_players.id = nstats_player_totals.player_id
-    WHERE nstats_players.name LIKE ? AND nstats_player_totals.gametype_id=0 AND nstats_player_totals.map_id=0`;
-    const result = await simpleQuery(query, [`%${name}%`]);
+    WHERE nstats_players.name LIKE ? AND nstats_player_totals.gametype_id=0 AND nstats_player_totals.map_id=0
+    AND nstats_player_totals.season_id=?`;
+    const result = await simpleQuery(query, [`%${name}%`, seasonId]);
 
     return result[0].total_players;
 }
 
 
-export async function searchPlayers(name, sortBy, order, page, perPage){
+export async function searchPlayers(name, sortBy, order, page, perPage, seasonId){
 
     sortBy = sortBy.toLowerCase();
     order = order.toUpperCase();
     perPage = parseInt(perPage);
     page = parseInt(page);
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId)  seasonId = 0;
 
     if(page !== page) page = 1;
     page--;
@@ -570,10 +576,11 @@ export async function searchPlayers(name, sortBy, order, page, perPage){
     FROM nstats_players 
     LEFT JOIN nstats_player_totals ON nstats_player_totals.player_id = nstats_players.id
     WHERE name LIKE ? AND nstats_player_totals.gametype_id=0 AND nstats_player_totals.map_id=0
+    AND nstats_player_totals.season_id=?
     ORDER BY ${sortByTable}.${sortBy} ${order} LIMIT ?, ?`;
     // FROM nstats_players WHERE name LIKE ? ORDER BY ${validSortBys[sortIndex]} ${order} LIMIT ?, ?`;
 
-    const promises = [getTotalPlayers(name), simpleQuery(query, [`%${name}%`, start, perPage])];
+    const promises = [getTotalPlayers(name, seasonId), simpleQuery(query, [`%${name}%`, seasonId, start, perPage])];
 
     const [totalPlayers, result] = await Promise.all(promises);
 
