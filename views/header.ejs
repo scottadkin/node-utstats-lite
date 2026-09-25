@@ -1,16 +1,11 @@
 <% 
 const options = [
     {"name": "Home", "url": "/", "highlight": ["home"]},
+    {"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]},
 ];
 
-if(locals.bSeasonPage){
-
-    if(locals.seasonInfo === undefined) throw new Error(`Season Info is missing`);
-
-
-}else{
+if(!locals.bSeasonPage || (locals.seasonInfo === undefined || locals.seasonInfo === null)){
     options.push(
-        {"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]},
         {"name": "Matches", "url": "/matches", "highlight": ["match"]},
         {"name": "Players", "url": "/players", "highlight": ["player", "players"]},
         {"name": "Rankings", "url": "/rankings", "highlight": ["rankings"]},
@@ -18,6 +13,18 @@ if(locals.bSeasonPage){
         {"name": "Records", "url": "/records", "highlight": ["records"]},
         {"name": "Maps", "url": "/maps", "highlight": ["maps"]}
     );
+}
+
+if(locals.bSeasonPage){
+
+    if(locals.seasonInfo === undefined) throw new Error(`Season Info is missing`);
+
+    if(locals.seasonInfo !== null){
+
+        const seasonSubURL = `/season/${locals.seasonInfo.id}`;
+        options.push({"name": "Season Home", "url": `${seasonSubURL}/`, "highlight": ["season-home"]});
+        options.push({"name": "Matches", "url": `${seasonSubURL}/matches`, "highlight": ["matches"]});
+    }
 }
 
 if(userSession === null){
