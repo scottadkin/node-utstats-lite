@@ -135,7 +135,7 @@ class PlayersSearchForm{
 
         const baseURL = (this.seasonId === 0) ? `/players/` : `/season/${this.seasonId}/players/`
 
-        const url = `${baseURL}?name=${this.searchName}&season=${this.seasonId}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}`;
+        const url = `${baseURL}?name=${this.searchName}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}`;
 
         history.pushState(null, "", url);
 

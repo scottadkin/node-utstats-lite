@@ -5,24 +5,24 @@
     userSession
     }) %>
 <%- include("timeZone.ejs", {timeZone})%>
-<script src="../js/ui/ui.js"></script>
-<script src="../js/ui/table.js"></script>
-<script src="../js/ui/matches.js"></script>
+
+<%
+
+const jsBase = (seasonId == 0) ? "../js/" : "../../js/";
+
+%>
+<script src="<%- jsBase %>ui/ui.js"></script>
+<script src="<%- jsBase %>ui/table.js"></script>
+<script src="<%- jsBase %>ui/matches.js"></script>
 
 <div id="root"></div>
 <script>
-
     new MatchesSearchForm(
-        "#root", 
-        <%- JSON.stringify(serverNames) %>, 
-        <%- JSON.stringify(gametypeNames) %>,
-        <%- JSON.stringify(mapNames)%>,
+        "<%= seasonId %>",
+        <%- JSON.stringify(uniqueCombinations) %>, 
         "<%= selectedServer %>", "<%= selectedGametype %>", "<%= selectedMap %>",
         "<%= displayMode %>",  
-        <%- JSON.stringify(uniqueGametypeMapCombos) %>,
-        <%= bUseSeasons %>,
-        <%- JSON.stringify(seasonsData)%>,
-        "<%= selectedSeason %>"
+        <%- JSON.stringify(matches)%>
     );
 </script>
 
@@ -36,17 +36,6 @@
     <% }
     %>
 
-    renderMatchesPagination(
-        document.querySelector("#root"), 
-        <%= selectedServer %>, 
-        <%= selectedGametype %>, 
-        <%= selectedMap %>, 
-        matchData.total, 
-        <%= perPage %>, 
-        <%= page %>, 
-        "<%= displayMode %>"
-    );
-    
     
 </script>
 

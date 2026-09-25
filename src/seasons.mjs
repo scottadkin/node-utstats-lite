@@ -168,13 +168,24 @@ async function updateSeasonObjectStats(seasonId, data, objectName){
 
 async function calculateSeasonUniqueCombinations(seasonId){
 
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
+
+    let where = ``;
+    const vars = [];
+
+    if(seasonId !== 0){
+        where = `WHERE season_id=?`;
+        vars.push(seasonId);
+    }
+
     const query = `SELECT server_id,gametype_id,map_id,SUM(playtime) as total_playtime,
     COUNT(*) as total_matches,
     MAX(date) as last_match,
     MIN(date) as first_match 
-    FROM nstats_matches WHERE season_id=? GROUP BY server_id,gametype_id,map_id`;
+    FROM nstats_matches ${where} GROUP BY server_id,gametype_id,map_id`;
 
-    return await simpleQuery(query, [seasonId]);
+    return await simpleQuery(query, vars);
 }
 
 export async function updateSeasonUniqueCombinations(seasonId){
@@ -323,6 +334,14 @@ export async function getSeasonUniqueMatchCombinations(seasonId){
 
     const mT = `nstats_seasons_unique_match_combinations`;
 
+    let where = ``;
+    const vars = [];
+
+    if(seasonId !== 0){
+        where =`WHERE ${mT}.season_id=?`;
+        vars.push(seasonId);
+    }
+
     const query = `SELECT ${mT}.*,
     nstats_servers.name as server_name,
     nstats_gametypes.name as gametype_name,
@@ -331,10 +350,10 @@ export async function getSeasonUniqueMatchCombinations(seasonId){
     LEFT JOIN nstats_servers ON nstats_servers.id = ${mT}.server_id
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = ${mT}.gametype_id
     LEFT JOIN nstats_maps ON nstats_maps.id = ${mT}.map_id
-    WHERE ${mT}.season_id=? ORDER BY map_name ASC`;
+    ${where} ORDER BY map_name ASC`;
 
    
-    return await simpleQuery(query, [seasonId]);
+    return await simpleQuery(query, vars);
    
 }
 

@@ -67,8 +67,6 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort){
     }
 
 
-    //wrapper.append(table);
-
     new TESTUITable(wrapper, tableOptions, rows)
 
     parent.append(wrapper); 
@@ -99,24 +97,19 @@ class MatchRichViewBox{
         const gametype = UIDiv("white");
 
         gametype.append(UIB(d.gametype_name));
-        info.append(gametype);
 
-        info.append(toDateString(d.date, TIME_ZONE, true));
+        const players = UIDiv("white");
+        players.append(`${d.players} Player${(d.players === 1) ? "" : "s"}`);
 
-        const players = document.createElement("div");
-        players.className = "white";
-        players.innerHTML = `${d.players} Player${(d.players === 1) ? "" : "s"}`;
-        info.append(players);
+        info.append(gametype, toDateString(d.date, TIME_ZONE, true), players, toPlaytime(d.playtime));
 
-        info.append(toPlaytime(d.playtime));
 
         this.wrapper.append(info);
     }
 
     createElems(){
 
-        const title = document.createElement("div");
-        title.className = "rich-title";
+        const title = UIDiv("rich-title")
         title.append(this.data.map_name);
         this.wrapper.append(title);
 
@@ -138,8 +131,7 @@ class MatchesRichView{
         this.parent = document.querySelector(parent);
         this.matches = matches;
 
-        this.wrapper = document.createElement("div");
-        this.wrapper.className = "rich-outter t-width-1";
+        this.wrapper = UIDiv("rich-outter t-width-1");
 
         this.parent.append(this.wrapper);
 
@@ -150,223 +142,262 @@ class MatchesRichView{
 
     createElems(){
 
-        this.elems = [];
-
         for(let i = 0; i < this.matches.data.length; i++){
 
             const d = this.matches.data[i];
 
-            this.elems.push(new MatchRichViewBox(this.wrapper, d));
+            new MatchRichViewBox(this.wrapper, d);
         }
     }
 }
 
 class MatchesSearchForm{
+    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, displayMode, matches, page, perPage){
 
-    constructor(parent, servers, gametypes, maps, selectedServer, selectedGametype, selectedMap, 
-        selectedDisplayMode, uniqueGametypeMapCombos, bUseSeasons, seasonsData, selectedSeason){
+        this.seasonId = seasonId;
+        this.uniqueCombinations = uniqueCombinations;
+        this.matches = matches;
+        this.displayMode = displayMode;
+        this.page = parseInt(page);
+        if(this.page !== this.page) this.page = 1;
+        if(this.page < 1) this.page = 1;
 
-        this.parent = document.querySelector(parent);
 
-        this.bUseSeasons = bUseSeasons;
-        this.seasonsData = seasonsData;
-
-        console.log(seasonsData);
-
-        this.servers = servers;
-        this.gametypes = gametypes;
-        this.maps = maps;
-        this.uniqueGametypeMapCombos = uniqueGametypeMapCombos;
+        this.perPage = parseInt(perPage);
+        if(this.perPage !== this.perPage) this.perPage = 25;
+        if(this.perPage < 5 || this.perPage > 100) this.perPage = 25;
 
         this.selectedServer = parseInt(selectedServer);
         this.selectedGametype = parseInt(selectedGametype);
         this.selectedMap = parseInt(selectedMap);
-        this.selectedDisplayMode = selectedDisplayMode;
-        this.selectedSeason = parseInt(selectedSeason);
+        this.selectedDisplayMode = displayMode.toLowerCase();
 
-        UIHeader(this.parent, "Recent Matches");
-        this.wrapper = UIDiv("form");
-        
-        this.createFormElems();
+        this.parent = document.querySelector("#root");
+
+        this.wrapper = UIDiv();
+
+        UIHeader(this.wrapper, "Season Matches");
+
         this.parent.append(this.wrapper);
+
+        this.createForm();
+
+
+        this.content = UIDiv();
+        this.content.id = "matches-content";
+
+        this.wrapper.append(this.content);
+
+  
+        this.pagination = new UIPagination(this.parent, `${this.getURL()}&page=`, this.matches.totalResults, this.perPage, this.page);
+
+        this.render();
+        
     }
-
-    changeSelected(key, value){
-
-        this[key] = value;
-        const url = `/matches/?s=${this.selectedServer}&g=${this.selectedGametype}&m=${this.selectedMap}&display=${this.selectedDisplayMode}&season=${this.selectedSeason}`;
-        window.location.href = url;
-    }
-
-    createSelect(type){
-
-        let title = "";
-        let selectedKey = "";
-        let id = "";
-
-        if(type === "servers"){
-
-            selectedKey = "selectedServer";
-            title = "Server";
-            id = "s";
-
-        }else if(type === "gametypes"){
-
-            selectedKey = "selectedGametype";
-            title = "Gametype";
-            id = "g";
-
-        }else if(type === "maps"){
-
-            selectedKey = "selectedMap";
-            title = "Map";
-            id = "m";
-
-        }else if(type === "display"){
-
-            selectedKey = "selectedDisplayMode";
-            title = "Display Mode";
-            id = "display";
-
-        }else if(type === "seasons"){
-            selectedKey = "selectedSeason";
-            title = "Season";
-            id = "season";
-        }
-
-
-        const row = UIDiv("form-row");
-        row.append(UILabel(title));
-
-        const select = new UISelect(
-            row, 
-            this.getNameOptions(type), 
-            this[selectedKey],
-            (newTab) => { 
-                this.changeSelected(selectedKey, newTab);
-            }
-        );
-
-        select.select.id = select.select.name = id;
-
-        return row;
-    }
-
-    getGametypeInfo(id){
-
-        if(id === 0) return {"bCTF": 1, "bDom": 1};
-
-        for(let i = 0; i < this.gametypes.length; i++){
-
-            const g = this.gametypes[i];
     
-            if(g.id === id) return {"bCTF": g.b_ctf, "bDom": g.b_dom}
-        }
-
-        return null;
-    }
-
-    bMapUsedWithGametype(gametypeId, mapId){
-
-
-        return this.uniqueGametypeMapCombos?.[gametypeId]?.indexOf(mapId) !== -1;
-
-    }
-
-    filterMaps(){
-
-        const valid = [];
-
-
-        for(let i = 0; i < this.maps.length; i++){
-
-            const m = this.maps[i];
-
-            if(this.selectedGametype === 0){
-                valid.push({"display": m.name, "value": m.id});
-                continue;
-            }
-
-            if(!this.bMapUsedWithGametype(this.selectedGametype, m.id)) continue;
-
-
-            valid.push({"display": m.name, "value": m.id});
-
-        }
-
-        valid.unshift({"display": "All", "value": 0});
-
-        return valid;
-    }
-
-    getNameOptions(type){
-
-
-        let targets = [];
+    getIdKeyNameKey(type){
 
         if(type === "servers"){
-
-            targets = this.servers.map((s) =>{
-                return {"display": s.name, "value": s.id}
-            });
+            return {"idKey": "server_id", "nameKey": "server_name"};
         }else if(type === "gametypes"){
-
-            targets = this.gametypes.map((g) =>{
-                return {"display": g.name, "value": g.id}
-            });
-
-
-
+            return {"idKey": "gametype_id", "nameKey": "gametype_name"};
         }else if(type === "maps"){
+            return {"idKey": "map_id", "nameKey": "map_name"};
+        }
 
-            targets = this.filterMaps();
+        throw new Error(`Unknown id type`);
+    }
 
-        }else if(type === "display"){
 
-            targets = [
-                {"display": "Default View", "value": "default"},
-                {"display": "Table View", "value": "table"}
-            ];
 
-        }else if(type === "seasons"){
+    getOptions(type){
 
-            targets = this.seasonsData.map((s) =>{
-                return {"display": s.name, "value": s.id};
-            });
 
+        const usedIds = new Set();
+        const found = [];
+
+        for(let i = 0; i < this.uniqueCombinations.length; i++){
+
+            const u = this.uniqueCombinations[i];
+
+            const {idKey, nameKey} = this.getIdKeyNameKey(type);
+
+            if(type !== "servers" && this.selectedServer !== 0 && u.server_id !== this.selectedServer) continue;
+            if(type !== "gametypes" && this.selectedGametype !== 0 && u.gametype_id !== this.selectedGametype) continue;
+
+            if(!usedIds.has(u[idKey])){
+
+                found.push({"display": u[nameKey], "value": u[idKey]});
+                usedIds.add(u[idKey]);
+            }
         }
 
 
+        found.sort((a, b) =>{
+            a = a.display.toLowerCase();
+            b = b.display.toLowerCase();
 
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+            return 0;
+        });
 
-        if(type !== "display"){
+        found.unshift({"display": "Any", "value": 0});
 
-            targets.sort((a, b) =>{
-                a = a.display.toLowerCase();
-                b = b.display.toLowerCase();
+        return found;
+    }
 
-                if(a < b){
-                    return -1;
-                }else if(a > b){
-                    return 1;
-                }
-                return 0;
-            });
+    getURL(){
+
+        let url = ``;
+
+        if(this.seasonId !== 0){
+            url += `/season/${this.seasonId}/matches/`;
         }
 
+        url = `?sid=${this.selectedServer}`;
+        url += `&gid=${this.selectedGametype}`;
+        url += `&mid=${this.selectedMap}&pp=${this.perPage}`;
+        url+= `&display=${this.selectedDisplayMode}`;
 
-        return targets;
+        return url;
     }
 
-    createFormElems(){
+    updateURL(){
 
-       // if(this.bUseSeasons){
-        //    this.wrapper.append(this.createSelect("seasons"));
-       // }
-        this.wrapper.append(this.createSelect("servers"));
-        this.wrapper.append(this.createSelect("gametypes"));
-        this.wrapper.append(this.createSelect("maps"));
-        this.wrapper.append(this.createSelect("display"));
+        const url = this.getURL();
+
+        this.pagination.changeUrl(`${url}&page=`);
+
+        history.pushState({}, "", url);
     }
 
+
+    async loadData(){
+
+        try{
+
+            if(this.abortController === undefined){
+
+                this.abortController = new AbortController();
+            }else{
+
+                this.abortController.abort("New input");
+                this.abortController = new AbortController();
+            }
+
+            let url = `/json/season-search-matches/`;
+            url += `?season=${this.seasonId}&sid=${this.selectedServer}&gid=${this.selectedGametype}`;
+            url += `&mid=${this.selectedMap}&page=${this.page}&pp=${this.perPage}`;
+
+            const req = await fetch(url, {
+                "signal": this.abortController.signal
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.matches = res;
+            this.content.innerHTML = ``;
+
+   
+
+            this.richView = new MatchesRichView("#matches-content",  this.matches);
+            this.pagination.updateResults(this.page, this.matches.totalResults, this.perPage);
+
+
+
+
+        }catch(err){
+
+            if(err.name === "AbortError") return;
+            console.trace(err);
+
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
+    }
+
+    createForm(){
+
+        this.form = UIDiv("form");
+
+        this.serverRow = UIDiv("form-row");
+        this.serverRow.append(UILabel("Server"));
+
+        this.serverSelect = new UISelect(this.serverRow, this.getOptions("servers"), this.selectedServer, (e) =>{
+
+            this.selectedServer = parseInt(e);
+
+            const newOptionsGametypes = this.getOptions("gametypes");
+
+            if(!this.gametypeSelect.updateOptions(newOptionsGametypes, this.selectedGametype) && newOptionsGametypes.length > 0){
+                this.selectedGametype = newOptionsGametypes[0].value;
+                this.gametypeSelect.changeSelected(this.selectedGametype);
+            }
+
+            const newOptionsMaps = this.getOptions("maps");
+
+            if(!this.mapSelect.updateOptions(newOptionsMaps, this.selectedMap) && newOptionsMaps.length > 0){
+                this.selectedMap = newOptionsMaps[0].value;
+                this.mapSelect.changeSelected(this.selectedMap);
+            }
+
+            this.page = 1;
+            this.updateURL();
+            this.loadData();
+        });
+
+        this.gametypeRow = UIDiv("form-row");
+        this.gametypeRow.append(UILabel("Gametype"));
+
+        this.gametypeSelect = new UISelect(this.gametypeRow, this.getOptions("gametypes"), this.selectedGametype, (e) =>{
+
+            this.selectedGametype = parseInt(e);
+            const newOptions = this.getOptions("maps");
+
+            if(!this.mapSelect.updateOptions(newOptions, this.selectedMap) && newOptions.length > 0){
+                this.selectedMap = newOptions[0].value;
+                this.mapSelect.changeSelected(this.selectedMap);
+            }
+            this.page = 1;
+            this.updateURL();
+            this.loadData();
+        });
+
+        this.mapRow = UIDiv("form-row");
+        this.mapRow.append(UILabel("Map"));
+
+        this.mapSelect = new UISelect(this.mapRow, this.getOptions("maps"), this.selectedMap, (e) =>{
+            this.selectedMap = parseInt(e);
+            this.page = 1;
+            this.updateURL();
+            this.loadData();
+        });
+
+        this.displayRow = UIDiv("form-row");
+        this.displayRow.append(UILabel("Display Mode"));
+
+
+        this.displaySelect = new UISelect(this.displayRow, [
+            {"display": "Default", "value": "default"},
+            {"display": "Table View", "value": "table"},
+        ], this.selectedDisplayMode, (e) =>{
+
+            this.selectedDisplayMode = e;
+            this.updateURL();
+        });
+
+        this.form.append(this.serverRow, this.gametypeRow, this.mapRow, this.displayRow);
+
+        this.wrapper.append(this.form);
+    }
+
+    render(){
+
+        this.richView = new MatchesRichView("#matches-content",  this.matches);
+    }
 }

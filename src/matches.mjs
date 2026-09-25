@@ -2251,3 +2251,30 @@ export async function getAllUniqueGametypeMapCombinations(){
 
     return data;
 }
+
+
+
+export function sanitizeMatchesReq(req, pageSettings){
+
+    let perPage = pageSettings?.["Results Per Page"] ?? 25;
+    perPage = parseInt(perPage);
+    if(perPage !== perPage) perPage = 25;
+
+    let selectedServer = (req.query.s !== undefined) ? parseInt(req.query.s) : 0;
+    if(selectedServer !== selectedServer) selectedServer = 0;
+
+    let selectedGametype = (req.query.g !== undefined) ? parseInt(req.query.g) : 0;
+    if(selectedGametype !== selectedGametype) selectedGametype = 0;
+
+    let selectedMap = (req.query.m !== undefined) ? parseInt(req.query.m) : 0;
+    if(selectedMap !== selectedMap) selectedMap = 0;
+
+    let page = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
+    if(page !== page) page = 1;
+
+    let displayMode = req.query?.display ?? pageSettings?.["Default Display Mode"] ?? "default"; 
+    displayMode = displayMode.toLowerCase();
+
+
+    return {page, perPage, selectedServer, selectedGametype, selectedMap, displayMode};
+}
