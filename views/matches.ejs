@@ -22,23 +22,11 @@ const jsBase = (seasonId == 0) ? "../js/" : "../../js/";
         <%- JSON.stringify(uniqueCombinations) %>, 
         "<%= selectedServer %>", "<%= selectedGametype %>", "<%= selectedMap %>",
         "<%= displayMode %>",  
-        <%- JSON.stringify(matches)%>
+        <%- JSON.stringify(matches)%>,
+        "<%= page %>",
+        "<%= perPage%>"
     );
 </script>
-
-<script>
-    const matchData = <%- JSON.stringify(matches)%>;  
-
-    <% if(displayMode !== "default"){ %>
-        renderMatchesTable("#root", matchData, false, true);
-    <%}else{ %>
-        new MatchesRichView("#root", matchData);
-    <% }
-    %>
-
-    
-</script>
-
 
 
 <%- include("footer.ejs") -%>

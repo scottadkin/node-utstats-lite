@@ -1,9 +1,4 @@
 
-function renderMatchesPagination(parent, server, gametype, map, totalMatches, perPage, currentPage, displayMode){
-
-    new UIPagination(parent, `/matches/?s=${server}&g=${gametype}&m=${map}&display=${displayMode}&page=`, totalMatches, perPage, currentPage);
-}
-
 function renderMatchesTable(parent, data, bMapsPage, bNoSort){
 
     if(typeof parent === "string"){
@@ -45,7 +40,6 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort){
     for(let i = 0; i < matches.length; i++){
 
         const m = matches[i];
-        
         const row = [];
 
         const url = `/match/${m.id}`;
@@ -152,8 +146,10 @@ class MatchesRichView{
 }
 
 class MatchesSearchForm{
+
     constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, displayMode, matches, page, perPage){
 
+        console.log(matches);
         this.seasonId = seasonId;
         this.uniqueCombinations = uniqueCombinations;
         this.matches = matches;
@@ -189,7 +185,7 @@ class MatchesSearchForm{
         this.wrapper.append(this.content);
 
   
-        this.pagination = new UIPagination(this.parent, `${this.getURL()}&page=`, this.matches.totalResults, this.perPage, this.page);
+        this.pagination = new UIPagination(this.parent, `${this.getURL()}&page=`, this.matches.total, this.perPage, this.page);
 
         this.render();
         
@@ -260,7 +256,7 @@ class MatchesSearchForm{
 
         url = `?sid=${this.selectedServer}`;
         url += `&gid=${this.selectedGametype}`;
-        url += `&mid=${this.selectedMap}&pp=${this.perPage}`;
+        url += `&mid=${this.selectedMap}`;//&pp=${this.perPage}`;
         url+= `&display=${this.selectedDisplayMode}`;
 
         return url;
@@ -306,8 +302,8 @@ class MatchesSearchForm{
 
    
 
-            this.richView = new MatchesRichView("#matches-content",  this.matches);
-            this.pagination.updateResults(this.page, this.matches.totalResults, this.perPage);
+            this.render();
+            this.pagination.updateResults(this.page, this.matches.total, this.perPage);
 
 
 
@@ -389,6 +385,7 @@ class MatchesSearchForm{
 
             this.selectedDisplayMode = e;
             this.updateURL();
+            this.render();
         });
 
         this.form.append(this.serverRow, this.gametypeRow, this.mapRow, this.displayRow);
@@ -398,6 +395,13 @@ class MatchesSearchForm{
 
     render(){
 
-        this.richView = new MatchesRichView("#matches-content",  this.matches);
+        this.content.innerHTML = ``;
+
+        if(this.selectedDisplayMode === "default"){
+            new MatchesRichView("#matches-content",  this.matches);
+        }else{
+            //renderMatchesTable("#root", matchData, false, true);
+            new renderMatchesTable("#matches-content", this.matches, false, true);
+        }
     }
 }

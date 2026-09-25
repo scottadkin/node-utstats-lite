@@ -1,22 +1,14 @@
-import { getAllNames as getAllServerNames } from "../servers.mjs";
-import { getAllGametypesWithBGametype } from "../gametypes.mjs";
-import { getAllMapNamesWithBGametype } from "../maps.mjs";
-import { getAllUniqueGametypeMapCombinations, getRecentMatches, sanitizeMatchesReq } from "../matches.mjs";
+import { getRecentMatches, sanitizeMatchesReq } from "../matches.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
-import { bUseSeasons } from "../../config.mjs";
 import { getSeasonUniqueMatchCombinations } from "../seasons.mjs";
 
 export async function renderMatchesPage(req, res, userSession){
 
     try{
 
-        const [serverNames, pageSettings, timeZone, gametypeNames, mapNames, uniqueGametypeMapCombos] = await Promise.all([
-            getAllServerNames(true),
+        const [ pageSettings, timeZone] = await Promise.all([
             getCategorySettings("Matches"),
-            getSiteWideTimeZone(),
-            getAllGametypesWithBGametype(true),
-            getAllMapNamesWithBGametype(true),
-            getAllUniqueGametypeMapCombinations()
+            getSiteWideTimeZone(),      
         ]);
   
         const uniqueCombinations = await getSeasonUniqueMatchCombinations(0);
@@ -42,7 +34,6 @@ export async function renderMatchesPage(req, res, userSession){
                 "image": "/images/maps/default.jpg"
             },
             uniqueCombinations,
-            uniqueGametypeMapCombos,
             selectedServer,
             selectedGametype,
             selectedMap,

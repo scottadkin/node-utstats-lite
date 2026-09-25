@@ -30,7 +30,7 @@ export async function renderSeasonMatchesPage(req, res){
         selectedGametype, selectedMap, displayMode
     } = sanitizeMatchesReq(req, pageSettings);
 
-    const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap, false);
+    const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap, false, seasonId);
 
 
     res.render("matches.ejs",{

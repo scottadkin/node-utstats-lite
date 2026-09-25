@@ -130,9 +130,12 @@ async function setMatchTypeNames(matches){
 
 
 
-function createSearchWhere(server, gametype, map){
+function createSearchWhere(server, gametype, map, seasonId){
 
     let where = ``;
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`); 
 
     const whereVars = [];
     const vars = [];
@@ -152,6 +155,11 @@ function createSearchWhere(server, gametype, map){
         vars.push(map);
     }
 
+    if(seasonId !== 0){
+        whereVars.push(`season_id=?`);
+        vars.push(seasonId);
+    }
+
     for(let i = 0; i < whereVars.length; i++){
 
         const w = whereVars[i];
@@ -168,9 +176,9 @@ function createSearchWhere(server, gametype, map){
 }
 
 
-export async function getTotalMatches(server, gametype, map){
+export async function getTotalMatches(server, gametype, map, seasonId){
 
-    const {where, vars} = createSearchWhere(server, gametype, map);
+    const {where, vars} = createSearchWhere(server, gametype, map, seasonId);
     const query = `SELECT COUNT(*) as total_matches FROM nstats_matches ${where}`;
 
     const result = await simpleQuery(query, vars);
@@ -179,13 +187,15 @@ export async function getTotalMatches(server, gametype, map){
     return 0;
 }
 
-export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype, map, bHomePage){
+export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype, map, bHomePage, seasonId){
 
     const DEFAULT_PER_PAGE = 50;
 
     let page = 0;
     let perPage = 0;
     let start = 0;
+
+    if(!seasonId) seasonId = 0;
 
     if(!bHomePage){
 
@@ -215,10 +225,11 @@ export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype
     gametype = parseInt(gametype);
     map = parseInt(map);
 
+
     if(server !== server || gametype !== gametype || map !== map){
-        throw new Error(`server, gametype, and map must be a valid integer`);
+        throw new Error(`server, gametype, seaonId, and map must be a valid integer`);
     }
-    const {where, vars} = createSearchWhere(server, gametype, map);
+    const {where, vars} = createSearchWhere(server, gametype, map, seasonId);
 
     let query = `SELECT ${MATCH_TABLE_COLUMNS_VERBOSE},
     nstats_servers.name as server_name,
@@ -237,7 +248,7 @@ export async function getRecentMatches(dirtyPage, dirtyPerPage, server, gametype
 
     await setMatchResultsMapImages(result);
     
-    const totalMatches = await getTotalMatches(server, gametype, map);
+    const totalMatches = await getTotalMatches(server, gametype, map, seasonId);
 
     return {"data": result, "total": totalMatches};
 }
@@ -2260,17 +2271,19 @@ export function sanitizeMatchesReq(req, pageSettings){
     perPage = parseInt(perPage);
     if(perPage !== perPage) perPage = 25;
 
-    let selectedServer = (req.query.s !== undefined) ? parseInt(req.query.s) : 0;
+    let selectedServer = (req.query.sid !== undefined) ? parseInt(req.query.sid) : 0;
     if(selectedServer !== selectedServer) selectedServer = 0;
 
-    let selectedGametype = (req.query.g !== undefined) ? parseInt(req.query.g) : 0;
+    let selectedGametype = (req.query.gid !== undefined) ? parseInt(req.query.gid) : 0;
     if(selectedGametype !== selectedGametype) selectedGametype = 0;
 
-    let selectedMap = (req.query.m !== undefined) ? parseInt(req.query.m) : 0;
+    let selectedMap = (req.query.mid !== undefined) ? parseInt(req.query.mid) : 0;
     if(selectedMap !== selectedMap) selectedMap = 0;
 
     let page = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
     if(page !== page) page = 1;
+    if(page < 1) page = 1;
+
 
     let displayMode = req.query?.display ?? pageSettings?.["Default Display Mode"] ?? "default"; 
     displayMode = displayMode.toLowerCase();
