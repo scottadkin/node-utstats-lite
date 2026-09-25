@@ -1,16 +1,24 @@
 <% 
-const test = ["a","b","c"];
-
 const options = [
     {"name": "Home", "url": "/", "highlight": ["home"]},
-    {"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]},
-    {"name": "Matches", "url": "/matches", "highlight": ["match"]},
-    {"name": "Players", "url": "/players", "highlight": ["player", "players"]},
-    {"name": "Rankings", "url": "/rankings", "highlight": ["rankings"]},
-    {"name": "CTF League", "url": "/ctfleague", "highlight": ["ctfleague"]},
-    {"name": "Records", "url": "/records", "highlight": ["records"]},
-    {"name": "Maps", "url": "/maps", "highlight": ["maps"]}
 ];
+
+if(locals.bSeasonPage){
+
+    if(locals.seasonInfo === undefined) throw new Error(`Season Info is missing`);
+
+
+}else{
+    options.push(
+        {"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]},
+        {"name": "Matches", "url": "/matches", "highlight": ["match"]},
+        {"name": "Players", "url": "/players", "highlight": ["player", "players"]},
+        {"name": "Rankings", "url": "/rankings", "highlight": ["rankings"]},
+        {"name": "CTF League", "url": "/ctfleague", "highlight": ["ctfleague"]},
+        {"name": "Records", "url": "/records", "highlight": ["records"]},
+        {"name": "Maps", "url": "/maps", "highlight": ["maps"]}
+    );
+}
 
 if(userSession === null){
     options.push({"name": "Login", "url": "/login", "highlight": ["login"]});
@@ -40,9 +48,16 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 <body> 
     <nav>
 
+        
+        
         <%
-        if(locals.bSeasonPage){
-            %><div id="nav-season">You are on a season page, to return back to main website click <a href="/">here</a></div><%
+        if(locals.bSeasonPage && locals.seasonInfo !== undefined && locals.seasonInfo !== null){
+            %>
+            
+            <div id="season-banner">
+                You are currently viewing season <b><%= locals.seasonInfo.name %></b>    
+            </div>
+            <%
         }
 
         %>

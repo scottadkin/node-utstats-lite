@@ -41,6 +41,7 @@ export async function renderSeasonMatchesPage(req, res){
 
     const matches = await searchSeasonMatches(seasonId, selectedServer, selectedGametype, selectedMap, page, perPage);
 
+
     res.render("seasons/matches.ejs",{
         req,
             "host": req.headers.host,
@@ -57,6 +58,7 @@ export async function renderSeasonMatchesPage(req, res){
             matches,
             page,
             perPage,
+            basicSeasonInfo,
             "bSeasonPage": true
         });
 }

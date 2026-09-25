@@ -106,7 +106,7 @@ nav a:hover{
     border-bottom:2px solid yellow;
 }
 
-#nav-season{
+#season-banner{
     background-color:var(--bg-header-color);
     font-size:12px;
 }
