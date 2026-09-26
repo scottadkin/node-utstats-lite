@@ -43,8 +43,9 @@ class MapsSearchForm{
             this.order
         );   
 
-        new UIPagination(
-            this.parent, 
+   
+        this.pagination = new UIPagination(
+            this.resultWrapper, 
             `${this.getUrl()}&perPage=${this.perPage}&page=`,
             this.totalMatches,
             this.perPage,
@@ -58,7 +59,11 @@ class MapsSearchForm{
 
             const name = encodeURIComponent(this.nameSearch);
 
-            const req = await fetch(`/json/map-search/?name=${name}&order=${this.order}&sortBy=${this.sortBy}&page=${this.page}&perPage=${this.perPage}`);
+            let url = `/json/map-search/?name=${name}`;
+            url += `&order=${this.order}&sortBy=${this.sortBy}`;
+            url += `&page=${this.page}&perPage=${this.perPage}`;
+
+            const req = await fetch(`${url}&season=${this.seasonId}`);
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);

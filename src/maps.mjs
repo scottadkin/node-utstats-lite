@@ -902,7 +902,7 @@ export async function getPlayedGametypes(mapId){
 async function getTotalPossibleMatches(nameSearch, seasonId){
 
     seasonId = parseInt(seasonId);
-    
+
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
     if(seasonId === 0){
@@ -941,7 +941,7 @@ async function normalMapsSearch(name, cleanStart, cleanPerPage, cleanSortBy, cle
 async function seasonMapsSearch(seasonId, name, cleanStart, cleanPerPage, cleanSortBy, cleanOrder){
 
 
-    const query = `SELECT nstats_seasons_maps.map_id,
+    const query = `SELECT nstats_maps.id,nstats_seasons_maps.map_id,
     nstats_maps.name,
     nstats_seasons_maps.first_match,
     nstats_seasons_maps.last_match,
@@ -950,7 +950,7 @@ async function seasonMapsSearch(seasonId, name, cleanStart, cleanPerPage, cleanS
     FROM nstats_seasons_maps
     LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id
     WHERE nstats_maps.name LIKE ? AND nstats_seasons_maps.season_id=?
-    ORDER BY ${cleanSortBy} ${cleanOrder}
+    ORDER BY ${(cleanSortBy !== "name") ? "nstats_seasons_maps" : "nstats_maps"}.${cleanSortBy} ${cleanOrder}
     LIMIT ?, ?`;
 
     return await simpleQuery(query, [`%${name}%`, seasonId, cleanStart, cleanPerPage]);

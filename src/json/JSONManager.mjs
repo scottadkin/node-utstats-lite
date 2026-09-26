@@ -272,8 +272,9 @@ export default class JSONManager{
         const name = this.req.query.name;
         const sortBy = this.req.query.sortBy ?? "name";
         const order = this.req.query.order ?? "ASC";
+        const seasonId = this.querySanitizeInteger("season");
 
-        const data = await searchMaps(name, page, perPage, sortBy, order);
+        const data = await searchMaps(name, page, perPage, sortBy, order, seasonId);
 
         this.res.status(200).json(data);
     }
