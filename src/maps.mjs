@@ -899,14 +899,30 @@ export async function getPlayedGametypes(mapId){
 }
 
 
-async function getTotalPossibleMatches(nameSearch){
+async function getTotalPossibleMatches(nameSearch, seasonId){
 
+    seasonId = parseInt(seasonId);
+    
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_maps WHERE name LIKE ?`;
+    if(seasonId === 0){
 
-    const result = await simpleQuery(query, [`%${nameSearch}%`]);
+        const query = `SELECT COUNT(*) as total_rows FROM nstats_maps WHERE name LIKE ?`;
 
-    return result[0].total_rows;
+        const result = await simpleQuery(query, [`%${nameSearch}%`]);
+
+        return result[0].total_rows;
+
+    }else{
+
+        const query = `SELECT COUNT(*) as total_rows FROM nstats_seasons_maps WHERE EXISTS (SELECT 1 FROM nstats_maps WHERE name LIKE ?) AND season_id=?`;
+
+        const result = await simpleQuery(query, [`%${nameSearch}%`, seasonId]);
+
+        return result[0].total_rows;
+    }
+
+    
 }
 
 
@@ -983,7 +999,7 @@ export async function searchMaps(name, dirtyPage, dirtyPerPage, sortBy, order, s
         r.image = mapImages?.[r.name.toLowerCase()] ?? "default.jpg";
     }
 
-    const totalMatches = await getTotalPossibleMatches(name);
+    const totalMatches = await getTotalPossibleMatches(name, seasonId);
 
     return {totalMatches, "maps": result};
 }
