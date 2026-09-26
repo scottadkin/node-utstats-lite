@@ -1,6 +1,6 @@
 class MapsSearchForm{
 
-    constructor(parent, nameSearch, sortBy, order, displayMode, page, perPage, maps, totalMatches){
+    constructor(parent, nameSearch, sortBy, order, displayMode, page, perPage, maps, totalMatches, seasonId){
 
         this.parent = document.querySelector(parent);
         this.nameSearch = decodeHTML(nameSearch);
@@ -9,6 +9,7 @@ class MapsSearchForm{
         this.page = page;
         this.sortBy = sortBy;
         this.order = order;
+        this.seasonId = parseInt(seasonId);
 
         this.displayModes = [
             {"display": "Default", "value": "default"},
@@ -41,6 +42,14 @@ class MapsSearchForm{
             this.sortBy,
             this.order
         );   
+
+        new UIPagination(
+            this.parent, 
+            `${this.getUrl()}&perPage=${this.perPage}&page=`,
+            this.totalMatches,
+            this.perPage,
+            this.page
+        );
     }
 
     async loadData(){
@@ -137,11 +146,33 @@ class MapsSearchForm{
 
     }
 
+    getUrl(){
+
+        let url = ``;
+
+        if(this.seasonId !== 0){
+            url += `/season/${this.seasonId}/maps/`;
+        }else{
+            url += `/maps/`;
+        }
+
+        url += `?name=${this.nameSearch}`;
+
+        url += `&display=${this.displayMode}`;
+        url += `&sortBy=${this.sortBy}`;
+        url += `&order=${this.order}`;
+
+        return url;
+
+    }
     updateUrl(){
-        //window.location = `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${this.order}`;
+        
+
+        
+
         history.pushState(
             {},"",
-            `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${this.order}`);
+            this.getUrl());
     }
 }
 
@@ -175,13 +206,7 @@ class MapListDisplay{
         if(this.displayMode === "table") this.renderTable();
         if(this.displayMode === "default") this.renderRichView();
 
-        new UIPagination(
-            this.parent, 
-            `/maps/?name=${this.nameSearch}&display=${displayMode}&sortBy=${this.sortBy}&order=${order}&perPage=${perPage}&page=`,
-            totalMatches,
-            perPage,
-            page
-        );
+        
     }
 
     headerToKey(header){

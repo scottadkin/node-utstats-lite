@@ -10,7 +10,7 @@
 
 <% 
 
-const jsBase = (locals.bSeasonPage) ? `../../js/` : `../js/`;
+const jsBase = (locals.bSeasonPage) ? `../../../js/` : `../../js/`;
 
 
 
@@ -20,7 +20,8 @@ const jsBase = (locals.bSeasonPage) ? `../../js/` : `../js/`;
 <script src="<%= jsBase %>ui/maps.js"></script>
 
 <div class="header-wrapper">
-    Maps
+  
+    <%= (locals.bSeasonPage) ? "Seasons": "" %> Maps
 </div>
 
 <div id="root">

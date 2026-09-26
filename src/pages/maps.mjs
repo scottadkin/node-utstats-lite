@@ -1,4 +1,4 @@
-import { searchMaps, VALID_MAP_SEARCH_BY } from "../maps.mjs";
+import { sanitizeMapsReq, searchMaps, VALID_MAP_SEARCH_BY } from "../maps.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 
@@ -11,41 +11,7 @@ export async function renderMapsPage(req, res, userSession){
         let title = "Maps";
         let description = "View all the maps played on our servers.";
 
-        let sortBy = req.query.sortBy ?? "name";
-
-        sortBy = sortBy.toLowerCase();
-
-        if(VALID_MAP_SEARCH_BY.indexOf(sortBy) === -1){
-            sortBy = "name";
-        }
-
-        let order = req.query.order ?? "ASC";
-
-        order = order.toUpperCase();
-
-        if(order !== "ASC" && order !== "DESC"){
-            order = "ASC";
-        }
-
-
-
-        let displayMode = req.query.display ?? pageSettings["Default Display Mode"] ?? "default";
-        displayMode = displayMode.toLowerCase();
-
-        if(displayMode !== "table" && displayMode !== "default") displayMode = "default";
-
-        let nameSearch = req.query?.name ?? "";
-
-        const DEFAULT_PER_PAGE = 25;
-
-        let perPage = req.query.perPage ?? pageSettings["Results Per Page"] ?? DEFAULT_PER_PAGE;
-        perPage = parseInt(perPage);
-
-        let page = req.query.page ?? 1;
-        page = parseInt(page);
-        if(page !== page) page = 1;
-
-        if(perPage !== perPage || perPage < 5 || perPage > 100) perPage = DEFAULT_PER_PAGE;
+        const {nameSearch, page, perPage, displayMode, order, sortBy} = sanitizeMapsReq(req, pageSettings);
 
 
         if(nameSearch !== ""){
