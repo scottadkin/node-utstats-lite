@@ -1,16 +1,16 @@
-import { attachDatabase, bulkInsert, createDatabase, simpleQuery } from "./database.mjs";
+import { simpleQuery } from "./database.mjs";
 import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
 import { cleanPageSettings } from "./siteSettings.mjs";
-import { addPageLayout, cleanDefaultPageLayouts} from "./pageLayout.mjs";
+import { cleanDefaultPageLayouts} from "./pageLayout.mjs";
 import { refreshAllTables, insertDefaultCTFLeagueSettings } from "./ctfLeague.mjs";
 import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
 import { calculateAllPlayerTotals, installPlayerSettings } from "./players.mjs";
-import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals, setAllMapTotals } from "./weapons.mjs";
-import { recalculateAllPlayerTotals270 } from "./ctf.mjs";
+import { setAllMapTotals } from "./weapons.mjs";
+import { ctfRecalculateAllPlayerTotals } from "./ctf.mjs";
 import { setAllBGametypeFlags } from "./matches.mjs";
 
 
@@ -18,19 +18,6 @@ import { setAllBGametypeFlags } from "./matches.mjs";
 export function createTableQueries(){
 
     
-  
-
-   // let bAddMainQueries = false;
-
-    //if(databaseName === null){
-       // return mainTableQueries;
-       // databaseName = "";
-        //bAddMainQueries = true;
-    //}else{
-    //    databaseName = `${databaseName}.`;
-    //}
-
-    const databaseName = "";
     const queries = [
         
         `CREATE TABLE IF NOT EXISTS nstats_sessions(
@@ -670,10 +657,11 @@ export function createTableQueries(){
                 epm_flag_return_base REAL NOT NULL,
                 epm_flag_return_mid REAL NOT NULL,
                 epm_flag_return_enemy_base REAL NOT NULL,
-                epm_flag_return_save REAL NOT NULL
+                epm_flag_return_save REAL NOT NULL,
+                season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
-
-            `CREATE UNIQUE INDEX IF NOT EXISTS nptc_pgm_idx ON nstats_player_totals_ctf(player_id, gametype_id, map_id)`,
+            `DROP INDEX IF EXISTS nptc_pgm_idx`,
+           `CREATE UNIQUE INDEX IF NOT EXISTS nptc_psgm_idx ON nstats_player_totals_ctf(player_id,season_id, gametype_id, map_id)`,
 
             
 
@@ -1375,20 +1363,22 @@ async function addSeasonColumnToPlayerTotals(){
     await addColumn("nstats_player_totals_max", "season_id", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_player_totals_weapons", "season_id", "INTEGER NOT NULL DEFAULT 0");
 
+    await addColumn("nstats_player_totals_ctf", "season_id", "INTEGER NOT NULL DEFAULT 0");
+
 }
 
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
 
+   //2.7.0
+    await updatePlayerCTFTotalsTable();
+    await updatePlayerTotalsTable();
+    await addColumn("nstats_match_players", "dom_caps", "INTEGER NOT NULL DEFAULT 0");
 
+    await simpleQuery(`DROP TABLE IF EXISTS nstats_player_map_minute_averages`);
 
-    //await createMainTable();
-
-    //const testDBName = "test_season_1";
-   // await createDatabase(testDBName);
-    //const queries = createTableQueries(testDBName);
-   // await attachDatabase(testDBName);
+    await addColumn("nstats_matches", "absolute_time", `TEXT NOT NULL DEFAULT "1999.11.22.01.01.01.000.0"`);
 
     //2.10.0
     await addSeasonColumnToMatches();
@@ -1409,21 +1399,6 @@ export async function sqliteInstall(bOnlyCreateTables){
     await updatePlayerWeaponTotalsTable();
     //2.6.0
     await updateMapWeaponTotalsTable();
-
-
-    //2.6.0 doing this broke mysqltosqlite tool...
-    //await addPageLayout("player", "General Summary", -3);
-
-
-    //2.7.0
-    await updatePlayerCTFTotalsTable();
-    await updatePlayerTotalsTable();
-    await addColumn("nstats_match_players", "dom_caps", "INTEGER NOT NULL DEFAULT 0");
-
-    await simpleQuery(`DROP TABLE IF EXISTS nstats_player_map_minute_averages`);
-
-    await addColumn("nstats_matches", "absolute_time", `TEXT NOT NULL DEFAULT "1999.11.22.01.01.01.000.0"`);
-
 
 
     //2.9.0
@@ -1453,15 +1428,13 @@ export async function sqliteInstall(bOnlyCreateTables){
         await setAllMapTotals();   
     }
 
-    
-
 
     //2.7.0
     new Message(`Calculating player totals.`,"note");
     await calculateAllPlayerTotals();
 
     new Message(`Calculating player ctf totals`, "note");
-    await recalculateAllPlayerTotals270();
+    await ctfRecalculateAllPlayerTotals();
 
 
     //2.9.0

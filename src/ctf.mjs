@@ -4,6 +4,7 @@ import { getMatchBasicTeamGame, getMatchesGametype, getMatchStartTimestamp } fro
 import { bIncludeMostUsedNameByHWID, toJSONAPIKeyNames } from "./json.mjs";
 import Message from "./message.mjs";
 import { getMostCommonNameUsedByHWIDS, getPlayersById } from "./players.mjs";
+import { getAllSeasonIds } from "./seasons.mjs";
 
 const CTF_TOTAL_KEYS = [
     "flag_taken", "flag_pickup", "flag_drop", "flag_assist",
@@ -359,7 +360,22 @@ function _updatePlayerTotals(totals, matchData){
     return await simpleQuery(query, [playerIds]);
 }*/
 
-async function getPlayersMatchesData(playerIds, gametypeId, mapId){
+async function getPlayersMatchesData(playerIds, seasonId){
+
+
+    let where = ``;
+
+    const vars = [playerIds]
+
+    if(seasonId !== 0){
+        where += ` AND EXISTS (
+            SELECT 1 FROM nstats_matches
+            WHERE nstats_matches.id=nstats_match_players.match_id 
+            AND nstats_matches.season_id=?)
+        `;
+
+        vars.push(seasonId);
+    }
 
     const query = `SELECT nstats_match_players.map_id,nstats_match_players.gametype_id,nstats_match_players.player_id,
     SUM(nstats_match_players.time_on_server) as total_playtime,
@@ -392,16 +408,17 @@ async function getPlayersMatchesData(playerIds, gametypeId, mapId){
     MAX(flag_return_save) as max_flag_return_save
     FROM nstats_match_players 
     INNER JOIN nstats_match_ctf ON nstats_match_players.player_id = nstats_match_ctf.player_id  AND nstats_match_players.match_id = nstats_match_ctf.match_id
-    WHERE nstats_match_players.player_id IN (?)
+    WHERE nstats_match_players.player_id IN (?)${where}
     GROUP BY nstats_match_players.player_id,nstats_match_players.gametype_id,nstats_match_players.map_id`;
 
     
-    return await simpleQuery(query, [playerIds]);
+    return await simpleQuery(query, vars);
 }
 
-async function calcPlayerTotals(playerIds){
+async function calcPlayerTotals(playerIds, seasonId){
+
   
-    const result = await getPlayersMatchesData(playerIds);
+    const result = await getPlayersMatchesData(playerIds, seasonId);
 
     const totals = {};
 
@@ -414,16 +431,6 @@ async function calcPlayerTotals(playerIds){
 
 
     return totals;
-}
-
-
-async function deleteMultiplePlayerTotals(playerIds){
-
-    if(playerIds.length === 0) return;
-
-    const query = `DELETE FROM nstats_player_totals_ctf WHERE player_id IN (?)`;
-
-    return await simpleQuery(query, [playerIds]);
 }
 
 
@@ -466,19 +473,23 @@ async function insertPlayerTotals(insertVars){
                     "epm_flag_return_base",
                     "epm_flag_return_mid",
                     "epm_flag_return_enemy_base",
-                    "epm_flag_return_save"
+                    "epm_flag_return_save",
+                    "season_id"
     ];
 
 
-    return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id", "gametype_id", "map_id"]);
+    return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id", "season_id", "gametype_id", "map_id"]);
     //return await bulkInsert(query, insertVars);
 }
 
-export async function updatePlayerTotals(playerIds){
+export async function updatePlayerTotals(playerIds, seasonId){
 
     if(playerIds.length === 0) return;
 
-    const data = await calcPlayerTotals(playerIds);
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`SeasonID must be a valid integer`);
+
+    const data = await calcPlayerTotals(playerIds, seasonId);
 
     const insertVars = [];
 
@@ -529,7 +540,8 @@ export async function updatePlayerTotals(playerIds){
                     d.epm_flag_return_base,
                     d.epm_flag_return_mid,
                     d.epm_flag_return_enemy_base,
-                    d.epm_flag_return_save
+                    d.epm_flag_return_save,
+                    seasonId
                 ]);
             }
         }
@@ -538,25 +550,6 @@ export async function updatePlayerTotals(playerIds){
     await insertPlayerTotals(insertVars);     
 }
 
-
-async function getUniquePlayerIdsInTotals(){
-
-    const query = `SELECT DISTINCT player_id FROM nstats_player_totals_ctf`;
-
-    const result = await simpleQuery(query);
-
-    return result.map((r) =>{ return r.player_id});
-}
-
-/**
- * Recalculate player totals for the 2.7.0 update
- */
-export async function recalculateAllPlayerTotals270(){
-
-    const playerIds = await getUniquePlayerIdsInTotals();
-
-    return await updatePlayerTotals(playerIds)
-}
 
 export async function getPlayerCTFTotals(playerId){
 
@@ -1638,4 +1631,34 @@ export async function ctfSetGametypesMapsAsBCTF(){
 
         await simpleQuery(mapQuery, [maps]);
     }
+}
+
+
+export async function ctfGetAllPlayerIdsInSeason(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
+
+    const query = `SELECT DISTINCT player_id FROM nstats_match_ctf WHERE EXISTS(
+    SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_ctf.match_id AND nstats_matches.season_id=?)`;
+
+    const result = await simpleQuery(query, [seasonId]);
+
+    return result.map((r) => r.player_id);
+}
+
+export async function ctfRecalculateAllPlayerTotals(){
+
+    const seasonIds = await getAllSeasonIds(false);
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        const sid = seasonIds[i];
+
+        const playerIds = await ctfGetAllPlayerIdsInSeason(sid);
+   
+        await updatePlayerTotals(playerIds, sid);
+
+    }
+
 }

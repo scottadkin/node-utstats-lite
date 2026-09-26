@@ -237,7 +237,7 @@ export class CTF{
     }
 
 
-    async updatePlayerTotals(players, gametypeId, mapId){
+    async updatePlayerTotals(players, seasonId){
 
         if(!this.bMatchCTF) return;
 
@@ -251,7 +251,10 @@ export class CTF{
             playerIds.push(p.masterId);
         }
 
-        await updatePlayerTotals(playerIds, gametypeId, mapId);
+        await updatePlayerTotals(playerIds, 0);
+        if(seasonId !== 0){
+            await updatePlayerTotals(playerIds, seasonId);
+        }
        
     }
 
