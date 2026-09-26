@@ -1,9 +1,11 @@
 
-function renderMatchesTable(parent, data, bMapsPage, bNoSort){
+function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId){
 
     if(typeof parent === "string"){
         parent = document.querySelector(parent);
     }
+
+    seasonId = parseInt(seasonId)
 
     const matches = data.data;
 
@@ -42,7 +44,14 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort){
         const m = matches[i];
         const row = [];
 
-        const url = `/match/${m.id}`;
+        let url = "";
+
+        if(seasonId === 0){
+            url = `/match/${m.id}`;
+        }else{
+            url = `/season/${seasonId}/match/${m.id}`;
+        }
+        
 
         if(!bMapsPage){
             row.push({"display": m.map_name, "value": m.map_name.toLowerCase(), "className": "text-left", url});
@@ -68,13 +77,18 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort){
 
 class MatchRichViewBox{
 
-    constructor(parent, data){
+    constructor(parent, data, seasonId){
 
         this.parent = parent;
         this.data = data;
-
+        this.seasonId = parseInt(seasonId);
         this.wrapper = document.createElement("a");
-        this.wrapper.href = `/match/${data.id}`;
+
+        if(this.seasonId === 0){
+            this.wrapper.href = `/match/${data.id}`;
+        }else{
+            this.wrapper.href = `/season/${this.seasonId}/match/${data.id}`;
+        }
         this.wrapper.className = "rich-wrapper";
         this.parent.append(this.wrapper);
 
@@ -120,11 +134,11 @@ class MatchRichViewBox{
 
 class MatchesRichView{
 
-    constructor(parent, matches){
+    constructor(parent, matches, seasonId){
 
         this.parent = document.querySelector(parent);
         this.matches = matches;
-
+        this.seasonId = seasonId;
         this.wrapper = UIDiv("rich-outter t-width-1");
 
         this.parent.append(this.wrapper);
@@ -140,7 +154,7 @@ class MatchesRichView{
 
             const d = this.matches.data[i];
 
-            new MatchRichViewBox(this.wrapper, d);
+            new MatchRichViewBox(this.wrapper, d, this.seasonId);
         }
     }
 }
@@ -397,10 +411,10 @@ class MatchesSearchForm{
         this.content.innerHTML = ``;
 
         if(this.selectedDisplayMode === "default"){
-            new MatchesRichView("#matches-content",  this.matches);
+            new MatchesRichView("#matches-content",  this.matches, this.seasonId);
         }else{
             //renderMatchesTable("#root", matchData, false, true);
-            new renderMatchesTable("#matches-content", this.matches, false, true);
+            renderMatchesTable("#matches-content", this.matches, false, true, this.seasonId);
         }
     }
 }

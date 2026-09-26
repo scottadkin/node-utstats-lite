@@ -40,6 +40,7 @@ import { renderSeasonPage } from './src/pages/season.mjs';
 import { renderSeasonMatchesPage } from './src/pages/seasons/matches.mjs';
 import { renderSeasonPlayersPage } from './src/pages/seasons/players.mjs';
 import { renderSeasonMapsPage } from './src/pages/seasons/maps.mjs';
+import { renderSeasonMatchPage } from './src/pages/seasons/match.mjs';
 //import { renderSeasonsPage } from './src/pages/seasons.mjs';
 //import { renderSeasonPage } from './src/pages/season.mjs';
 
@@ -334,6 +335,18 @@ app.get("/season/:season/maps", async (req, res) =>{
         await renderSeasonMapsPage(req, res);
     
     }catch(err){
+        res.json({"error": err.toString()});
+    }
+});
+
+app.get('/season/:season/match/:id', async (req, res) => {
+	
+    try{
+
+	    await renderSeasonMatchPage(req, res, req.userSession);
+        
+    }catch(err){
+
         res.json({"error": err.toString()});
     }
 });

@@ -1,10 +1,11 @@
-import { getMatchData } from "../matches.mjs";
-import { getMatchData as getClassicStatsData } from "../classicWeaponStats.mjs";
-import { convertTimestamp, plural, toPlaytime } from "../generic.mjs";
-import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
-import { getPageLayout } from "../pageLayout.mjs";
+import { getMatchData } from "../../matches.mjs";
+import { getMatchData as getClassicStatsData } from "../../classicWeaponStats.mjs";
+import { convertTimestamp, plural, toPlaytime } from "../../generic.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
+import { getPageLayout } from "../../pageLayout.mjs";
+import { getSeasonById } from "../../seasons.mjs";
 
-export async function renderMatchPage(req, res, userSession){
+export async function renderSeasonMatchPage(req, res, userSession){
 
     try{
         
@@ -14,6 +15,15 @@ export async function renderMatchPage(req, res, userSession){
 
         const timeZone = await getSiteWideTimeZone();
         let desc = `Match Doesn't Exist - Node UTStats Lite`;
+
+        const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : null;
+
+        if(seasonId === null) throw new Error(`Season missing`);
+        if(seasonId !== seasonId) throw new Error(`Season must be a valid integer.`);
+
+        const basicSeasonInfo = await getSeasonById(seasonId);
+        
+        if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
         
         const data = await getMatchData(matchId);
 
@@ -47,7 +57,9 @@ export async function renderMatchPage(req, res, userSession){
             pageSettings,
             pageLayout,
             timeZone,
-            "bSeasonPage": false
+            seasonId,
+            "seasonInfo": basicSeasonInfo,
+            "bSeasonPage": true
 
         });
 

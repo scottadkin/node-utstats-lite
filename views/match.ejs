@@ -2,14 +2,22 @@
     "mode": "match", 
     "meta": meta,
     "host": host,
-    userSession
+    userSession,
+    bSeasonPage
     }) -%>
 <%- include("timeZone.ejs", {timeZone})%>
-<script src="../js/ui/ui.js"></script>
-<script src="../js/ui/table.js"></script>
-<script src="../js/ui/match.js"></script>
-<script src="../js/matchScreenshot.js"></script>
-<script src="../js/ui/canvas-graphs.js"></script>
+
+<% 
+
+const jsBase = (locals.seasonId !== 0) ? `../../../js/` : `../js/`;
+
+%>
+
+<script src="<%= jsBase %>ui/ui.js"></script>
+<script src="<%= jsBase %>ui/table.js"></script>
+<script src="<%= jsBase %>ui/match.js"></script>
+<script src="<%= jsBase %>matchScreenshot.js"></script>
+<script src="<%= jsBase %>ui/canvas-graphs.js"></script>
 <div id="root"></div>
 <script>
     const basic = <%- JSON.stringify(data.basic) -%>;
