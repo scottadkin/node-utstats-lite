@@ -38,7 +38,7 @@ export async function renderSeasonMatchesPage(req, res){
             "host": req.headers.host,
             timeZone,
             title,
-            "meta": {"description": "Login", "image": "images/maps/default.jpg"},
+            "meta": {"description": "Season Matches", "image": "images/maps/default.jpg"},
             "userSession": req.userSession,
             uniqueCombinations,
             selectedServer,

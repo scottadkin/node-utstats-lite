@@ -909,9 +909,46 @@ async function getTotalPossibleMatches(nameSearch){
     return result[0].total_rows;
 }
 
-export async function searchMaps(name, dirtyPage, dirtyPerPage, sortBy, order){
+
+async function normalMapsSearch(name, cleanStart, cleanPerPage, cleanSortBy, cleanOrder){
+
+
+    const query = `SELECT id,name,first_match,last_match,matches,playtime 
+    FROM nstats_maps 
+    WHERE name LIKE ? 
+    ORDER BY ${cleanSortBy} ${cleanOrder}
+    LIMIT ?, ?`;
+
+    return await simpleQuery(query, [`%${name}%`, cleanStart, cleanPerPage]);
+}
+
+async function seasonMapsSearch(seasonId, name, cleanStart, cleanPerPage, cleanSortBy, cleanOrder){
+
+
+    const query = `SELECT nstats_seasons_maps.map_id,
+    nstats_maps.name,
+    nstats_seasons_maps.first_match,
+    nstats_seasons_maps.last_match,
+    nstats_seasons_maps.matches,
+    nstats_seasons_maps.playtime 
+    FROM nstats_seasons_maps
+    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id
+    WHERE nstats_maps.name LIKE ? AND nstats_seasons_maps.season_id=?
+    ORDER BY ${cleanSortBy} ${cleanOrder}
+    LIMIT ?, ?`;
+
+    return await simpleQuery(query, [`%${name}%`, seasonId, cleanStart, cleanPerPage]);
+}
+
+
+
+export async function searchMaps(name, dirtyPage, dirtyPerPage, sortBy, order, seasonId){
     
     if(VALID_MAP_SEARCH_BY.indexOf(sortBy) === -1) throw new Error(`Not a valid map search by type`);
+
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
 
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
@@ -920,14 +957,13 @@ export async function searchMaps(name, dirtyPage, dirtyPerPage, sortBy, order){
     if(order !== "ASC" && order !== "DESC") order = "ASC";
 
 
-    const query = `SELECT id,name,first_match,last_match,matches,playtime 
-    FROM nstats_maps 
-    WHERE name LIKE ? 
-    ORDER BY ${sortBy} ${order}
-    LIMIT ?, ?`;
-
-
-    const result = await simpleQuery(query, [`%${name}%`, start, perPage]);
+    let result = [];
+    
+    if(seasonId !== 0){
+        result = await seasonMapsSearch(seasonId, name, start, perPage, sortBy, order);
+    }else{
+        result = await normalMapsSearch(name, start, perPage, sortBy, order);
+    }
 
     const images = new Set();
 

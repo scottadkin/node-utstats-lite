@@ -56,7 +56,7 @@ export async function renderMapsPage(req, res, userSession){
         const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
-        const {totalMatches, maps} = await searchMaps(nameSearch, page, perPage, sortBy, order);
+        const {totalMatches, maps} = await searchMaps(nameSearch, page, perPage, sortBy, order, 0);
 
         res.render("maps.ejs",{
             "host": req.headers.host,
@@ -71,7 +71,8 @@ export async function renderMapsPage(req, res, userSession){
             maps,
             userSession,
             perPage,
-            page
+            page,
+            "seasonId": 0
         });
     }catch(err){
         console.trace(err);
