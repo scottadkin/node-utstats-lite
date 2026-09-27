@@ -613,6 +613,8 @@ export function getHeatmapDates(month, year){
         month++;
     }
 
+    if(month < 10) month = `0${month}`;
+
     const end = `${year}-${month}-01 00:00:00`;
 
     return {start, end, lastDayOfMonth};

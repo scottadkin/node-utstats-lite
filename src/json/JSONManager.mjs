@@ -228,8 +228,9 @@ export default class JSONManager{
         const mapId = this.querySanitizeInteger("mid");
         const year = this.querySanitizeInteger("y");
         const month = this.querySanitizeInteger("m");
+        const seasonId = this.querySanitizeInteger("season");
 
-        const data = await getActivtyHeatMapData(gametypeId, mapId, year, month);
+        const data = await getActivtyHeatMapData(gametypeId, mapId, year, month, seasonId);
 
         this.res.status(200).json({data});
     }

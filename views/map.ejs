@@ -8,7 +8,8 @@
 <%- include("timeZone.ejs", {timeZone})%>
 
 <%
-const jsBase = (seasonId !== 0) ? `../../../js/` : `../js/`
+const jsBase = (seasonId !== 0) ? `../../../js/` : `../js/`;
+const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
 %>
 
 <script src="<%= jsBase %>ui/ui.js"></script>
@@ -74,8 +75,10 @@ const jsBase = (seasonId !== 0) ? `../../../js/` : `../js/`
                     "header": "Activity HeatMap", 
                     "gametype": 0,
                     "map": <%= basic.id %>, 
-                    "jsonURL": `../json/activity-heatmap-data/`,
-                    "defaultMode": "<%= pageSettings["Activity Heatmap Default Mode"]%>"}
+                    "jsonURL": `<%= jsonBase %>activity-heatmap-data/`,
+                    "defaultMode": "<%= pageSettings["Activity Heatmap Default Mode"]%>",
+                    "seasonId": "<%= seasonId %>"
+                }
                 );<%
                
             } break;

@@ -1249,6 +1249,9 @@ class UICalendarHeatMap{
         this.selectedMonth = this.now.getMonth();
 
         this.selectedMode = options?.defaultMode ?? "playtime";
+        if(options.seasonId === undefined) throw new Error(`You need to provide seasonId`);
+        this.seasonId = parseInt(options.seasonId);
+
         //cache data instead of fetching the same data twice
         this.data = {};
 
@@ -1303,12 +1306,12 @@ class UICalendarHeatMap{
                 return;
             }
 
-            let slug = `?y=${this.selectedYear}&m=${this.selectedMonth}`;
+            let slug = `?y=${this.selectedYear}&m=${this.selectedMonth}&season=${this.seasonId}`;
 
             const keysToSlugs = {
                 "targetGametype": "gid",
                 "targetMap": "mid",
-                "targetPlayer": "pid",
+                "targetPlayer": "pid"
             };
 
 

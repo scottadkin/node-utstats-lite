@@ -2004,9 +2004,12 @@ export async function getLatestMatchGametypeMapIds(){
 
 
 
-export async function getActivtyHeatMapData(gametypeId, mapId, year, month){
+export async function getActivtyHeatMapData(gametypeId, mapId, year, month, seasonId){
 
     const {start, end, lastDayOfMonth} = getHeatmapDates(month, year);
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
     let where = ``;
     const vars = [];
@@ -2016,13 +2019,19 @@ export async function getActivtyHeatMapData(gametypeId, mapId, year, month){
         vars.push(gametypeId);
     }
 
-    if(mapId !== 0){
+    if(mapId != 0){
         where += ` AND map_id=?`;
         vars.push(mapId);
     }
 
+    if(seasonId != 0){
+        where += ` AND season_id=?`;
+        vars.push(seasonId);
+    }
+
     const query = `SELECT date,playtime,players FROM nstats_matches WHERE date>=? AND date<?${where} ORDER BY date DESC`;
     const result = await simpleQuery(query, [start, end, ...vars]);
+
 
     const data = {};
 

@@ -507,7 +507,9 @@ export async function getMapInfo(mapId, seasonId){
 
     if(seasonId !== 0){
 
-        query = `SELECT nstats_seasons_maps.*, nstats_maps.name 
+        query = `SELECT nstats_seasons_maps.matches,
+        nstats_seasons_maps.playtime, nstats_seasons_maps.first_match,
+        nstats_seasons_maps.last_match, nstats_maps.name, nstats_maps.id 
         FROM nstats_seasons_maps 
         LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id
         WHERE nstats_seasons_maps.season_id=? AND nstats_seasons_maps.map_id=?`
