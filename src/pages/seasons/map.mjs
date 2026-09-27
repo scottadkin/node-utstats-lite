@@ -1,13 +1,23 @@
-import { getAllUniquePlayedGametypes, getMapInfo, VALID_PLAYER_EPM_AVERAGES } from "../maps.mjs";
-import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
-import { getPageLayout } from "../pageLayout.mjs";
-import { getMapWeaponStats } from "../weapons.mjs";
-import { VALID_PLAYER_MAP_MINUTE_AVERAGES, VALID_PLAYER_TOTALS } from "../maps.mjs";
-import { getLeagueCategorySettings } from "../ctfLeague.mjs";
+import { getAllUniquePlayedGametypes, getMapInfo, VALID_PLAYER_EPM_AVERAGES } from "../../maps.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
+import { getPageLayout } from "../../pageLayout.mjs";
+import { getMapWeaponStats } from "../../weapons.mjs";
+import { VALID_PLAYER_MAP_MINUTE_AVERAGES, VALID_PLAYER_TOTALS } from "../../maps.mjs";
+import { getLeagueCategorySettings } from "../../ctfLeague.mjs";
+import { getSeasonById } from "../../seasons.mjs";
 
-export async function renderMapPage(req, res, userSession){
+export async function renderSeasonMapPage(req, res){
 
     try{
+
+        const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : null;
+    
+        if(seasonId === null) throw new Error(`Season missing`);
+        if(seasonId !== seasonId) throw new Error(`Season must be a valid integer.`);
+        
+        const basicSeasonInfo = await getSeasonById(seasonId);
+    
+        if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
 
         if(req.params.id === undefined) throw new Error(`No map id found`);
         const timeZone = await getSiteWideTimeZone();
@@ -38,12 +48,12 @@ export async function renderMapPage(req, res, userSession){
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
 
-        const uniqueGametypes = await getAllUniquePlayedGametypes(basic.id, true, 0);
+        const uniqueGametypes = await getAllUniquePlayedGametypes(basic.id, true, seasonId);
         
         res.render("map.ejs",{
             "host": req.headers.host,
             timeZone,
-            userSession,
+            "userSession": req.userSession,
             title,
             basic,
             pageSettings,
@@ -51,9 +61,9 @@ export async function renderMapPage(req, res, userSession){
             weaponStats,
             ctfLeagueSettings,
             uniqueGametypes,
-            "seasonId":0,
-            "seasonInfo": null,
-            "bSeasonPage": false,
+            seasonId,
+            "seasonInfo": basicSeasonInfo,
+            "bSeasonPage": true,
             "validTypes": {
                 "match-averages": VALID_PLAYER_MAP_MINUTE_AVERAGES, 
                 "epm": VALID_PLAYER_EPM_AVERAGES,

@@ -794,21 +794,32 @@ export async function getAllPlayedMatchIds(mapId){
     });
 }
 
-export async function getAllUniquePlayedGametypes(mapId, bReturnName){
+export async function getAllUniquePlayedGametypes(mapId, bReturnName, seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
 
     let query = "";
+
+    const vars = [mapId]
     
+    let where = ``;
+
+    if(seasonId !== 0){
+        where += ` AND nstats_matches.season_id=?`;
+        vars.push(seasonId);
+    }
 
     if(!bReturnName){
-        query = `SELECT DISTINCT gametype_id FROM nstats_matches WHERE map_id=?`
+        query = `SELECT DISTINCT gametype_id FROM nstats_matches WHERE map_id=?${where}`
     }else{
         query = `SELECT DISTINCT nstats_matches.gametype_id,nstats_gametypes.name as gametype_name 
             FROM nstats_matches 
             LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_matches.gametype_id
-            WHERE nstats_matches.map_id=?`;
+            WHERE nstats_matches.map_id=?${where}`;
     }
 
-    const result = await simpleQuery(query, [mapId]);
+    const result = await simpleQuery(query, vars);
 
     if(!bReturnName){
         return result.map((r) =>{
