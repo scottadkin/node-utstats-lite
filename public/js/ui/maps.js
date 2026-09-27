@@ -1443,7 +1443,6 @@ class UIMapPlayerRecords{
             this.totalResults = res.totalResults;
             this.data = res.data;
 
-            console.log(this.data);
 
             this.render();
 

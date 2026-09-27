@@ -26,20 +26,20 @@ async function getPlayerMatchCTFRecords(recordInfo, gametypeId, mapId, cleanStar
 
     const query = `SELECT 
     
-    ${cT}.player_id,
-    ${cT}.gametype_id,
-    ${cT}.map_id,
+    ${tT}.player_id,
+    ${tT}.gametype_id,
+    ${tT}.map_id,
     ${nameT}.name as player_name,
     ${nameT}.country as country,
-    ${tT}.last_active as last_active,
-    ${cT}.playtime,
-    ${cT}.total_matches,
+    ${tT}.last_active,
+    ${tT}.playtime,
+    ${tT}.total_matches,
     ${cT}.${recordInfo.value} as record_value
-    FROM ${cT} 
-    LEFT JOIN ${nameT} ON ${cT}.player_id = ${nameT}.id
-    LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id AND ${cT}.season_id = ${tT}.season_id
-    WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 AND ${cT}.total_matches>=? AND ${cT}.season_id=?
-    ORDER BY ${cT}.${recordInfo.value} DESC LIMIT ${cleanStart}, ${cleanPerPage}`;
+    FROM ${tT} 
+    LEFT JOIN ${nameT} ON ${tT}.player_id = ${nameT}.id
+    LEFT JOIN ${cT} ON ${tT}.player_id = ${cT}.player_id AND ${tT}.gametype_id = ${cT}.gametype_id AND ${tT}.map_id = ${cT}.map_id AND ${tT}.season_id = ${cT}.season_id
+    WHERE ${tT}.gametype_id=? AND ${tT}.map_id=? AND record_value!=0 AND ${tT}.total_matches>=? AND ${tT}.season_id=?
+    ORDER BY record_value DESC LIMIT ${cleanStart}, ${cleanPerPage}`;
 
 
     const [result, totalResults] = await Promise.all([
