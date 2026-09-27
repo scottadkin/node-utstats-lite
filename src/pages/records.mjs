@@ -73,7 +73,7 @@ export async function renderRecordsPage(req, res, userSession){
 
         const {page, perPage, totalResults, data} = await getRecords(
             mode, recordType, selectedGametype, selectedMap, dirtyPage, dirtyPerPage,
-            selectedMinimumMatchesPlayed
+            selectedMinimumMatchesPlayed, 0
         );
 
  
@@ -122,6 +122,8 @@ export async function renderRecordsPage(req, res, userSession){
             domGametypes,
             domMaps,
             userSession,
+            "seasonId": 0,
+            "bSeasonPage": false,
             "siteName": brandingSettings["Site Name"],
             "selectedMinimumMatchesPlayed": selectedMinimumMatchesPlayed
         });

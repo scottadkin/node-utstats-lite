@@ -2,7 +2,7 @@ class RecordsPage{
 
     constructor(siteName, parent, mode, validTypes, modeTitles, gametypes, maps, 
         gametypeMapCombos, selectedGametype, selectedMap, recordType, minimumMatchesPlayed, data, totalResults,
-        page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps
+        page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps, seasonId
     ){
 
         this.siteName = siteName;
@@ -10,6 +10,8 @@ class RecordsPage{
         this.mode = mode;
         this.validTypes = validTypes;
         this.modeTitles = modeTitles;
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
 
         this.gametypes = gametypes;
         this.maps = maps;
@@ -89,6 +91,7 @@ class RecordsPage{
             url += `&mid=${this.selectedMap}`;
             url += `&p=${this.page}&pp=${this.perPage}`;
             url += `&mm=${this.selectedMinimumMatches}`;
+            url += `&season=${this.seasonId}`
 
             const req = await fetch(`${url}`);
 

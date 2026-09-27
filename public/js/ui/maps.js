@@ -1236,7 +1236,6 @@ class UIMapPlayerTotals{
             if(res.error !== undefined) throw new Error(res.error);
 
             this.data = res.data;
-            console.log(this.data);
             this.totalResults = res.totalResults;
 
 

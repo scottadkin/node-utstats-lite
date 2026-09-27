@@ -1092,23 +1092,10 @@ function getMapPlayerTotalInfo(type){
     return null;
 }
 
-async function getMapPlayerTotalsMaxResults(mapId, gametypeId, seasonId){
-
-    const query = `SELECT COUNT(*) as total_results FROM nstats_player_totals WHERE map_id=? AND gametype_id=? AND season_id=?`;
-
-    const result = await simpleQuery(query, [mapId, gametypeId, seasonId]);
-
-    return result[0].total_results;
-}
-
-
-
 
 export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPage, dirtyPerPage, seasonId){
 
     const dirtyMinimumMatchesPlayed = 0;
-
-    console.log(`category = ${category}`);
 
     const {page, perPage, data, totalResults } = await getRecords(
         "player-lifetime", 
@@ -1121,7 +1108,7 @@ export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPage,
         seasonId
     )
     
-    return {data, totalResults};
+    return {data, totalResults, page, perPage};
 }
 
 
