@@ -1130,10 +1130,13 @@ function getMapThumbOrFullSize(data){
     return `/images/maps/default.jpg`;
 }
 
-function UIMapRichBox(data){
+function UIMapRichBox(data, seasonId){
 
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
     const link = document.createElement("a");
-    link.href = `/map/${data.id}`;
+
+    link.href = (seasonId === 0) ? `/map/${data.id}`: `/season/${seasonId}/map/${data.id}`;
 
     const wrapper = UIDiv("rich-wrapper");
 

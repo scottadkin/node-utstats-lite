@@ -230,7 +230,7 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
         const d = data[i];
 
         if(displayMode === "default"){
-            wrapper.append(UIMapRichBox(d));
+            wrapper.append(UIMapRichBox(d, 0));
 
         }else{
 

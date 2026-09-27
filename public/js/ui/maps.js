@@ -34,13 +34,11 @@ class MapsSearchForm{
         const display = new MapListDisplay(
             this.resultWrapper,
             this.maps, 
-            this.totalMatches, 
             this.nameSearch, 
             this.displayMode,
-            this.page, 
-            this.perPage,
             this.sortBy,
-            this.order
+            this.order,
+            this.seasonId
         );   
 
    
@@ -184,7 +182,7 @@ class MapsSearchForm{
 
 class MapListDisplay{
 
-    constructor(parent, data, totalMatches, nameSearch, displayMode, page, perPage, sortBy, order){
+    constructor(parent, data, nameSearch, displayMode, sortBy, order, seasonId){
 
         if(data.length === 0){
 
@@ -199,6 +197,8 @@ class MapListDisplay{
             new UIInfo(parent, content);
             return;   
         }
+
+        this.seasonId = parseInt(seasonId);
 
         this.nameSearch = nameSearch; 
         this.parent = parent;
@@ -228,6 +228,13 @@ class MapListDisplay{
 
     }
 
+    getMapUrl(mapId){
+
+        if(this.seasonId === 0) return `/map/${mapId}`;
+
+        return `/season/${this.seasonId}/map/${mapId}`
+    }
+
     createRows(){
 
         const rows = [];
@@ -236,7 +243,7 @@ class MapListDisplay{
 
             const d = this.data[i];
 
-            const url = `/map/${d.id}`;
+            const url = this.getMapUrl(d.id);
 
             rows.push([
                 {"display": d.name, "value": d.name.toLowerCase(), "className": "text-left", url},
@@ -273,7 +280,15 @@ class MapListDisplay{
                     this.sortBy = targetKey;
 
                     const order = (this.bAscOrder) ? "ASC" : "DESC";
-                    window.location = `/maps/?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${order}`;
+
+                    let url = ``;
+
+                    if(this.seasonId === 0){
+                        url += `/maps/`;
+                    }else{
+                        url += `/season/${this.seasonId}/maps/`;
+                    }
+                    window.location = `${url}?name=${this.nameSearch}&display=${this.displayMode}&sortBy=${this.sortBy}&order=${order}`;
          
                 }
             }
@@ -291,7 +306,7 @@ class MapListDisplay{
 
             const d = this.data[i];
 
-            wrapper.append(UIMapRichBox(d));
+            wrapper.append(UIMapRichBox(d, this.seasonId));
         }
     }
 }
