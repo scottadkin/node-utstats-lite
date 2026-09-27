@@ -11,7 +11,7 @@ export async function renderMapPage(req, res, userSession){
 
         if(req.params.id === undefined) throw new Error(`No map id found`);
         const timeZone = await getSiteWideTimeZone();
-        const basic = await getMapInfo(req.params.id);
+        const basic = await getMapInfo(req.params.id, 0);
 
 
         if(basic === null) throw new Error(`Map does not exist`);

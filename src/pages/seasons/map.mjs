@@ -21,7 +21,7 @@ export async function renderSeasonMapPage(req, res){
 
         if(req.params.id === undefined) throw new Error(`No map id found`);
         const timeZone = await getSiteWideTimeZone();
-        const basic = await getMapInfo(req.params.id);
+        const basic = await getMapInfo(req.params.id, seasonId);
 
 
         if(basic === null) throw new Error(`Map does not exist`);

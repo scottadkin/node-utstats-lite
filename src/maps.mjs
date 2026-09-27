@@ -496,11 +496,30 @@ export async function getAllBasicAndImages(){
 }
 
 
-export async function getMapInfo(mapId){
+export async function getMapInfo(mapId, seasonId){
 
-    const query = `SELECT * FROM nstats_maps WHERE id=?`;
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
 
-    const result = await simpleQuery(query, [mapId]);
+ 
+    let query = "";
+    const vars = [];
+
+    if(seasonId !== 0){
+
+        query = `SELECT nstats_seasons_maps.*, nstats_maps.name 
+        FROM nstats_seasons_maps 
+        LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id
+        WHERE nstats_seasons_maps.season_id=? AND nstats_seasons_maps.map_id=?`
+
+        vars.push(seasonId, mapId);
+
+    }else{
+        query = "SELECT * FROM nstats_maps WHERE id=?";
+        vars.push(mapId);
+    }
+
+    const result = await simpleQuery(query, vars);
 
     if(result.length === 0) return null;
 
