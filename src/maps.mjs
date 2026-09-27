@@ -696,25 +696,13 @@ export function bValidMinuteCategory(type){
     return false;
 } 
 
-export async function getMapPlayerAveragesTotalCount(mapId, gametypeId){
+export async function getMapPlayerAveragesTotalCount(mapId, gametypeId, seasonId){
 
-    const query = `SELECT COUNT(*) as total_values FROM nstats_player_totals WHERE map_id=? AND gametype_id=?`;
+    const query = `SELECT COUNT(*) as total_values FROM nstats_player_totals WHERE map_id=? AND gametype_id=? AND season_id=?`;
 
-    const result = await simpleQuery(query, [mapId, gametypeId]);
+    const result = await simpleQuery(query, [mapId, gametypeId, seasonId]);
 
     return result[0].total_values;
-}
-
-function getMapAverageTitle(target){
-
-    for(let i = 0; i < VALID_PLAYER_MAP_MINUTE_AVERAGES.length; i++){
-
-        const {value, display} = VALID_PLAYER_MAP_MINUTE_AVERAGES[i];
-
-        if(value === target) return display;
-    }
-
-    return "Not Found";
 }
 
 function getMapAverageType(averageType, target){
@@ -730,9 +718,12 @@ function getMapAverageType(averageType, target){
     return null;
 }
 
-export async function getMapPlayerAverages(averageType, mapId, gametypeId, category, initialPage, initialPerPage){
+export async function getMapPlayerAverages(averageType, mapId, gametypeId, category, initialPage, initialPerPage, seasonId){
 
     averageType = averageType.toLowerCase();
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
     const averageTypes = ["match-averages", "epm"];
 
@@ -772,6 +763,17 @@ export async function getMapPlayerAverages(averageType, mapId, gametypeId, categ
     }
 
 
+    let where = ``;
+    const vars = [mapId, gametypeId];
+
+    //if(seasonId !== 0){
+
+        where += ` AND nstats_player_totals.season_id=?`;
+        vars.push(seasonId);
+    //}
+
+    vars.push(start, perPage);
+
     const query = `SELECT 
     ${pTotals}.player_id,
     ${pTotals}.last_active,
@@ -783,12 +785,12 @@ export async function getMapPlayerAverages(averageType, mapId, gametypeId, categ
     FROM ${pTotals}
     INNER JOIN ${pT} ON ${pT}.id = ${pTotals}.player_id
     ${ctfJoin}
-    WHERE ${pTotals}.map_id=? AND ${pTotals}.gametype_id=? ORDER BY target_value DESC LIMIT ?, ?`;
+    WHERE ${pTotals}.map_id=?${where} AND ${pTotals}.gametype_id=? ORDER BY target_value DESC LIMIT ?, ?`;
     
 
-    const data = await simpleQuery(query, [mapId, gametypeId, start, perPage]);
+    const data = await simpleQuery(query, vars);
 
-    const totalEntries = await getMapPlayerAveragesTotalCount(mapId, gametypeId);
+    const totalEntries = await getMapPlayerAveragesTotalCount(mapId, gametypeId, seasonId);
 
     return {data, title, totalEntries}
 }

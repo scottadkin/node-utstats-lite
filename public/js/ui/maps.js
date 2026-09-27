@@ -730,7 +730,7 @@ class UIMapPlayerRankings{
 
 class UIMapPlayerAverages{
 
-    constructor(parent, mapId, validTypes, uniqueGametypes){
+    constructor(parent, mapId, validTypes, uniqueGametypes, seasonId){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
@@ -741,6 +741,7 @@ class UIMapPlayerAverages{
         this.selectedCat = "avg_score";
         this.validTypes = validTypes;
         this.uniqueGametypes = uniqueGametypes;
+        this.seasonId = parseInt(seasonId);
     
         this.data = [];
         this.totalResults = 0;
@@ -857,8 +858,8 @@ class UIMapPlayerAverages{
         try{
 
 
-            const urlParts = `${this.mapId}&page=${this.page}&perPage=${this.perPage}&cat=${this.selectedCat}`;
-
+            let urlParts = `${this.mapId}&page=${this.page}&perPage=${this.perPage}&cat=${this.selectedCat}`;
+            urlParts += `&season=${this.seasonId}`;
             const req = await fetch(`/json/map-player-averages/?id=${urlParts}&gid=${this.selectedGametype}&avgType=${this.mode}`);
 
             const res = await req.json();

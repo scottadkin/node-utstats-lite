@@ -67,7 +67,7 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
             } break;
 
             case "Display Player Top Averages": {
-                %>new UIMapPlayerAverages("#root", "<%= basic.id %>", validTypes, <%- JSON.stringify(uniqueGametypes) %>);<%
+                %>new UIMapPlayerAverages("#root", "<%= basic.id %>", validTypes, <%- JSON.stringify(uniqueGametypes) %>, "<%= seasonId %>");<%
             }  break;
 
             case "Display Activity Heatmap": {
