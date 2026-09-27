@@ -368,5 +368,4 @@ export async function getRecords(mode, recordType, gametypeId, mapId, dirtyPage,
 
     return {page, perPage, "data": result.data, "totalResults": result.totalResults};
   
-
 }

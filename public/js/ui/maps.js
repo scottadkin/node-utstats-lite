@@ -737,11 +737,12 @@ class UIMapPlayerAverages{
         this.perPage = 25;
         this.page = 1;
         this.selectedGametype = 0;
-        this.mode = "match-averages";
+        this.mode = "player-avg";
         this.selectedCat = "avg_score";
         this.validTypes = validTypes;
         this.uniqueGametypes = uniqueGametypes;
         this.seasonId = parseInt(seasonId);
+        this.minMatches = 0;
     
         this.data = [];
         this.totalResults = 0;
@@ -769,7 +770,8 @@ class UIMapPlayerAverages{
         const row = UIDiv("form-row");
         row.append(UILabel("Type"));
 
-        const validTypes = (this.mode === "match-averages") ? this.validTypes["match-averages"] : this.validTypes["epm"];
+
+        const validTypes = (this.mode === "player-avg") ? this.validTypes["player-match"] : this.validTypes["player-epm"];
 
         this.catSelect = new UISelect(row, validTypes, this.selectedCat, (e) =>{
             this.selectedCat = e;
@@ -830,8 +832,8 @@ class UIMapPlayerAverages{
     createTabs(){
 
         const options = [
-            {"display": "Match Averages", "value": "match-averages"},
-            {"display": "Events Per Minute", "value": "epm"},
+            {"display": "Match Averages", "value": "player-avg"},
+            {"display": "Events Per Minute", "value": "player-epm"}
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
@@ -841,8 +843,9 @@ class UIMapPlayerAverages{
             this.mode = e.detail.newTab;
 
       
-            const validTypes = (this.mode === "match-averages") ? this.validTypes["match-averages"] : this.validTypes["epm"];
+            const validTypes = (this.mode === "player-avg") ? this.validTypes["player-match"] : this.validTypes["player-epm"];
 
+            
             if(!this.catSelect.updateOptions(validTypes, this.mode)){
 
                 this.selectedCat = validTypes[0].value;
@@ -853,13 +856,29 @@ class UIMapPlayerAverages{
         });
     }
 
+
+    getTableHeaderTitle(mode, selectedCat){
+
+        if(mode === "player-avg") mode = "player-match";
+
+        if(this.validTypes[mode] === undefined) throw new Error(`cant find validTypes category`);
+
+        for(let i = 0; i < this.validTypes[mode].length; i++){
+
+            const v = this.validTypes[mode][i];
+
+            if(v.value === selectedCat) return v.display;
+        }
+        return "Not Found";
+    }
+
     async loadData(){
 
         try{
 
 
             let urlParts = `${this.mapId}&page=${this.page}&perPage=${this.perPage}&cat=${this.selectedCat}`;
-            urlParts += `&season=${this.seasonId}`;
+            urlParts += `&season=${this.seasonId}&mm=${this.minMatches}`;
             const req = await fetch(`/json/map-player-averages/?id=${urlParts}&gid=${this.selectedGametype}&avgType=${this.mode}`);
 
             const res = await req.json();
@@ -870,7 +889,9 @@ class UIMapPlayerAverages{
 
             this.data = res.data;
             this.totalResults = res.totalEntries;
-            this.title = res.title;
+
+       
+            this.title = this.getTableHeaderTitle(this.mode, this.selectedCat);
             
 
             this.render();
@@ -887,7 +908,7 @@ class UIMapPlayerAverages{
         const content = [];
 
 
-        if(this.mode === "match-averages"){
+        if(this.mode === "player-match"){
             content.push(`Player Averages Per Match`);
         }else{
             content.push(`Average of total events / minutes played.`);
@@ -920,7 +941,6 @@ class UIMapPlayerAverages{
 
             const place = i + 1 + (page * this.perPage);
 
-            const intValue = parseInt(d.target_value);
 
             return [
                 {
@@ -931,7 +951,7 @@ class UIMapPlayerAverages{
                     "bSkipTD": true,
                     "display": UIPlayerLink({
                         "playerId": d.player_id, 
-                        "name": d.name, 
+                        "name": d.player_name, 
                         "country": d.country,
                         "bTableElem": true
                     }),
@@ -945,7 +965,7 @@ class UIMapPlayerAverages{
                 },
                 {"display": toPlaytime(d.playtime), "className": "playtime"},
                 {
-                    "display": (d.target_value % 1 !== 0) ? d.target_value.toFixed(2) :d.target_value
+                    "display": (d.record_value % 1 !== 0) ? d.record_value.toFixed(2) :d.record_value
                 }
             ]
         });
@@ -1175,6 +1195,7 @@ class UIMapPlayerTotals{
         this.mapId = mapId;
         this.selectedCat = "kills";
         this.data = [];
+        this.minMatches = 0;
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Totals");
@@ -1228,6 +1249,7 @@ class UIMapPlayerTotals{
             let url = `/json/map-player-totals/`;
             url += `?id=${this.mapId}&gid=${this.selectedGametype}&season=${this.seasonId}`;
             url += `&cat=${this.selectedCat}&page=${this.page}&perPage=${this.perPage}`
+            url += `&mm=${this.minMatches}`
 
 
             const req = await fetch(url);

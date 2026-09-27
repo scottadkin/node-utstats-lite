@@ -153,9 +153,15 @@ export default class JSONManager{
         const {page, perPage} = this.getPageAndPerPage();
         const gid = this.querySanitizeInteger("gid");
         const averageType = this.querySanitizeString("avgType");
-        const seasonId = this.querySanitizeInteger("season");
 
-        this.res.status(200).json(await getMapPlayerAverages(averageType, id, gid, cat, page, perPage, seasonId));
+        const seasonId = this.querySanitizeInteger("season");
+        const minMatches = this.querySanitizeInteger("mm");
+
+
+        this.res.status(200).json(await getRecords(averageType, cat, gid, id, page, perPage, minMatches, seasonId));
+
+        //await getRecords("player-avg", cat, gid, id, page, perPage, minMatches, seasonId);
+       // this.res.status(200).json(await getMapPlayerAverages(averageType, id, gid, cat, page, perPage, seasonId));
     }
 
     async mapPlayerTotals(){
@@ -165,8 +171,9 @@ export default class JSONManager{
         const gid = this.querySanitizeInteger("gid");
         const {page, perPage} = this.getPageAndPerPage();
         const seasonId = this.querySanitizeInteger("season");
-
-        this.res.status(200).json(await getMapPlayerTotals(id, gid, cat, page, perPage, seasonId));
+        const minMatches = this.querySanitizeInteger("mm");
+        this.res.status(200).json(await getRecords("player-lifetime", cat, gid, id, page, perPage, minMatches, seasonId));
+       // this.res.status(200).json(await getMapPlayerTotals(id, gid, cat, page, perPage, seasonId));
 
     }
 
