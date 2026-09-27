@@ -1,10 +1,10 @@
-import { getAllUniquePlayedGametypes, getMapInfo, VALID_PLAYER_EPM_AVERAGES } from "../../maps.mjs";
+import { getAllUniquePlayedGametypes, getMapInfo } from "../../maps.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 import { getPageLayout } from "../../pageLayout.mjs";
 import { getMapWeaponStats } from "../../weapons.mjs";
-import { VALID_PLAYER_MAP_MINUTE_AVERAGES, VALID_PLAYER_TOTALS } from "../../maps.mjs";
 import { getLeagueCategorySettings } from "../../ctfLeague.mjs";
 import { getSeasonById } from "../../seasons.mjs";
+import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_AVG_TYPES, VALID_PLAYER_EPM_TYPES, VALID_PLAYER_MATCH_TYPES } from "../../validRecordTypes.mjs";
 
 export async function renderSeasonMapPage(req, res){
 
@@ -65,9 +65,9 @@ export async function renderSeasonMapPage(req, res){
             "seasonInfo": basicSeasonInfo,
             "bSeasonPage": true,
             "validTypes": {
-                "match-averages": VALID_PLAYER_MAP_MINUTE_AVERAGES, 
-                "epm": VALID_PLAYER_EPM_AVERAGES,
-                "playerTotals": VALID_PLAYER_TOTALS
+                "match-averages": VALID_PLAYER_MATCH_AVG_TYPES, 
+                "epm": VALID_PLAYER_EPM_TYPES,
+                "playerTotals": VALID_PLAYER_LIFETIME_TYPES
             },
             
             "meta": {"description": description, "image": `images/maps/${basic.image.fullSize}`},

@@ -1158,7 +1158,7 @@ class UIMapCTFLeague{
 
 class UIMapPlayerTotals{
 
-    constructor(parent, mapId, uniqueGametypes, validTypes){
+    constructor(parent, mapId, uniqueGametypes, validTypes, seasonId){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
@@ -1166,6 +1166,8 @@ class UIMapPlayerTotals{
         this.uniqueGametypes = uniqueGametypes;
         this.selectedGametype = 0;
         this.validTypes = validTypes;
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
 
         this.page = 1;
         this.totalResults = 0;
@@ -1224,7 +1226,8 @@ class UIMapPlayerTotals{
         try{
             
             let url = `/json/map-player-totals/`;
-            url += `?id=${this.mapId}&gid=${this.selectedGametype}&cat=${this.selectedCat}&page=${this.page}&perPage=${this.perPage}`
+            url += `?id=${this.mapId}&gid=${this.selectedGametype}&season=${this.seasonId}`;
+            url += `&cat=${this.selectedCat}&page=${this.page}&perPage=${this.perPage}`
 
 
             const req = await fetch(url);
@@ -1233,6 +1236,7 @@ class UIMapPlayerTotals{
             if(res.error !== undefined) throw new Error(res.error);
 
             this.data = res.data;
+            console.log(this.data);
             this.totalResults = res.totalResults;
 
 
@@ -1280,7 +1284,7 @@ class UIMapPlayerTotals{
             const place = i + 1 + (this.page - 1) * this.perPage;
 
 
-            let value = d.total_value;
+            let value = d.record_value;
             let className = "";
 
             if(this.selectedCat === "playtime"){
@@ -1295,7 +1299,7 @@ class UIMapPlayerTotals{
                 {
                     "display": UIPlayerLink({
                         "playerId": d.player_id,
-                        "name": d.name,
+                        "name": d.player_name,
                         "country": d.country,
                         "bTableElem": true
                     }),

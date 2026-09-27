@@ -87,7 +87,8 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
                     "#root", 
                     "<%= basic.id %>", 
                     <%- JSON.stringify(uniqueGametypes) %>, 
-                    <%- JSON.stringify(validTypes.playerTotals) %>
+                    <%- JSON.stringify(validTypes.playerTotals) %>,
+                    "<%= seasonId %>"
                 );<%
             }
         }

@@ -164,8 +164,9 @@ export default class JSONManager{
         const cat = this.querySanitizeString("cat", true);
         const gid = this.querySanitizeInteger("gid");
         const {page, perPage} = this.getPageAndPerPage();
+        const seasonId = this.querySanitizeInteger("season");
 
-        this.res.status(200).json(await getMapPlayerTotals(id, gid, cat, page, perPage));
+        this.res.status(200).json(await getMapPlayerTotals(id, gid, cat, page, perPage, seasonId));
 
     }
 

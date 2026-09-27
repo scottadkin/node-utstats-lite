@@ -6,6 +6,7 @@ import { getMapImageName as genericGetMapImageName,
 import { getPlayerMapTotals as getPlayerCTFMapTotals } from "./ctf.mjs";
 import { getPlayerMapTotals as getPlayerDOMMapTotals } from "./domination.mjs";
 import Message from "./message.mjs";
+import { getRecords } from "./records.mjs";
 
 
 const validBoth = [
@@ -1091,57 +1092,35 @@ function getMapPlayerTotalInfo(type){
     return null;
 }
 
-export async function getMapPlayerTotalsMaxResults(mapId, gametypeId){
+async function getMapPlayerTotalsMaxResults(mapId, gametypeId, seasonId){
 
-    const query = `SELECT COUNT(*) as total_results FROM nstats_player_totals WHERE map_id=? AND gametype_id=?`;
+    const query = `SELECT COUNT(*) as total_results FROM nstats_player_totals WHERE map_id=? AND gametype_id=? AND season_id=?`;
 
-    const result = await simpleQuery(query, [mapId, gametypeId]);
+    const result = await simpleQuery(query, [mapId, gametypeId, seasonId]);
 
     return result[0].total_results;
 }
 
-export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPage, dirtyPerPage){
 
-    const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
-    category = category.toLowerCase();
 
-    const setting = getMapPlayerTotalInfo(category);
+export async function getMapPlayerTotals(mapId, gametypeId, category, dirtyPage, dirtyPerPage, seasonId){
 
-    if(setting === null) throw new Error(`Not a valid player map total type.`);
+    const dirtyMinimumMatchesPlayed = 0;
+
+    console.log(`category = ${category}`);
+
+    const {page, perPage, data, totalResults } = await getRecords(
+        "player-lifetime", 
+        category, 
+        gametypeId, 
+        mapId, 
+        dirtyPage, 
+        dirtyPerPage, 
+        dirtyMinimumMatchesPlayed, 
+        seasonId
+    )
     
-    const pT = "nstats_player_totals";
-    const nameT = "nstats_players";
-    const ctfT = "nstats_player_totals_ctf";
-
-    const targetCol = (setting.group === "CTF") ? `${ctfT}.${category}` : `${pT}.${category}`;
-
-    let ctfJoin = "";
-
-    if(setting.group === "CTF"){
-        ctfJoin = `INNER JOIN ${ctfT} on ${ctfT}.player_id = ${pT}.player_id`;
-        ctfJoin += ` AND ${ctfT}.gametype_id=${pT}.gametype_id AND ${ctfT}.map_id = ${pT}.map_id`;
-    }
-
-
-    const query = `SELECT 
-    ${pT}.player_id,
-    ${nameT}.name as name,
-    ${nameT}.country as country,
-    ${pT}.last_active,
-    ${pT}.playtime,
-    ${pT}.total_matches,
-    ${targetCol} as total_value
-    FROM ${pT} 
-    INNER JOIN ${nameT} on ${nameT}.id = ${pT}.player_id
-    ${ctfJoin}
-    WHERE ${pT}.map_id=? AND ${pT}.gametype_id=? 
-    ORDER BY ${targetCol} DESC
-    LIMIT ${start}, ${perPage}`;
-
-    const data = await simpleQuery(query, [mapId, gametypeId]);
-    const totalResults = await getMapPlayerTotalsMaxResults(mapId, gametypeId);
-
     return {data, totalResults};
 }
 

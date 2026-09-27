@@ -258,9 +258,8 @@ async function getPlayerLifetimeCTFRecords(recordInfo, gametypeId, mapId, cleanS
 
 async function getPlayerLifetimeRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage, cleanMinimumMatchesPlayed){
 
-  
     if(recordInfo.group === "CTF"){
-        return await getPlayerLifetimeCTFRecords(recordInfo.value, gametypeId, mapId, cleanStart, cleanPerPage, cleanMinimumMatchesPlayed);
+        return await getPlayerLifetimeCTFRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage, cleanMinimumMatchesPlayed);
     }
     
     const query = getTotalsTableQuery(recordInfo.value);
@@ -336,7 +335,7 @@ async function getPlayerAVGRecords(recordInfo, gametypeId, mapId, cleanStartOffs
 }
 
 
-export async function getRecords(mode, recordType, gametypeId, mapId, dirtyPage, dirtyPerPage, dirtyMinimumMatchesPlayed){
+export async function getRecords(mode, recordType, gametypeId, mapId, dirtyPage, dirtyPerPage, dirtyMinimumMatchesPlayed, seasonId){
 
     if(!bValidRecordMode(mode)) throw new Error(`Not a valid record mode`);
 
