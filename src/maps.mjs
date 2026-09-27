@@ -515,11 +515,12 @@ export async function getMapInfo(mapId){
 }
 
 
-export async function getRecentMatches(mapId, page, perPage){
+export async function getRecentMatches(mapId, page, perPage, seasonId){
 
     page = parseInt(page);
     perPage = parseInt(perPage);
-
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
     if(page !== page) page = 1;
     page--;
     if(page < 0) page = 0;
@@ -529,6 +530,17 @@ export async function getRecentMatches(mapId, page, perPage){
 
     let start = page * perPage;
     if(start < 0) start = 0;
+
+    const vars = [mapId];
+
+    let where = ``;
+
+    if(seasonId !== 0){
+        where += ` AND nstats_matches.season_id=?`;
+        vars.push(seasonId);
+    }
+
+    vars.push(start, perPage);
 
 
     const query = `SELECT 
@@ -554,10 +566,9 @@ export async function getRecentMatches(mapId, page, perPage){
     LEFT JOIN nstats_players ON nstats_players.id = nstats_matches.solo_winner
     LEFT JOIN nstats_servers ON nstats_servers.id = nstats_matches.server_id
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_matches.gametype_id
-    WHERE nstats_matches.map_id=? ORDER BY nstats_matches.date DESC, nstats_matches.id DESC LIMIT ?, ?`;
+    WHERE nstats_matches.map_id=?${where} ORDER BY nstats_matches.date DESC, nstats_matches.id DESC LIMIT ?, ?`;
 
-
-    const result = await simpleQuery(query, [mapId, start, perPage]);
+    const result = await simpleQuery(query, vars);
 
     return result;
 }

@@ -62,7 +62,7 @@ const jsBase = (seasonId !== 0) ? `../../../js/` : `../js/`
             } break;
 
             case "Display Recent Matches": {
-                %>new UIMapRecentMatches("#root", "<%= basic.id %>");<%
+                %>new UIMapRecentMatches("#root", "<%= basic.id %>", "<%= seasonId %>");<%
             } break;
 
             case "Display Player Top Averages": {

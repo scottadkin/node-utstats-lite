@@ -119,11 +119,12 @@ export default class JSONManager{
 
 
         const id = this.querySanitizeInteger("id");
+        const seasonId = this.querySanitizeInteger("season");
 
         const {page, perPage} = this.getPageAndPerPage();
 
-        const data = await getMapRecentMatches(id, page, perPage);
-        const totalMatches = await getTotalMatches(0, 0, id);
+        const data = await getMapRecentMatches(id, page, perPage, seasonId);
+        const totalMatches = await getTotalMatches(0, 0, id, seasonId);
 
         return this.res.status(200).json({"data": data, "totalResults": totalMatches});
     }

@@ -369,10 +369,12 @@ function UIMapBasicSummary(parent, data){
 
 class UIMapRecentMatches{
 
-    constructor(parent, mapId){
+    constructor(parent, mapId, seasonId){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`SeasonId must be a valid integer`);
 
         this.page = 1;
         this.perPage = 25;
@@ -399,7 +401,7 @@ class UIMapRecentMatches{
 
         try{
 
-            const req = await fetch(`/json/map-recent-matches/?id=${this.mapId}&page=${this.page}&perPage=${this.perPage}`);
+            const req = await fetch(`/json/map-recent-matches/?id=${this.mapId}&season=${this.seasonId}&page=${this.page}&perPage=${this.perPage}`);
 
             const res = await req.json();
 
