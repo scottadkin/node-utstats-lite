@@ -1390,3 +1390,119 @@ class UIMapPlayerTotals{
         }
     }
 }
+
+class UIMapPlayerRecords{
+
+    constructor(parent, mapId, uniqueGametypes, validTypes, seasonId){
+
+        this.parent = document.querySelector(parent);
+        this.mapId = mapId;
+        this.seasonId = seasonId;
+        this.uniqueGametypes = uniqueGametypes;
+        this.validTypes = validTypes;
+        this.selectedGametype = 0;
+        this.selectedMinMatches = 0;
+        this.selectedType = "max_score";
+        this.page = 1;
+        this.perPage = 25;
+
+        if(this.mapId !== this.mapId || this.seasonId !== this.seasonId){
+            throw new Error(`Both mapId and seasonId must be valid integers`);
+        }
+
+
+        this.wrapper = UIDiv();
+        UIHeader(this.wrapper, "Player Match Records");
+
+        this.parent.append(this.wrapper);
+
+        this.createForm();
+
+        this.loadData();
+    }
+
+
+    async loadData(){
+
+        try{
+
+            let url = `/json/map-player-records/`;
+            url += `?id=${this.mapId}&gid=${this.selectedGametype}&season=${this.seasonId}`;
+            url += `&cat=${this.selectedType}&page=${this.page}&perPage=${this.perPage}`
+            url += `&mm=${this.selectedMinMatches}`
+
+            const req = await fetch(url);
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.perPage = res.perPage;
+            this.page = res.page;
+            this.totalResults = res.totalResults;
+            this.data = res.data;
+
+            console.log(res);
+
+            this.render();
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
+    }
+
+    createForm(){
+
+
+        const gametypeRow = UIDiv("form-row");
+        gametypeRow.append(UILabel("Gametype"));
+
+        const uniqueGametypes = this.uniqueGametypes.map((g) =>{
+
+            return {"display": g.gametype_name, "value": g.gametype_id};
+        });
+
+        uniqueGametypes.unshift({"display": "Any", "value": 0});
+        const gametypeSelect = new UISelect(gametypeRow, uniqueGametypes, this.selectedGametype, (e) =>{
+            this.selectedGametype = e;
+            this.loadData();
+        });
+
+        const typeRow = UIDiv("form-row");
+        typeRow.append(UILabel("Type"));
+
+        const typeSelect = new UISelect(typeRow, this.validTypes, this.selectedType, (e) =>{
+            this.selectedType = e;
+            this.loadData();
+        });
+
+        const minMatchesRow = UIDiv("form-row");
+        minMatchesRow.append(UILabel("Minimum Matches Played"));
+        
+        new UIMinMatchesSelect(minMatchesRow, this.selectedMinMatches, (e) =>{
+            this.selectedMinMatches = e;  
+            this.loadData();  
+        });
+
+        this.wrapper.append(gametypeRow, typeRow, minMatchesRow);
+    }
+
+    render(){
+
+        if(this.pagination === undefined){
+
+                this.pagination = new UIPagination(
+                    this.wrapper, 
+                    (e) => { 
+                        this.page = e;
+                        this.loadData();
+                    },
+                    this.totalResults,
+                    this.perPage,
+                    this.page + 1
+                );
+        }
+    }
+}

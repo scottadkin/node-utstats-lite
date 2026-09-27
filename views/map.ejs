@@ -31,6 +31,13 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
     const ctfLeagueSettings = <%- JSON.stringify(ctfLeagueSettings) %>
 
 
+    new UIMapPlayerRecords(
+                    "#root", 
+                    "<%= basic.id %>", 
+                    <%- JSON.stringify(uniqueGametypes) %>, 
+                    <%- JSON.stringify(validTypes["player-match"]) %>,
+                    "<%= seasonId %>"
+                );
 
     <%
     for(let i = 0; i < pageOrder.length; i++){

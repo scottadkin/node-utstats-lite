@@ -173,7 +173,18 @@ export default class JSONManager{
         const seasonId = this.querySanitizeInteger("season");
         const minMatches = this.querySanitizeInteger("mm");
         this.res.status(200).json(await getRecords("player-lifetime", cat, gid, id, page, perPage, minMatches, seasonId));
-       // this.res.status(200).json(await getMapPlayerTotals(id, gid, cat, page, perPage, seasonId));
+
+    }
+
+    async mapPlayerRecords(){
+
+        const id = this.querySanitizeInteger("id");
+        const cat = this.querySanitizeString("cat", true);
+        const gid = this.querySanitizeInteger("gid");
+        const {page, perPage} = this.getPageAndPerPage();
+        const seasonId = this.querySanitizeInteger("season");
+        const minMatches = this.querySanitizeInteger("mm");
+        this.res.status(200).json(await getRecords("player-match", cat, gid, id, page, perPage, minMatches, seasonId));
 
     }
 
@@ -360,6 +371,10 @@ export default class JSONManager{
 
                 return await this.mapPlayerTotals();
 
+            }else if(this.mode === "map-player-records"){
+
+                return await this.mapPlayerRecords();
+                
             }else if(this.mode === "map-ctf-league-gametypes"){
 
                 return await this.mapPlayerCTFLeagueGametypes();
