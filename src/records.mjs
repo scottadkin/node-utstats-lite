@@ -17,7 +17,7 @@ function sanitizeId(value){
 }
 
 
-async function getPlayerMatchCTFRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage, cleanMinimumMatchesPlayed){
+async function getPlayerMatchCTFRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage, cleanMinimumMatchesPlayed, seasonId){
 
 
     const nameT = "nstats_players"
@@ -37,14 +37,14 @@ async function getPlayerMatchCTFRecords(recordInfo, gametypeId, mapId, cleanStar
     ${cT}.${recordInfo.value} as record_value
     FROM ${cT} 
     LEFT JOIN ${nameT} ON ${cT}.player_id = ${nameT}.id
-    LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id
-    WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 AND ${cT}.total_matches>=?
+    LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id AND ${cT}.season_id = ${tT}.season_id
+    WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 AND ${cT}.total_matches>=? AND ${cT}.season_id=?
     ORDER BY ${cT}.${recordInfo.value} DESC LIMIT ${cleanStart}, ${cleanPerPage}`;
 
 
     const [result, totalResults] = await Promise.all([
-        simpleQuery(query, [gametypeId, mapId, cleanMinimumMatchesPlayed]), 
-        getTotalEntries("player-match", recordInfo, gametypeId, mapId, cleanMinimumMatchesPlayed)
+        simpleQuery(query, [gametypeId, mapId, cleanMinimumMatchesPlayed, seasonId]), 
+        getTotalEntries("player-match", recordInfo, gametypeId, mapId, cleanMinimumMatchesPlayed, seasonId)
     ]);
 
     return {"data": result, totalResults}
@@ -87,7 +87,7 @@ function getTotalsCTFTableQuery(recordType){
 
     FROM ${cT}
     LEFT JOIN ${nameT} ON ${cT}.player_id = ${nameT}.id
-    LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id
+    LEFT JOIN ${tT} ON ${cT}.player_id = ${tT}.player_id AND ${cT}.gametype_id = ${tT}.gametype_id AND ${cT}.map_id = ${tT}.map_id AND ${cT}.season_id = ${tT}.season_id
     WHERE ${cT}.gametype_id=? AND ${cT}.map_id=? AND record_value!=0 AND ${tT}.total_matches>=? AND ${tT}.season_id=?
     ORDER BY record_value DESC LIMIT ?, ?`;
 }
@@ -135,19 +135,18 @@ async function getTotalEntries(cleanMode, recordInfo, cleanGametypeId, cleanMapI
     if(table === "") throw new Error("No table found");
 
     let query = `SELECT COUNT(*) as total_rows FROM ${table} WHERE ${recordInfo.value}!=0 
-    AND gametype_id=? AND map_id=? AND ${table}.total_matches>=? AND nstats_player_totals.season_id=?`;
+    AND gametype_id=? AND map_id=? AND ${table}.total_matches>=? AND ${table}.season_id=?`;
 
     if(table === "nstats_player_totals_max" && !bCTF){
 
         query = `SELECT COUNT(*) as total_rows FROM ${table} 
         LEFT JOIN nstats_player_totals ON ${table}.player_id = nstats_player_totals.player_id 
         AND ${table}.gametype_id=nstats_player_totals.gametype_id 
-        AND ${table}.map_id=nstats_player_totals.map_id
+        AND ${table}.map_id=nstats_player_totals.map_id AND ${table}.season_id=nstats_player_totals.season_id
         WHERE ${recordInfo.value}!=0 AND ${table}.gametype_id=? AND ${table}.map_id=? AND nstats_player_totals.total_matches>=?
-        AND nstats_player_totals.season_id=?`
-        ;
+        AND ${table}.season_id=?`
+     
     }
-    
 
     const result = await simpleQuery(query, [cleanGametypeId, cleanMapId, cleanMinimumMatchesPlayed, seasonId]);
 
@@ -288,7 +287,7 @@ async function getPlayerEPMCTFRecords(recordInfo, gametypeId, mapId, cleanStart,
     return {data, totalResults}
 }
 
-async function getPlayerEPMRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage, cleanMinimumMatchesPlayed){
+async function getPlayerEPMRecords(recordInfo, gametypeId, mapId, cleanStart, cleanPerPage, cleanMinimumMatchesPlayed, seasonId){
 
     if(recordInfo.group === "CTF"){
 
@@ -340,7 +339,6 @@ async function getPlayerAVGRecords(recordInfo, gametypeId, mapId, cleanStartOffs
 
 export async function getRecords(mode, recordType, gametypeId, mapId, dirtyPage, dirtyPerPage, dirtyMinimumMatchesPlayed, seasonId){
 
-    try{
     if(!bValidRecordMode(mode)) throw new Error(`Not a valid record mode`);
 
     const recordInfo = getRecordTypeInfo(mode, recordType);
@@ -369,8 +367,6 @@ export async function getRecords(mode, recordType, gametypeId, mapId, dirtyPage,
     }
 
     return {page, perPage, "data": result.data, "totalResults": result.totalResults};
-    }catch(err){
-        console.trace(err);
-    }
+  
 
 }
