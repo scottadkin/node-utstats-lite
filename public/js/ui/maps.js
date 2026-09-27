@@ -742,7 +742,7 @@ class UIMapPlayerAverages{
         this.validTypes = validTypes;
         this.uniqueGametypes = uniqueGametypes;
         this.seasonId = parseInt(seasonId);
-        this.minMatches = 0;
+        this.selectedMinMatches = 0;
     
         this.data = [];
         this.totalResults = 0;
@@ -753,6 +753,7 @@ class UIMapPlayerAverages{
         this.info = new UIInfo(this.wrapper, this.getInfoContent());
         this.createGametypeSelect();
         this.createTypesSelect();
+        this.createMinMatchesSelect();
         
         
         this.parent.append(this.wrapper);
@@ -762,6 +763,19 @@ class UIMapPlayerAverages{
 
         this.loadData();
 
+    }
+
+    createMinMatchesSelect(){
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Min Matches Played"));
+
+        this.minMatchesSelect = new UIMinMatchesSelect(row, this.selectedMinMatches, (e) =>{
+            this.selectedMinMatches = e;
+            this.loadData();
+        });
+
+        this.wrapper.append(row);
     }
 
     createTypesSelect(){
@@ -878,7 +892,7 @@ class UIMapPlayerAverages{
 
 
             let urlParts = `${this.mapId}&page=${this.page}&perPage=${this.perPage}&cat=${this.selectedCat}`;
-            urlParts += `&season=${this.seasonId}&mm=${this.minMatches}`;
+            urlParts += `&season=${this.seasonId}&mm=${this.selectedMinMatches}`;
             const req = await fetch(`/json/map-player-averages/?id=${urlParts}&gid=${this.selectedGametype}&avgType=${this.mode}`);
 
             const res = await req.json();
@@ -1195,7 +1209,7 @@ class UIMapPlayerTotals{
         this.mapId = mapId;
         this.selectedCat = "kills";
         this.data = [];
-        this.minMatches = 0;
+        this.selectedMinMatches = 0;
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Totals");
@@ -1203,9 +1217,22 @@ class UIMapPlayerTotals{
 
         this.createGametypeSelect();
         this.createValidTypesSelect();
+        this.createMinMatchesSelect();
         this.loadData();
     }
 
+    createMinMatchesSelect(){
+
+        const row = UIDiv("form-row");
+        row.append(UILabel("Min Matches Played"));
+
+        this.minMatchesSelect = new UIMinMatchesSelect(row, this.selectedMinMatches, (e) =>{
+            this.selectedMinMatches = e;
+            this.loadData();
+        });
+
+        this.wrapper.append(row);
+    }
 
 
     createGametypeSelect(){
@@ -1249,7 +1276,7 @@ class UIMapPlayerTotals{
             let url = `/json/map-player-totals/`;
             url += `?id=${this.mapId}&gid=${this.selectedGametype}&season=${this.seasonId}`;
             url += `&cat=${this.selectedCat}&page=${this.page}&perPage=${this.perPage}`
-            url += `&mm=${this.minMatches}`
+            url += `&mm=${this.selectedMinMatches}`
 
 
             const req = await fetch(url);

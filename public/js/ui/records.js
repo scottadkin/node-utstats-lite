@@ -287,7 +287,7 @@ class RecordsPage{
 
             this.selectedGametype = parseInt(e);
             
-            if(!this.mapSelect.updateOptions(this.getMapOptions())){
+            if(!this.mapSelect.updateOptions(this.getMapOptions(), this.selectedMap)){
     
                 const newSel = this.mapSelect.options[0]?.value ?? 0;
                 this.mapSelect.changeSelected(newSel);

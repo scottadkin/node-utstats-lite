@@ -1083,6 +1083,19 @@ class UITimeZoneSelect{
         this.elem = new UISelect(parent, options, initialValue, callback);
     }
 }
+
+class UIMinMatchesSelect{
+
+    constructor(parent, initalValue, callback){
+
+        const options = [0, 5, 10, 15, 20, 25, 50, 100, 250, 500, 1000].map((v) =>{
+            return {"display": v, "value": v}
+        });
+
+
+        this.elem = new UISelect(parent, options, initalValue, callback);
+    }
+}
 /**
  * Get the thumbnail or fullsize map image from a getMapImages result
  * @param {Object} data 
