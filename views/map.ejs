@@ -31,13 +31,7 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
     const ctfLeagueSettings = <%- JSON.stringify(ctfLeagueSettings) %>
 
 
-    new UIMapPlayerRecords(
-                    "#root", 
-                    "<%= basic.id %>", 
-                    <%- JSON.stringify(uniqueGametypes) %>, 
-                    <%- JSON.stringify(validTypes["player-match"]) %>,
-                    "<%= seasonId %>"
-                );
+    
 
     <%
     for(let i = 0; i < pageOrder.length; i++){
@@ -74,7 +68,7 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
             } break;
 
             case "Display Player Top Averages": {
-                %>new UIMapPlayerAverages("#root", "<%= basic.id %>", validTypes, <%- JSON.stringify(uniqueGametypes) %>, "<%= seasonId %>");<%
+                %>new UIMapPlayerAverages("#root", "<%= basic.id %>", <%- JSON.stringify(validTypes["player-avg"]) %>, <%- JSON.stringify(uniqueGametypes) %>, "<%= seasonId %>");<%
             }  break;
 
             case "Display Activity Heatmap": {
@@ -97,7 +91,20 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
                     <%- JSON.stringify(validTypes["player-lifetime"]) %>,
                     "<%= seasonId %>"
                 );<%
-            }
+            } break;
+
+            case "Display Player Match Records": {
+
+                %>
+                new UIMapPlayerRecords(
+                    "#root", 
+                    "<%= basic.id %>", 
+                    <%- JSON.stringify(uniqueGametypes) %>, 
+                    <%- JSON.stringify(validTypes["player-match"]) %>,
+                    "<%= seasonId %>"
+                );
+                <%
+            } break;
         }
     }
     %>

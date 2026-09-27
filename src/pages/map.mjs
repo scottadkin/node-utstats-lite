@@ -1,8 +1,8 @@
-import { getAllUniquePlayedGametypes, getMapInfo, VALID_PLAYER_EPM_AVERAGES } from "../maps.mjs";
+import { getAllUniquePlayedGametypes, getMapInfo } from "../maps.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getMapWeaponStats } from "../weapons.mjs";
-import { VALID_PLAYER_EPM_TYPES, VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
+import { VALID_PLAYER_EPM_TYPES, VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_AVG_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getLeagueCategorySettings } from "../ctfLeague.mjs";
 
 export async function renderMapPage(req, res, userSession){
@@ -58,7 +58,8 @@ export async function renderMapPage(req, res, userSession){
             "validTypes": {
                 "player-match": VALID_PLAYER_MATCH_TYPES, 
                 "player-epm": VALID_PLAYER_EPM_TYPES,
-                "player-lifetime": VALID_PLAYER_LIFETIME_TYPES
+                "player-lifetime": VALID_PLAYER_LIFETIME_TYPES,
+                "player-avg": VALID_PLAYER_MATCH_AVG_TYPES,
             },
             
             "meta": {"description": description, "image": `images/maps/${basic.image.fullSize}`},

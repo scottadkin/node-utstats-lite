@@ -21,6 +21,7 @@ const DEFAULT_PAGE_LAYOUTS = {
         "Weapon Statistics", 
         "CTF League", 
         "Player Top Averages",
+        "Player Match Records",
         "Player Totals"
     ],
     "match": [

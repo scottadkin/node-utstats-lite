@@ -785,9 +785,9 @@ class UIMapPlayerAverages{
         row.append(UILabel("Type"));
 
 
-        const validTypes = (this.mode === "player-avg") ? this.validTypes["player-match"] : this.validTypes["player-epm"];
+    
 
-        this.catSelect = new UISelect(row, validTypes, this.selectedCat, (e) =>{
+        this.catSelect = new UISelect(row, this.validTypes, this.selectedCat, (e) =>{
             this.selectedCat = e;
      
             this.loadData();
@@ -857,12 +857,11 @@ class UIMapPlayerAverages{
             this.mode = e.detail.newTab;
 
       
-            const validTypes = (this.mode === "player-avg") ? this.validTypes["player-match"] : this.validTypes["player-epm"];
-
+          
             
-            if(!this.catSelect.updateOptions(validTypes, this.mode)){
+            if(!this.catSelect.updateOptions(this.validTypes, this.mode)){
 
-                this.selectedCat = validTypes[0].value;
+                this.selectedCat = this.validTypes[0].value;
                 this.catSelect.changeSelected(this.selectedCat);
             }
 
@@ -873,13 +872,12 @@ class UIMapPlayerAverages{
 
     getTableHeaderTitle(mode, selectedCat){
 
-        if(mode === "player-avg") mode = "player-match";
 
-        if(this.validTypes[mode] === undefined) throw new Error(`cant find validTypes category`);
+        if(this.validTypes=== undefined) throw new Error(`cant find validTypes category`);
 
-        for(let i = 0; i < this.validTypes[mode].length; i++){
+        for(let i = 0; i < this.validTypes.length; i++){
 
-            const v = this.validTypes[mode][i];
+            const v = this.validTypes[i];
 
             if(v.value === selectedCat) return v.display;
         }
@@ -1190,6 +1188,19 @@ class UIMapCTFLeague{
     }
 }
 
+
+function getTitleFromValidTypes(validTypes, target){
+
+    for(let i = 0; i < validTypes.length; i++){
+
+        const {value, display} = validTypes[i];
+
+        if(value === target) return display;
+    }
+
+    return "NOT FOUND";
+}
+
 class UIMapPlayerTotals{
 
     constructor(parent, mapId, uniqueGametypes, validTypes, seasonId){
@@ -1298,21 +1309,11 @@ class UIMapPlayerTotals{
         }
     }
 
-    getTitle(target){
-
-        for(let i = 0; i < this.validTypes.length; i++){
-
-            const {value, display} = this.validTypes[i];
-
-            if(value === target) return display;
-        }
-
-        return "NOT FOUND";
-    }
+   
 
     render(){
 
-        const title = this.getTitle(this.selectedCat);
+        const title = getTitleFromValidTypes(this.validTypes, this.selectedCat);
 
         const tableOptions = {
             "className": "t-width-1",
@@ -1336,7 +1337,7 @@ class UIMapPlayerTotals{
             let className = "";
 
             if(this.selectedCat === "playtime"){
-                value = toPlaytime(d.playtime);
+                value = toPlaytime(value);
                 className = "playtime";
             }else if(this.selectedCat === "winrate" || this.selectedCat === "efficiency"){
                 value = `${value.toFixed(2)}%`;
@@ -1442,7 +1443,7 @@ class UIMapPlayerRecords{
             this.totalResults = res.totalResults;
             this.data = res.data;
 
-            console.log(res);
+            console.log(this.data);
 
             this.render();
 
@@ -1491,18 +1492,74 @@ class UIMapPlayerRecords{
 
     render(){
 
+        const title = getTitleFromValidTypes(this.validTypes, this.selectedType);
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "bNoSort": true,
+            "headers": [
+                {"display": "Place"},
+                {"display": "Player"},
+                {"display": "Last Seen"},
+                {"display": "Matches Played"},
+                {"display": "Total Playtime"},
+                {"display": title},
+            ]
+        };
+
+        const rows = this.data.map((d, i) =>{
+
+            const place = i + 1 + (this.page) * this.perPage;
+
+
+            let value = d.record_value;
+            let className = "";
+
+            if(this.selectedType === "max_playtime"){
+                value = toPlaytime(value);
+                className = "playtime";
+            }
+
+            return [
+                {"display": `${place}${getOrdinal(place)}`, "value": i, "className": "ordinal"},
+                {
+                    "display": UIPlayerLink({
+                        "playerId": d.player_id,
+                        "name": d.player_name,
+                        "country": d.country,
+                        "bTableElem": true
+                    }),
+                    "bSkipTD": true,
+                },
+                {
+                    "display": toDateString(d.last_active, TIME_ZONE,true), "className": "playtime"
+                },
+                {"display": d.total_matches},
+                {"display": toPlaytime(d.playtime), "className": "playtime"},
+                {"display": value, className},
+            ];
+        });
+
+
+
+        if(this.table === undefined){
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+        }else{
+            this.table.updateRows(rows, tableOptions.headers);
+        }
+
         if(this.pagination === undefined){
 
-                this.pagination = new UIPagination(
-                    this.wrapper, 
-                    (e) => { 
-                        this.page = e;
-                        this.loadData();
-                    },
-                    this.totalResults,
-                    this.perPage,
-                    this.page + 1
-                );
+            this.pagination = new UIPagination(
+                this.wrapper, 
+                (e) => { 
+                    this.page = e;
+                    this.loadData();
+                },
+                this.totalResults,
+                this.perPage,
+                this.page + 1
+            );
         }
     }
 }

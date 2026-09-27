@@ -67,7 +67,8 @@ export async function renderSeasonMapPage(req, res){
             "validTypes": {
                 "player-match": VALID_PLAYER_MATCH_TYPES, 
                 "player-epm": VALID_PLAYER_EPM_TYPES,
-                "player-lifetime": VALID_PLAYER_LIFETIME_TYPES
+                "player-lifetime": VALID_PLAYER_LIFETIME_TYPES,
+                "player-avg": VALID_PLAYER_MATCH_AVG_TYPES,
             },
             
             "meta": {"description": description, "image": `images/maps/${basic.image.fullSize}`},

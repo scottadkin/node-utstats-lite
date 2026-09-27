@@ -342,7 +342,7 @@ export async function getRecords(mode, recordType, gametypeId, mapId, dirtyPage,
     if(!bValidRecordMode(mode)) throw new Error(`Not a valid record mode`);
 
     const recordInfo = getRecordTypeInfo(mode, recordType);
-    if(recordInfo === null) throw new Error(`Not a valid recordType for ${mode}`);
+    if(recordInfo === null) throw new Error(`Not a valid recordType for ${mode}, looking for ${recordType}`);
 
     gametypeId = sanitizeId(gametypeId);
     mapId = sanitizeId(mapId);
