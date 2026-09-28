@@ -826,6 +826,7 @@ export function createTableQueries(){
                 ) STRICT`,
                  //moved to top of install scriot
             //`CREATE UNIQUE INDEX IF NOT EXISTS psm_idx ON nstats_map_rankings(player_id,season_id, map_id)`,
+            `DROP INDEX IF EXISTS pm_idx`,
 
 
             `CREATE TABLE IF NOT EXISTS nstats_classic_weapon_match_stats (
@@ -1382,6 +1383,11 @@ async function addSeasonColumnsToRankings(){
         `CREATE UNIQUE INDEX IF NOT EXISTS psg_idx ON nstats_rankings(player_id,season_id,gametype_id)`,
         `CREATE UNIQUE INDEX IF NOT EXISTS psm_idx ON nstats_map_rankings(player_id,season_id, map_id)`
     ];
+
+    for(let i = 0; i < queries.length; i++){
+
+        await simpleQuery(queries[i]);
+    }
 }
 
 export async function sqliteInstall(bOnlyCreateTables){

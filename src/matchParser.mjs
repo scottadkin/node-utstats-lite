@@ -296,8 +296,21 @@ export class MatchParser{
        
         const uniquePlayerIds = this.players.getUniquePlayerIds();
 
-        await calculateRankings(this.gametype.id, uniquePlayerIds);
-        await calculateRankings(this.map.id, uniquePlayerIds, "map");
+
+        const rankingPromises = [
+            calculateRankings(0, this.gametype.id, uniquePlayerIds),
+            calculateRankings(0, this.map.id, uniquePlayerIds, "map")
+        ];
+
+
+        if(seasonId !== 0){
+            rankingPromises.push(
+                calculateRankings(seasonId, this.gametype.id, uniquePlayerIds),
+                calculateRankings(seasonId, this.map.id, uniquePlayerIds, "map")
+            );
+        }
+
+        await Promise.all(rankingPromises);
        
         const hashVars = [this.map.name, 
             this.gametype.name, 
