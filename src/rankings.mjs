@@ -361,16 +361,16 @@ export async function calculateRankings(seasonId, targetId, playerIds, type){
 
 
 
-async function getRankingPlayerCount(targetId, minDate, type){
+async function getRankingPlayerCount(seasonId, targetId, minDate, type){
 
 
-    let query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=? AND last_active>=?`;
+    let query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=? AND last_active>=? AND season_id=?`;
 
     if(type === "map"){
-        query = `SELECT COUNT(*) as total_rows FROM nstats_map_rankings WHERE map_id=? AND last_active>=?`;
+        query = `SELECT COUNT(*) as total_rows FROM nstats_map_rankings WHERE map_id=? AND last_active>=? AND season_id=?`;
     }
 
-    const result = await simpleQuery(query, [targetId, minDate]);
+    const result = await simpleQuery(query, [targetId, minDate, seasonId]);
 
     return result[0].total_rows;
 }
@@ -385,7 +385,7 @@ async function getRankingPlayerCount(targetId, minDate, type){
  * @param {*} type if undefined will fetch gametype rankings
  * @returns 
  */
-export async function getRankings(targetId, page, perPage, timeRange, type){
+export async function getRankings(seasonId, targetId, page, perPage, timeRange, type){
 
     if(type === undefined) type = "gametype";
 
@@ -398,14 +398,26 @@ export async function getRankings(targetId, page, perPage, timeRange, type){
 
     const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
 
-    let query = `SELECT * FROM nstats_rankings WHERE gametype_id=? AND last_active>=? ORDER by score DESC LIMIT ?, ?`;
 
-    if(type === "map"){
-        query = `SELECT * FROM nstats_map_rankings WHERE map_id=? AND last_active>=? ORDER by score DESC LIMIT ?, ?`;
-    }
+    const rT = (type === "gametype") ? "nstats_rankings" : "nstats_map_rankings";
+    const pT = "nstats_players";
+    const targetColumn = (type === "gametype") ? "gametype_id" : "map_id";
 
-    const data = await simpleQuery(query, [targetId, minDate, start, cleanPerPage]);
-    const totalResults = await getRankingPlayerCount(targetId, minDate, type);
+    const query = `SELECT ${rT}.player_id,
+    ${rT}.matches,
+    ${rT}.playtime,
+    ${rT}.score,
+    ${rT}.last_active,
+    ${pT}.name,
+    ${pT}.country
+    FROM ${rT} 
+    LEFT JOIN ${pT} ON ${pT}.id = ${rT}.player_id
+    WHERE ${rT}.${targetColumn}=? AND ${rT}.last_active>=? AND ${rT}.season_id=? ORDER by ${rT}.score DESC LIMIT ?, ?`;
+
+
+
+    const data = await simpleQuery(query, [targetId, minDate, seasonId, start, cleanPerPage]);
+    const totalResults = await getRankingPlayerCount(seasonId, targetId, minDate, type);
 
     return {data, totalResults};
 }
@@ -681,8 +693,11 @@ export async function recalculateMap(seasonId, id){
 }
 
 
+
+
 export async function getRankingsWithPlayerNames(targetId, page, perPage, timeRange, type){
 
+    throw new Error("Dont use this function");
     const {totalResults, data} = await getRankings(targetId, page, perPage, timeRange, type);
 
 

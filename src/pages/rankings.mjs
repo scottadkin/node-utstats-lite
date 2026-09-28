@@ -1,7 +1,8 @@
 import { 
     getMinMatchesSetting, getMostActiveInTimeRange, 
     getRankingsWithPlayerNames, 
-    getUniqueGametypes, getUniqueMaps, getRankingSettings 
+    getUniqueGametypes, getUniqueMaps, getRankingSettings, 
+    getRankings
 } from "../rankings.mjs";
 import { getGametypeNames } from "../gametypes.mjs";
 import { getNamesByIds as getMapNames } from "../maps.mjs";
@@ -24,6 +25,9 @@ export async function renderRankingsPage(req, res, userSession){
         let page = (req.query.p !== undefined) ? parseInt(req.query.p) : 1;
         let perPage = req.query.pp ?? pageSettings["Results Per Page"] ?? 25;
         let targetId = (req.query.id !== undefined) ? parseInt(req.query.id) : 0;
+        let seasonId = req.params?.season ?? 0;
+
+        console.log(seasonId);
 
         let defaultLastActive = 28;
 
@@ -37,67 +41,12 @@ export async function renderRankingsPage(req, res, userSession){
 
         const timeRange = defaultLastActive;
 
-        if(targetId === 0){
+        const data = await getRankings(seasonId, targetId, page, perPage, timeRange, mode);
 
-            targetId = await getMostActiveInTimeRange(mode, timeRange);
-        }
+        console.log(data);
 
-        let title = `Player Rankings`;
-
-        let ids = [];
-
-        let typeName = "";
-
-        if(mode === "gametype"){
-
-            
-            
-            
-            ids = await getUniqueGametypes();
-
-            if(targetId === 0 && ids.length > 0){
-                targetId = ids[0];
-            }
-
-            if(targetId !== 0){
-                const names = await getGametypeNames(targetId, true);
-                typeName = `${names[targetId]}` ?? "Not Found ";
-            }
-            title = `${typeName} Player Gametype Rankings`;
-
-
-        }else if(mode === "map"){
-  
-            
-
-            
-            ids = await getUniqueMaps();
-
-            if(targetId === 0 && ids.length > 0){
-                targetId = ids[0];
-            }
-
-            if(targetId !== 0){
-                const names = await getMapNames(targetId);
-                typeName = `${names?.[targetId]}` ?? "Not Found ";
-            }
-            title = `${typeName} Player Map Rankings`;
-        }
-
-        const data = await getRankingsWithPlayerNames(targetId, page, perPage, timeRange, mode);
-
-        let itemNames = [];
-        
-        if(mode === "gametype"){
-
-            itemNames = await getGametypeNames(ids, true);
-
-        }else if(mode === "map"){
-            itemNames = await getMapNames(ids);
-        }
-
-        const brandingSettings = await getCategorySettings("Branding");
-        title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+        let title = "title";
+        const itemNames = [];
 
 
         const minMatchesSetting = await getMinMatchesSetting(mode);
@@ -105,7 +54,7 @@ export async function renderRankingsPage(req, res, userSession){
         res.render("rankings.ejs",{
             "host": req.headers.host,
             "title": title,
-            "meta": {"description": `View player rankings for ${typeName}.`, "image": "images/maps/default/jpg"},
+            "meta": {"description": `UPDATE DESCRIPTION View player rankings.`, "image": "images/maps/default/jpg"},
             mode,
             data,
             "names": itemNames,
@@ -117,7 +66,9 @@ export async function renderRankingsPage(req, res, userSession){
             pageSettings,
             rankingSettings,
             minMatchesSetting,
-            timeZone
+            timeZone,
+            "seasonId": 0,
+            "bSeasonPage": false
         });
     }catch(err){
         res.send(err.toString());
