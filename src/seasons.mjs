@@ -478,3 +478,42 @@ export async function seasonGetAllMapIds(seasonId){
         return r.map_id
     });
 }
+
+
+export async function seasonGetAllMapNames(seasonId){
+
+    const query = `SELECT DISTINCT nstats_seasons_maps.map_id, nstats_maps.name FROM nstats_seasons_maps 
+    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id
+    WHERE nstats_seasons_maps.season_id=?`;
+
+
+    const result = await simpleQuery(query, [seasonId]);
+
+    const data = {};
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.map_id] = r.name;
+    }
+    return data;
+}
+
+export async function seasonGetAllGametypeNames(seasonId){
+
+    const query = `SELECT DISTINCT nstats_seasons_gametypes.gametype_id, nstats_gametypes.name FROM nstats_seasons_gametypes
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_seasons_gametypes.gametype_id
+    WHERE nstats_seasons_gametypes.season_id=?`;
+
+
+    const result = await simpleQuery(query, [seasonId]);
+
+    const data = {};
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        data[r.gametype_id] = r.name;
+    }
+    return data;
+}

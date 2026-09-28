@@ -1,13 +1,13 @@
 import { getPlayerActivityHeatmapData, getPlayerAllGametypesAndMaps, getPlayerRecentMatches } from "../players.mjs";
 import { getTotalMatches, getMatchesByHashes, getActivtyHeatMapData, getRecentMatches } from "../matches.mjs";
 import  {getRecentMatches as getMapRecentMatches, getMapPlayerAverages, searchMaps, getMapPlayerTotals} from "../maps.mjs";
-import { getRankingsWithPlayerNames } from "../rankings.mjs";
 import { getMapCTFTable, getMapUniqueGametypeLeagues } from "../ctfLeague.mjs";
 import { getPlayersByHashes, searchPlayers } from "../players.mjs";
 import { getKillsGraphData } from "../kills.mjs";
 import { getMatchWeaponDamage } from "../playerWeaponDamage.mjs";
 import { getRecords } from "../records.mjs";
 import { searchSeasonMatches } from "../seasons.mjs";
+import { getRankings } from "../rankings.mjs";
 
 export default class JSONManager{
 
@@ -139,7 +139,10 @@ export default class JSONManager{
         if(timeRange !== timeRange) timeRange = null;
         if(timeRange === null) throw new Error(`TimeRange must be an intger, example 5 would mean active players in last 5 days.`);
 
-        const {data, totalResults} = await getRankingsWithPlayerNames(id, page, perPage, timeRange, "map");
+        const seasonId = this.querySanitizeInteger("season");
+        
+
+        const {data, totalResults} = await getRankings(seasonId, id, page, perPage, timeRange, "map")
 
         return this.res.status(200).json({data, totalResults});
    

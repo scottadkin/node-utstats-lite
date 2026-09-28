@@ -693,32 +693,6 @@ export async function recalculateMap(seasonId, id){
 }
 
 
-
-
-export async function getRankingsWithPlayerNames(targetId, page, perPage, timeRange, type){
-
-    throw new Error("Dont use this function");
-    const {totalResults, data} = await getRankings(targetId, page, perPage, timeRange, type);
-
-
-    const playerIds = new Set([...data.map((d) =>{
-        return d.player_id;
-    })]);
-
-    const playerInfo = await getBasicPlayerInfo([...playerIds]);
-
-    for(let i = 0; i < data.length; i++){
-
-        const d = data[i];
-
-        d.name = playerInfo[d.player_id]?.name || "Not Found";
-        d.country = playerInfo[d.player_id]?.country || "xx";
-    }
-
-    return {totalResults, data}
-}
-
-
 export async function getUniqueMaps(){
 
     const query = `SELECT DISTINCT map_id FROM nstats_map_rankings`;
@@ -743,20 +717,20 @@ export async function getUniqueGametypes(){
 }
 
 //use for rankings main page instead of just using the latest
-export async function getMostActiveInTimeRange(type, timeRange){
+export async function getMostActiveInTimeRange(seasonId, type, timeRange){
 
 
     const gametypeQuery = `SELECT gametype_id as id,COUNT(*) as total_players FROM nstats_rankings 
-    WHERE last_active>=? GROUP BY gametype_id ORDER BY total_players DESC LIMIT 1`;
+    WHERE last_active>=? AND season_id=? GROUP BY gametype_id ORDER BY total_players DESC LIMIT 1`;
 
     const mapQuery = `SELECT map_id as id,COUNT(*) as total_players FROM nstats_map_rankings 
-    WHERE last_active>=? GROUP BY map_id ORDER BY total_players DESC LIMIT 1`;
+    WHERE last_active>=? AND season_id=? GROUP BY map_id ORDER BY total_players DESC LIMIT 1`;
 
     const query = (type === "map") ? mapQuery : gametypeQuery;
 
     const minDate = new Date(Date.now() - 60 * 60 * 24 * 1000 * timeRange);
 
-    const result = await simpleQuery(query, [minDate]);
+    const result = await simpleQuery(query, [minDate, seasonId]);
 
     if(result.length === 0) return 0;
     return result[0].id;

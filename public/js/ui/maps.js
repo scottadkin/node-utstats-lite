@@ -601,11 +601,12 @@ class UIMapWeaponsSummary{
 
 class UIMapPlayerRankings{
 
-    constructor(parent, mapId){
+    constructor(parent, mapId, seasonId){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
-
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
         this.page = 1;
         this.perPage = 10;
         this.data = [];
@@ -630,7 +631,7 @@ class UIMapPlayerRankings{
 
         try{
 
-            const urlParts = `${this.mapId}&timeRange=${this.timeRange}&page=${this.page}&perPage=${this.perPage}`;
+            const urlParts = `${this.mapId}&season=${this.seasonId}&timeRange=${this.timeRange}&page=${this.page}&perPage=${this.perPage}`;
             const req = await fetch(`/json/map-rankings/?id=${urlParts}`);
 
             const res = await req.json();

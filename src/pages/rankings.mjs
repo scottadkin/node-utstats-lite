@@ -1,17 +1,13 @@
 import { 
-    getMinMatchesSetting, getMostActiveInTimeRange, 
-    getRankingsWithPlayerNames, 
-    getUniqueGametypes, getUniqueMaps, getRankingSettings, 
+    getMinMatchesSetting, getMostActiveInTimeRange, getRankingSettings, 
     getRankings
 } from "../rankings.mjs";
-import { getGametypeNames } from "../gametypes.mjs";
-import { getNamesByIds as getMapNames } from "../maps.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
+import { seasonGetAllGametypeNames, seasonGetAllMapNames } from "../seasons.mjs";
 
 export async function renderRankingsPage(req, res, userSession){
 
     try{
-
 
         const pageSettings = await getCategorySettings("Rankings");
         const timeZone = await getSiteWideTimeZone();
@@ -27,8 +23,6 @@ export async function renderRankingsPage(req, res, userSession){
         let targetId = (req.query.id !== undefined) ? parseInt(req.query.id) : 0;
         let seasonId = req.params?.season ?? 0;
 
-        console.log(seasonId);
-
         let defaultLastActive = 28;
 
         if(req.query.tf !== undefined){
@@ -41,13 +35,14 @@ export async function renderRankingsPage(req, res, userSession){
 
         const timeRange = defaultLastActive;
 
+        if(targetId === 0){
+            targetId = await getMostActiveInTimeRange(seasonId, mode, timeRange);
+        }
+
         const data = await getRankings(seasonId, targetId, page, perPage, timeRange, mode);
 
-        console.log(data);
-
         let title = "title";
-        const itemNames = [];
-
+        const itemNames = (mode === "gametype") ? await seasonGetAllGametypeNames(seasonId)  : await seasonGetAllMapNames(seasonId);
 
         const minMatchesSetting = await getMinMatchesSetting(mode);
 
