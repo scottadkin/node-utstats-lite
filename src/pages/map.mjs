@@ -31,7 +31,7 @@ export async function renderMapPage(req, res, userSession){
         let weaponStats = null;
 
         if(pageSettings["Display Weapon Statistics"] === 1){
-            weaponStats = await getMapWeaponStats(basic.id);
+            weaponStats = await getMapWeaponStats(0, basic.id);
         }
 
         const brandingSettings = await getCategorySettings("Branding");

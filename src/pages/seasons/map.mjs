@@ -41,7 +41,7 @@ export async function renderSeasonMapPage(req, res){
         let weaponStats = null;
 
         if(pageSettings["Display Weapon Statistics"] === 1){
-            weaponStats = await getMapWeaponStats(basic.id);
+            weaponStats = await getMapWeaponStats(seasonId, basic.id);
         }
 
         const brandingSettings = await getCategorySettings("Branding");
