@@ -604,14 +604,23 @@ export async function getTotalMatches(id){
     return result[0].total_matches;
 }
 
-export async function getTotalPlaytimeAndMatches(id, gametypeId){
+export async function getTotalPlaytimeAndMatches(seasonId, id, gametypeId){
 
+    if(arguments.length === 2) throw new Error(`need to add seasonId`);
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
     let where = "map_id=?";
     const vars = [id];
 
     if(gametypeId !== 0){
         where += ` AND gametype_id=?`;
         vars.push(gametypeId);
+    }
+
+    if(seasonId !== 0){
+        where += ` AND season_id=?`;
+        vars.push(seasonId);
     }
 
     const query = `SELECT COUNT(*) as total_matches, SUM(playtime) as total_playtime FROM nstats_matches WHERE ${where}`;

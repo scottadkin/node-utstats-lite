@@ -809,10 +809,13 @@ export function createTableQueries(){
                 max_kills INTEGER NOT NULL,
                 max_deaths INTEGER NOT NULL,
                 max_suicides INTEGER NOT NULL,
-                max_team_kills INTEGER NOT NULL
+                max_team_kills INTEGER NOT NULL,
+                season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
             `DROP INDEX IF EXISTS mw_idx`,//replaced with mgw_idx below
-            `CREATE UNIQUE INDEX IF NOT EXISTS mgw_idx ON nstats_map_weapon_totals(map_id,gametype_id,weapon_id)`,
+            `DROP INDEX IF EXISTS mgw_idx`,//replaced with msgw_idx below
+            //moved to top of install script
+            //`CREATE UNIQUE INDEX IF NOT EXISTS mgsw_idx ON nstats_map_weapon_totals(map_id,season_id,gametype_id,weapon_id)`,
 
             `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -824,7 +827,7 @@ export function createTableQueries(){
                 last_active TEXT NOT NULL,
                 season_id INTEGER NOT NULL DEFAULT 0
                 ) STRICT`,
-                 //moved to top of install scriot
+                 //moved to top of install script
             //`CREATE UNIQUE INDEX IF NOT EXISTS psm_idx ON nstats_map_rankings(player_id,season_id, map_id)`,
             `DROP INDEX IF EXISTS pm_idx`,
 
@@ -1103,6 +1106,10 @@ async function updateMapWeaponTotalsTable(){
     await addColumn("nstats_map_weapon_totals", "max_deaths", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_map_weapon_totals", "max_suicides", "INTEGER NOT NULL DEFAULT 0");
     await addColumn("nstats_map_weapon_totals", "max_team_kills", "INTEGER NOT NULL DEFAULT 0");
+    await addColumn("nstats_map_weapon_totals", "season_id", "INTEGER NOT NULL DEFAULT 0");
+
+    await simpleQuery(`CREATE UNIQUE INDEX IF NOT EXISTS mgsw_idx ON nstats_map_weapon_totals(map_id,season_id,gametype_id,weapon_id)`);
+    //`CREATE UNIQUE INDEX IF NOT EXISTS mgsw_idx ON nstats_map_weapon_totals(map_id,season_id,gametype_id,weapon_id)`
     new Message("Updated nstats_map_weapon_totals", "pass");
 }
 
@@ -1403,10 +1410,18 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     await addColumn("nstats_matches", "absolute_time", `TEXT NOT NULL DEFAULT "1999.11.22.01.01.01.000.0"`);
 
+    //2.9.0
+    await addBCTFBDOMMapGametypes();
+
     //2.10.0
     await addSeasonColumnToMatches();
     await addSeasonColumnToPlayerTotals();
     await addSeasonColumnsToRankings();
+
+    //2.6.0
+    await updatePlayerWeaponTotalsTable();
+    //2.6.0 & 2.10.0
+    await updateMapWeaponTotalsTable();
 
 
    const queries = createTableQueries("");
@@ -1419,14 +1434,10 @@ export async function sqliteInstall(bOnlyCreateTables){
     }
 
 
-    //2.6.0
-    await updatePlayerWeaponTotalsTable();
-    //2.6.0
-    await updateMapWeaponTotalsTable();
+    
 
 
-    //2.9.0
-    await addBCTFBDOMMapGametypes();
+    
 
 
     new Message("Inserting Default Rankings Settings", "note");

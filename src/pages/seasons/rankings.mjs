@@ -15,6 +15,8 @@ export async function renderSeasonRankingsPage(req, res, userSession){
 
         const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId} = await sanitizeRankingsPageReq(req, pageSettings);
 
+        if(seasonId === 0) throw new Error(`No season with id of 0`);
+
         const data = await getRankings(seasonId, targetId, page, perPage, timeRange, mode);
 
         let title = `${typeName} - ${titleName} Season Rankings`;

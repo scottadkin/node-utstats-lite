@@ -696,14 +696,8 @@ export async function setMatchMapGametypeIds(data){
     await Promise.all(queries);
 }
 
-async function deleteMapWeaponTotals(mapId){
 
-    const query = `DELETE FROM nstats_map_weapon_totals WHERE map_id=?`;
-
-    return await simpleQuery(query, [mapId]);
-}
-
-async function bulkInsertMapWeaponTotals(totals){
+async function bulkInsertMapWeaponTotals(seasonId, totals){
 
     const t = `nstats_map_weapon_totals`;
 
@@ -731,6 +725,7 @@ async function bulkInsertMapWeaponTotals(totals){
             d.max_deaths,
             d.max_suicides,
             d.max_team_kills,
+            seasonId
         ]);
     }
 
@@ -740,19 +735,29 @@ async function bulkInsertMapWeaponTotals(totals){
         "map_id", "total_matches", "total_playtime", "weapon_id", "kills", 
         "deaths", "suicides", "team_kills", "kills_per_min", "deaths_per_min", 
         "team_kills_per_min", "suicides_per_min", "gametype_id", "max_kills",
-        "max_deaths", "max_suicides", "max_team_kills"
+        "max_deaths", "max_suicides", "max_team_kills", "season_id"
     ];
 
-    return await sqlInsertOnDuplicateUpdate(t,columns, insertVars, ["map_id", "gametype_id", "weapon_id"]);
+    return await sqlInsertOnDuplicateUpdate(t,columns, insertVars, ["map_id", "season_id", "gametype_id", "weapon_id"]);
     //await bulkInsert(query, insertVars);
 }
 
-async function calcMapWeaponTotalsFromMatchTable(mapId, gametypeId){
+async function calcMapWeaponTotalsFromMatchTable(seasonId, mapId, gametypeId){
 
 
     let gametypeIdString = "";
+
+    const vars = [];
+
     let whereString = "WHERE map_id=?";
-    const vars = [mapId];
+    vars.push(mapId);
+
+    if(seasonId !== 0){
+        whereString += ` AND EXISTS (SELECT 1 
+        FROM nstats_matches WHERE nstats_matches.id = nstats_match_weapon_stats.match_id AND nstats_matches.season_id=?)`;
+        vars.push(seasonId);
+    }
+
 
     if(gametypeId !== 0){
         vars.push(gametypeId);
@@ -772,6 +777,7 @@ async function calcMapWeaponTotalsFromMatchTable(mapId, gametypeId){
     FROM nstats_match_weapon_stats ${whereString} GROUP BY ${gametypeIdString}weapon_id`;
 
     return await simpleQuery(query, vars);
+
 }
 
 
@@ -811,19 +817,22 @@ function setXPH(data, totalMatches, playtime, mapId, gametypeId){
     }
 }
 
-export async function calcMapWeaponsTotals(mapId, gametypeId){
+export async function calcMapWeaponsTotals(seasonId, mapId, gametypeId){
 
-    const gametypeData = await calcMapWeaponTotalsFromMatchTable(mapId, gametypeId);
-    const allTimeData = await calcMapWeaponTotalsFromMatchTable(mapId, 0);
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
-    const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(mapId, 0);
-    const {playtime: gametypePlaytime, matches: gametypeMatches} = await getTotalPlaytimeAndMatches(mapId, gametypeId);
+    const gametypeData = await calcMapWeaponTotalsFromMatchTable(seasonId, mapId, gametypeId);
+    const allTimeData = await calcMapWeaponTotalsFromMatchTable(seasonId, mapId, 0);
+
+    const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(seasonId, mapId, 0);
+    const {playtime: gametypePlaytime, matches: gametypeMatches} = await getTotalPlaytimeAndMatches(seasonId, mapId, gametypeId);
 
     setXPH(allTimeData, allTimeMatches, allTimePlaytime, mapId, 0);
     setXPH(gametypeData, gametypeMatches, gametypePlaytime, mapId, gametypeId);
 
-    await bulkInsertMapWeaponTotals(allTimeData);
-    await bulkInsertMapWeaponTotals(gametypeData);
+    await bulkInsertMapWeaponTotals(seasonId, allTimeData);
+    await bulkInsertMapWeaponTotals(seasonId, gametypeData);
 }
 
 

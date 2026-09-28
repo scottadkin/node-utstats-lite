@@ -336,8 +336,14 @@ export class MatchParser{
             await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
         }
         
+
+        const mapWeaponTotalPromises = [this.weapons.updateMapTotals(0, this.map.id, this.gametype.id)];
       
-        await this.weapons.updateMapTotals(this.map.id, this.gametype.id);
+        if(seasonId !== 0){
+            mapWeaponTotalPromises.push(this.weapons.updateMapTotals(seasonId, this.map.id, this.gametype.id));
+        }
+
+        await Promise.all(mapWeaponTotalPromises);
 
         if(this.classicWeaponStats.lines.length > 0){
             await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);

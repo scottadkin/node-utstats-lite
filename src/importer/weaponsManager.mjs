@@ -155,9 +155,9 @@ export class WeaponsManager{
  
     }
 
-    async updateMapTotals(mapId, gametypeId){
+    async updateMapTotals(seasonId, mapId, gametypeId){
 
-        await calcMapWeaponsTotals(mapId, gametypeId);
+        await calcMapWeaponsTotals(seasonId, mapId, gametypeId);
     }
 
 

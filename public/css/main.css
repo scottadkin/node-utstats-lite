@@ -108,7 +108,8 @@ nav a:hover{
 
 #season-banner{
     background-color:var(--bg-header-color);
-    font-size:12px;
+    font-size:var(--font-size-100);
+    padding:var(--padding-2);
 }
 
 footer{ 

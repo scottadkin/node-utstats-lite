@@ -765,6 +765,7 @@ export async function sanitizeRankingsPageReq(req, pageSettings){
     let perPage = req.query.pp ?? pageSettings["Results Per Page"] ?? 25;
     let targetId = (req.query.id !== undefined) ? parseInt(req.query.id) : 0;
     let seasonId = req.params?.season ?? 0;
+    seasonId = parseInt(seasonId);
 
     let defaultLastActive = 28;
 
