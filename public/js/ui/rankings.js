@@ -1,8 +1,10 @@
 class RankingsSearchForm{
 
-    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage){
+    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage, seasonId){
 
         this.parent = document.querySelector(parent);
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
         this.mode = mode;
         this.data = data.data;
         this.totalResults = data.totalResults;
@@ -16,7 +18,12 @@ class RankingsSearchForm{
 
         this.wrapper = document.createElement("form");
         this.wrapper.className = "form";
-        this.wrapper.action = `/rankings/?mode=${mode}`;
+
+
+        this.urlBase = (this.seasonId === 0) ? `/rankings/` : `/season/${this.seasonId}/rankings/`
+
+        this.wrapper.action = `${this.urlBase}?mode=${mode}`;
+   
         this.wrapper.method = "GET";
 
         this.parent.append(this.wrapper);
@@ -40,7 +47,7 @@ class RankingsSearchForm{
 
         this.tabs = new UITabs(this.parent, options, this.mode);
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
-            window.location.replace(`/rankings/?mode=${e.detail.newTab}`);// = "#";
+            window.location.replace(`${this.urlBase}?mode=${e.detail.newTab}`);// = "#";
         });
     }
 

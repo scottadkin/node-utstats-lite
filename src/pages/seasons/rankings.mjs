@@ -1,11 +1,11 @@
 import { 
-    getMinMatchesSetting, getRankingSettings, 
-    getRankings,
-    sanitizeRankingsPageReq
-} from "../rankings.mjs";
-import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
+    getMinMatchesSetting, getRankingSettings, sanitizeRankingsPageReq, 
+    getRankings
+} from "../../rankings.mjs";
+import { getSeasonById } from "../../seasons.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 
-export async function renderRankingsPage(req, res, userSession){
+export async function renderSeasonRankingsPage(req, res, userSession){
 
     try{
 
@@ -13,18 +13,21 @@ export async function renderRankingsPage(req, res, userSession){
         const timeZone = await getSiteWideTimeZone();
         const rankingSettings = await getRankingSettings(true);
 
-        const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId} = await sanitizeRankingsPageReq(req, pageSettings)
+        const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId} = await sanitizeRankingsPageReq(req, pageSettings);
 
         const data = await getRankings(seasonId, targetId, page, perPage, timeRange, mode);
 
-        let title = `${typeName} - ${titleName} Rankings`;
+        let title = `${typeName} - ${titleName} Season Rankings`;
+
+        const seasonInfo = await getSeasonById(seasonId);
        
+
         const minMatchesSetting = await getMinMatchesSetting(mode);
 
         res.render("rankings.ejs",{
             "host": req.headers.host,
             "title": title,
-            "meta": {"description": `View the player ${mode} rankings for ${typeName}.`, "image": "images/maps/default/jpg"},
+            "meta": {"description": `View season player ${mode} rankings for ${typeName}.`, "image": "images/maps/default/jpg"},
             mode,
             data,
             "names": itemNames,
@@ -37,8 +40,9 @@ export async function renderRankingsPage(req, res, userSession){
             rankingSettings,
             minMatchesSetting,
             timeZone,
-            "seasonId": 0,
-            "bSeasonPage": false
+            "seasonId": seasonId,
+            "bSeasonPage": true,
+             seasonInfo
         });
     }catch(err){
         res.send(err.toString());

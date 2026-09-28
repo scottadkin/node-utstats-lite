@@ -7,9 +7,13 @@
     }) -%>
 
 <%- include("timeZone.ejs", {timeZone})%>
-<script src="../js/ui/ui.js"></script>
-<script src="../js/ui/table.js"></script>
-<script src="../js/ui/rankings.js"></script>
+
+<%
+const jsBase = (locals.seasonId !== 0) ? `../../../js/`  : `../js/`;
+%>
+<script src="<%= jsBase %>ui/ui.js"></script>
+<script src="<%= jsBase %>ui/table.js"></script>
+<script src="<%= jsBase %>ui/rankings.js"></script>
 
 <div class="header-wrapper">
     <%= (mode === "gametype") ? "Gametype" : "Map" %> Rankings

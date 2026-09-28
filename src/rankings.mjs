@@ -3,7 +3,7 @@ import { sanitizePagePerPage } from "./generic.mjs";
 import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
 import { getAllGametypeIds as getAllPlayerGametypeIds, getAllPlayerMapIds, getBasicPlayerInfo } from "./players.mjs";
 import { getAllMapIds } from "./maps.mjs";
-import { getAllSeasonIds, seasonGetAllGametypeIds, seasonGetAllMapIds } from "./seasons.mjs";
+import { getAllSeasonIds, seasonGetAllGametypeIds, seasonGetAllGametypeNames, seasonGetAllMapIds, seasonGetAllMapNames } from "./seasons.mjs";
 import Message from "./message.mjs";
 
 export const DEFAULT_RANKING_SETTINGS = [
@@ -751,4 +751,53 @@ export async function getMinMatchesSetting(type){
     if(result.length === 0) return null;
 
     return result[0].points;
+}
+
+
+export async function sanitizeRankingsPageReq(req, pageSettings){
+
+    let mode = req?.query?.mode ?? "gametype";
+    mode = mode.toLowerCase();
+
+    if(mode !== "gametype" && mode !== "map") mode = "gametype";
+
+    let page = (req.query.p !== undefined) ? parseInt(req.query.p) : 1;
+    let perPage = req.query.pp ?? pageSettings["Results Per Page"] ?? 25;
+    let targetId = (req.query.id !== undefined) ? parseInt(req.query.id) : 0;
+    let seasonId = req.params?.season ?? 0;
+
+    let defaultLastActive = 28;
+
+    if(req.query.tf !== undefined){
+        defaultLastActive = req.query.tf;
+    }else{
+
+        const key = (mode === "gametype") ? "Default Last Active Limit(Gametypes)" : "Default Last Active Limit(Maps)"
+        defaultLastActive = pageSettings?.[key];
+    }
+
+    const timeRange = defaultLastActive;
+
+    const itemNames = (mode === "gametype") ? await seasonGetAllGametypeNames(seasonId)  : await seasonGetAllMapNames(seasonId);
+
+    if(targetId === 0){
+
+        targetId = await getMostActiveInTimeRange(seasonId, mode, timeRange);
+
+        //prevent page looking like not loaded any data for target
+        if(targetId === 0){
+
+            const itemKeys = Object.keys(itemNames);
+
+            if(itemKeys.length > 0){
+                
+                targetId = itemKeys[0];
+            }
+        }
+    }
+
+    let typeName = itemNames[targetId] ?? "Not Found";
+    let titleName = (mode === "gametype") ? "Gametype" : "Map";
+
+    return {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId}
 }

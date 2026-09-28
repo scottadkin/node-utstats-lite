@@ -509,11 +509,13 @@ export async function seasonGetAllGametypeNames(seasonId){
     const result = await simpleQuery(query, [seasonId]);
 
     const data = {};
+    
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
         data[r.gametype_id] = r.name;
     }
+
     return data;
 }
