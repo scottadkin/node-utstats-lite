@@ -672,9 +672,12 @@ export function createTableQueries(){
                 matches INTEGER NOT NULL,
                 playtime REAL NOT NULL,
                 score REAL NOT NULL,
-                last_active TEXT NOT NULL
+                last_active TEXT NOT NULL,
+                season_id INTEGER NOT NULL DEFAULT 0
                 ) STRICT`,
-                `CREATE UNIQUE INDEX IF NOT EXISTS pg_idx ON nstats_rankings(player_id,gametype_id)`,
+                `DROP INDEX IF EXISTS pg_idx`,
+                //moved to start of install script
+                //`CREATE UNIQUE INDEX IF NOT EXISTS psg_idx ON nstats_rankings(player_id,season_id,gametype_id)`,
 
             
 
@@ -818,9 +821,11 @@ export function createTableQueries(){
                 matches INTEGER NOT NULL,
                 playtime REAL NOT NULL,
                 score REAL NOT NULL,
-                last_active TEXT NOT NULL
+                last_active TEXT NOT NULL,
+                season_id INTEGER NOT NULL DEFAULT 0
                 ) STRICT`,
-            `CREATE UNIQUE INDEX IF NOT EXISTS pm_idx ON nstats_map_rankings(player_id, map_id)`,
+                 //moved to top of install scriot
+            //`CREATE UNIQUE INDEX IF NOT EXISTS psm_idx ON nstats_map_rankings(player_id,season_id, map_id)`,
 
 
             `CREATE TABLE IF NOT EXISTS nstats_classic_weapon_match_stats (
@@ -1367,6 +1372,18 @@ async function addSeasonColumnToPlayerTotals(){
 
 }
 
+async function addSeasonColumnsToRankings(){
+
+
+    await addColumn("nstats_rankings", "season_id", "INTEGER NOT NULL DEFAULT 0");
+    await addColumn("nstats_map_rankings", "season_id", "INTEGER NOT NULL DEFAULT 0");
+
+    const queries = [
+        `CREATE UNIQUE INDEX IF NOT EXISTS psg_idx ON nstats_rankings(player_id,season_id,gametype_id)`,
+        `CREATE UNIQUE INDEX IF NOT EXISTS psm_idx ON nstats_map_rankings(player_id,season_id, map_id)`
+    ];
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1383,6 +1400,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.10.0
     await addSeasonColumnToMatches();
     await addSeasonColumnToPlayerTotals();
+    await addSeasonColumnsToRankings();
 
 
    const queries = createTableQueries("");

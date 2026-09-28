@@ -16,7 +16,7 @@ import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
 //import { bImportRandomizeNames } from "../config.mjs";
 import PlayerWeaponDamage from "./importer/playerWeaponDamage.mjs";
-import { getSeasonByMatchDate } from "./seasons.mjs";
+import { calculateSeasonStats, getSeasonByMatchDate } from "./seasons.mjs";
 //import { attachDatabase, bDatabaseConnected, bDatabaseFileExist, changeActiveDatabase, createDatabase, detachDatabase, simpleQuery } from "./database.mjs";
 //import { getSeasonByMatchDate } from "./seasons.mjs";
 
@@ -347,6 +347,10 @@ export class MatchParser{
             await this.gametype.setBDom();
         }
 
+        await calculateSeasonStats(0);
+        if(seasonId !== 0){
+            await calculateSeasonStats(seasonId);
+        }
         //this.players.debugListAllPlayers();
     }
 
