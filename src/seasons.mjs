@@ -455,3 +455,26 @@ export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId,
 
     return {"data": result, totalResults};
 }
+
+
+export async function seasonGetAllGametypeIds(seasonId){
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_seasons_gametypes WHERE season_id=?`;
+
+    const result = await simpleQuery(query, [seasonId]);
+    
+    return result.map((r) =>{
+        return r.gametype_id
+    });
+}
+
+export async function seasonGetAllMapIds(seasonId){
+
+    const query = `SELECT DISTINCT map_id FROM nstats_seasons_maps WHERE season_id=?`;
+
+    const result = await simpleQuery(query, [seasonId]);
+    
+    return result.map((r) =>{
+        return r.map_id
+    });
+}
