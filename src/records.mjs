@@ -1,7 +1,7 @@
 import { simpleQuery } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
 import { getSeasonById } from "./seasons.mjs";
-import { getRecordTypeInfo,  bValidPlayerMatchType, bValidRecordMode, sanitizeRecordMode, sanitizeRecordType } from "./validRecordTypes.mjs";
+import { getRecordTypeInfo,  bValidPlayerMatchType, bValidRecordMode, sanitizeRecordMode, sanitizeRecordType, getTypeDisplayName, MODE_TITLES } from "./validRecordTypes.mjs";
 
 /**
  * parseInt, if NaN return 0
@@ -371,8 +371,16 @@ export async function getRecords(mode, recordType, gametypeId, mapId, dirtyPage,
   
 }
 
+function bRecordsPageIdExists(data, id){
 
-export async function sanitizeRecordsPageReq(req, res, pageSettings){
+    for(let i = 0; i < data.length; i++){
+        if(data[i].id === id) return true;
+    }
+
+    return false;
+}
+
+export async function sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps){
 
     let mode = (req.query.mode !== undefined) ? req.query.mode.toLowerCase() : "player-match";
     let recordType = (req.query.rec !== undefined) ? req.query.rec.toLowerCase() : "score";
@@ -384,6 +392,7 @@ export async function sanitizeRecordsPageReq(req, res, pageSettings){
     let seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : 0;
 
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
+
     //if(seasonId === 0) throw new Error(`There is no season 0`);
 
     let seasonInfo = null;
@@ -400,16 +409,47 @@ export async function sanitizeRecordsPageReq(req, res, pageSettings){
     if(selectedGametype !== selectedGametype) selectedGametype = 0;
     if(selectedMap !== selectedMap) selectedMap = 0;
 
-    if(selectedGametype !== 0 && !bIdExists(gametypes, selectedGametype)){
+    if(selectedGametype !== 0 && !bRecordsPageIdExists(gametypes, selectedGametype)){
         selectedGametype = 0;
     }
 
-    if(selectedMap !== 0 && !bIdExists(maps, selectedMap)){
+    if(selectedMap !== 0 && !bRecordsPageIdExists(maps, selectedMap)){
         selectedMap = 0;
     }
 
     mode = sanitizeRecordMode(mode);
     recordType = sanitizeRecordType(mode, recordType);
 
-    return {dirtyPage, dirtyPerPage, mode, recordType, selectedGametype, selectedMap, selectedMinimumMatchesPlayed, seasonInfo}
+    return {dirtyPage, dirtyPerPage, mode, recordType, selectedGametype, selectedMap, selectedMinimumMatchesPlayed, seasonInfo, seasonId}
+}
+
+function getIdName(data, id){
+
+    for(let i = 0; i < data.length; i++){
+
+        if(data[i].id === id) return data[i].name;
+    }
+
+    return "Not Found";
+}
+
+export function createRecordsPageMetaData(mode, recordType, gametypes, maps, selectedGametype, selectedMap, brandingSettings){
+
+    const modeDisplayName = getTypeDisplayName(mode, recordType);
+    
+    let title = `${MODE_TITLES[mode]} - ${modeDisplayName} - ${brandingSettings["Site Name"]}`;
+
+    let description = `View the top ${modeDisplayName} ${MODE_TITLES[mode].toLowerCase()}`;
+
+    if(selectedMap !== 0){
+        description += `, where the map played was ${getIdName(maps, selectedMap)}`;
+    }
+
+    if(selectedGametype !== 0){
+        description += `, ${(selectedMap !== 0) ? "and " : "where "}the gametype played was ${getIdName(gametypes, selectedGametype)}`;
+    }
+
+    description += `.`;
+
+    return {title, description, modeDisplayName}
 }

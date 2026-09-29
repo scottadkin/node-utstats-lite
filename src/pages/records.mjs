@@ -1,33 +1,11 @@
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { 
     VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, 
-    getTypeDisplayName, MODE_TITLES, 
+    MODE_TITLES, 
     VALID_PLAYER_EPM_TYPES,
-    VALID_PLAYER_MATCH_AVG_TYPES,
-    sanitizeRecordType,
-    sanitizeRecordMode
+    VALID_PLAYER_MATCH_AVG_TYPES
 } from "../validRecordTypes.mjs";
-import { getUniqueGametypeMapCombinations, getRecords, sanitizeRecordsPageReq } from "../records.mjs";
-
-
-function bIdExists(data, id){
-
-    for(let i = 0; i < data.length; i++){
-        if(data[i].id === id) return true;
-    }
-
-    return false;
-}
-
-function getIdName(data, id){
-
-    for(let i = 0; i < data.length; i++){
-
-        if(data[i].id === id) return data[i].name;
-    }
-
-    return "Not Found";
-}
+import { getUniqueGametypeMapCombinations, getRecords, sanitizeRecordsPageReq, createRecordsPageMetaData } from "../records.mjs";
 
 
 export async function renderRecordsPage(req, res, userSession){
@@ -48,7 +26,7 @@ export async function renderRecordsPage(req, res, userSession){
             dirtyPerPage, selectedGametype, 
             selectedMap, selectedMinimumMatchesPlayed, 
             seasonId, seasonInfo
-        } = await sanitizeRecordsPageReq(req, res, pageSettings);
+        } = await sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps);
 
 
         const {page, perPage, totalResults, data} = await getRecords(
@@ -57,21 +35,8 @@ export async function renderRecordsPage(req, res, userSession){
         );
 
  
-        const modeDisplayName = getTypeDisplayName(mode, recordType);
+        const {title, description, modeDisplayName} = createRecordsPageMetaData(mode, recordType, gametypes, maps, selectedGametype, selectedMap, brandingSettings);
 
-        let title = `${MODE_TITLES[mode]} - ${modeDisplayName} - ${brandingSettings["Site Name"]}`;
-
-        let description = `View the top ${modeDisplayName} ${MODE_TITLES[mode].toLowerCase()}`;
-
-        if(selectedMap !== 0){
-            description += `, where the map played was ${getIdName(maps, selectedMap)}`;
-        }
-
-        if(selectedGametype !== 0){
-            description += `, ${(selectedMap !== 0) ? "and " : "where "}the gametype played was ${getIdName(gametypes, selectedGametype)}`;
-        }
-
-        description += `.`;
 
         
         res.render("records.ejs",{

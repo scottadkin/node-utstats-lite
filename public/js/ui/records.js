@@ -10,6 +10,7 @@ class RecordsPage{
         this.mode = mode;
         this.validTypes = validTypes;
         this.modeTitles = modeTitles;
+
         this.seasonId = parseInt(seasonId);
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
 
@@ -115,7 +116,14 @@ class RecordsPage{
 
     createUrl(){
 
-        return `/records?mode=${this.mode}&rec=${this.selectedRecordType}&gid=${this.selectedGametype}&mid=${this.selectedMap}&mm=${this.selectedMinimumMatches}`;
+        const urlBase = (this.seasonId !== 0) ? `/season/${this.seasonId}/records` : `/records`;
+
+        let url = urlBase;
+
+        url += `?mode=${this.mode}&rec=${this.selectedRecordType}`;
+        url += `&gid=${this.selectedGametype}&mid=${this.selectedMap}`;
+
+        return `${url}&mm=${this.selectedMinimumMatches}`;
     }
 
     updateHistory(){
