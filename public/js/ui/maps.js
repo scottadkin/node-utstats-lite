@@ -731,7 +731,7 @@ class UIMapPlayerRankings{
 
 class UIMapPlayerAverages{
 
-    constructor(parent, mapId, validTypes, uniqueGametypes, seasonId){
+    constructor(parent, mapId, validAverageTypes, validEPMTypes, uniqueGametypes, seasonId){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
@@ -740,7 +740,9 @@ class UIMapPlayerAverages{
         this.selectedGametype = 0;
         this.mode = "player-avg";
         this.selectedCat = "avg_score";
-        this.validTypes = validTypes;
+        //this.validTypes = validTypes;
+        this.validAverageTypes = validAverageTypes;
+        this.validEPMTypes = validEPMTypes;
         this.uniqueGametypes = uniqueGametypes;
         this.seasonId = parseInt(seasonId);
         this.selectedMinMatches = 0;
@@ -787,8 +789,9 @@ class UIMapPlayerAverages{
 
 
     
+        const validTypes = this.getValidTypes();
 
-        this.catSelect = new UISelect(row, this.validTypes, this.selectedCat, (e) =>{
+        this.catSelect = new UISelect(row, validTypes, this.selectedCat, (e) =>{
             this.selectedCat = e;
      
             this.loadData();
@@ -844,6 +847,17 @@ class UIMapPlayerAverages{
         }, this.totalResults, this.perPage, this.page);
     }
 
+    getValidTypes(){
+
+        if(this.mode === "player-avg"){
+            return this.validAverageTypes;
+        }else if(this.mode === "player-epm"){
+            return this.validEPMTypes;
+        }
+
+        return null;
+    }
+
     createTabs(){
 
         const options = [
@@ -857,12 +871,11 @@ class UIMapPlayerAverages{
 
             this.mode = e.detail.newTab;
 
-      
-          
-            
-            if(!this.catSelect.updateOptions(this.validTypes, this.mode)){
+            const validTypes = this.getValidTypes();
+     
+            if(!this.catSelect.updateOptions(validTypes, this.mode)){
 
-                this.selectedCat = this.validTypes[0].value;
+                this.selectedCat = validTypes[0].value;
                 this.catSelect.changeSelected(this.selectedCat);
             }
 
@@ -874,11 +887,11 @@ class UIMapPlayerAverages{
     getTableHeaderTitle(mode, selectedCat){
 
 
-        if(this.validTypes=== undefined) throw new Error(`cant find validTypes category`);
+        const valid = this.getValidTypes();
 
-        for(let i = 0; i < this.validTypes.length; i++){
+        for(let i = 0; i < valid.length; i++){
 
-            const v = this.validTypes[i];
+            const v = valid[i];
 
             if(v.value === selectedCat) return v.display;
         }
