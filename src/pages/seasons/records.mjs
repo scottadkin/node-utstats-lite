@@ -1,13 +1,11 @@
-import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 import { 
     VALID_PLAYER_MATCH_TYPES, VALID_PLAYER_LIFETIME_TYPES, 
     getTypeDisplayName, MODE_TITLES, 
     VALID_PLAYER_EPM_TYPES,
     VALID_PLAYER_MATCH_AVG_TYPES,
-    sanitizeRecordType,
-    sanitizeRecordMode
-} from "../validRecordTypes.mjs";
-import { getUniqueGametypeMapCombinations, getRecords, sanitizeRecordsPageReq } from "../records.mjs";
+} from "../../validRecordTypes.mjs";
+import { getUniqueGametypeMapCombinations, getRecords, sanitizeRecordsPageReq } from "../../records.mjs";
 
 
 function bIdExists(data, id){
@@ -30,7 +28,7 @@ function getIdName(data, id){
 }
 
 
-export async function renderRecordsPage(req, res, userSession){
+export async function renderSeasonRecordsPage(req, res, userSession){
 
     
     try{
@@ -102,11 +100,12 @@ export async function renderRecordsPage(req, res, userSession){
             domGametypes,
             domMaps,
             userSession,
-            "seasonId": 0,
             seasonInfo,
-            "bSeasonPage": false,
+            "seasonId": seasonId,
+            "bSeasonPage": true,
             "siteName": brandingSettings["Site Name"],
-            "selectedMinimumMatchesPlayed": selectedMinimumMatchesPlayed
+            "selectedMinimumMatchesPlayed": selectedMinimumMatchesPlayed,
+            
         });
         
     }catch(err){

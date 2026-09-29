@@ -1,6 +1,7 @@
 import { simpleQuery } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
-import { getRecordTypeInfo,  bValidPlayerMatchType, bValidRecordMode } from "./validRecordTypes.mjs";
+import { getSeasonById } from "./seasons.mjs";
+import { getRecordTypeInfo,  bValidPlayerMatchType, bValidRecordMode, sanitizeRecordMode, sanitizeRecordType } from "./validRecordTypes.mjs";
 
 /**
  * parseInt, if NaN return 0
@@ -368,4 +369,47 @@ export async function getRecords(mode, recordType, gametypeId, mapId, dirtyPage,
 
     return {page, perPage, "data": result.data, "totalResults": result.totalResults};
   
+}
+
+
+export async function sanitizeRecordsPageReq(req, res, pageSettings){
+
+    let mode = (req.query.mode !== undefined) ? req.query.mode.toLowerCase() : "player-match";
+    let recordType = (req.query.rec !== undefined) ? req.query.rec.toLowerCase() : "score";
+    let selectedGametype = (req.query.gid !== undefined) ? parseInt(req.query.gid) : 0;
+    let selectedMap = (req.query.mid !== undefined) ? parseInt(req.query.mid) : 0;
+    let dirtyPerPage = (req.query.pp !== undefined) ? parseInt(req.query.pp) : parseInt(pageSettings["Results Per Page"]);
+    let dirtyPage = (req.query.page !== undefined) ? parseInt(req.query.page) : 1;
+    let selectedMinimumMatchesPlayed = (req.query.mm !== undefined) ? parseInt(req.query.mm) : 0;
+    let seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : 0;
+
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
+    //if(seasonId === 0) throw new Error(`There is no season 0`);
+
+    let seasonInfo = null;
+
+    if(seasonId !== 0){
+        seasonInfo = await getSeasonById(seasonId);
+    }
+
+    if(selectedMinimumMatchesPlayed !== selectedMinimumMatchesPlayed) selectedMinimumMatchesPlayed = 0;
+    
+    if(dirtyPerPage !== dirtyPerPage) dirtyPerPage = 25;
+    if(dirtyPage !== dirtyPage) dirtyPage = 1;
+    
+    if(selectedGametype !== selectedGametype) selectedGametype = 0;
+    if(selectedMap !== selectedMap) selectedMap = 0;
+
+    if(selectedGametype !== 0 && !bIdExists(gametypes, selectedGametype)){
+        selectedGametype = 0;
+    }
+
+    if(selectedMap !== 0 && !bIdExists(maps, selectedMap)){
+        selectedMap = 0;
+    }
+
+    mode = sanitizeRecordMode(mode);
+    recordType = sanitizeRecordType(mode, recordType);
+
+    return {dirtyPage, dirtyPerPage, mode, recordType, selectedGametype, selectedMap, selectedMinimumMatchesPlayed, seasonInfo}
 }
