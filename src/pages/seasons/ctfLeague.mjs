@@ -1,42 +1,47 @@
-import { getUniqueGametypeLeagues, getUniqueMapLeagues, sanitizeCTFLeaguePageReq, setCTFLeaguePageMetaData } from "../ctfLeague.mjs";
-import { getGametypeNames } from "../gametypes.mjs";
-import { getMapNames } from "../maps.mjs";
-import { getSingleCTFLeague } from "../ctfLeague.mjs";
-import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
+import { getLeagueSiteSettings, getUniqueGametypeLeagues, getUniqueMapLeagues, sanitizeCTFLeaguePageReq, setCTFLeaguePageMetaData } from "../../ctfLeague.mjs";
+import { convertTimestamp } from "../../generic.mjs";
+import { getGametypeNames } from "../../gametypes.mjs";
+import { getMapNames } from "../../maps.mjs";
+import { getSingleCTFLeague } from "../../ctfLeague.mjs";
+import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
+import { getSeasonById } from "../../seasons.mjs";
 
-export async function renderCTFLeaguePage(req, res){
+export async function renderSeasonCTFLeaguePage(req, res){
 
     try{
 
         const timeZone = await getSiteWideTimeZone();
         const pageSettings = await getCategorySettings("CTF League");
 
+        
         const {
             mode, id, gId, seasonId, seasonInfo, 
-            page, perPage, leagueSettings, 
-            maxMatchesPerPlayer, maxMatchAge, lastLeagueRefresh
+            page, perPage, leagueSettings, maxMatchesPerPlayer, 
+            maxMatchAge, lastLeagueRefresh
         } = await sanitizeCTFLeaguePageReq(req, pageSettings);
 
-        const uniqueGametypes = await getUniqueGametypeLeagues(0);
+        const uniqueGametypes = await getUniqueGametypeLeagues(seasonId);
         const gametypeNames = await getGametypeNames(uniqueGametypes, true);
 
         let mapNames = {};
 
         if(mode === "maps"){
 
-            const mapIds = await getUniqueMapLeagues(0);
+            const mapIds = await getUniqueMapLeagues(seasonId);
             mapNames = await getMapNames(mapIds);
         }
 
         let data =  {"totalRows": 0, "data": []};
 
         if(mode === "gametypes"){
-            data = await getSingleCTFLeague(0, id, 0, page, perPage);
+            data = await getSingleCTFLeague(seasonId, id, 0, page, perPage);
         }else if(mode === "maps"){
-            data = await getSingleCTFLeague(0, gId, id, page, perPage);
+            data = await getSingleCTFLeague(seasonId, gId, id, page, perPage);
         }else if(mode === "combined"){
-            data = await getSingleCTFLeague(0, 0, 0, page, perPage);
+            data = await getSingleCTFLeague(seasonId, 0, 0, page, perPage);
         }
+
+        //need to get latest played gametypeId and mapId
 
         const {
             title, brandingSettings, subHeader, 
@@ -61,10 +66,10 @@ export async function renderCTFLeaguePage(req, res){
             page,
             perPage,
             subHeader,
-            "userSession": req.userSession,
-            "bSeasonPage": false,
-            "seasonInfo": null,
-            "seasonId": 0
+            "bSeasonPage": true,
+            seasonInfo,
+            "seasonId": seasonId,
+            "userSession": req.userSession
         });
     }catch(err){
         res.send(err.toString());

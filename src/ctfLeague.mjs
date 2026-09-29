@@ -2,8 +2,10 @@
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import {  getCTFGametypesInSeason, getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo} from "./players.mjs";
-import { DAY, getPlayer, sanitizePagePerPage, setInt } from "./generic.mjs";
+import { convertTimestamp, DAY, getPlayer, sanitizePagePerPage, setInt } from "./generic.mjs";
 import Message from "./message.mjs";
+import { getCategorySettings } from "./siteSettings.mjs";
+import { getSeasonById } from "./seasons.mjs";
 
 
 export const DEFAULT_SETTINGS = [
@@ -643,22 +645,28 @@ export async function getPlayerMapsPosition(playerId, targetData){
 /**
 * Only return gametypes with mapId=0
 */
-export async function getUniqueGametypeLeagues(){
+export async function getUniqueGametypeLeagues(seasonId){
 
-    const query = `SELECT DISTINCT gametype_id FROM nstats_player_ctf_league WHERE map_id=0`;
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
-    const result = await simpleQuery(query);
+    const query = `SELECT DISTINCT gametype_id FROM nstats_player_ctf_league WHERE map_id=0 AND season_id=?`;
+
+    const result = await simpleQuery(query, [seasonId]);
 
     return result.map((r) =>{
         return r.gametype_id;
     });
 }
 
-export async function getUniqueMapLeagues(){
+export async function getUniqueMapLeagues(seasonId){
 
-    const query = `SELECT DISTINCT map_id FROM nstats_player_ctf_league WHERE map_id!=0`;
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
+    
+    const query = `SELECT DISTINCT map_id FROM nstats_player_ctf_league WHERE map_id!=0 AND season_id=?`;
 
-    const result = await simpleQuery(query);
+    const result = await simpleQuery(query, [seasonId]);
 
     return result.map((r) =>{
         return r.map_id;
@@ -716,7 +724,7 @@ export async function getMapPlayedValidGametypes(mapId){
     return data;
 }
 
-export async function getLatestMapGametypePlayed(){
+export async function ctfLeagueGetLatestMapGametypePlayed(){
 
     const query = `SELECT gametype_id,map_id FROM nstats_player_ctf_league WHERE map_id!=0 AND gametype_id!=0 ORDER by id DESC LIMIT 1`;
 
@@ -738,14 +746,14 @@ export async function getTotalEntries(gametypeId, mapId){
     return 0;
 }
 
-export async function getSingleCTFLeague(gametypeId, mapId, dirtyPage, dirtyPerPage, bOnlyCombined){
+export async function getSingleCTFLeague(seasonId, gametypeId, mapId, dirtyPage, dirtyPerPage, bOnlyCombined){
 
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
     const query = `SELECT * FROM nstats_player_ctf_league 
-    WHERE map_id=? AND gametype_id=? ORDER BY points DESC LIMIT ?, ?`;
+    WHERE map_id=? AND gametype_id=? AND season_id=? ORDER BY points DESC LIMIT ?, ?`;
 
-    const result = await simpleQuery(query, [mapId, gametypeId, start, perPage]);
+    const result = await simpleQuery(query, [mapId, gametypeId, seasonId, start, perPage]);
 
     const playerIds = [...new Set(result.map((p) =>{
         return p.player_id;
@@ -877,4 +885,96 @@ export async function deleteMatch(mapId, gametypeId){
             settings.combined["Maximum Match Age In Days"].value
         );
     }
+}
+
+
+export async function sanitizeCTFLeaguePageReq(req, pageSettings){
+
+    const mode = req.query?.mode ?? pageSettings["Default Mode"] ?? "gametypes";
+    let id = req.query?.id ?? "";
+    //gid only used for maps mode as id in that case is the map id
+    let gId = req.query?.gid ?? "";
+
+    let seasonId = req.params.season ?? 0;
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+
+    let seasonInfo = await getSeasonById(seasonId);
+
+
+    if(id === "" && gId === ""){
+
+        const latestIds = await ctfLeagueGetLatestMapGametypePlayed();
+        if(latestIds !== null){
+
+            if(mode === "gametypes"){
+                id = latestIds.gametype_id;
+            }else{
+                gId = latestIds.gametype_id;
+                id = latestIds.map_id;
+            }
+        }
+    }
+
+    let page = req.query?.page ?? 1;
+    let perPage = req.query?.perPage ?? pageSettings["Results Per Page"] ?? 25;
+
+    if(perPage !== perPage) perPage = 25;
+
+    const leagueSettings = await getLeagueSiteSettings();
+
+    let maxMatchesPerPlayer = 0;
+    let maxMatchAge = 0;
+    let lastLeagueRefresh = "Never";
+
+    if(mode === "gametypes" || mode === "maps" || mode === "combined"){
+
+        maxMatchesPerPlayer = leagueSettings[mode]["Maximum Matches Per Player"].value;
+        maxMatchAge = leagueSettings[mode]["Maximum Match Age In Days"].value;
+        lastLeagueRefresh = leagueSettings[mode]["Last Whole League Refresh"].value;
+
+        lastLeagueRefresh = convertTimestamp(new Date(lastLeagueRefresh), false, false, true);
+    }
+
+    return {mode, id, gId, seasonId, seasonInfo, page, perPage, leagueSettings, maxMatchesPerPlayer, maxMatchAge, lastLeagueRefresh}
+}
+
+
+export async function setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id, gId){
+
+    let gametypeName = "Gametypes";
+    let mapName = "Maps";
+    let subHeader = "";
+
+    let title = "";
+
+    if(mode === "gametypes"){
+
+        gametypeName = gametypeNames?.[id] ?? "Gametypes";
+        title = `${gametypeName} - CTF League`;
+        subHeader = gametypeName;
+
+    }else if(mode === "maps"){
+    
+        mapName = mapNames?.[id] ?? "Maps";
+
+        if(gId == 0){
+            title = `${mapName} - CTF League`;
+            subHeader = mapName;
+        }else{
+            gametypeName = gametypeNames?.[gId] ?? "Gametypes";
+            title = `${mapName} (${gametypeName}) - CTF League`;
+            subHeader = `${mapName} (${gametypeName})`
+        }
+
+    }else if(mode === "combined"){
+
+        title = `Combined - CTF League`;
+        subHeader = "Combined";
+    }
+
+    const brandingSettings = await getCategorySettings("Branding");
+    title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+
+    return {title, brandingSettings, subHeader, gametypeName, mapName}
 }

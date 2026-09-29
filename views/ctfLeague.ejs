@@ -8,8 +8,12 @@
     
 <%- include("timeZone.ejs", {timeZone})%>
 
-<script src="../js/ui/ui.js"></script>
-<script src="../js/ui/ctfLeague.js"></script>
+<%
+const jsBase = (bSeasonPage) ? `../../../js/` : `../js/`
+%>
+
+<script src="<%= jsBase %>ui/ui.js"></script>
+<script src="<%= jsBase %>ui/ctfLeague.js"></script>
 
 <div class="header-wrapper">CTF League</div>
 <div id="tabs"></div>

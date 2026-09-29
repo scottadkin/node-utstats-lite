@@ -44,6 +44,7 @@ import { renderSeasonMatchPage } from './src/pages/seasons/match.mjs';
 import { renderSeasonMapPage } from './src/pages/seasons/map.mjs';
 import { renderSeasonRankingsPage } from './src/pages/seasons/rankings.mjs';
 import { renderSeasonRecordsPage } from './src/pages/seasons/records.mjs';
+import { renderSeasonCTFLeaguePage } from './src/pages/seasons/ctfLeague.mjs';
 //import { renderSeasonsPage } from './src/pages/seasons.mjs';
 //import { renderSeasonPage } from './src/pages/season.mjs';
 
@@ -376,6 +377,16 @@ app.get("/season/:season/records/", async (req, res) =>{
 
     try{
         await renderSeasonRecordsPage(req, res);
+    }catch(err){
+        res.json({"error": err.toString()});
+    }
+});
+
+
+app.get("/season/:season/ctfleague/", async (req, res) =>{
+
+    try{
+        await renderSeasonCTFLeaguePage(req, res);
     }catch(err){
         res.json({"error": err.toString()});
     }
