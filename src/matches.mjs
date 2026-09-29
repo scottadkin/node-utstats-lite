@@ -1933,64 +1933,6 @@ export async function getBasicMatchesInfoInPastDays(daysLimit){
     return await simpleQuery(query, [minDate]);
 }
 
-/**
- * 
- * @param {*} daysLimit 
- * @returns Unique gametype, map combinations e
- */
-export async function getUniqueMapGametypeCombosInPastDays(daysLimit){
-
-    daysLimit = setInt(daysLimit, 28);
-    if(daysLimit < 1) daysLimit = 1;
-
-    const validGametypes = await getValidGametypes();
-    const validMaps = await getValidMaps();
-
-    const query = `SELECT DISTINCT map_id,gametype_id FROM nstats_matches 
-    WHERE date>=? ${(validGametypes.length > 0) ? "AND gametype_id IN(?) " : ""} 
-    ${(validMaps.length > 0) ? "AND map_id IN(?)" : ""} 
-    GROUP BY map_id,gametype_id`;
-
-    const now = Date.now();
-    const minDate = new Date(now - daysLimit * DAY);
-
-    const vars = [minDate];
-
-    if(validGametypes.length > 0){
-        vars.push(validGametypes);
-    }
-    if(validMaps.length > 0){
-        vars.push(validMaps);
-    }
-
-    return await simpleQuery(query, vars);
-    
-}
-
-export async function getUniqueGametypesInPastDays(daysLimit){
-
-    daysLimit = setInt(daysLimit, 28);
-    if(daysLimit < 1) daysLimit = 1;
-
-    const query = `SELECT DISTINCT gametype_id FROM nstats_matches WHERE date>=?`;
-
-    const now = Date.now();
-    const minDate = new Date(now - daysLimit * DAY);
-
-    const validGametypes = await getValidGametypes();
-
-    const result = await simpleQuery(query, [minDate]);
-
-    const data = [];
-
-    for(let i = 0; i < result.length; i++){
-
-        if(validGametypes.indexOf(result[i].gametype_id) !== -1){
-            data.push(result[i]);
-        }
-    }
-    return data;
-}
 
 export async function getLatestMatchGametypeMapIds(){
 

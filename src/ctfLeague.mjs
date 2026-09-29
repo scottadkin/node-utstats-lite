@@ -1,9 +1,8 @@
 
-import { simpleQuery, bulkInsert, sqlInsertOnDuplicateUpdate } from "./database.mjs";
-import { getCTFGametypes, getCTFGametypesInSeason, getMatchesTeamResults } from "./ctf.mjs";
-import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
+import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
+import {  getCTFGametypesInSeason, getMatchesTeamResults } from "./ctf.mjs";
+import { getBasicPlayerInfo} from "./players.mjs";
 import { DAY, getPlayer, sanitizePagePerPage, setInt } from "./generic.mjs";
-import { getUniqueMapGametypeCombosInPastDays, getUniqueGametypesInPastDays } from "./matches.mjs";
 import Message from "./message.mjs";
 
 
@@ -414,13 +413,13 @@ export async function updateSettings(data){
 
 
 /**
- * Get only valid CTF gametypes based on data stored in player match_ctf table
+ * Get only valid CTF gametypes based on data stored in season_unique_match_combinations
  */
-export async function getValidGametypes(){
+export async function getValidGametypes(seasonId){
 
-    const query = `SELECT DISTINCT gametype_id FROM nstats_match_ctf`;
+    const query = `SELECT DISTINCT gametype_id FROM nstats_seasons_unique_match_combinations WHERE season_id=?`;
 
-    const result = await simpleQuery(query);
+    const result = await simpleQuery(query, [seasonId]);
 
     return result.map((r) =>{
         return r.gametype_id;
@@ -428,31 +427,100 @@ export async function getValidGametypes(){
 }
 
 /**
- * Get only valid CTF maps based on data stored in player match_ctf table
+ * Get only valid CTF maps based on data stored in season_unique_match_combinations
  */
 
-export async function getValidMaps(){
+export async function getValidMaps(seasonId){
 
-    const query = `SELECT DISTINCT map_id FROM nstats_match_ctf`;
+    const query = `SELECT DISTINCT map_id FROM nstats_seasons_unique_match_combinations WHERE season_id=?`;
 
-    const result = await simpleQuery(query);
+    const result = await simpleQuery(query, [seasonId]);
 
     return result.map((r) =>{
         return r.map_id;
     });
 }
 
-async function bAnyData(){
+async function bAnyData(seasonId){
 
-    const query = `SELECT id FROM nstats_player_ctf_league LIMIT 1`;
+    const query = `SELECT id FROM nstats_player_ctf_league WHERE season_id=? LIMIT 1`;
 
-    const result = await simpleQuery(query);
+    const result = await simpleQuery(query, [seasonId]);
 
     return result.length > 0;
 }
 
-export async function refreshAllTables(type){
+/**
+ * 
+ * @param {*} daysLimit 
+ * @returns Unique gametype, map combinations e
+ */
+async function ctfLeagueGetUniqueMapGametypeCombosInPastDays(seasonId, daysLimit){
 
+    daysLimit = setInt(daysLimit, 28);
+    if(daysLimit < 1) daysLimit = 1;
+
+    const validGametypes = await getValidGametypes(seasonId);
+    const validMaps = await getValidMaps(seasonId);
+
+    const now = Date.now();
+    const minDate = new Date(now - daysLimit * DAY);
+
+    const vars = [minDate];
+
+    let where = `WHERE date>=? `;
+
+    if(validGametypes.length > 0){
+        where += `AND gametype_id IN(?) `;
+        vars.push(validGametypes);
+    }
+
+    if(validMaps.length > 0){
+        where += `AND map_id IN(?) `;
+        vars.push(validMaps);
+    }
+
+    vars.push(seasonId);
+
+    const query = `SELECT DISTINCT map_id,gametype_id FROM nstats_matches 
+    ${where} AND season_id=?
+    GROUP BY map_id,gametype_id`;
+
+    
+
+    return await simpleQuery(query, vars);  
+}
+
+export async function ctfLeagueGetUniqueGametypesInPastDays(seasonId, daysLimit){
+
+    daysLimit = setInt(daysLimit, 28);
+    if(daysLimit < 1) daysLimit = 1;
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_matches WHERE date>=? AND season_id=?`;
+
+    const now = Date.now();
+    const minDate = new Date(now - daysLimit * DAY);
+
+    const validGametypes = await getValidGametypes(seasonId);
+
+    const result = await simpleQuery(query, [minDate, seasonId]);
+
+    const data = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        if(validGametypes.indexOf(result[i].gametype_id) !== -1){
+            data.push(result[i]);
+        }
+    }
+    return data;
+}
+
+export async function refreshAllTables(seasonId, type){
+
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
     if(type === undefined) throw new Error(`Refresh all tables requires a type`);
 
@@ -471,7 +539,7 @@ export async function refreshAllTables(type){
 
     const timeSinceLastRefresh = now - lastImport;
 
-    if(await bAnyData() && timeSinceLastRefresh < DAY){
+    if(await bAnyData(seasonId) && timeSinceLastRefresh < DAY){
         new Message(`Less than 24 hours have passed since last CTF ${type} league refresh, skipping.`,"note");
         return;
     }
@@ -482,9 +550,9 @@ export async function refreshAllTables(type){
 
     let uniqueCombos = [];
     if(type === "maps"){
-        uniqueCombos = await getUniqueMapGametypeCombosInPastDays(maxDays);
+        uniqueCombos = await ctfLeagueGetUniqueMapGametypeCombosInPastDays(seasonId, maxDays);
     }else if(type === "gametypes"){
-        uniqueCombos = await getUniqueGametypesInPastDays(maxDays);
+        uniqueCombos = await ctfLeagueGetUniqueGametypesInPastDays(seasonId, maxDays);
     }
 
     const maxMatches = setInt(settings["Maximum Matches Per Player"], 20);
@@ -507,13 +575,13 @@ export async function refreshAllTables(type){
 
             let mapId = (type === "maps") ? u.map_id : 0;
 
-            await calcPlayersMapResults(mapId, u.gametype_id, maxMatches, maxDays);
+            await calcPlayersMapResults(seasonId, mapId, u.gametype_id, maxMatches, maxDays);
         }
         
     }else{
 
         new Message(`Recalculating CTF Lifetime League table`, "note");
-        await calcPlayersMapResults(0, 0, maxMatches, maxDays);
+        await calcPlayersMapResults(seasonId, 0, 0, maxMatches, maxDays);
     }
 
     const newData = {};

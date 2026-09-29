@@ -12,6 +12,7 @@ import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategoryS
 import { setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID } from "./src/players.mjs";
+import { getAllSeasonIds } from "./src/seasons.mjs";
 
 new Message('Node UTStats Lite Importer module started.','note');
 
@@ -497,19 +498,26 @@ async function startImport(){
 
     await main(ctfLeagueSettings);
 
-    if(ctfLeagueSettings.maps["Update Whole League End Of Import"].value === "true"){
+    const seasonIds = await getAllSeasonIds(false);
 
-        await refreshAllTables("maps");
-    }
+    for(let i = 0; i < seasonIds.length; i++){
 
-    if(ctfLeagueSettings.gametypes["Update Whole League End Of Import"].value === "true"){
+        const seasonId = seasonIds[i];
 
-        await refreshAllTables("gametypes");
-    }
+        if(ctfLeagueSettings.maps["Update Whole League End Of Import"].value === "true"){
 
-    if(ctfLeagueSettings.combined["Update Whole League End Of Import"].value === "true"){
+            await refreshAllTables(seasonId, "maps");
+        }
 
-        await refreshAllTables("combined");
+        if(ctfLeagueSettings.gametypes["Update Whole League End Of Import"].value === "true"){
+
+            await refreshAllTables(seasonId, "gametypes");
+        }
+
+        if(ctfLeagueSettings.combined["Update Whole League End Of Import"].value === "true"){
+
+            await refreshAllTables(seasonId, "combined");
+        }
     }
 }
 
