@@ -393,8 +393,6 @@ export async function sanitizeRecordsPageReq(req, res, pageSettings, gametypes, 
 
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
-    //if(seasonId === 0) throw new Error(`There is no season 0`);
-
     let seasonInfo = null;
 
     if(seasonId !== 0){

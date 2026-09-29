@@ -1,6 +1,6 @@
 
 import { simpleQuery, bulkInsert, sqlInsertOnDuplicateUpdate } from "./database.mjs";
-import { getCTFGametypes, getMatchesTeamResults } from "./ctf.mjs";
+import { getCTFGametypes, getCTFGametypesInSeason, getMatchesTeamResults } from "./ctf.mjs";
 import { getBasicPlayerInfo, applyBasicPlayerInfoToObjects } from "./players.mjs";
 import { DAY, getPlayer, sanitizePagePerPage, setInt } from "./generic.mjs";
 import { getUniqueMapGametypeCombosInPastDays, getUniqueGametypesInPastDays } from "./matches.mjs";
@@ -54,7 +54,7 @@ export async function insertDefaultCTFLeagueSettings(){
     }
 }
 
-async function getPlayerHistory(mapId, gametypeId, maxAgeDays, ctfGametypes){
+async function getPlayerHistory(seasonId, mapId, gametypeId, maxAgeDays, ctfGametypes){
 
     const now = Date.now();
     const minDate = new Date(now - maxAgeDays * DAY);
@@ -81,7 +81,12 @@ async function getPlayerHistory(mapId, gametypeId, maxAgeDays, ctfGametypes){
         vars.push(ctfGametypes);
     }
 
-    const result = await simpleQuery(`${query}${where} ORDER BY match_date DESC`, vars);
+    
+    vars.push(seasonId);
+
+    const result = await simpleQuery(`${query}${where} AND EXISTS(
+        SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?
+        ) ORDER BY match_date DESC`, vars);
 
     const matchIds = new Set();
     const matchesToPlayers = {};
@@ -169,7 +174,7 @@ async function deleteAllEntries(mapId, gametypeId){
     return await simpleQuery(query, vars);
 }
 
-async function bulkInsertEntries(mapId, gametypeId, tableData){
+async function bulkInsertEntries(seasonId, mapId, gametypeId, tableData){
 
     const insertVars = [];
 
@@ -180,7 +185,7 @@ async function bulkInsertEntries(mapId, gametypeId, tableData){
             d.firstMatch, d.lastMatch, d.matches,
             0, d.wins, d.draws, d.losses, 0, 
             d.capFor, d.capAgainst, d.capOffset,
-            d.points
+            d.points, seasonId
         ]);
     }
 
@@ -189,22 +194,25 @@ async function bulkInsertEntries(mapId, gametypeId, tableData){
     const columns = [
         "player_id","gametype_id","map_id","first_match","last_match",
         "total_matches","playtime","wins","draws","losses","winrate",
-        "cap_for","cap_against","cap_offset","points"
+        "cap_for","cap_against","cap_offset","points", "season_id"
     ];
 
 
-    return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","gametype_id","map_id"]);
+    return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id","season_id","gametype_id","map_id"]);
     //await bulkInsert(query, insertVars);
 }
 
-export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDays){
+export async function calcPlayersMapResults(seasonId, mapId, gametypeId, maxMatches, maxDays){
 
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`SeasonId must be valid integer`);
     if(maxMatches === undefined) maxMatches = 5;
     if(maxDays === undefined) maxDays = 180;
 
-    const ctfGametypes = await getCTFGametypes();
+    const ctfGametypes = await getCTFGametypesInSeason(seasonId);
 
-    const history = await getPlayerHistory(mapId, gametypeId, maxDays, ctfGametypes);
+
+    const history = await getPlayerHistory(seasonId, mapId, gametypeId, maxDays, ctfGametypes);
 
     const matchResults = await getMatchesTeamResults(history.matchIds);
 
@@ -243,7 +251,7 @@ export async function calcPlayersMapResults(mapId, gametypeId, maxMatches, maxDa
         }  
     }
 
-    await bulkInsertEntries(mapId, gametypeId, table);
+    await bulkInsertEntries(seasonId, mapId, gametypeId, table);
 }
 
 

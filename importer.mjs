@@ -108,14 +108,37 @@ async function updateCTFLeague(m, ctfLeagueSettings){
 
         if(bEnabledMapCTF === "true"){
 
+
             //we only want to do all time once
             if(i === 0){
-                await leagueCalcPlayerMapResults(0, 0, maxMatches, maxDays);
+                
+                const allTimePromises = [leagueCalcPlayerMapResults(0, 0, 0, maxMatches, maxDays)];
+                //season all time
+                if(m.seasonId !== 0) allTimePromises.push(leagueCalcPlayerMapResults(m.seasonId, 0, 0, maxMatches, maxDays));
+              
+                await Promise.all(allTimePromises);
+
             }
-            //map gametype
-            await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays);
-            //map all time
-            await leagueCalcPlayerMapResults((t === "maps") ? m.map.id: 0, 0, maxMatches, maxDays);
+
+            const gametypeMapPromises = [
+                //map gametype
+                leagueCalcPlayerMapResults(0, (t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays),
+                //map all time
+                leagueCalcPlayerMapResults(0, (t === "maps") ? m.map.id: 0, 0, maxMatches, maxDays)
+            ];
+
+            //if seasons are enabled
+            if(m.seasonId !== 0){
+
+                gametypeMapPromises.push(
+                    //season map gametype
+                    leagueCalcPlayerMapResults(m.seasonId, (t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays),
+                    //season map all time
+                    leagueCalcPlayerMapResults(m.seasonId, (t === "maps") ? m.map.id: 0, 0, maxMatches, maxDays)
+                );
+            }
+            
+            await Promise.all(gametypeMapPromises);
 
         }else{
             new Message(`CTF ${t.toUpperCase()} league is disabled, skipping.`,"note");

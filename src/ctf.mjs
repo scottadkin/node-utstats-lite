@@ -1176,6 +1176,20 @@ export async function getCTFGametypes(){
     return result.map((r) => r.gametype_id);
 }
 
+export async function getCTFGametypesInSeason(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+
+    const query = `SELECT DISTINCT gametype_id FROM nstats_match_ctf WHERE EXISTS (
+        SELECT 1 FROM nstats_matches WHERE nstats_matches.id=nstats_match_ctf.match_id AND nstats_matches.season_id=?
+    )`;
+
+    const result = await simpleQuery(query, [seasonId]);
+
+    return result.map((r) => r.gametype_id);
+}
+
 function createTeamTotalsMatchCTFJSON(players, teamCapIds){
 
     const teams = {};

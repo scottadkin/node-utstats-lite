@@ -864,10 +864,13 @@ export function createTableQueries(){
             cap_for INTEGER NOT NULL,
             cap_against INTEGER NOT NULL,
             cap_offset INTEGER NOT NULL,
-            points INTEGER NOT NULL
+            points INTEGER NOT NULL,
+            season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
             `CREATE INDEX IF NOT EXISTS npcl_mgp_idx ON nstats_player_ctf_league(map_id, gametype_id, player_id)`,
-            `CREATE UNIQUE INDEX IF NOT EXISTS npcl_pgm_idx ON nstats_player_ctf_league(player_id,gametype_id,map_id)`,
+            //`CREATE UNIQUE INDEX IF NOT EXISTS npcl_pgm_idx ON nstats_player_ctf_league(player_id,gametype_id,map_id)`,
+            //replaced with npcl_psgm_idx in install script
+            `DROP INDEX IF EXISTS npcl_pgm_idx`,
 
             
 
@@ -1397,6 +1400,14 @@ async function addSeasonColumnsToRankings(){
     }
 }
 
+async function addSeasonColumnToCTFLeague(){
+
+    await addColumn("nstats_player_ctf_league", "season_id", "INTEGER NOT NULL DEFAULT 0");
+    await simpleQuery(`CREATE UNIQUE INDEX IF NOT EXISTS npcl_psgm_idx ON nstats_player_ctf_league(player_id,season_id,gametype_id,map_id)`);
+
+
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1417,6 +1428,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     await addSeasonColumnToMatches();
     await addSeasonColumnToPlayerTotals();
     await addSeasonColumnsToRankings();
+    await addSeasonColumnToCTFLeague();
 
     //2.6.0
     await updatePlayerWeaponTotalsTable();
