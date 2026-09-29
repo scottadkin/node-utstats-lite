@@ -13,12 +13,13 @@ const jsBase = (bSeasonPage) ? `../../../js/` : `../js/`
 %>
 
 <script src="<%= jsBase %>ui/ui.js"></script>
+<script src="<%= jsBase %>ui/table.js"></script>
 <script src="<%= jsBase %>ui/ctfLeague.js"></script>
 
 <div class="header-wrapper">CTF League</div>
 <div id="tabs"></div>
 <script>
-    renderTypeTabs("#tabs", "<%= mode %>");
+    renderTypeTabs("#tabs", "<%= mode %>", "<%= seasonId %>");
 </script>
 <div id="root">
 
@@ -62,7 +63,7 @@ const jsBase = (bSeasonPage) ? `../../../js/` : `../js/`
 </div>
 <script>
     new CTFLeagueFilterForm("#root", "<%= mode %>", <%- JSON.stringify(gametypeNames) %>, <%- JSON.stringify(mapNames) %>, "<%= id %>", "<%= gId %>");
-    new CTFLeagueTable("#root", "<%= mode %>", <%- JSON.stringify(data) %>,  "<%= id %>", "<%= gId %>", "<%= page %>", "<%= perPage %>", "<%= subHeader %>");
+    new CTFLeagueTable("#root", "<%= mode %>", <%- JSON.stringify(data) %>,  "<%= id %>", "<%= gId %>", "<%= page %>", "<%= perPage %>", "<%= subHeader %>", "<%= seasonId %>");
 </script>
 
 <%- include("footer.ejs") -%>

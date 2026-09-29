@@ -1,5 +1,7 @@
-function renderTypeTabs(parent, currentMode){
+function renderTypeTabs(parent, currentMode, seasonId){
 
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
     parent = document.querySelector(parent);
 
     const tabOptions = [
@@ -9,8 +11,11 @@ function renderTypeTabs(parent, currentMode){
     ];
 
     const tabs = new UITabs(parent, tabOptions, currentMode);
+
     tabs.wrapper.addEventListener("tabChanged", (e) =>{
-        window.location.replace(`/ctfleague/?mode=${e.detail.newTab}`);
+        const urlBase = (seasonId === 0) ? `/ctfleague/` : `/season/${seasonId}/ctfleague/`;
+
+        window.location.replace(`${urlBase}?mode=${e.detail.newTab}`);
     });
 }
 
@@ -123,11 +128,13 @@ class CTFLeagueFilterForm{
 
 class CTFLeagueTable{
 
-    constructor(parent, mode, data, id, gId, page, perPage, subHeader){
+    constructor(parent, mode, data, id, gId, page, perPage, subHeader, seasonId){
         
         this.parent = document.querySelector(parent);
         this.mode = mode;
         this.data = data;
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be valid integer`);
 
         if(this.data.data.length === 0){
 
@@ -140,59 +147,67 @@ class CTFLeagueTable{
         this.currentPage = page;
         this.perPage = perPage;
 
-        this.table = document.createElement("table");
-        this.table.className = `t-width-1`;
-
+        
         UIHeader(this.parent, `${subHeader} - Player League`);
+        this.content = UIDiv();
+        this.parent.append(this.content);
 
-        this.parent.append(this.table);
+
         this.render();
     }
 
 
     render(){
 
-        const headers = [
-            "Place", "Player", "Played", "Wins", 
-            "Draws", "Losses", "Caps For",
-            "Caps Against", "Cap Offset", "Points"
-        ];
-
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < headers.length; i++){
-
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
+        const tableOptions = {
+            "headers":[
+                "Place", "Player", "Played", "Wins", 
+                "Draws", "Losses", "Caps For",
+                "Caps Against", "Cap Offset", "Points"
+            ].map((h) => { return {"display": h}}),
+            "className": "t-width-1",
+            "bNoSort": true
         }
 
-        this.table.append(headerRow);
-
+        const rows = [];
 
         for(let i = 0; i < this.data.data.length; i++){
 
             const d = this.data.data[i];
-            const row = document.createElement("tr");
+            
 
             let pos = 1;
 
             pos = i + 1 + (this.perPage * (this.currentPage - 1));
 
-            row.append(UITableCell({"content": pos, "parse": ["ordinal"], "className": "ordinal"}));
-            row.append(UIPlayerLink({"playerId": d.player.id, "name": d.player.name, "country": d.player.country, "bTableElem": true}));
-
-            row.append(UITableCell({"content": d.total_matches}));
-            row.append(UITableCell({"content": d.wins, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.draws, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.losses, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.cap_for, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.cap_against, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.cap_offset, "parse": ["ignore0"]}));
-            row.append(UITableCell({"content": d.points, "parse": ["ignore0"]}));
-
-            this.table.append(row);
+            
+            rows.push([
+                {"display": `${pos}${getOrdinal(pos)}`, "className": "ordinal"},
+                {
+                    "display": UIPlayerLink({
+                        "playerId": d.player.id, 
+                        "name": d.player.name, 
+                        "country": d.player.country, 
+                        "bTableElem": true
+                    }), 
+                    "bSkipTD": true
+                },
+                {"display": d.total_matches},
+                {"display": ignore0(d.wins)},
+                {"display": ignore0(d.draws)},
+                {"display": ignore0(d.losses)},
+                {"display": ignore0(d.cap_for)},
+                {"display": ignore0(d.cap_against)},
+                {"display": d.cap_offset},
+                {"display": ignore0(d.points)},
+            ]);
         }
 
-        const url = `/ctfleague?mode=${this.mode}${(this.mode === "gametypes") ? `&id=${this.id}` : `&gid=${this.gId}&id=${this.id}`}&page=`;
+        this.table = new TESTUITable(this.content, tableOptions, rows);
+
+        const urlBase = (this.seasonId === 0) ? `/ctfleague/` : `/season/${this.seasonId}/ctfleague/`;
+
+        const url = `${urlBase}?mode=${this.mode}${(this.mode === "gametypes") ? `&id=${this.id}` : `&gid=${this.gId}&id=${this.id}`}&page=`;
         new UIPagination(this.parent, url, this.data.totalRows, this.perPage, this.currentPage);
     }
 }
