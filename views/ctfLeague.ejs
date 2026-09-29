@@ -62,7 +62,7 @@ const jsBase = (bSeasonPage) ? `../../../js/` : `../js/`
     
 </div>
 <script>
-    new CTFLeagueFilterForm("#root", "<%= mode %>", <%- JSON.stringify(gametypeNames) %>, <%- JSON.stringify(mapNames) %>, "<%= id %>", "<%= gId %>");
+    new CTFLeagueFilterForm("#root", "<%= mode %>", <%- JSON.stringify(gametypeNames) %>, <%- JSON.stringify(mapNames) %>, "<%= id %>", "<%= gId %>", "<%= seasonId %>");
     new CTFLeagueTable("#root", "<%= mode %>", <%- JSON.stringify(data) %>,  "<%= id %>", "<%= gId %>", "<%= page %>", "<%= perPage %>", "<%= subHeader %>", "<%= seasonId %>");
 </script>
 

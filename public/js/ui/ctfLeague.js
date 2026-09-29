@@ -22,12 +22,14 @@ function renderTypeTabs(parent, currentMode, seasonId){
 
 class CTFLeagueFilterForm{
 
-    constructor(parent, mode, gametypeNames, mapNames, id, gId){
+    constructor(parent, mode, gametypeNames, mapNames, id, gId, seasonId){
         
         if(mode === "combined") return;
         this.parent = document.querySelector(parent);
         this.mode = mode;
         this.gametypeNames = gametypeNames;
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be valid integer`)
         this.mapNames = mapNames;
         this.id = parseInt(id);
         this.gId = parseInt(gId);
@@ -100,8 +102,9 @@ class CTFLeagueFilterForm{
                 this[targetKey] = parseInt(e);
             }
 
+            const urlBase = (this.seasonId === 0) ? `/ctfleague/` : `/season/${this.seasonId}/ctfleague/`;
             
-            let newUrl = `/ctfleague/?mode=${this.mode}`;
+            let newUrl = `${urlBase}?mode=${this.mode}`;
 
             if(this.mode === "maps"){
                 newUrl+=`&id=${this.id}&gid=${this.gId}`;

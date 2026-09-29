@@ -415,11 +415,13 @@ export async function updateSettings(data){
 
 
 /**
- * Get only valid CTF gametypes based on data stored in season_unique_match_combinations
+ * Get only valid CTF gametypes
  */
 export async function getValidGametypes(seasonId){
 
-    const query = `SELECT DISTINCT gametype_id FROM nstats_seasons_unique_match_combinations WHERE season_id=?`;
+    const query = `SELECT DISTINCT gametype_id FROM nstats_match_ctf WHERE EXISTS (
+        SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_ctf.match_id AND nstats_matches.season_id=?
+    )`;
 
     const result = await simpleQuery(query, [seasonId]);
 
@@ -429,12 +431,14 @@ export async function getValidGametypes(seasonId){
 }
 
 /**
- * Get only valid CTF maps based on data stored in season_unique_match_combinations
+ * Get only valid CTF maps
  */
 
 export async function getValidMaps(seasonId){
 
-    const query = `SELECT DISTINCT map_id FROM nstats_seasons_unique_match_combinations WHERE season_id=?`;
+    const query = `SELECT DISTINCT map_id FROM nstats_match_ctf WHERE EXISTS (
+        SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_ctf.match_id AND nstats_matches.season_id=?
+    )`;
 
     const result = await simpleQuery(query, [seasonId]);
 
@@ -641,7 +645,6 @@ export async function getPlayerMapsPosition(playerId, targetData){
 
 }
 
-
 /**
 * Only return gametypes with mapId=0
 */
@@ -724,22 +727,22 @@ export async function getMapPlayedValidGametypes(mapId){
     return data;
 }
 
-export async function ctfLeagueGetLatestMapGametypePlayed(){
+export async function ctfLeagueGetLatestMapGametypePlayed(seasonId){
 
-    const query = `SELECT gametype_id,map_id FROM nstats_player_ctf_league WHERE map_id!=0 AND gametype_id!=0 ORDER by id DESC LIMIT 1`;
+    const query = `SELECT gametype_id,map_id FROM nstats_player_ctf_league WHERE map_id!=0 AND gametype_id!=0 AND season_id=? ORDER by id DESC LIMIT 1`;
 
-    const result = await simpleQuery(query);
+    const result = await simpleQuery(query, [seasonId]);
 
     if(result.length > 0) return result[0];
 
     return null;
 }
 
-export async function getTotalEntries(gametypeId, mapId){
+export async function getTotalEntries(seasonId, gametypeId, mapId){
 
-    const query = `SELECT COUNT(*) as total_matches FROM nstats_player_ctf_league WHERE gametype_id=? AND map_id=?`;
+    const query = `SELECT COUNT(*) as total_matches FROM nstats_player_ctf_league WHERE gametype_id=? AND map_id=? AND season_id=?`;
 
-    const result = await simpleQuery(query, [gametypeId, mapId]);
+    const result = await simpleQuery(query, [gametypeId, mapId, seasonId]);
 
     if(result.length > 0) return result[0].total_matches;
 
@@ -768,7 +771,7 @@ export async function getSingleCTFLeague(seasonId, gametypeId, mapId, dirtyPage,
         r.player = getPlayer(playerNames, r.player_id);
     }
 
-    const totalRows = await getTotalEntries(gametypeId, mapId);
+    const totalRows = await getTotalEntries(seasonId, gametypeId, mapId);
 
     return {"data": result, totalRows};
 }
@@ -904,7 +907,7 @@ export async function sanitizeCTFLeaguePageReq(req, pageSettings){
 
     if(id === "" && gId === ""){
 
-        const latestIds = await ctfLeagueGetLatestMapGametypePlayed();
+        const latestIds = await ctfLeagueGetLatestMapGametypePlayed(seasonId);
         if(latestIds !== null){
 
             if(mode === "gametypes"){
