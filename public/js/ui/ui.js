@@ -505,15 +505,19 @@ class UITabs{
     }
 }
 
-function UIHeader(parent, text, id){
+function UIHeader(parent, text, id, bUseHeaderDom){
 
     if(typeof parent === "string"){
         parent = document.querySelector(parent);
     }
 
-    const elem = UIDiv("header-wrapper");
+    const elem = (!bUseHeaderDom) ? UIDiv("header-wrapper") : document.createElement("header");
 
-    if(id !== undefined){
+    if(bUseHeaderDom){
+        elem.className = "header";
+    }
+
+    if(id !== undefined && id !== null){
 
         elem.id = id;
         const a = document.createElement("a");
@@ -2032,7 +2036,7 @@ class UISection{
         this.title = title;
 
         this.elem = document.createElement("section");
-        UIHeader(this.elem, this.title);
+        UIHeader(this.elem, this.title, null, true);
 
         this.content = UIDiv();
         this.elem.append(this.content);

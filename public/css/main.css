@@ -946,7 +946,7 @@ option{
 	cursor: pointer;
 }
 
-.header-wrapper{
+.header-wrapper, header{
     text-align:center;
     padding:var(--padding-1);
     font-weight:400;
@@ -1448,4 +1448,50 @@ code{
 
     padding:var(--padding-2);
     font-size:var(--font-size-90);
+}
+
+
+section{
+    margin-bottom: var(--margin-1);
+}
+
+.season-info{
+    font-size:var(--font-size-100);
+    text-align: center;
+    padding-bottom: var(--padding-1);
+}
+
+
+.season-info-date{
+    font-size:var(--font-size-100);
+    display: grid;
+    text-align: center;
+}
+
+
+.season-stat-wrapper{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    column-gap: 5px;
+    row-gap: 5px;
+    margin-top:var(--margin-2);
+}
+
+.season-stat{
+    flex: 0 1 auto;
+    background-color: var(--bg-color-mid);
+    border:1px solid var(--border-color-1);
+    font-size:var(--font-size-80);
+    
+}
+
+.season-stat-label{
+    font-weight:bold;
+    background-color: var(--bg-header-color);
+    padding:10px;
+}
+
+.season-stat-value{
+    padding:5px;
 }

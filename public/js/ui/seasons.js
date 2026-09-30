@@ -71,6 +71,64 @@ class SeasonPage{
     }
 }
 
+
+function UISeasonStat(label, value){
+
+    const elem = UIDiv("season-stat");
+    const labelElem = UIDiv("season-stat-label");
+    labelElem.append(label);
+
+    const valueElem = UIDiv("season-stat-value");
+    valueElem.append(value);
+
+    elem.append(labelElem, valueElem);
+    return elem;
+}
+
+function UISeasonInfo(parent, data, bActive){
+
+    const section = new UISection(parent, data.name);
+    section.elem.className = "season-info";
+
+    if(bActive) section.elem.className += ` season-active`;
+
+
+    const content = [];
+
+    const startElem = UIDiv("season-info-date");
+
+    startElem.append("Start Date ", toDateString(data.start_date, TIME_ZONE, true));
+
+
+    const endElem = UIDiv("season-info-date");
+    
+    endElem.append(`End Date ${toDateString(data.end_date, TIME_ZONE, true)}`);
+
+    content.push(startElem, endElem);
+
+   
+    
+    const ssw = UIDiv("season-stat-wrapper");
+
+    content.push(ssw);
+
+
+    const test = UIDiv("season-stat");
+    test.append(`Total Matches`, UIBr(), data.total_matches);
+    ssw.append(UISeasonStat("Total Matches", data.total_matches));
+
+    ssw.append(UISeasonStat(`Total Players`, data.total_players));
+    ssw.append(UISeasonStat(`Total Playtime`, toPlaytime(data.total_playtime)));
+ 
+
+
+    section.setContent(content);
+
+    
+
+
+}
+
 class SeasonsPage{
 
     constructor(data){
@@ -79,16 +137,38 @@ class SeasonsPage{
 
         this.wrapper = UIDiv();
 
-        UIHeader(this.parent, "Seasons");
-
         this.data = data;
         console.log(data);
 
         this.parent.append(this.wrapper);
 
-        this.renderBasicList();
+        this.renderTestRichView();
+        //this.renderBasicList();
     }
 
+    renderTestRichView(){
+
+        this.wrapper.innerHTML = ``;
+
+        const now = new Date();
+
+        const nowISO = now.toISOString();
+
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            const bActive = nowISO >= d.start_date && nowISO < d.end_date;
+
+            const link = document.createElement("a");
+            link.href = `/season/${d.id}/`;
+
+            
+            UISeasonInfo(link, d, bActive);
+            this.wrapper.append(link);
+        }
+    }
 
     renderBasicList(){
 
