@@ -12,6 +12,7 @@ import { calculateAllPlayerTotals, installPlayerSettings } from "./players.mjs";
 import { setAllMapTotals } from "./weapons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "./ctf.mjs";
 import { setAllBGametypeFlags } from "./matches.mjs";
+import { getAllSeasonIds } from "./seasons.mjs";
 
 
 
@@ -1524,9 +1525,17 @@ export async function sqliteInstall(bOnlyCreateTables){
 
 
     if(!bOnlyCreateTables){
-        new Message(`Refreshing player ctf league Map tables.`,"note");
-        await refreshAllTables("maps");
-        new Message(`Refreshing player ctf league Gametype tables.`,"note");
-        await refreshAllTables("gametypes");
+
+        const seasonIds = await getAllSeasonIds(false);
+
+        for(let i = 0; i < seasonIds.length; i++){
+
+            const seasonId = seasonIds[i];
+
+            new Message(`Refreshing player ctf league Map tables.`,"note");
+            await refreshAllTables(seasonId, "maps");
+            new Message(`Refreshing player ctf league Gametype tables.`,"note");
+            await refreshAllTables(seasonId, "gametypes");
+        }
     }
 }
