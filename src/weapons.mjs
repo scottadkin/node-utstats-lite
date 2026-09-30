@@ -2,6 +2,7 @@ import { bulkInsert, simpleQuery, sqlInsertOnDuplicateUpdate, sqlInsertReturnRow
 import { getAllMapIds, getAllUniquePlayedGametypes, getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
 import Message from "./message.mjs";
+import { getAllSeasonIds, seasonGetAllMapIds } from "./seasons.mjs";
 
 
 export async function getWeaponId(name, bCreateIfMissing){
@@ -700,50 +701,34 @@ export async function getMapWeaponStats(seasonId, mapId){
     return result;
 }
 
-
-
-async function getAllMapData(mapId){
-
-    const query = `SELECT match_id,map_id,weapon_id,SUM(kills) as kills,SUM(deaths) as deaths, SUM(team_kills) as team_kills,SUM(suicides) as suicides
-    FROM nstats_match_weapon_stats WHERE map_id=? GROUP BY match_id,weapon_id,map_id`;
-
-    return await simpleQuery(query, [mapId]);
-}
-
 export async function setAllMapTotals(){
 
+    const seasonIds = await getAllSeasonIds(false);
 
     await simpleQuery(`DELETE FROM nstats_map_weapon_totals`);
 
-    const mapIds = await getAllMapIds();
 
-    for(let i = 0; i < mapIds.length; i++){
+    for(let i = 0; i < seasonIds.length; i++){
 
-        const m = mapIds[i];
+        const seasonId = seasonIds[i];
 
-        const current = await getAllMapData(m);
-        const uniqueGametypes = await getAllUniquePlayedGametypes(m);
+        const mapIds = await seasonGetAllMapIds(seasonId);
 
-        new Message(`Attempting to calculate map weapon totals for mapId=${m} (All time totals)`,"note");
-        //all time map totals
-        const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(m, 0);
-        const mapAllTimeData = await calcMapWeaponTotalsFromMatchTable(m, 0);
-        setXPH(mapAllTimeData, allTimeMatches, allTimePlaytime, m, 0);
+        for(let x = 0; x < mapIds.length; x++){
 
-        await bulkInsertMapWeaponTotals(mapAllTimeData);
+            const mapId = mapIds[x];
 
-        for(let x = 0; x < uniqueGametypes.length; x++){
+            new Message(`Attempting to calculate map weapon totals for seasonId=${seasonId} mapId=${mapId} (All time totals)`,"note");
+            //all time map totals
+            const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(seasonId, mapId, 0);
+            const mapAllTimeData = await calcMapWeaponTotalsFromMatchTable(seasonId, mapId, 0);
+            setXPH(mapAllTimeData, allTimeMatches, allTimePlaytime, mapId, 0);
 
-            const g = uniqueGametypes[x];
+            await bulkInsertMapWeaponTotals(seasonId, mapAllTimeData);
 
-            new Message(`Attempting to calculate map weapon totals for mapId=${m} and gametypeId=${g}`,"note");
-
-            const {playtime, matches} = await getTotalPlaytimeAndMatches(m,g);
-            const mapGametypeData = await calcMapWeaponTotalsFromMatchTable(m, g);
-            setXPH(mapGametypeData, matches, playtime, m, g);
-            await bulkInsertMapWeaponTotals(mapGametypeData);
-        }   
+        }
     }
+
 
     new Message(`Set all map weapon totals completed.`,"pass");
 }
