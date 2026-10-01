@@ -1,7 +1,7 @@
 import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate} from "./database.mjs";
-import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString, sortByName } from "./generic.mjs";
+import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString, sortByName, convertTimestamp, toPlaytime } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
-import { setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
+import { getPlayerCTFTotals, setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
 import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./weapons.mjs";
 import { getPlayerMapTotals, getUniquePlayerIdsOnMap, getAllMapIds} from "./maps.mjs";
@@ -9,7 +9,12 @@ import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";
 import { getAllSeasonIds } from "./seasons.mjs";
-
+import { getCategorySettings } from "./siteSettings.mjs";
+import { getPageLayout } from "./pageLayout.mjs";
+import { getPlayerTotals as getPlayerWeaponTotals } from "./weapons.mjs";
+import { getLeagueSiteSettings, getPlayerMapsLeagueData } from "./ctfLeague.mjs";
+import { getPlayerWeaponDamageTotals } from "./playerWeaponDamage.mjs";
+import { getPlayerRankings } from "./rankings.mjs";
 const DEFAULT_PLAYER_SETTINGS = [
     {"category": "Importer", "name": "Auto Assign HWID To First Used Name", "valueType": "bool", "value": "false"}
 ];
@@ -414,7 +419,7 @@ export async function getPlayerByHash(hash){
  * @param {(Number|String)} playerId 
  * @returns {Promise<Object|null>}
  */
-export async function getPlayerProfileInfo(playerId){
+export async function getPlayerProfileInfo(playerId, seasonId){
 
     let column = "id";
 
@@ -423,17 +428,18 @@ export async function getPlayerProfileInfo(playerId){
     }
 
     const query = `SELECT 
+    nstats_player_totals.playtime,
+    nstats_player_totals.last_active,
     nstats_players.id,
     nstats_players.name,
     nstats_players.country,
-    nstats_players.hash,
-    nstats_player_totals.last_active,
-    nstats_player_totals.playtime 
-    FROM nstats_players 
-    LEFT JOIN nstats_player_totals ON nstats_players.id = nstats_player_totals.player_id
-    WHERE nstats_players.${column}=?`;
+    nstats_players.hash
+    FROM nstats_player_totals 
+    LEFT JOIN nstats_players ON nstats_players.id = nstats_player_totals.player_id
+    WHERE nstats_player_totals.player_id=? AND nstats_player_totals.season_id=? 
+    AND nstats_player_totals.gametype_id=0 AND nstats_player_totals.map_id=0`;
 
-    const result = await simpleQuery(query, [playerId]);
+    const result = await simpleQuery(query, [playerId, seasonId]);
 
     if(result.length === 0) return null;
     return result[0];
@@ -2565,4 +2571,98 @@ export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, ord
     title = `${title} - ${siteName}`;
 
     return {description, title, siteName}
+}
+
+
+export async function sanitizePlayerPageReq(id,req){
+
+
+    const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : 0;
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid Integer`);
+
+    const basicPlayerInfo = await getPlayerProfileInfo(id, seasonId);
+    if(basicPlayerInfo === null) throw new Error(`Player does not exist!`);
+
+    let title = `${basicPlayerInfo.name} - Player Profile`;
+
+    const lastSeenString = convertTimestamp(basicPlayerInfo.last_active, true, false, true);
+    const playtimeString = toPlaytime(basicPlayerInfo.playtime);
+
+    let description = `View the player profile of ${basicPlayerInfo.name}, `;
+    description += `they were last seen ${lastSeenString}, and have played for a total of ${playtimeString}`;
+
+    const playerId = basicPlayerInfo.id;
+
+    if(basicPlayerInfo.country === "") basicPlayerInfo.country = "xx";
+
+    const [pageSettings, pageLayout, brandingSettings,] = await Promise.all([
+        getCategorySettings("Player"),
+        getPageLayout("Player"),
+        getCategorySettings("Branding")]
+    );
+
+
+
+    const generalTotals = await getPlayerGeneralSummary(playerId);
+
+
+    let ctfTotals = [];
+
+    if(pageSettings["Display CTF"] === 1){
+        ctfTotals = await getPlayerCTFTotals(playerId);
+    }
+
+    let weaponTotals = [];
+
+    if(pageSettings["Display Weapons"] === 1){
+
+        weaponTotals = await getPlayerWeaponTotals(playerId);    
+    
+    }
+
+
+    let rankingDayRange = (pageSettings["Rankings Activity Range"] !== undefined) ? parseInt(pageSettings["Rankings Activity Range"]) : 28;
+
+    if(rankingDayRange !== rankingDayRange) rankingDayRange = 28;
+
+    const dateMin = 60 * 60 * 24 * rankingDayRange;
+    
+    const minDate = new Date(Date.now() - dateMin * 1000);
+
+    let rankings = null;
+
+    if(pageSettings["Display Rankings"] === 1){
+        //no real speed diffs with indexes
+        rankings = await getPlayerRankings(playerId, minDate);
+        rankings.minDate = minDate;
+        rankings.maxDays = rankingDayRange;
+    
+    }
+    
+    let ctfLeagueData = [];
+
+    let ctfLeagueSettings = {};
+
+    if(pageSettings["Display CTF League"] === 1){
+        ctfLeagueData = await getPlayerMapsLeagueData(playerId);
+        ctfLeagueSettings = await getLeagueSiteSettings();
+    }
+
+    let weaponDamage = [];
+
+    if(pageSettings["Display Weapon Damage"] === 1){
+
+        weaponDamage = await getPlayerWeaponDamageTotals(id);
+    }
+    
+    
+    title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+
+
+    return {
+        title, description, playerId, seasonId, basicPlayerInfo,
+        pageSettings, pageLayout, brandingSettings, 
+        generalTotals, ctfTotals, weaponTotals, rankings, 
+        ctfLeagueData, ctfLeagueSettings, weaponDamage
+    }
 }
