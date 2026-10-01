@@ -1312,7 +1312,7 @@ export async function getPlayerGeneralSummary(playerId, seasonId){
 }
 
 
-async function getPlayerTotalMatches(playerId, where, vars){
+async function getPlayerTotalMatches(where, vars){
 
     const query = `SELECT COUNT(*) as total_matches FROM nstats_match_players WHERE player_id=? ${where} AND spectator=0`;
 
@@ -1324,23 +1324,22 @@ async function getPlayerTotalMatches(playerId, where, vars){
     return result[0].total_matches;
 }
 
-export async function getPlayerAllGametypesAndMaps(playerId){
+export async function getPlayerAllGametypesAndMaps(playerId, seasonId){
 
     const p = "nstats_player_totals";
     const m = "nstats_maps";
     const g = "nstats_gametypes";
 
-    const query = `SELECT DISTINCT 
+    const query = `SELECT DISTINCT
     ${p}.gametype_id,${p}.map_id, 
     ${m}.name as map_name,
     ${g}.name as gametype_name
     FROM nstats_player_totals 
     LEFT JOIN ${m} ON ${m}.id = ${p}.map_id
     LEFT JOIN ${g} ON ${g}.id = ${p}.gametype_id
-    WHERE ${p}.player_id=? AND ${p}.gametype_id!=0 AND ${p}.map_id!=0`;
+    WHERE ${p}.player_id=? AND ${p}.season_id=? AND ${p}.gametype_id!=0 AND ${p}.map_id!=0`;
 
-
-    const result = await simpleQuery(query, [playerId])
+    const result = await simpleQuery(query, [playerId, seasonId])
     const gametypes = {};
     const maps = {};
 
@@ -1395,7 +1394,7 @@ export async function getPlayerAllGametypesAndMaps(playerId){
 }
 
 // add page and perpage filtering
-export async function getPlayerRecentMatches(playerId, gametype, map, page, perPage){
+export async function getPlayerRecentMatches(playerId, seasonId, gametype, map, page, perPage){
 
     page = parseInt(page);
     perPage = parseInt(perPage);
@@ -1423,6 +1422,10 @@ export async function getPlayerRecentMatches(playerId, gametype, map, page, perP
         where += ` AND nstats_match_players.map_id=?`;
     }
 
+    where += ` AND
+    EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?)`;
+    vars.push(seasonId);
+
 
     const query = `SELECT 
     nstats_match_players.match_id,
@@ -1438,7 +1441,7 @@ export async function getPlayerRecentMatches(playerId, gametype, map, page, perP
     
     ORDER BY nstats_match_players.match_date DESC, nstats_match_players.match_id DESC LIMIT ?, ?`;
 
-    const totalMatches = await getPlayerTotalMatches(playerId, where, vars);
+    const totalMatches = await getPlayerTotalMatches(where, vars);
 
     let start = page * perPage;
     vars.push(start);
@@ -2653,7 +2656,7 @@ export async function sanitizePlayerPageReq(id,req){
 
     if(pageSettings["Display Weapon Damage"] === 1){
 
-        weaponDamage = await getPlayerWeaponDamageTotals(id);
+        weaponDamage = await getPlayerWeaponDamageTotals(id, seasonId);
     }
     
     

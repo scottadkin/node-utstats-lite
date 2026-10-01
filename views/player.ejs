@@ -57,7 +57,7 @@
                 %>new PlayerItemsSummary("#root", generalTotals);<%
             } break;
             case "Display Recent Matches": {
-                %>const rm = new PlayerRecentMatches("#root", <%= playerId %>);<%
+                %>const rm = new PlayerRecentMatches("#root", <%= playerId %>, "<%= seasonId %>");<%
             } break;
             case "Display Activity Heatmap": {
                 %>new UIPlayerActivityHeatmap("#root", {

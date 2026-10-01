@@ -31,10 +31,13 @@ export default class JSONManager{
         const playerId = this.req.query?.playerId ?? "";
         let gametypeId = this.req.query?.gametypeId ?? 0; 
         let mapId = this.req.query?.mapId ?? 0; 
+        const seasonId = (this.req.query.season !== undefined) ? parseInt(this.req.query.season) : NaN;
+
+        if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
         let {page, perPage} = this.getPageAndPerPage();
         
-        const data = await getPlayerRecentMatches(playerId, gametypeId, mapId, page, perPage);
+        const data = await getPlayerRecentMatches(playerId, seasonId, gametypeId, mapId, page, perPage);
 
         //const data = await getPlayerRecentMatches();
         return this.res.status(200).json(data);
@@ -43,8 +46,12 @@ export default class JSONManager{
     async getPlayerAllGametypeMapNames(){
 
         const playerId = this.req.query?.playerId ?? "";
+        const seasonId = (this.req.query.season !== undefined) ? parseInt(this.req.query.season) : NaN;
 
-        const data = await getPlayerAllGametypesAndMaps(playerId);
+        if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+       
+
+        const data = await getPlayerAllGametypesAndMaps(playerId, seasonId);
 
         return this.res.status(200).json(data);
     }

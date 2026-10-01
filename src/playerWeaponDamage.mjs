@@ -35,7 +35,7 @@ export async function getMatchWeaponDamage(matchId){
 }
 
 
-export async function getPlayerWeaponDamageTotals(playerId){
+export async function getPlayerWeaponDamageTotals(playerId, seasonId){
 
     const dT = `nstats_totals_player_weapon_damage`;
     const wT = `nstats_weapons`;
@@ -59,9 +59,9 @@ export async function getPlayerWeaponDamageTotals(playerId){
     LEFT JOIN ${wT} on ${wT}.id = ${dT}.weapon_id
     LEFT JOIN ${gT} on ${gT}.id = ${dT}.gametype_id
     LEFT JOIN ${mT} on ${mT}.id = ${dT}.map_id
-    WHERE ${dT}.player_id=?`;
+    WHERE ${dT}.player_id=? AND ${dT}.season_id=?`;
 
-    return await simpleQuery(query, [playerId]);
+    return await simpleQuery(query, [playerId, seasonId]);
 }
 
 class PlayerWeaponDamageTotals{

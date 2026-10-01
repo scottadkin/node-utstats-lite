@@ -1,9 +1,12 @@
 class PlayerRecentMatches{
 
-    constructor(parent, playerId){
+    constructor(parent, playerId, seasonId){
 
         this.parent = document.querySelector(parent);
         this.playerId = playerId;
+        this.seasonId = parseInt(seasonId);
+
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
 
 
         this.gametypes = [];
@@ -33,7 +36,7 @@ class PlayerRecentMatches{
 
         try{
 
-            const url = `../json/player-get-all-gametypes-maps?playerId=${this.playerId}`;
+            const url = `../json/player-get-all-gametypes-maps?playerId=${this.playerId}&season=${this.seasonId}`;
 
             const req = await fetch(url);
 
@@ -164,6 +167,7 @@ class PlayerRecentMatches{
         try{
 
             let url = `../json/player-recent-matches?playerId=${this.playerId}`;
+            url += `&season=${this.seasonId}`;
             url+= `&gametypeId=${this.selectedGametype}&mapId=${this.selectedMap}`;
             url+= `&perPage=${this.perPage}&page=${this.page}`;
 
