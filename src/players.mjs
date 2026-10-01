@@ -1292,7 +1292,7 @@ export async function getPlayerAllMapTotals(playerId){
  * @param {Number} playerId 
  * @returns All gametype and map totals, not including CTF totals
  */
-export async function getPlayerGeneralSummary(playerId){
+export async function getPlayerGeneralSummary(playerId, seasonId){
 
     const t = "nstats_player_totals";
     const maxT = "nstats_player_totals_max";
@@ -1302,12 +1302,13 @@ export async function getPlayerGeneralSummary(playerId){
     IF(${t}.map_id = 0, 'All', nstats_maps.name) as map_name,
     IF(${t}.gametype_id = 0, 'All', nstats_gametypes.name) as gametype_name
     FROM ${t} 
-    LEFT JOIN ${maxT} ON ${t}.player_id = ${maxT}.player_id AND ${t}.gametype_id = ${maxT}.gametype_id AND ${t}.map_id = ${maxT}.map_id
+    LEFT JOIN ${maxT} ON ${t}.player_id = ${maxT}.player_id AND ${t}.gametype_id = ${maxT}.gametype_id AND 
+    ${t}.map_id = ${maxT}.map_id AND ${maxT}.season_id = ${t}.season_id
     LEFT JOIN nstats_maps ON ${t}.map_id = nstats_maps.id 
     LEFT JOIN nstats_gametypes ON ${t}.gametype_id = nstats_gametypes.id 
-    WHERE ${t}.player_id=?`;
+    WHERE ${t}.player_id=? AND ${t}.season_id=?`;
 
-    return await simpleQuery(query, [playerId]);
+    return await simpleQuery(query, [playerId, seasonId]);
 }
 
 
@@ -2595,7 +2596,7 @@ export async function sanitizePlayerPageReq(id,req){
 
     if(basicPlayerInfo.country === "") basicPlayerInfo.country = "xx";
 
-    const [pageSettings, pageLayout, brandingSettings,] = await Promise.all([
+    const [pageSettings, pageLayout, brandingSettings] = await Promise.all([
         getCategorySettings("Player"),
         getPageLayout("Player"),
         getCategorySettings("Branding")]
@@ -2603,20 +2604,20 @@ export async function sanitizePlayerPageReq(id,req){
 
 
 
-    const generalTotals = await getPlayerGeneralSummary(playerId);
+    const generalTotals = await getPlayerGeneralSummary(playerId, seasonId);
 
 
     let ctfTotals = [];
 
     if(pageSettings["Display CTF"] === 1){
-        ctfTotals = await getPlayerCTFTotals(playerId);
+        ctfTotals = await getPlayerCTFTotals(playerId, seasonId);
     }
 
     let weaponTotals = [];
 
     if(pageSettings["Display Weapons"] === 1){
 
-        weaponTotals = await getPlayerWeaponTotals(playerId);    
+        weaponTotals = await getPlayerWeaponTotals(playerId, seasonId);    
     
     }
 
@@ -2633,7 +2634,7 @@ export async function sanitizePlayerPageReq(id,req){
 
     if(pageSettings["Display Rankings"] === 1){
         //no real speed diffs with indexes
-        rankings = await getPlayerRankings(playerId, minDate);
+        rankings = await getPlayerRankings(playerId, minDate, seasonId);
         rankings.minDate = minDate;
         rankings.maxDays = rankingDayRange;
     
@@ -2644,7 +2645,7 @@ export async function sanitizePlayerPageReq(id,req){
     let ctfLeagueSettings = {};
 
     if(pageSettings["Display CTF League"] === 1){
-        ctfLeagueData = await getPlayerMapsLeagueData(playerId);
+        ctfLeagueData = await getPlayerMapsLeagueData(playerId, seasonId);
         ctfLeagueSettings = await getLeagueSiteSettings();
     }
 

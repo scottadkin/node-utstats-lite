@@ -551,7 +551,7 @@ export async function updatePlayerTotals(playerIds, seasonId){
 }
 
 
-export async function getPlayerCTFTotals(playerId){
+export async function getPlayerCTFTotals(playerId, seasonId){
 
     const query = `SELECT ${getPlayerCTFProfileColumns()},
     nstats_gametypes.name as gametype_name,
@@ -559,9 +559,9 @@ export async function getPlayerCTFTotals(playerId){
     FROM nstats_player_totals_ctf 
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_player_totals_ctf.gametype_id
     LEFT JOIN nstats_maps ON nstats_maps.id = nstats_player_totals_ctf.map_id
-    WHERE nstats_player_totals_ctf.player_id=?`;
+    WHERE nstats_player_totals_ctf.player_id=? AND nstats_player_totals_ctf.season_id=?`;
 
-    return await simpleQuery(query, [playerId]);
+    return await simpleQuery(query, [playerId, seasonId]);
 }
 
 async function changeCapPlayerIds(oldIds, newId){

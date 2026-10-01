@@ -599,7 +599,7 @@ export async function refreshAllTables(seasonId, type){
 
 
 
-export async function getPlayerMapsLeagueData(playerId){
+export async function getPlayerMapsLeagueData(playerId, seasonId){
 
     const pT = "nstats_player_ctf_league";
     const mT = "nstats_maps";
@@ -614,12 +614,12 @@ export async function getPlayerMapsLeagueData(playerId){
     LEFT JOIN ${gT} ON ${gT}.id = ${pT}.gametype_id
     LEFT JOIN ${mT} ON ${mT}.id = ${pT}.map_id
     
-    WHERE ${pT}.player_id=?`;
+    WHERE ${pT}.player_id=? AND ${pT}.season_id=?`;
 
-    const result = await simpleQuery(query, [playerId]);
+    const result = await simpleQuery(query, [playerId, seasonId]);
 
 
-    await getPlayerMapsPosition(playerId, result);
+    await getPlayerMapsPosition(playerId, result, seasonId);
 
     return result;
 }

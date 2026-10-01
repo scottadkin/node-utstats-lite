@@ -27,6 +27,7 @@ export async function renderPlayerPage(req, res, userSession){
         pageSettings, pageLayout, brandingSettings, playerId, basicPlayerInfo, weaponDamage,seasonId,
         generalTotals, ctfTotals, weaponTotals, rankings, 
         ctfLeagueData, ctfLeagueSettings} = await sanitizePlayerPageReq(id, req);
+       
 
         res.render("player.ejs", {
             "meta": {description, "image": "images/maps/default.jpg"},

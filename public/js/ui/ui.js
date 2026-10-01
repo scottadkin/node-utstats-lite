@@ -1620,6 +1620,7 @@ class UIPlayerActivityHeatmap extends UICalendarHeatMap{
         this.targetGametype = options?.gametype ?? "";
         this.targetMap = options?.map ?? "";
         this.targetPlayer = options?.player ?? "";
+   
         
         super.init();
     }

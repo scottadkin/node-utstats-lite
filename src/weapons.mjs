@@ -417,7 +417,7 @@ export async function updatePlayerTotals(playerIds, seasonId){
 }
 
 
-export async function getPlayerTotals(playerId){
+export async function getPlayerTotals(playerId, seasonId){
 
     const query = `SELECT 
     nstats_player_totals_weapons.gametype_id,
@@ -449,9 +449,9 @@ export async function getPlayerTotals(playerId){
     LEFT JOIN nstats_weapons ON nstats_weapons.id = nstats_player_totals_weapons.weapon_id
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_player_totals_weapons.gametype_id
     LEFT JOIN nstats_maps ON nstats_maps.id = nstats_player_totals_weapons.map_id
-    WHERE nstats_player_totals_weapons.player_id=?`;
+    WHERE nstats_player_totals_weapons.player_id=? AND nstats_player_totals_weapons.season_id=?`;
 
-    return await simpleQuery(query, [playerId]);
+    return await simpleQuery(query, [playerId, seasonId]);
 }
 
 
