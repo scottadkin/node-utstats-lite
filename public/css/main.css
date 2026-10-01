@@ -57,6 +57,9 @@
 	--box-shadow-1:1px 1px 1px 1px rgba(0,0,0,0.25);
     --player-name-width:150px;
     --player-name-max-width:150px;
+    --gold:rgb(121, 108, 34);
+    --silver:rgb(96,96,96);
+    --bronze:rgb(101,70,39);
 }
 
 main{
@@ -1455,7 +1458,7 @@ section{
     margin-bottom: var(--margin-1);
 }
 
-.season-info{
+/*.season-info{
     font-size:var(--font-size-100);
     text-align: center;
     padding-bottom: var(--padding-1);
@@ -1496,4 +1499,51 @@ section{
 
 .season-stat-value{
     padding:0px 5px;
+}*/
+
+.top-objects-wrapper{
+    display:flex;
+    flex-wrap: nowrap;
+    max-width:var(--max-table-width-2);
+    margin-left:auto;
+    margin-right: auto;
+    column-gap: 10px;
+    margin-bottom: var(--margin-1);
 }
+
+.top-object{
+    flex: 1 1 auto;
+    text-align: center;
+    align-content: end;
+    font-size:var(--font-size-80);
+    overflow: hidden;   
+}
+
+
+.top-object-info{
+    font-size:var(--font-size-65);
+}
+
+
+.top-object img{
+    width:100%;
+    display:block;
+}
+
+.podium-bottom{
+    background-color:var(--bg-color-light);
+    font-size:var(--font-size-70);
+}
+
+.gold{
+    background-color: var(--gold);
+}
+
+.silver{
+    background-color: var(--silver);
+}
+
+.bronze{
+    background-color: var(--bronze);
+}
+

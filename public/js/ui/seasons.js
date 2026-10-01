@@ -110,25 +110,81 @@ function UISeasonInfo(parent, data, bActive, mostPlayedMaps){
     ssw.append(UISeasonStat(`Total Playtime`, toPlaytime(data.total_playtime)));
  
 
-    for(let i = 0; i < mostPlayedMaps.length; i++){
+    const topObjects = UIDiv("top-objects-wrapper");
 
-        const m = mostPlayedMaps[i];
+
+    let end = (mostPlayedMaps.length > 2) ? 3 : mostPlayedMaps.length; 
+
+    for(let i = 0; i < end; i++){
+
+        let index = 0;
+
+        if(i === 0){
+            index = 1;
+        }else if(i === 1){
+            index = 0;
+        }else if(i === 2){
+            index = 2;
+        }
+   
+        const m = mostPlayedMaps[index];
 
         const image = document.createElement("img");
         image.src = getMapThumbOrFullSize(m);
 
-        const test = UIDiv();
-        test.append(
-            m.name, 
-            UIBr(), 
-            `${m.total_matches} Matches Played`,
-            image);
+        const topObject = UIDiv("top-object");
 
-        ssw.append(UISeasonStat(`${i+1}${getOrdinal(i+1)} Most Played Map`, test));
+        const objectName = UIDiv("top-object-name");
+        objectName.append(m.name);
+
+        const objectInfo = UIDiv("top-object-info");
+        objectInfo.append(`${m.total_matches} Matches Played`);
+
+
+        const podiumBottom = UIDiv("podium-bottom");
+
+        let podiumStyle = "";
+        let podiumText = "";
+
+        let bgClass = "";
+
+        if(i === 0){
+            podiumStyle = "height:30px;line-height:30px;font-size:14px;";
+            podiumText = "2nd";
+            bgClass = "silver";
+        }else if(i === 1){
+            podiumStyle = "height:50px;line-height:50px;font-size:20px;";
+            podiumText = "1st";
+            bgClass = "gold";
+        }else if(i === 2){
+            podiumStyle= "height:20px;line-height:20px;font-size:12px;";
+            podiumText = "3rd";
+            bgClass = "bronze";
+        }
+
+        podiumBottom.style.cssText = podiumStyle;
+        podiumBottom.append(podiumText);
+
+        podiumBottom.className += ` ${bgClass}`;
+        objectName.className += ` ${bgClass}`;
+        objectInfo.className += ` ${bgClass}`;
+
+        const imgWrapper = UIDiv("podium-img-wrapper");
+        imgWrapper.append(image);
+        topObject.append(
+            objectName,
+            objectInfo,
+            imgWrapper,
+            podiumBottom
+        );
+
+        topObjects.append(topObject);
+        //topObjects.append(UISeasonStat(`${i+1}${getOrdinal(i+1)} Most Played Map`, test));
     }
 
+    parent.append(topObjects);
 
-    section.setContent(content);
+    //section.setContent(content);
 
     
 
