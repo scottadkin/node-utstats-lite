@@ -113,7 +113,7 @@ export default class PlayerWeaponDamage{
 
     }
 
-    async updatePlayerTotals(gametypeId, mapId){
+    async updatePlayerTotals(seasonId, gametypeId, mapId){
 
         if(!this.bFoundData) return;
 
@@ -123,7 +123,7 @@ export default class PlayerWeaponDamage{
 
 
 
-        await updatePlayerWeaponDamageTotals(playerIds, gametypeId, mapId)
+        await updatePlayerWeaponDamageTotals(playerIds, seasonId, gametypeId, mapId)
     }
 }
 

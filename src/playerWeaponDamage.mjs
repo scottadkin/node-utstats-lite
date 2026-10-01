@@ -66,9 +66,11 @@ export async function getPlayerWeaponDamageTotals(playerId){
 
 class PlayerWeaponDamageTotals{
 
-    constructor(playerIds, gametypeId, mapId){
+    constructor(playerIds, seasonId, gametypeId, mapId){
 
         this.playerIds = playerIds;
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be valid integer`);
         this.gametypeId = gametypeId;
         this.mapId = mapId;
 
@@ -160,7 +162,9 @@ class PlayerWeaponDamageTotals{
                     for(const [weaponId, data] of Object.entries(weaponData)){
                        // console.log(playerId, gametypeId, mapId, weaponId);
                         insertVars.push([
-                            playerId, data.totalMatches, data.playtime, gametypeId, mapId, weaponId, data.damage, data.maxDamage, data.avgDamage, data.dpm
+                            playerId, data.totalMatches, data.playtime, gametypeId, 
+                            mapId, weaponId, data.damage, data.maxDamage, data.avgDamage, data.dpm,
+                            this.seasonId
                         ]);
                     }
                 }
@@ -170,8 +174,11 @@ class PlayerWeaponDamageTotals{
 
         await sqlInsertOnDuplicateUpdate(
         "nstats_totals_player_weapon_damage", 
-        ["player_id", "total_matches", "total_playtime", "gametype_id", "map_id", "weapon_id", "damage", "max_damage", "avg_damage", "damage_per_minute"]
-        , insertVars, "player_id,gametype_id,map_id,weapon_id")
+        [   "player_id", "total_matches", "total_playtime", 
+            "gametype_id", "map_id", "weapon_id", "damage", "max_damage", "avg_damage", "damage_per_minute",
+            "season_id"
+        ]
+        , insertVars, "player_id,season_id, gametype_id,map_id,weapon_id")
         
     }
 
@@ -198,22 +205,24 @@ class PlayerWeaponDamageTotals{
         AVG(damage) as avg_damage,
         IF(SUM(playtime) > 0 AND SUM(damage) > 0, SUM(damage) / SUM(playtime) * 60, 0) as damage_per_minute
         FROM nstats_match_player_weapon_damage 
-        WHERE player_id IN(?)
+        WHERE player_id IN(?) AND EXISTS (
+            SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_player_weapon_damage.match_id AND nstats_matches.season_id=?
+        )
         GROUP BY player_id, gametype_id, map_id, weapon_id`;
 
 
-        this.rawData = await simpleQuery(query, [this.playerIds]);
+        this.rawData = await simpleQuery(query, [this.playerIds, this.seasonId]);
 
 
     }
 }
 
 
-export async function updatePlayerWeaponDamageTotals(playerIds, gametypeId, mapId){
+export async function updatePlayerWeaponDamageTotals(playerIds, seasonId, gametypeId, mapId){
 
 
     //await altApproach(playerIds);
-    const test = new PlayerWeaponDamageTotals(playerIds, gametypeId, mapId);
+    const test = new PlayerWeaponDamageTotals(playerIds, seasonId, gametypeId, mapId);
 
     await test.init();
     return;

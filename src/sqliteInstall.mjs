@@ -919,10 +919,13 @@ export function createTableQueries(){
                 damage INTEGER NOT NULL,
                 max_damage INTEGER NOT NULL,
                 avg_damage REAL NOT NULL,
-                damage_per_minute REAL NOT NULL
+                damage_per_minute REAL NOT NULL,
+                season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
 
-            `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_pwd ON nstats_totals_player_weapon_damage(player_id,gametype_id,map_id,weapon_id)`,
+            `DROP INDEX IF EXISTS nstats_totals_pwd`,//replaced with nstats_totals_pswd
+            //moved to top of install script
+            //`CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_pswd ON nstats_totals_player_weapon_damage(player_id,season_id,gametype_id,map_id,weapon_id)`,
 
             `CREATE TABLE IF NOT EXISTS nstats_player_totals_max (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1381,6 +1384,11 @@ async function addSeasonColumnToPlayerTotals(){
     await addColumn("nstats_player_totals_weapons", "season_id", "INTEGER NOT NULL DEFAULT 0");
 
     await addColumn("nstats_player_totals_ctf", "season_id", "INTEGER NOT NULL DEFAULT 0");
+
+    
+    await addColumn("nstats_totals_player_weapon_damage", "season_id", "INTEGER NOT NULL DEFAULT 0");
+
+    await simpleQuery(`CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_pswd ON nstats_totals_player_weapon_damage(player_id,season_id,gametype_id,map_id,weapon_id)`);
 
 }
 
