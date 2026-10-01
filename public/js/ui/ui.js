@@ -2090,3 +2090,103 @@ function sortUISelectOptionsByDisplay(a, b){
     return 0;
     
 }
+
+
+class UIPodium{
+
+    constructor(parent, data){
+
+        this.parent = parent;
+        this.data = data;
+
+        this.render();
+    }
+
+    render(){
+
+        const topObjects = UIDiv("top-objects-wrapper");
+
+        let end = (this.data.length > 2) ? 3 : this.data.length; 
+
+        for(let i = 0; i < end; i++){
+
+            let index = 0;
+
+            if(i === 0){
+                index = 1;
+            }else if(i === 1){
+                index = 0;
+            }else if(i === 2){
+                index = 2;
+            }
+    
+            const m = this.data[index];
+
+            const image = document.createElement("img");
+            image.src = m.image;
+
+            let topObject = null;
+
+            if(m.url === undefined){
+                topObject = UIDiv("top-object");
+            }else{
+
+                topObject = document.createElement("a");
+                topObject.href = m.url;
+                topObject.className = "top-object";
+
+            }
+
+            
+            
+
+            const objectName = UIDiv("top-object-name");
+            objectName.append(m.name);
+
+            const objectInfo = UIDiv("top-object-info");
+            objectInfo.append(m.info);
+
+
+            const podiumBottom = UIDiv("podium-bottom");
+
+            let podiumStyle = "";
+            let podiumText = "";
+
+            let bgClass = "";
+
+            if(i === 0){
+                podiumStyle = "height:30px;line-height:30px;font-size:14px;";
+                podiumText = "2nd";
+                bgClass = "silver";
+            }else if(i === 1){
+                podiumStyle = "height:50px;line-height:50px;font-size:20px;";
+                podiumText = "1st";
+                bgClass = "gold";
+            }else if(i === 2){
+                podiumStyle= "height:20px;line-height:20px;font-size:12px;";
+                podiumText = "3rd";
+                bgClass = "bronze";
+            }
+
+            podiumBottom.style.cssText = podiumStyle;
+            podiumBottom.append(podiumText);
+
+            podiumBottom.className += ` ${bgClass}`;
+            objectName.className += ` ${bgClass}`;
+            objectInfo.className += ` ${bgClass}`;
+
+            const imgWrapper = UIDiv("podium-img-wrapper");
+            imgWrapper.append(image);
+            topObject.append(
+                objectName,
+                objectInfo,
+                imgWrapper,
+                podiumBottom
+            );
+
+            topObjects.append(topObject);
+        }
+
+        this.parent.append(topObjects);
+    }
+}
