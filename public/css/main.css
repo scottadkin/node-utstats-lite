@@ -1476,10 +1476,13 @@ section{
     column-gap: 5px;
     row-gap: 5px;
     margin-top:var(--margin-2);
+    max-width: var(--max-table-width-2);
+    margin-left:auto;
+    margin-right:auto;
 }
 
 .season-stat{
-    flex: 0 1 auto;
+    flex: 1 1 200px;
     background-color: var(--bg-color-mid);
     border:1px solid var(--border-color-1);
     font-size:var(--font-size-80);
@@ -1488,10 +1491,9 @@ section{
 
 .season-stat-label{
     font-weight:bold;
-    background-color: var(--bg-header-color);
-    padding:10px;
+    padding:5px 5px 0px 5px;
 }
 
 .season-stat-value{
-    padding:5px;
+    padding:0px 5px;
 }

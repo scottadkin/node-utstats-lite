@@ -1,6 +1,6 @@
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
-import { sanitizePagePerPage } from "./generic.mjs";
-import { setMatchResultsMapImages } from "./maps.mjs";
+import { getMapImageName, sanitizePagePerPage } from "./generic.mjs";
+import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
 
 export const VALID_OBJECT_TYPES = {
         "gametypes": "gametype_id",
@@ -46,8 +46,68 @@ export async function getAllSeasons(){
 
     const result = await simpleQuery(query);
     
+    return result;
+}
+
+export async function seasonsGetMostPlayedMaps(seasonId, maxMaps){
+
+    const DEFAULT_MAX_MAPS = 3;
+
+    maxMaps = parseInt(maxMaps);
+    if(maxMaps !== maxMaps) maxMaps = DEFAULT_MAX_MAPS;
+
+    if(maxMaps < 1 || maxMaps > 10){
+        maxMaps = DEFAULT_MAX_MAPS;
+    }
+
+    const mT = "nstats_seasons_unique_match_combinations";
+
+    const query = `SELECT ${mT}.map_id,
+    SUM(${mT}.matches) as total_matches, 
+    SUM(${mT}.playtime) as total_playtime,
+    nstats_maps.name
+    FROM ${mT} 
+    LEFT JOIN nstats_maps ON nstats_maps.id = ${mT}.map_id
+     WHERE ${mT}.season_id=? GROUP BY ${mT}.map_id ORDER BY total_matches DESC LIMIT ?`;
+
+    const result = await simpleQuery(query, [seasonId, maxMaps]);
+
+    const mapNames = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        if(r.name !== null){
+            mapNames.push(r.name);
+        }
+    }
+    
+    const mapImages = await getMapImages(mapNames);
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+        r.image = mapImages[r.name.toLowerCase()];
+    }
+    
 
     return result;
+}
+
+export async function getAllSeasonsMostPlayedMaps(seasonIds, maxMaps){
+
+    if(seasonIds.length === 0) return {};
+
+    const data = {};
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        const seasonId = seasonIds[i];
+
+        data[seasonId] = await seasonsGetMostPlayedMaps(seasonId, maxMaps);
+    }
+
+    return data;
 }
 
 /**

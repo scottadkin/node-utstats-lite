@@ -85,7 +85,7 @@ function UISeasonStat(label, value){
     return elem;
 }
 
-function UISeasonInfo(parent, data, bActive){
+function UISeasonInfo(parent, data, bActive, mostPlayedMaps){
 
     const section = new UISection(parent, data.name);
     section.elem.className = "season-info";
@@ -95,17 +95,6 @@ function UISeasonInfo(parent, data, bActive){
 
     const content = [];
 
-    const startElem = UIDiv("season-info-date");
-
-    startElem.append("Start Date ", toDateString(data.start_date, TIME_ZONE, true));
-
-
-    const endElem = UIDiv("season-info-date");
-    
-    endElem.append(`End Date ${toDateString(data.end_date, TIME_ZONE, true)}`);
-
-    content.push(startElem, endElem);
-
    
     
     const ssw = UIDiv("season-stat-wrapper");
@@ -113,13 +102,30 @@ function UISeasonInfo(parent, data, bActive){
     content.push(ssw);
 
 
-    const test = UIDiv("season-stat");
-    test.append(`Total Matches`, UIBr(), data.total_matches);
+    ssw.append(UISeasonStat("Start Date", toDateString(data.start_date, TIME_ZONE, true)));
+    ssw.append(UISeasonStat("End Date", toDateString(data.end_date, TIME_ZONE, true)));
     ssw.append(UISeasonStat("Total Matches", data.total_matches));
 
     ssw.append(UISeasonStat(`Total Players`, data.total_players));
     ssw.append(UISeasonStat(`Total Playtime`, toPlaytime(data.total_playtime)));
  
+
+    for(let i = 0; i < mostPlayedMaps.length; i++){
+
+        const m = mostPlayedMaps[i];
+
+        const image = document.createElement("img");
+        image.src = getMapThumbOrFullSize(m);
+
+        const test = UIDiv();
+        test.append(
+            m.name, 
+            UIBr(), 
+            `${m.total_matches} Matches Played`,
+            image);
+
+        ssw.append(UISeasonStat(`${i+1}${getOrdinal(i+1)} Most Played Map`, test));
+    }
 
 
     section.setContent(content);
@@ -131,13 +137,15 @@ function UISeasonInfo(parent, data, bActive){
 
 class SeasonsPage{
 
-    constructor(data){
+    constructor(data, mostPlayedMaps){
 
         this.parent = document.querySelector("#root");
 
         this.wrapper = UIDiv();
 
         this.data = data;
+        
+        this.mostPlayedMaps = mostPlayedMaps;
         console.log(data);
 
         this.parent.append(this.wrapper);
@@ -161,12 +169,13 @@ class SeasonsPage{
 
             const bActive = nowISO >= d.start_date && nowISO < d.end_date;
 
-            const link = document.createElement("a");
-            link.href = `/season/${d.id}/`;
-
+           // const link = document.createElement("a");
+           // link.href = `/season/${d.id}/`;
+            console.log(d);
+            console.log(this.mostPlayedMaps[d.id]);
             
-            UISeasonInfo(link, d, bActive);
-            this.wrapper.append(link);
+            UISeasonInfo(this.wrapper, d, bActive, this.mostPlayedMaps[d.id]);
+           // this.wrapper.append(link);
         }
     }
 

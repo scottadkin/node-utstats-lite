@@ -1,4 +1,4 @@
-import { getAllSeasons } from "../seasons.mjs";
+import { getAllSeasons, getAllSeasonsMostPlayedMaps, seasonsGetMostPlayedMaps } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 export async function renderSeasonsPage(req, res){
@@ -9,7 +9,10 @@ export async function renderSeasonsPage(req, res){
     const timeZone = await getSiteWideTimeZone();
 
     const seasons = await getAllSeasons();
+    const seasonIds = seasons.map((s) => { return s.id});
 
+    const mostPlayedMaps = await getAllSeasonsMostPlayedMaps(seasonIds, 3);
+    
 
     return res.render("seasons.ejs", {
         req,
@@ -18,6 +21,7 @@ export async function renderSeasonsPage(req, res){
             title,
             "meta": {"description": "Login", "image": "images/maps/default.jpg"},
             "userSession": req.userSession ,
-            "seasonsData": seasons
+            "seasonsData": seasons,
+            mostPlayedMaps
     });
 }
