@@ -32,11 +32,19 @@ class PlayerRecentMatches{
         
     }
 
+
+    getJSONURLBase(){
+
+        return (this.seasonId !== 0) ? `../../../` : `../`;
+    }
+
     async loadAllPlayedNames(){
 
         try{
 
-            const url = `../json/player-get-all-gametypes-maps?playerId=${this.playerId}&season=${this.seasonId}`;
+            const urlBase = this.getJSONURLBase();
+            
+            const url = `${urlBase}json/player-get-all-gametypes-maps?playerId=${this.playerId}&season=${this.seasonId}`;
 
             const req = await fetch(url);
 
@@ -166,7 +174,9 @@ class PlayerRecentMatches{
 
         try{
 
-            let url = `../json/player-recent-matches?playerId=${this.playerId}`;
+            const urlBase = this.getJSONURLBase();
+
+            let url = `${urlBase}json/player-recent-matches?playerId=${this.playerId}`;
             url += `&season=${this.seasonId}`;
             url+= `&gametypeId=${this.selectedGametype}&mapId=${this.selectedMap}`;
             url+= `&perPage=${this.perPage}&page=${this.page}`;

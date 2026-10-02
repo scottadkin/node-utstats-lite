@@ -7,9 +7,16 @@
     }) -%>
 
 <%- include("timeZone.ejs", {timeZone})%>
-<script src="../js/ui/ui.js"></script>
-<script src="../js/ui/table.js"></script>
-<script src="../js/ui/player.js"></script>
+
+<%
+const jsBase = (seasonId !== 0) ? `../../../js/` : `../js/`;
+const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
+%>
+
+
+<script src="<%= jsBase %>ui/ui.js"></script>
+<script src="<%= jsBase %>ui/table.js"></script>
+<script src="<%= jsBase %>ui/player.js"></script>
 
 <div id="root">
     <div class="header-wrapper">
@@ -64,7 +71,7 @@
                     "gametype": 0,
                     "map": 0,
                     "header": "Activity Heatmap",
-                    "jsonURL": "../json/player-activity-heatmap-data/",
+                    "jsonURL": "<%= jsonBase %>player-activity-heatmap-data/",
                     "player": <%= basicPlayerInfo.id %>,
                     "defaultMode": "<%= pageSettings["Activity Heatmap Default Mode"] %>",
                     "seasonId": <%= seasonId %>

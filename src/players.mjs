@@ -2673,6 +2673,6 @@ export async function sanitizePlayerPageReq(id,req){
         title, description, playerId, seasonId, basicPlayerInfo,
         pageSettings, pageLayout, brandingSettings, 
         generalTotals, ctfTotals, weaponTotals, rankings, 
-        ctfLeagueData, ctfLeagueSettings, weaponDamage
+        ctfLeagueData, ctfLeagueSettings, weaponDamage, seasonId
     }
 }
