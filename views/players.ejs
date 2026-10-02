@@ -3,16 +3,15 @@
     host,
     meta,
     userSession,
-    bSeasonPage,
-    seasonInfo
     }) -%>
 <%- include("timeZone.ejs", {timeZone})%>
 
 <%
-const jsBase = (locals.bSeasonPage) ? "../../js/" : "../js/";
+const jsBase = (seasonId !== 0) ? "../../js/" : "../js/";
 %>
 
 <script src="<%- jsBase %>ui/ui.js"></script>
+<script src="<%- jsBase %>ui/table.js"></script>
 <script src="<%- jsBase %>ui/players.js"></script>
 
 <div id="root"></div>

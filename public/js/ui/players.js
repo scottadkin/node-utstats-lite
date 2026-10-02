@@ -64,6 +64,7 @@ class PlayersSearchForm{
         this.parent = document.querySelector(parent);
         
         this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be valid integer`);
         this.searchName = searchName;
         this.sortBy = sortBy;
         this.order = order;
@@ -78,10 +79,6 @@ class PlayersSearchForm{
 
 
         this.content = UIDiv();
-
-        this.table = document.createElement("table");
-        this.table.className = "t-width-1";
-
         this.parent.append(this.content);
 
         this.headers = [
@@ -133,7 +130,7 @@ class PlayersSearchForm{
     changeSelected(){
 
 
-        const baseURL = (this.seasonId === 0) ? `/players/` : `/season/${this.seasonId}/players/`
+        const baseURL = (this.seasonId === 0) ? `/players` : `/season/${this.seasonId}/players`
 
         const url = `${baseURL}?name=${this.searchName}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}`;
 
@@ -193,27 +190,33 @@ class PlayersSearchForm{
 
     createPlayerRow(player){
 
-        const row = document.createElement("tr");
 
-        row.append(UIPlayerLink({
-            "playerId": player.id,
-            "name": player.name, 
-            "country": player.country, 
-            "bTableElem": true, 
-            "className": "text-left"
-        }));
+        return [
+            {
+                "display": UIPlayerLink({
+                    "playerId": player.id,
+                    "name": player.name, 
+                    "country": player.country, 
+                    "bTableElem": true, 
+                    "className": "text-left",
+                    "seasonId": this.seasonId
+                }),
+                "bSkipTD": true
+            },
 
-        row.append(UITableCell({"content": toDateString(player.last_active, TIME_ZONE, true), "className": "date"}));
-        row.append(UITableCell({"content": player.score, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": player.frags, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": player.kills, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": player.deaths, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": player.suicides, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": `${player.efficiency.toFixed(2)}%` }));
-        row.append(UITableCell({"content": player.total_matches, "parse": ["ignore0"]}));
-        row.append(UITableCell({"content": player.playtime, "parse": ["playtime"], "className": "playtime"}));
+            {
+                "display": toDateString(player.last_active, TIME_ZONE, true), "className": "date"
+            },
+            {   "display": ignore0(player.score) },
+            {   "display": ignore0(player.frags) },
+            {   "display": ignore0(player.kills) },
+            {   "display": ignore0(player.deaths) },
+            {   "display": ignore0(player.suicides) },
+            {   "display": `${player.efficiency.toFixed(2)}%` },
+            {   "display": ignore0(player.total_matches) },
+            {   "display": toPlaytime(player.playtime), "className": "playtime" },
+        ]
 
-        return row;
     }
 
     sortByHeader(targetKey){
@@ -232,44 +235,35 @@ class PlayersSearchForm{
 
         this.content.innerHTML = ``;
 
-        this.table.innerHTML = "";
+        const tableOptions = {
+            "headers": this.headers.map((h) =>{ return {
+                "display": h.display,
+                "callback": (bAscOrder) =>{ 
+                    
 
-        const headerRow = document.createElement("tr");
+                    this.order = (bAscOrder) ? "ASC": "DESC";
 
-        for(let i = 0; i < this.headers.length; i++){
+                    this.sortByHeader(h.value);
+                    console.log(h.value, bAscOrder);
+                }
+            }}),
+            "className": "t-width-1",
+            "bNoSort": true
+        };
 
-            const hc = UITableHeaderColumn({"content": this.headers[i].display});
-            hc.className = "hover";
-
-            hc.addEventListener("click", () =>{
-                this.sortByHeader(this.headers[i].value);
-            });
-
-            headerRow.append(hc);
-        }
-
-        this.table.append(headerRow);
-
-
-        if(this.data.totalPlayers === 0){
-
-            const row = document.createElement("tr");
-            const col = UITableCell({"content": "No players matching your search terms"});
-            col.colSpan = 10;
-            row.append(col);
-            this.table.append(row);
-      
-        }
+        const rows = [];
 
         for(let i = 0; i < this.data.players.length; i++){
 
             const p = this.data.players[i];
-            this.table.append(this.createPlayerRow(p));
+
+            rows.push(this.createPlayerRow(p));
         }
 
-        this.content.append(this.table);
 
-         this.pagination = new UIPagination(this.content, (newPage) =>{
+        new TESTUITable(this.content, tableOptions, rows);
+
+        this.pagination = new UIPagination(this.content, (newPage) =>{
             this.page = newPage;
             this.changeSelected();
         }, this.data.totalPlayers, this.perPage, this.page);

@@ -160,13 +160,14 @@ function UICountryFlag(country){
 function UIPlayerLink(params){
 
 
-    let {playerId, className, country, bTableElem, name, bHeaderElem} = params;
+    let {playerId, className, country, bTableElem, name, bHeaderElem, seasonId} = params;
 
     if(className === undefined) className = "";
     if(country === undefined) country = "";
     if(country === "") country = "xx";
     if(bTableElem === undefined) bTableElem = false;
     if(bHeaderElem === undefined) bHeaderElem = false;
+    if(seasonId === undefined) seasonId = 0;
 
     const elem = document.createElement("a");
 
@@ -176,7 +177,15 @@ function UIPlayerLink(params){
 
     if(!bTableElem && className !== "") elem.className = className;
 
-    elem.href = `/player/${playerId}`;
+    let url = ``;
+
+    if(seasonId !== 0){
+        url = `/season/${seasonId}/player/`;
+    }else{
+        url = `/player/`;
+    }
+
+    elem.href = `${url}${playerId}`;
 
     elem.append(UICountryFlag(country), name);
 
