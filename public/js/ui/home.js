@@ -152,7 +152,7 @@ function homeRenderRecentMatches(parent, data, displayMode){
 
     if(displayMode === "default"){
 
-        new MatchesRichView("#home-recent-matches", data);
+        new MatchesRichView("#home-recent-matches", data, 0);
     }else{
 
         const tableOptions = {
@@ -168,7 +168,7 @@ function homeRenderRecentMatches(parent, data, displayMode){
         };
 
 
-        renderMatchesTable(parent, data, false, false);
+        renderMatchesTable(parent, data, false, false, 0);
     }
 }
 

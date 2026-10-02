@@ -6,6 +6,7 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId){
     }
 
     seasonId = parseInt(seasonId)
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
     const matches = data.data;
 
