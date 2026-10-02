@@ -59,7 +59,8 @@ export async function renderSeasonMatchPage(req, res, userSession){
             timeZone,
             seasonId,
             "seasonInfo": basicSeasonInfo,
-            "bSeasonPage": true
+            "bSeasonPage": true,
+            "seasonId": data.basic.season_id
 
         });
 

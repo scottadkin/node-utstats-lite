@@ -12,7 +12,10 @@
 const jsBase = (locals.seasonId !== 0) ? `../../../js/` : `../js/`;
 
 %>
+<script>
 
+    const USED_MATCH_SEASON_ID = <%= seasonId %>;
+</script>
 <script src="<%= jsBase %>ui/ui.js"></script>
 <script src="<%= jsBase %>ui/table.js"></script>
 <script src="<%= jsBase %>ui/match.js"></script>
@@ -27,9 +30,6 @@ const jsBase = (locals.seasonId !== 0) ? `../../../js/` : `../js/`;
     const classicWeaponData = <%- JSON.stringify(classicWeaponStats) -%>;
     const playerAverages = <%- JSON.stringify(data.playerAverages) %>;
     const playerCTFAverages = <%- JSON.stringify(data.playerCTFAverages) %>;
-
-    console.log(playerData);
-    //new MatchPlayerPersonalBests("#root", "frags", playerData, playerAverages, basic.total_teams);
 
     <%
 

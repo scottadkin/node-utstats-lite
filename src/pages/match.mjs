@@ -47,7 +47,8 @@ export async function renderMatchPage(req, res, userSession){
             pageSettings,
             pageLayout,
             timeZone,
-            "bSeasonPage": false
+            "bSeasonPage": false,
+            "seasonId": 0
 
         });
 

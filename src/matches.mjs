@@ -55,7 +55,8 @@ const MATCH_TABLE_COLUMNS_VERBOSE = `nstats_matches.id,
     nstats_matches.time_limit,
     nstats_matches.mutators,
     nstats_matches.hash,
-    nstats_matches.absolute_time
+    nstats_matches.absolute_time,
+    nstats_matches.season_id
     `;
 
 

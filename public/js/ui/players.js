@@ -244,7 +244,6 @@ class PlayersSearchForm{
                     this.order = (bAscOrder) ? "ASC": "DESC";
 
                     this.sortByHeader(h.value);
-                    console.log(h.value, bAscOrder);
                 }
             }}),
             "className": "t-width-1",
