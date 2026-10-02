@@ -65,12 +65,14 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
     <script src="/js/main.js"></script>
 </head>
 <body> 
+
+    <%- include("seasonDropdown.ejs")%>
+
     <nav>
 
         
-        
         <%
-        if(locals.bSeasonPage && locals.seasonInfo !== undefined && locals.seasonInfo !== null){
+        if(false/*locals.bSeasonPage && locals.seasonInfo !== undefined && locals.seasonInfo !== null*/){
             %>
             
             <div id="season-banner">
@@ -94,7 +96,6 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
             }
 
             _%><a href="<%= url %>"<%- (className === "") ? "" :` class="${className}"`%>><%= name %></a><%_
-        }
-        %>
+        }%>        
     </nav>
 <main>

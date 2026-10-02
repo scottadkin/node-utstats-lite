@@ -1,0 +1,47 @@
+<% 
+
+
+let activeSeasonName = "Not Found";
+
+if(locals.seasonList !== undefined && locals.seasonId !== undefined){
+
+    for(let i = 0; i < locals.seasonList.length; i++){
+
+        const s = locals.seasonList[i];
+        
+        if(s.id === locals.seasonId){
+            activeSeasonName = s.name;
+        }
+    }
+}
+
+
+if(locals.seasonId === 0){
+    activeSeasonName = "No Season Selected";
+}
+
+%>
+
+<div id="nav-dropdown">
+<div id="nav-season-current"><div><%= activeSeasonName %></div><div id="nav-branding">Node UTStats Lite</div></div>
+
+<div id="nav-season-list">
+    
+<%
+if(locals.seasonList !== undefined){
+
+
+    for(let i = 0; i < locals.seasonList.length; i++){
+
+        const s = locals.seasonList[i];
+
+        %>
+            <a class="nav-dropdown-option" href="/season/<%= s.id %>"><%= s.name %></a>
+        
+        <%
+    }
+}
+%>
+</div>
+
+</div>

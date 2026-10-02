@@ -49,6 +49,8 @@ export async function getAllSeasons(){
     return result;
 }
 
+
+
 export async function seasonsGetMostPlayedMaps(seasonId, maxMaps){
 
     const DEFAULT_MAX_MAPS = 3;

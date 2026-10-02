@@ -1,4 +1,4 @@
-import { getSeasonBasicObjectStats, getSeasonById, seasonsGetMostPlayedMaps } from "../seasons.mjs";
+import { getAllSeasons, getSeasonBasicObjectStats, getSeasonById, seasonsGetMostPlayedMaps } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 export async function renderSeasonPage(req, res){
@@ -6,6 +6,9 @@ export async function renderSeasonPage(req, res){
     const brandingSettings = await getCategorySettings("Branding");
     const title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
     const timeZone = await getSiteWideTimeZone();
+
+    const seasonList = await getAllSeasons();
+   
 
     let seasonId = req.params.season ?? 0;
 
@@ -29,7 +32,9 @@ export async function renderSeasonPage(req, res){
             "userSession": req.userSession,
             basicSeasonInfo,
             objectStats,
-            mostPlayedMaps
+            mostPlayedMaps,
+            seasonList,
+            seasonId
         });
     //res.json({"test": "test"});
 }

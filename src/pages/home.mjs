@@ -6,6 +6,7 @@ import { getBasicList as getBasicServerList } from "../servers.mjs";
 import { getMostPlayedGametypes } from "../gametypes.mjs";
 import { getMostPlayedMaps } from "../maps.mjs";
 import { getMostActivePlayers } from "../players.mjs";
+import { getAllSeasons } from "../seasons.mjs";
 //import { getRecentActivityByDay } from "../matches.mjs";
 
 export async function renderHomePage(req, res, userSession){
@@ -20,6 +21,8 @@ export async function renderHomePage(req, res, userSession){
         const pageLayout = await getPageLayout("Home");
         const socialSettings = await getCategorySettings("Social Media");
         const welcomeMessageSettings = await getCategorySettings("Welcome Message");
+
+        const seasonList = await getAllSeasons();
 
        // const testActivityData = await getRecentActivityByDay();
 
@@ -86,7 +89,9 @@ export async function renderHomePage(req, res, userSession){
             mostPlayedGametypes,
             mostPlayedMaps,
             screenshotData,
-            mostActivePlayers
+            mostActivePlayers,
+            seasonList,
+            "seasonId": 0
         });
     }catch(err){
         console.trace(err);
