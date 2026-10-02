@@ -1400,6 +1400,9 @@ export async function getPlayerRecentMatches(playerId, seasonId, gametype, map, 
     perPage = parseInt(perPage);
     map = parseInt(map);
     gametype = parseInt(gametype);
+    seasonId = parseInt(seasonId);
+
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
     if(page !== page || perPage !== perPage) throw new Error(`Page, or perPage is not a valid integer.`);
 
@@ -1422,9 +1425,12 @@ export async function getPlayerRecentMatches(playerId, seasonId, gametype, map, 
         where += ` AND nstats_match_players.map_id=?`;
     }
 
-    where += ` AND
-    EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?)`;
-    vars.push(seasonId);
+    if(seasonId !== 0){
+        where += ` AND
+        EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?)`;
+        vars.push(seasonId);
+    }
+
 
 
     const query = `SELECT 
