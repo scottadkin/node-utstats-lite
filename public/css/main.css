@@ -76,12 +76,14 @@ main{
 
 body{ 
 	min-height: 100vh; 
-	display: grid;
-	grid-template-rows:auto auto 1fr auto;
 	background-color:var(--bg-color-dark);
     font-size:1rem;
     line-height:1.5rem;
+    display: grid;
+	grid-template-rows:auto 1fr auto;
 }
+
+
 
 nav{
     background-color:var(--bg-color-mid);
@@ -103,6 +105,7 @@ nav a, .nav-dropdown{
     cursor: pointer;
 }
 
+
 .nav-content{
     position:absolute;
     display:flex;
@@ -110,6 +113,7 @@ nav a, .nav-dropdown{
     box-shadow: var(--box-shadow-1);
     font-size:var(--font-size-80);
     border:1px solid var(--border-color-4);
+    text-align: left;
 }
 
 .nav-content a{
@@ -129,7 +133,7 @@ nav a, .nav-dropdown{
 
 
 
-nav a:hover, .nav-dropdown:hover{
+nav a:hover{
     border-bottom:2px solid rgb(122,122,0);
     color:rgb(188,188,0);
 }

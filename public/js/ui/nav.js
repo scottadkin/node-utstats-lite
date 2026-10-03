@@ -33,7 +33,9 @@ class UINavDropDown{
 
             this.unHide();
             const bounds = this.parent.getBoundingClientRect();
-            this.wrapper.style.cssText = `margin-left:${bounds.x}px;margin-top:${bounds.height}px;`;
+            
+            this.wrapper.style.cssText = `margin-top:10px;margin-left:-10px;`;
+            //this.wrapper.style.cssText = `margin-left:${bounds.x}px;margin-top:${bounds.height}px;`;
   
         });
 
@@ -44,7 +46,7 @@ class UINavDropDown{
     }
 
     unHide(){
-        this.root.style.cssText = `display:inline-block;`;
+        this.root.style.cssText = `display:block;`;
     }
 
     hide(){

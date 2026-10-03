@@ -68,33 +68,34 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 </head>
 <body> 
 
-    <div id="nav-dummy"></div>
-    <nav>
+        
+            <nav>
+                    
+                <div class="nav-dropdown" id="nav-season-list">
+                    
+                    Season List 
+                    <div id="nav-dummy"></div>  
+                </div>
+                
+                
+                <%
+                for(let i = 0; i < options.length; i++){
+
+                    const {name, url, highlight} = options[i];
+
+                    let className = "";
+
+                    if(highlight.indexOf(mode) !== -1){
+                        className = `nav-active`;
+                    }
+
+                    _%><a href="<%= url %>"<%- (className === "") ? "" :` class="${className}"`%>><%= name %></a><%_
+                }%>        
+            </nav>
 
             
-            <div class="nav-dropdown" id="nav-season-list">
-                Season List   
-            </div>
-        
-        
-        <%
-        for(let i = 0; i < options.length; i++){
-
-            const {name, url, highlight} = options[i];
-
-            let className = "";
-
-            if(highlight.indexOf(mode) !== -1){
-                className = `nav-active`;
-            }
-
-            _%><a href="<%= url %>"<%- (className === "") ? "" :` class="${className}"`%>><%= name %></a><%_
-        }%>        
-    </nav>
-
-    
-    <script>       
-        new UINavDropDown("#nav-season-list", <%- JSON.stringify(locals.seasonList) %>);    
-    </script>
-    
-<main>
+            <script>       
+                new UINavDropDown("#nav-season-list", <%- JSON.stringify(locals.seasonList) %>);    
+            </script>
+            
+        <main>
