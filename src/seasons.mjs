@@ -129,15 +129,25 @@ export async function getAllSeasonIds(bSkip0){
     return ids;
 }
 
-async function getSeasonConflicts(startDate, endDate){
+export async function getSeasonConflicts(startDate, endDate){
 
+   /* if(currentStartDate <= startDate && currentEndDate >= startDate){
+                console.log("START");
+            }
+
+            if(currentStartDate <= endDate && currentEndDate >= endDate){
+                console.log("END");
+            }*/
+
+    //return simpleQuery(`SELECT * FROM nstats_seasons`);
 
     const query = `SELECT * FROM nstats_seasons WHERE 
-    (start_date>=? AND start_date<=?) OR (end_date>=? AND end_date<=?)`;
+    (start_date<=? AND end_date>=?) OR (start_date<=? AND end_date>=?)`;
 
 
-    return await simpleQuery(query, [startDate, endDate, startDate, endDate]);
+    return await simpleQuery(query, [startDate, startDate, endDate, endDate]);
 }
+
 
 
 async function bSeasonNameExists(name){
@@ -156,8 +166,16 @@ export async function createSeason(name, startDate, endDate){
     
     const conficts = await getSeasonConflicts(startDate, endDate);
 
-  
     if(conficts.length > 0){
+
+        /*console.log(startDate, endDate);
+        console.log(conficts);
+
+        console.log(conficts[0].start_date, startDate , (conficts[0].start_date <= startDate));
+        console.log(conficts[0].end_date, endDate , (conficts[0].end_date <= endDate));*/
+
+
+        //return;
 
         return {
             "error": `Dates conflict with the following seasons:${conficts.map((c) =>{ return ` ${c.name}`})}.`,

@@ -107,6 +107,7 @@ nav a, .nav-dropdown{
 
 #nav-dummy{
     color:var(--font-color-blue);
+    font-size:var(--font-size-80);
 }
 
 .nav-content{
