@@ -63,26 +63,21 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
     <meta property="og:site_name" content="Node UTStats Lite" >
     <meta name="twitter:card" content="summary_large_image">
     <script src="/js/main.js"></script>
+    <script src="/js/ui/ui.js"></script>
+    <script src="/js/ui/nav.js"></script>
 </head>
 <body> 
 
-    <%- include("seasonDropdown.ejs")%>
-
+    <div id="nav-dummy"></div>
     <nav>
 
+
         
-        <%
-        if(false/*locals.bSeasonPage && locals.seasonInfo !== undefined && locals.seasonInfo !== null*/){
-            %>
             
-            <div id="season-banner">
-                You are currently viewing season <b><%= locals.seasonInfo.name %></b>    
+            <div class="nav-dropdown" id="nav-season-list">
+                Season List   
             </div>
-            <%
-        }
-
-        %>
-
+        
         
         <%
         for(let i = 0; i < options.length; i++){
@@ -98,4 +93,18 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
             _%><a href="<%= url %>"<%- (className === "") ? "" :` class="${className}"`%>><%= name %></a><%_
         }%>        
     </nav>
+
+    
+    <script>
+
+        const seasonsOptions = [
+            {"display": "Season 1", "url": `/season/1/`},
+            {"display": "Season 2", "url": `/season/2/`},
+            {"display": "Season 3", "url": `/season/3/`},
+            {"display": "Season 241242142", "url": `/season/241242142/`},
+        ];
+        
+        new UINavDropDown("#nav-season-list", seasonsOptions);    
+    </script>
+    
 <main>

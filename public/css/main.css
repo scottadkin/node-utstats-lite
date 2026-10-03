@@ -89,8 +89,8 @@ nav{
     text-align:center;
 }
 
-nav a{
-    display:inline-block;
+nav a, .nav-dropdown{
+    display: inline-block;
     padding:var(--padding-1) var(--padding-1);
 	font-weight:400;
 	transition: color 0.5s;
@@ -99,11 +99,36 @@ nav a{
 	
 }
 
+.nav-dropdown:hover{
+    cursor: pointer;
+}
+
+.nav-content{
+    position:absolute;
+    display:flex;
+    flex-direction: column;
+    box-shadow: var(--box-shadow-1);
+    font-size:var(--font-size-80);
+}
+
+.nav-content a{
+    padding:var(--padding-2);
+    background-color:var(--bg-color-dark);
+}
+
+.nav-content a:hover{
+
+    background-color:var(--bg-color-mid);
+}
+
+
+#nav-dummy{
+    display:none;
+}
 
 
 
-
-nav a:hover{
+nav a:hover, .nav-dropdown:hover{
     border-bottom:2px solid rgb(122,122,0);
     color:rgb(188,188,0);
 }
@@ -113,58 +138,6 @@ nav a:hover{
     border-bottom:2px solid yellow;
 }
 
-
-#nav-dropdown{
-    background-color:var(--bg-color-dark);
-    position:relative;
-    height: 32px;
-    max-height: 32px;
-    
-}
-
-#nav-season-current{
-    padding:5px;
-    font-size:var(--font-size-100);
-    color:yellow;
-    display: grid;
-    grid-template-columns: auto auto;
-    overflow: hidden;
-}
-
-#nav-season-list{
-    position:absolute;
-    display:none;
-}
-
-#nav-branding{
-    text-align: right;
-
-}
-
-.nav-dropdown-option{
-    display:block;
-    padding:5px;
-    padding-left: 10px;
-    transition: all 0.5s;
-    font-size:var(--font-size-100)
-}
-
-.nav-dropdown-option:hover{
-    background-color: var(--bg-color-dark);
-    color:yellow;
-}
-
-#nav-dropdown:hover #nav-season-list{
-    display:block;
-    background-color: var(--bg-color-light);
-    min-width:100px;
-}
-
-#season-banner{
-    background-color:var(--bg-header-color);
-    font-size:var(--font-size-100);
-    padding:var(--padding-2);
-}
 
 footer{ 
 	padding:var(--padding-1);
