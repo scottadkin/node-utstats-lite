@@ -74,6 +74,17 @@ async function setSeasonsList(req, res, next){
 
     const data = await getAllSeasons();
 
+    data.sort((a, b) =>{
+        a = a.end_date;
+        b = b.end_date;
+        if(a < b){
+            return 1;
+        }else if(a > b){
+            return -1;
+        }
+        return 0;
+    });
+
     res.locals.seasonList = data;
 
     next();

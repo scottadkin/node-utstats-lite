@@ -51,9 +51,9 @@ class SeasonPage{
         UIHeader(topMaps, "Top 3 Maps Of The Season");
         const testData = [];
 
-        const totalParts = (this.mostPlayedMaps.length >= 2) ? 2 : this.mostPlayedMaps.length;
+        const totalParts = (this.mostPlayedMaps.length >= 2) ? 3 : this.mostPlayedMaps.length;
 
-        for(let i = 0; i <= totalParts; i++){
+        for(let i = 0; i < totalParts; i++){
 
             const m = this.mostPlayedMaps[i];
             const image = getMapThumbOrFullSize(m);
@@ -156,8 +156,8 @@ class SeasonsPage{
 
         this.parent.append(this.wrapper);
 
-        this.renderTestRichView();
-        //this.renderBasicList();
+        //this.renderTestRichView();
+        this.renderBasicList();
     }
 
     renderTestRichView(){
@@ -206,12 +206,12 @@ class SeasonsPage{
             a.href = `/season/${d.id}`;
             a.append(d.name);
             return [
-                {"display": a, "value": d.name},
-                {"value": toDateString(d.start_date, TIME_ZONE, true)},
-                {"value": toDateString(d.end_date, TIME_ZONE, true)},
+                {"display": a, "value": d.name, "className": "text-left"},
+                {"value": d.start_date, "display": toDateString(d.start_date, TIME_ZONE, true), "className": "date"},
+                {"value": d.end_date, "display": toDateString(d.end_date, TIME_ZONE, true), "className": "date"},
                 {"value": d.total_matches},
                 {"value": d.total_players},
-                {"value": d.total_playtime},
+                {"value": toPlaytime(d.total_playtime), "className": "playtime"},
             ]
         });
 
