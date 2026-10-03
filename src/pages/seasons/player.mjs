@@ -13,11 +13,12 @@ export async function renderSeasonPlayerPage(req, res, userSession){
 
         const timeZone = await getSiteWideTimeZone();
      
+        const seasonId = res.locals.season;
 
         const {title, description,
-        pageSettings, pageLayout, brandingSettings, playerId, basicPlayerInfo, weaponDamage,seasonId,
+        pageSettings, pageLayout, brandingSettings, playerId, basicPlayerInfo, weaponDamage,
         generalTotals, ctfTotals, weaponTotals, rankings, 
-        ctfLeagueData, ctfLeagueSettings} = await sanitizePlayerPageReq(id, req);
+        ctfLeagueData, ctfLeagueSettings} = await sanitizePlayerPageReq(id, req, seasonId);
 
 
         const seasonInfo = await getSeasonById(seasonId);

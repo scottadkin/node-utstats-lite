@@ -2584,11 +2584,8 @@ export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, ord
 }
 
 
-export async function sanitizePlayerPageReq(id,req){
+export async function sanitizePlayerPageReq(id,req, seasonId){
 
-
-    const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : 0;
-    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid Integer`);
 
     const basicPlayerInfo = await getPlayerProfileInfo(id, seasonId);
     if(basicPlayerInfo === null) throw new Error(`Player does not exist!`);

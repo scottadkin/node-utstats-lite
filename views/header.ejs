@@ -69,14 +69,7 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 <body> 
 
         
-            <nav>
-                    
-                <div class="nav-dropdown" id="nav-season-list">
-                    
-                    Season List 
-                    <div id="nav-dummy"></div>  
-                </div>
-                
+            <nav>  
                 
                 <%
                 for(let i = 0; i < options.length; i++){
@@ -90,7 +83,13 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
                     }
 
                     _%><a href="<%= url %>"<%- (className === "") ? "" :` class="${className}"`%>><%= name %></a><%_
-                }%>        
+                }%>    
+                <div class="nav-dropdown" id="nav-season-list">
+                    <div id="nav-dummy">
+                        <%= (locals.season !== 0) ? locals?.seasonInfo.name : "Seasons List" %>
+                        <div id="nav-inner"></div>
+                    </div>  
+                </div>    
             </nav>
 
             

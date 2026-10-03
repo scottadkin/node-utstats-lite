@@ -13,6 +13,7 @@ export async function renderMapPage(req, res, userSession){
         const timeZone = await getSiteWideTimeZone();
         const basic = await getMapInfo(req.params.id, 0);
 
+        const seasonId = res.locals.season;
 
         if(basic === null) throw new Error(`Map does not exist`);
 

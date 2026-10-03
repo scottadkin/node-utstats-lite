@@ -13,9 +13,9 @@ export async function renderSeasonRankingsPage(req, res, userSession){
         const timeZone = await getSiteWideTimeZone();
         const rankingSettings = await getRankingSettings(true);
 
-        const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId} = await sanitizeRankingsPageReq(req, pageSettings);
+        const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage} = await sanitizeRankingsPageReq(req, pageSettings);
 
-        if(seasonId === 0) throw new Error(`No season with id of 0`);
+        const seasonId = res.locals.season;
 
         const data = await getRankings(seasonId, targetId, page, perPage, timeRange, mode);
 

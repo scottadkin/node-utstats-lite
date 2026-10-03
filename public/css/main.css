@@ -105,6 +105,9 @@ nav a, .nav-dropdown{
     cursor: pointer;
 }
 
+#nav-dummy{
+    color:var(--font-color-blue);
+}
 
 .nav-content{
     position:absolute;
@@ -127,7 +130,7 @@ nav a, .nav-dropdown{
 }
 
 
-#nav-dummy{
+#nav-inner{
     display:none;
 }
 

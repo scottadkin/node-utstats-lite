@@ -11,9 +11,7 @@ export async function renderSeasonPlayersPage(req, res){
     const pageSettings = await getCategorySettings("Players");
     const timeZone = await getSiteWideTimeZone();
 
-    const seasonId = parseInt(req.params.season);
-
-    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
+    const seasonId = res.locals.season;
 
     const basicSeasonInfo = await getSeasonById(seasonId);
 

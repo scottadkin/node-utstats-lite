@@ -415,7 +415,7 @@ class UIMapRecentMatches{
     async loadData(){
 
         try{
-
+            
             const req = await fetch(`/json/map-recent-matches/?id=${this.mapId}&season=${this.seasonId}&page=${this.page}&perPage=${this.perPage}`);
 
             const res = await req.json();
@@ -438,7 +438,7 @@ class UIMapRecentMatches{
 
         this.wrapper.innerHTML = ``;
         
-        renderMatchesTable("#map-recent-matches", {"data": this.data}, true);
+        renderMatchesTable("#map-recent-matches", {"data": this.data}, true, true, this.seasonId);
    
         this.pagination.updateResults(this.page, this.totalMatches, this.perPage);
         

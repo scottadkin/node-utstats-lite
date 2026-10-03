@@ -10,10 +10,7 @@ export async function renderSeasonMapsPage(req, res){
     let title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
     const timeZone = await getSiteWideTimeZone();
 
-    const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : null;
-
-    if(seasonId === null) throw new Error(`Season missing`);
-    if(seasonId !== seasonId) throw new Error(`Season must be a valid integer.`);
+    const seasonId = res.locals.season;
     
     const basicSeasonInfo = await getSeasonById(seasonId);
 

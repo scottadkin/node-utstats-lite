@@ -8,7 +8,7 @@ class UINavDropDown{
         this.mainNav = document.querySelector("nav");
 
         this.wrapper = UIDiv("nav-content");
-        this.root = document.querySelector("#nav-dummy");
+        this.root = document.querySelector("#nav-inner");
         this.root.append(this.wrapper);
 
         this.createElements();
@@ -32,14 +32,14 @@ class UINavDropDown{
         this.parent.addEventListener("mouseover", (e) =>{
 
             this.unHide();
-            const bounds = this.parent.getBoundingClientRect();
+            //const bounds = this.parent.getBoundingClientRect();
             
             this.wrapper.style.cssText = `margin-top:10px;margin-left:-10px;`;
             //this.wrapper.style.cssText = `margin-left:${bounds.x}px;margin-top:${bounds.height}px;`;
   
         });
 
-        this.wrapper.addEventListener("mouseleave", () =>{
+        this.parent.addEventListener("mouseleave", () =>{
 
             this.hide();
         });

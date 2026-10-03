@@ -3,21 +3,15 @@ import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs
 import { getPageLayout } from "../../pageLayout.mjs";
 import { getMapWeaponStats } from "../../weapons.mjs";
 import { getLeagueCategorySettings } from "../../ctfLeague.mjs";
-import { getSeasonById } from "../../seasons.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_AVG_TYPES, VALID_PLAYER_EPM_TYPES, VALID_PLAYER_MATCH_TYPES } from "../../validRecordTypes.mjs";
 
 export async function renderSeasonMapPage(req, res){
 
     try{
 
-        const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : null;
-    
-        if(seasonId === null) throw new Error(`Season missing`);
-        if(seasonId !== seasonId) throw new Error(`Season must be a valid integer.`);
+        const seasonId = res.locals.season;
         
-        const basicSeasonInfo = await getSeasonById(seasonId);
-    
-        if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
+        const basicSeasonInfo = res.locals.seasonInfo;
 
         if(req.params.id === undefined) throw new Error(`No map id found`);
         const timeZone = await getSiteWideTimeZone();

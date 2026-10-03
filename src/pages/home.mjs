@@ -12,7 +12,6 @@ export async function renderHomePage(req, res, userSession){
 
     try{
 
-
         const timeZone = await getSiteWideTimeZone();
        
 

@@ -20,12 +20,13 @@ export async function renderSeasonRecordsPage(req, res, userSession){
             getUniqueGametypeMapCombinations()
         ]);
 
+        const seasonId = res.locals.season;
 
         const {
             mode, recordType, dirtyPage, 
             dirtyPerPage, selectedGametype, 
             selectedMap, selectedMinimumMatchesPlayed, 
-            seasonId, seasonInfo
+            seasonInfo
         } = await sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps);
 
 
