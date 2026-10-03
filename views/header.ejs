@@ -71,8 +71,6 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
     <div id="nav-dummy"></div>
     <nav>
 
-
-        
             
             <div class="nav-dropdown" id="nav-season-list">
                 Season List   
@@ -95,16 +93,8 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
     </nav>
 
     
-    <script>
-
-        const seasonsOptions = [
-            {"display": "Season 1", "url": `/season/1/`},
-            {"display": "Season 2", "url": `/season/2/`},
-            {"display": "Season 3", "url": `/season/3/`},
-            {"display": "Season 241242142", "url": `/season/241242142/`},
-        ];
-        
-        new UINavDropDown("#nav-season-list", seasonsOptions);    
+    <script>       
+        new UINavDropDown("#nav-season-list", <%- JSON.stringify(locals.seasonList) %>);    
     </script>
     
 <main>

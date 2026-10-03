@@ -7,7 +7,7 @@ export async function renderSeasonPage(req, res){
     const title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
     const timeZone = await getSiteWideTimeZone();
 
-    const seasonList = res.locals.seasonsList;
+
    
     const seasonId = res.locals.season;
 
@@ -27,7 +27,6 @@ export async function renderSeasonPage(req, res){
             basicSeasonInfo,
             objectStats,
             mostPlayedMaps,
-            seasonList,
             seasonId
         });
     //res.json({"test": "test"});

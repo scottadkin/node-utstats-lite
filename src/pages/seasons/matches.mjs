@@ -10,11 +10,7 @@ export async function renderSeasonMatchesPage(req, res){
     const title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
     const timeZone = await getSiteWideTimeZone();
 
-
-    const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : null;
-
-    if(seasonId === null) throw new Error(`Season missing`);
-    if(seasonId !== seasonId) throw new Error(`Season must be a valid integer.`);
+    const seasonId = res.locals.season;
     
     const uniqueCombinations = await getSeasonUniqueMatchCombinations(seasonId);
 
@@ -44,11 +40,11 @@ export async function renderSeasonMatchesPage(req, res){
             selectedServer,
             selectedGametype,
             selectedMap,
-            seasonId,
             matches,
             page,
             perPage,
             displayMode,
+            seasonId,
             "seasonInfo": basicSeasonInfo,
             "bSeasonPage": true
         });

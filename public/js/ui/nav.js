@@ -21,8 +21,8 @@ class UINavDropDown{
 
             const o = this.options[i];
             const elem = document.createElement("a");
-            elem.href = o.url;
-            elem.append(o.display);
+            elem.href = `/season/${o.id}/`;
+            elem.append(o.name);
             this.wrapper.append(elem)
         }
     }

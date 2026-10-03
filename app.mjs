@@ -59,7 +59,6 @@ async function sanitizeSeasonId(req, res, next){
     if(seasonId !== seasonId){
         return res.send("not a valid season");
     }
-    console.log(seasonId);
 
     const info = await getSeasonById(seasonId);
 
@@ -75,7 +74,7 @@ async function setSeasonsList(req, res, next){
 
     const data = await getAllSeasons();
 
-    res.locals.seasonsList = data;
+    res.locals.seasonList = data;
 
     next();
 }
@@ -97,7 +96,7 @@ async function setUserSession(req, res, next){
 
 app.use(setUserSession);
 
-app.get('/', async (req, res) => {
+app.get('/', async (req, res, next) => { await setSeasonsList(req, res, next)}, async (req, res) => {
 
 	try{
 
@@ -110,50 +109,50 @@ app.get('/', async (req, res) => {
 });
 
 
-app.get('/match/:id', async (req, res) => {
+app.get('/match/:id',async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) => {
 	
 	renderMatchPage(req, res, req.userSession);
 });
 
-app.get("/matches", async (req, res) =>{
+app.get("/matches", async (req, res, next) => { await setSeasonsList(req, res, next)}, async (req, res) =>{
 	
 	renderMatchesPage(req, res, req.userSession);
 });
 
-app.get("/players", async (req, res) =>{
+app.get("/players",async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) =>{
 	renderPlayersPage(req, res, req.userSession);
 });
 
-app.get("/rankings", async (req, res) =>{
+app.get("/rankings", async (req, res, next) => { await setSeasonsList(req, res, next)}, async (req, res) =>{
 	renderRankingsPage(req, res, req.userSession);
 });
 
-app.get("/ctfleague", async (req, res) =>{
+app.get("/ctfleague", async (req, res, next) => { await setSeasonsList(req, res, next)}, async (req, res) =>{
 	renderCTFLeaguePage(req, res, req.userSession);
 });
 
-app.get("/records", async (req, res) =>{
+app.get("/records",async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) =>{
 	renderRecordsPage(req, res, req.userSession);
 });
 
-app.get("/maps", async (req, res) =>{
+app.get("/maps", async (req, res, next) => { await setSeasonsList(req, res, next)}, async (req, res) =>{
 	renderMapsPage(req, res, req.userSession);
 });
 
-app.get("/player/:id", async (req, res) =>{
+app.get("/player/:id",async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) =>{
 	renderPlayerPage(req, res, req.userSession);
 });
 
-app.get("/map/:id", async (req, res) =>{
+app.get("/map/:id",async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) =>{
 	renderMapPage(req, res, req.userSession);
 });
 
 
-app.get("/watchlist", async (req, res) =>{
+app.get("/watchlist",async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) =>{
 	renderWatchlistPage(req, res, req.userSession);
 });
 
-app.get("/jsonexamples", async (req, res) =>{
+app.get("/jsonexamples",async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) =>{
 
 	renderJSONExamples(req, res, req.userSession);
 });
@@ -180,7 +179,7 @@ app.get("/matchshot/:id", async (req, res) =>{
 });
 
 
-app.get("/login", async (req, res) =>{
+app.get("/login", async (req, res, next) => { await setSeasonsList(req, res, next)}, async (req, res) =>{
 
 	renderLoginPage(req, res, sessionStore, req.userSession);
 });
@@ -210,11 +209,11 @@ app.get("/logout", async (req, res) =>{
 });
 
 
-app.get("/register", async (req, res) =>{
+app.get("/register",async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) =>{
 	renderRegisterPage(req, res, req.userSession);
 });
 
-app.post("/register", async (req, res) =>{
+app.post("/register",async (req, res, next) => { await setSeasonsList(req, res, next)},  async (req, res) =>{
 
 	try{
 		
@@ -227,7 +226,7 @@ app.post("/register", async (req, res) =>{
 });
 
 
-app.get("/admin", async (req, res) =>{
+app.get("/admin", async (req, res, next) => { await setSeasonsList(req, res, next)}, async (req, res) =>{
 
 	if(req.userSession === null){
 		res.status(401).send("Access Denied");
@@ -313,7 +312,9 @@ app.listen(websitePort, () => {
 })
 
 
-app.get("/seasons", async (req, res) =>{
+app.get("/seasons", 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
 
@@ -341,7 +342,10 @@ app.get("/season/:season",
     
 });
 
-app.get("/season/:season/matches", async (req, res) =>{
+app.get("/season/:season/matches",
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
 
@@ -355,7 +359,10 @@ app.get("/season/:season/matches", async (req, res) =>{
 });
 
 
-app.get("/season/:season/players", async (req, res) =>{
+app.get("/season/:season/players", 
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
         await renderSeasonPlayersPage(req, res);
@@ -365,7 +372,10 @@ app.get("/season/:season/players", async (req, res) =>{
     }
 });
 
-app.get("/season/:season/maps", async (req, res) =>{
+app.get("/season/:season/maps", 
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
         
@@ -376,7 +386,10 @@ app.get("/season/:season/maps", async (req, res) =>{
     }
 });
 
-app.get('/season/:season/match/:id', async (req, res) => {
+app.get('/season/:season/match/:id', 
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) => {
 	
     try{
 
@@ -388,7 +401,10 @@ app.get('/season/:season/match/:id', async (req, res) => {
     }
 });
 
-app.get("/season/:season/map/:id", async (req, res) =>{
+app.get("/season/:season/map/:id", 
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
         await renderSeasonMapPage(req, res);
@@ -397,7 +413,10 @@ app.get("/season/:season/map/:id", async (req, res) =>{
     }
 });
 
-app.get("/season/:season/rankings/", async (req, res) =>{
+app.get("/season/:season/rankings/", 
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
         await renderSeasonRankingsPage(req, res);
@@ -406,7 +425,10 @@ app.get("/season/:season/rankings/", async (req, res) =>{
     }
 });
 
-app.get("/season/:season/records/", async (req, res) =>{
+app.get("/season/:season/records/", 
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
         await renderSeasonRecordsPage(req, res);
@@ -416,7 +438,10 @@ app.get("/season/:season/records/", async (req, res) =>{
 });
 
 
-app.get("/season/:season/ctfleague/", async (req, res) =>{
+app.get("/season/:season/ctfleague/", 
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
         await renderSeasonCTFLeaguePage(req, res);
@@ -425,7 +450,10 @@ app.get("/season/:season/ctfleague/", async (req, res) =>{
     }
 });
 
-app.get("/season/:season/player/:id", async (req, res) =>{
+app.get("/season/:season/player/:id",
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
         await renderSeasonPlayerPage(req, res);
