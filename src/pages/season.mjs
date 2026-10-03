@@ -7,22 +7,16 @@ export async function renderSeasonPage(req, res){
     const title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
     const timeZone = await getSiteWideTimeZone();
 
-    const seasonList = await getAllSeasons();
+    const seasonList = res.locals.seasonsList;
    
+    const seasonId = res.locals.season;
 
-    let seasonId = req.params.season ?? 0;
-
-    seasonId = parseInt(seasonId);
-    if(seasonId !== seasonId) seasonId = 0;
-
-    const basicSeasonInfo = await getSeasonById(seasonId);
-
-    if(basicSeasonInfo === null) throw new Error(`Season doesn't exist`);
+    const basicSeasonInfo = res.locals.seasonInfo;
 
     const objectStats = await getSeasonBasicObjectStats(seasonId);
 
     const mostPlayedMaps = await seasonsGetMostPlayedMaps(seasonId,3);
-    
+
     res.render("season.ejs",{
         req,
             "host": req.headers.host,

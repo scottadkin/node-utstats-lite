@@ -46,12 +46,39 @@ import { renderSeasonRankingsPage } from './src/pages/seasons/rankings.mjs';
 import { renderSeasonRecordsPage } from './src/pages/seasons/records.mjs';
 import { renderSeasonCTFLeaguePage } from './src/pages/seasons/ctfLeague.mjs';
 import { renderSeasonPlayerPage } from './src/pages/seasons/player.mjs';
+import { getAllSeasons, getSeasonById } from './src/seasons.mjs';
 //import { renderSeasonsPage } from './src/pages/seasons.mjs';
 //import { renderSeasonPage } from './src/pages/season.mjs';
 
 new Message("Attempting To Start Node UTStats Lite Website","progress");
 
+async function sanitizeSeasonId(req, res, next){
 
+    const seasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : NaN;
+
+    if(seasonId !== seasonId){
+        return res.send("not a valid season");
+    }
+    console.log(seasonId);
+
+    const info = await getSeasonById(seasonId);
+
+    res.locals.seasonInfo = info;
+    res.locals.season = seasonId;
+
+    if(info === null) return res.send(`Season Doesn't exist`);
+
+    next();
+}
+
+async function setSeasonsList(req, res, next){
+
+    const data = await getAllSeasons();
+
+    res.locals.seasonsList = data;
+
+    next();
+}
 
 
 const sessionStore = null;
@@ -297,7 +324,12 @@ app.get("/seasons", async (req, res) =>{
     }
 });
 
-app.get("/season/:season", async (req, res) =>{
+
+
+app.get("/season/:season", 
+    async (req, res, next) => { await sanitizeSeasonId(req, res, next)}, 
+    async (req, res, next) => { await setSeasonsList(req, res, next)}, 
+    async (req, res) =>{
 
     try{
 

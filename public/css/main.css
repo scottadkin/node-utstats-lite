@@ -109,6 +109,7 @@ nav a, .nav-dropdown{
     flex-direction: column;
     box-shadow: var(--box-shadow-1);
     font-size:var(--font-size-80);
+    border:1px solid var(--border-color-4);
 }
 
 .nav-content a{
