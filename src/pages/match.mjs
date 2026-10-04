@@ -17,7 +17,17 @@ export async function renderMatchPage(req, res, userSession){
         
         const data = await getMatchData(matchId);
 
-        if(data.error !== undefined) throw new Error(data.error);
+        if(data.error !== undefined){
+
+            return res.render("error.ejs", {
+                "host": req.headers.host, 
+                userSession, 
+                timeZone,
+                "errorMessage": data.error
+            });
+
+        }
+
         const b = data.basic;
 
         let date = b.date;

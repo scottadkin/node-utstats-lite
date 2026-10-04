@@ -18,13 +18,37 @@ export async function renderSeasonMatchPage(req, res, userSession){
 
         const seasonId = res.locals.season;
 
-        const basicSeasonInfo = await getSeasonById(seasonId);
+        const basicSeasonInfo = res.locals.seasonInfo;
         
         if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
+
+        
         
         const data = await getMatchData(matchId);
 
-        if(data.error !== undefined) throw new Error(data.error);
+        if(data.error !== undefined){
+
+            return res.render("error.ejs", {
+                "host": req.headers.host, 
+                userSession, 
+                timeZone,
+                "errorMessage": data.error
+            });
+
+        }else{
+
+            if(data.basic.season_id !== seasonId){
+
+                return res.render("error.ejs", {
+                    "host": req.headers.host, 
+                    userSession, 
+                    timeZone,
+                    "errorMessage": `Match was not played in the provided season.<br>
+                    You can view the match on this <a href="/season/${data.basic.season_id}/match/${matchId}"><b>link</b></a>.`
+                });   
+            }
+        }
+
         const b = data.basic;
 
         let date = b.date;

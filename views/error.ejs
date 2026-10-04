@@ -1,0 +1,26 @@
+
+<%- include("header.ejs", {
+    "mode": "", 
+    "title": "Error",
+    "meta": {},
+    host,
+    userSession
+    }) -%>
+
+<%- include("timeZone.ejs", {timeZone})%>
+
+<div class="header-wrapper">
+    Error
+</div>
+
+<div id="root">
+
+    <div class="error">
+        <%- errorMessage %>
+    </div>
+
+</div>
+
+
+
+<%- include("footer.ejs") -%>
