@@ -6812,7 +6812,7 @@ class AdminSeasonsManager{
 
             if(res.error !== undefined) throw new Error(res.error);
             this.data.seasons = res.data;
-            console.log(res);
+
             this.render();
 
         }catch(err){
@@ -6924,8 +6924,8 @@ class AdminSeasonsManager{
                     "mode": "edit-season",
                     "season": this.selectedSeason,
                     "name": this.editSeason.name,
-                    "startDate": this.editSeason.startDate,
-                    "endDate": this.editSeason.endDate
+                    "startDate": new Date(this.editSeason.startDate),
+                    "endDate": new Date(this.editSeason.endDate)
                 })
             });
 
@@ -7022,8 +7022,6 @@ class AdminSeasonsManager{
 
         const form = UIDiv("form");
 
-        console.log(this.data.seasons);
-
         const selectRow = UIDiv("form-row");
         selectRow.append(UILabel("Selected Season"));
 
@@ -7055,9 +7053,11 @@ class AdminSeasonsManager{
             if(seasonInfo === null) throw new Error(`Failed to find data`);
 
             this.editNameInput.value = seasonInfo.name;
+         
             this.editStartDateInput.value = stripISOSecondsAndMS(seasonInfo.start_date);
+          
             this.editEndDateInput.value = stripISOSecondsAndMS(seasonInfo.end_date);
-
+          
             this.editSeason.name = seasonInfo.name;
             this.editSeason.startDate = seasonInfo.start_date;
             this.editSeason.endDate = seasonInfo.end_date;
@@ -7070,6 +7070,7 @@ class AdminSeasonsManager{
         this.editNameInput = UIInput("text", "season-name", this.editSeason.name, "Season Name....", (newValue) =>{
             this.editSeason.name = newValue;
         });
+  
 
         this.editNameRow.append(this.editNameInput);
 
@@ -7078,18 +7079,18 @@ class AdminSeasonsManager{
         this.editStartDateRow.append(UILabel("Start Date (UTC)"));
         this.editStartDateInput = UIInput("datetime-local", "start-date", stripISOSecondsAndMS(this.editSeason.startDate), "Start Date", (e) =>{
             
-            this.editSeason.startDate = e;
+            this.editSeason.startDate = new Date(`${e}:00Z`).toISOString();
         });
-
+   
         this.editStartDateRow.append(this.editStartDateInput);
 
         this.editEndDateRow = UIDiv("form-row");
         this.editEndDateRow.append(UILabel("End Date (UTC)"));
         this.editEndDateInput = UIInput("datetime-local", "start-date", stripISOSecondsAndMS(this.editSeason.endDate), "End Date", (e) =>{
             
-            this.editSeason.endDate = e;
+            this.editSeason.endDate = new Date(`${e}:59.999Z`).toISOString();
         });
-
+      
         this.editEndDateRow.append(this.editEndDateInput);
 
         this.saveEditButton = UIButton("Save Changes", "submit-button");

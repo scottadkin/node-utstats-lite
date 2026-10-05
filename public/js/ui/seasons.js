@@ -84,9 +84,6 @@ class SeasonPage{
         new UIHeader(this.wrapper, "Servers");
 
 
-        
- 
-
         const serversRows = this.objectStats.servers.map(mapObjectStats)
         const gametypeRows = this.objectStats.gametypes.map(mapObjectStats)
         const mapRows = this.objectStats.maps.map(mapObjectStats)
