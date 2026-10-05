@@ -129,7 +129,7 @@ export async function getAllSeasonIds(bSkip0){
     return ids;
 }
 
-export async function getSeasonConflicts(startDate, endDate){
+export async function getSeasonConflicts(startDate, endDate, ignoreSeasonId){
 
    /* if(currentStartDate <= startDate && currentEndDate >= startDate){
                 console.log("START");
@@ -141,20 +141,35 @@ export async function getSeasonConflicts(startDate, endDate){
 
     //return simpleQuery(`SELECT * FROM nstats_seasons`);
 
-    const query = `SELECT * FROM nstats_seasons WHERE 
-    (start_date<=? AND end_date>=?) OR (start_date<=? AND end_date>=?)`;
+    let query = `SELECT * FROM nstats_seasons WHERE `;
+
+    const vars = [];
+    if(ignoreSeasonId !== undefined){
+        query += ` id != ? AND `;
+        vars.push(ignoreSeasonId);
+    }
 
 
-    return await simpleQuery(query, [startDate, startDate, endDate, endDate]);
+    query += `((start_date<=? AND end_date>=?) OR (start_date<=? AND end_date>=?))`;
+
+    vars.push(startDate, startDate, endDate, endDate);
+
+    return await simpleQuery(query, vars);
 }
 
 
 
-async function bSeasonNameExists(name){
+async function bSeasonNameExists(name, ignoreSeasonId){
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_seasons WHERE name=?`;
+    let query = `SELECT COUNT(*) as total_rows FROM nstats_seasons WHERE name=?`;
+    const vars = [name];
 
-    const result = await simpleQuery(query, [name]);
+    if(ignoreSeasonId !== undefined){
+        query += ` AND id !=?`;
+        vars.push(ignoreSeasonId);
+    }
+
+    const result = await simpleQuery(query, vars);
 
     return result[0].total_rows !== 0;
 }
@@ -168,20 +183,11 @@ export async function createSeason(name, startDate, endDate){
 
     if(conficts.length > 0){
 
-        /*console.log(startDate, endDate);
-        console.log(conficts);
-
-        console.log(conficts[0].start_date, startDate , (conficts[0].start_date <= startDate));
-        console.log(conficts[0].end_date, endDate , (conficts[0].end_date <= endDate));*/
-
-
-        //return;
 
         return {
             "error": `Dates conflict with the following seasons:${conficts.map((c) =>{ return ` ${c.name}`})}.`,
             conficts
         };
-        //throw new Error(`Dates conflict with the following seasons:${conficts.map((c) =>{ return ` ${c.name}`})}.`);
     }
 
 
@@ -192,6 +198,37 @@ export async function createSeason(name, startDate, endDate){
     const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?,0,0,0)`;
 
     await simpleQuery(query, [startDate, endDate, name]);
+
+    return {"message": "passed"}
+}
+
+export async function editSeason(seasonId, name, startDate, endDate){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+    if(name === "") throw new Error("Season name can't be an empty string.");
+    if(startDate >= endDate) throw new Error(`StartDate is later than or equal to endDate.`);
+    
+    const conficts = await getSeasonConflicts(startDate, endDate, seasonId);
+
+    if(conficts.length > 0){
+
+
+        return {
+            "error": `Dates conflict with the following seasons:${conficts.map((c) =>{ return ` ${c.name}`})}.`,
+            conficts
+        };
+    }
+
+
+    const bNameAlreadyInUse = await bSeasonNameExists(name, seasonId);
+
+    if(bNameAlreadyInUse) return {"error": `There is already a season called ${name}`};
+
+    //const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?,0,0,0)`;
+    const query = `UPDATE nstats_seasons SET name=?,start_date=?,end_date=? WHERE id=?`;
+
+    await simpleQuery(query, [name, startDate, endDate, seasonId]);
 
     return {"message": "passed"}
 }

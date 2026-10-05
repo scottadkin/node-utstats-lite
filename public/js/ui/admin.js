@@ -6899,6 +6899,58 @@ class AdminSeasonsManager{
         }
     }
 
+    async saveSeasonChanges(){
+
+        try{
+
+            if(this.bActionInProgress){
+                new UINotification(this.parent, "warning", "Please Wait", `A previous action is still being processed.`);
+                return;
+            }
+
+            if(this.editSeason.name === "") throw new Error(`Season name can't be an empty string`);
+
+            if(this.editSeason.startDate >= this.editSeason.endDate){
+                throw new Error(`The season end date must be later than the start date.`);
+            }
+  
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "edit-season",
+                    "season": this.selectedSeason,
+                    "name": this.editSeason.name,
+                    "startDate": this.editSeason.startDate,
+                    "endDate": this.editSeason.endDate
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined){
+
+                if(res.conflicts !== undefined) console.log(res.conflicts);
+                throw new Error(res.error);
+            }
+
+            
+
+            new UINotification(this.parent, "pass", "Changes Saved", `Season updated successfully.`);
+            await this.loadData();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Edit Season", err.toString());
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     renderCreateSeason(){
 
         if(this.mode !== "create") return;
@@ -6999,7 +7051,7 @@ class AdminSeasonsManager{
             this.selectedSeason = parseInt(newValue);
 
             const seasonInfo = this.getSeasonById(this.selectedSeason);
-            console.log(seasonInfo);
+          
             if(seasonInfo === null) throw new Error(`Failed to find data`);
 
             this.editNameInput.value = seasonInfo.name;
@@ -7041,6 +7093,11 @@ class AdminSeasonsManager{
         this.editEndDateRow.append(this.editEndDateInput);
 
         this.saveEditButton = UIButton("Save Changes", "submit-button");
+
+        this.saveEditButton.addEventListener("click", () =>{
+
+            this.saveSeasonChanges();
+        });
 
         form.append(selectRow, UIBr(), this.editNameRow, this.editStartDateRow, this.editEndDateRow, this.saveEditButton);
 
