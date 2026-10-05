@@ -6741,7 +6741,7 @@ class AdminSeasonsManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "create";
+        this.mode = "edit";
 
         this.data = {
             "seasons": []
@@ -6755,6 +6755,12 @@ class AdminSeasonsManager{
         this.createName = "";
         this.createStartDate = new Date().toISOString();
         this.createEndDate = new Date().toISOString();
+        this.selectedSeason = 0;
+        this.editSeason = {
+            "name": "",
+            "startDate": new Date().toISOString(),
+            "endDate": new Date().toISOString()
+        };
 
 
         this.bActionInProgress = false;
@@ -6766,11 +6772,22 @@ class AdminSeasonsManager{
         
     }
 
+    getSeasonById(id){
+
+        for(let i = 0; i < this.data.seasons.length; i++){
+
+            const d = this.data.seasons[i];
+            if(d.id === id) return d;
+        }
+        return null;
+    }
+
     createTabs(){
 
         const options = [
             {"display": "List", "value": "list"},
             {"display": "Create Season", "value": "create"},
+            {"display": "Edit Season", "value": "edit"},
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
@@ -6886,7 +6903,7 @@ class AdminSeasonsManager{
 
         if(this.mode !== "create") return;
 
-        new UIInfo(this.content, [`Create a new season`]);
+        new UIInfo(this.content, [`Create a new season.`]);
 
         const form = UIDiv("form");
 
@@ -6904,7 +6921,7 @@ class AdminSeasonsManager{
 
         const startRow = UIDiv("form-row");
 
-        startRow.append(UILabel("Start Date"));
+        startRow.append(UILabel("Start Date (UTC)"));
 
 
         const startInput = UIInput("datetime-local", "start-date", stripISOSecondsAndMS(this.createStartDate), "start date", (e) =>{
@@ -6929,7 +6946,7 @@ class AdminSeasonsManager{
         
         
         const endRow = UIDiv("form-row");
-        endRow.append(UILabel("End Date"), endInput);
+        endRow.append(UILabel("End Date (UTC)"), endInput);
 
         form.append(nameRow, startRow, endRow);
 
@@ -6943,10 +6960,98 @@ class AdminSeasonsManager{
         this.content.append(form);
     }
 
+
+    renderEditSeason(){
+
+        if(this.mode !== "edit") return;
+
+        new UIInfo(this.content, ["Edit an existing season."]);
+
+
+        const form = UIDiv("form");
+
+        console.log(this.data.seasons);
+
+        const selectRow = UIDiv("form-row");
+        selectRow.append(UILabel("Selected Season"));
+
+        const seasonOptions = this.data.seasons.map((s) =>{
+            return {"display": s.name, "value": s.id}
+        });
+
+        seasonOptions.sort((a, b) =>{
+
+            a = a.display.toLowerCase();
+            b = b.display.toLowerCase();
+            if(a > b){
+                return 1;
+            }else if(a < b){
+                return -1;
+            }
+
+            return 0;
+        });
+
+        seasonOptions.unshift({"display": "- Please Select A Season -", "value": 0});
+
+        const dropDown = new UISelect(selectRow, seasonOptions, this.selectedSeason, (newValue) =>{
+
+            this.selectedSeason = parseInt(newValue);
+
+            const seasonInfo = this.getSeasonById(this.selectedSeason);
+            console.log(seasonInfo);
+            if(seasonInfo === null) throw new Error(`Failed to find data`);
+
+            this.editNameInput.value = seasonInfo.name;
+            this.editStartDateInput.value = stripISOSecondsAndMS(seasonInfo.start_date);
+            this.editEndDateInput.value = stripISOSecondsAndMS(seasonInfo.end_date);
+
+            this.editSeason.name = seasonInfo.name;
+            this.editSeason.startDate = seasonInfo.start_date;
+            this.editSeason.endDate = seasonInfo.end_date;
+        });
+
+
+        
+        this.editNameRow = UIDiv("form-row");
+        this.editNameRow.append(UILabel("Name"));
+        this.editNameInput = UIInput("text", "season-name", this.editSeason.name, "Season Name....", (newValue) =>{
+            this.editSeason.name = newValue;
+        });
+
+        this.editNameRow.append(this.editNameInput);
+
+
+        this.editStartDateRow = UIDiv("form-row");
+        this.editStartDateRow.append(UILabel("Start Date (UTC)"));
+        this.editStartDateInput = UIInput("datetime-local", "start-date", stripISOSecondsAndMS(this.editSeason.startDate), "Start Date", (e) =>{
+            
+            this.editSeason.startDate = e;
+        });
+
+        this.editStartDateRow.append(this.editStartDateInput);
+
+        this.editEndDateRow = UIDiv("form-row");
+        this.editEndDateRow.append(UILabel("End Date (UTC)"));
+        this.editEndDateInput = UIInput("datetime-local", "start-date", stripISOSecondsAndMS(this.editSeason.endDate), "End Date", (e) =>{
+            
+            this.editSeason.endDate = e;
+        });
+
+        this.editEndDateRow.append(this.editEndDateInput);
+
+        this.saveEditButton = UIButton("Save Changes", "submit-button");
+
+        form.append(selectRow, UIBr(), this.editNameRow, this.editStartDateRow, this.editEndDateRow, this.saveEditButton);
+
+        this.content.append(form);
+    }
+
     render(){
 
         this.content.innerHTML = ``;
         this.renderSeasonsList();
         this.renderCreateSeason();
+        this.renderEditSeason();
     }
 }
