@@ -638,10 +638,54 @@ export async function seasonGetAllGametypeNames(seasonId){
 }
 
 
+async function deleteAllPlayerSeasonData(seasonId){
+
+    const tables = [
+        "nstats_player_totals", 
+        "nstats_player_totals_max", 
+        "nstats_player_totals_weapons", 
+        "nstats_player_totals_ctf",
+        "nstats_totals_player_weapon_damage",
+        "nstats_player_ctf_league",
+        "nstats_rankings",
+        "nstats_map_rankings"
+        
+    ];
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+    
+        const query = `DELETE FROM ${t} WHERE season_id=?`;
+
+        await simpleQuery(query, [seasonId]);
+    }
+}
+
 
 export async function deleteSeason(seasonId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
     if(seasonId === 0) throw new Error(`You can not delete season 0.`);
+
+    /*
+    TODO:
+    - Set all matches seasonId to 0 if match season
+    X nstats_player_totals
+    X nstats_player_totals_max
+    X nstats_player_totals_weapons
+    X nstats_player_totals_ctf
+    X nstats_rankings
+    - nstats_map_weapon_totals
+    X nstats_map_rankings
+    X nstats_player_ctf_league
+    X nstats_totals_player_weapon_damage
+    - nstats_seasons_servers
+    - nstats_seasons_gametypes
+    - nstats_seasons_maps
+    - nstats_seasons_unique_match_combinations
+    */
+
+    await deleteAllPlayerSeasonData(seasonId);
 }
