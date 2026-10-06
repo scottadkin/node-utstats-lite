@@ -3,6 +3,7 @@ import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { getMapImageName, sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
 import { calculateSeasonPlayerTotals } from "./players.mjs";
+import { playerWeaponDamageRecalculateSeasonTotals } from "./playerWeaponDamage.mjs";
 import { updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
 
 export const VALID_OBJECT_TYPES = {
@@ -726,6 +727,8 @@ async function recalculateSeasonPlayerTotals(seasonId){
     await calculateSeasonPlayerTotals(seasonId);
     await ctfRecalculatePlayerTotals(seasonId);
     await weaponsUpdatePlayerTotals(null, seasonId)
+
+    await playerWeaponDamageRecalculateSeasonTotals(seasonId);
     /*
     TODO:
     X nstats_player_totals

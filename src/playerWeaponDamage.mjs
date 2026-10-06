@@ -304,3 +304,160 @@ export async function calculatePlayerWeaponDamageTotals(playerIds, gametypeId, m
         ["player_id", "total_matches", "total_playtime", "gametype_id", "map_id", "weapon_id", "damage", "max_damage", "avg_damage", "damage_per_minute"]
         , insertVars, "player_id,gametype_id,map_id,weapon_id")
 }
+
+
+function updateCurrentTotals(totals, rowData, gametypeId, mapId){
+
+    const playerId = rowData.player_id;
+   // const gametypeId = rowData.gametype_id;
+   // const mapId = rowData.map_id;
+    const weaponId = rowData.weapon_id;
+
+
+    if(totals[playerId] === undefined){
+        totals[playerId] = {};
+    }
+
+    if(totals[playerId][gametypeId] === undefined){
+        totals[playerId][gametypeId] = {};
+    }
+
+    if(totals[playerId][gametypeId][mapId] === undefined){
+        totals[playerId][gametypeId][mapId] = {};
+    }
+
+
+    //WE dont need to do all weapons(0) as already stored in match_table and will be in the rowData already
+     if(totals[playerId][gametypeId][mapId][weaponId] === undefined){
+
+        totals[playerId][gametypeId][mapId][weaponId] = {
+            "totalPlaytime": 0,
+            "totalDamage": 0,
+            "totalMatches": 0,
+            "maxDamage": 0,
+            "avgDamage": 0,
+            "damagePM": 0
+        };
+    }
+
+    const t = totals[playerId][gametypeId][mapId][weaponId];
+
+    t.totalMatches += rowData.total_matches;
+    t.totalPlaytime += rowData.playtime;
+    t.totalDamage += rowData.total_damage;
+
+    if(t.totalMatches > 0 && t.totalDamage > 0){
+        t.avgDamage = t.totalDamage / t.totalMatches;
+    }else{
+        t.avgDamage = 0;
+    }
+
+    if(rowData.max_damage > t.maxDamage){
+        t.maxDamage = rowData.max_damage;
+    }
+
+    if(t.totalPlaytime > 0 && t.totalDamage > 0){
+        t.damagePM = (t.totalDamage / t.totalPlaytime) * 60
+    }else{
+        t.damagePM = 0;
+    }
+}
+
+async function deletePlayerTotals(seasonId){
+
+    const query = `DELETE FROM nstats_totals_player_weapon_damage WHERE season_id=?`;
+
+    return await simpleQuery(query, [seasonId]);
+}
+
+
+async function calculateTotals(seasonId){
+
+    const query = `SELECT
+    COUNT(*) as total_matches,
+    SUM(playtime) as playtime, 
+    gametype_id,
+    map_id,
+    player_id,
+    weapon_id, 
+    SUM(damage) as total_damage, 
+    MAX(damage) as max_damage
+
+    FROM nstats_match_player_weapon_damage 
+    WHERE EXISTS(
+        SELECT 1 FROM nstats_matches 
+        WHERE nstats_matches.id = nstats_match_player_weapon_damage.match_id 
+        AND nstats_matches.season_id=?
+    )
+    GROUP BY player_id,gametype_id,map_id,weapon_id`;
+
+    const vars = [seasonId];
+
+    const gametypeMapTotals = await simpleQuery(query, vars);
+
+    const totals = {};
+
+    for(let i = 0; i < gametypeMapTotals.length; i++){
+
+        const t = gametypeMapTotals[i];
+
+        //all time
+        updateCurrentTotals(totals, t, 0, 0);
+        //map all time
+        updateCurrentTotals(totals, t, 0, t.map_id);
+        //gametype all time
+        updateCurrentTotals(totals, t, t.gametype_id, 0);
+        //gametype map combo
+        updateCurrentTotals(totals, t, t.gametype_id, t.map_id);
+
+    }
+
+    return totals;
+}
+
+export async function playerWeaponDamageRecalculateSeasonTotals(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+
+    await deletePlayerTotals(seasonId);
+
+    const start = performance.now();
+    const totals = await calculateTotals(seasonId);
+    const end = performance.now();
+    console.log((end - start) * 0.001);
+    
+
+    const insertVars = [];
+
+    for(const [playerId, playerData] of Object.entries(totals)){
+
+        for(const [gametypeId, gametypeData] of Object.entries(playerData)){
+
+            for(const [mapId, weaponData] of Object.entries(gametypeData)){
+
+                for(const [weaponId, stats] of Object.entries(weaponData)){
+                   
+                    insertVars.push([
+
+                        playerId, stats.totalMatches, 
+                        stats.totalPlaytime, gametypeId, mapId, 
+                        weaponId, stats.totalDamage, stats.maxDamage, 
+                        stats.avgDamage, stats.damagePM, seasonId
+                    ]);
+                }
+            }
+        }
+    }
+
+
+
+    await sqlInsertOnDuplicateUpdate(
+        "nstats_totals_player_weapon_damage", 
+        [   "player_id", "total_matches", "total_playtime", 
+            "gametype_id", "map_id", "weapon_id", "damage", "max_damage", "avg_damage", "damage_per_minute",
+            "season_id"
+        ]
+        , insertVars, "player_id,season_id, gametype_id,map_id,weapon_id")
+
+}
