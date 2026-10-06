@@ -422,11 +422,8 @@ export async function playerWeaponDamageRecalculateSeasonTotals(seasonId){
 
     await deletePlayerTotals(seasonId);
 
-    const start = performance.now();
     const totals = await calculateTotals(seasonId);
-    const end = performance.now();
-    console.log((end - start) * 0.001);
-    
+
 
     const insertVars = [];
 

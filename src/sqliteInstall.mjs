@@ -907,6 +907,7 @@ export function createTableQueries(){
             ) STRICT`,
 
             `CREATE INDEX IF NOT EXISTS nstats_match_pmwd ON nstats_match_player_weapon_damage(match_id)`,
+            `CREATE INDEX IF NOT EXISTS nstats_match_pmwdweapon ON nstats_match_player_weapon_damage(weapon_id)`,
 
             `CREATE TABLE IF NOT EXISTS nstats_totals_player_weapon_damage (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
