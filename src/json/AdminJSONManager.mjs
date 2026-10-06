@@ -29,7 +29,7 @@ import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
 import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, adminRenameForceHWIDToName, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
-import { createSeason, editSeason, getAllSeasons } from "../seasons.mjs";
+import { createSeason, deleteSeason, editSeason, getAllSeasons } from "../seasons.mjs";
 
 
 
@@ -509,6 +509,15 @@ export default class AdminJSONManager{
                 if(startDate === null || endDate === null) throw new Error(`Start or End Date is undefined`);
           
                 const result = await editSeason(id, name, startDate, endDate);
+
+                return this.res.json(result);
+
+            }else if(this.mode === "delete-season"){
+
+                const id = this.req.body.season ?? null;
+                if(id === null) throw new Error(`no season selected to edit`);
+
+                const result = await deleteSeason(id);
 
                 return this.res.json(result);
             }

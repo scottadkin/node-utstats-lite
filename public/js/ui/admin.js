@@ -1786,7 +1786,6 @@ class AdminSiteSettingsManager{
                     if(current.item === saved.item && current.page_order !== saved.page_order){
                         found.push(current);
                     }
-                    //console.log(current.item, saved.item);
                 }
             }
         }
@@ -6951,6 +6950,35 @@ class AdminSeasonsManager{
         }
     }
 
+    async deleteSeason(){
+
+        try{
+
+            if(this.bActionInProgress){
+                new UINotification(this.parent, "warning", "Please Wait", `A previous action is still being processed.`);
+                return;
+            }
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "delete-season", "season": this.selectedSeason})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Delete Season", err.toString());
+        }finally{
+            this.bActionInProgress = false;
+        }
+    }
+
     renderCreateSeason(){
 
         if(this.mode !== "create") return;
@@ -7103,6 +7131,22 @@ class AdminSeasonsManager{
         form.append(selectRow, UIBr(), this.editNameRow, this.editStartDateRow, this.editEndDateRow, this.saveEditButton);
 
         this.content.append(form);
+
+
+        UIHeader(this.content, "Delete Selected Season");
+        const deleteForm = UIDiv("form");
+        new UIInfo(deleteForm, [
+            `Deleting a season `, UIB("will not delete"),` any match data.`, UIBr(),
+            `Matches that where assigned to the season will have their seasonId change to 0(no season).`, UIBr(),
+            `All totals, rankings, records, ctf league data for the season will be deleted.`
+        ]);
+
+        const deleteButton = UIButton("Delete Season","delete-button");
+        deleteButton.addEventListener("click", () =>{
+            this.deleteSeason();
+        });
+        deleteForm.append(deleteButton);
+        this.content.append(deleteForm);
     }
 
     render(){

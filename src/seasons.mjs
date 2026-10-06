@@ -636,3 +636,12 @@ export async function seasonGetAllGametypeNames(seasonId){
 
     return data;
 }
+
+
+
+export async function deleteSeason(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
+    if(seasonId === 0) throw new Error(`You can not delete season 0.`);
+}
