@@ -6971,6 +6971,11 @@ class AdminSeasonsManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
+            new UINotification(this.parent, "pass", "Success", `Season deleted successfully.`);
+
+            this.selectedSeason = 0;
+            await this.loadData();
+
         }catch(err){
             console.trace(err);
             new UINotification(this.parent, "error", "Failed To Delete Season", err.toString());

@@ -641,14 +641,15 @@ export async function seasonGetAllGametypeNames(seasonId){
 async function deleteAllPlayerSeasonData(seasonId){
 
     const tables = [
-        "nstats_player_totals", 
+        
         "nstats_player_totals_max", 
         "nstats_player_totals_weapons", 
         "nstats_player_totals_ctf",
         "nstats_totals_player_weapon_damage",
         "nstats_player_ctf_league",
         "nstats_rankings",
-        "nstats_map_rankings"
+        "nstats_map_rankings",
+        "nstats_player_totals",
         
     ];
 
@@ -663,6 +664,42 @@ async function deleteAllPlayerSeasonData(seasonId){
 }
 
 
+async function deleteSeasonUniqueMatchCombinations(seasonId){
+
+    const query = `DELETE FROM nstats_seasons_unique_match_combinations WHERE season_id=?`;
+
+    return await simpleQuery(query, [seasonId]);
+}
+
+async function deleteSeasonObjectStats(seasonId){
+
+    const tables = [
+        "nstats_seasons_servers",
+        "nstats_seasons_gametypes",
+        "nstats_seasons_maps",
+    ];
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        const query = `DELETE FROM ${t} WHERE season_id=?`;
+        await simpleQuery(query, [seasonId]);
+    }
+}
+
+async function deleteSeasonMapWeaponTotals(seasonId){
+
+    return await simpleQuery(`DELETE FROM nstats_map_weapon_totals WHERE season_id=?`, [seasonId]);
+}
+
+async function replaceMatchesSeasonId(find, replace){
+
+    const query = `UPDATE nstats_matches SET season_id=? WHERE season_id=?`;
+
+    return await simpleQuery(query, [replace, find]);
+}
+
 export async function deleteSeason(seasonId){
 
     seasonId = parseInt(seasonId);
@@ -671,21 +708,29 @@ export async function deleteSeason(seasonId){
 
     /*
     TODO:
-    - Set all matches seasonId to 0 if match season
+    X Set all matches seasonId to 0 if match season
     X nstats_player_totals
     X nstats_player_totals_max
     X nstats_player_totals_weapons
     X nstats_player_totals_ctf
     X nstats_rankings
-    - nstats_map_weapon_totals
+    X nstats_map_weapon_totals
     X nstats_map_rankings
     X nstats_player_ctf_league
     X nstats_totals_player_weapon_damage
-    - nstats_seasons_servers
-    - nstats_seasons_gametypes
-    - nstats_seasons_maps
-    - nstats_seasons_unique_match_combinations
+    X nstats_seasons_servers
+    X nstats_seasons_gametypes
+    X nstats_seasons_maps
+    X nstats_seasons_unique_match_combinations
     */
 
     await deleteAllPlayerSeasonData(seasonId);
+    await deleteSeasonUniqueMatchCombinations(seasonId);
+    await deleteSeasonObjectStats(seasonId);
+    await deleteSeasonMapWeaponTotals(seasonId);
+    await replaceMatchesSeasonId(seasonId, 0);
+
+    await simpleQuery(`DELETE FROM nstats_seasons WHERE id=?`, [seasonId]);
+
+    return {"message": "passed"};
 }
