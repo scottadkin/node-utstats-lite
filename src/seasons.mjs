@@ -1,7 +1,9 @@
+import { ctfRecalculatePlayerTotals } from "./ctf.mjs";
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { getMapImageName, sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
 import { calculateSeasonPlayerTotals } from "./players.mjs";
+import { updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
 
 export const VALID_OBJECT_TYPES = {
         "gametypes": "gametype_id",
@@ -722,21 +724,23 @@ export async function deleteSeason(seasonId){
 async function recalculateSeasonPlayerTotals(seasonId){
 
     await calculateSeasonPlayerTotals(seasonId);
+    await ctfRecalculatePlayerTotals(seasonId);
+    await weaponsUpdatePlayerTotals(null, seasonId)
     /*
     TODO:
     X nstats_player_totals
     X nstats_player_totals_max
-    - nstats_player_totals_weapons
-    - nstats_player_totals_ctf
+    X nstats_player_totals_weapons
+    X nstats_player_totals_ctf
     - nstats_rankings
     - nstats_map_weapon_totals
     - nstats_map_rankings
     - nstats_player_ctf_league
     - nstats_totals_player_weapon_damage
-    - nstats_seasons_servers
-    - nstats_seasons_gametypes
-    - nstats_seasons_maps
-    - nstats_seasons_unique_match_combinations
+    X nstats_seasons_servers
+    X nstats_seasons_gametypes
+    X nstats_seasons_maps
+    X nstats_seasons_unique_match_combinations
     */
 }
 

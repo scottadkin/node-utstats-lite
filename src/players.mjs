@@ -4,7 +4,6 @@ import { getMapAndGametypeIds } from "./matches.mjs";
 import { getPlayerCTFTotals, setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
 import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./weapons.mjs";
-import { getPlayerMapTotals, getUniquePlayerIdsOnMap, getAllMapIds} from "./maps.mjs";
 import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";

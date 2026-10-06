@@ -1661,6 +1661,17 @@ export async function ctfGetAllPlayerIdsInSeason(seasonId){
     return result.map((r) => r.player_id);
 }
 
+
+export async function ctfRecalculatePlayerTotals(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid itneger`);
+
+    const playerIds = await ctfGetAllPlayerIdsInSeason(seasonId);
+   
+    await updatePlayerTotals(playerIds, seasonId);
+}
+
 export async function ctfRecalculateAllPlayerTotals(){
 
     const seasonIds = await getAllSeasonIds(false);
@@ -1669,10 +1680,7 @@ export async function ctfRecalculateAllPlayerTotals(){
 
         const sid = seasonIds[i];
 
-        const playerIds = await ctfGetAllPlayerIdsInSeason(sid);
-   
-        await updatePlayerTotals(playerIds, sid);
+        await ctfRecalculatePlayerTotals(sid);
 
     }
-
 }

@@ -399,6 +399,10 @@ export async function updatePlayerTotals(playerIds, seasonId){
 
     if(playerIds !== null && playerIds.length === 0) return null;
     
+    if(seasonId === undefined) seasonId = 0;
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+
     const test = await testCalculatePlayerTotalsFromMatchData(playerIds, seasonId);
 
 
