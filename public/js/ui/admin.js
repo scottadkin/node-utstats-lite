@@ -6740,7 +6740,7 @@ class AdminSeasonsManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "edit";
+        this.mode = "recalculate";
 
         this.data = {
             "seasons": []
@@ -6787,6 +6787,7 @@ class AdminSeasonsManager{
             {"display": "List", "value": "list"},
             {"display": "Create Season", "value": "create"},
             {"display": "Edit Season", "value": "edit"},
+            {"display": "Recalculate Season", "value": "recalculate"}
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
@@ -6825,21 +6826,30 @@ class AdminSeasonsManager{
 
         if(this.mode !== "list") return;
 
+        new UIInfo(this.content, [
+            `Seasons that have been created.`
+        ]);
         const tableOptions = {
             "className": "t-width-1",
             "headers": [
                 {"display": "Name"},
                 {"display": "Start Date"},
                 {"display": "End Date"},
+                {"display": "Total Matches"},
+                {"display": "Total Playtime"},
+                {"display": "Total Players"},
             ]
         };
 
         const rows = this.data.seasons.map((s) =>{
 
             return [
-                {"display": s.name, "value": s.name.toLowerCase()},
+                {"display": s.name, "value": s.name.toLowerCase(), "className": "text-left"},
                 {"display": toDateString(s.start_date, TIME_ZONE, true), "value": s.start_date, "className": "date"},
                 {"display": toDateString(s.end_date, TIME_ZONE, true), "value": s.end_date, "className": "date"},
+                {"value": s.total_matches},
+                {"value": s.total_playtime, "display": toPlaytime(s.total_playtime), "className": "playtime"},
+                {"value": s.total_players}
             ];
         });
 
@@ -7046,17 +7056,7 @@ class AdminSeasonsManager{
     }
 
 
-    renderEditSeason(){
-
-        if(this.mode !== "edit") return;
-
-        new UIInfo(this.content, ["Edit an existing season."]);
-
-
-        const form = UIDiv("form");
-
-        const selectRow = UIDiv("form-row");
-        selectRow.append(UILabel("Selected Season"));
+    getSeasonOptions(){
 
         const seasonOptions = this.data.seasons.map((s) =>{
             return {"display": s.name, "value": s.id}
@@ -7077,13 +7077,46 @@ class AdminSeasonsManager{
 
         seasonOptions.unshift({"display": "- Please Select A Season -", "value": 0});
 
+        return seasonOptions;
+    }
+
+    renderEditSeason(){
+
+        if(this.mode !== "edit") return;
+
+        new UIInfo(this.content, ["Edit an existing season."]);
+
+
+        const form = UIDiv("form");
+
+        const selectRow = UIDiv("form-row");
+        selectRow.append(UILabel("Selected Season"));
+
+        const seasonOptions = this.getSeasonOptions();
+
         const dropDown = new UISelect(selectRow, seasonOptions, this.selectedSeason, (newValue) =>{
 
             this.selectedSeason = parseInt(newValue);
 
             const seasonInfo = this.getSeasonById(this.selectedSeason);
+     
+            if(seasonInfo === null && this.selectedSeason !== 0){
+
+                throw new Error(`Failed to find data`);
+
+            }else if(this.selectedSeason === 0){
+
+                this.editSeason = {
+                    "name": "",
+                    "startDate": new Date().toISOString(),
+                    "endDate": new Date().toISOString()
+                };
+                this.editNameInput.value = "";
+                this.editStartDateInput.value = stripISOSecondsAndMS(this.editSeason.startDate);
           
-            if(seasonInfo === null) throw new Error(`Failed to find data`);
+                this.editEndDateInput.value = stripISOSecondsAndMS(this.editSeason.endDate);
+                return;
+            }
 
             this.editNameInput.value = seasonInfo.name;
          
@@ -7154,11 +7187,40 @@ class AdminSeasonsManager{
         this.content.append(deleteForm);
     }
 
+    renderRecalculateSeason(){
+
+        if(this.mode !== "recalculate") return;
+
+        new UIInfo(this.content, [
+            `Create season data from existing data without the need of reimporting logs.`, UIBr(),
+            `If you adjust the start and or end dates of an existing season you will need to perform this action.`
+        ]);
+
+
+        const form = UIDiv("form");
+        const seasonRow = UIDiv("form-row");
+
+
+        seasonRow.append(UILabel("Selected Season"));
+
+        const seasonOptions = this.getSeasonOptions();
+
+        new UISelect(seasonRow, seasonOptions, this.selectedSeason, (e) =>{
+            this.selectedSeason = parseInt(e);
+        });
+
+        form.append(seasonRow);
+        this.content.append(form);
+
+
+    }
+
     render(){
 
         this.content.innerHTML = ``;
         this.renderSeasonsList();
         this.renderCreateSeason();
         this.renderEditSeason();
+        this.renderRecalculateSeason();
     }
 }

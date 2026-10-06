@@ -14,11 +14,8 @@ import Items from "./importer/items.mjs";
 import {calculateRankings} from "./rankings.mjs";
 import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
-//import { bImportRandomizeNames } from "../config.mjs";
 import PlayerWeaponDamage from "./importer/playerWeaponDamage.mjs";
 import { calculateSeasonStats, getSeasonByMatchDate } from "./seasons.mjs";
-//import { attachDatabase, bDatabaseConnected, bDatabaseFileExist, changeActiveDatabase, createDatabase, detachDatabase, simpleQuery } from "./database.mjs";
-//import { getSeasonByMatchDate } from "./seasons.mjs";
 
 
 export class MatchParser{
@@ -106,28 +103,6 @@ export class MatchParser{
             new Message(`Match length is shorter than minPlaytime (${this.minPlaytime} seconds).`,"error");
             throw new Error("MIN PLAYTIME");
         }   
-
-
-        
-
-        /*const testSeason = await getSeasonByMatchDate(this.match.date);
-        
-
-        if(testSeason === null) throw new Error(`No Matching Season Found`);
-
-        if(!await bDatabaseFileExist(testSeason.file_name)){
-
-            throw new Error(`There is no matching database for season file ${testSeason.file_name}`);
-        }
-
-        if(!await bDatabaseConnected(testSeason.file_name)){
-
-            await attachDatabase(testSeason.file_name);
-
-            
-        }
-
-        this.attachedDatabase = testSeason.file_name;*/
       
         
 

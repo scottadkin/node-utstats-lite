@@ -1012,48 +1012,51 @@ export async function calcPlayerTotals(playerIds, seasonId){
   
 }
 
+export async function calculateSeasonPlayerTotals(seasonId){
+
+    let result = [];
+
+    //all time totals
+    if(seasonId === 0){
+
+        const query = `SELECT
+        ${PLAYER_TOTALS_COLUMNS_MATCHES},
+        ${PLAYER_TOTALS_MAX_COLUMNS}
+        FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
+
+        result = await simpleQuery(query);
+
+    }else{
+        
+        const query = `SELECT
+        ${PLAYER_TOTALS_COLUMNS_MATCHES},
+        ${PLAYER_TOTALS_MAX_COLUMNS}
+        FROM nstats_match_players 
+        WHERE spectator=0 AND EXISTS(
+            SELECT 1 FROM nstats_matches
+            WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?
+        )
+        GROUP BY player_id,gametype_id,map_id`;
+
+        result = await simpleQuery(query, [seasonId]);
+    }
+
+    const totals = createPlayerTotalsFromData(result, seasonId);
+
+    await insertPlayerGametypeTotals(totals, seasonId);
+
+    await insertPlayerGametypeMaxValues(totals, seasonId);
+}
+
 export async function calculateAllPlayerTotals(){
 
-
     const seasonIds = await getAllSeasonIds(false);
-
 
     for(let i = 0; i < seasonIds.length; i++){
 
         const sid = seasonIds[i];
 
-        let result = [];
-
-        //all time totals
-        if(sid === 0){
-
-            const query = `SELECT
-            ${PLAYER_TOTALS_COLUMNS_MATCHES},
-            ${PLAYER_TOTALS_MAX_COLUMNS}
-            FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
-
-            result = await simpleQuery(query);
-
-        }else{
-            
-            const query = `SELECT
-            ${PLAYER_TOTALS_COLUMNS_MATCHES},
-            ${PLAYER_TOTALS_MAX_COLUMNS}
-            FROM nstats_match_players 
-            WHERE spectator=0 AND EXISTS(
-                SELECT 1 FROM nstats_matches
-                WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?
-            )
-            GROUP BY player_id,gametype_id,map_id`;
-
-            result = await simpleQuery(query, [sid]);
-        }
-
-        const totals = createPlayerTotalsFromData(result, sid);
-
-        await insertPlayerGametypeTotals(totals, sid);
-
-        await insertPlayerGametypeMaxValues(totals, sid);
+        await calculateSeasonPlayerTotals(sid);
     }
 
 }

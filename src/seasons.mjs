@@ -1,6 +1,7 @@
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { getMapImageName, sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
+import { calculateSeasonPlayerTotals } from "./players.mjs";
 
 export const VALID_OBJECT_TYPES = {
         "gametypes": "gametype_id",
@@ -706,24 +707,6 @@ export async function deleteSeason(seasonId){
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
     if(seasonId === 0) throw new Error(`You can not delete season 0.`);
 
-    /*
-    TODO:
-    X Set all matches seasonId to 0 if match season
-    X nstats_player_totals
-    X nstats_player_totals_max
-    X nstats_player_totals_weapons
-    X nstats_player_totals_ctf
-    X nstats_rankings
-    X nstats_map_weapon_totals
-    X nstats_map_rankings
-    X nstats_player_ctf_league
-    X nstats_totals_player_weapon_damage
-    X nstats_seasons_servers
-    X nstats_seasons_gametypes
-    X nstats_seasons_maps
-    X nstats_seasons_unique_match_combinations
-    */
-
     await deleteAllPlayerSeasonData(seasonId);
     await deleteSeasonUniqueMatchCombinations(seasonId);
     await deleteSeasonObjectStats(seasonId);
@@ -733,4 +716,42 @@ export async function deleteSeason(seasonId){
     await simpleQuery(`DELETE FROM nstats_seasons WHERE id=?`, [seasonId]);
 
     return {"message": "passed"};
+}
+
+
+async function recalculateSeasonPlayerTotals(seasonId){
+
+    await calculateSeasonPlayerTotals(seasonId);
+    /*
+    TODO:
+    X nstats_player_totals
+    X nstats_player_totals_max
+    - nstats_player_totals_weapons
+    - nstats_player_totals_ctf
+    - nstats_rankings
+    - nstats_map_weapon_totals
+    - nstats_map_rankings
+    - nstats_player_ctf_league
+    - nstats_totals_player_weapon_damage
+    - nstats_seasons_servers
+    - nstats_seasons_gametypes
+    - nstats_seasons_maps
+    - nstats_seasons_unique_match_combinations
+    */
+}
+
+export async function recalculateSeason(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
+    if(seasonId === 0) throw new Error(`You can not delete season 0.`);
+
+    await deleteAllPlayerSeasonData(seasonId);
+    await deleteSeasonUniqueMatchCombinations(seasonId);
+    await deleteSeasonObjectStats(seasonId);
+    await deleteSeasonMapWeaponTotals(seasonId);
+
+
+    await recalculateSeasonPlayerTotals(seasonId);
+    await calculateSeasonStats(seasonId);
 }
