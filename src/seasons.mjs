@@ -4,7 +4,7 @@ import { getMapImageName, sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
 import { calculateSeasonPlayerTotals } from "./players.mjs";
 import { playerWeaponDamageRecalculateSeasonTotals } from "./playerWeaponDamage.mjs";
-import { updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
+import { deleteAllMapWeaponsTotals, updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
 
 export const VALID_OBJECT_TYPES = {
         "gametypes": "gametype_id",
@@ -692,10 +692,7 @@ async function deleteSeasonObjectStats(seasonId){
     }
 }
 
-async function deleteSeasonMapWeaponTotals(seasonId){
 
-    return await simpleQuery(`DELETE FROM nstats_map_weapon_totals WHERE season_id=?`, [seasonId]);
-}
 
 async function replaceMatchesSeasonId(find, replace){
 
@@ -713,7 +710,7 @@ export async function deleteSeason(seasonId){
     await deleteAllPlayerSeasonData(seasonId);
     await deleteSeasonUniqueMatchCombinations(seasonId);
     await deleteSeasonObjectStats(seasonId);
-    await deleteSeasonMapWeaponTotals(seasonId);
+    await deleteAllMapWeaponsTotals(seasonId);
     await replaceMatchesSeasonId(seasonId, 0);
 
     await simpleQuery(`DELETE FROM nstats_seasons WHERE id=?`, [seasonId]);
@@ -736,10 +733,10 @@ async function recalculateSeasonPlayerTotals(seasonId){
     X nstats_player_totals_weapons
     X nstats_player_totals_ctf
     - nstats_rankings
-    - nstats_map_weapon_totals
+    X nstats_map_weapon_totals
     - nstats_map_rankings
     - nstats_player_ctf_league
-    - nstats_totals_player_weapon_damage
+    X nstats_totals_player_weapon_damage
     X nstats_seasons_servers
     X nstats_seasons_gametypes
     X nstats_seasons_maps
@@ -756,7 +753,7 @@ export async function recalculateSeason(seasonId){
     await deleteAllPlayerSeasonData(seasonId);
     await deleteSeasonUniqueMatchCombinations(seasonId);
     await deleteSeasonObjectStats(seasonId);
-    await deleteSeasonMapWeaponTotals(seasonId);
+    await deleteAllMapWeaponsTotals(seasonId);
 
 
     await recalculateSeasonPlayerTotals(seasonId);

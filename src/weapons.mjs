@@ -528,6 +528,14 @@ export async function setMatchMapGametypeIds(data){
     await Promise.all(queries);
 }
 
+export async function deleteAllMapWeaponsTotals(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+    const query = `DELETE FROM nstats_map_weapon_totals WHERE season_id=?`;
+
+    return await simpleQuery(query, [seasonId]);
+}
 
 async function bulkInsertMapWeaponTotals(seasonId, totals){
 

@@ -20,11 +20,11 @@
   "license": "ISC",
   "dependencies": {
     "archiver": "^8.0.0",
-    "basic-ftp": "^6.2.1",
+    "basic-ftp": "^6.2.2",
     "body-parser": "^2.3.0",
     "canvas": "^3.2.3",
     "cookie-parser": "^1.4.7",
-    "ejs": "^6.0.1",
+    "ejs": "^7.0.1",
     "encoding-japanese": "^2.4.0",
     "express": "^5.2.1",
     "geoip-lite": "^2.0.3",
@@ -32,7 +32,7 @@
     "js-sha256": "^1.0.0",
     "md5": "^2.3.0",
     "multer": "^2.4.0",
-    "mysql2": "^3.24.4",
+    "mysql2": "^3.24.5",
     "ssh2-sftp-client": "^12.1.1",
     "unzipper": "^0.12.5"
   }
