@@ -1,4 +1,5 @@
 import { ctfRecalculatePlayerTotals } from "./ctf.mjs";
+import { ctfLeagueRecalculateSeason, refreshAllTables } from "./ctfLeague.mjs";
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { getMapImageName, sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
@@ -733,9 +734,9 @@ async function recalculateSeasonPlayerTotals(seasonId){
     X nstats_player_totals_max
     X nstats_player_totals_weapons
     X nstats_player_totals_ctf
-    - nstats_rankings
+    X nstats_rankings
     X nstats_map_weapon_totals
-    - nstats_map_rankings
+    X nstats_map_rankings
     - nstats_player_ctf_league
     X nstats_totals_player_weapon_damage
     X nstats_seasons_servers
@@ -762,6 +763,7 @@ export async function recalculateSeason(seasonId){
 
 
     await recalculateSeasonPlayerTotals(seasonId);
+    await ctfLeagueRecalculateSeason(seasonId),
     await recalculateSeasonRankings(seasonId);
     
 }
