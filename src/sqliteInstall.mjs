@@ -253,6 +253,8 @@ export function createTableQueries(){
                 season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
 
+            `CREATE INDEX IF NOT EXISTS idx_matches_season_date ON nstats_matches(season_id,date)`,
+
             `CREATE TABLE IF NOT EXISTS nstats_matches_dom (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 match_id INTEGER NOT NULL,
