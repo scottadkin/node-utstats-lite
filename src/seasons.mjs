@@ -4,6 +4,7 @@ import { getMapImageName, sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
 import { calculateSeasonPlayerTotals } from "./players.mjs";
 import { playerWeaponDamageRecalculateSeasonTotals } from "./playerWeaponDamage.mjs";
+import { recalculateSeasonRankings } from "./rankings.mjs";
 import { deleteAllMapWeaponsTotals, updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
 
 export const VALID_OBJECT_TYPES = {
@@ -750,12 +751,17 @@ export async function recalculateSeason(seasonId){
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
     if(seasonId === 0) throw new Error(`You can not delete season 0.`);
 
-    await deleteAllPlayerSeasonData(seasonId);
+
     await deleteSeasonUniqueMatchCombinations(seasonId);
     await deleteSeasonObjectStats(seasonId);
+    await calculateSeasonStats(seasonId);
+
+    await deleteAllPlayerSeasonData(seasonId);
+    
     await deleteAllMapWeaponsTotals(seasonId);
 
 
     await recalculateSeasonPlayerTotals(seasonId);
-    await calculateSeasonStats(seasonId);
+    await recalculateSeasonRankings(seasonId);
+    
 }

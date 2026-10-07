@@ -496,6 +496,41 @@ async function deleteAllMapSeasonRankings(seasonId){
 }
 
 
+export async function recalculateSeasonRankings(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+
+    await Promise.all([
+        deleteAllPlayerSeasonRankings(seasonId),
+        deleteAllMapSeasonRankings(seasonId)
+    ]);
+
+    const [gametypeIds, mapIds] = await Promise.all([
+        seasonGetAllGametypeIds(seasonId), 
+        seasonGetAllMapIds(seasonId)
+    ]);
+
+
+    const seasonPromises = [];
+
+    for(let i = 0; i < gametypeIds.length; i++){
+
+        const gId = gametypeIds[i];
+
+        seasonPromises.push(recalculateGametype(seasonId, gId));
+    }
+
+    for(let i = 0; i < mapIds.length; i++){
+
+        const mId = mapIds[i];
+        seasonPromises.push(recalculateMap(seasonId, mId));
+    }
+
+
+    return await Promise.all(seasonPromises);
+}
+
 
 export async function recalculateAllRankings(){
 
@@ -548,39 +583,6 @@ export async function recalculateAllRankings(){
 
     return `Recalculated ${seasonIds.length} season rankings, ${totalGametypesRecalculated} gametypes, and ${totalMapsRecalculated} map rankings`;
 
-    //const gametypeIds = await seasonGetAllGametypeIds()
-
-    //should probably limit max amount of promises at a time pug communities 
-    // should be ok with limited amount of gametype and maps
-    const gametypeIds = await getAllGametypeIds();
-
-    const gametypePromises = [];
-
-    for(let i = 0; i < gametypeIds.length; i++){
-
-        gametypePromises.push(recalculateGametype(gametypeIds[i]));
-    }
-
-    await deleteAllPlayerRankings();
-
-    await Promise.all(gametypePromises);
-
-    await deleteAllMapRankings();
-
-    const mapIds = await getAllMapIds();
-
-    const mapPromises = [];
-
-    for(let i = 0; i < mapIds.length; i++){
-
-        const m = mapIds[i];
-
-        mapPromises.push(recalculateMap(m));
-    }
-
-    await Promise.all(mapPromises);
-
-    return `Recalculated ${gametypeIds.length} gametype rankings, and ${mapIds.length} map rankings`;
 }
 
 export async function recalculateGametype(seasonId, id){
