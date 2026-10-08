@@ -90,6 +90,8 @@ async function updateCTFLeague(m, ctfLeagueSettings){
 
     const types = ["maps", "gametypes"];
 
+    const start = performance.now();
+
     for(let i = 0; i < types.length; i++){
 
         const t = types[i];
@@ -146,6 +148,9 @@ async function updateCTFLeague(m, ctfLeagueSettings){
         }
         
     } 
+    const end = performance.now();
+
+    console.log(`ctfLeague took ${(end - start) * 0.001}`);
 }
 
 async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, 

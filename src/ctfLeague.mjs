@@ -1179,7 +1179,8 @@ async function bulkInsertSeasonTable(seasonId, gametypeId, mapId, data){
     await bulkInsert(query, insertVars);
 }
 
-async function recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, startDate, endDate){
+
+async function calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, startDate, endDate){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`SeasonId must be valid integer`);
@@ -1206,7 +1207,84 @@ async function recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, s
         where += ` AND nstats_matches.map_id=?`;
     }
 
-    const query = `SELECT 
+    const test = `WITH RankedMatches AS (
+        SELECT nstats_match_players.player_id,
+        nstats_match_players.match_result,
+        nstats_match_players.time_on_server,
+        nstats_match_players.team,
+        nstats_matches.team_0_score,
+        nstats_matches.team_1_score,
+        nstats_matches.date,
+        ROW_NUMBER() OVER (
+            PARTITION BY nstats_match_players.player_id
+            ORDER BY nstats_matches.date DESC
+        ) AS rn
+        FROM nstats_match_players
+        INNER JOIN nstats_matches ON nstats_matches.id = nstats_match_players.match_id
+        WHERE nstats_matches.season_id=? AND nstats_match_players.spectator=0 AND nstats_match_players.time_on_server>0
+        AND nstats_matches.date >= ?
+        AND nstats_matches.date <= ?
+    )
+    SELECT player_id,MIN(date) as first_match, MAX(date) as last_match, SUM(time_on_server) as total_playtime,
+    COUNT(*) as total_matches,
+    SUM(CASE
+        WHEN match_result = 'w'
+        THEN 1
+        ELSE 0
+    END
+    ) as wins,
+     SUM(CASE
+        WHEN match_result = 'd'
+        THEN 1
+        ELSE 0
+    END
+    ) as draws,
+     SUM(CASE
+        WHEN match_result = 'l'
+        THEN 1
+        ELSE 0
+    END
+    ) as losses,
+     SUM(CASE
+        WHEN match_result = 'w'
+        THEN 3
+        WHEN match_result = 'd'
+        THEN 1
+        WHEN match_result = 'l'
+        THEN 0
+        ELSE 0
+        END
+     ) as points,
+    SUM(CASE 
+        WHEN team = 0
+        THEN team_0_score - team_1_score
+        WHEN team = 1
+        THEN team_1_score - team_0_score
+        ELSE 0
+    END) AS cap_offset,
+    SUM(CASE 
+        WHEN team = 0
+        THEN team_1_score
+        WHEN team = 1
+        THEN team_0_score
+        ELSE 0
+    END) AS cap_against,
+    SUM(CASE 
+        WHEN team = 0
+        THEN team_0_score
+        WHEN team = 1
+        THEN team_1_score
+        ELSE 0
+    END) AS cap_for
+     
+    FROM RankedMatches WHERE rn <=? GROUP BY player_id ORDER BY last_match DESC
+    `;
+
+    return await simpleQuery(test, [seasonId, startDate, endDate, maxMatches]);
+
+
+
+    /*const query = `SELECT 
     nstats_match_players.player_id,
     ${playersColumns}
     MIN(nstats_matches.date) AS first_match,
@@ -1265,12 +1343,17 @@ async function recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, s
     INNER JOIN nstats_matches ON nstats_matches.id=nstats_match_players.match_id
     WHERE nstats_matches.season_id=? AND spectator=0 AND time_on_server>0 
     AND nstats_matches.date>=? AND nstats_matches.date<=? ${where}
-     GROUP BY player_id
+     GROUP BY player_id ORDER BY nstats_matches.date DESC
     `;
 
-    const result = await simpleQuery(query, vars);
+    return await simpleQuery(query, vars);*/
+}
+
+async function recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, startDate, endDate){
+
+    //TODO NEED TO ADD MAX_MATCHES
     
-   
+    const result = await calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, startDate, endDate);
 
     await deleteSeasonTable(seasonId, gametypeId, mapId);
 
