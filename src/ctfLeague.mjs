@@ -1085,26 +1085,124 @@ async function testGetPlayerHistory(seasonId, gametypeId, mapId, maxMatches, sta
     console.log(gametypeId, mapId);
 }
 
+/** GET match result with cap offset,against for
+const query = `SELECT 
+    nstats_match_players.player_id,
+    nstats_match_players.match_id,
+    nstats_match_players.match_result,
+    CASE 
+        WHEN nstats_match_players.team = 0
+        THEN nstats_matches.team_0_score - nstats_matches.team_1_score
+        WHEN nstats_match_players.team = 1
+        THEN nstats_matches.team_1_score - nstats_matches.team_0_score
+        ELSE 0
+    END AS cap_offset,
+    CASE 
+        WHEN nstats_match_players.team = 0
+        THEN nstats_matches.team_1_score
+        WHEN nstats_match_players.team = 1
+        THEN nstats_matches.team_0_score
+        ELSE 0
+    END AS cap_against,
+    CASE 
+        WHEN nstats_match_players.team = 0
+        THEN nstats_matches.team_0_score
+        WHEN nstats_match_players.team = 1
+        THEN nstats_matches.team_1_score
+        ELSE 0
+    END AS cap_for,
+    nstats_matches.team_0_score,
+    nstats_matches.team_1_score,
+    match_date FROM nstats_match_players 
+    INNER JOIN nstats_matches ON nstats_matches.id=nstats_match_players.match_id
+    WHERE nstats_matches.season_id=? AND spectator=0 AND nstats_matches.date>=? AND nstats_matches.date<=?
+    `;
+ */
 
 async function recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, startDate, endDate){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`SeasonId must be valid integer`);
 
-    //const query = `SELECT player_id,match_id,match_result,team FROM nstats_match_players WHERE spectator=0 AND match_id IN(SELECT id FROM nstats_matches WHERE season_id=? AND date>=? AND date<=?)`;
-    /*const query = `SELECT player_id,match_id,match_result,team,match_date FROM nstats_match_players 
-    INNER JOIN nstats_matches ON nstats_matches.id=nstats_match_players.match_id
-    WHERE nstats_matches.season_id=? AND spectator=0 AND nstats_matches.date>=? AND nstats_matches.date<=?
-    `;*/
+ 
+    mapId = parseInt(mapId);
+    gametypeId = parseInt(gametypeId);
 
-    const query = `SELECT player_id,match_id,match_result,team,match_date FROM nstats_match_players 
+    if(mapId !== mapId || gametypeId !== gametypeId) throw new Error(`map and gametype id must be valid integer`);
+
+    const vars = [seasonId, startDate, endDate];
+
+    let playersColumns = ``;
+
+    if(gametypeId !== 0){
+        playersColumns += `nstats_match_players.gametype_id,`;
+    }
+    if(mapId !== 0){
+        playersColumns += `nstats_match_players.map_id,`;
+    }
+
+    const query = `SELECT 
+    nstats_match_players.player_id,
+    ${playersColumns}
+    MIN(nstats_matches.date) AS first_match,
+    MAX(nstats_matches.date) AS last_match,
+    COUNT(*) as total_matches,
+    SUM(CASE
+        WHEN nstats_match_players.match_result = 'w'
+        THEN 1
+        ELSE 0
+    END
+    ) as wins,
+     SUM(CASE
+        WHEN nstats_match_players.match_result = 'd'
+        THEN 1
+        ELSE 0
+    END
+    ) as draws,
+     SUM(CASE
+        WHEN nstats_match_players.match_result = 'l'
+        THEN 1
+        ELSE 0
+    END
+    ) as losses,
+     SUM(CASE
+        WHEN nstats_match_players.match_result = 'w'
+        THEN 3
+        WHEN nstats_match_players.match_result = 'd'
+        THEN 1
+        WHEN nstats_match_players.match_result = 'l'
+        THEN 0
+        ELSE 0
+        END
+     ) as points,
+    SUM(CASE 
+        WHEN nstats_match_players.team = 0
+        THEN nstats_matches.team_0_score - nstats_matches.team_1_score
+        WHEN nstats_match_players.team = 1
+        THEN nstats_matches.team_1_score - nstats_matches.team_0_score
+        ELSE 0
+    END) AS cap_offset,
+    SUM(CASE 
+        WHEN nstats_match_players.team = 0
+        THEN nstats_matches.team_1_score
+        WHEN nstats_match_players.team = 1
+        THEN nstats_matches.team_0_score
+        ELSE 0
+    END) AS cap_against,
+    SUM(CASE 
+        WHEN nstats_match_players.team = 0
+        THEN nstats_matches.team_0_score
+        WHEN nstats_match_players.team = 1
+        THEN nstats_matches.team_1_score
+        ELSE 0
+    END) AS cap_for FROM nstats_match_players 
     INNER JOIN nstats_matches ON nstats_matches.id=nstats_match_players.match_id
-    WHERE nstats_matches.season_id=? AND spectator=0 AND nstats_matches.date>=? AND nstats_matches.date<=?
+    WHERE nstats_matches.season_id=? AND spectator=0 AND nstats_matches.date>=? AND nstats_matches.date<=? GROUP BY player_id, nstats_match_players.gametype_id
     `;
 
     console.log(startDate, endDate);
     const start = performance.now();
-    const result = await simpleQuery(query, [seasonId, startDate, endDate]);
+    const result = await simpleQuery(query, vars);
     const end = performance.now();
     console.log((end - start) * 0.001);
     console.log("result");
