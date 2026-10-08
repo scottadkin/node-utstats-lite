@@ -213,7 +213,7 @@ export async function calcPlayersMapResults(seasonId, mapId, gametypeId, maxMatc
     const ctfGametypes = await getCTFGametypesInSeason(seasonId);
 
 
-    const history = await getPlayerHistory(seasonId, mapId, gametypeId, maxDays, ctfGametypes);
+    /*const history = await getPlayerHistory(seasonId, mapId, gametypeId, maxDays, ctfGametypes);
 
     const matchResults = await getMatchesTeamResults(history.matchIds);
 
@@ -252,7 +252,7 @@ export async function calcPlayersMapResults(seasonId, mapId, gametypeId, maxMatc
         }  
     }
 
-    await bulkInsertEntries(seasonId, mapId, gametypeId, table);
+    await bulkInsertEntries(seasonId, mapId, gametypeId, table);*/
 }
 
 
@@ -995,129 +995,8 @@ async function ctfLeagueGetUniqueCombosBetweenDates(seasonId, startDate, endDate
     const result = await simpleQuery(query, [seasonId, ctfGametypes, startDate, endDate]);
 
     return result.map((r) => { return r.map_id});
-    /*
-     const start = performance.now();
-    const query =  `SELECT DISTINCT gametype_id as target_id,'gametype' as type 
-    FROM nstats_match_ctf 
-    WHERE EXISTS(SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_ctf.match_id AND nstats_matches.season_id=? AND nstats_matches.date>=? AND nstats_matches.date<=?)
-    UNION ALL
-    SELECT DISTINCT map_id as target_id,'map' as type 
-    FROM nstats_match_ctf 
-    WHERE EXISTS(SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_ctf.match_id AND nstats_matches.season_id=? AND nstats_matches.date>=? AND nstats_matches.date<=?)
-    `;
-
-    const result = await simpleQuery(query, [seasonId, startDate, endDate, seasonId, startDate, endDate]);
     
-    const end = performance.now();
-    console.log(result);
-    console.log((end - start) * 0.001);
-    process.exit();
-    */
-
-    /*const query = `SELECT DISTINCT gametype_id,map_id 
-    FROM nstats_matches WHERE season_id=? AND date>=? AND date<=? 
-    AND EXISTS(
-        SELECT 1 FROM nstats_match_ctf WHERE nstats_match_ctf.match_id = nstats_matches.id
-    )`;
-
-    const result = await simpleQuery(query, [seasonId, startDate, endDate]);
-
-    const gametypeIds = new Set();
-    const mapIds = new Set();
-    for(let i = 0; i < result.length; i++){
-
-        gametypeIds.add(result[0].gametype_id);
-        mapIds.add(result[0].map_id);
-        
-    }
-
-    return {"gametypeIds": [...gametypeIds], "mapIds": [...mapIds]}*/
-
 }
-
-async function testGetPlayerHistory(seasonId, gametypeId, mapId, maxMatches, startDate, endDate){
-
-    gametypeId = parseInt(gametypeId);
-    mapId = parseInt(mapId);
-
-    if(gametypeId !== gametypeId || mapId !== mapId) throw new Error(`Both gametypeID and mapId must be valid integers`);
-
-
-    let where = ``;
-    const vars = [startDate, endDate, seasonId];
-
-    if(gametypeId !== 0){
-       // nstats_match_players.gametype_id=? AND nstats_match_players.map_id=? AND
-       where += `nstats_match_players.gametype_id=? AND `;
-       vars.unshift(gametypeId);
-    }
-
-    if(mapId !== 0){
-        where += `nstats_match_players.map_id=? AND `;
-        vars.unshift(mapId);
-    }
-
-
-
-    /*const query = `SELECT 
-    nstats_match_players.match_id,
-    nstats_match_players.player_id,
-    nstats_match_players.match_result 
-    FROM nstats_match_players
-    WHERE ${where} nstats_match_players.spectator=0 AND nstats_match_players.match_date>=? AND nstats_match_players.match_date<=?
-    AND EXISTS(SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?)`;*/
-
-    const query = `SELECT 
-    nstats_match_players.match_id,
-    nstats_match_players.player_id,
-    nstats_match_players.match_result 
-    FROM nstats_match_players
-    WHERE ${where} nstats_match_players.spectator=0 AND nstats_match_players.match_date>=? AND nstats_match_players.match_date<=?
-    AND EXISTS(SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?)`;
-
-    const start = performance.now();
-    const result = await simpleQuery(query, vars);
-    const end = performance.now();
-
-    console.log((end - start) * 0.001);
-
-    console.log(result);
-    console.log(gametypeId, mapId);
-}
-
-/** GET match result with cap offset,against for
-const query = `SELECT 
-    nstats_match_players.player_id,
-    nstats_match_players.match_id,
-    nstats_match_players.match_result,
-    CASE 
-        WHEN nstats_match_players.team = 0
-        THEN nstats_matches.team_0_score - nstats_matches.team_1_score
-        WHEN nstats_match_players.team = 1
-        THEN nstats_matches.team_1_score - nstats_matches.team_0_score
-        ELSE 0
-    END AS cap_offset,
-    CASE 
-        WHEN nstats_match_players.team = 0
-        THEN nstats_matches.team_1_score
-        WHEN nstats_match_players.team = 1
-        THEN nstats_matches.team_0_score
-        ELSE 0
-    END AS cap_against,
-    CASE 
-        WHEN nstats_match_players.team = 0
-        THEN nstats_matches.team_0_score
-        WHEN nstats_match_players.team = 1
-        THEN nstats_matches.team_1_score
-        ELSE 0
-    END AS cap_for,
-    nstats_matches.team_0_score,
-    nstats_matches.team_1_score,
-    match_date FROM nstats_match_players 
-    INNER JOIN nstats_matches ON nstats_matches.id=nstats_match_players.match_id
-    WHERE nstats_matches.season_id=? AND spectator=0 AND nstats_matches.date>=? AND nstats_matches.date<=?
-    `;
- */
 
 async function deleteSeasonTable(seasonId, gametypeId, mapId){
 
@@ -1136,12 +1015,10 @@ async function deleteSeasonTable(seasonId, gametypeId, mapId){
  */
 async function bulkInsertSeasonTable(seasonId, gametypeId, mapId, data){
 
+    console.log(`bulkInsert with seasonId ${seasonId} ${data.length}`);
     if(data.length === 0) return;
-    const query = `INSERT INTO nstats_player_ctf_league (
-        player_id, gametype_id, map_id, first_match, last_match, 
-        playtime, total_matches, wins, draws, losses, winrate, 
-        cap_for, cap_against, cap_offset, points, season_id
-    ) VALUES ?`;
+
+
 
     const insertVars = [];
 
@@ -1176,36 +1053,59 @@ async function bulkInsertSeasonTable(seasonId, gametypeId, mapId, data){
         ]);
     }
 
-    await bulkInsert(query, insertVars);
+    const columns = [
+        "player_id", "gametype_id", "map_id", "first_match", "last_match",
+        "playtime", "total_matches", "wins", "draws", "losses", "winrate", "cap_for",
+        "cap_against", "cap_offset", "points", "season_id"
+    ];
+
+    const conflict = ["player_id","season_id","gametype_id","map_id"];
+
+    
+
+    await sqlInsertOnDuplicateUpdate("nstats_player_ctf_league", columns, insertVars, conflict);
+    //await bulkInsert(query, insertVars);
 }
 
 
-async function calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, startDate, endDate){
+export async function calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, startDate, endDate){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`SeasonId must be valid integer`);
-
  
     mapId = parseInt(mapId);
     gametypeId = parseInt(gametypeId);
 
     if(mapId !== mapId || gametypeId !== gametypeId) throw new Error(`map and gametype id must be valid integer`);
 
-    const vars = [seasonId, startDate, endDate];
-    let where = ``;
+    const vars = [startDate, endDate];
+
+    let cteWhere = ``;
 
     let playersColumns = ``;
+
+    if(seasonId !== 0){
+        vars.unshift(seasonId);
+        cteWhere += `nstats_matches.season_id=?`;
+    }
 
     if(gametypeId !== 0){
         playersColumns += `nstats_match_players.gametype_id,`;
         vars.push(gametypeId);
-        where += ` AND nstats_matches.gametype_id=?`;
+        if(cteWhere !== "") cteWhere += ` AND `;
+        cteWhere += `nstats_match_players.gametype_id=?`;
     }
     if(mapId !== 0){
         playersColumns += `nstats_match_players.map_id,`;
         vars.push(mapId);
-        where += ` AND nstats_matches.map_id=?`;
+        if(cteWhere !== "") cteWhere += ` AND `;
+        cteWhere += ` nstats_match_players.map_id=?`;
     }
+
+    if(cteWhere !== "") cteWhere += ` AND `;
+
+    vars.push(maxMatches);
+
 
     const test = `WITH RankedMatches AS (
         SELECT nstats_match_players.player_id,
@@ -1221,7 +1121,7 @@ async function calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, startDat
         ) AS rn
         FROM nstats_match_players
         INNER JOIN nstats_matches ON nstats_matches.id = nstats_match_players.match_id
-        WHERE nstats_matches.season_id=? AND nstats_match_players.spectator=0 AND nstats_match_players.time_on_server>0
+        WHERE ${cteWhere} nstats_match_players.spectator=0 AND nstats_match_players.time_on_server>0
         AND nstats_matches.date >= ?
         AND nstats_matches.date <= ?
     )
@@ -1280,78 +1180,12 @@ async function calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, startDat
     FROM RankedMatches WHERE rn <=? GROUP BY player_id ORDER BY last_match DESC
     `;
 
-    return await simpleQuery(test, [seasonId, startDate, endDate, maxMatches]);
 
+    return await simpleQuery(test, vars);
 
-
-    /*const query = `SELECT 
-    nstats_match_players.player_id,
-    ${playersColumns}
-    MIN(nstats_matches.date) AS first_match,
-    MAX(nstats_matches.date) AS last_match,
-    COUNT(*) as total_matches,
-    SUM(time_on_server) as total_playtime,
-    SUM(CASE
-        WHEN nstats_match_players.match_result = 'w'
-        THEN 1
-        ELSE 0
-    END
-    ) as wins,
-     SUM(CASE
-        WHEN nstats_match_players.match_result = 'd'
-        THEN 1
-        ELSE 0
-    END
-    ) as draws,
-     SUM(CASE
-        WHEN nstats_match_players.match_result = 'l'
-        THEN 1
-        ELSE 0
-    END
-    ) as losses,
-     SUM(CASE
-        WHEN nstats_match_players.match_result = 'w'
-        THEN 3
-        WHEN nstats_match_players.match_result = 'd'
-        THEN 1
-        WHEN nstats_match_players.match_result = 'l'
-        THEN 0
-        ELSE 0
-        END
-     ) as points,
-    SUM(CASE 
-        WHEN nstats_match_players.team = 0
-        THEN nstats_matches.team_0_score - nstats_matches.team_1_score
-        WHEN nstats_match_players.team = 1
-        THEN nstats_matches.team_1_score - nstats_matches.team_0_score
-        ELSE 0
-    END) AS cap_offset,
-    SUM(CASE 
-        WHEN nstats_match_players.team = 0
-        THEN nstats_matches.team_1_score
-        WHEN nstats_match_players.team = 1
-        THEN nstats_matches.team_0_score
-        ELSE 0
-    END) AS cap_against,
-    SUM(CASE 
-        WHEN nstats_match_players.team = 0
-        THEN nstats_matches.team_0_score
-        WHEN nstats_match_players.team = 1
-        THEN nstats_matches.team_1_score
-        ELSE 0
-    END) AS cap_for FROM nstats_match_players 
-    INNER JOIN nstats_matches ON nstats_matches.id=nstats_match_players.match_id
-    WHERE nstats_matches.season_id=? AND spectator=0 AND time_on_server>0 
-    AND nstats_matches.date>=? AND nstats_matches.date<=? ${where}
-     GROUP BY player_id ORDER BY nstats_matches.date DESC
-    `;
-
-    return await simpleQuery(query, vars);*/
 }
 
 async function recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, startDate, endDate){
-
-    //TODO NEED TO ADD MAX_MATCHES
     
     const result = await calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, startDate, endDate);
 
@@ -1359,6 +1193,16 @@ async function recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, s
 
     await bulkInsertSeasonTable(seasonId, gametypeId, mapId, result);
 
+}
+
+export async function ctfLeagueUpdateSeasonTable(seasonId, mapId, gametypeId, maxMatches, startDate, endDate){
+
+    console.log(`update`,seasonId, gametypeId, mapId);
+
+    const result = await calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, startDate, endDate);
+    console.log(result.length,`update`,seasonId, gametypeId, mapId);
+
+    await bulkInsertSeasonTable(seasonId, gametypeId, mapId, result);
 }
 
 

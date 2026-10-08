@@ -8,8 +8,8 @@ import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
 import { bLogAlreadyImported } from "./src/importer.mjs";
-import { calcPlayersMapResults as leagueCalcPlayerMapResults, getLeagueCategorySettings, getMultipleLeagueCategorySettings, refreshAllTables } from "./src/ctfLeague.mjs";
-import { setInt } from "./src/generic.mjs";
+import { ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables } from "./src/ctfLeague.mjs";
+import { DAY, setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID } from "./src/players.mjs";
 import { getAllSeasonIds } from "./src/seasons.mjs";
@@ -92,6 +92,10 @@ async function updateCTFLeague(m, ctfLeagueSettings){
 
     const start = performance.now();
 
+    const seasonEndDate = (m.seasonId !== 0) ? new Date(m.seasonInfo.end_date) : new Date(Date.now());
+        
+    const seasonStartDate = (m.seasonId !== 0) ? new Date(m.seasonInfo.start_date) : new Date(1);
+
     for(let i = 0; i < types.length; i++){
 
         const t = types[i];
@@ -103,49 +107,56 @@ async function updateCTFLeague(m, ctfLeagueSettings){
             continue;
         }
 
-
         const bEnabledMapCTF = settings["Enable League"]?.value ?? "false";
         const maxMatches = setInt(settings["Maximum Matches Per Player"]?.value, 5);
         const maxDays = setInt(settings["Maximum Match Age In Days"]?.value, 180);
 
+        let cutOffDate = seasonStartDate;
 
-        if(bEnabledMapCTF === "true"){
-
-
-            //we only want to do all time once
-            if(i === 0){
-                
-                const allTimePromises = [leagueCalcPlayerMapResults(0, 0, 0, maxMatches, maxDays)];
-                //season all time
-                if(m.seasonId !== 0) allTimePromises.push(leagueCalcPlayerMapResults(m.seasonId, 0, 0, maxMatches, maxDays));
-              
-                await Promise.all(allTimePromises);
-
-            }
-
-            const gametypeMapPromises = [
-                //map gametype
-                leagueCalcPlayerMapResults(0, (t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays),
-                //map all time
-                leagueCalcPlayerMapResults(0, (t === "maps") ? m.map.id: 0, 0, maxMatches, maxDays)
-            ];
-
-            //if seasons are enabled
-            if(m.seasonId !== 0){
-
-                gametypeMapPromises.push(
-                    //season map gametype
-                    leagueCalcPlayerMapResults(m.seasonId, (t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, maxDays),
-                    //season map all time
-                    leagueCalcPlayerMapResults(m.seasonId, (t === "maps") ? m.map.id: 0, 0, maxMatches, maxDays)
-                );
-            }
-            
-            await Promise.all(gametypeMapPromises);
-
-        }else{
-            new Message(`CTF ${t.toUpperCase()} league is disabled, skipping.`,"note");
+        if(maxDays > 0){
+            cutOffDate = new Date(seasonEndDate - DAY * maxDays);
         }
+
+        if(bEnabledMapCTF !== "true"){
+       
+            new Message(`CTF ${t.toUpperCase()} league is disabled, skipping.`,"note");
+        
+            continue;
+        }
+
+        //we only want to do all time once
+        if(i === 0){
+
+
+            const allTimePromises = [ctfLeagueUpdateSeasonTable(0, 0, 0, maxMatches, cutOffDate, seasonEndDate)];
+            //season all time
+            if(m.seasonId !== 0) allTimePromises.push(ctfLeagueUpdateSeasonTable(m.seasonId, 0, 0, maxMatches, cutOffDate, seasonEndDate));
+            
+            await Promise.all(allTimePromises);
+
+        }
+
+        const gametypeMapPromises = [
+            //map gametype
+            ctfLeagueUpdateSeasonTable(0, (t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, cutOffDate, seasonEndDate),
+                //map all time
+            ctfLeagueUpdateSeasonTable(0, (t === "maps") ? m.map.id: 0, 0, maxMatches, cutOffDate, seasonEndDate),
+        ];
+
+        //if seasons are enabled
+        if(m.seasonId !== 0){
+
+            gametypeMapPromises.push(
+                //season map gametype
+                ctfLeagueUpdateSeasonTable(m.seasonId, (t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, cutOffDate, seasonEndDate),
+                //season map all time
+                ctfLeagueUpdateSeasonTable(m.seasonId, (t === "maps") ? m.map.id: 0, 0, maxMatches, cutOffDate, seasonEndDate),
+            );
+        }
+        
+        await Promise.all(gametypeMapPromises);
+
+        
         
     } 
     const end = performance.now();
@@ -201,6 +212,7 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
         if(m.ctf.bMatchCTF){
             new Message(`Updating CTF League`,"note");
             await updateCTFLeague(m, ctfLeagueSettings);
+           // process.exit();
         }
 
         await InsertLogHistory(file, m.matchId);

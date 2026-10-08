@@ -185,6 +185,7 @@ export class MatchParser{
 
         const seasonId = seasonInfo?.id ?? 0;
         this.seasonId = seasonId;
+        this.seasonInfo = seasonInfo;
 
 
         this.matchId = await createMatch(
