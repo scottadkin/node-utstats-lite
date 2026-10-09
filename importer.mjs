@@ -8,7 +8,7 @@ import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
 import { bLogAlreadyImported } from "./src/importer.mjs";
-import { ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables } from "./src/ctfLeague.mjs";
+import { ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
 import { DAY, setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID } from "./src/players.mjs";
@@ -509,33 +509,29 @@ async function main(ctfLeagueSettings){
 async function startImport(){
 
 
-    const {maps, gametypes, combined} = await getMultipleLeagueCategorySettings(["maps", "gametypes", "combined"]);
-
-    const ctfLeagueSettings = {maps, gametypes, combined};
+    const ctfLeagueSettings = await getMultipleLeagueCategorySettings(["maps", "gametypes", "combined"]);
 
     await main(ctfLeagueSettings);
 
     const seasonIds = await getAllSeasonIds(false);
 
+    
+
+
     for(let i = 0; i < seasonIds.length; i++){
 
         const seasonId = seasonIds[i];
 
-        if(ctfLeagueSettings.maps["Update Whole League End Of Import"].value === "true"){
+        await refreshAllTables(seasonId, ctfLeagueSettings);
 
-            await refreshAllTables(seasonId, "maps");
-        }
-
-        if(ctfLeagueSettings.gametypes["Update Whole League End Of Import"].value === "true"){
-
-            await refreshAllTables(seasonId, "gametypes");
-        }
-
-        if(ctfLeagueSettings.combined["Update Whole League End Of Import"].value === "true"){
-
-            await refreshAllTables(seasonId, "combined");
-        }
     }
+
+    const newData = {};
+    
+    newData["combined"] = {"Last Whole League Refresh": {"value": new Date(Date.now()).toISOString(), "category": "combined"}};
+    newData["gametypes"] = {"Last Whole League Refresh": {"value": new Date(Date.now()).toISOString(), "category": "gametypes"}};
+    newData["maps"] = {"Last Whole League Refresh": {"value": new Date(Date.now()).toISOString(), "category": "maps"}};
+    await updateSettings(newData);
 }
 
 

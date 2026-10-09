@@ -591,7 +591,7 @@ export async function getBasicMatchesInfo(matchIds){
 
     if(matchIds.length === 0) return {};
 
-    const query = `SELECT id,server_id,gametype_id,map_id FROM nstats_matches WHERE id IN(?)`;
+    const query = `SELECT id,server_id,gametype_id,map_id,season_id FROM nstats_matches WHERE id IN(?)`;
 
     const result = await simpleQuery(query, [matchIds]);
 
@@ -1673,6 +1673,11 @@ export async function deleteMatch(id){
     const basicInfo = await getBasicMatchesInfo([id]);
     const playerIds = await getPlayerIdsInMatch(id);
 
+    console.log(basicInfo);
+    const basic = basicInfo[id];
+    await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
+    process.exit();
+
     await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
@@ -1689,7 +1694,7 @@ export async function deleteMatch(id){
 
         
         if(ctfRowsDeleted > 0){
-            await deleteMatchCTFLeague(basic.map_id, basic.gametype_id);
+            await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
         }
 
         await gametypeUpdateBasicTotals(basic.gametype_id); 
