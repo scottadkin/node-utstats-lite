@@ -514,13 +514,37 @@ async function startImport(){
     await main(ctfLeagueSettings);
 
     const seasonIds = await getAllSeasonIds(false);
-
     
+    const combinedLastRefresh = new Date(ctfLeagueSettings.combined["Last Whole League Refresh"].value);
+    const gametypeLastRefresh = new Date(ctfLeagueSettings.gametypes["Last Whole League Refresh"].value);
+    const mapLastRefresh = new Date(ctfLeagueSettings.maps["Last Whole League Refresh"].value);
 
+
+    const refreshMinDate = new Date(Date.now() - DAY);
+
+    const compareDates = [combinedLastRefresh, gametypeLastRefresh, mapLastRefresh];
+
+    let bRefreshTables = false;
+
+    for(let i = 0; i < compareDates.length; i++){
+
+        if(compareDates[i] <= refreshMinDate){
+            bRefreshTables = true;
+            break;
+        }
+    }
+
+    if(!bRefreshTables){
+
+        new Message(`Less than 24hours since full ctf league refresh, skipping full refresh.`, "note");
+        return;
+    }
 
     for(let i = 0; i < seasonIds.length; i++){
 
         const seasonId = seasonIds[i];
+
+        new Message(`Refreshing CTFLeague tables for season ${seasonId}`,"note");
 
         await refreshAllTables(seasonId, ctfLeagueSettings);
 

@@ -369,16 +369,19 @@ export async function refreshAllTables(seasonId, ctfLeagueSettings){
  
 
         //gametype + map
+        new Message(`Refreshing ctf league map ${mapId} + gametypeId ${gametypeId} table for season ${seasonId}`,"note");
         await refreshTable(seasonId, gametypeId, mapId, mapRestrictions.cutOffDate, mapRestrictions.seasonEndDate, mapSettings);
 
         //map season, we only want to do map season total once otherwise just redoing same data over and over
         if(!processedMaps.has(mapId)){
+            new Message(`Refreshing ctf league map ${mapId} table for season ${seasonId}`,"note");
             await refreshTable(seasonId, 0, mapId, mapRestrictions.cutOffDate, mapRestrictions.seasonEndDate, mapSettings);
             processedMaps.add(mapId);
         }
 
         //gametype season, we only want to do gametype season total once otherwise just redoing same data over and over
         if(!processedGametypes.has(gametypeId)){
+            new Message(`Refreshing ctf league gametype ${gametypeId} table for season ${seasonId}`,"note");
             await refreshTable(seasonId, gametypeId, 0, gametypeRestrictions.cutOffDate, gametypeRestrictions.seasonEndDate, gametypeSettings);
             processedGametypes.add(gametypeId);
         }
