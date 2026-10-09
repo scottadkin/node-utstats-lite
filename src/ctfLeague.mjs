@@ -333,6 +333,7 @@ async function refreshTable(seasonId, gametypeId, mapId, cutOffDate, seasonEndDa
     
 }
 
+
 export async function refreshAllTables(seasonId, ctfLeagueSettings){
 
     seasonId = parseInt(seasonId);
@@ -351,9 +352,12 @@ export async function refreshAllTables(seasonId, ctfLeagueSettings){
     //season all time
     await refreshTable(seasonId, 0, 0, combinedRestrictions.cutOffDate, combinedRestrictions.seasonEndDate, combinedSettings);
 
+    //const allValidCTFGametypes = await getAllValidCTFGametypes();
+
     const uniqueCombos = await getUniqueMatchCombinationsInDateRange(seasonId, new Date(0), new Date(Date.now()));
 
     const ctfGametypes = [...new Set(uniqueCombos.map((u) => { return u.gametype_id}))];
+
 
     if(ctfGametypes.length === 0){
         new Message(`No CTF gametypes found in seasonId ${seasonId}.`,"note");
@@ -820,9 +824,12 @@ async function ctfLeagueGetUniqueCombosBetweenDates(seasonId, startDate, endDate
 
 async function getUniqueMatchCombinationsInDateRange(seasonId, startDate, endDate){
 
-    const query = `SELECT DISTINCT gametype_id,map_id FROM nstats_matches WHERE season_id=? AND date>=? AND date<=?`;
+    const query = `SELECT DISTINCT gametype_id,map_id FROM nstats_matches WHERE season_id=? AND date>=? AND date<=? AND gametype_id IN(
+        SELECT id FROM nstats_gametypes WHERE b_ctf=1
+    )`;
 
     return await simpleQuery(query, [seasonId, startDate, endDate]);
+
     
 }
 
