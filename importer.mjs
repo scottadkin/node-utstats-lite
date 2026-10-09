@@ -508,7 +508,6 @@ async function main(ctfLeagueSettings){
 
 async function startImport(){
 
-
     const ctfLeagueSettings = await getMultipleLeagueCategorySettings(["maps", "gametypes", "combined"]);
 
     await main(ctfLeagueSettings);
@@ -518,7 +517,6 @@ async function startImport(){
     const combinedLastRefresh = new Date(ctfLeagueSettings.combined["Last Whole League Refresh"].value);
     const gametypeLastRefresh = new Date(ctfLeagueSettings.gametypes["Last Whole League Refresh"].value);
     const mapLastRefresh = new Date(ctfLeagueSettings.maps["Last Whole League Refresh"].value);
-
 
     const refreshMinDate = new Date(Date.now() - DAY);
 

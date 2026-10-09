@@ -27,7 +27,7 @@ export async function renderSeasonCTFLeaguePage(req, res){
 
         if(mode === "maps"){
 
-            const mapIds = await getUniqueMapLeagues(seasonId);
+            const mapIds = await getUniqueMapLeagues(seasonId, gId);
             mapNames = await getMapNames(mapIds);
         }
 

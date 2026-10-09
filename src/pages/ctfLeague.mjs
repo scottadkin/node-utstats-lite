@@ -24,7 +24,7 @@ export async function renderCTFLeaguePage(req, res){
 
         if(mode === "maps"){
 
-            const mapIds = await getUniqueMapLeagues(0);
+            const mapIds = await getUniqueMapLeagues(0, gId);
             mapNames = await getMapNames(mapIds);
         }
 

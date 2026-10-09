@@ -457,14 +457,14 @@ export async function getUniqueGametypeLeagues(seasonId){
     });
 }
 
-export async function getUniqueMapLeagues(seasonId){
+export async function getUniqueMapLeagues(seasonId, gametypeId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
     
-    const query = `SELECT DISTINCT map_id FROM nstats_player_ctf_league WHERE map_id!=0 AND season_id=?`;
+    const query = `SELECT DISTINCT map_id FROM nstats_player_ctf_league WHERE map_id!=0 AND season_id=? AND gametype_id=?`;
 
-    const result = await simpleQuery(query, [seasonId]);
+    const result = await simpleQuery(query, [seasonId, gametypeId]);
 
     return result.map((r) =>{
         return r.map_id;
