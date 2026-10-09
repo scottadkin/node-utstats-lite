@@ -11,7 +11,7 @@ export async function renderCTFLeaguePage(req, res){
         const timeZone = await getSiteWideTimeZone();
         const pageSettings = await getCategorySettings("CTF League");
 
-        const {
+        let {
             mode, id, gId, seasonId, seasonInfo, 
             page, perPage, leagueSettings, 
             maxMatchesPerPlayer, maxMatchAge, lastLeagueRefresh
@@ -26,6 +26,10 @@ export async function renderCTFLeaguePage(req, res){
 
             const mapIds = await getUniqueMapLeagues(0, gId);
             mapNames = await getMapNames(mapIds);
+
+            if(mapIds.indexOf(parseInt(id)) === -1 && mapIds.length > 0){
+                id = mapIds[0];
+            }
         }
 
         let data =  {"totalRows": 0, "data": []};
