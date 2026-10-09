@@ -337,7 +337,35 @@ export async function refreshAllTables(seasonId, type){
 
     const lastImport = Math.floor(new Date(settings["Last Whole League Refresh"].value));
 
-    const now = Date.now();
+    const seasonInfo = await getSeasonById(seasonId);
+
+    if(settings["Maximum Match Age In Days"] === undefined) throw new Error(`CTF ${type} League Missing Setting, Maximum Match Age In Days`);
+
+    const maxDays = setInt(settings["Maximum Match Age In Days"].value, 180);
+
+    
+    const now = new Date(Date.now());
+
+    const seasonStartDate = (seasonInfo !== null) ? new Date(seasonInfo.start_date) : new Date(1);
+    const seasonEndDate = (seasonInfo !== null) ? new Date(seasonInfo.end_date) : now;
+
+    let cutOffDate = seasonStartDate;
+
+    if(seasonInfo !== null){
+
+        if(maxDays > 0){
+            cutOffDate = new Date(seasonEndDate - DAY * maxDays);
+        }else{
+            cutOffDate = seasonStartDate;
+        }
+
+    }else{
+        if(maxDays > 0){
+            cutOffDate = new Date(seasonEndDate - DAY * maxDays);
+        }else{
+            cutOffDate = seasonStartDate;
+        }
+    }
 
     const timeSinceLastRefresh = now - lastImport;
 
@@ -346,9 +374,7 @@ export async function refreshAllTables(seasonId, type){
         return;
     }
 
-    if(settings["Maximum Match Age In Days"] === undefined) throw new Error(`CTF ${type} League Missing Setting, Maximum Match Age In Days`);
-
-    const maxDays = settings["Maximum Match Age In Days"].value;
+    
 
     let uniqueCombos = [];
     if(type === "maps"){
@@ -377,13 +403,14 @@ export async function refreshAllTables(seasonId, type){
 
             let mapId = (type === "maps") ? u.map_id : 0;
 
-            await REPLACE_ME(seasonId, mapId, u.gametype_id, maxMatches, maxDays);
+            await recalculateSeasonTable(seasonId, mapId, u.gametype_id, maxMatches, cutOffDate, seasonEndDate);
+    
         }
         
     }else{
 
         new Message(`Recalculating CTF Lifetime League table`, "note");
-        await REPLACE_ME(seasonId, 0, 0, maxMatches, maxDays);
+        await recalculateSeasonTable(seasonId, 0, 0, maxMatches, cutOffDate, seasonEndDate);
     }
 
     const newData = {};
