@@ -1685,9 +1685,7 @@ export async function deleteMatch(id){
 
     await deleteMatchKills(id);
     await deleteMatchDamage(basic.season_id, id);
-    const ctfRowsDeleted = await ctfDeleteMatch(id);
-
-    process.exit();
+    const ctfRowsDeleted = await ctfDeleteMatch(basic.season_id, id);
     
 
     if(basicInfo[id] !== undefined){
@@ -1697,11 +1695,12 @@ export async function deleteMatch(id){
         
         if(ctfRowsDeleted > 0){
             await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
+       
         }
 
         await gametypeUpdateBasicTotals(basic.gametype_id); 
         await mapUpdateTotals(basic.map_id); 
-        await weaponCalcMapWeaponsTotals(basic.map_id, basic.gametype_id); 
+        await weaponCalcMapWeaponsTotals(basic.season_id, basic.map_id, basic.gametype_id); 
    
         await rankingRecalculateGametype(basic.gametype_id);
         await rankingRecalculateMap(basic.map_id);

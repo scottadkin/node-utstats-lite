@@ -1087,9 +1087,9 @@ async function getTotalsFromMatchData(){
 
 }
 
-async function recalculateTotals(playerIds){
+async function recalculateTotals(seasonId, playerIds){
 
-    await updatePlayerTotals(playerIds);
+    await updatePlayerTotals(playerIds, seasonId);
     //const gametypeTotals = await getTotalsFromMatchData();
 }
 
@@ -1103,7 +1103,10 @@ async function getPlayerIdsInMatch(matchId){
     });
 }
 
-export async function deleteMatch(matchId){
+export async function deleteMatch(seasonId, matchId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
     const deleteFromTables = [
         "nstats_ctf_caps","nstats_ctf_cap_kills","nstats_ctf_cap_suicides",
@@ -1125,7 +1128,7 @@ export async function deleteMatch(matchId){
         }
     }
 
-    await recalculateTotals(playerIds);
+    await recalculateTotals(seasonId, playerIds);
 
     return rowsAffected;
 }

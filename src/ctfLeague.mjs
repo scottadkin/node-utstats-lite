@@ -678,7 +678,9 @@ export async function deleteMatch(seasonId, mapId, gametypeId){
     }
 
     const seasonInfo = await getSeasonById(seasonId);
-    
+
+
+    const recalPromises = [];
 
 
     if(settings.maps["Enable League"].value){
@@ -686,12 +688,21 @@ export async function deleteMatch(seasonId, mapId, gametypeId){
         //#####
         const {cutOffDate, seasonEndDate, maxMatches} = getCTFLeagueRestrictions(seasonInfo, settings.maps);
 
-        //await recalculateSeasonTable(seasonId, mapId, 0, maxMatches, cutOffDate, seasonEndDate);
-        await recalculateSeasonTable(seasonId, mapId, 0, maxMatches, cutOffDate, seasonEndDate);
-        //map all time 
+        recalPromises.push([
+                //season map all time
+                recalculateSeasonTable(seasonId, mapId, 0, maxMatches, cutOffDate, seasonEndDate),
+                //season map gametype combo
+                recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, cutOffDate, seasonEndDate)
+            ]);
 
-        //map + gametype 
-        await recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, cutOffDate, seasonEndDate);
+        if(seasonId !== 0){
+            recalPromises.push([
+                //all time map totals
+                recalculateSeasonTable(0, mapId, 0, maxMatches, cutOffDate, seasonEndDate),
+                //all time map gametype
+                recalculateSeasonTable(0, mapId, gametypeId, maxMatches, cutOffDate, seasonEndDate)
+            ]);
+        }
  
     }
 
@@ -699,17 +710,27 @@ export async function deleteMatch(seasonId, mapId, gametypeId){
     if(settings.gametypes["Enable League"].value){
 
         const {cutOffDate, seasonEndDate, maxMatches} = getCTFLeagueRestrictions(seasonInfo, settings.gametypes);
-        //gametype all time
-        await recalculateSeasonTable(seasonId, 0, gametypeId, maxMatches, cutOffDate, seasonEndDate);
+        //season gametype all time
+        recalPromises.push(recalculateSeasonTable(seasonId, 0, gametypeId, maxMatches, cutOffDate, seasonEndDate));
+        if(seasonId !== 0){
+            //all time gametype
+            recalPromises.push(recalculateSeasonTable(0, 0, gametypeId, maxMatches, cutOffDate, seasonEndDate));
+        }
   
     }
 
     if(settings.combined["Enable League"].value){
 
         const {cutOffDate, seasonEndDate, maxMatches} = getCTFLeagueRestrictions(seasonInfo, settings.combined);
-        await recalculateSeasonTable(seasonId, 0, 0, maxMatches, cutOffDate, seasonEndDate);
-    
+
+        recalPromises.push(recalculateSeasonTable(seasonId, 0, 0, maxMatches, cutOffDate, seasonEndDate));
+
+        if(seasonId !== 0){
+            recalPromises.push(recalculateSeasonTable(seasonId, 0, 0, maxMatches, cutOffDate, seasonEndDate));
+        }
     }
+
+    await Promise.all(recalPromises);
 }
 
 
