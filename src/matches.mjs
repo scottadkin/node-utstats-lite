@@ -1673,7 +1673,6 @@ export async function deleteMatch(id){
     const basicInfo = await getBasicMatchesInfo([id]);
     const playerIds = await getPlayerIdsInMatch(id);
 
-    console.log(basicInfo);
     const basic = basicInfo[id];
     await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
     
@@ -1701,20 +1700,32 @@ export async function deleteMatch(id){
         await gametypeUpdateBasicTotals(basic.gametype_id); 
         await mapUpdateTotals(basic.map_id); 
         await weaponCalcMapWeaponsTotals(basic.season_id, basic.map_id, basic.gametype_id); 
+        if(basic.season_id !== 0){
+            await weaponCalcMapWeaponsTotals(0, basic.map_id, basic.gametype_id); 
+        }
    
-        await rankingRecalculateGametype(basic.gametype_id);
-        await rankingRecalculateMap(basic.map_id);
+        await rankingRecalculateGametype(basic.season_id, basic.gametype_id);
+        await rankingRecalculateMap(basic.season_id, basic.map_id);
 
-        if(playerIds.length > 0){
-            await weaponUpdatePlayerTotals(playerIds);
+        if(basic.season_id !== 0){
+            await rankingRecalculateGametype(0, basic.gametype_id);
+            await rankingRecalculateMap(0, basic.map_id);
         }
 
-
-        
+        if(playerIds.length > 0){
+            await weaponUpdatePlayerTotals(playerIds, basic.season_id);
+            if(basic.season_id !== 0){
+                await weaponUpdatePlayerTotals(playerIds, 0);
+            }
+        }
+   
     }
 
     if(playerIds.length > 0){
-        await updatePlayerTotals(playerIds);
+        await updatePlayerTotals(playerIds, basic.season_id);
+        if(basic.season_id !== 0){
+            await updatePlayerTotals(playerIds, 0);
+        }
     }
 
 }
