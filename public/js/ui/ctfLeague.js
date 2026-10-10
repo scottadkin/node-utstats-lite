@@ -108,12 +108,16 @@ class CTFLeagueFilterForm{
 
             if(this.mode === "maps"){
                 newUrl+=`&id=${this.id}&gid=${this.gId}`;
+                   
             }else{
                 newUrl+=`&id=${this.id}`;
             }
+    
 
             window.location = newUrl;
         }, labelFor, labelFor);
+
+        
     }
 
     createForm(){

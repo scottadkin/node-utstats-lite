@@ -119,16 +119,101 @@ export async function insertMatchData(players, matchId, mapId, gametypeId){
 
 
 
-export async function getAllPlayerMatchData(){
+/*export async function getAllPlayerMatchData(seasonId){
 
-    //if(matchIds.length === 0) return [];
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
-    const query = `SELECT match_id,gametype_id,player_id,damage_delt,damage_taken,self_damage,
-    team_damage_delt,team_damage_taken,fall_damage,drown_damage,cannon_damage 
-    FROM nstats_damage_match`;
+    const vars = [];
+    let where = ``;
+
+    if(seasonId !== 0){
+        vars.push(seasonId);
+        where += ` WHERE EXISTS(SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_damage_match.match_id AND nstats_matches.season_id=?)`;
+    }
+
+    const query = `SELECT 
+    nstats_damage_match.match_id,
+    nstats_damage_match.gametype_id,
+    nstats_damage_match.player_id,
+    nstats_damage_match.damage_delt,
+    nstats_damage_match.damage_taken,
+    nstats_damage_match.self_damage,
+    nstats_damage_match.team_damage_delt,
+    nstats_damage_match.team_damage_taken,
+    nstats_damage_match.fall_damage,drown_damage,
+    nstats_damage_match.cannon_damage,
+    nstats_match_players.time_on_server 
+    FROM nstats_damage_match
+    INNER JOIN nstats_match_players ON nstats_match_players.player_id = nstats_damage_match.player_id AND nstats_match_players.match_id = nstats_damage_match.match_id 
+    ${where}
+    `;
   
 
-    return await simpleQuery(query);
+    return await simpleQuery(query, vars);
+}*/
+
+export async function getAllPlayerMatchData(seasonId){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+
+    const vars = [];
+    let where = ``;
+
+    if(seasonId !== 0){
+        vars.push(seasonId);
+        where += ` WHERE EXISTS(SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_damage_match.match_id AND nstats_matches.season_id=?)`;
+    }
+
+    const query = `WITH MatchData AS (SELECT 
+        nstats_damage_match.match_id,
+        nstats_damage_match.gametype_id,
+        nstats_damage_match.player_id,
+        nstats_damage_match.damage_delt,
+        nstats_damage_match.damage_taken,
+        nstats_damage_match.self_damage,
+        nstats_damage_match.team_damage_delt,
+        nstats_damage_match.team_damage_taken,
+        nstats_damage_match.fall_damage,
+        nstats_damage_match.drown_damage,
+        nstats_damage_match.cannon_damage,
+        nstats_match_players.time_on_server 
+        FROM nstats_damage_match
+        INNER JOIN nstats_match_players ON nstats_match_players.player_id = nstats_damage_match.player_id AND nstats_match_players.match_id = nstats_damage_match.match_id 
+        ${where})
+    SELECT COUNT(*) as total_matches,
+    SUM(MatchData.time_on_server) as total_playtime,
+    SUM(MatchData.damage_delt) as total_damage_delt,
+    SUM(MatchData.damage_taken) as total_damage_taken,
+    0 as gametype_id,
+    SUM(MatchData.self_damage) as total_self_damage,
+    SUM(MatchData.team_damage_delt) as total_team_damage_delt,
+    SUM(MatchData.team_damage_taken) as total_team_damage_taken,
+    SUM(MatchData.fall_damage) as total_fall_damage,
+    SUM(MatchData.drown_damage) as total_drown_damage,
+    SUM(MatchData.cannon_damage) as total_cannon_damage,
+    MatchData.player_id 
+    FROM MatchData GROUP BY MatchData.player_id
+
+    UNION ALL
+
+    SELECT COUNT(*) as total_matches,
+    SUM(MatchData.time_on_server) as total_playtime,
+    SUM(MatchData.damage_delt) as total_damage_delt,
+    SUM(MatchData.damage_taken) as total_damage_taken,
+    MatchData.gametype_id,
+    SUM(MatchData.self_damage) as total_self_damage,
+    SUM(MatchData.team_damage_delt) as total_team_damage_delt,
+    SUM(MatchData.team_damage_taken) as total_team_damage_taken,
+    SUM(MatchData.fall_damage) as total_fall_damage,
+    SUM(MatchData.drown_damage) as total_drown_damage,
+    SUM(MatchData.cannon_damage) as total_cannon_damage,
+    MatchData.player_id 
+    FROM MatchData GROUP BY MatchData.player_id,MatchData.gametype_id`;
+  
+
+    return await simpleQuery(query, vars);
 }
 
 async function deleteAllTotals(){
@@ -162,9 +247,9 @@ export async function bulkInsertPlayerTotals(data){
     await bulkInsert(query, insertVars);
 }
 
-async function recalculatePlayerTotals(){
+async function recalculatePlayerTotals(seasonId){
 
-    const matchesData = await getAllPlayerMatchData();
+    const matchesData = await getAllPlayerMatchData(seasonId);
 
     const matchIds = [...new Set(matchesData.map((m) =>{
         return m.match_id;
@@ -224,10 +309,18 @@ async function recalculatePlayerTotals(){
     
 }
 
-export async function deleteMatch(id){
+export async function deleteMatch(seasonId, id){
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
   
     await simpleQuery(`DELETE FROM nstats_damage_match WHERE match_id=?`, [id]);
-    await recalculatePlayerTotals();
+
+    await recalculatePlayerTotals(0);
+
+    if(seasonId !== 0){
+        await recalculatePlayerTotals(seasonId);
+    }
 }
 
 /**

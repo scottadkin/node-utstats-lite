@@ -671,7 +671,6 @@ export async function deleteMatch(seasonId, mapId, gametypeId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
-    //TODO add seasonID
     const settings = await getLeagueSiteSettings();
 
     if(settings["gametypes"]["Maximum Match Age In Days"] === undefined){

@@ -1676,7 +1676,7 @@ export async function deleteMatch(id){
     console.log(basicInfo);
     const basic = basicInfo[id];
     await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
-    process.exit();
+    
 
     await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
@@ -1684,8 +1684,10 @@ export async function deleteMatch(id){
     await simpleQuery(`DELETE FROM nstats_match_weapon_stats WHERE match_id=?`, [id]);
 
     await deleteMatchKills(id);
-    await deleteMatchDamage(id);
+    await deleteMatchDamage(basic.season_id, id);
     const ctfRowsDeleted = await ctfDeleteMatch(id);
+
+    process.exit();
     
 
     if(basicInfo[id] !== undefined){
