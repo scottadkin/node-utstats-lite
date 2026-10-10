@@ -373,6 +373,11 @@ async function getSeasonTotalPlayers(seasonId){
     return result[0].total_players;
 }
 
+/**
+ * Update basic stats such as unique match combinations, gametype + map totals
+ * @param {*} seasonId 
+ * @returns 
+ */
 export async function calculateSeasonStats(seasonId){
 
     const basicTotals = await calculateSeasonBasicTotals(seasonId);

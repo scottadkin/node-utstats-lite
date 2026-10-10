@@ -28,6 +28,7 @@ import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
 import { getValidGametypes, getValidMaps, deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
+import { calculateSeasonStats } from "./seasons.mjs";
 
 
 const MATCH_TABLE_COLUMNS_VERBOSE = `nstats_matches.id,
@@ -1673,6 +1674,11 @@ export async function deleteMatch(id){
     const basicInfo = await getBasicMatchesInfo([id]);
     const playerIds = await getPlayerIdsInMatch(id);
 
+    if(basicInfo[id] === undefined){
+
+        throw new Error(`Match does not exists`);
+    }
+
     const basic = basicInfo[id];
     
 
@@ -1686,41 +1692,37 @@ export async function deleteMatch(id){
     const ctfRowsDeleted = await ctfDeleteMatch(basic.season_id, id);
     
 
-    if(basicInfo[id] !== undefined){
-
-        const basic = basicInfo[id];
-
-        
-        if(ctfRowsDeleted > 0){
-            await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
-       
-        }
-
-        await gametypeUpdateBasicTotals(basic.gametype_id); 
-
-        await mapUpdateTotals(basic.map_id); 
-
-        await weaponCalcMapWeaponsTotals(basic.season_id, basic.map_id, basic.gametype_id); 
-        if(basic.season_id !== 0){
-            await weaponCalcMapWeaponsTotals(0, basic.map_id, basic.gametype_id); 
-        }
-   
-        await rankingRecalculateGametype(basic.season_id, basic.gametype_id);
-        await rankingRecalculateMap(basic.season_id, basic.map_id);
-
-        if(basic.season_id !== 0){
-            await rankingRecalculateGametype(0, basic.gametype_id);
-            await rankingRecalculateMap(0, basic.map_id);
-        }
-
-        if(playerIds.length > 0){
-            await weaponUpdatePlayerTotals(playerIds, basic.season_id);
-            if(basic.season_id !== 0){
-                await weaponUpdatePlayerTotals(playerIds, 0);
-            }
-        }
-   
+    
+    if(ctfRowsDeleted > 0){
+        await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
+    
     }
+
+    await gametypeUpdateBasicTotals(basic.gametype_id); 
+
+    await mapUpdateTotals(basic.map_id); 
+
+    await weaponCalcMapWeaponsTotals(basic.season_id, basic.map_id, basic.gametype_id); 
+    if(basic.season_id !== 0){
+        await weaponCalcMapWeaponsTotals(0, basic.map_id, basic.gametype_id); 
+    }
+
+    await rankingRecalculateGametype(basic.season_id, basic.gametype_id);
+    await rankingRecalculateMap(basic.season_id, basic.map_id);
+
+    if(basic.season_id !== 0){
+        await rankingRecalculateGametype(0, basic.gametype_id);
+        await rankingRecalculateMap(0, basic.map_id);
+    }
+
+    if(playerIds.length > 0){
+        await weaponUpdatePlayerTotals(playerIds, basic.season_id);
+        if(basic.season_id !== 0){
+            await weaponUpdatePlayerTotals(playerIds, 0);
+        }
+    }
+
+   
 
     if(playerIds.length > 0){
         await updatePlayerTotals(playerIds, basic.season_id);
@@ -1728,6 +1730,12 @@ export async function deleteMatch(id){
             await updatePlayerTotals(playerIds, 0);
         }
     }
+
+
+    if(basic.season_id !== 0){
+        await calculateSeasonStats(basic.season_id);
+    }
+    
 
 }
 
