@@ -116,7 +116,7 @@ function renderServerList(parent, servers){
         const url = `/matches/?s=${s.id}`;
 
         rows.push([
-            {"display": `${s.name} ${TIME_ZONE}`, "value": s.name.toLowerCase(), "className": "text-left", url},
+            {"display": `${s.name}`, "value": s.name.toLowerCase(), "className": "text-left", url},
             {"display": toDateString(s.first_match, TIME_ZONE, true), "value": s.first_match, "className": "date", url},
             {"display": toDateString(s.last_match, TIME_ZONE, true), "value": s.last_match,"className": "date", url},
             {"display": toPlaytime(s.playtime), "value": s.playtime,"className": "date", url},

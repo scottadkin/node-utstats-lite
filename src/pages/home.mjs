@@ -52,7 +52,7 @@ export async function renderHomePage(req, res, userSession){
         let mostActivePlayers = [];
 
         if(pageSettings["Display Most Active Players"] === 1){
-            mostActivePlayers = await getMostActivePlayers(pageSettings["Total Most Active Players"]);
+            mostActivePlayers = await getMostActivePlayers(pageSettings["Total Most Active Players"], 0);
         }
 
         

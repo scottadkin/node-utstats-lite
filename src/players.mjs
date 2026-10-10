@@ -996,15 +996,23 @@ export async function calcPlayerTotals(playerIds, seasonId){
 
     if(playerIds.length === 0) return [];
 
+    let seasonCheck = ``;
+    const vars = [playerIds];
+
+    if(seasonId !== 0){
+        seasonCheck += ` AND nstats_matches.season_id=?`;
+        vars.push(seasonId);
+    }
+
     let query = `SELECT
     ${PLAYER_TOTALS_COLUMNS_MATCHES},
     ${PLAYER_TOTALS_MAX_COLUMNS}
     FROM nstats_match_players 
     WHERE spectator=0 AND player_id IN (?) 
-    AND EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id=nstats_match_players.match_id AND nstats_matches.season_id=?)
+    AND EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id=nstats_match_players.match_id${seasonCheck})
     GROUP BY player_id,gametype_id,map_id`;
 
-    const result = await simpleQuery(query, [playerIds, seasonId]);
+    const result = await simpleQuery(query, vars);
 
 
     return createPlayerTotalsFromData(result, seasonId);
@@ -1837,11 +1845,15 @@ export async function getPlayerActivityHeatmapData(playerId, gametypeId, mapId, 
 }
 
 
-export async function getMostActivePlayers(limit){
+export async function getMostActivePlayers(limit, seasonId){
 
     limit = parseInt(limit);
-
     if(limit !== limit) throw new Error("getMostActivePlayers limit must be an integer");
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
+
+    const vars = [seasonId, limit];
 
     const query = `SELECT
     nstats_players.id,
@@ -1852,12 +1864,12 @@ export async function getMostActivePlayers(limit){
     nstats_player_totals.wins,
     nstats_player_totals.last_active
     FROM nstats_players
-    LEFT JOIN nstats_player_totals ON nstats_player_totals.player_id = nstats_players.id
-    WHERE nstats_player_totals.gametype_id=0 AND nstats_player_totals.map_id=0
+    LEFT JOIN nstats_player_totals ON nstats_player_totals.player_id = nstats_players.id 
+    WHERE nstats_player_totals.gametype_id=0 AND nstats_player_totals.map_id=0 AND nstats_player_totals.season_id=?
     ORDER BY playtime DESC, wins DESC LIMIT ?
     `;
 
-    return await simpleQuery(query, [limit]);
+    return await simpleQuery(query, vars);
 
 }
 
