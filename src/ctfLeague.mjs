@@ -824,11 +824,21 @@ async function ctfLeagueGetUniqueCombosBetweenDates(seasonId, startDate, endDate
 
 async function getUniqueMatchCombinationsInDateRange(seasonId, startDate, endDate){
 
-    const query = `SELECT DISTINCT gametype_id,map_id FROM nstats_matches WHERE season_id=? AND date>=? AND date<=? AND gametype_id IN(
+    seasonId = parseInt(seasonId);
+    let where = ``;
+
+    const vars = [startDate, endDate];
+
+    if(seasonId !== 0){
+        where += `season_id=? AND`;
+        vars.unshift(seasonId);
+    }
+
+    const query = `SELECT DISTINCT gametype_id,map_id FROM nstats_matches WHERE ${where} date>=? AND date<=? AND gametype_id IN(
         SELECT id FROM nstats_gametypes WHERE b_ctf=1
     )`;
 
-    return await simpleQuery(query, [seasonId, startDate, endDate]);
+    return await simpleQuery(query, vars);
 
     
 }
