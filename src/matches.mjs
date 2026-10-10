@@ -1674,7 +1674,6 @@ export async function deleteMatch(id){
     const playerIds = await getPlayerIdsInMatch(id);
 
     const basic = basicInfo[id];
-    await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
     
 
     await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
@@ -1698,7 +1697,9 @@ export async function deleteMatch(id){
         }
 
         await gametypeUpdateBasicTotals(basic.gametype_id); 
+
         await mapUpdateTotals(basic.map_id); 
+
         await weaponCalcMapWeaponsTotals(basic.season_id, basic.map_id, basic.gametype_id); 
         if(basic.season_id !== 0){
             await weaponCalcMapWeaponsTotals(0, basic.map_id, basic.gametype_id); 

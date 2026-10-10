@@ -767,3 +767,32 @@ export async function recalculateSeason(seasonId){
     await recalculateSeasonRankings(seasonId);
     
 }
+
+export async function seasonsDeleteGametypeStats(gametypeId){
+
+    const vars = [gametypeId];
+
+    const gametypeQuery = `DELETE FROM nstats_seasons_gametypes WHERE gametype_id=?`;
+
+    const comboQuery = `DELETE FROM nstats_seasons_unique_match_combinations WHERE gametype_id=?`;
+
+    return await Promise.all([
+        simpleQuery(comboQuery, vars),
+        simpleQuery(gametypeQuery, vars),
+        
+    ]);
+}
+
+export async function seasonsDeleteMapStats(mapId){
+
+    const vars = [mapId];
+
+    const mapQuery = `DELETE FROM nstats_seasons_maps WHERE map_id=?`;
+
+    const comboQuery = `DELETE FROM nstats_seasons_unique_match_combinations WHERE map_id=?`;
+
+    return await Promise.all([
+        simpleQuery(comboQuery, vars),
+        simpleQuery(mapQuery, vars),
+    ]);
+}

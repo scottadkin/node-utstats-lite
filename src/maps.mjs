@@ -1,12 +1,10 @@
-import { bulkInsert, simpleQuery, sqlInsertOnDuplicateUpdate, sqlInsertReturnRowId } from "./database.mjs";
+import { simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
 import { readdir } from 'node:fs/promises';
 import { getMapImageName as genericGetMapImageName, 
     mysqlSetTotalsByDate, sanitizePagePerPage
 } from "./generic.mjs";
-import { getPlayerMapTotals as getPlayerCTFMapTotals } from "./ctf.mjs";
-import { getPlayerMapTotals as getPlayerDOMMapTotals } from "./domination.mjs";
-import Message from "./message.mjs";
 import { getRecords } from "./records.mjs";
+import { seasonsDeleteMapStats } from "./seasons.mjs";
 
 
 const validBoth = [
@@ -313,6 +311,8 @@ export async function updateTotals(mapId){
     const totals = await calculateTotals(mapId);
 
     if(totals === null){
+        
+        await seasonsDeleteMapStats(mapId);
         await deleteMap(mapId);
        // new Message(`Failed to calculate map totals.`,`error`);
        return

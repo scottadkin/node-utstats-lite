@@ -4,6 +4,7 @@ import { changeMatchGametype, getAllMatchesGametypesPlayersTotalTeams } from "./
 import Message from "./message.mjs";
 import { calculateAllPlayerTotals } from "./players.mjs";
 import { recalculateAllRankings } from "./rankings.mjs";
+import { seasonsDeleteGametypeStats } from "./seasons.mjs";
 
 
 
@@ -111,8 +112,11 @@ async function updateTotals(id, totals){
     if(totals === null){
         //new Message(`Can't update gametype totals,first_match,last_match, or playtime are null`,"warning");
 
+        if(seasonId !== 0){
+            await seasonsDeleteGametypeStats(id);
+        }
+
         return await simpleQuery(`DELETE FROM nstats_gametypes WHERE id=?`, [id]);
-        return;
     }
 
     const query = `UPDATE nstats_gametypes SET matches=?,playtime=?,first_match=?,last_match=? WHERE id=?`;
