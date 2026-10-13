@@ -16,7 +16,7 @@ export async function renderPlayersPage(req, res, userSession){
     
         const players = await searchPlayers(searchName, sortBy, order, page, perPage, 0);
 
-        const {title, description, siteName} = setPlayersPageMetaData(brandingSettings, searchName, sortBy, order);
+        const {title, description, siteName} = setPlayersPageMetaData(brandingSettings, searchName, sortBy, order, null);
 
         res.render("players.ejs", {
             "host": req.headers.host,

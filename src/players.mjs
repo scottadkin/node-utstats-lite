@@ -2577,22 +2577,35 @@ export function sanitizePlayersPageParams(req, pageSettings, defaultPerPage){
 }
 
 
-export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, order){
+export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, order, seasonName){
 
-    let description = "Search for a player that has been active on one of our servers";
+    let description = `Search for a player that has been active `;
+
     let title = "Player Search";
 
     if(searchName !== ""){
         title =  `${searchName} - Player Search `;
-        description = `Search result for player's named "${searchName}"`;
+        description = `Search result for player named "${searchName}" `;
+    }
+
+    
+
+    if(seasonName !== null){
+        description += `during the season: ${seasonName}`
+    }else{
+        description += `on one of our servers`;
     }
 
     description += `, sorted by ${sortBy} in ${order} order`;
 
-
     const siteName = brandingSettings?.["Site Name"] ?? "Node UTStats Lite";
     
-    title = `${title} - ${siteName}`;
+    
+    if(seasonName !== null){
+        title = `${title} - ${seasonName} - ${siteName}`;
+    }else{
+        title = `${title} - ${siteName}`;
+    }
 
     return {description, title, siteName}
 }

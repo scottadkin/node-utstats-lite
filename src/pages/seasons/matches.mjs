@@ -5,20 +5,20 @@ import { getRecentMatches, sanitizeMatchesReq } from "../../matches.mjs";
 
 export async function renderSeasonMatchesPage(req, res){
 
-    const brandingSettings = await getCategorySettings("Branding");
-    const pageSettings = await getCategorySettings("Matches");
-    const title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
-    const timeZone = await getSiteWideTimeZone();
-
     const seasonId = res.locals.season;
-    
-    const uniqueCombinations = await getSeasonUniqueMatchCombinations(seasonId);
 
-    const basicSeasonInfo = await getSeasonById(seasonId);
+    const [
+        brandingSettings, pageSettings, 
+        timeZone, uniqueCombinations, basicSeasonInfo
+    ] = await Promise.all([
+        getCategorySettings("Branding"),
+        getCategorySettings("Matches"),
+        getSiteWideTimeZone(),
+        getSeasonUniqueMatchCombinations(seasonId),
+        getSeasonById(seasonId)
+    ]);
 
-    if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
-
-
+    const title = `Matches - ${basicSeasonInfo.name} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
 
     const {
@@ -29,12 +29,14 @@ export async function renderSeasonMatchesPage(req, res){
     const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap, false, seasonId);
 
 
+    let description = `Search for matches played during the ${basicSeasonInfo.name} season.`;
+
     res.render("matches.ejs",{
         req,
             "host": req.headers.host,
             timeZone,
             title,
-            "meta": {"description": "Season Matches", "image": "images/maps/default.jpg"},
+            "meta": {description, "image": "images/maps/default.jpg"},
             "userSession": req.userSession,
             uniqueCombinations,
             selectedServer,

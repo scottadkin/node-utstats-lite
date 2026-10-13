@@ -7,18 +7,18 @@ const DEFAULT_PER_PAGE = 25;
 
 export async function renderSeasonPlayersPage(req, res){
 
-    const brandingSettings = await getCategorySettings("Branding");
-    const pageSettings = await getCategorySettings("Players");
-    const timeZone = await getSiteWideTimeZone();
-
     const seasonId = res.locals.season;
 
-    const basicSeasonInfo = await getSeasonById(seasonId);
+    const [brandingSettings, pageSettings, timeZone, basicSeasonInfo] = await Promise.all([
+        getCategorySettings("Branding"),
+        getCategorySettings("Players"),
+        getSiteWideTimeZone(),
+        getSeasonById(seasonId)
+    ]);
 
-    if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
-
+    
     const {searchName, sortBy, order, perPage, page} = sanitizePlayersPageParams(req, pageSettings, DEFAULT_PER_PAGE);
-    const {title, description, siteName} = setPlayersPageMetaData(brandingSettings, searchName, sortBy, order);
+    const {title, description, siteName} = setPlayersPageMetaData(brandingSettings, searchName, sortBy, order, basicSeasonInfo.name);
 
 
     res.render("players.ejs",{
