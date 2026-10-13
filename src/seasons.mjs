@@ -610,12 +610,21 @@ export async function seasonGetAllMapIds(seasonId){
 
 export async function seasonGetAllMapNames(seasonId){
 
-    const query = `SELECT DISTINCT nstats_seasons_maps.map_id, nstats_maps.name FROM nstats_seasons_maps 
-    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id
-    WHERE nstats_seasons_maps.season_id=?`;
+    seasonId = parseInt(seasonId);
 
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
-    const result = await simpleQuery(query, [seasonId]);
+    let query = `SELECT DISTINCT nstats_seasons_maps.map_id, nstats_maps.name FROM nstats_seasons_maps 
+    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id`;
+
+    const vars = [];
+
+    if(seasonId !== 0){
+        query += ` WHERE nstats_seasons_maps.season_id=?`;
+        vars.push(seasonId);
+    }
+
+    const result = await simpleQuery(query, vars);
 
     const data = {};
     for(let i = 0; i < result.length; i++){
@@ -629,12 +638,19 @@ export async function seasonGetAllMapNames(seasonId){
 
 export async function seasonGetAllGametypeNames(seasonId){
 
-    const query = `SELECT DISTINCT nstats_seasons_gametypes.gametype_id, nstats_gametypes.name FROM nstats_seasons_gametypes
-    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_seasons_gametypes.gametype_id
-    WHERE nstats_seasons_gametypes.season_id=?`;
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
+    let query = `SELECT DISTINCT nstats_seasons_gametypes.gametype_id, nstats_gametypes.name FROM nstats_seasons_gametypes
+    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_seasons_gametypes.gametype_id`;
 
-    const result = await simpleQuery(query, [seasonId]);
+    const vars = [];
+    if(seasonId !== 0){
+        query += ` WHERE nstats_seasons_gametypes.season_id=?`;
+        vars.push(seasonId);
+    }
+
+    const result = await simpleQuery(query, vars);
 
     const data = {};
     
