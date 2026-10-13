@@ -448,27 +448,62 @@ export async function getUniqueGametypeLeagues(seasonId){
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
 
-    const query = `SELECT DISTINCT gametype_id FROM nstats_player_ctf_league WHERE map_id=0 AND season_id=?`;
+    const query = `SELECT DISTINCT nstats_player_ctf_league.gametype_id,
+    nstats_gametypes.name FROM nstats_player_ctf_league 
+    INNER JOIN nstats_gametypes ON nstats_gametypes.id=nstats_player_ctf_league.gametype_id
+    WHERE nstats_player_ctf_league.map_id=0 AND nstats_player_ctf_league.season_id=?`;
 
     const result = await simpleQuery(query, [seasonId]);
 
-    return result.map((r) =>{
-        return r.gametype_id;
-    });
+    const ids = [];
+    const names = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        ids.push(r.gametype_id);
+        names[r.gametype_id] = r.name;
+    }
+
+    return {"gametypeIds": ids, names};
 }
 
 export async function getUniqueMapLeagues(seasonId, gametypeId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
+
+    gametypeId = parseInt(gametypeId);
+    if(gametypeId !== gametypeId) throw new Error(`gametypeId must be a valid integer`);
     
-    const query = `SELECT DISTINCT map_id FROM nstats_player_ctf_league WHERE map_id!=0 AND season_id=? AND gametype_id=?`;
+    let query = `SELECT DISTINCT nstats_player_ctf_league.map_id,nstats_maps.name 
+    FROM nstats_player_ctf_league 
+    INNER JOIN nstats_maps ON nstats_maps.id = nstats_player_ctf_league.map_id
+    WHERE nstats_player_ctf_league.map_id!=0 AND nstats_player_ctf_league.season_id=?`;
 
-    const result = await simpleQuery(query, [seasonId, gametypeId]);
+    const vars = [seasonId];
 
-    return result.map((r) =>{
-        return r.map_id;
-    });
+    if(gametypeId != 0){
+        query += ` AND nstats_player_ctf_league.gametype_id=?`;
+        vars.push(gametypeId);
+    }
+
+    const result = await simpleQuery(query, vars);
+
+    const names = {};
+    const ids = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        names[r.map_id] = r.name;
+        ids.push(r.map_id);
+    }
+
+
+    return {names, "mapIds": ids}
 }
 
 
@@ -558,7 +593,6 @@ export async function getSingleCTFLeague(seasonId, gametypeId, mapId, dirtyPage,
     }))];
 
     const playerNames = await getBasicPlayerInfo(playerIds);
-
 
     for(let i = 0; i < result.length; i++){
 
@@ -734,23 +768,17 @@ export async function deleteMatch(seasonId, mapId, gametypeId){
 }
 
 
-export async function sanitizeCTFLeaguePageReq(req, pageSettings){
+export async function sanitizeCTFLeaguePageReq(req, seasonId, pageSettings){
 
     const mode = req.query?.mode ?? pageSettings["Default Mode"] ?? "gametypes";
     let id = req.query?.id ?? "";
     //gid only used for maps mode as id in that case is the map id
     let gId = req.query?.gid ?? "";
 
-    let seasonId = req.params.season ?? 0;
-    seasonId = parseInt(seasonId);
-    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
-
-    let seasonInfo = await getSeasonById(seasonId);
-
-
     if(id === "" && gId === ""){
 
         const latestIds = await ctfLeagueGetLatestMapGametypePlayed(seasonId);
+
         if(latestIds !== null){
 
             if(mode === "gametypes"){
@@ -782,7 +810,7 @@ export async function sanitizeCTFLeaguePageReq(req, pageSettings){
         lastLeagueRefresh = convertTimestamp(new Date(lastLeagueRefresh), false, false, true);
     }
 
-    return {mode, id, gId, seasonId, seasonInfo, page, perPage, leagueSettings, maxMatchesPerPlayer, maxMatchAge, lastLeagueRefresh}
+    return {mode, id, gId, page, perPage, leagueSettings, maxMatchesPerPlayer, maxMatchAge, lastLeagueRefresh}
 }
 
 

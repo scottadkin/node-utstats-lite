@@ -1,38 +1,39 @@
-import { getLeagueSiteSettings, getUniqueGametypeLeagues, getUniqueMapLeagues, sanitizeCTFLeaguePageReq, setCTFLeaguePageMetaData } from "../../ctfLeague.mjs";
-import { convertTimestamp } from "../../generic.mjs";
-import { getGametypeNames } from "../../gametypes.mjs";
-import { getMapNames } from "../../maps.mjs";
+import { getUniqueGametypeLeagues, getUniqueMapLeagues, sanitizeCTFLeaguePageReq, setCTFLeaguePageMetaData } from "../../ctfLeague.mjs";
 import { getSingleCTFLeague } from "../../ctfLeague.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
-import { getSeasonById } from "../../seasons.mjs";
 
 export async function renderSeasonCTFLeaguePage(req, res){
 
     try{
 
-        const timeZone = await getSiteWideTimeZone();
-        const pageSettings = await getCategorySettings("CTF League");
+        const seasonId = res.locals.season;
+        const seasonInfo = res.locals.seasonInfo;
 
+        const [timeZone, pageSettings, gametypesInfo] = await Promise.all([
+            getSiteWideTimeZone(),
+            getCategorySettings("CTF League"),
+            getUniqueGametypeLeagues(seasonId),
+        ]);
         
         let {
-            mode, id, gId, seasonId, seasonInfo, 
+            mode, id, gId, 
             page, perPage, leagueSettings, maxMatchesPerPlayer, 
             maxMatchAge, lastLeagueRefresh
-        } = await sanitizeCTFLeaguePageReq(req, pageSettings);
+        } = await sanitizeCTFLeaguePageReq(req, seasonId, pageSettings);
 
-        const uniqueGametypes = await getUniqueGametypeLeagues(seasonId);
-        const gametypeNames = await getGametypeNames(uniqueGametypes, true);
 
-        let mapNames = {};
+        let mapsInfo = {
+            "names": {},
+            "mapIds": []
+        };
 
         if(mode === "maps"){
 
-            const mapIds = await getUniqueMapLeagues(seasonId, gId);
-            mapNames = await getMapNames(mapIds);
+            mapsInfo = await getUniqueMapLeagues(seasonId, gId);
 
-
-            if(mapIds.indexOf(parseInt(id)) === -1 && mapIds.length > 0){
-                id = mapIds[0];
+    
+            if(mapsInfo.mapIds.indexOf(parseInt(id)) === -1 && mapsInfo.mapIds.length > 0){
+                id = mapsInfo.mapIds[0];
             }
         }
 
@@ -51,7 +52,7 @@ export async function renderSeasonCTFLeaguePage(req, res){
         const {
             title, brandingSettings, subHeader, 
             gametypeName, mapName 
-        } = await setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id, gId);
+        } = await setCTFLeaguePageMetaData(mode, gametypesInfo.names, mapsInfo.names, id, gId);
 
 
         res.render("ctfLeague.ejs", {
@@ -63,8 +64,8 @@ export async function renderSeasonCTFLeaguePage(req, res){
             maxMatchesPerPlayer,
             maxMatchAge,
             lastLeagueRefresh,
-            gametypeNames,
-            mapNames,
+            "gametypeNames": gametypesInfo.names,
+            "mapNames": mapsInfo.names,
             id,
             gId,
             data,

@@ -1,6 +1,4 @@
 import { getUniqueGametypeLeagues, getUniqueMapLeagues, sanitizeCTFLeaguePageReq, setCTFLeaguePageMetaData } from "../ctfLeague.mjs";
-import { getGametypeNames } from "../gametypes.mjs";
-import { getMapNames } from "../maps.mjs";
 import { getSingleCTFLeague } from "../ctfLeague.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
@@ -8,27 +6,32 @@ export async function renderCTFLeaguePage(req, res){
 
     try{
 
-        const timeZone = await getSiteWideTimeZone();
-        const pageSettings = await getCategorySettings("CTF League");
+        const seasonId = 0;
+
+        const [timeZone, pageSettings, gametypesInfo] = await Promise.all([
+            getSiteWideTimeZone(),
+            getCategorySettings("CTF League"),
+            getUniqueGametypeLeagues(0),
+        ]);
 
         let {
-            mode, id, gId, seasonId, seasonInfo, 
+            mode, id, gId, 
             page, perPage, leagueSettings, 
             maxMatchesPerPlayer, maxMatchAge, lastLeagueRefresh
-        } = await sanitizeCTFLeaguePageReq(req, pageSettings);
+        } = await sanitizeCTFLeaguePageReq(req, seasonId, pageSettings);
 
-        const uniqueGametypes = await getUniqueGametypeLeagues(0);
-        const gametypeNames = await getGametypeNames(uniqueGametypes, true);
 
-        let mapNames = {};
+        let mapsInfo = {
+            "names": {},
+            "mapIds": []
+        };
 
         if(mode === "maps"){
 
-            const mapIds = await getUniqueMapLeagues(0, gId);
-            mapNames = await getMapNames(mapIds);
-
-            if(mapIds.indexOf(parseInt(id)) === -1 && mapIds.length > 0){
-                id = mapIds[0];
+            mapsInfo = await getUniqueMapLeagues(seasonId, gId);
+    
+            if(mapsInfo.mapIds.indexOf(parseInt(id)) === -1 && mapsInfo.mapIds.length > 0){
+                id = mapsInfo.mapIds[0];
             }
         }
 
@@ -45,7 +48,7 @@ export async function renderCTFLeaguePage(req, res){
         const {
             title, brandingSettings, subHeader, 
             gametypeName, mapName 
-        } = await setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id, gId);
+        } = await setCTFLeaguePageMetaData(mode, gametypesInfo.names, mapsInfo.names, id, gId);
 
 
         res.render("ctfLeague.ejs", {
@@ -57,8 +60,8 @@ export async function renderCTFLeaguePage(req, res){
             maxMatchesPerPlayer,
             maxMatchAge,
             lastLeagueRefresh,
-            gametypeNames,
-            mapNames,
+            "gametypeNames": gametypesInfo.names,
+            "mapNames": mapsInfo.names,
             id,
             gId,
             data,
