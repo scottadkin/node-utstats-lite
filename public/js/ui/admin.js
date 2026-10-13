@@ -6794,6 +6794,7 @@ class AdminSeasonsManager{
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
             this.mode = e.detail.newTab;
+            if(this.mode === "edit" || this.mode === "recalculate") this.selectedSeason = 0;
             this.render();
         });
     }
@@ -7187,6 +7188,39 @@ class AdminSeasonsManager{
         this.content.append(deleteForm);
     }
 
+    async recalculateSeason(){
+
+        try{
+
+            if(this.bActionInProgress){
+                new UINotification(this.parent, "warning", "Action In Progress", `Please wait for previous action to finish`);
+                return;
+            }
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "recalculate-season", "season": this.selectedSeason})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+            new UINotification(this.parent, "pass", "Success", `Season recalculated successfully`);
+            
+            await this.loadData();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Recalculate Seasons", err.toString());
+        }finally{
+
+            this.bActionInProgress = false;
+        }
+    }
+
     renderRecalculateSeason(){
 
         if(this.mode !== "recalculate") return;
@@ -7196,10 +7230,8 @@ class AdminSeasonsManager{
             `If you adjust the start and or end dates of an existing season you will need to perform this action.`
         ]);
 
-
         const form = UIDiv("form");
         const seasonRow = UIDiv("form-row");
-
 
         seasonRow.append(UILabel("Selected Season"));
 
@@ -7210,6 +7242,15 @@ class AdminSeasonsManager{
         });
 
         form.append(seasonRow);
+
+        const button = UIButton("Recalculate Season","submit-button");
+
+        button.addEventListener("click", () =>{
+            this.recalculateSeason();
+        });
+
+        form.append(button);
+
         this.content.append(form);
 
 

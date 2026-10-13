@@ -757,7 +757,6 @@ export async function recalculateSeason(seasonId){
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
     if(seasonId === 0) throw new Error(`You can not delete season 0.`);
 
-
     await deleteSeasonUniqueMatchCombinations(seasonId);
     await deleteSeasonObjectStats(seasonId);
     await calculateSeasonStats(seasonId);
