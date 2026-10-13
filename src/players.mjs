@@ -1469,13 +1469,23 @@ export async function getPlayerRecentMatches(playerId, seasonId, gametype, map, 
 }
 
 
-export async function getAllGametypeIds(seasonId, gametypeId){
+export async function getAllPlayerGametypeIds(seasonId, gametypeId){
 
-    if(arguments.length === 1) throw new Error(`seasonId getAllGametypeIds is missing`);
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+    
+    if(arguments.length === 1) throw new Error(`seasonId getAllPlayerGametypeIds is missing`);
 
-    const query = `SELECT player_id FROM nstats_player_totals WHERE gametype_id=? AND map_id=0 AND season_id=?`;
+    let query = `SELECT player_id FROM nstats_player_totals WHERE gametype_id=? AND map_id=0`;
 
-    const result = await simpleQuery(query, [gametypeId, seasonId]);
+    const vars = [gametypeId];
+
+    //if(seasonId !== 0){
+        query += ` AND season_id=?`;
+        vars.push(seasonId);
+   // }
+
+    const result = await simpleQuery(query, vars);
 
     return result.map((r) =>{
         return r.player_id;
@@ -1489,12 +1499,20 @@ export async function getAllGametypeIds(seasonId, gametypeId){
 export async function getAllPlayerMapIds(seasonId, mapId){
 
     if(arguments.length === 1) throw new Error(`seasonId is missing`);
-    const query = `SELECT DISTINCT player_id FROM 
-    nstats_match_players 
-    WHERE map_id=? AND 
-    EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id=nstats_match_players.player_id AND nstats_matches.season_id=?)`;
 
-    const result = await simpleQuery(query, [mapId, seasonId]);
+    let query = `SELECT DISTINCT player_id FROM 
+    nstats_player_totals 
+    WHERE map_id=?`;
+
+    const vars = [mapId];
+
+
+
+    query += ` AND season_id=?`;
+    vars.push(seasonId);
+    
+
+    const result = await simpleQuery(query, vars);
 
     return result.map((r) =>{
         return r.player_id;

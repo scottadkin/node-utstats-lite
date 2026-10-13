@@ -9,17 +9,22 @@ export async function renderRankingsPage(req, res, userSession){
 
     try{
 
-        const pageSettings = await getCategorySettings("Rankings");
-        const timeZone = await getSiteWideTimeZone();
-        const rankingSettings = await getRankingSettings(true);
+        const [pageSettings, timeZone, rankingSettings] = await Promise.all([
+
+            getCategorySettings("Rankings"),
+            getSiteWideTimeZone(),
+            getRankingSettings(true)
+        ]);
 
         const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId} = await sanitizeRankingsPageReq(req, pageSettings)
 
-        const data = await getRankings(seasonId, targetId, page, perPage, timeRange, mode);
-
         let title = `${typeName} - ${titleName} Rankings`;
+
+        const [data, minMatchesSetting] = await Promise.all([
+            getRankings(seasonId, targetId, page, perPage, timeRange, mode),
+            getMinMatchesSetting(mode)
+        ]);
        
-        const minMatchesSetting = await getMinMatchesSetting(mode);
 
         res.render("rankings.ejs",{
             "host": req.headers.host,
@@ -38,6 +43,7 @@ export async function renderRankingsPage(req, res, userSession){
             minMatchesSetting,
             timeZone,
             "seasonId": 0,
+            "seasonInfo": null,
             "bSeasonPage": false
         });
     }catch(err){

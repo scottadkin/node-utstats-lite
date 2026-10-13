@@ -2,29 +2,30 @@ import {
     getMinMatchesSetting, getRankingSettings, sanitizeRankingsPageReq, 
     getRankings
 } from "../../rankings.mjs";
-import { getSeasonById } from "../../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 
 export async function renderSeasonRankingsPage(req, res, userSession){
 
     try{
 
-        const pageSettings = await getCategorySettings("Rankings");
-        const timeZone = await getSiteWideTimeZone();
-        const rankingSettings = await getRankingSettings(true);
+        const [pageSettings, timeZone, rankingSettings] = await Promise.all([
+
+            getCategorySettings("Rankings"),
+            getSiteWideTimeZone(),
+            getRankingSettings(true)
+        ]);
 
         const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage} = await sanitizeRankingsPageReq(req, pageSettings);
 
         const seasonId = res.locals.season;
-
-        const data = await getRankings(seasonId, targetId, page, perPage, timeRange, mode);
+        const seasonInfo = res.locals.seasonInfo;
 
         let title = `${typeName} - ${titleName} Season Rankings`;
 
-        const seasonInfo = await getSeasonById(seasonId);
-       
-
-        const minMatchesSetting = await getMinMatchesSetting(mode);
+        const [data, minMatchesSetting] = await Promise.all([
+            getRankings(seasonId, targetId, page, perPage, timeRange, mode),
+            getMinMatchesSetting(mode)
+        ]);
 
         res.render("rankings.ejs",{
             "host": req.headers.host,
@@ -44,7 +45,7 @@ export async function renderSeasonRankingsPage(req, res, userSession){
             timeZone,
             "seasonId": seasonId,
             "bSeasonPage": true,
-             seasonInfo
+            seasonInfo
         });
     }catch(err){
         res.send(err.toString());

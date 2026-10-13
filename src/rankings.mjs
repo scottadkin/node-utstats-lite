@@ -1,7 +1,7 @@
 import { simpleQuery, bulkInsert, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
-import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
-import { getAllGametypeIds as getAllPlayerGametypeIds, getAllPlayerMapIds, getBasicPlayerInfo } from "./players.mjs";
+import { getAll, getAllIds as getAllGametypeIds } from "./gametypes.mjs";
+import { getAllPlayerGametypeIds, getAllPlayerMapIds, getBasicPlayerInfo } from "./players.mjs";
 import { getAllMapIds } from "./maps.mjs";
 import { getAllSeasonIds, seasonGetAllGametypeIds, seasonGetAllGametypeNames, seasonGetAllMapIds, seasonGetAllMapNames } from "./seasons.mjs";
 import Message from "./message.mjs";
@@ -201,7 +201,6 @@ async function bulkInsertRankings(seasonId, targetId, data, type){
     }else{
         throw new Error(`Unknown type for bulk insert rankings`);
     }
-
 
     const insertVars = [];
 
@@ -546,8 +545,9 @@ export async function recalculateAllRankings(){
 
         new Message(`Recalculating rankings for season ${seasonId}`, "note");
 
-        const gametypeIds = await getAllGametypeIds(seasonId);
-
+        const gametypeIds = (seasonId !== 0) ? await seasonGetAllGametypeIds(seasonId) : await getAllGametypeIds();
+        //await deleteAllPlayerSeasonRankings(seasonId); already done in recalculate gametype
+        //await deleteAllMapSeasonRankings(seasonId);   already done in recalculate map
         const seasonPromises = [];
 
 
@@ -561,12 +561,12 @@ export async function recalculateAllRankings(){
             seasonPromises.push(recalculateGametype(seasonId, gametypeId));
         }
 
-        await deleteAllPlayerSeasonRankings(seasonId);
+        //await deleteAllPlayerSeasonRankings(seasonId);
         await Promise.all(seasonPromises);
 
-
-        const mapIds = await seasonGetAllMapIds(seasonId);
-
+        
+        const mapIds = (seasonId !== 0) ? await seasonGetAllMapIds(seasonId) : await getAllMapIds();
+        
         const mapPromises = [];
 
         for(let x = 0; x < mapIds.length; x++){
@@ -576,7 +576,7 @@ export async function recalculateAllRankings(){
             mapPromises.push(recalculateMap(seasonId, mapIds[x]));
         }
 
-        await deleteAllMapSeasonRankings(seasonId);
+        //await deleteAllMapSeasonRankings(seasonId);
         await Promise.all(mapPromises);
 
     }
@@ -588,30 +588,14 @@ export async function recalculateAllRankings(){
 export async function recalculateGametype(seasonId, id){
 
     if(arguments.length === 1) throw new Error(`You need to add seasonId parameter`);
+
+ 
     await deleteGametypeRankings(seasonId, id);
 
     const playerIds = await getAllPlayerGametypeIds(seasonId, id);
 
     await calculateRankings(seasonId, id, playerIds);
   
-}
-
-export async function recalculatePlayersByIds(playerIds){
-
-    if(playerIds.length === 0) return null;
-
-    const gametypeIds = await getAllGametypeIds();
-
-    for(let i = 0; i < gametypeIds.length; i++){
-        
-        const g = gametypeIds[i];
-
-        const playerIds = await getAllPlayerGametypeIds(g);
-
-        throw new Error(`Need to add seasonId to calculate rankings`);
-        await calculateRankings(g, playerIds)
-    }
-
 }
 
 
@@ -685,6 +669,8 @@ export async function getPlayerRankings(playerId, minDate, seasonId){
 
 export async function recalculateMap(seasonId, id){
 
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
     if(arguments.length === 1) throw new Error(`seasonId is missing`);
     await deleteMapRankings(seasonId, id);
 
