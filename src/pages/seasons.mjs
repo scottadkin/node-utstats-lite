@@ -19,7 +19,7 @@ export async function renderSeasonsPage(req, res){
             "host": req.headers.host,
             timeZone,
             title,
-            "meta": {"description": "Login", "image": "images/maps/default.jpg"},
+            "meta": {"description": "View basic information about all the seasons played on our servers.", "image": "images/maps/default.jpg"},
             "userSession": req.userSession ,
             "seasonsData": seasons,
     });

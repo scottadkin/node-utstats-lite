@@ -1,17 +1,29 @@
+import { convertTimestamp, toPlaytime } from "../generic.mjs";
 import { getAllSeasons, getSeasonBasicObjectStats, getSeasonById, seasonsGetMostPlayedMaps } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
+
 export async function renderSeasonPage(req, res){
 
-    const brandingSettings = await getCategorySettings("Branding");
-    const title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
-    const timeZone = await getSiteWideTimeZone();
 
 
-   
-    const seasonId = res.locals.season;
+    const [brandingSettings, timeZone] = await Promise.all([
+        getCategorySettings("Branding"), 
+        getSiteWideTimeZone()
+    ]);
 
     const basicSeasonInfo = res.locals.seasonInfo;
+
+    const title = `${basicSeasonInfo.name} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+    
+    let description = `${basicSeasonInfo.name} season started ${convertTimestamp(basicSeasonInfo.start_date, true, true)}`;
+    description += ` and ended ${convertTimestamp(basicSeasonInfo.end_date, true, true)}.`;
+    description += ` ${basicSeasonInfo.total_matches} matches where played with a total of ${basicSeasonInfo.total_players} players,`;
+    description += ` with a total playtime of ${toPlaytime(basicSeasonInfo.total_playtime)}.`;
+
+    const seasonId = res.locals.season;
+
+    
 
     const objectStats = await getSeasonBasicObjectStats(seasonId);
 
@@ -22,12 +34,11 @@ export async function renderSeasonPage(req, res){
             "host": req.headers.host,
             timeZone,
             title,
-            "meta": {"description": "Login", "image": "images/maps/default.jpg"},
+            "meta": {description, "image": "images/maps/default.jpg"},
             "userSession": req.userSession,
             basicSeasonInfo,
             objectStats,
             mostPlayedMaps,
             seasonId
         });
-    //res.json({"test": "test"});
 }

@@ -546,3 +546,18 @@ function stripISOSecondsAndMS(isoString){
     if(result === null) throw new Error(`Not a valid iso string provided`);
     return result[1];
 }
+
+
+function debugDisplayPageMetaData(){
+
+    const elems = document.querySelectorAll("meta");
+
+    for(let i = 0; i < elems.length; i++){
+
+        const e = elems[i];
+
+        const name = e.getAttribute("name") ?? e.getAttribute("property");
+        if(name === null) continue;
+        console.log(name, " = " ,e.getAttribute("content"));
+    }
+}
