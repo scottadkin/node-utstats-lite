@@ -18,18 +18,18 @@ export async function renderRankingsPage(req, res, userSession){
 
         const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId} = await sanitizeRankingsPageReq(req, pageSettings)
 
-        let title = `${typeName} - ${titleName} Rankings`;
 
         const [data, minMatchesSetting] = await Promise.all([
             getRankings(seasonId, targetId, page, perPage, timeRange, mode),
             getMinMatchesSetting(mode)
         ]);
        
+        let title = `${typeName} - ${titleName} Rankings`;
 
         res.render("rankings.ejs",{
             "host": req.headers.host,
             "title": title,
-            "meta": {"description": `View the player ${mode} rankings for ${typeName}.`, "image": "images/maps/default/jpg"},
+            "meta": {"description": `View player ${mode} rankings for ${typeName}.`, "image": "images/maps/default/jpg"},
             mode,
             data,
             "names": itemNames,

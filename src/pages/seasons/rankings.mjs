@@ -15,12 +15,17 @@ export async function renderSeasonRankingsPage(req, res, userSession){
             getRankingSettings(true)
         ]);
 
-        const {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage} = await sanitizeRankingsPageReq(req, pageSettings);
-
         const seasonId = res.locals.season;
         const seasonInfo = res.locals.seasonInfo;
 
-        let title = `${typeName} - ${titleName} Season Rankings`;
+        const {
+            mode, itemNames, targetId, 
+            timeRange, typeName, titleName, page, perPage
+        } = await sanitizeRankingsPageReq(req, pageSettings);
+
+        
+
+        let title = `${typeName} - ${seasonInfo.name} - Rankings`;
 
         const [data, minMatchesSetting] = await Promise.all([
             getRankings(seasonId, targetId, page, perPage, timeRange, mode),
@@ -30,7 +35,7 @@ export async function renderSeasonRankingsPage(req, res, userSession){
         res.render("rankings.ejs",{
             "host": req.headers.host,
             "title": title,
-            "meta": {"description": `View season player ${mode} rankings for ${typeName}.`, "image": "images/maps/default/jpg"},
+            "meta": {"description": `View player ${typeName} rankings for the season ${seasonInfo.name}.`, "image": "images/maps/default/jpg"},
             mode,
             data,
             "names": itemNames,
