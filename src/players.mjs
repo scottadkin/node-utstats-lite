@@ -7,7 +7,7 @@ import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./w
 import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";
-import { getAllSeasonIds } from "./seasons.mjs";
+import { getAllSeasonIds, getSeasonById } from "./seasons.mjs";
 import { getCategorySettings } from "./siteSettings.mjs";
 import { getPageLayout } from "./pageLayout.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "./weapons.mjs";
@@ -2611,19 +2611,34 @@ export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, ord
 }
 
 
-export async function sanitizePlayerPageReq(id,req, seasonId){
+export async function sanitizePlayerPageReq(id, req, seasonId){
 
 
     const basicPlayerInfo = await getPlayerProfileInfo(id, seasonId);
     if(basicPlayerInfo === null) throw new Error(`Player does not exist!`);
 
-    let title = `${basicPlayerInfo.name} - Player Profile`;
+    const seasonInfo = await getSeasonById(seasonId);
+   
+
+    let title = `${basicPlayerInfo.name}`;
+    let description = `View the`;
+
+    if(seasonInfo !== null){
+
+        title += ` - ${seasonInfo.name}`;
+        description += ` ${seasonInfo.name} season player profile of ${basicPlayerInfo.name},`;
+        
+    }else{
+        description += ` player profile of ${basicPlayerInfo.name},`
+       
+    }
+    title += ` - Player Profile`;
 
     const lastSeenString = convertTimestamp(basicPlayerInfo.last_active, true, false, true);
     const playtimeString = toPlaytime(basicPlayerInfo.playtime);
 
-    let description = `View the player profile of ${basicPlayerInfo.name}, `;
-    description += `they were last seen ${lastSeenString}, and have played for a total of ${playtimeString}`;
+    description += ` they were last seen ${lastSeenString}, and have played for a total of ${playtimeString}`;
+    
 
     const playerId = basicPlayerInfo.id;
 
