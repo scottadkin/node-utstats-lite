@@ -3,13 +3,13 @@
 const options = [];
 
 if(locals.bSeasonPage && locals.seasonInfo !== undefined && locals.seasonInfo !== null){
-    options.push({"name": "Main Site", "url": "/", "highlight": ["home"]});
+    //options.push({"name": "Main Site", "url": "/", "highlight": ["home"]});
 }else{
     options.push({"name": "Home", "url": "/", "highlight": ["home"]});
 }
 
 
-options.push({"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]});
+//options.push({"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]});
 
 if(!locals.bSeasonPage || (locals.seasonInfo === undefined || locals.seasonInfo === null)){
     options.push(
@@ -29,7 +29,7 @@ if(locals.bSeasonPage){
     if(locals.seasonInfo !== null){
 
         const seasonSubURL = `/season/${locals.seasonInfo.id}`;
-        options.push({"name": "Season Home", "url": `${seasonSubURL}/`, "highlight": ["season-home"]});
+        options.push({"name": "Home", "url": `${seasonSubURL}/`, "highlight": ["season-home"]});
         options.push({"name": "Matches", "url": `${seasonSubURL}/matches`, "highlight": ["matches", "match"]});
         options.push({"name": "Players", "url": `${seasonSubURL}/players`, "highlight": ["players"]});
         options.push({"name": "Rankings", "url": `${seasonSubURL}/rankings`, "highlight": ["rankings"]});
@@ -70,6 +70,12 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 
         
             <nav>  
+                <div class="nav-dropdown" id="nav-season-list">
+                    <div id="nav-dummy">
+                        <%= (locals.season !== 0) ? locals?.seasonInfo.name : "Season List" %>
+                        <div id="nav-inner"></div>
+                    </div>  
+                </div> 
                 
                 <%
                 for(let i = 0; i < options.length; i++){
@@ -84,12 +90,7 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 
                     _%><a href="<%= url %>"<%- (className === "") ? "" :` class="${className}"`%>><%= name %></a><%_
                 }%>    
-                <div class="nav-dropdown" id="nav-season-list">
-                    <div id="nav-dummy">
-                        <%= (locals.season !== 0) ? locals?.seasonInfo.name : "Seasons List" %>
-                        <div id="nav-inner"></div>
-                    </div>  
-                </div>    
+                   
             </nav>
 
             

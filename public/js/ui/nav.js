@@ -17,13 +17,18 @@ class UINavDropDown{
 
     createElements(){
 
+        const elem = document.createElement("a");
+        elem.href = `/`;
+        elem.append(`All Time`);
+        this.wrapper.append(elem);
+
         for(let i = 0; i < this.options.length; i++){
 
             const o = this.options[i];
             const elem = document.createElement("a");
             elem.href = `/season/${o.id}/`;
             elem.append(o.name);
-            this.wrapper.append(elem)
+            this.wrapper.append(elem);
         }
     }
 

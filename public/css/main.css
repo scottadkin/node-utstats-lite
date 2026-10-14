@@ -106,8 +106,9 @@ nav a, .nav-dropdown{
 }
 
 #nav-dummy{
-    color:var(--font-color-blue);
     font-size:var(--font-size-80);
+    font-style: italic;
+    color:rgb(200,200,200);
 }
 
 .nav-content{
