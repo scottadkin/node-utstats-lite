@@ -1506,6 +1506,8 @@ section{
 
 
 .season-stat-wrapper{
+    background-color:var(--bg-color-mid);
+    border:1px solid var(--border-color-1);
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -1516,11 +1518,18 @@ section{
     margin-left:auto;
     margin-right:auto;
     margin-bottom: var(--margin-1);
+    padding:var(--padding-1);
+}
+
+.season-name{
+    font-size:var(--font-size-100);
+    flex: 1 0 100%;
+    margin-bottom: var(--margin-2);
 }
 
 .season-stat{
     flex: 1 1 200px;
-    background-color: var(--bg-color-mid);
+    background-color: var(--bg-color-dark);
     border:1px solid var(--border-color-1);
     font-size:var(--font-size-80);
     

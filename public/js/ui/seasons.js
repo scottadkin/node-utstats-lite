@@ -111,31 +111,25 @@ function UISeasonStat(label, value){
     return elem;
 }
 
-function UISeasonInfo(parent, data, bActive){
+function UISeasonInfo(parent, data){
 
-    const section = new UISection(parent, data.name);
-    section.elem.className = "season-info";
-
-    if(bActive) section.elem.className += ` season-active`;
+    const wrapper = UIDiv("season-info");
+    parent.append(wrapper);
 
 
-    const content = [];
-
-   
-    
     const ssw = UIDiv("season-stat-wrapper");
+    wrapper.append(ssw);
 
-    content.push(ssw);
+    const test = UIDiv("season-name");
+    test.append(data.name);
 
-
+    ssw.append(test);
     ssw.append(UISeasonStat("Start Date", toDateString(data.start_date, TIME_ZONE, true)));
     ssw.append(UISeasonStat("End Date", toDateString(data.end_date, TIME_ZONE, true)));
     ssw.append(UISeasonStat("Total Matches", data.total_matches));
 
     ssw.append(UISeasonStat(`Total Players`, data.total_players));
     ssw.append(UISeasonStat(`Total Playtime`, toPlaytime(data.total_playtime)));
-
-    section.setContent(content);
 }
 
 class SeasonsPage{
@@ -146,6 +140,8 @@ class SeasonsPage{
 
         this.wrapper = UIDiv();
 
+        UIHeader(this.wrapper, "Seasons");
+
         this.data = data;
         
         this.mostPlayedMaps = mostPlayedMaps;
@@ -153,13 +149,13 @@ class SeasonsPage{
 
         this.parent.append(this.wrapper);
 
-        //this.renderTestRichView();
-        this.renderBasicList();
+        this.renderTestRichView();
+        //this.renderBasicList();
     }
 
     renderTestRichView(){
 
-        this.wrapper.innerHTML = ``;
+        //this.wrapper.innerHTML = ``;
 
         const now = new Date();
 
