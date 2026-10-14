@@ -1161,6 +1161,9 @@ export async function ctfLeagueRecalculateSeason(seasonId){
                     const mapId = mapIds[y];
                     new Message(`Recalculating season(${seasonId}) ctf league for gametypeId ${gId} and mapId ${mapId}`,"note");
                     await recalculateSeasonTable(seasonId, mapId, gId, maxMatches, cutOffDate, seasonEndDate);
+
+                    new Message(`Recalculating season(${seasonId}) ctf league for gametypeId 0(all time) and mapId ${mapId}`,"note");
+                    await recalculateSeasonTable(seasonId, mapId, 0, maxMatches, cutOffDate, seasonEndDate);
       
                 }
 
