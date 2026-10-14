@@ -1,12 +1,16 @@
-import { sanitizeMapsReq, searchMaps, VALID_MAP_SEARCH_BY } from "../maps.mjs";
+import { sanitizeMapsReq, searchMaps } from "../maps.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 
 export async function renderMapsPage(req, res, userSession){
 
     try{
-        const timeZone = await getSiteWideTimeZone();
-        const pageSettings = await getCategorySettings("Maps");
+        
+        const [brandingSettings, pageSettings, timeZone] = await Promise.all([
+            getCategorySettings("Branding"),
+            getCategorySettings("Maps"),
+            getSiteWideTimeZone()
+        ]);
 
         let title = "Maps";
         let description = "View all the maps played on our servers.";
@@ -19,7 +23,6 @@ export async function renderMapsPage(req, res, userSession){
             description = `Map search for names containing: ${nameSearch}`;
         }
         
-        const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
         const {totalMatches, maps} = await searchMaps(nameSearch, page, perPage, sortBy, order, 0);

@@ -1,22 +1,22 @@
 
 import { searchMaps, sanitizeMapsReq } from "../../maps.mjs";
-import { getSeasonById } from "../../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 
 export async function renderSeasonMapsPage(req, res){
 
-    const brandingSettings = await getCategorySettings("Branding");
-    const pageSettings = await getCategorySettings("Maps");
-    let title = `Season - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
-    const timeZone = await getSiteWideTimeZone();
+
+    const [brandingSettings, pageSettings, timeZone] = await Promise.all([
+        getCategorySettings("Branding"),
+        getCategorySettings("Maps"),
+        getSiteWideTimeZone()
+    ]);
 
     const seasonId = res.locals.season;
-    
-    const basicSeasonInfo = await getSeasonById(seasonId);
+    const seasonInfo = res.locals.seasonInfo;
 
-    if(basicSeasonInfo === null) throw new Error(`Season doesn't exist.`);
+    let title = `${seasonInfo.name} Maps - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
-    let description = "View all the maps played on our servers.";
+    let description = `View all the maps played on our servers during the ${seasonInfo.name} season.`;
 
     const {nameSearch, page, perPage, displayMode, order, sortBy} = sanitizeMapsReq(req, pageSettings);
 
@@ -26,7 +26,6 @@ export async function renderSeasonMapsPage(req, res){
         description = `Map search for names containing: ${nameSearch}`;
     }
 
-
     const {totalMatches, maps} = await searchMaps(nameSearch, page, perPage, sortBy, order, seasonId);
 
 
@@ -35,10 +34,10 @@ export async function renderSeasonMapsPage(req, res){
             "host": req.headers.host,
             timeZone,
             title,
-            "meta": {"description": "Season Maps", "image": "images/maps/default.jpg"},
+            "meta": {description, "image": "images/maps/default.jpg"},
             "userSession": req.userSession,
             seasonId,
-            "seasonInfo": basicSeasonInfo,
+            seasonInfo,
             "bSeasonPage": true,
             nameSearch,
             sortBy,
