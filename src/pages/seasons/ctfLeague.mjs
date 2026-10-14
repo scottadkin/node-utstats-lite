@@ -54,12 +54,18 @@ export async function renderSeasonCTFLeaguePage(req, res){
             gametypeName, mapName 
         } = await setCTFLeaguePageMetaData(mode, gametypesInfo.names, mapsInfo.names, id, gId);
 
+        let description = `View the top players for ${subHeader} during the ${seasonInfo.name} season.`;
+
+        if(subHeader.toLowerCase() === "combined"){
+            description = `View the season all time CTF player league for ${seasonInfo.name}, any ctf gametype and map is counted.`
+        }
+
 
         res.render("ctfLeague.ejs", {
             "host": req.headers.host,
             timeZone,
             title,
-            "meta": {"description": `View the top players for the ${title}`, "image": "images/maps/default.jpg"},
+            "meta": {description, "image": "images/maps/default.jpg"},
             mode,
             maxMatchesPerPlayer,
             maxMatchAge,
