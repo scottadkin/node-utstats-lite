@@ -55,7 +55,8 @@ const jsBase = (seasonId !== 0) ? `../../../js/` : `../js/`
         <%- JSON.stringify(ctfMaps) %>,
         <%- JSON.stringify(domGametypes) %>,
         <%- JSON.stringify(domMaps) %>,
-        "<%= seasonId %>"
+        "<%= seasonId %>",
+        <%- JSON.stringify(seasonInfo) %>
     );
 </script>
 

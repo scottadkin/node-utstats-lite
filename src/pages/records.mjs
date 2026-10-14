@@ -12,6 +12,9 @@ export async function renderRecordsPage(req, res, userSession){
 
     
     try{
+
+        const seasonId = res.locals.season;
+        const seasonInfo = null;
         
         const [pageSettings, brandingSettings, timeZone, {gametypes, maps, combos, ctfGametypes, ctfMaps, domGametypes, domMaps}] = await Promise.all([
             getCategorySettings("Records"),
@@ -24,8 +27,7 @@ export async function renderRecordsPage(req, res, userSession){
         const {
             mode, recordType, dirtyPage, 
             dirtyPerPage, selectedGametype, 
-            selectedMap, selectedMinimumMatchesPlayed, 
-            seasonId, seasonInfo
+            selectedMap, selectedMinimumMatchesPlayed
         } = await sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps);
 
 
@@ -35,7 +37,11 @@ export async function renderRecordsPage(req, res, userSession){
         );
 
  
-        const {title, description, modeDisplayName} = createRecordsPageMetaData(mode, recordType, gametypes, maps, selectedGametype, selectedMap, brandingSettings);
+        const {
+            title, description, modeDisplayName
+        } = createRecordsPageMetaData(
+            mode, recordType, gametypes, maps, selectedGametype, selectedMap, brandingSettings, seasonInfo
+        );
 
 
         

@@ -21,12 +21,12 @@ export async function renderSeasonRecordsPage(req, res, userSession){
         ]);
 
         const seasonId = res.locals.season;
+        const seasonInfo = res.locals.seasonInfo;
 
         const {
             mode, recordType, dirtyPage, 
             dirtyPerPage, selectedGametype, 
-            selectedMap, selectedMinimumMatchesPlayed, 
-            seasonInfo
+            selectedMap, selectedMinimumMatchesPlayed
         } = await sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps);
 
 
@@ -35,7 +35,15 @@ export async function renderSeasonRecordsPage(req, res, userSession){
             selectedMinimumMatchesPlayed, seasonId
         );
 
-        const {title, description, modeDisplayName} = createRecordsPageMetaData(mode, recordType, gametypes, maps, selectedGametype, selectedMap, brandingSettings);
+        const {
+            title, 
+            description, 
+            modeDisplayName
+        } = createRecordsPageMetaData(
+            mode, recordType, gametypes, 
+            maps, selectedGametype, selectedMap, 
+            brandingSettings, seasonInfo
+        );
 
         
         res.render("records.ejs",{

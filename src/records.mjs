@@ -464,9 +464,6 @@ export async function sanitizeRecordsPageReq(req, res, pageSettings, gametypes, 
 
     let seasonInfo = null;
 
-    if(seasonId !== 0){
-        seasonInfo = await getSeasonById(seasonId);
-    }
 
     if(selectedMinimumMatchesPlayed !== selectedMinimumMatchesPlayed) selectedMinimumMatchesPlayed = 0;
     
@@ -487,7 +484,7 @@ export async function sanitizeRecordsPageReq(req, res, pageSettings, gametypes, 
     mode = sanitizeRecordMode(mode);
     recordType = sanitizeRecordType(mode, recordType);
 
-    return {dirtyPage, dirtyPerPage, mode, recordType, selectedGametype, selectedMap, selectedMinimumMatchesPlayed, seasonInfo, seasonId}
+    return {dirtyPage, dirtyPerPage, mode, recordType, selectedGametype, selectedMap, selectedMinimumMatchesPlayed}
 }
 
 function getIdName(data, id){
@@ -500,13 +497,22 @@ function getIdName(data, id){
     return "Not Found";
 }
 
-export function createRecordsPageMetaData(mode, recordType, gametypes, maps, selectedGametype, selectedMap, brandingSettings){
+export function createRecordsPageMetaData(mode, recordType, gametypes, maps, selectedGametype, selectedMap, brandingSettings, seasonInfo){
 
     const modeDisplayName = getTypeDisplayName(mode, recordType);
     
-    let title = `${MODE_TITLES[mode]} - ${modeDisplayName} - ${brandingSettings["Site Name"]}`;
+    let title = `${modeDisplayName} -`;
+    
+    if(seasonInfo !== null){
+        title += ` ${seasonInfo.name}`;
+    }
+    title += ` ${MODE_TITLES[mode]} - ${brandingSettings["Site Name"]}`;
 
     let description = `View the top ${modeDisplayName} ${MODE_TITLES[mode].toLowerCase()}`;
+
+    if(seasonInfo !== null){
+        description += ` for the ${seasonInfo.name} season`;
+    }
 
     if(selectedMap !== 0){
         description += `, where the map played was ${getIdName(maps, selectedMap)}`;

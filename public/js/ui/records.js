@@ -2,7 +2,7 @@ class RecordsPage{
 
     constructor(siteName, parent, mode, validTypes, modeTitles, gametypes, maps, 
         gametypeMapCombos, selectedGametype, selectedMap, recordType, minimumMatchesPlayed, data, totalResults,
-        page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps, seasonId
+        page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps, seasonId, seasonInfo
     ){
 
         this.siteName = siteName;
@@ -13,6 +13,8 @@ class RecordsPage{
 
         this.seasonId = parseInt(seasonId);
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
+
+        this.seasonInfo = seasonInfo;
 
         this.gametypes = gametypes;
         this.maps = maps;
@@ -381,7 +383,14 @@ class RecordsPage{
             title = "Player Match Average Records";
         }
 
-        document.title = `${displayName} - ${title} - ${this.siteName}`;
+
+        if(this.seasonInfo === null){
+
+            document.title = `${displayName} - ${title} - ${this.siteName}`;
+        }else{
+
+            document.title = `${displayName} - ${this.seasonInfo.name} - ${title}`;
+        }
 
         this.header.innerHTML = '';
         this.header.append(`${displayName} - ${title}`);
