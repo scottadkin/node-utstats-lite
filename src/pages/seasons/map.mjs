@@ -11,20 +11,23 @@ export async function renderSeasonMapPage(req, res){
 
         const seasonId = res.locals.season;
         
-        const basicSeasonInfo = res.locals.seasonInfo;
+        const seasonInfo = res.locals.seasonInfo;
 
         if(req.params.id === undefined) throw new Error(`No map id found`);
-        const timeZone = await getSiteWideTimeZone();
-        const basic = await getMapInfo(req.params.id, seasonId);
 
+        const [timeZone, basic, pageSettings, pageOrder, brandingSettings] = await Promise.all([
+            getSiteWideTimeZone(),
+            getMapInfo(req.params.id, seasonId),
+            getCategorySettings("map"),
+            getPageLayout("map"),
+            getCategorySettings("Branding")
+        ]);
 
         if(basic === null) throw new Error(`Map does not exist`);
 
         let title = basic.name;
-        let description = `View stats for the map ${basic.name}.`;
+        let description = `View ${seasonInfo.name} season stats for the map ${basic.name}.`;
 
-        const pageSettings = await getCategorySettings("map");
-        const pageOrder = await getPageLayout("map");
 
         let ctfLeagueSettings = {};
 
@@ -38,8 +41,7 @@ export async function renderSeasonMapPage(req, res){
             weaponStats = await getMapWeaponStats(seasonId, basic.id);
         }
 
-        const brandingSettings = await getCategorySettings("Branding");
-        title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+        title = `${title} - ${seasonInfo.name} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
 
         const uniqueGametypes = await getAllUniquePlayedGametypes(basic.id, true, seasonId);
@@ -56,7 +58,7 @@ export async function renderSeasonMapPage(req, res){
             ctfLeagueSettings,
             uniqueGametypes,
             seasonId,
-            "seasonInfo": basicSeasonInfo,
+            seasonInfo,
             "bSeasonPage": true,
             "validTypes": {
                 "player-match": VALID_PLAYER_MATCH_TYPES, 

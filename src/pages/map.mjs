@@ -10,18 +10,21 @@ export async function renderMapPage(req, res, userSession){
     try{
 
         if(req.params.id === undefined) throw new Error(`No map id found`);
-        const timeZone = await getSiteWideTimeZone();
-        const basic = await getMapInfo(req.params.id, 0);
 
-        const seasonId = res.locals.season;
+        const [timeZone, basic, pageSettings, pageOrder, brandingSettings] = await Promise.all([
+            getSiteWideTimeZone(),
+            getMapInfo(req.params.id, 0),
+            getCategorySettings("map"),
+            getPageLayout("map"),
+            getCategorySettings("Branding")
+        ]);
+
 
         if(basic === null) throw new Error(`Map does not exist`);
 
         let title = basic.name;
         let description = `View stats for the map ${basic.name}.`;
 
-        const pageSettings = await getCategorySettings("map");
-        const pageOrder = await getPageLayout("map");
 
         let ctfLeagueSettings = {};
 
@@ -35,7 +38,6 @@ export async function renderMapPage(req, res, userSession){
             weaponStats = await getMapWeaponStats(0, basic.id);
         }
 
-        const brandingSettings = await getCategorySettings("Branding");
         title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
 
