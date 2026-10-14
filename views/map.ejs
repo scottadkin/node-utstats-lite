@@ -56,7 +56,7 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
             } break;
 
             case "Display CTF League": {
-                %>new UIMapCTFLeague("#root", "<%= basic.id %>", pageSettings, ctfLeagueSettings);<%
+                %>new UIMapCTFLeague("#root", "<%= basic.id %>", pageSettings, ctfLeagueSettings, "<%= seasonId %>");<%
             } break;
 
             case "Display Recent Matches": {

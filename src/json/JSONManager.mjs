@@ -204,8 +204,9 @@ export default class JSONManager{
         const gametypeId = this.querySanitizeInteger("gametypeId");
         const {page, perPage} = this.getPageAndPerPage();
         const range = this.querySanitizeInteger("range");
+        const season = this.querySanitizeInteger("season");
 
-        const data = await getMapCTFTable(mapId, gametypeId, page, perPage, range);
+        const data = await getMapCTFTable(mapId, gametypeId, page, perPage, range, season);
  
         this.res.status(200).json({data});
     }
@@ -214,8 +215,9 @@ export default class JSONManager{
 
         const mapId = this.querySanitizeInteger("mapId");
         const range = this.querySanitizeInteger("range");
+        const season = this.querySanitizeInteger("season");
 
-        const data = await getMapUniqueGametypeLeagues(mapId, range);
+        const data = await getMapUniqueGametypeLeagues(mapId, range, season);
         this.res.status(200).json({data});
     }
 

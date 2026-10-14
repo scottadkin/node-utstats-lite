@@ -53,17 +53,17 @@ export async function insertDefaultCTFLeagueSettings(){
 }
 
 
-async function getMapTotalPossibleResults(mapId, gametypeId, minDate){
+async function getMapTotalPossibleResults(mapId, gametypeId, minDate, seasonId){
 
     const query = `SELECT COUNT(*) as total_players FROM nstats_player_ctf_league WHERE map_id=? 
-    AND gametype_id=? AND last_match>=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset ASC`;
+    AND gametype_id=? AND last_match>=? AND season_id=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset ASC`;
 
-    const result = await simpleQuery(query, [mapId, gametypeId, minDate]);
+    const result = await simpleQuery(query, [mapId, gametypeId, minDate, seasonId]);
 
     return result[0].total_players;
 }
 
-export async function getMapCTFTable(mapId, gametypeId, page, perPage, timeRange){
+export async function getMapCTFTable(mapId, gametypeId, page, perPage, timeRange, seasonId){
 
     page--;
     if(page < 0) page = 0;
@@ -71,10 +71,13 @@ export async function getMapCTFTable(mapId, gametypeId, page, perPage, timeRange
     if(timeRange !== timeRange) throw new Error("timeRange must be an integer");
     if(timeRange < 1) timeRange = 1;
 
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
+
     const now = new Date();
     const minDate = new Date(now - 60 * 60 * 24 * 1000 * timeRange);
 
-    const totalMatches = await getMapTotalPossibleResults(mapId, gametypeId, minDate);
+    const totalMatches = await getMapTotalPossibleResults(mapId, gametypeId, minDate, seasonId);
 
     if(totalMatches === 0) return {"data": [], "totalResults": 0};
 
@@ -96,6 +99,7 @@ export async function getMapCTFTable(mapId, gametypeId, page, perPage, timeRange
     LEFT JOIN nstats_players ON nstats_players.id = nstats_player_ctf_league.player_id
     WHERE nstats_player_ctf_league.map_id=? AND nstats_player_ctf_league.gametype_id=? 
     AND nstats_player_ctf_league.last_match>=?
+    AND nstats_player_ctf_league.season_id=?
     ORDER BY nstats_player_ctf_league.points DESC, 
     nstats_player_ctf_league.total_matches ASC, 
     nstats_player_ctf_league.wins DESC, 
@@ -105,7 +109,7 @@ export async function getMapCTFTable(mapId, gametypeId, page, perPage, timeRange
     
 
     const start = page * perPage;
-    const result = await simpleQuery(query, [mapId, gametypeId, minDate, start, perPage]);
+    const result = await simpleQuery(query, [mapId, gametypeId, minDate, seasonId, start, perPage]);
     
     return {"data": result, "totalResults": totalMatches};
 }
@@ -624,25 +628,30 @@ export async function getLeaguesEnabledStatus(){
     return data;
 }
 
-export async function getMapUniqueGametypeLeagues(mapId, timeframe){
+export async function getMapUniqueGametypeLeagues(mapId, timeframe, seasonId){
 
     timeframe = parseInt(timeframe);
     if(timeframe !== timeframe) throw new Error("Timeframe must be an integer");
-
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
     const range = timeframe * 60 * 60 * 24 * 1000;
 
     const now = Date.now();
     const minDate = new Date(now - range);
 
-    const query = `SELECT DISTINCT 
+    const vars = [mapId, minDate, seasonId];
+ 
+    let query = `SELECT DISTINCT 
     nstats_player_ctf_league.gametype_id as id,
-    nstats_gametypes.name as name 
+    IF(nstats_player_ctf_league.gametype_id=0, 'All Time', nstats_gametypes.name) as name 
     FROM nstats_player_ctf_league 
     LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_player_ctf_league.gametype_id
     WHERE nstats_player_ctf_league.map_id=? 
-    AND nstats_player_ctf_league.last_match>=? ORDER BY name ASC`;
+    AND nstats_player_ctf_league.last_match>=? AND nstats_player_ctf_league.season_id=?  ORDER BY name ASC`;
 
-    return await simpleQuery(query, [mapId, minDate]);
+
+    return await simpleQuery(query, vars);
+
 }
 
 export async function adminGetAllCTFLeagueSettings(){

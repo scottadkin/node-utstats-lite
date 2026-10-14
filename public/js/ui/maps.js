@@ -1014,13 +1014,15 @@ class UIMapPlayerAverages{
 
 class UIMapCTFLeague{
 
-    constructor(parent, mapId, pageSettings, leagueSettings){
+    constructor(parent, mapId, pageSettings, leagueSettings, seasonId){
 
         this.parent = document.querySelector(parent);
         this.mapId = mapId;
         this.gametypeId = 0;
         this.pageSettings = pageSettings;
         this.leagueSettings = leagueSettings;
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid itneger`);
         this.page = 1;
         this.perPage = 10;
         this.timeRange = this.leagueSettings?.["Maximum Match Age In Days"].value ?? 180;
@@ -1070,7 +1072,11 @@ class UIMapCTFLeague{
 
         try{
 
-            const req = await fetch(`/json/map-ctf-league-gametypes/?mapId=${this.mapId}&range=${this.timeRange}`);
+            let url = `/json/map-ctf-league-gametypes/?mapId=${this.mapId}`;
+
+            url += `&range=${this.timeRange}&season=${this.seasonId}`
+
+            const req = await fetch(url);
 
             const res = await req.json();
 
@@ -1101,9 +1107,13 @@ class UIMapCTFLeague{
 
             if(this.bNoDataFound) return;
 
-            const urlParts = `${this.mapId}&gametypeId=${this.gametypeId}&page=${this.page}&perPage=${this.perPage}&range=${this.timeRange}`;
+            let url = `/json/map-ctf-league/?mapId=${this.mapId}`;
+
+            url += `&gametypeId=${this.gametypeId}&page=${this.page}`;
+            url += `&perPage=${this.perPage}&range=${this.timeRange}`;
+            url += `&season=${this.seasonId}`
      
-            const req = await fetch(`/json/map-ctf-league/?mapId=${urlParts}`);
+            const req = await fetch(url);
 
             const res = await req.json();
 
