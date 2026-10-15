@@ -221,16 +221,27 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
     let wrapper = null;
     
     if(displayMode === "default"){
-        wrapper = UIDiv("rich-outter");
+        wrapper = UIDiv("new-rich-wrapper");
     }
-    const rows = [];
+    
+
 
     for(let i = 0; i < data.length; i++){
 
         const d = data[i];
 
         if(displayMode === "default"){
-            wrapper.append(UIMapRichBox(d, 0));
+            
+            const img = getMapThumbOrFullSize(d);
+            
+            const url = `/map/${d.id}`;
+            const content = [];
+
+            content.push(`${d.matches} ${plural(d.matches, "match")} played`);
+            content.push(UIBr(),`${toPlaytime(d.playtime)} Playtime`);
+            content.push(UIBr(),`Last Match ${toDateString(d.last_match, TIME_ZONE, true)}`);
+
+            wrapper.append(UIRichImageBox(img, url, d.name, content));
 
         }else{
 
