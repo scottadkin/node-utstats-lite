@@ -73,6 +73,8 @@ export async function seasonsGetMostPlayedMaps(seasonId, maxMaps){
     const query = `SELECT ${mT}.map_id,
     SUM(${mT}.matches) as total_matches, 
     SUM(${mT}.playtime) as total_playtime,
+    MIN(${mT}.first_match) as first_match,
+    MAX(${mT}.last_match) as last_match,
     nstats_maps.name
     FROM ${mT} 
     LEFT JOIN nstats_maps ON nstats_maps.id = ${mT}.map_id

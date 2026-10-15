@@ -42,13 +42,14 @@ class SeasonPage{
     }
 
 
-    renderTestMaps(){
+    renderTestMaps(maps){
 
         const testMaps = UIDiv(`test-maps`);
 
-        for(let i = 0; i < this.mostPlayedMaps.length; i++){
+        for(let i = 0; i < maps.length; i++){
 
-            const m = this.mostPlayedMaps[i];
+            const m = maps[i];
+     
             const image = getMapThumbOrFullSize(m);
 
             const wrapper = UIDiv(`test-map-wrapper`);
@@ -69,7 +70,8 @@ class SeasonPage{
             title.append(m.name);
 
             info.append(title, `${m.total_matches} Matches Played`);
-            info.append(UIBr(), `Playtime ${toPlaytime(m.total_playtime, false)}`);
+            info.append(UIBr(), `Playtime ${toPlaytime(m.total_playtime, false)}`, UIBr());
+            info.append(`Last Match ${toDateString(m.last_match, TIME_ZONE, true)}`);
             wrapper.append(imgWrapper, info);
 
 
@@ -141,8 +143,8 @@ class SeasonPage{
         new TESTUITable(this.wrapper, tableOptions, serversRows);
         new UIHeader(this.wrapper, "Gametypes");
         new TESTUITable(this.wrapper, tableOptions, gametypeRows);
-        new UIHeader(this.wrapper, "Maps");
-        this.renderTestMaps();
+        new UIHeader(this.wrapper, "Most Played Maps");
+        this.renderTestMaps(this.mostPlayedMaps);
     }
 }
 
