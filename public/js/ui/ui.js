@@ -2110,5 +2110,30 @@ function sortUISelectOptionsByDisplay(a, b){
         return 1;
     }
     return 0;
-    
+}
+
+
+function UIRichImageBox(image, url, title, content){
+
+    const wrapper = UIDiv(`new-rich-box`);
+
+    const imgElem = document.createElement("img");
+    imgElem.src = image;
+    imgElem.className = `new-rich-img`;
+
+    const info = UIDiv(`new-rich-info`);
+
+    const titleElem = UIDiv(`new-rich-title`);
+    titleElem.append(title);
+
+
+    info.append(titleElem, ...content);
+    wrapper.append(imgElem, info);
+
+    const a = document.createElement("a");
+    a.href = url;
+
+    a.append(wrapper);
+
+    return a;
 }

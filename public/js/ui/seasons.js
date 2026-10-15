@@ -44,7 +44,7 @@ class SeasonPage{
 
     renderTestMaps(maps){
 
-        const testMaps = UIDiv(`test-maps`);
+        const testMaps = UIDiv(`new-rich-wrapper`);
 
         for(let i = 0; i < maps.length; i++){
 
@@ -52,35 +52,23 @@ class SeasonPage{
      
             const image = getMapThumbOrFullSize(m);
 
-            const wrapper = UIDiv(`test-map-wrapper`);
+            const content = [];
 
-            const imgWrapper = UIDiv("test-map-img-wrapper");
+            content.push(
+                `${m.total_matches} Matches Played`, UIBr(),
+                `Playtime ${toPlaytime(m.total_playtime, false)}`,UIBr(),
+                `Last Match ${toDateString(m.last_match, TIME_ZONE, true)}`
+            );
+
+
+            const richBox = UIRichImageBox(
+                image, 
+                `/season/${this.basicInfo.id}/map/${m.map_id}`, 
+                m.name, 
+                content
+            );
             
-            const imgElem = document.createElement("img");
-            imgElem.src = image;
-            imgElem.className = `test-map-img`;
-            imgWrapper.append(imgElem);
-
-            
-
-            const info = UIDiv(`test-map-info`);
-
-            const title = UIDiv(`test-map-title`);
-            title.append(m.name);
-
-            info.append(title, `${m.total_matches} Matches Played`);
-            info.append(UIBr(), `Playtime ${toPlaytime(m.total_playtime, false)}`, UIBr());
-            info.append(`Last Match ${toDateString(m.last_match, TIME_ZONE, true)}`);
-            wrapper.append(imgWrapper, info);
-
-
-
-            const a = document.createElement("a");
-            a.href = `/season/${this.basicInfo.id}/map/${m.map_id}`;
-
-            a.append(wrapper);
-
-            testMaps.append(a);
+            testMaps.append(richBox);
         }
 
 
