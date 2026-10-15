@@ -49,26 +49,8 @@ class SeasonPage{
         for(let i = 0; i < maps.length; i++){
 
             const m = maps[i];
-     
-            const image = getMapThumbOrFullSize(m);
 
-            const content = [];
-
-            content.push(
-                `${m.total_matches} Matches Played`, UIBr(),
-                `Playtime ${toPlaytime(m.total_playtime, false)}`,UIBr(),
-                `Last Match ${toDateString(m.last_match, TIME_ZONE, true)}`
-            );
-
-
-            const richBox = UIRichImageBox(
-                image, 
-                `/season/${this.basicInfo.id}/map/${m.map_id}`, 
-                m.name, 
-                content
-            );
-            
-            testMaps.append(richBox);
+            testMaps.append(UIRichMapBox(m, `/season/${this.basicInfo.id}/map/${m.map_id}`));
         }
 
 

@@ -1594,8 +1594,9 @@ section{
 
 .new-rich-info{
     padding:var(--padding-1);
-    font-size:var(--font-size-80);
+    font-size:var(--font-size-70);
     color:var(--font-color-2);
+    line-height: 1.6em;
 }
 
 .new-rich-title{

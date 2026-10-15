@@ -1168,44 +1168,6 @@ function getMapThumbOrFullSize(data){
     return `/images/maps/default.jpg`;
 }
 
-function UIMapRichBox(data, seasonId){
-
-    seasonId = parseInt(seasonId);
-    if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
-    const link = document.createElement("a");
-
-    link.href = (seasonId === 0) ? `/map/${data.id}`: `/season/${seasonId}/map/${data.id}`;
-
-    const wrapper = UIDiv("rich-wrapper");
-
-    const title = UIDiv("rich-title");
-    title.append(data.name);
-
-    wrapper.append(title);
-
-    const image = document.createElement("img");
-    image.className = "rich-image";
-
-
-    image.src = getMapThumbOrFullSize(data);
-
-    wrapper.append(image);
-
-    const info = UIDiv("rich-info");
-    info.append(
-        `${data.matches} Match${(data.matches === 1) ? "" : "es"} Played`,
-        UIBr(), 
-        `Playtime ${toPlaytime(data.playtime)}`,
-        UIBr(),
-        `Last Match ${toDateString(data.last_match, TIME_ZONE, true)}`
-    )
-
-    wrapper.append(info);
-
-    link.append(wrapper);
-    return link;
-}
-
 class UIBasicMouseOver{
 
     constructor(parent, title, content){
@@ -2136,4 +2098,20 @@ function UIRichImageBox(image, url, title, content){
     a.append(wrapper);
 
     return a;
+}
+
+function UIRichMapBox(data, url){
+
+    const image = getMapThumbOrFullSize(data);
+
+    const content = [
+        `${data.total_matches ?? data.matches} Matches Played`, UIBr(),
+        `Playtime ${toPlaytime(data.total_playtime ?? data.playtime, false)}`,UIBr(),
+        `Last Match ${toDateString(data.last_match, TIME_ZONE, true)}`
+    ];
+
+    
+
+    return UIRichImageBox(image, url, data.name, content);
+
 }

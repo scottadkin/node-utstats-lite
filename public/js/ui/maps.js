@@ -305,9 +305,6 @@ class MapListDisplay{
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
-            const img = getMapThumbOrFullSize(d);
-
-            const content = [];
 
             let url = ``;
 
@@ -317,11 +314,7 @@ class MapListDisplay{
                 url = `/season/${this.seasonId}/map/${d.id}`;
             }
 
-            content.push(`${d.matches} ${plural(d.matches, "match")} played`);
-            content.push(UIBr(),`${toPlaytime(d.playtime)} Playtime`);
-            content.push(UIBr(),`Last Match ${toDateString(d.last_match, TIME_ZONE, true)}`);
-
-            wrapper.append(UIRichImageBox(img, url, d.name, content));
+            wrapper.append(UIRichMapBox(d, url));
         }
     }
 }
