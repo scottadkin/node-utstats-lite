@@ -41,6 +41,53 @@ class SeasonPage{
         ]);
     }
 
+
+    renderTestMaps(){
+
+        const testMaps = UIDiv(`test-maps`);
+
+        for(let i = 0; i < this.mostPlayedMaps.length; i++){
+
+            const m = this.mostPlayedMaps[i];
+            const image = getMapThumbOrFullSize(m);
+
+            const wrapper = UIDiv(`test-map-wrapper`);
+
+            const imgWrapper = UIDiv(`test-map-img-wrapper`);
+
+            const imgElem = document.createElement("img");
+            imgElem.src = image;
+            imgElem.className = `test-map-img`;
+
+            imgWrapper.append(imgElem);
+
+            
+
+            const info = UIDiv(`test-map-info`);
+
+            const title = UIDiv(`test-map-title`);
+            title.append(m.name);
+
+            info.append(title, `${m.total_matches} Matches Played`);
+            info.append(UIBr(), `Playtime ${toPlaytime(m.total_playtime, false)}`);
+            wrapper.append(imgWrapper, info);
+
+
+
+            const a = document.createElement("a");
+            a.href = `/season/${this.basicInfo.id}/map/${m.map_id}`;
+
+            a.append(wrapper);
+
+            testMaps.append(a);
+        }
+
+
+        this.wrapper.append(testMaps);
+
+
+    }
+
     renderObjectStats(){
 
 
@@ -66,9 +113,11 @@ class SeasonPage{
             });
         }
 
-        new UIPodium(topMaps, testData);
+       // new UIPodium(topMaps, testData);
 
-        this.wrapper.append(topMaps);
+        
+
+        //this.wrapper.append(topMaps);
        
         const tableOptions = {
             "className": "t-width-1",
@@ -86,14 +135,14 @@ class SeasonPage{
 
         const serversRows = this.objectStats.servers.map(mapObjectStats)
         const gametypeRows = this.objectStats.gametypes.map(mapObjectStats)
-        const mapRows = this.objectStats.maps.map(mapObjectStats)
+        //const mapRows = this.objectStats.maps.map(mapObjectStats)
 
 
         new TESTUITable(this.wrapper, tableOptions, serversRows);
         new UIHeader(this.wrapper, "Gametypes");
         new TESTUITable(this.wrapper, tableOptions, gametypeRows);
         new UIHeader(this.wrapper, "Maps");
-        new TESTUITable(this.wrapper, tableOptions, mapRows);
+        this.renderTestMaps();
     }
 }
 
