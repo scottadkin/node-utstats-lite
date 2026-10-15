@@ -27,7 +27,7 @@ export async function renderSeasonPage(req, res){
 
     const objectStats = await getSeasonBasicObjectStats(seasonId);
 
-    const mostPlayedMaps = await seasonsGetMostPlayedMaps(seasonId,3);
+    const mostPlayedMaps = await seasonsGetMostPlayedMaps(seasonId,23);
 
     res.render("season.ejs",{
         req,

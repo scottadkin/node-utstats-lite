@@ -64,9 +64,9 @@ export async function seasonsGetMostPlayedMaps(seasonId, maxMaps){
     maxMaps = parseInt(maxMaps);
     if(maxMaps !== maxMaps) maxMaps = DEFAULT_MAX_MAPS;
 
-    if(maxMaps < 1 || maxMaps > 10){
-        maxMaps = DEFAULT_MAX_MAPS;
-    }
+    //if(maxMaps < 1 || maxMaps > 10){
+     //   maxMaps = DEFAULT_MAX_MAPS;
+    //}
 
     const mT = "nstats_seasons_unique_match_combinations";
 

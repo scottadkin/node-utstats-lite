@@ -54,12 +54,11 @@ class SeasonPage{
 
             const wrapper = UIDiv(`test-map-wrapper`);
 
-            const imgWrapper = UIDiv(`test-map-img-wrapper`);
-
+            const imgWrapper = UIDiv("test-map-img-wrapper");
+            
             const imgElem = document.createElement("img");
             imgElem.src = image;
             imgElem.className = `test-map-img`;
-
             imgWrapper.append(imgElem);
 
             

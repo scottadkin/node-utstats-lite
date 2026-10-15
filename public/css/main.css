@@ -1573,26 +1573,21 @@ section{
     column-gap: var(--margin-2);
     row-gap:var(--margin-2);
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .test-map-wrapper{
-    display:flex;
     margin-bottom:10px;
     border:1px solid var(--border-color-1);
     box-shadow: var(--box-shadow-1);
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
 }
 
-.test-map-img-wrapper{
-    flex:0 1 200px;
-    align-content: center;
-    
-  
-}
-
-.test-map-img-wrapper img{
+.test-map-img{
+    height:100%;
     width:100%;
-    
+    display:block;
 }
 
 .test-map-info{
