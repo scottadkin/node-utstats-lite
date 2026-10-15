@@ -97,7 +97,7 @@ nav a, .nav-dropdown{
 	font-weight:400;
 	transition: color 0.5s;
 	border-bottom:2px solid transparent;
-    font-size:0.9rem;
+    font-size:var(--font-size-90);
 	
 }
 
@@ -397,7 +397,7 @@ th{
 	font-weight:500;
 	font-size:var(--font-size-80);
 	background-color:var(--bg-header-color);
-    line-height:2rem;
+    line-height:2.2rem;
 }
 
 th:hover{
@@ -412,7 +412,7 @@ td{
 	padding:0px var(--padding-3);
 	font-size:var(--font-size-80);
 	font-weight:500;
-    line-height: 1.8rem;
+    line-height: 2rem;
 }
 
 td a{

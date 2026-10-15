@@ -52,6 +52,14 @@ function UILabel(label, htmlFor){
     return elem;
 }
 
+/**
+ * If parent is null return the element else append
+ * @param {HTMLElement | null} parent 
+ * @param {*} data 
+ * @param {*} small 
+ * @param {*} bTableElem 
+ * @returns 
+ */
 function UIMatchScoreBox(parent, data, small, bTableElem){
 
     const wrapper = document.createElement((bTableElem) ? "td" : "div");
@@ -126,7 +134,11 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
 
     wrapper.className = wrapperClassName;
 
-    parent.append(wrapper);
+    if(parent !== null){
+        parent.append(wrapper);
+    }
+
+    return wrapper;
 }
 
 function UIBasicTeamScore(redValue, blueValue){

@@ -59,13 +59,11 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId){
         }
         row.push({"display": m.gametype_name, "value": m.gametype_name.toLowerCase(), "className": "font-small", url});
         row.push({"display": m.server_name, "value": m.server_name.toLowerCase(), "className": "font-small", url});
-        row.push({"display": toDateString(m.date, TIME_ZONE), "value": m.date,  "className": "playtime", url});
+        row.push({"display": toDateString(m.date, TIME_ZONE, true), "value": m.date,  "className": "playtime", url});
         row.push({"value": m.players, url});
-        row.push({"display": toPlaytime(m.playtime), "value": m.playtime,  "className": "playtime", url});
+        row.push({"display": MMSS(m.playtime), "value": m.playtime,  "className": "playtime", url});
 
-        const a = document.createElement("td");
-        UIMatchScoreBox(a, m, true, false);
-        row.push({"display": a, "bSkipTD": true});
+        row.push({"display": UIMatchScoreBox(null, m, true, true), "bSkipTD": true});
 
         rows.push(row);
     }
