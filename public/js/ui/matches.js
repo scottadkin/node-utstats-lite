@@ -74,61 +74,24 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId){
     parent.append(wrapper); 
 }
 
-class MatchRichViewBox{
 
-    constructor(parent, data, seasonId){
+function UIRichMatchBox(data, url){
 
-        this.parent = parent;
-        this.data = data;
-        this.seasonId = parseInt(seasonId);
-        this.wrapper = document.createElement("a");
+    const image = getMapThumbOrFullSize(data);
 
-        if(this.seasonId === 0){
-            this.wrapper.href = `/match/${data.id}`;
-        }else{
-            this.wrapper.href = `/season/${this.seasonId}/match/${data.id}`;
-        }
-        this.wrapper.className = "rich-wrapper";
-        this.parent.append(this.wrapper);
+    const scoreBox = UIMatchScoreBox(null, data, false, false);
 
-        this.createElems();
-        
-    }
+    scoreBox.className += ` text-center` 
 
-    createInfoElems(){
+    const content = [
 
-        const d = this.data;
+        data.gametype_name, UIBr(),
+        toDateString(data.date, TIME_ZONE, true), UIBr(),
+        `${data.players} ${plural(data.players, "player")}`, UIBr(),
+        toPlaytime(data.playtime),
+    ];
 
-        const info = UIDiv("rich-info");
-
-        const gametype = UIDiv("white");
-
-        gametype.append(UIB(d.gametype_name));
-
-        const players = UIDiv("white");
-        players.append(`${d.players} Player${(d.players === 1) ? "" : "s"}`);
-
-        info.append(gametype, toDateString(d.date, TIME_ZONE, true), players, toPlaytime(d.playtime));
-
-
-        this.wrapper.append(info);
-    }
-
-    createElems(){
-
-        const title = UIDiv("rich-title")
-        title.append(this.data.map_name);
-        this.wrapper.append(title);
-
-        const image = document.createElement("img");
-        image.className = "rich-image";
-        image.alt = "map-sshot";
-        image.src = getMapThumbOrFullSize(this.data);
-
-        this.wrapper.append(image);
-        this.createInfoElems();
-        UIMatchScoreBox(this.wrapper, this.data, false, false);
-    }
+    return UIRichImageBox(image, url, data.map_name, content, scoreBox);
 }
 
 class MatchesRichView{
@@ -137,8 +100,9 @@ class MatchesRichView{
 
         this.parent = document.querySelector(parent);
         this.matches = matches;
-        this.seasonId = seasonId;
-        this.wrapper = UIDiv("rich-outter t-width-1");
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
+        this.wrapper = UIDiv("new-rich-wrapper");
 
         this.parent.append(this.wrapper);
 
@@ -153,7 +117,17 @@ class MatchesRichView{
 
             const d = this.matches.data[i];
 
-            new MatchRichViewBox(this.wrapper, d, this.seasonId);
+            console.log(d);
+
+            let url = ``;
+
+            if(this.seasonId === 0){
+                url = `/match/${d.id}`;
+            }else{
+                url = `/season/${this.seasonId}/match/${d.id}`;
+            }
+
+            this.wrapper.append(UIRichMatchBox(d, url));
         }
     }
 }

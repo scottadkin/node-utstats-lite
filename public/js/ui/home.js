@@ -145,29 +145,13 @@ function homeRenderRecentMatches(parent, data, displayMode){
 
     const wrapper = UIDiv();
     wrapper.id = "home-recent-matches";
-    wrapper.className = "text-center";
     UIHeader(wrapper, "Recent Matches");
 
     parent.append(wrapper);
 
     if(displayMode === "default"){
-
         new MatchesRichView("#home-recent-matches", data, 0);
     }else{
-
-        const tableOptions = {
-            "headers": [
-                {"display": "Map"},
-                {"display": "Gametype"},
-                {"display": "Server"},
-                {"display": "Date"},
-                {"display": "Players"},
-                {"display": "Playtime"},
-                {"display": "Result"},
-            ]
-        };
-
-
         renderMatchesTable(parent, data, false, false, 0);
     }
 }
@@ -235,13 +219,8 @@ function homeRenderMostPlayedMaps(parent, data, displayMode){
             const img = getMapThumbOrFullSize(d);
             
             const url = `/map/${d.id}`;
-            const content = [];
-
-            content.push(`${d.matches} ${plural(d.matches, "match")} played`);
-            content.push(UIBr(),`${toPlaytime(d.playtime)} Playtime`);
-            content.push(UIBr(),`Last Match ${toDateString(d.last_match, TIME_ZONE, true)}`);
-
-            wrapper.append(UIRichImageBox(img, url, d.name, content));
+     
+            wrapper.append(UIRichMapBox(d, url));
 
         }else{
 

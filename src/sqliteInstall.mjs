@@ -1257,8 +1257,8 @@ async function createThumbnailSettings(){
 
     const settings = [
         {"name": "Quality", "value": 60},
-        {"name": "Width", "value": 384},
-        {"name": "Height", "value": 216}
+        {"name": "Width", "value": 640},
+        {"name": "Height", "value": 360}
     ];
 
 

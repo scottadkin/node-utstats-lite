@@ -1593,6 +1593,10 @@ section{
 }
 
 .new-rich-info{
+
+}
+
+.new-rich-info-content{
     padding:var(--padding-1);
     font-size:var(--font-size-70);
     color:var(--font-color-2);
@@ -1602,5 +1606,6 @@ section{
 .new-rich-title{
     font-weight:500;
     font-size:var(--font-size-100);
-    padding-bottom:var(--padding-2);
+    padding-left:var(--padding-1);
+    padding-top:var(--padding-1);
 }

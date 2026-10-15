@@ -2075,7 +2075,7 @@ function sortUISelectOptionsByDisplay(a, b){
 }
 
 
-function UIRichImageBox(image, url, title, content){
+function UIRichImageBox(image, url, title, content, scoreBox){
 
     const wrapper = UIDiv(`new-rich-box`);
 
@@ -2088,8 +2088,14 @@ function UIRichImageBox(image, url, title, content){
     const titleElem = UIDiv(`new-rich-title`);
     titleElem.append(title);
 
+    const infoContent = UIDiv(`new-rich-info-content`);
+    infoContent.append(...content);
+    info.append(titleElem, infoContent);
 
-    info.append(titleElem, ...content);
+    if(scoreBox !== undefined){
+        info.append(scoreBox);
+    }
+    
     wrapper.append(imgElem, info);
 
     const a = document.createElement("a");
@@ -2110,8 +2116,9 @@ function UIRichMapBox(data, url){
         `Last Match ${toDateString(data.last_match, TIME_ZONE, true)}`
     ];
 
-    
-
     return UIRichImageBox(image, url, data.name, content);
+}
+
+function UIRichMatchBox(){
 
 }
