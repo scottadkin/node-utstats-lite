@@ -7041,7 +7041,7 @@ class AdminSeasonsManager{
 
                 const value = new Date(`${e}:59.999Z`).toISOString();
                 this.createEndDate = value;
-                
+
             }catch(err){
 
                 if(err.name === "RangeError"){
@@ -7098,7 +7098,11 @@ class AdminSeasonsManager{
 
         if(this.mode !== "edit") return;
 
-        new UIInfo(this.content, ["Edit an existing season."]);
+        new UIInfo(this.content, [
+            "Edit an existing season.",
+            UIBr(),
+            `Existing data will automatically be adjusted to any date changes.`
+        ]);
 
 
         const form = UIDiv("form");
@@ -7240,7 +7244,7 @@ class AdminSeasonsManager{
 
         new UIInfo(this.content, [
             `Create season data from existing data without the need of reimporting logs.`, UIBr(),
-            `If you adjust the start and or end dates of an existing season you will need to perform this action.`
+            `Previously imported matches will automatically be assigned to the season if applicable.`
         ]);
 
         const form = UIDiv("form");

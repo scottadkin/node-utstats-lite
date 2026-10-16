@@ -7,6 +7,7 @@ import { calculateSeasonPlayerTotals } from "./players.mjs";
 import { playerWeaponDamageRecalculateSeasonTotals } from "./playerWeaponDamage.mjs";
 import { recalculateSeasonRankings } from "./rankings.mjs";
 import { deleteAllMapWeaponsTotals, updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
+import Message from "./message.mjs";
 
 export const VALID_OBJECT_TYPES = {
         "gametypes": "gametype_id",
@@ -40,6 +41,18 @@ export async function getSeasonById(id){
     const query = `SELECT * FROM nstats_seasons WHERE id=?`;
 
     const result =  await simpleQuery(query, [id]);
+
+    if(result.length === 0) return null;
+
+    return result[0];
+}
+
+
+export async function getSeasonByName(name){
+
+    const query = `SELECT * FROM nstats_seasons WHERE name=?`;
+
+    const result =  await simpleQuery(query, [name]);
 
     if(result.length === 0) return null;
 
@@ -203,6 +216,10 @@ export async function createSeason(name, startDate, endDate){
 
     await simpleQuery(query, [startDate, endDate, name]);
 
+    const seasonInfo = await getSeasonByName(name);
+    if(seasonInfo === null) throw new Error(`Failed to get season data`);
+    await recalculateSeason(seasonInfo.id);
+
     return {"message": "passed"}
 }
 
@@ -233,6 +250,8 @@ export async function editSeason(seasonId, name, startDate, endDate){
     const query = `UPDATE nstats_seasons SET name=?,start_date=?,end_date=? WHERE id=?`;
 
     await simpleQuery(query, [name, startDate, endDate, seasonId]);
+
+    await recalculateSeason(seasonId);
 
     return {"message": "passed"}
 }
@@ -783,6 +802,8 @@ async function removeSeasonIdFromMatches(seasonId){
 }
 
 export async function recalculateSeason(seasonId){
+
+    new Message(`Recalculate season with id of ${seasonId}`,"note");
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
