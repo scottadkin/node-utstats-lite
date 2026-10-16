@@ -842,6 +842,7 @@ option{
 
 .basic-team-scores div{
 	padding:0px 2px;
+    font-size:var(--font-size-90);
 }
 
 .basic-team-score{
