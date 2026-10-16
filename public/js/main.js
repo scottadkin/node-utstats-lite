@@ -548,6 +548,27 @@ function stripISOSecondsAndMS(isoString){
 }
 
 
+function isoDateToParts(isoString){
+
+    const reg = /^((\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.(\d{3})(.*))$/i;
+
+    const result = reg.exec(isoString);
+
+    if(result === null) throw new Error(`Not a valid isoString`);
+
+    const year = result[1];
+    const month = result[2];
+    const date = result[3];
+    const hours = result[4];
+    const minutes = result[5];
+    const seconds = result[6];
+    const milliSeconds = result[7];
+    const timeZone = result[8];
+
+    return {year, month, date, hours, minutes, seconds, milliSeconds, timeZone}
+}
+
+
 function debugDisplayPageMetaData(){
 
     const elems = document.querySelectorAll("meta");

@@ -6995,6 +6995,8 @@ class AdminSeasonsManager{
         }
     }
 
+  
+
     renderCreateSeason(){
 
         if(this.mode !== "create") return;
@@ -7024,6 +7026,8 @@ class AdminSeasonsManager{
             
             const value = new Date(`${e}:00Z`).toISOString();
 
+            console.log(value);
+
             this.createStartDate = value;
         
         });
@@ -7033,9 +7037,18 @@ class AdminSeasonsManager{
 
         const endInput = UIInput("datetime-local", "end-date", stripISOSecondsAndMS(this.createEndDate), "end date", (e) =>{
             
-            const value = new Date(`${e}:59.999Z`).toISOString();
+            try{
 
-            this.createEndDate = value;
+                const value = new Date(`${e}:59.999Z`).toISOString();
+                this.createEndDate = value;
+                
+            }catch(err){
+
+                if(err.name === "RangeError"){
+     
+                    endInput.value = stripISOSecondsAndMS(this.createEndDate);
+                }
+            }
 
         });
 

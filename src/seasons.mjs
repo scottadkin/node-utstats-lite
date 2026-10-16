@@ -758,7 +758,7 @@ async function recalculateSeasonPlayerTotals(seasonId){
     X nstats_rankings
     X nstats_map_weapon_totals
     X nstats_map_rankings
-    - nstats_player_ctf_league
+    X nstats_player_ctf_league
     X nstats_totals_player_weapon_damage
     X nstats_seasons_servers
     X nstats_seasons_gametypes
@@ -767,11 +767,34 @@ async function recalculateSeasonPlayerTotals(seasonId){
     */
 }
 
+
+async function assignSeasonIdToMatchesInRange(seasonId, startDate, endDate){
+
+    const query = `UPDATE nstats_matches SET season_id=? WHERE date>=? AND date<=?`;
+
+    return await simpleQuery(query, [seasonId, startDate, endDate]);  
+}
+
+async function removeSeasonIdFromMatches(seasonId){
+
+    const query = `UPDATE nstats_matches SET season_id=0 WHERE season_id=?`;
+
+    return await simpleQuery(query, [seasonId]);
+}
+
 export async function recalculateSeason(seasonId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
     if(seasonId === 0) throw new Error(`You can not delete season 0.`);
+
+    const seasonInfo = await getSeasonById(seasonId);
+    if(seasonInfo === null) throw new Error(`season doesn't exist`);
+
+
+    //just incase season start and or end date have been modified to avoid stragglers
+    await removeSeasonIdFromMatches(seasonId);
+    await assignSeasonIdToMatchesInRange(seasonId, seasonInfo.start_date, seasonInfo.end_date);
 
     await deleteSeasonUniqueMatchCombinations(seasonId);
     await deleteSeasonObjectStats(seasonId);
