@@ -22,7 +22,22 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
         <img class="header-country-flag" src="/images/flags/<%= basicPlayerInfo.country %>.svg" alt="flag"/>
         <%= basicPlayerInfo.name %> Player Profile
     </div>
+    <%
+    if(locals.seasonList.length > 0){
+        %>
+
+        <div id="player-seasons-list"></div>
+        <script>
+            UIPlayerProfileSeasonsList("#player-seasons-list","<%= playerId %>", <%- JSON.stringify(seasonList) %>);    
+        </script>
+        %>
+        
+        <%
+    }
+    %>
     <div class="perma-links text-center"></div>
+
+    
 </div>
 
 <script>

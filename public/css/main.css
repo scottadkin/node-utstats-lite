@@ -1440,3 +1440,20 @@ section{
     font-size:var(--font-size-100);
     padding:var(--padding-1);
 }
+
+#player-seasons-list{
+    font-size:var(--font-size-70);
+    display:flex;
+    flex-wrap: wrap;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+    
+}
+
+.player-season-list-link{
+
+    padding:var(--padding-2);
+    text-decoration: underline;
+ 
+}

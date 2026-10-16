@@ -2293,3 +2293,27 @@ class PlayerWeaponDamage{
 
     }
 }
+
+function UIPlayerProfileSeasonsList(parent, playerId, seasonsList){
+
+    parent = document.querySelector(parent);
+
+    parent.append(`Player has additional profiles for the following seasons: `);
+
+    console.log(seasonsList);
+
+
+    for(let i = 0; i < seasonsList.length; i++){
+
+        const s = seasonsList[i];
+
+        const a = document.createElement("a");
+        a.href = `/season/${s.id}/player/${playerId}`;
+
+        
+        const elem = UIDiv("player-season-list-link");
+        elem.append(s.name);
+        a.append(elem);
+        parent.append(a);
+    }
+}
