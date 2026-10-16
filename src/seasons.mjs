@@ -892,8 +892,13 @@ export async function debugCheckForOrphanedData(){
 
         console.log(await simpleQuery(query));
     }
+}
 
+export async function getPlayerActiveSeasons(playerId){
 
+    const query = `SELECT DISTINCT season_id FROM nstats_player_totals WHERE player_id=? AND season_id!=0`;
 
+    const result = await simpleQuery(query, [playerId]);
 
+    return result.map((r) =>{ return r.season_id});
 }

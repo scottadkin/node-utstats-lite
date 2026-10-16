@@ -23,12 +23,18 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
         <%= basicPlayerInfo.name %> Player Profile
     </div>
     <%
-    if(locals.seasonList.length > 0){
+    if(locals.activeSeasons.length > 0){
         %>
 
         <div id="player-seasons-list"></div>
         <script>
-            UIPlayerProfileSeasonsList("#player-seasons-list","<%= playerId %>", <%- JSON.stringify(seasonList) %>);    
+            UIPlayerProfileSeasonsList(
+                "#player-seasons-list",
+                "<%= playerId %>", 
+                <%- JSON.stringify(locals.activeSeasons)%>, 
+                <%- JSON.stringify(seasonList) %>,
+                <%- seasonId %>
+            );    
         </script>
         %>
         

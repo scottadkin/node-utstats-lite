@@ -7,7 +7,7 @@ import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./w
 import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";
-import { getAllSeasonIds, getSeasonById } from "./seasons.mjs";
+import { getAllSeasonIds, getPlayerActiveSeasons, getSeasonById } from "./seasons.mjs";
 import { getCategorySettings } from "./siteSettings.mjs";
 import { getPageLayout } from "./pageLayout.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "./weapons.mjs";
@@ -2629,14 +2629,13 @@ export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, ord
 }
 
 
-export async function sanitizePlayerPageReq(id, req, seasonId){
+export async function sanitizePlayerPageReq(id, seasonId, seasonInfo){
 
 
     const basicPlayerInfo = await getPlayerProfileInfo(id, seasonId);
     if(basicPlayerInfo === null) throw new Error(`Player does not exist!`);
 
-    const seasonInfo = await getSeasonById(seasonId);
-   
+    const activeSeasons = await getPlayerActiveSeasons(id);
 
     let title = `${basicPlayerInfo.name}`;
     let description = `View the`;
@@ -2727,9 +2726,9 @@ export async function sanitizePlayerPageReq(id, req, seasonId){
 
 
     return {
-        title, description, playerId, seasonId, basicPlayerInfo,
+        title, description, playerId, basicPlayerInfo,
         pageSettings, pageLayout, brandingSettings, 
         generalTotals, ctfTotals, weaponTotals, rankings, 
-        ctfLeagueData, ctfLeagueSettings, weaponDamage, seasonId
+        ctfLeagueData, ctfLeagueSettings, weaponDamage, activeSeasons
     }
 }

@@ -2294,24 +2294,51 @@ class PlayerWeaponDamage{
     }
 }
 
-function UIPlayerProfileSeasonsList(parent, playerId, seasonsList){
+function UIPlayerProfileSeasonsList(parent, playerId, activeSeasons, seasonsList, playerProfileSeason){
 
     parent = document.querySelector(parent);
 
     parent.append(`Player has additional profiles for the following seasons: `);
 
-    console.log(seasonsList);
+    if(playerProfileSeason !== 0){
+
+        const a = document.createElement("a");
+        a.href = `/player/${playerId}`;
+
+        
+        const elem = UIDiv("player-season-list-link");
 
 
-    for(let i = 0; i < seasonsList.length; i++){
+        elem.append("All Time");
+        a.append(elem);
+        parent.append(a);
+    }
 
-        const s = seasonsList[i];
+    for(let i = 0; i < activeSeasons.length; i++){
+
+        const sId = activeSeasons[i];
+
+        let s = null;
+
+        for(let x = 0; x < seasonsList.length; x++){
+
+            s = seasonsList[x];
+            if(s.id === sId) break;
+        }
+
+        if(s === null){
+            console.warn(`Failed to find season info`);
+            continue;
+        }
 
         const a = document.createElement("a");
         a.href = `/season/${s.id}/player/${playerId}`;
 
         
         const elem = UIDiv("player-season-list-link");
+
+        if(s.id === playerProfileSeason) elem.className += ` matching-season`
+
         elem.append(s.name);
         a.append(elem);
         parent.append(a);

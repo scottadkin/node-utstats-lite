@@ -12,11 +12,12 @@ export async function renderPlayerPage(req, res, userSession){
         
 
         const seasonId = res.locals.season;
+        const seasonInfo = null;
 
         const {title, description,
-        pageSettings, pageLayout, brandingSettings, playerId, basicPlayerInfo, weaponDamage,
+        pageSettings, pageLayout, playerId, basicPlayerInfo, weaponDamage,
         generalTotals, ctfTotals, weaponTotals, rankings, 
-        ctfLeagueData, ctfLeagueSettings} = await sanitizePlayerPageReq(id, req, seasonId);
+        ctfLeagueData, ctfLeagueSettings, activeSeasons} = await sanitizePlayerPageReq(id, seasonId, seasonInfo);
        
 
         res.render("player.ejs", {
@@ -36,6 +37,7 @@ export async function renderPlayerPage(req, res, userSession){
             timeZone,
             weaponDamage,
             ctfLeagueSettings,
+            activeSeasons,
             "bSeasonPage": false,
             "seasonInfo": null,
             "seasonId": 0
