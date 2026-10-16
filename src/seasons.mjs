@@ -148,9 +148,15 @@ export async function getSeasonConflicts(startDate, endDate, ignoreSeasonId){
         vars.push(ignoreSeasonId);
     }
 
-    query += `((?>=start_date AND ?<=end_date) OR (?>=start_date AND ?<=end_date))`;
 
-    vars.push(startDate, startDate, endDate, endDate);
+    query += `(
+    (? BETWEEN start_date AND end_date OR ? BETWEEN start_date AND end_date)`
+
+    query += ` OR (start_date >=? AND end_date <=?)  
+    )`
+
+
+    vars.push(startDate, endDate, startDate, endDate);
 
     return await simpleQuery(query, vars);
 }
