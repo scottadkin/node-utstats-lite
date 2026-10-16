@@ -21,17 +21,15 @@ export async function renderSeasonCTFLeaguePage(req, res){
             maxMatchAge, lastLeagueRefresh
         } = await sanitizeCTFLeaguePageReq(req, seasonId, pageSettings);
 
-
         let mapsInfo = {
             "names": {},
             "mapIds": []
         };
 
-        if(mode === "maps"){
-
+        if(mode === "maps" && gId !== ""){
+ 
             mapsInfo = await getUniqueMapLeagues(seasonId, gId);
-
-    
+            
             if(mapsInfo.mapIds.indexOf(parseInt(id)) === -1 && mapsInfo.mapIds.length > 0){
                 id = mapsInfo.mapIds[0];
             }
@@ -83,6 +81,7 @@ export async function renderSeasonCTFLeaguePage(req, res){
             "seasonId": seasonId,
             "userSession": req.userSession
         });
+        
     }catch(err){
         res.send(err.toString());
     }

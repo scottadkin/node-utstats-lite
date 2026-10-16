@@ -797,6 +797,7 @@ export async function sanitizeCTFLeaguePageReq(req, seasonId, pageSettings){
                 id = latestIds.map_id;
             }
         }
+
     }
 
     let page = req.query?.page ?? 1;
