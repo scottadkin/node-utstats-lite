@@ -139,15 +139,6 @@ export async function getAllSeasonIds(bSkip0){
 
 export async function getSeasonConflicts(startDate, endDate, ignoreSeasonId){
 
-   /* if(currentStartDate <= startDate && currentEndDate >= startDate){
-                console.log("START");
-            }
-
-            if(currentStartDate <= endDate && currentEndDate >= endDate){
-                console.log("END");
-            }*/
-
-    //return simpleQuery(`SELECT * FROM nstats_seasons`);
 
     let query = `SELECT * FROM nstats_seasons WHERE `;
 
@@ -157,8 +148,7 @@ export async function getSeasonConflicts(startDate, endDate, ignoreSeasonId){
         vars.push(ignoreSeasonId);
     }
 
-
-    query += `((start_date<=? AND end_date>=?) OR (start_date<=? AND end_date>=?))`;
+    query += `((?>=start_date AND ?<=end_date) OR (?>=start_date AND ?<=end_date))`;
 
     vars.push(startDate, startDate, endDate, endDate);
 
