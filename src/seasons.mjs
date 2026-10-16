@@ -344,7 +344,9 @@ export async function updateSeasonUniqueCombinations(seasonId){
 
 async function calculateSeasonBasicTotals(seasonId){
 
-    const query = `SELECT COUNT(*) as total_matches,SUM(playtime) as total_playtime FROM nstats_matches WHERE season_id=?`;
+    const query = `SELECT COUNT(*) as total_matches,
+    COALESCE(SUM(playtime), 0) as total_playtime 
+    FROM nstats_matches WHERE season_id=?`;
 
     const result = await simpleQuery(query, [seasonId]);
 
