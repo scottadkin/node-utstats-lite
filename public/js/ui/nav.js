@@ -2,8 +2,11 @@ class UINavDropDown{
 
     constructor(parent, options){
 
+        if(options.length === 0) return;
+
         this.parent = document.querySelector(parent);
         this.options = options;
+        
 
         this.mainNav = document.querySelector("nav");
 

@@ -47,9 +47,11 @@ if(userSession === null){
     options.push({"name": "Logout", "url": "/logout", "highlight": ["logout"]},);
 }
 
-options.push({"name": "Watchlist", "url": "/watchlist", "highlight": ["watchlist"]},);
+options.push({"name": "Watchlist", "url": "/watchlist", "highlight": ["watchlist"]});
+
 
 const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
+
 %><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,12 +72,14 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 
         
             <nav>  
+                <% if(locals.seasonList.length > 0){ %>
                 <div class="nav-dropdown" id="nav-season-list">
                     <div id="nav-dummy">
                         <%= (locals.season !== 0) ? locals?.seasonInfo.name : "Season List" %>
                         <div id="nav-inner"></div>
                     </div>  
                 </div> 
+                <% } %>
                 
                 <%
                 for(let i = 0; i < options.length; i++){
