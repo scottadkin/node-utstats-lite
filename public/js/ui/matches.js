@@ -116,9 +116,6 @@ class MatchesRichView{
         for(let i = 0; i < this.matches.data.length; i++){
 
             const d = this.matches.data[i];
-
-            console.log(d);
-
             let url = ``;
 
             if(this.seasonId === 0){
@@ -136,7 +133,8 @@ class MatchesSearchForm{
 
     constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, displayMode, matches, page, perPage){
 
-        this.seasonId = seasonId;
+        this.seasonId = parseInt(seasonId);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
         this.uniqueCombinations = uniqueCombinations;
         this.matches = matches;
         this.displayMode = displayMode;
@@ -158,7 +156,7 @@ class MatchesSearchForm{
 
         this.wrapper = UIDiv();
 
-        UIHeader(this.wrapper, "Season Matches");
+        UIHeader(this.wrapper, `${(this.seasonId !== 0) ? `Season` : ``} Matches`);
 
         this.parent.append(this.wrapper);
 

@@ -542,7 +542,6 @@ option{
 	margin-bottom:var(--margin-2);
 	font-size:var(--font-size-80);
 	line-height: var(--line-height-1);
-	font-weight:500;
 	background-color: var(--bg-color-mid);
 	border:1px solid var(--border-color-1);
 }

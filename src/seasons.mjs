@@ -818,3 +818,40 @@ export async function seasonsDeleteMapStats(mapId){
         simpleQuery(mapQuery, vars),
     ]);
 }
+
+
+export async function debugCheckForOrphanedData(){
+
+
+    const tables = [
+        "nstats_matches",
+        "nstats_player_totals",
+        "nstats_player_totals_weapons",
+        "nstats_player_totals_ctf",
+        "nstats_rankings",
+        "nstats_map_weapon_totals",
+        "nstats_map_rankings",
+        "nstats_player_ctf_league",
+        "nstats_totals_player_weapon_damage",
+        "nstats_player_totals_max",
+        "nstats_seasons_servers",
+        "nstats_seasons_gametypes",
+        "nstats_seasons_maps",
+        "nstats_seasons_unique_match_combinations"
+    ];
+
+
+    
+
+    for(let i = 0; i < tables.length; i++){
+
+        const table = tables[i];
+        const query = `SELECT COUNT(*) as total_rows FROM ${table} WHERE season_id !=0 AND season_id NOT IN(SELECT id FROM nstats_seasons)`;
+
+        console.log(await simpleQuery(query));
+    }
+
+
+
+
+}
