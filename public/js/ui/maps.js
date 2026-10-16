@@ -299,7 +299,7 @@ class MapListDisplay{
 
     renderRichView(){
 
-        const wrapper = UIDiv("rich-outter");
+        const wrapper = UIDiv("new-rich-wrapper");
         this.parent.append(wrapper);
 
         for(let i = 0; i < this.data.length; i++){
