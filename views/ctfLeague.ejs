@@ -35,9 +35,20 @@ const jsBase = (bSeasonPage) ? `../../../js/` : `../js/`
             if(mode === "maps") leagueType = "Map";
             if(mode === "combined") leagueType = "Combined(Any CTF Gametype and Map combination)";
 
-            if(maxMatchAge != 0){
+            if(maxMatchAge != 0 && seasonId == 0){
                 %>
                     Only matches played in the previous <b><%= parseInt(maxMatchAge) %> days</b> are counted towards a league.<br>
+                <%
+            }else if(maxMatchAge != 0 && seasonId != 0){
+
+                const startDateByDayLimit = new Date(new Date(seasonInfo.end_date) - (60 * 60 * 24 * 1000) * maxMatchAge);
+                const seasonStartDate = new Date(seasonInfo.start_date);
+
+                let realStartDate = (startDateByDayLimit < seasonStartDate) ? seasonStartDate : startDateByDayLimit; 
+
+                %>
+                    
+                    Only matches played between <b><%= realStartDate.toISOString() %></b> and <b><%= new Date(seasonInfo.end_date).toISOString() %></b> are counted.<br>
                 <%
             }
 
