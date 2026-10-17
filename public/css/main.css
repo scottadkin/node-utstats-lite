@@ -1408,6 +1408,7 @@ section{
     row-gap:var(--margin-2);
     justify-content: center;
     flex-wrap: wrap;
+    max-width:var(--max-width-1);
 }
 
 

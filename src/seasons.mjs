@@ -902,3 +902,44 @@ export async function getPlayerActiveSeasons(playerId){
 
     return result.map((r) =>{ return r.season_id});
 }
+
+async function mergeServersGetAffectedSeasons(oldId){
+
+    const query = `SELECT DISTINCT season_id FROM nstats_seasons_unique_match_combinations WHERE server_id=?`;
+
+    const result = await simpleQuery(query, [oldId]);
+
+    return result.map((r) =>{
+        return r.season_id;
+    });
+}
+
+/**
+ * Delete oldId data from seasons table
+ * @param {*} oldId 
+ * @param {*} newId 
+ */
+export async function seasonsMergeServers(oldId, newId){
+
+    const tables = [
+        `nstats_seasons_unique_match_combinations`,
+        `nstats_seasons_servers`   
+    ];
+
+    const seasonIds = await mergeServersGetAffectedSeasons(oldId);
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        await simpleQuery(`DELETE FROM ${t} WHERE server_id=?`, [oldId]);
+    }
+
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        await calculateSeasonStats(seasonIds[i]);
+    }
+
+
+}

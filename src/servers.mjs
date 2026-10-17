@@ -1,5 +1,6 @@
 import { simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
 import Message from "./message.mjs";
+import { seasonsMergeServers } from "./seasons.mjs";
 
 
 async function bServerExist(name){
@@ -161,12 +162,19 @@ export async function mergeServers(oldId, newId){
 
     const query = `UPDATE nstats_matches SET server_id=? WHERE server_id=?`;
 
+    //nstats_seasons_servers
+    //nstats_seasons_unique_match_combinations
+
     const result = await simpleQuery(query, [newId, oldId]);
 
     const rowsChanged = result.changedRows;
 
+    await seasonsMergeServers(oldId, newId);
+
     await deleteServer(oldId);
+   
     await updateServerTotals(newId);
+    
     
     return {rowsChanged}
 }
