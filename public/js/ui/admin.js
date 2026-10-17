@@ -2986,10 +2986,10 @@ class AdminCTFLeagueManager{
 
         this.parent = document.querySelector(parent);
 
-        this.mode = "combined";
+        this.mode = "recalculate";
         this.settings = [];
         this.savedSettings = [];
-        this.bSavingInProgress = false;
+        this.bActionInProgress = false;
 
         this.wrapper = UIDiv();
         this.content = UIDiv();
@@ -2999,8 +2999,7 @@ class AdminCTFLeagueManager{
 
         this.unsavedChanges = UIDiv("hidden");
 
-        this.wrapper.append(this.unsavedChanges);
-        this.wrapper.append(this.content);
+        this.wrapper.append(this.unsavedChanges, this.content);
         this.parent.append(this.wrapper);
         
         this.render();
@@ -3036,7 +3035,7 @@ class AdminCTFLeagueManager{
 
         try{
 
-            if(this.bSavingInProgress){
+            if(this.bActionInProgress){
                 throw new Error(`Previous save is still processing, please wait.`);
             }
 
@@ -3044,7 +3043,7 @@ class AdminCTFLeagueManager{
 
             if(changes.length === 0) return;
 
-            this.bSavingInProgress = true;
+            this.bActionInProgress = true;
 
             const req = await fetch("/admin", {
                 "headers": {"Content-type": "application/json"},
@@ -3066,13 +3065,14 @@ class AdminCTFLeagueManager{
             new UINotification(this.parent, "error", "Failed To Save Changes", err.toString());
         }finally{
 
-            this.bSavingInProgress = false;
+            this.bActionInProgress = false;
         }
     }
 
     createTabs(){
 
         const options = [
+            {"value": "recalculate", "display": "Recalculate Tables"},
             {"value": "combined", "display": "Gametype & Map Combinations Tables"},
             {"value": "gametypes", "display": "Gametype Tables"},
             {"value": "maps", "display": "Maps Tables"},
@@ -3107,10 +3107,17 @@ class AdminCTFLeagueManager{
 
             elem.append(`Map league settings refer to any match played on a unique map, 
                 it doesn't matter what gametype was played, the match result will be counted towards this table.`);
+
+        }else if(this.mode === "recalculate"){
+
+            elem.append(`Recalculate existing CTF league tables`);
         }
 
-        elem.append(UIBr(), `Whole League Refreshes refer to automatic recalculating of every CTF League table, 
+        if(this.mode !== "recalculate"){
+            elem.append(UIBr(), `Whole League Refreshes refer to automatic recalculating of every CTF League table, 
             the importer will carry out this process every 24 hours since the previous whole league refresh.`);
+
+        }
         return elem;
     }
 
@@ -3159,11 +3166,65 @@ class AdminCTFLeagueManager{
         return found;
     }
 
+    async recalculateAllTables(){
+
+        try{
+
+            if(this.bActionInProgress){
+                new UINotification(this.parent, "warning", "Please Wait", `A previous action is still being processed.`);
+                return;
+            }
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "recalculate-ctf-league-tables"})
+            });
+
+            const res = await req.json();
+
+            console.log(res);
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", "Success", `CTF league tables recalculated successfully.`);
+
+            this.bActionInProgress = false;
+            await this.loadSettings();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Recalculate CTF League Tables", err.toString());
+        }
+    }
+
+    renderRecalculate(){
+
+        const form = UIDiv("form");
+
+        const button = UIButton("Recalculate All Tables", "submit-button");
+
+        button.addEventListener("click", () =>{
+            this.recalculateAllTables();
+        });
+
+        form.append(button);
+
+        this.content.append(form);
+    }
+
     render(){
 
         this.content.innerHTML = ``;
 
         this.content.append(this.createInfoElem());
+
+        if(this.mode === "recalculate"){
+            this.renderRecalculate()
+            return;
+        }
 
         const form = UIDiv("form");
 

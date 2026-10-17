@@ -15,7 +15,7 @@ import {
     getSQLiteBackups, getSQLiteStats, /*restoreDatabase*/ 
     restoreFromSQLiteBackup 
 } from "../admin.mjs";
-import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings } from "../ctfLeague.mjs";
+import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings, getMultipleLeagueCategorySettings, refreshAllTables } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
 import { 
@@ -29,7 +29,7 @@ import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
 import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, adminRenameForceHWIDToName, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
-import { createSeason, deleteSeason, editSeason, getAllSeasons, recalculateSeason } from "../seasons.mjs";
+import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
 
 
 
@@ -535,6 +535,21 @@ export default class AdminJSONManager{
                 await recalculateSeason(season);
 
                 return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "recalculate-ctf-league-tables"){
+
+
+                const seasonIds = await getAllSeasonIds(false);
+                const ctfLeagueSettings = await getMultipleLeagueCategorySettings(["combined", "gametypes", "maps"]);
+
+                for(let i = 0; i < seasonIds.length; i++){
+
+                    const sId = seasonIds[i];
+                    await refreshAllTables(sId,ctfLeagueSettings);
+                }
+
+                return this.res.json({"message": "passed"});
+                
             }
 
 
