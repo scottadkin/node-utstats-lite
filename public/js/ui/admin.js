@@ -6712,6 +6712,83 @@ class AdminPlayersWeaponsRecalculator{
     }
 }
 
+
+class AdminPlayersTotalsRecalculator{
+
+    constructor(parent, parentMode){
+
+        this.parent = parent;
+
+        this.bActive = parentMode === "recalculate";
+
+        this.wrapper = UIDiv();
+        this.parent.append(this.wrapper);
+        this.createElems();
+        this.render();
+    }
+
+
+    async recalculate(){
+
+        try{
+
+            const req = await fetch(`/admin`, {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "recalculate-players-totals"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            new UINotification(this.parent, "pass", `Player Totals Recalculated`, `Player totals recalculated successfully`);
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", `Failed To Recalculate Player Totals`, err.toString());
+        }
+    }
+
+
+    createElems(){
+
+        this.info = new UIInfo(this.wrapper, [
+            "Recalculate all player totals",
+            
+        ]);
+
+        this.form = UIDiv("form");
+
+        this.button = UIButton("Recalculate Totals", "submit-button");
+
+        this.button.addEventListener("click", () =>{
+            this.recalculate();
+        });
+
+        this.form.append(this.button);
+        this.wrapper.append(this.form);
+    }
+
+    setActive(value){
+
+        this.bActive = value;
+        this.render();
+    }
+
+    render(){
+
+        if(!this.bActive){
+
+            this.wrapper.className = "hidden";
+            return;
+        }else{
+            this.wrapper.className = "";
+        }
+
+    }
+}
+
 class AdminPlayersManager{
 
     constructor(parent){
@@ -6721,12 +6798,13 @@ class AdminPlayersManager{
         this.wrapper = UIDiv();
         
         this.parent.append(this.wrapper);
-        this.mode = "recalc-weapon-totals";
+        this.mode = "recalculate";
 
 
         this.importerSettings = new AdminPlayersImporterSettings(this.parent, this.mode);
         this.forceNameManager = new AdminPlayerForceName(this.parent, this.mode);
         this.playerWeaponsRecalculator = new AdminPlayersWeaponsRecalculator(this.parent, this.mode);
+        this.recalculateAll = new AdminPlayersTotalsRecalculator(this.parent, this.mode);
 
         UIHeader(this.wrapper, "Player Manager");
 
@@ -6743,6 +6821,7 @@ class AdminPlayersManager{
         const tabOptions = [
             {"display": "Importer Settings", "value": "importer"},
             {"display": "Force Player Name", "value": "force-name"},
+            {"display": "Recalculate Player Totals", "value": "recalculate"},
             {"display": "Recalculate Player Weapon Totals", "value": "recalc-weapon-totals"},
         ];
 
@@ -6753,6 +6832,7 @@ class AdminPlayersManager{
             this.forceNameManager.setActive(e.detail.newTab === "force-name");
             this.importerSettings.setActive(e.detail.newTab === "importer");
             this.playerWeaponsRecalculator.setActive(e.detail.newTab === "recalc-weapon-totals");
+            this.recalculateAll.setActive(e.detail.newTab === "recalculate");
        
             
             this.mode = e.detail.newTab;
@@ -6783,6 +6863,14 @@ class AdminPlayersManager{
         this.playerWeaponsRecalculator.render();
     }
 
+    renderRecalculateAll(){
+
+        if(this.mode !== "recalculate") return;
+
+        this.recalculateAll.render();
+
+    }
+
     render(){
 
         this.content.innerHTML = ``;
@@ -6790,6 +6878,7 @@ class AdminPlayersManager{
         this.renderImporterSettings();
         this.renderForceName();
         this.renderRecalculateWeapons();
+        this.renderRecalculateAll();
     }
 }
 

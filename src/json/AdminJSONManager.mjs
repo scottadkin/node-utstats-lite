@@ -27,9 +27,10 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, adminRenameForceHWIDToName, updatePlayerSettings } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, adminRenameForceHWIDToName, calculateAllPlayerTotals, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
 import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
+import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
 
 
 
@@ -550,6 +551,13 @@ export default class AdminJSONManager{
 
                 return this.res.json({"message": "passed"});
                 
+            }else if(this.mode === "recalculate-players-totals"){
+
+                await calculateAllPlayerTotals();
+                await ctfRecalculateAllPlayerTotals();
+
+                return this.res.json({"message": "passed"});
+
             }
 
 
