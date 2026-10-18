@@ -1433,8 +1433,6 @@ section{
     font-size:var(--font-size-70);
     color:var(--font-color-2);
     line-height: 1.6em;
-    background-color:rgba(0,0,0,0.125);
-    border-top:1px solid var(--border-color-4);
 }
 
 .new-rich-title{

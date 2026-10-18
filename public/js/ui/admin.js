@@ -5351,7 +5351,7 @@ class AdminPlayerForceName{
 
         }
 
-        this.hwidSelect.updateOptions(options);
+        this.hwidSelect.updateOptions(options, this.hwidSearch);
     }
 
 
