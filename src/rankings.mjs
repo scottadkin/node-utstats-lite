@@ -598,22 +598,6 @@ export async function recalculateGametype(seasonId, id){
   
 }
 
-
-async function getRankingPosition(score, gametypeId, minDate, type, seasonId){
-
-    let query = null;
-
-    if(type === "map"){
-        query = `SELECT COUNT(*) as position FROM nstats_map_rankings WHERE score>? AND map_id=? AND last_active>? AND season_id=? ORDER BY score DESC`;
-    }else{
-        query = `SELECT COUNT(*) as position FROM nstats_rankings WHERE score>? AND gametype_id=? AND last_active>? AND season_id=? ORDER BY score DESC`;
-    }
-
-    const result = await simpleQuery(query, [score, gametypeId, minDate, seasonId]);
-    
-    return result[0].position + 1;
-}
-
 async function getPlayerMapRankings(playerId, minDate, seasonId){
 
 
@@ -625,12 +609,9 @@ async function getPlayerMapRankings(playerId, minDate, seasonId){
         nstats_map_rankings.score,
         nstats_map_rankings.last_active,
         nstats_maps.name,
-        DENSE_RANK() OVER(
-            PARTITION BY season_id,map_id ORDER BY map_id ASC, score DESC
-        ) position,
-        PERCENT_RANK() OVER(
-            PARTITION BY season_id,map_id ORDER BY map_id ASC, score DESC
-        ) percent_rank
+        RANK() OVER(
+            PARTITION BY map_id ORDER BY score DESC
+        ) position
         FROM nstats_map_rankings 
         LEFT JOIN nstats_maps ON map_id=nstats_maps.id 
         WHERE nstats_map_rankings.last_active>=? AND nstats_map_rankings.season_id=?
@@ -651,12 +632,9 @@ export async function getPlayerRankings(playerId, minDate, seasonId){
     nstats_rankings.last_active,
     nstats_rankings.season_id,
     nstats_gametypes.name,
-    DENSE_RANK() OVER(
-        PARTITION BY season_id,gametype_id ORDER BY season_id ASC, gametype_id ASC, score DESC
-    ) as position,
-     PERCENT_RANK() OVER(
-        PARTITION BY season_id,gametype_id ORDER BY season_id ASC, gametype_id ASC, score DESC
-     )  as percent_rank
+    RANK() OVER(
+        PARTITION BY gametype_id ORDER BY score DESC
+    ) as position
      FROM nstats_rankings 
      LEFT JOIN nstats_gametypes ON nstats_rankings.gametype_id=nstats_gametypes.id
      WHERE  last_active>=? AND season_id=?)

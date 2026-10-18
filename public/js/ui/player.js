@@ -1965,8 +1965,8 @@ class PlayerCTFLeague{
 
         const row = [
             {
-                "display": `${data.pos+1}${getOrdinal(parseInt(data.pos) + 1)}`, 
-                "value": data.pos
+                "display": `${data.position}${getOrdinal(parseInt(data.position))}`, 
+                "value": data.position
             },
             {
                 "display": name,

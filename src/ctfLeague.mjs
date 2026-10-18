@@ -404,45 +404,28 @@ export async function getPlayerMapsLeagueData(playerId, seasonId){
     const mT = "nstats_maps";
     const gT = "nstats_gametypes";
 
-    const query = `SELECT ${pT}.gametype_id,${pT}.map_id,${pT}.total_matches,
+    const query = `WITH rankings AS (SELECT ${pT}.season_id,${pT}.player_id,${pT}.gametype_id,${pT}.map_id,${pT}.total_matches,
     ${pT}.wins,${pT}.draws,${pT}.losses,${pT}.cap_for,
     ${pT}.cap_against,${pT}.cap_offset,${pT}.points,
+    RANK() OVER (
+        PARTITION BY ${pT}.gametype_id,${pT}.map_id 
+        ORDER BY 
+        ${pT}.points DESC, ${pT}.wins DESC, ${pT}.draws DESC, ${pT}.losses ASC, ${pT}.cap_offset DESC
+    ) position,
     ${gT}.name as gametype_name,
     ${mT}.name as map_name
     FROM ${pT} 
     LEFT JOIN ${gT} ON ${gT}.id = ${pT}.gametype_id
     LEFT JOIN ${mT} ON ${mT}.id = ${pT}.map_id
-    
-    WHERE ${pT}.player_id=? AND ${pT}.season_id=?`;
+     WHERE ${pT}.season_id=?)
+     SELECT * FROM rankings WHERE player_id=?
+     `;
 
-    const result = await simpleQuery(query, [playerId, seasonId]);
+    return await simpleQuery(query, [seasonId, playerId]);
 
 
-    await getPlayerMapsPosition(playerId, result, seasonId);
-
-    return result;
 }
 
-
-/**
- * probably not an efficent way of doing this...
- * @param {*} playerId 
- * @param {*} targetData 
- */
-export async function getPlayerMapsPosition(playerId, targetData){
-
-    const query = `SELECT COUNT(*) as pos FROM nstats_player_ctf_league 
-    WHERE gametype_id=? AND map_id=? AND points>?
-    ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset DESC`;
-
-    for(let i = 0; i < targetData.length; i++){
-
-        const t = targetData[i];
-        const pos = await simpleQuery(query, [t.gametype_id, t.map_id, t.points]);
-        if(pos.length > 0) t.pos = pos[0].pos;
-    }
-
-}
 
 /**
 * Only return gametypes with mapId=0
@@ -511,40 +494,6 @@ export async function getUniqueMapLeagues(seasonId, gametypeId){
 }
 
 
-/**
- * get top x for every gametype specified
- */
-export async function getGametypesTopX(gametypeIds, max){
-
-    if(gametypeIds.length === 0) return {};
-    max = setInt(max, 10);
-
-    const query = `SELECT player_id,first_match,last_match,total_matches,wins,draws,losses,
-    cap_for,cap_against,cap_offset,points FROM nstats_player_ctf_league WHERE gametype_id=? AND map_id=0 ORDER BY points DESC LIMIT ?`;
-
-    const data = {};
-    const uniquePlayers = new Set();
-
-    for(let i = 0; i < gametypeIds.length; i++){
-
-        const g = parseInt(gametypeIds[i]);
-        if(g !== g) continue;
-        const result = await simpleQuery(query, [g, max]); 
-        data[g] = result;
-
-        for(let x = 0; x < result.length; x++){
-
-            uniquePlayers.add(result[x].player_id);
-        }
-    }
-
-    const playerNames = await getBasicPlayerInfo([...uniquePlayers]);
-
-    return {"data": data, "playerNames": playerNames};
-
-}
-
-
 export async function getMapPlayedValidGametypes(mapId){
 
     if(mapId === 0) return {};
@@ -588,7 +537,7 @@ export async function getSingleCTFLeague(seasonId, gametypeId, mapId, dirtyPage,
     const [page, perPage, start] = sanitizePagePerPage(dirtyPage, dirtyPerPage);
 
     const query = `SELECT * FROM nstats_player_ctf_league 
-    WHERE map_id=? AND gametype_id=? AND season_id=? ORDER BY points DESC LIMIT ?, ?`;
+    WHERE map_id=? AND gametype_id=? AND season_id=? ORDER BY points DESC, wins DESC, draws DESC, losses ASC, cap_offset DESC LIMIT ?, ?`;
 
     const result = await simpleQuery(query, [mapId, gametypeId, seasonId, start, perPage]);
 
