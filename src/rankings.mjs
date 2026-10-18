@@ -614,57 +614,62 @@ async function getRankingPosition(score, gametypeId, minDate, type, seasonId){
     return result[0].position + 1;
 }
 
-
 async function getPlayerMapRankings(playerId, minDate, seasonId){
 
-    const query = `SELECT nstats_map_rankings.map_id,
-    nstats_map_rankings.matches,
-    nstats_map_rankings.playtime,
-    nstats_map_rankings.score,
-    nstats_map_rankings.last_active,
-    nstats_maps.name as name 
-    FROM nstats_map_rankings 
-    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_map_rankings.map_id
-    WHERE nstats_map_rankings.player_id=? AND nstats_map_rankings.last_active>? AND nstats_map_rankings.season_id=? ORDER BY nstats_maps.name ASC`;
 
-    const result = await simpleQuery(query, [playerId, minDate, seasonId]);
+    const query = `WITH rankings AS(
+        SELECT nstats_map_rankings.player_id,
+        nstats_map_rankings.map_id,
+        nstats_map_rankings.matches,
+        nstats_map_rankings.playtime,
+        nstats_map_rankings.score,
+        nstats_map_rankings.last_active,
+        nstats_maps.name,
+        DENSE_RANK() OVER(
+            PARTITION BY season_id,map_id ORDER BY map_id ASC, score DESC
+        ) position,
+        PERCENT_RANK() OVER(
+            PARTITION BY season_id,map_id ORDER BY map_id ASC, score DESC
+        ) percent_rank
+        FROM nstats_map_rankings 
+        LEFT JOIN nstats_maps ON map_id=nstats_maps.id 
+        WHERE nstats_map_rankings.last_active>=? AND nstats_map_rankings.season_id=?
+    )
+    SELECT * FROM rankings WHERE player_id=?`;
 
-    for(let i = 0; i < result.length; i++){
+    return await simpleQuery(query, [minDate, seasonId, playerId]);
 
-        const r = result[i];
-        r.position = await getRankingPosition(r.score, r.map_id, minDate, "map", seasonId) ?? -1;
-    }
-
-    return result;
 }
 
 export async function getPlayerRankings(playerId, minDate, seasonId){
 
-    const query = `SELECT nstats_rankings.gametype_id,
+    const query = `WITH rankings AS(SELECT nstats_rankings.score,
+    nstats_rankings.player_id,
+    nstats_rankings.gametype_id,
     nstats_rankings.matches,
     nstats_rankings.playtime,
-    nstats_rankings.score,
     nstats_rankings.last_active,
-    nstats_gametypes.name as name
-    FROM nstats_rankings 
-    LEFT JOIN nstats_gametypes ON nstats_gametypes.id = nstats_rankings.gametype_id
-    WHERE nstats_rankings.player_id=? AND nstats_rankings.last_active>? AND nstats_rankings.season_id=? ORDER BY nstats_gametypes.name ASC`;
+    nstats_rankings.season_id,
+    nstats_gametypes.name,
+    DENSE_RANK() OVER(
+        PARTITION BY season_id,gametype_id ORDER BY season_id ASC, gametype_id ASC, score DESC
+    ) as position,
+     PERCENT_RANK() OVER(
+        PARTITION BY season_id,gametype_id ORDER BY season_id ASC, gametype_id ASC, score DESC
+     )  as percent_rank
+     FROM nstats_rankings 
+     LEFT JOIN nstats_gametypes ON nstats_rankings.gametype_id=nstats_gametypes.id
+     WHERE  last_active>=? AND season_id=?)
+    SELECT * FROM rankings WHERE player_id=?`;
 
-    const result = await simpleQuery(query, [playerId, minDate, seasonId]);
+    const [gametypes, maps] = await Promise.all([
+        simpleQuery(query, [minDate, seasonId, playerId]),
+        getPlayerMapRankings(playerId, minDate, seasonId)
 
-    for(let i = 0; i < result.length; i++){
+    ]);
 
-        const r = result[i];
-        const pos = await getRankingPosition(r.score, r.gametype_id, minDate, "gametype", seasonId);
-        r.position = (pos !== null) ? pos : -1;
-        
-    }
-
-    const maps = await getPlayerMapRankings(playerId, minDate, seasonId);
-
-    return {"gametypes": result, "maps": maps};
+    return {gametypes, maps}
 }
-
 
 
 export async function recalculateMap(seasonId, id){
