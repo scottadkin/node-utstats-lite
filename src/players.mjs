@@ -2732,3 +2732,50 @@ export async function sanitizePlayerPageReq(id, seasonId, seasonInfo){
         ctfLeagueData, ctfLeagueSettings, weaponDamage, activeSeasons
     }
 }
+
+export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
+
+
+    if(hwid === "" && mac1 === "" && mac2 === ""){
+        throw new Error(`You can't search a player's history with just blank strings`);
+    }
+
+    const vars = [];
+    let query = `SELECT 
+    player_id,spectator,nstats_match_players.country,match_id,
+    map_id,gametype_id,match_date,match_result,
+    time_on_server, 
+    COALESCE(nstats_gametypes.name, 'Not Found') as gametype_name,
+    COALESCE(nstats_maps.name, 'Not Found') as map_name,
+    COALESCE(nstats_players.name, 'Not Found') as player_name
+    FROM nstats_match_players 
+    LEFT JOIN nstats_gametypes ON gametype_id=nstats_gametypes.id
+    LEFT JOIN nstats_maps ON map_id=nstats_maps.id
+    LEFT JOIN nstats_players ON player_id=nstats_players.id
+    WHERE `;
+
+    if(hwid !== ""){
+        query += ` hwid=? `
+        vars.push(hwid);
+    }
+
+    if(mac1 !== ""){
+        if(vars.length > 0) query += `AND`
+        query += ` mac1=? `;
+        vars.push(mac1);
+        
+    }
+
+    if(mac2 !== ""){
+        if(vars.length > 0) query += `AND`;
+        query += ` mac2=? `;
+        vars.push(mac2);
+    }
+
+
+    query += ` ORDER BY match_date DESC, match_id DESC`;
+
+    const result = await simpleQuery(query, vars);
+
+    return result;
+}

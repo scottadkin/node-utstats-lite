@@ -27,7 +27,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetNameOverrideHistory, adminRenameForceHWIDToName, calculateAllPlayerTotals, updatePlayerSettings } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminRenameForceHWIDToName, calculateAllPlayerTotals, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
 import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
@@ -370,6 +370,20 @@ export default class AdminJSONManager{
 
   
                 return this.res.json({usage, hwidToNames, macToNames, bothToNames, renameHistory});
+
+            }else if(this.mode === "preview-force-name"){
+                
+                const hwid = this.req.body.hwid ?? null;
+                const mac1 = this.req.body.mac1 ?? null;
+                const mac2 = this.req.body.mac2 ?? null;
+
+                if(hwid === null || mac1 === null || mac2 === null){
+                    throw new Error(`hwid, mac1, and mac2 can't be undefined`);
+                }
+
+                const data = await adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2);
+
+                return this.res.json(data);
 
             }else if(this.mode === "force-hwid-to-use-name"){
 

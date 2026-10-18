@@ -582,3 +582,18 @@ function debugDisplayPageMetaData(){
         console.log(name, " = " ,e.getAttribute("content"));
     }
 }
+
+function toMatchResultString(result){
+
+    result = result.toLowerCase();
+
+
+    switch(result){
+        case "w": return "Won";
+        case "l": return "Lost";
+        case "d": return "Draw";
+        case "s": return "Spectator";
+        default: return "Unknown";
+    }
+   
+}
