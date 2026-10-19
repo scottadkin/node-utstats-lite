@@ -876,6 +876,16 @@ class UISelect{
         }
     }
 
+    unselect(){
+        
+        for(let i = 0; i < this.select.length; i++){
+
+            this.select[i].selected = false;
+        }
+        this.select.selectedIndex = -1;
+        this.select.value = "";
+    }
+
     createOptions(){
 
         const groups = {};

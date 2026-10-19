@@ -6462,14 +6462,18 @@ class AdminRenamePlayer{
         this.hwidToNames = [];
         this.macToNames = [];
         this.bothToNames = [];
+        this.playerNames = [];
 
         this.previewData = [];
 
+        this.nameFilter = "";
         this.hwidFilter = "";
         this.mac1Filter = "";
         this.mac2Filter = "";
 
         this.selectedHWID = "";
+
+        this.selectedName = "";
 
         this.parent.append(this.wrapper);
 
@@ -6639,6 +6643,7 @@ class AdminRenamePlayer{
             this.hwidToNames = res.hwidToNames;
             this.macToNames = res.macToNames;
             this.bothToNames = res.bothToNames;
+            this.playerNames = res.playerNames;
 
             this.render();
 
@@ -6650,8 +6655,6 @@ class AdminRenamePlayer{
     }
 
     renderCurrentHistory(){
-
-        
 
         const validModes = [
             "both", "hwid", "mac"
@@ -6724,6 +6727,24 @@ class AdminRenamePlayer{
         return options;
     }
 
+    getExistingNamesOptions(){
+
+        const options = [];
+
+        for(let i = 0; i < this.playerNames.length; i++){
+
+            const {name} = this.playerNames[i];
+
+            if(this.nameFilter === "" || name.toLowerCase().includes(this.nameFilter)){
+                options.push({"display": name, "value": name});
+            }
+        }
+
+        options.unshift({"display": "- Optional Select Existing Name -", "value": ""});
+
+        return options;
+    }
+
     renderForm(){
 
         this.form.innerHTML = ``;
@@ -6735,15 +6756,13 @@ class AdminRenamePlayer{
             filterHwidRow.append(UILabel("Filter HWIDS"));
 
             this.filterHWIDInput = UIInput("text", "hwid-filter", this.hwidFilter, "Filter HWIDS", (e) =>{
-                this.hwidFilter = e.toUpperCase();
-                console.log(this.hwidFilter);
 
+                this.hwidFilter = e.toUpperCase();
+           
                 const newOptions = this.getHWIDSelectOptions();
                 
-                if(this.hwidSelect.updateOptions(newOptions, this.hwidFilter)){
-                    
-                }else{
-
+                if(!this.hwidSelect.updateOptions(newOptions, this.hwidFilter)){
+      
                     if(newOptions.length > 0){
                         this.hwidSelect.changeSelected(newOptions[0].value);
                     }
@@ -6759,7 +6778,7 @@ class AdminRenamePlayer{
 
 
             this.hwidSelect = new UISelect(hwidRow, this.getHWIDSelectOptions(), this.selectedHWID, (e) =>{
-                console.log(e);
+             
                 this.selectedHWID = e.toUpperCase();
                 this.previewChanges(this.selectedHWID, "", "");
             });
@@ -6781,6 +6800,45 @@ class AdminRenamePlayer{
             this.form.append(mac1Row, mac2Row);
 
         }
+
+
+        const filterNameRow = UIDiv("form-row");
+        filterNameRow.append(UILabel("Filter Existing Player Names"));
+        filterNameRow.append(UIInput("text", "filter-name", this.nameFilter, "Filter names...", (e) =>{
+
+            this.nameFilter = e.toLowerCase();
+            const newOptions = this.getExistingNamesOptions();
+
+            if(!this.existingNameSelect.updateOptions(newOptions, this.selectedName)){
+
+                this.existingNameSelect.unselect();
+                this.nameFilter = "";
+               
+            }
+        }));
+
+
+        const existingNamesRow = UIDiv("form-row");
+        existingNamesRow.append(UILabel("Select An Existing Player Name"));
+
+        this.existingNameSelect = new UISelect(existingNamesRow, this.getExistingNamesOptions(), this.selectedName, (e) =>{
+            console.log(e);
+
+            this.selectedName = e;
+            this.newNameInput.value = this.selectedName;
+        });
+
+        const nameRow = UIDiv("form-row");
+        nameRow.append(UILabel("Name To Use"));
+
+
+
+        this.newNameInput = new UIInput("text", "new-name", this.selectedName, "Player Name...", (e) =>{
+            this.selectedName = e;
+        })
+        nameRow.append(this.newNameInput);
+
+        this.form.append(UIBr(),UIBr(),filterNameRow, existingNamesRow,UIBr(),UIBr(), nameRow);
 
         const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
         currentButton.addEventListener("click", () =>{

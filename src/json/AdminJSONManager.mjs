@@ -27,7 +27,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminRenameForceHWIDToName, calculateAllPlayerTotals, updatePlayerSettings } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
 import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
@@ -377,8 +377,9 @@ export default class AdminJSONManager{
                 const hwidToNames = await adminGetAllForceHWIDToNames();
                 const macToNames = await adminGetAllForceMacToNames();
                 const bothToNames = await adminGetAllForceNamesByHWIDAndMac();
+                const playerNames = await getAllNames();
 
-                return this.res.json({usage, hwidToNames, macToNames, bothToNames});
+                return this.res.json({usage, hwidToNames, macToNames, bothToNames, playerNames});
                 
             }else if(this.mode === "preview-force-name"){
                 
