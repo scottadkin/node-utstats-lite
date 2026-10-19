@@ -667,7 +667,7 @@ class UITrueFalse{
         this.wrapper = document.createElement((bTableElem) ? "td" : "div");
         this.elem = UIDiv();
 
-        this.elem.addEventListener("click", () =>{
+        this.elem.addEventListener("mousedown", () =>{
 
             this.value = !this.value;
             this.hidden.value = this.value;

@@ -6427,6 +6427,8 @@ class AdminRenamePlayer{
 
         this.previewData = [];
 
+        this.bSelectAll = false;
+
         this.nameFilter = "";
         this.hwidFilter = "";
         this.mac1Filter = "";
@@ -6641,9 +6643,34 @@ class AdminRenamePlayer{
             this.updateSelectedEntries(this.hwidSearch, "", "");
         });
 
-        const test = UIDiv("form");
-        test.append(currentButton);
-        this.previewElem.append(test);
+        const buttonWrapper = UIDiv("form");
+        buttonWrapper.append(currentButton, UIBr(), UIBr());
+
+
+        const selectAllRow = UIDiv("form-row");
+    
+
+        const selectAll = new UITrueFalse(this.bSelectAll, "select-all", false, (e) =>{
+    
+
+            this.bSelectAll = !this.bSelectAll;
+
+            for(let i = 0; i < this.previewData.data.length; i++){
+
+                const d = this.previewData.data[i];
+                d.selected = this.bSelectAll;
+            }
+
+            this.updatePreview();
+        })
+
+        selectAllRow.append(UILabel("Select All"), selectAll.wrapper);
+        
+        buttonWrapper.append(selectAllRow);
+
+        this.previewElem.append(buttonWrapper);
+
+        
 
         const table = new TESTUITable(this.previewElem, tableOptions, rows);
 
