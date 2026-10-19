@@ -5495,6 +5495,42 @@ class AdminPlayerForceName{
         }
     }
 
+
+    async updateSelectedEntries(hwid, mac1, mac2){
+
+        try{
+
+            //need to get the matching player_id for the current filter so we can replace the player_id
+            //need to update rename history
+
+            if(this.previewData.length === 0) throw new Error(`No preview data found`);
+
+            const rowIds = [];
+
+            for(let i = 0; i < this.previewData.length; i++){
+
+                const d = this.previewData[i];
+      
+                if(d.selected){
+                    rowIds.push(d.id);
+                }
+            }
+
+            if(rowIds.length === 0){
+                throw new Error(`No matches selected to update`);
+            }
+
+            console.log(`rows to update`);
+            console.log(rowIds);
+
+        }catch(err){
+
+            console.trace(err);
+
+            new UINotification(this.parent, "error", `Failed To Update Selected Entries`, err.toString());
+        }
+    }
+
     renderForceByHWID(){
 
         if(this.mode !== "hwid") return;
@@ -5520,6 +5556,10 @@ class AdminPlayerForceName{
 
 
         const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
+        currentButton.addEventListener("click", () =>{
+
+            this.updateSelectedEntries(this.hwidSearch, "", "");
+        });
 
         const previewInfo = UIDiv("info");
         previewInfo.append(`Preview all affected player match entries and toggle which entries will be changed.`);
@@ -5532,7 +5572,7 @@ class AdminPlayerForceName{
         });
 
         const applyInfo = UIDiv("info");
-        applyInfo.append(`Update player match entries for existing entries in the database.`);
+        applyInfo.append(`Update player match entries for existing data in the database.`);
 
         this.form.append(
             this.hwidInfoElem, 

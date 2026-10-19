@@ -2742,9 +2742,16 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
 
     const vars = [];
     let query = `SELECT 
-    player_id,spectator,nstats_match_players.country,match_id,
-    map_id,gametype_id,match_date,match_result,
-    time_on_server, 
+    nstats_match_players.id,
+    nstats_match_players.player_id,
+    nstats_match_players.spectator,
+    nstats_match_players.country,
+    nstats_match_players.match_id,
+    nstats_match_players.map_id,
+    nstats_match_players.gametype_id,
+    nstats_match_players.match_date,
+    nstats_match_players.match_result,
+    nstats_match_players.time_on_server, 
     COALESCE(nstats_gametypes.name, 'Not Found') as gametype_name,
     COALESCE(nstats_maps.name, 'Not Found') as map_name,
     COALESCE(nstats_players.name, 'Not Found') as player_name
@@ -2755,20 +2762,20 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
     WHERE `;
 
     if(hwid !== ""){
-        query += ` hwid=? `
+        query += ` nstats_match_players.hwid=? `
         vars.push(hwid);
     }
 
     if(mac1 !== ""){
         if(vars.length > 0) query += `AND`
-        query += ` mac1=? `;
+        query += ` nstats_match_players.mac1=? `;
         vars.push(mac1);
         
     }
 
     if(mac2 !== ""){
         if(vars.length > 0) query += `AND`;
-        query += ` mac2=? `;
+        query += ` nstats_match_players.mac2=? `;
         vars.push(mac2);
     }
 
