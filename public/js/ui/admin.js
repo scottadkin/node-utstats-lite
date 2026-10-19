@@ -6525,6 +6525,39 @@ class AdminRenamePlayer{
         }
     }
 
+
+    async updateSelectedEntries(){
+
+        try{
+
+            const toUpdate = [];
+
+            for(let i = 0; i < this.previewData.data.length; i++){
+
+                const d = this.previewData.data[i];
+
+                if(d.selected){
+                    toUpdate.push(d.id);
+                }
+            }
+
+
+            if(toUpdate.length === 0){
+
+                throw new Error(`No matches selected to rename player`);
+            }
+
+            console.log(toUpdate);
+
+        }catch(err){
+
+            console.trace(err);
+
+            new UINotification(this.parent, "error", "Failed To Rename Player", err.toString());
+        }
+
+    }
+
     updatePreview(){
 
         if(this.previewData.data.length === 0){
@@ -6602,6 +6635,16 @@ class AdminRenamePlayer{
         });
 
         this.previewElem.append(info);
+        const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
+        currentButton.addEventListener("click", () =>{
+
+            this.updateSelectedEntries(this.hwidSearch, "", "");
+        });
+
+        const test = UIDiv("form");
+        test.append(currentButton);
+        this.previewElem.append(test);
+
         const table = new TESTUITable(this.previewElem, tableOptions, rows);
 
     }
@@ -6638,28 +6681,6 @@ class AdminRenamePlayer{
             console.trace(err);
             new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
         }
-    }
-
-    renderCurrentHistory(){
-
-        const validModes = [
-            "both", "hwid", "mac"
-        ];
-
-        if(validModes.indexOf(this.mode) === -1) return;
-
-
-        if(this.previewElem === undefined){
-            this.previewElem = UIDiv();
-        }else{
-            this.previewElem.innerHTML = ``;
-        }
-
-        UIHeader(this.previewElem, "Full Match History");
-
-        if(this.previewData.data.length === 0) this.previewElem.className = "hidden";
-
-        this.form.append(this.previewElem);
     }
 
     getHWIDSelectOptions(){
@@ -6826,13 +6847,6 @@ class AdminRenamePlayer{
 
         this.form.append(UIBr(),UIBr(),filterNameRow, existingNamesRow,UIBr(),UIBr(), nameRow);
 
-        const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
-        currentButton.addEventListener("click", () =>{
-
-            this.updateSelectedEntries(this.hwidSearch, "", "");
-        });
-
-        this.form.append(currentButton);
     }
 
     render(){
