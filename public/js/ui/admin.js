@@ -5402,6 +5402,8 @@ class AdminPlayerForceName{
             this.selectedHWIDInput.value = e;
             this.selectedHWID = e;
 
+            this.previewData = [];
+
             if(this.mode === "hwid"){
                 this.updateHWIDInfo();
             }else{
@@ -5467,7 +5469,7 @@ class AdminPlayerForceName{
                 "method": "POST",
                 "body": JSON.stringify({
                     "mode": "preview-force-name",
-                    "hwid": this.hwidSearch,
+                    "hwid": hwid,
                     mac1,
                     mac2
                 })
@@ -5478,6 +5480,12 @@ class AdminPlayerForceName{
             if(res.error !== undefined) throw new Error(res.error);
 
             this.previewData = res;
+
+            for(let i = 0; i < this.previewData.length; i++){
+
+                const d = this.previewData[i];
+                d.selected = false;
+            }
 
             this.updatePreview();
 
@@ -5495,28 +5503,49 @@ class AdminPlayerForceName{
 
         const hwids = [];
 
-
         this.createHWIDFormElems(hwids);
 
-        const preview = UIButton("Preview Changes", "submit-button");
+        
 
-        preview.addEventListener("click", () =>{
-
-
-            this.previewChanges(this.hwidSearch, "", "");
-        });
+        const saveInfo = UIDiv("info");
+        saveInfo.append(`Any matches imported after saving force to name will automatically change the player's name.`);
 
         const submit = document.createElement("button");
         submit.className = "submit-button";
-        submit.append("Save Changes");
+        submit.append("Save Force Name");
 
         submit.addEventListener("click", () =>{
             this.forceHWIDToName();
         });
 
 
-        this.form.append(preview,UIBr(),UIBr(), submit, UIBr(), UIBr());
-        this.form.append(this.hwidInfoElem);
+        const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
+
+        const previewInfo = UIDiv("info");
+        previewInfo.append(`Preview all affected player match entries and toggle which entries will be changed.`);
+
+        const preview = UIButton("Preview Changes", "submit-button");
+
+        preview.addEventListener("click", () =>{
+
+            this.previewChanges(this.hwidSearch, "", "");
+        });
+
+        const applyInfo = UIDiv("info");
+        applyInfo.append(`Update player match entries for existing entries in the database.`);
+
+        this.form.append(
+            this.hwidInfoElem, 
+            saveInfo, 
+            submit, UIBr(), UIBr(),
+            previewInfo,
+            preview, UIBr(),UIBr()
+        );
+        
+        this.renderCurrentHistory();
+
+        this.form.append(applyInfo, currentButton);
+
     
     }
 
@@ -6429,6 +6458,11 @@ class AdminPlayerForceName{
 
     updatePreview(){
 
+        if(this.previewData.length === 0){
+            this.previewElem.className = "hidden";
+        }else{
+            this.previewElem.className = "";
+        }
         this.previewElem.innerHTML = ``;
 
         UIHeader(this.previewElem, "Preview Changes");
@@ -6436,21 +6470,28 @@ class AdminPlayerForceName{
         const tableOptions = {
             "className": "t-width-1",
             "headers": [
+                
                 {"display": "Used Name"},
                 {"display": "Date"},
                 {"display": "Gametype"},
                 {"display": "Map"},
                 {"display": "Playtime"},
                 {"display": "Match Result"},
+                {"display": "Selected"},
             ]
         };
 
-        const rows = this.previewData.map((d) =>{
+        const rows = this.previewData.map((d, i) =>{
 
             const nameDisplay = UITableCell({
                 "className": "player-name-td"
             });
             nameDisplay.append(UICountryFlag(d.country), d.player_name);
+
+            const sel = new UITrueFalse(d.selected, `select-${i}`, true, (e) =>{
+        
+                this.previewData[i].selected = e;
+            });
 
             return [
                 {"value":d.player_name.toLowerCase(), "display": nameDisplay, "bSkipTD": true},
@@ -6459,6 +6500,11 @@ class AdminPlayerForceName{
                 {"value":d.map_name.toLowerCase(), "display": d.map_name},
                 {"value":d.time_on_server, "display": MMSS(d.time_on_server), "className": "mmss"},
                 {"value":d.match_result, "display": toMatchResultString(d.match_result)},
+                {
+                    "value": "", 
+                    "display": sel.elem,
+                    "bSkipTD": true
+                },
             ]
         });
 
@@ -6467,6 +6513,8 @@ class AdminPlayerForceName{
     }
 
     renderCurrentHistory(){
+
+        
 
         const validModes = [
             "both", "hwid", "mac"
@@ -6482,6 +6530,8 @@ class AdminPlayerForceName{
         }
 
         UIHeader(this.previewElem, "Full Match History");
+
+        if(this.previewData.length === 0) this.previewElem.className = "hidden";
 
         this.form.append(this.previewElem);
     }
@@ -6503,7 +6553,6 @@ class AdminPlayerForceName{
         this.renderForceByMac();
         this.renderForceByBoth();
 
-        this.renderCurrentHistory();
     }
 }
 
