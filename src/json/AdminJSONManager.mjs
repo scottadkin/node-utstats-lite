@@ -371,6 +371,15 @@ export default class AdminJSONManager{
   
                 return this.res.json({usage, hwidToNames, macToNames, bothToNames, renameHistory});
 
+            }else if(this.mode === "load-admin-player-names"){
+
+                const usage = await adminGetForceNamesData();
+                const hwidToNames = await adminGetAllForceHWIDToNames();
+                const macToNames = await adminGetAllForceMacToNames();
+                const bothToNames = await adminGetAllForceNamesByHWIDAndMac();
+
+                return this.res.json({usage, hwidToNames, macToNames, bothToNames});
+                
             }else if(this.mode === "preview-force-name"){
                 
                 const hwid = this.req.body.hwid ?? null;

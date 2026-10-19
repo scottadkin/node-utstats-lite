@@ -4727,7 +4727,6 @@ class AdminSQLiteBackupManager{
     }
 }
 
-
 class AdminPlayerForceName{
 
     constructor(parent, parentMode){
@@ -4735,7 +4734,7 @@ class AdminPlayerForceName{
         this.parent = parent;
 
         this.wrapper = UIDiv("hidden");
-        this.mode = "hwid";
+        this.mode = "current";
         this.selectedHWID = "";
         this.hwidSearch = "";
         this.overrideName = "";
@@ -4757,7 +4756,6 @@ class AdminPlayerForceName{
         this.bothToNames = [];
         this.uniqueHWIDMACs = [];
         this.nameOverrideHistory = [];
-        this.previewData = [];
 
         this.parent.append(this.wrapper);
 
@@ -4893,7 +4891,7 @@ class AdminPlayerForceName{
             {"display": "Name Override History", "value": "rename-history"},
             {"display": "Force BY HWID & MAC Addresses", "value": "both"},
             {"display": "Force By HWID", "value": "hwid"},
-            {"display": "Force By MAC Addresses", "value": "mac"},
+            {"display": "Force By MAC Addresses", "value": "mac"}
             
         ];
 
@@ -5051,15 +5049,9 @@ class AdminPlayerForceName{
         };
 
         
-
         this.hwidTable = new UITable(this.form, hwidOptions, this.createCurrentHWIDRows());
 
-
         new UIHeader(this.form, "Current Names Forced By MAC Addresses");
-
-        
-
-
 
         const macOptions = {
             "width":1,
@@ -5402,8 +5394,6 @@ class AdminPlayerForceName{
             this.selectedHWIDInput.value = e;
             this.selectedHWID = e;
 
-            this.previewData = [];
-
             if(this.mode === "hwid"){
                 this.updateHWIDInfo();
             }else{
@@ -5457,42 +5447,6 @@ class AdminPlayerForceName{
         
         this.form.append(this.hwidSearchElem, row, selectedRow, this.hwidNameOverrideElem);
 
-    }
-
-
-    async previewChanges(hwid, mac1, mac2){
-
-        try{
-
-            const req = await fetch("/admin", {
-                "headers": {"Content-type": "application/json"},
-                "method": "POST",
-                "body": JSON.stringify({
-                    "mode": "preview-force-name",
-                    "hwid": hwid,
-                    mac1,
-                    mac2
-                })
-            });
-
-            const res = await req.json();
-
-            if(res.error !== undefined) throw new Error(res.error);
-
-            this.previewData = res;
-
-            for(let i = 0; i < this.previewData.length; i++){
-
-                const d = this.previewData[i];
-                d.selected = false;
-            }
-
-            this.updatePreview();
-
-        }catch(err){
-            console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Preview Data", err.toString());
-        }
     }
 
 
@@ -5555,36 +5509,15 @@ class AdminPlayerForceName{
         });
 
 
-        const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
-        currentButton.addEventListener("click", () =>{
-
-            this.updateSelectedEntries(this.hwidSearch, "", "");
-        });
-
-        const previewInfo = UIDiv("info");
-        previewInfo.append(`Preview all affected player match entries and toggle which entries will be changed.`);
-
-        const preview = UIButton("Preview Changes", "submit-button");
-
-        preview.addEventListener("click", () =>{
-
-            this.previewChanges(this.hwidSearch, "", "");
-        });
-
-        const applyInfo = UIDiv("info");
-        applyInfo.append(`Update player match entries for existing data in the database.`);
 
         this.form.append(
-            this.hwidInfoElem, 
-            saveInfo, 
+            this.hwidInfoElem, submit
+          /*  saveInfo, 
             submit, UIBr(), UIBr(),
             previewInfo,
-            preview, UIBr(),UIBr()
+            preview, UIBr(),UIBr()*/
         );
         
-        this.renderCurrentHistory();
-
-        this.form.append(applyInfo, currentButton);
 
     
     }
@@ -6494,7 +6427,137 @@ class AdminPlayerForceName{
         this.nameSearchTable = new UITable(this.form, tableOptions, this.getNameSearchRows());
         
     }
-    
+
+    render(){
+
+        if(!this.bActive){
+            this.wrapper.className = "hidden";
+        }else{
+            this.wrapper.className = "";
+        }
+
+        this.form.innerHTML = "";
+
+        this.renderCurrentData();
+        this.renderSearchByName();
+        this.renderOverrideHistory();
+        this.renderForceByHWID();
+        this.renderForceByMac();
+        this.renderForceByBoth();
+
+    }
+}
+
+class AdminRenamePlayer{
+
+    constructor(parent, parentMode){
+
+        this.parent = parent;
+
+        this.wrapper = UIDiv();
+
+        this.mode = "hwid";
+
+        this.usageData = [];
+        this.hwidToNames = [];
+        this.macToNames = [];
+        this.bothToNames = [];
+
+        this.previewData = [];
+
+        this.hwidFilter = "";
+        this.mac1Filter = "";
+        this.mac2Filter = "";
+
+        this.selectedHWID = "";
+
+        this.parent.append(this.wrapper);
+
+        this.bActive = parentMode === "rename";
+        
+        this.createElems();
+        this.loadData();
+    }
+
+    setActive(value){
+        this.bActive = value;
+
+        this.render();
+    }
+
+
+    createTabs(){
+
+        const options = [
+            {"display": "Rename By HWID History", "value": "hwid"},
+            {"display": "Rename By MAC History", "value": "mac"},
+            {"display": "Rename By HWID & MAC History", "value": "both"},
+        ];
+
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            //console.log(e.detail.newTab);
+            this.mode = e.detail.newTab;
+            this.render();
+        })
+    }
+
+    createElems(){
+
+        this.info = UIDiv("info");
+
+        this.info.append(`Rename a player in existing data.`);
+
+        this.wrapper.append(this.info);
+
+        this.createTabs();
+
+
+        this.form = UIDiv("form");
+
+
+        this.wrapper.append(this.form);
+
+        this.previewElem = UIDiv();
+        this.wrapper.append(this.previewElem);
+    }
+
+    async previewChanges(hwid, mac1, mac2){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "preview-force-name",
+                    "hwid": hwid,
+                    mac1,
+                    mac2
+                })
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.previewData = res;
+
+            for(let i = 0; i < this.previewData.length; i++){
+
+                const d = this.previewData[i];
+                d.selected = false;
+            }
+
+            this.updatePreview();
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Preview Data", err.toString());
+        }
+    }
 
     updatePreview(){
 
@@ -6503,9 +6566,10 @@ class AdminPlayerForceName{
         }else{
             this.previewElem.className = "";
         }
+
         this.previewElem.innerHTML = ``;
 
-        UIHeader(this.previewElem, "Preview Changes");
+        UIHeader(this.previewElem, "Match History");
 
         const tableOptions = {
             "className": "t-width-1",
@@ -6552,6 +6616,39 @@ class AdminPlayerForceName{
 
     }
 
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "load-admin-player-names"
+                })
+            });
+
+            const res = await req.json();
+
+
+            if(res.error !== undefined) throw new Error(res.error);
+            console.log(res);
+
+            this.usageData = res.usage;
+            this.hwidToNames = res.hwidToNames;
+            this.macToNames = res.macToNames;
+            this.bothToNames = res.bothToNames;
+
+            this.render();
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+        }
+    }
+
     renderCurrentHistory(){
 
         
@@ -6576,24 +6673,135 @@ class AdminPlayerForceName{
         this.form.append(this.previewElem);
     }
 
-    render(){
+    getHWIDSelectOptions(){
 
-        if(!this.bActive){
-            this.wrapper.className = "hidden";
-        }else{
-            this.wrapper.className = "";
+        const found = new Set();
+
+        for(let i = 0; i < this.usageData.length; i++){
+
+            const d = this.usageData[i];
+
+            const current = d.hwid.toUpperCase();
+
+            if(current === "N/A"){
+                console.warn(`HWID is N/A skipping`);
+                continue;
+            }
+
+            if(this.hwidFilter === "" && current !== ""){
+                found.add(current);
+                continue;
+            }
+
+            if(current === "" || this.hwidFilter === "") continue;
+
+            if(current.includes(this.hwidFilter)){
+                found.add(current);
+            }
         }
 
-        this.form.innerHTML = "";
+        const options = [...found].map((v) =>{
+            return {"display": v, "value": v}
+        });
 
-        this.renderCurrentData();
-        this.renderSearchByName();
-        this.renderOverrideHistory();
-        this.renderForceByHWID();
-        this.renderForceByMac();
-        this.renderForceByBoth();
 
+        options.sort((a, b) =>{
+
+            a = a.value;
+            b = b.value;
+
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+            
+            return 0;
+        });
+
+        options.unshift({"display": "- Please Select An Option -", "value": 0});
+
+        return options;
     }
+
+    renderForm(){
+
+        this.form.innerHTML = ``;
+
+        if(this.mode === "hwid" || this.mode === "both"){
+
+            const filterHwidRow = UIDiv("form-row");
+
+            filterHwidRow.append(UILabel("Filter HWIDS"));
+
+            this.filterHWIDInput = UIInput("text", "hwid-filter", this.hwidFilter, "Filter HWIDS", (e) =>{
+                this.hwidFilter = e.toUpperCase();
+                console.log(this.hwidFilter);
+
+                const newOptions = this.getHWIDSelectOptions();
+                
+                if(this.hwidSelect.updateOptions(newOptions, this.hwidFilter)){
+                    
+                }else{
+
+                    if(newOptions.length > 0){
+                        this.hwidSelect.changeSelected(newOptions[0].value);
+                    }
+                }
+
+                
+            });
+
+            filterHwidRow.append(this.filterHWIDInput);
+
+            const hwidRow = UIDiv("form-row");
+            hwidRow.append(UILabel("HWID"));
+
+
+            this.hwidSelect = new UISelect(hwidRow, this.getHWIDSelectOptions(), this.selectedHWID, (e) =>{
+                console.log(e);
+                this.selectedHWID = e.toUpperCase();
+                this.previewChanges(this.selectedHWID, "", "");
+            });
+
+           // this.hwidSelect = UISelect();
+
+            this.form.append(filterHwidRow, hwidRow);
+        }
+
+
+
+        if(this.mode === "mac" || this.mode === "both"){
+            const mac1Row = UIDiv("form-row");
+            mac1Row.append(UILabel("MAC1"));
+
+            const mac2Row = UIDiv("form-row");
+            mac2Row.append(UILabel("MAC2"));
+
+            this.form.append(mac1Row, mac2Row);
+
+        }
+
+        const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
+        currentButton.addEventListener("click", () =>{
+
+            this.updateSelectedEntries(this.hwidSearch, "", "");
+        });
+
+        this.form.append(currentButton);
+    }
+
+    render(){
+
+        if(this.bActive){
+            this.wrapper.className = ``;
+        }else{
+            this.wrapper.className = "hidden";
+        }
+
+        this.renderForm();
+    }
+
 }
 
 class AdminPlayersImporterSettings{
@@ -6980,10 +7188,11 @@ class AdminPlayersManager{
         this.wrapper = UIDiv();
         
         this.parent.append(this.wrapper);
-        this.mode = "force-name";
+        this.mode = "rename";
 
 
         this.importerSettings = new AdminPlayersImporterSettings(this.parent, this.mode);
+        this.renamePlayer = new AdminRenamePlayer(this.parent, this.mode);
         this.forceNameManager = new AdminPlayerForceName(this.parent, this.mode);
         this.playerWeaponsRecalculator = new AdminPlayersWeaponsRecalculator(this.parent, this.mode);
         this.recalculateAll = new AdminPlayersTotalsRecalculator(this.parent, this.mode);
@@ -7002,6 +7211,7 @@ class AdminPlayersManager{
 
         const tabOptions = [
             {"display": "Importer Settings", "value": "importer"},
+            {"display": "Rename Player", "value": "rename"},
             {"display": "Force Player Name", "value": "force-name"},
             {"display": "Recalculate Player Totals", "value": "recalculate"},
             {"display": "Recalculate Player Weapon Totals", "value": "recalc-weapon-totals"},
@@ -7015,6 +7225,7 @@ class AdminPlayersManager{
             this.importerSettings.setActive(e.detail.newTab === "importer");
             this.playerWeaponsRecalculator.setActive(e.detail.newTab === "recalc-weapon-totals");
             this.recalculateAll.setActive(e.detail.newTab === "recalculate");
+            this.renamePlayer.setActive(e.detail.newTab === "rename");
        
             
             this.mode = e.detail.newTab;
@@ -7053,6 +7264,13 @@ class AdminPlayersManager{
 
     }
 
+
+    renderRename(){
+
+        if(this.mode !== "rename") return;
+        this.renamePlayer.render();
+    }
+
     render(){
 
         this.content.innerHTML = ``;
@@ -7061,6 +7279,7 @@ class AdminPlayersManager{
         this.renderForceName();
         this.renderRecalculateWeapons();
         this.renderRecalculateAll();
+        this.renderRename();
     }
 }
 
