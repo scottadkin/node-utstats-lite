@@ -5450,41 +5450,6 @@ class AdminPlayerForceName{
     }
 
 
-    async updateSelectedEntries(hwid, mac1, mac2){
-
-        try{
-
-            //need to get the matching player_id for the current filter so we can replace the player_id
-            //need to update rename history
-
-            if(this.previewData.length === 0) throw new Error(`No preview data found`);
-
-            const rowIds = [];
-
-            for(let i = 0; i < this.previewData.length; i++){
-
-                const d = this.previewData[i];
-      
-                if(d.selected){
-                    rowIds.push(d.id);
-                }
-            }
-
-            if(rowIds.length === 0){
-                throw new Error(`No matches selected to update`);
-            }
-
-            console.log(`rows to update`);
-            console.log(rowIds);
-
-        }catch(err){
-
-            console.trace(err);
-
-            new UINotification(this.parent, "error", `Failed To Update Selected Entries`, err.toString());
-        }
-    }
-
     renderForceByHWID(){
 
         if(this.mode !== "hwid") return;
@@ -5512,10 +5477,6 @@ class AdminPlayerForceName{
 
         this.form.append(
             this.hwidInfoElem, submit
-          /*  saveInfo, 
-            submit, UIBr(), UIBr(),
-            previewInfo,
-            preview, UIBr(),UIBr()*/
         );
         
 
@@ -6494,8 +6455,8 @@ class AdminRenamePlayer{
 
         const options = [
             {"display": "Rename By HWID History", "value": "hwid"},
-            {"display": "Rename By MAC History", "value": "mac"},
-            {"display": "Rename By HWID & MAC History", "value": "both"},
+           // {"display": "Rename By MAC History", "value": "mac"},
+          //  {"display": "Rename By HWID & MAC History", "value": "both"},
         ];
 
 
@@ -6549,9 +6510,10 @@ class AdminRenamePlayer{
 
             this.previewData = res;
 
-            for(let i = 0; i < this.previewData.length; i++){
 
-                const d = this.previewData[i];
+            for(let i = 0; i < this.previewData.data.length; i++){
+
+                const d = this.previewData.data[i];
                 d.selected = false;
             }
 
@@ -6565,7 +6527,7 @@ class AdminRenamePlayer{
 
     updatePreview(){
 
-        if(this.previewData.length === 0){
+        if(this.previewData.data.length === 0){
             this.previewElem.className = "hidden";
         }else{
             this.previewElem.className = "";
@@ -6573,13 +6535,36 @@ class AdminRenamePlayer{
 
         this.previewElem.innerHTML = ``;
 
-        UIHeader(this.previewElem, "Match History");
+        UIHeader(this.previewElem, "Full Match History");
+
+
+        const info = UIDiv("info");
+
+        const totalMatches = this.previewData.data.length;
+        const {uniqueHWIDS, uniqueIps, uniqueMac1s, uniqueMac2s, uniqueMacs, uniqueNames} = this.previewData;
+
+        console.log(this.previewData);
+
+        const infoContent = [];
+
+        if(this.mode === "hwid"){
+
+            infoContent.push(`HWID was used in a total of ${totalMatches} ${plural(totalMatches, "match")}.`);
+            infoContent.push(UIBr(), ` ${uniqueNames.length} Unique ${plural(uniqueNames.length, "name")} used.`);
+            infoContent.push(UIBr(), ` ${uniqueIps.length} Unique IP ${plural(uniqueIps.length, "address")} used.`);
+            infoContent.push(UIBr(), ` ${uniqueMac1s.length} Unique MAC1 ${plural(uniqueMac1s.length, "address")} used.`);
+            infoContent.push(UIBr(), ` ${uniqueMac2s.length} Unique MAC2 ${plural(uniqueMac2s.length, "address")} used.`);
+            infoContent.push(UIBr(), ` ${uniqueMacs.length} Unique MAC(MAC1 or MAC2) ${plural(uniqueMacs.length, "address")} used.`);
+        }
+
+        info.append(...infoContent);
+
 
         const tableOptions = {
             "className": "t-width-1",
             "headers": [
                 
-                {"display": "Used Name"},
+                {"display": "Name"},
                 {"display": "Date"},
                 {"display": "Gametype"},
                 {"display": "Map"},
@@ -6589,7 +6574,7 @@ class AdminRenamePlayer{
             ]
         };
 
-        const rows = this.previewData.map((d, i) =>{
+        const rows = this.previewData.data.map((d, i) =>{
 
             const nameDisplay = UITableCell({
                 "className": "player-name-td"
@@ -6598,14 +6583,14 @@ class AdminRenamePlayer{
 
             const sel = new UITrueFalse(d.selected, `select-${i}`, true, (e) =>{
         
-                this.previewData[i].selected = e;
+                this.previewData.data[i].selected = e;
             });
 
             return [
                 {"value":d.player_name.toLowerCase(), "display": nameDisplay, "bSkipTD": true},
-                {"value":d.match_date, "display": toDateString(d.match_date, TIME_ZONE, true), "className": "date"},
-                {"value":d.gametype_name.toLowerCase(), "display": d.gametype_name},
-                {"value":d.map_name.toLowerCase(), "display": d.map_name},
+                {"value":d.match_date, "display": toDateString(d.match_date, TIME_ZONE, true), "className": "date font-small"},
+                {"value":d.gametype_name.toLowerCase(), "display": d.gametype_name, "className": "font-small"},
+                {"value":d.map_name.toLowerCase(), "display": d.map_name, "className": "font-small"},
                 {"value":d.time_on_server, "display": MMSS(d.time_on_server), "className": "mmss"},
                 {"value":d.match_result, "display": toMatchResultString(d.match_result)},
                 {
@@ -6616,6 +6601,7 @@ class AdminRenamePlayer{
             ]
         });
 
+        this.previewElem.append(info);
         const table = new TESTUITable(this.previewElem, tableOptions, rows);
 
     }
@@ -6671,7 +6657,7 @@ class AdminRenamePlayer{
 
         UIHeader(this.previewElem, "Full Match History");
 
-        if(this.previewData.length === 0) this.previewElem.className = "hidden";
+        if(this.previewData.data.length === 0) this.previewElem.className = "hidden";
 
         this.form.append(this.previewElem);
     }

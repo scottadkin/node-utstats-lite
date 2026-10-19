@@ -2752,6 +2752,10 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
     nstats_match_players.match_date,
     nstats_match_players.match_result,
     nstats_match_players.time_on_server, 
+    nstats_match_players.ip, 
+    nstats_match_players.hwid, 
+    nstats_match_players.mac1, 
+    nstats_match_players.mac2, 
     COALESCE(nstats_gametypes.name, 'Not Found') as gametype_name,
     COALESCE(nstats_maps.name, 'Not Found') as map_name,
     COALESCE(nstats_players.name, 'Not Found') as player_name
@@ -2784,5 +2788,46 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
 
     const result = await simpleQuery(query, vars);
 
-    return result;
+    const uniqueNames = new Set();
+    const uniqueIps = new Set();
+    const uniqueHWIDs = new Set();
+    const uniqueMacs = new Set();
+    const uniqueMac1s = new Set();
+    const uniqueMac2s = new Set();
+
+    for(let i = 0; i < result.length; i++){
+
+        const {player_name, ip, hwid, mac1, mac2} = result[i];
+
+
+        uniqueNames.add(player_name);
+
+        if(ip !== "" && ip !== "0.0.0.0"){
+            uniqueIps.add(ip);
+        }
+        if(hwid !== "" && hwid !== "N/A"){
+            uniqueHWIDs.add(hwid);
+        }
+
+        if(mac1 !== ""){
+            uniqueMacs.add(mac1);
+            uniqueMac1s.add(mac1);
+        }
+
+        if(mac2 !== ""){
+            uniqueMacs.add(mac2);
+            uniqueMac2s.add(mac2);
+        }
+        
+    }
+
+    return {
+        "data": result,
+        "uniqueHWIDs": [...uniqueHWIDs],
+        "uniqueIps": [...uniqueIps],
+        "uniqueMacs": [...uniqueMacs],
+        "uniqueMac1s": [...uniqueMac1s],
+        "uniqueMac2s": [...uniqueMac2s],
+        "uniqueNames": [...uniqueNames]
+    };
 }
