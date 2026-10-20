@@ -1,7 +1,11 @@
 import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate, bulkUpdate} from "./database.mjs";
 import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString, sortByName, convertTimestamp, toPlaytime } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
-import { ctfChangePlayerMatchIds, getPlayerCTFTotals, setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
+import { 
+    ctfChangePlayerMatchIds, getPlayerCTFTotals, 
+    setMatchMapGametypeIds as setCTFMatchMapGametypeIds,
+    updatePlayerTotals as ctfUpdatePlayerTotals
+ } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
 import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./weapons.mjs";
 import md5 from "md5";
@@ -1014,6 +1018,22 @@ export async function calcPlayerTotals(playerIds, seasonId){
 
     const result = await simpleQuery(query, vars);
 
+    const missing = playerIds;
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const index = missing.indexOf(r.player_id);
+        if(index !== -1) missing.splice(index, 1)
+    }
+
+    if(missing.length > 0){
+
+        //need to do this first because of foreign key
+        await simpleQuery(`DELETE FROM nstats_player_totals_max WHERE player_id IN(?) AND season_id=?`, [missing, seasonId]);
+        await simpleQuery(`DELETE FROM nstats_player_totals WHERE player_id IN(?) AND season_id=?`, [missing, seasonId]);
+    }
 
     return createPlayerTotalsFromData(result, seasonId);
   
@@ -2977,6 +2997,7 @@ export async function recalculatePlayerTotals(playerIds, seasonIds){
         const sId = seasonIds[i];
 
         promises.push(updatePlayerTotals(playerIds, sId));
+        promises.push(ctfUpdatePlayerTotals(playerIds, sId));
     }
 
     await Promise.all(promises);

@@ -417,8 +417,23 @@ async function getPlayersMatchesData(playerIds, seasonId){
 
 async function calcPlayerTotals(playerIds, seasonId){
 
-  
     const result = await getPlayersMatchesData(playerIds, seasonId);
+
+    const missing = playerIds;
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const index = missing.indexOf(r.player_id);
+
+        if(index !== -1) missing.splice(index, 1);
+    }
+
+    if(missing.length > 0){
+
+        await simpleQuery(`DELETE FROM nstats_player_totals_ctf WHERE player_id IN(?) AND season_id=?`, [playerIds, seasonId]);
+    }
 
     const totals = {};
 
