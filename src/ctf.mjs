@@ -1,4 +1,4 @@
-import { simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate } from "./database.mjs";
+import { simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate, bulkUpdate } from "./database.mjs";
 import { getTeamName, toMatchResultString } from "./generic.mjs";
 import { getMatchBasicTeamGame, getMatchesGametype, getMatchStartTimestamp } from "./matches.mjs";
 import { bIncludeMostUsedNameByHWID, toJSONAPIKeyNames } from "./json.mjs";
@@ -1686,4 +1686,38 @@ export async function ctfRecalculateAllPlayerTotals(){
         await ctfRecalculatePlayerTotals(sid);
 
     }
+}
+
+/**
+ * 
+ * @param {Array} must have matchId, oldPlayerId, newPlayerId
+ */
+export async function ctfChangePlayerMatchIds(targets){
+
+
+    /**
+     * 
+
+     X nstats_match_ctf
+     - nstats_ctf_caps
+     - nstats_ctf_covers
+     - nstats_ctf_carry_times
+     - nstats_ctf_cap_kills
+     - nstats_ctf_cap_suicides
+     */
+
+    const matchQuery = `UPDATE nstats_match_ctf SET player_id=? WHERE match_id=? AND player_id=?`;
+
+    const matchVars = [];
+
+    for(let i = 0; i < targets.length; i++){
+
+        const t = targets[i];
+
+        matchVars.push([t.newPlayerId, t.matchId, t.oldPlayerId]);
+       
+    }
+
+    await bulkUpdate(matchQuery, matchVars);
+
 }

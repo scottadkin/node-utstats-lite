@@ -1,7 +1,7 @@
 import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate} from "./database.mjs";
 import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString, sortByName, convertTimestamp, toPlaytime } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
-import { getPlayerCTFTotals, setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
+import { ctfChangePlayerMatchIds, getPlayerCTFTotals, setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
 import { setMatchMapGametypeIds as setDOMMatchMapGametypeIds } from "./domination.mjs";
 import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./weapons.mjs";
 import md5 from "md5";
@@ -2900,6 +2900,37 @@ async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds){
     }
 }
 
+
+async function changePlayerIdInMatchesData(matchesInfo, newPlayerId){
+
+
+    const targets = [];
+
+    for(let i = 0; i < matchesInfo.data.length; i++){
+
+        const d = matchesInfo.data[i];
+
+        targets.push({
+            "matchId": d.match_id,
+            "oldPlayerId": d.player_id,
+            newPlayerId
+        });
+    }
+
+    console.log(targets);
+    await ctfChangePlayerMatchIds(targets);
+    /**
+     * 
+     * nstats_match_players
+     * nstats_match_weapon_stats
+     * nstats_kills
+     * nstats_match_dom
+     * nstats_damage_match
+     * nstats_classic_weapon_match_stats
+     * nstats_match_player_weapon_damage
+     */
+}
+
 export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, bCreatePlayerIfNotExist){
 
     if(matchPlayerRowIds.length === 0) return;
@@ -2928,6 +2959,9 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
     const matchesInfo = await getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds);
 
     console.log(matchesInfo);
+
+
+    await changePlayerIdInMatchesData(matchesInfo, playerInfo.id);
 
     //console.log(affectedPlayerIds);
 
