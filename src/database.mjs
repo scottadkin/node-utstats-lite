@@ -461,7 +461,7 @@ export async function bulkUpdate(query, vars){
 
     for(let i = 0; i < vars.length; i++){
 
-        update.run(...vars[i])
+        update.run(...vars[i]);
     }
 
     const end = performance.now();

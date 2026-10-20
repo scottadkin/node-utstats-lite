@@ -603,18 +603,6 @@ async function changeCapPlayerIds(oldIds, newId){
     }
 }
 
-export async function changePlayerIds(oldIds, newId){
-
-    if(oldIds.length === 0) return {"changedRows": 0};
-
-    await changeCapPlayerIds(oldIds, newId);
-
-    const query = `UPDATE nstats_match_ctf SET
-    player_id = IF(player_id IN (?), ?, player_id)`;
-
-    return await simpleQuery(query, [oldIds, newId]);
-}
-
 async function insertCovers(playerManager, matchId, capId, covers){
 
 
@@ -1699,7 +1687,7 @@ export async function ctfChangePlayerMatchIds(targets){
      * 
 
      X nstats_match_ctf
-     - nstats_ctf_caps
+     X nstats_ctf_caps
      - nstats_ctf_covers
      - nstats_ctf_carry_times
      - nstats_ctf_cap_kills
@@ -1707,17 +1695,24 @@ export async function ctfChangePlayerMatchIds(targets){
      */
 
     const matchQuery = `UPDATE nstats_match_ctf SET player_id=? WHERE match_id=? AND player_id=?`;
+    const capsQuery = `UPDATE nstats_ctf_caps SET 
+    taken_player = IF(taken_player=?, ?, taken_player), 
+    cap_player = IF(cap_player=?, ?, cap_player) WHERE match_id=?`;
 
     const matchVars = [];
+    const capsVars = [];
 
     for(let i = 0; i < targets.length; i++){
 
         const t = targets[i];
 
         matchVars.push([t.newPlayerId, t.matchId, t.oldPlayerId]);
+
+        capsVars.push([t.oldPlayerId, t.newPlayerId, t.oldPlayerId, t.newPlayerId, t.matchId]);
        
     }
 
     await bulkUpdate(matchQuery, matchVars);
+    await bulkUpdate(capsQuery, capsVars);
 
 }
