@@ -1265,9 +1265,7 @@ async function insertPlayerGametypeTotals(data, seasonId){
 
 export async function updatePlayerTotals(playerIds, seasonId){
 
-
     const totals = await calcPlayerTotals(playerIds, seasonId);
-
 
     await insertPlayerGametypeTotals(totals, seasonId);
     return await insertPlayerGametypeMaxValues(totals, seasonId);
@@ -2857,9 +2855,11 @@ async function getPlayerInfoByMatchRowIds(matchPlayerRowIds){
     return result.map((r) =>{ return r.player_id});
 }
 
-async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds){
+async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds, newPlayerId){
 
     if(matchPlayerRowIds.length === 0) return [];
+
+    if(newPlayerId === undefined) throw new Error(`newPlayerId is missing`);
 
     const query = `SELECT 
     nstats_match_players.match_id,
@@ -2877,6 +2877,8 @@ async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds){
     const uniqueGametypes = new Set();
     const uniqueMaps = new Set();
     const uniquePlayers = new Set();
+
+    uniquePlayers.add(newPlayerId);
 
     uniqueSeasons.add(0);
 
@@ -2964,6 +2966,23 @@ async function changePlayerIdInMatchesData(matchesInfo, newPlayerId){
      */
 }
 
+export async function recalculatePlayerTotals(playerIds, seasonIds){
+
+    if(playerIds.length === 0 || seasonIds.length === 0) return;
+
+    const promises = [];
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        const sId = seasonIds[i];
+
+        promises.push(updatePlayerTotals(playerIds, sId));
+    }
+
+    await Promise.all(promises);
+
+}
+
 export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, bCreatePlayerIfNotExist){
 
     if(matchPlayerRowIds.length === 0) return;
@@ -2989,9 +3008,15 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
     }
 
 
-    const matchesInfo = await getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds);
+    const matchesInfo = await getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds, playerInfo.id);
 
     await changePlayerIdInMatchesData(matchesInfo, playerInfo.id);
+
+    if(matchesInfo.uniquePlayers.indexOf(playerInfo.id) === -1){
+        matchesInfo.uniquePlayers.push(playerInfo.id);
+    }
+
+    await recalculatePlayerTotals(matchesInfo.uniquePlayers, matchesInfo.uniqueSeasons);
 
     console.log(matchesInfo.uniquePlayers);
 
