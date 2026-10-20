@@ -1684,14 +1684,12 @@ export async function ctfChangePlayerMatchIds(targets){
 
 
     /**
-     * 
-
      X nstats_match_ctf
      X nstats_ctf_caps
-     - nstats_ctf_covers
-     - nstats_ctf_carry_times
-     - nstats_ctf_cap_kills
-     - nstats_ctf_cap_suicides
+     X nstats_ctf_covers
+     X nstats_ctf_carry_times
+     X nstats_ctf_cap_kills
+     X nstats_ctf_cap_suicides
      */
 
     const matchQuery = `UPDATE nstats_match_ctf SET player_id=? WHERE match_id=? AND player_id=?`;
@@ -1699,8 +1697,14 @@ export async function ctfChangePlayerMatchIds(targets){
     taken_player = IF(taken_player=?, ?, taken_player), 
     cap_player = IF(cap_player=?, ?, cap_player) WHERE match_id=?`;
 
+    const coversQuery = `UPDATE nstats_ctf_covers SET player_id=? WHERE match_id=? AND player_id=?`;
+    const carryQuery = `UPDATE nstats_ctf_carry_times SET player_id=? WHERE match_id=? AND player_id=?`;
+    const capKillsQuery = `UPDATE nstats_ctf_cap_kills SET killer_id=? WHERE match_id=? AND killer_id=?`;
+    const suicideQuery = `UPDATE nstats_ctf_cap_suicides SET player_id=? WHERE match_id=? AND player_id=?`;
+
     const matchVars = [];
     const capsVars = [];
+  
 
     for(let i = 0; i < targets.length; i++){
 
@@ -1714,5 +1718,11 @@ export async function ctfChangePlayerMatchIds(targets){
 
     await bulkUpdate(matchQuery, matchVars);
     await bulkUpdate(capsQuery, capsVars);
+
+    //reuse matchVars as same query layout
+    await bulkUpdate(coversQuery, matchVars);
+    await bulkUpdate(carryQuery, matchVars);
+    await bulkUpdate(capKillsQuery, matchVars);
+    await bulkUpdate(suicideQuery, matchVars);
 
 }
