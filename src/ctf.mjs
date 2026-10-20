@@ -1677,8 +1677,8 @@ export async function ctfRecalculateAllPlayerTotals(){
 }
 
 /**
- * 
- * @param {Array} must have matchId, oldPlayerId, newPlayerId
+ * Change player ids via match_id and player_id check
+ * @param {Array<Object>} must have matchId, oldPlayerId, newPlayerId
  */
 export async function ctfChangePlayerMatchIds(targets){
 
@@ -1711,7 +1711,6 @@ export async function ctfChangePlayerMatchIds(targets){
         const t = targets[i];
 
         matchVars.push([t.newPlayerId, t.matchId, t.oldPlayerId]);
-
         capsVars.push([t.oldPlayerId, t.newPlayerId, t.oldPlayerId, t.newPlayerId, t.matchId]);
        
     }

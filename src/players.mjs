@@ -1,4 +1,4 @@
-import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate} from "./database.mjs";
+import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate, bulkUpdate} from "./database.mjs";
 import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString, sortByName, convertTimestamp, toPlaytime } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
 import { ctfChangePlayerMatchIds, getPlayerCTFTotals, setMatchMapGametypeIds as setCTFMatchMapGametypeIds } from "./ctf.mjs";
@@ -2901,6 +2901,11 @@ async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds){
 }
 
 
+/**
+ * matchesInfo objects require match_id, and player_id keys
+ * @param {Array<Object>} matchesInfo 
+ * @param {*} newPlayerId 
+ */
 async function changePlayerIdInMatchesData(matchesInfo, newPlayerId){
 
 
@@ -2917,17 +2922,45 @@ async function changePlayerIdInMatchesData(matchesInfo, newPlayerId){
         });
     }
 
-    console.log(targets);
+    const matchQuery = `UPDATE nstats_match_players SET player_id=? WHERE match_id=? AND player_id=?`;
+    const weaponStatsQuery = `UPDATE nstats_match_weapon_stats SET player_id=? WHERE match_id=? AND player_id=?`;
+    const killQuery = `UPDATE nstats_kills SET killer_id = IF(killer_id=?, ?, killer_id), victim_id = IF(victim_id=?, ?, victim_id) WHERE match_id=?`;
+    const domQuery = `UPDATE nstats_match_dom SET player_id=? WHERE match_id=? AND player_id=?`;
+    const damageQuery = `UPDATE nstats_damage_match SET player_id=? WHERE match_id=? AND player_id=?`;
+    const classicWeaponStatsQuery = `UPDATE nstats_classic_weapon_match_stats SET player_id=? WHERE match_id=? AND player_id=?`;
+    const weaponDamageQuery = `UPDATE nstats_match_player_weapon_damage SET player_id=? WHERE match_id=? AND player_id=?`;
+   
+    const matchVars = [];
+    const killVars = [];
+
+    for(let i = 0; i < targets.length; i++){
+
+        const {matchId, oldPlayerId, newPlayerId} = targets[i];
+
+        matchVars.push([newPlayerId, matchId, oldPlayerId]);
+        killVars.push([oldPlayerId, newPlayerId, oldPlayerId, newPlayerId, matchId]);
+    }
+
+    //use same vars as query layout is the same
+    await bulkUpdate(matchQuery, matchVars);
+    await bulkUpdate(weaponStatsQuery, matchVars);
+    await bulkUpdate(domQuery, matchVars);
+    await bulkUpdate(damageQuery, matchVars);
+    await bulkUpdate(classicWeaponStatsQuery, matchVars);
+    await bulkUpdate(weaponDamageQuery, matchVars);
+
+    await bulkUpdate(killQuery, killVars);
+
     await ctfChangePlayerMatchIds(targets);
     /**
      * 
-     * nstats_match_players
-     * nstats_match_weapon_stats
-     * nstats_kills
-     * nstats_match_dom
-     * nstats_damage_match
-     * nstats_classic_weapon_match_stats
-     * nstats_match_player_weapon_damage
+     X nstats_match_players
+     X nstats_match_weapon_stats
+     X nstats_kills
+     X nstats_match_dom
+     X nstats_damage_match
+     X nstats_classic_weapon_match_stats
+     X nstats_match_player_weapon_damage
      */
 }
 
@@ -2958,16 +2991,13 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
 
     const matchesInfo = await getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds);
 
-    console.log(matchesInfo);
-
-
     await changePlayerIdInMatchesData(matchesInfo, playerInfo.id);
 
-    //console.log(affectedPlayerIds);
+    console.log(matchesInfo.uniquePlayers);
 
 
     /** TODO
-    - Update match rows with the new player_id
+    X Update match rows with the new player_id
     - Recalculate affected player profiles
     - Recalculate affected player totals
     - Recalculate affected player ctf league
