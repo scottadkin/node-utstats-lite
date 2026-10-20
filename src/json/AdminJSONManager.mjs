@@ -27,7 +27,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, updatePlayerSettings } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
 import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
@@ -581,6 +581,27 @@ export default class AdminJSONManager{
                 await ctfRecalculateAllPlayerTotals();
 
                 return this.res.json({"message": "passed"});
+
+            }else if(this.mode === "rename-player-by-history"){
+
+                const rowIds = this.req.body.rowIds;
+
+                if(rowIds === undefined) throw new Error(`rowIds missing`);
+                if(rowIds.length === 0) throw new Error(`No rowIds selected`);
+
+
+                const name = this.req.body.name;
+
+                if(name === undefined || name === "") throw new Error(`Name is undefined or blank`);
+
+                const bCreatePlayer = this.req.body.bCreatePlayer;
+
+                if(bCreatePlayer === undefined) throw new Error(`bCreatePlayer argument is missing`);
+
+                console.log(name);
+
+                await renamePlayerByMatchHistory(name, rowIds, bCreatePlayer);
+
 
             }
 

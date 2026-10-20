@@ -6438,6 +6438,8 @@ class AdminRenamePlayer{
 
         this.selectedName = "";
 
+        this.bCreatePlayer = false;
+
         this.parent.append(this.wrapper);
 
         this.bActive = parentMode === "rename";
@@ -6549,6 +6551,23 @@ class AdminRenamePlayer{
                 throw new Error(`No matches selected to rename player`);
             }
 
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "rename-player-by-history", 
+                    "rowIds": toUpdate,
+                    "name": this.selectedName,
+                    "bCreatePlayer": this.bCreatePlayer
+                })
+            });
+
+
+            const res = await req.json();
+            console.log(res);
+
+
             console.log(toUpdate);
 
         }catch(err){
@@ -6588,8 +6607,8 @@ class AdminRenamePlayer{
             infoContent.push(UIBr(), ` ${uniqueNames.length} Unique ${plural(uniqueNames.length, "name")} used.`);
             infoContent.push(UIBr(), ` ${uniqueIps.length} Unique IP ${plural(uniqueIps.length, "address")} used.`);
             infoContent.push(UIBr(), ` ${uniqueMac1s.length} Unique MAC1 ${plural(uniqueMac1s.length, "address")} used.`);
-            infoContent.push(UIBr(), ` ${uniqueMac2s.length} Unique MAC2 ${plural(uniqueMac2s.length, "address")} used.`);
-            infoContent.push(UIBr(), ` ${uniqueMacs.length} Unique MAC(MAC1 or MAC2) ${plural(uniqueMacs.length, "address")} used.`);
+            infoContent.push(` ${uniqueMac2s.length} Unique MAC2 ${plural(uniqueMac2s.length, "address")} used.`);
+            infoContent.push(` ${uniqueMacs.length} Unique MAC(MAC1 or MAC2) ${plural(uniqueMacs.length, "address")} used.`);
         }
 
         info.append(...infoContent);
@@ -6637,6 +6656,20 @@ class AdminRenamePlayer{
         });
 
         this.previewElem.append(info);
+
+        const createIfNotRow = UIDiv("form-row");
+        
+
+        const createButton = new UITrueFalse(this.bCreatePlayer, "create-player", false, (e) =>{
+    
+            this.bCreatePlayer = e;
+
+            console.log(this.bCreatePlayer);
+        })
+
+        createIfNotRow.append(UILabel("Create Player If Name Doesn't Exist"), createButton.wrapper);
+
+
         const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
         currentButton.addEventListener("click", () =>{
 
@@ -6644,7 +6677,7 @@ class AdminRenamePlayer{
         });
 
         const buttonWrapper = UIDiv("form");
-        buttonWrapper.append(currentButton, UIBr(), UIBr());
+        buttonWrapper.append(createIfNotRow, currentButton, UIBr(), UIBr());
 
 
         const selectAllRow = UIDiv("form-row");

@@ -215,7 +215,7 @@ export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
     return result[0].id;
 }
 
-export async function createMasterPlayer(name, ip, hwid, mac1, mac2, matchDate){
+export async function createMasterPlayer(name){
 
     const query = `INSERT INTO nstats_players VALUES(NULL,?,'',?)`;
 
@@ -2830,4 +2830,44 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
         "uniqueMac2s": [...uniqueMac2s],
         "uniqueNames": [...uniqueNames]
     };
+}
+
+
+export async function getPlayerByName(name){
+
+    const query = `SELECT * FROM nstats_players WHERE name=? ORDER BY name ASC, id ASC`;
+
+
+    const result = await simpleQuery(query, [name]);
+
+    if(result.length === 0) return null;
+
+    return result[0];
+
+}
+
+export async function renamePlayerByMatchHistory(playerName, matchRowIds, bCreatePlayerIfNotExist){
+
+    if(matchRowIds.length === 0) return;
+
+    if(bCreatePlayerIfNotExist !== false && bCreatePlayerIfNotExist !== true){
+        throw new Error(`bCreatePlayerIfNotExists must be a boolean`);
+    }
+
+    let playerInfo = await getPlayerByName(playerName);
+
+    if(playerInfo === null){
+
+        if(!bCreatePlayerIfNotExist){
+            throw new Error(`A player with that name doesn't exist, and bCreatePlayer is false.`);
+        }
+
+        const playerId = await createMasterPlayer(playerName);
+        playerInfo = await getPlayerById(playerId);
+    }
+
+    if(playerInfo === null){
+        throw new Error(`playerInfo is null.`);
+    }
+
 }
