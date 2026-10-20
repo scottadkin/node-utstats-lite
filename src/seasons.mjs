@@ -940,6 +940,21 @@ export async function seasonsMergeServers(oldId, newId){
 
         await calculateSeasonStats(seasonIds[i]);
     }
+}
 
+export async function seasonsGetMatchesSeasonIds(matchIds){
 
+    if(matchIds.length === 0) return {};
+
+    const query = `SELECT id,season_id FROM nstats_match WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [matchIds]);
+
+    const data = {};
+
+    for(let i = 0; i < result.length; i++){
+        data[result[i].id] = result[i].season_id;
+    }
+
+    return data;
 }

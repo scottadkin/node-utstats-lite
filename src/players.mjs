@@ -7,7 +7,7 @@ import { setMatchMapGametypeIds as setWeaponStatsMatchMapGametypeIds } from "./w
 import md5 from "md5";
 import { DEFAULT_DATE } from "../config.mjs";
 import Message from "./message.mjs";
-import { getAllSeasonIds, getPlayerActiveSeasons, getSeasonById } from "./seasons.mjs";
+import { getAllSeasonIds, getPlayerActiveSeasons, getSeasonById, seasonsGetMatchesSeasonIds } from "./seasons.mjs";
 import { getCategorySettings } from "./siteSettings.mjs";
 import { getPageLayout } from "./pageLayout.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "./weapons.mjs";
@@ -2846,9 +2846,63 @@ export async function getPlayerByName(name){
 
 }
 
-export async function renamePlayerByMatchHistory(playerName, matchRowIds, bCreatePlayerIfNotExist){
+async function getPlayerInfoByMatchRowIds(matchPlayerRowIds){
 
-    if(matchRowIds.length === 0) return;
+    if(matchPlayerRowIds.length === 0) return [];
+
+    const query = `SELECT DISTINCT player_id FROM nstats_match_players WHERE id IN(?)`;
+
+    const result = await simpleQuery(query, [matchPlayerRowIds]);
+
+    return result.map((r) =>{ return r.player_id});
+}
+
+async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds){
+
+    if(matchPlayerRowIds.length === 0) return [];
+
+    const query = `SELECT 
+    nstats_match_players.match_id,
+    nstats_match_players.player_id,
+    nstats_matches.season_id, 
+    nstats_matches.gametype_id, 
+    nstats_matches.map_id 
+    FROM nstats_match_players 
+    LEFT JOIN nstats_matches ON nstats_matches.id = nstats_match_players.match_id
+    WHERE nstats_match_players.id IN(?)`;
+
+    const result = await simpleQuery(query, [matchPlayerRowIds]);
+
+    const uniqueSeasons = new Set();
+    const uniqueGametypes = new Set();
+    const uniqueMaps = new Set();
+    const uniquePlayers = new Set();
+
+    uniqueSeasons.add(0);
+
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        uniqueSeasons.add(r.season_id);
+        uniqueGametypes.add(r.gametype_id);
+        uniqueMaps.add(r.map_id);
+        uniquePlayers.add(r.player_id);
+    }
+
+    return {
+        "data": result, 
+        "uniqueSeasons": [...uniqueSeasons],
+        "uniqueGametypes": [...uniqueGametypes],
+        "uniqueMaps": [...uniqueMaps],
+        "uniquePlayers": [...uniquePlayers]
+    }
+}
+
+export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, bCreatePlayerIfNotExist){
+
+    if(matchPlayerRowIds.length === 0) return;
 
     if(bCreatePlayerIfNotExist !== false && bCreatePlayerIfNotExist !== true){
         throw new Error(`bCreatePlayerIfNotExists must be a boolean`);
@@ -2869,5 +2923,22 @@ export async function renamePlayerByMatchHistory(playerName, matchRowIds, bCreat
     if(playerInfo === null){
         throw new Error(`playerInfo is null.`);
     }
+
+
+    const matchesInfo = await getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds);
+
+    console.log(matchesInfo);
+
+    //console.log(affectedPlayerIds);
+
+
+    /** TODO
+    - Update match rows with the new player_id
+    - Recalculate affected player profiles
+    - Recalculate affected player totals
+    - Recalculate affected player ctf league
+    - Recalculate affected player rankings
+     */
+
 
 }
