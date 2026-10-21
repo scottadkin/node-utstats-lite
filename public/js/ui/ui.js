@@ -688,6 +688,16 @@ class UITrueFalse{
         
     }
 
+    setValue(newValue){
+
+        if(newValue !== true && newValue !== false){
+            throw new Error(`newValue must be a boolean`);
+        }
+
+        this.hidden.value = newValue;
+        this.render()
+    }
+
     render(){
 
         let text = "True";

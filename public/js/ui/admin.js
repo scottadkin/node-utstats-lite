@@ -6425,7 +6425,8 @@ class AdminRenamePlayer{
         this.bothToNames = [];
         this.playerNames = [];
 
-        this.previewData = [];
+        this.previewData = {};
+        this.resetPreviewData();
 
         this.bSelectAll = false;
 
@@ -6446,6 +6447,18 @@ class AdminRenamePlayer{
         
         this.createElems();
         this.loadData();
+    }
+
+    resetPreviewData(){
+
+        this.previewData = {"data": [],
+            "uniqueHWIDs": [],
+            "uniqueIps": [],
+            "uniqueMacs": [],
+            "uniqueMac1s": [],
+            "uniqueMac2s": [],
+            "uniqueNames": []
+        };
     }
 
     setActive(value){
@@ -6683,7 +6696,7 @@ class AdminRenamePlayer{
         const selectAllRow = UIDiv("form-row");
     
 
-        const selectAll = new UITrueFalse(this.bSelectAll, "select-all", false, (e) =>{
+        this.selectAllInput = new UITrueFalse(this.bSelectAll, "select-all", false, (e) =>{
     
 
             this.bSelectAll = !this.bSelectAll;
@@ -6697,13 +6710,11 @@ class AdminRenamePlayer{
             this.updatePreview();
         })
 
-        selectAllRow.append(UILabel("Select All"), selectAll.wrapper);
+        selectAllRow.append(UILabel("Select All"), this.selectAllInput.wrapper);
         
         buttonWrapper.append(selectAllRow);
 
-        this.previewElem.append(buttonWrapper);
-
-        
+        this.previewElem.append(buttonWrapper); 
 
         const table = new TESTUITable(this.previewElem, tableOptions, rows);
 
@@ -6827,13 +6838,19 @@ class AdminRenamePlayer{
                 this.hwidFilter = e.toUpperCase();
            
                 const newOptions = this.getHWIDSelectOptions();
-                
-                if(!this.hwidSelect.updateOptions(newOptions, this.hwidFilter)){
+
+                this.bSelectAll = false;
       
-                    if(newOptions.length > 0){
-                        this.hwidSelect.changeSelected(newOptions[0].value);
-                    }
-                }
+                this.hwidSelect.unselect();
+                this.resetPreviewData();
+                this.updatePreview();
+
+                
+                
+                this.hwidSelect.updateOptions(newOptions, this.hwidFilter);
+      
+                    
+                
 
                 
             });
@@ -6847,6 +6864,9 @@ class AdminRenamePlayer{
             this.hwidSelect = new UISelect(hwidRow, this.getHWIDSelectOptions(), this.selectedHWID, (e) =>{
              
                 this.selectedHWID = e.toUpperCase();
+                
+                //this.selectAllInput.setValue(false);
+                this.bSelectAll = false;
                 this.previewChanges(this.selectedHWID, "", "");
             });
 
