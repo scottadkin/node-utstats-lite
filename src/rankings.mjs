@@ -322,7 +322,7 @@ function _setRankingPoints(settings, playerData){
 
     _applyTimePenalty(t, settings.penalty, mins);
 
-    
+
 }
 
 
@@ -453,15 +453,6 @@ export async function updateRankingSettings(settings){
     }
 
     return {passed, fails};
-}
-
-
-async function deleteAllPlayerRankings(){
-
-    const query = `DELETE FROM nstats_rankings`;
-
-    await simpleQuery(query);
-
 }
 
 async function deleteAllPlayerSeasonRankings(seasonId){
@@ -787,25 +778,47 @@ async function getUniquePlayerMatchCombinations(playerIds){
 
     const playerStats = {};
 
+    const gametypes = {};
+    const maps = {};
+
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
-        if(playerStats[r.player_id] === undefined){
+        /*if(playerStats[r.player_id] === undefined){
             playerStats[r.player_id] = {
                 "gametypes":{},
                 "maps":{},
+                "uniqueGametypes": [],
+                "uniqueMaps":[]
             };
-        }
+        }*/
 
         if(r.type === "gametype"){
-            playerStats[r.player_id].gametypes[r.id] = r.total_matches;
+
+            if(gametypes[r.id] === undefined){
+                gametypes[r.id] = [];
+            }
+
+            gametypes[r.id].push(r.player_id);
+
+         //   playerStats[r.player_id].gametypes[r.id] = r.total_matches;
+         //   playerStats[r.player_id].uniqueGametypes.push(r.id);
+
         }else if(r.type === "map"){
-            playerStats[r.player_id].maps[r.id] = r.total_matches;
+
+            if(maps[r.id] === undefined){
+                maps[r.id] = [];
+            }
+
+            maps[r.id].push(r.player_id);
+
+           // playerStats[r.player_id].maps[r.id] = r.total_matches;
+          //  playerStats[r.player_id].uniqueMaps.push(r.id);
         }
     }
 
-    return playerStats;
+    return {gametypes, maps, playerStats};
 }
 
 /**
@@ -817,8 +830,27 @@ export async function rankingsRecalculatePlayers(playerIds){
 
     if(playerIds.length === 0) return;
 
-    
-    const playerStats = await getUniquePlayerMatchCombinations(playerIds);
+    const {gametypes, maps} = await getUniquePlayerMatchCombinations(playerIds);
 
-    console.log(playerStats);
+    //lazy should only get ones players where involved with
+    const seasonIds = await getAllSeasonIds(false);
+
+    for(const [gametypeId, gametypePlayerIds] of Object.entries(gametypes)){
+
+        for(let i = 0; i < seasonIds.length; i++){
+
+            new Message(`Recalculating gametype rankings for selected players for season ${seasonIds[i]} and gametype=${gametypeId}`,"note");
+            await calculateRankings(seasonIds[i], gametypeId, gametypePlayerIds, "gametype");
+        }
+    }
+
+    for(const [mapId, mapPlayerIds] of Object.entries(maps)){
+
+        for(let i = 0; i < seasonIds.length; i++){
+            new Message(`Recalculating map rankings for selected players for season ${seasonIds[i]} and map=${mapId}`,"note");
+            await calculateRankings(seasonIds[i], mapId, mapPlayerIds, "map");
+        }
+    }
+
+
 }
