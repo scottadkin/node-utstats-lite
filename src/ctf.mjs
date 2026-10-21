@@ -419,7 +419,7 @@ async function calcPlayerTotals(playerIds, seasonId){
 
     const result = await getPlayersMatchesData(playerIds, seasonId);
 
-    const missing = playerIds;
+    const missing = [...playerIds];
 
     for(let i = 0; i < result.length; i++){
 

@@ -17,7 +17,7 @@ import { getPageLayout } from "./pageLayout.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "./weapons.mjs";
 import { getLeagueSiteSettings, getPlayerMapsLeagueData } from "./ctfLeague.mjs";
 import { getPlayerWeaponDamageTotals } from "./playerWeaponDamage.mjs";
-import { getPlayerRankings } from "./rankings.mjs";
+import { getPlayerRankings, rankingsRecalculatePlayers } from "./rankings.mjs";
 const DEFAULT_PLAYER_SETTINGS = [
     {"category": "Importer", "name": "Auto Assign HWID To First Used Name", "valueType": "bool", "value": "false"}
 ];
@@ -1018,7 +1018,7 @@ export async function calcPlayerTotals(playerIds, seasonId){
 
     const result = await simpleQuery(query, vars);
 
-    const missing = playerIds;
+    const missing = [...playerIds]
 
     for(let i = 0; i < result.length; i++){
 
@@ -3022,6 +3022,7 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
 
         const playerId = await createMasterPlayer(playerName);
         playerInfo = await getPlayerById(playerId);
+
     }
 
     if(playerInfo === null){
@@ -3039,8 +3040,7 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
 
     await recalculatePlayerTotals(matchesInfo.uniquePlayers, matchesInfo.uniqueSeasons);
 
-    console.log(matchesInfo.uniquePlayers);
-
+    await rankingsRecalculatePlayers(matchesInfo.uniquePlayers);
 
     /** TODO
     X Update match rows with the new player_id

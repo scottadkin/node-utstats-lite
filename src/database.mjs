@@ -457,15 +457,11 @@ export async function bulkUpdate(query, vars){
     if(!Array.isArray(vars)) throw new Error(`vars must be an array`);
     const update = database.prepare(query);
 
-    const start = performance.now();
 
     for(let i = 0; i < vars.length; i++){
 
         update.run(...vars[i]);
     }
 
-    const end = performance.now();
-
-    console.log((end - start) * 0.001);
 
 }

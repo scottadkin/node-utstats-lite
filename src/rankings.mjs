@@ -821,6 +821,20 @@ async function getUniquePlayerMatchCombinations(playerIds){
     return {gametypes, maps, playerStats};
 }
 
+
+async function deletePlayerRankings(playerIds){
+
+    if(playerIds.length === 0) return;
+
+    const gametypeQuery = `DELETE FROM nstats_rankings WHERE player_id IN(?)`;
+    const mapQuery = `DELETE FROM nstats_map_rankings WHERE player_id IN(?)`;
+
+    return Promise.all([
+        simpleQuery(gametypeQuery, [playerIds]),
+        simpleQuery(mapQuery, [playerIds])
+    ]);
+}
+
 /**
  * Recalculate all matching player ids
  * @param {Array<Number>} playerIds 
@@ -831,6 +845,8 @@ export async function rankingsRecalculatePlayers(playerIds){
     if(playerIds.length === 0) return;
 
     const {gametypes, maps} = await getUniquePlayerMatchCombinations(playerIds);
+
+    await deletePlayerRankings(playerIds);
 
     //lazy should only get ones players where involved with
     const seasonIds = await getAllSeasonIds(false);
