@@ -3044,8 +3044,8 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
 
     /** TODO
     X Update match rows with the new player_id
-    - Recalculate affected player profiles
-    - Recalculate affected player totals
+    X Recalculate affected player profiles
+    X Recalculate affected player totals
     - Recalculate affected player ctf league
     - Recalculate affected player rankings
      */

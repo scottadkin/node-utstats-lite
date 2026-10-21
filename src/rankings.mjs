@@ -773,3 +773,52 @@ export async function sanitizeRankingsPageReq(req, pageSettings){
 
     return {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId}
 }
+
+
+async function getUniquePlayerMatchCombinations(playerIds){
+
+    const query = `
+    SELECT player_id,COUNT(*) as total_matches,gametype_id as id,'gametype' as type FROM nstats_match_players WHERE player_id IN(?) GROUP BY player_id,gametype_id
+    UNION ALL
+    SELECT player_id,COUNT(*) as total_matches,map_id as id,'map' as type FROM nstats_match_players WHERE player_id IN(?) GROUP BY player_id,map_id
+    `;
+
+    const result = await simpleQuery(query, [playerIds, playerIds]);
+
+    const playerStats = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(playerStats[r.player_id] === undefined){
+            playerStats[r.player_id] = {
+                "gametypes":{},
+                "maps":{},
+            };
+        }
+
+        if(r.type === "gametype"){
+            playerStats[r.player_id].gametypes[r.id] = r.total_matches;
+        }else if(r.type === "map"){
+            playerStats[r.player_id].maps[r.id] = r.total_matches;
+        }
+    }
+
+    return playerStats;
+}
+
+/**
+ * Recalculate all matching player ids
+ * @param {Array<Number>} playerIds 
+ * @returns 
+ */
+export async function rankingsRecalculatePlayers(playerIds){
+
+    if(playerIds.length === 0) return;
+
+    
+    const playerStats = await getUniquePlayerMatchCombinations(playerIds);
+
+    console.log(playerStats);
+}
