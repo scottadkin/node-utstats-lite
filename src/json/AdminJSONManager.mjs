@@ -603,6 +603,9 @@ export default class AdminJSONManager{
                 await renamePlayerByMatchHistory(name, rowIds, bCreatePlayer);
 
 
+                return this.res.json({"message": "passed"});
+
+
             }
 
 

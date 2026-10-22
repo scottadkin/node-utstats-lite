@@ -6578,10 +6578,13 @@ class AdminRenamePlayer{
 
 
             const res = await req.json();
-            console.log(res);
 
+            if(res.error !== undefined) throw new Error(res.error);
 
-            console.log(toUpdate);
+            new UINotification(this.parent, "pass", "Success", "Player history updated successfully");
+            this.resetPreviewData();
+            this.updatePreview();
+            await this.loadData();
 
         }catch(err){
 
@@ -6609,8 +6612,6 @@ class AdminRenamePlayer{
 
         const totalMatches = this.previewData.data.length;
         const {uniqueHWIDS, uniqueIps, uniqueMac1s, uniqueMac2s, uniqueMacs, uniqueNames} = this.previewData;
-
-        console.log(this.previewData);
 
         const infoContent = [];
 
@@ -6676,8 +6677,6 @@ class AdminRenamePlayer{
         const createButton = new UITrueFalse(this.bCreatePlayer, "create-player", false, (e) =>{
     
             this.bCreatePlayer = e;
-
-            console.log(this.bCreatePlayer);
         })
 
         createIfNotRow.append(UILabel("Create Player If Name Doesn't Exist"), createButton.wrapper);
@@ -6690,11 +6689,6 @@ class AdminRenamePlayer{
         });
 
         const buttonWrapper = UIDiv("form");
-        buttonWrapper.append(createIfNotRow, currentButton, UIBr(), UIBr());
-
-
-        const selectAllRow = UIDiv("form-row");
-    
 
         this.selectAllInput = new UITrueFalse(this.bSelectAll, "select-all", false, (e) =>{
     
@@ -6710,9 +6704,18 @@ class AdminRenamePlayer{
             this.updatePreview();
         })
 
+
+        const selectAllRow = UIDiv("form-row");
         selectAllRow.append(UILabel("Select All"), this.selectAllInput.wrapper);
         
         buttonWrapper.append(selectAllRow);
+
+        buttonWrapper.append(createIfNotRow, currentButton, UIBr(), UIBr());
+
+
+        
+
+        
 
         this.previewElem.append(buttonWrapper); 
 
@@ -6737,7 +6740,6 @@ class AdminRenamePlayer{
 
 
             if(res.error !== undefined) throw new Error(res.error);
-            console.log(res);
 
             this.usageData = res.usage;
             this.hwidToNames = res.hwidToNames;
@@ -6909,8 +6911,7 @@ class AdminRenamePlayer{
         existingNamesRow.append(UILabel("Select An Existing Player Name"));
 
         this.existingNameSelect = new UISelect(existingNamesRow, this.getExistingNamesOptions(), this.selectedName, (e) =>{
-            console.log(e);
-
+     
             this.selectedName = e;
             this.newNameInput.value = this.selectedName;
         });
