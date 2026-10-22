@@ -1636,10 +1636,10 @@ function UIMatchScreenshot(parent, matchData, bLatest){
 
     parent = document.querySelector(parent);
 
-    const wrapper = UIDiv("text-center margin-bottom-2");
+    const wrapper = UIDiv("margin-bottom-2");
     UIHeader(wrapper, `${(bLatest) ? "Latest " : ""}Match Screenshot`);
     const canvas = document.createElement("canvas"); 
-    canvas.className = "match-sshot text-center";
+    canvas.className = "match-sshot";
     canvas.width = 2560;
     canvas.height = 1440;
     wrapper.append(canvas);

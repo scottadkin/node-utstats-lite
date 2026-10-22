@@ -2099,7 +2099,7 @@ class MatchWeaponSummary{
         this.totalTeams = totalTeams;
         this.matchLength = matchLength;
 
-        this.wrapper = UIDiv(`scroll-x t-width-1 center`);
+        this.wrapper = UIDiv(`scroll-x t-width-1`);
 
         UIHeader(this.parent, "Weapons Summary");
         this.currentMode = "kills";
@@ -2978,7 +2978,7 @@ class MatchKillsGraph{
         this.data = {"kills": {}, "teamKills": {}};
 
         this.wrapper = UIDiv("graph-wrapper");
-        UIHeader(this.wrapper, "Match Frags Graph");
+        UIHeader(this.parent, "Match Frags Graph");
         this.parent.append(this.wrapper);
         this.loadData();
     }
