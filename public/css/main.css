@@ -81,6 +81,13 @@ body{
 	grid-template-rows:auto 1fr auto;
 }
 
+#root{
+    background-color:rgba(0,0,0,0.125);
+    max-width:1200px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
 nav{
     background-color:var(--bg-color-mid);
 	border-bottom: 1px solid var(--border-color-1);
@@ -411,7 +418,7 @@ tfoot td{
 	overflow:hidden;
 }
 
-.t-width-1{
+/*.t-width-1{
 	width:var(--width-1);
 	max-width:var(--max-table-width-1);
 }
@@ -429,7 +436,7 @@ tfoot td{
 .t-width-4{
 	width:var(--width-4);
 	max-width:var(--max-table-width-4);
-}
+}*/
 
 .duo{
     display:grid;
@@ -833,13 +840,14 @@ option{
 }
 
 .header-wrapper, header{
-    text-align:center;
     padding:var(--padding-10);
+    padding-left:var(--margin-25);
     font-weight:400;
     margin-bottom:var(--margin-10);
 	background-color:var(--bg-header-color);
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 	border:1px solid var(--border-color-1);
+    text-align: center;
 }
 
 
@@ -908,10 +916,10 @@ ul{
 }
 
 .pagination-wrapper{
-    text-align: center;
     margin-top:var(--margin-25);
     margin-bottom:var(--margin-25);
     padding-bottom:var(--padding-10);
+    padding-left:var(--margin-25);
 }
 
 .pagination-button{
@@ -1373,9 +1381,8 @@ section{
     flex-direction: row;
     column-gap: var(--margin-10);
     row-gap:var(--margin-10);
-    justify-content: start;
+    justify-content: space-evenly;
     flex-wrap: wrap;
-    max-width:var(--max-width-1);
 }
 
 

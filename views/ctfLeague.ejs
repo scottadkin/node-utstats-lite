@@ -15,13 +15,15 @@ const jsBase = (bSeasonPage) ? `../../../js/` : `../js/`
 <script src="<%= jsBase %>ui/table.js"></script>
 <script src="<%= jsBase %>ui/ctfLeague.js"></script>
 
-<div class="header-wrapper">CTF League</div>
-<div id="tabs"></div>
-<script>
-    renderTypeTabs("#tabs", "<%= mode %>", "<%= seasonId %>");
-</script>
+
+
 <div id="root">
 
+    <div class="header-wrapper">CTF League</div>
+    <div id="tabs"></div>
+    <script>
+        renderTypeTabs("#tabs", "<%= mode %>", "<%= seasonId %>");
+    </script>
     <div class="info">
         
         <div class="info-text">
@@ -62,7 +64,13 @@ const jsBase = (bSeasonPage) ? `../../../js/` : `../js/`
         %>
         </div>
     </div>
-</div>
+    
+
+
+<script>
+    new CTFLeagueFilterForm("#root", "<%= mode %>", <%- JSON.stringify(gametypeNames) %>, <%- JSON.stringify(mapNames) %>, "<%= id %>", "<%= gId %>", "<%= seasonId %>");
+    new CTFLeagueTable("#root", "<%= mode %>", <%- JSON.stringify(data) %>,  "<%= id %>", "<%= gId %>", "<%= page %>", "<%= perPage %>", "<%= subHeader %>", "<%= seasonId %>");
+</script>
 <div class="info">
     <div class="info-text">
         Last whole <b><%= leagueType %></b> League refresh was <b><%= lastLeagueRefresh %></b><br/>
@@ -71,9 +79,6 @@ const jsBase = (bSeasonPage) ? `../../../js/` : `../js/`
     </div>
     
 </div>
-<script>
-    new CTFLeagueFilterForm("#root", "<%= mode %>", <%- JSON.stringify(gametypeNames) %>, <%- JSON.stringify(mapNames) %>, "<%= id %>", "<%= gId %>", "<%= seasonId %>");
-    new CTFLeagueTable("#root", "<%= mode %>", <%- JSON.stringify(data) %>,  "<%= id %>", "<%= gId %>", "<%= page %>", "<%= perPage %>", "<%= subHeader %>", "<%= seasonId %>");
-</script>
+</div>
 
 <%- include("footer.ejs") -%>

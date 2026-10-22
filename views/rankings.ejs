@@ -14,11 +14,14 @@ const jsBase = (locals.seasonId !== 0) ? `../../../js/`  : `../js/`;
 <script src="<%= jsBase %>ui/table.js"></script>
 <script src="<%= jsBase %>ui/rankings.js"></script>
 
-<div class="header-wrapper">
+
+
+<div id="root">
+
+    <div class="header-wrapper">
     <%= (mode === "gametype") ? "Gametype" : "Map" %> Rankings
 </div>
-
-<div id="root"></div>
+</div>
 <script>
     new RankingsSearchForm("#root", "<%= mode %>", 
     <%- JSON.stringify(data) %>,
