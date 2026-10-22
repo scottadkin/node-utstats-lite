@@ -2179,11 +2179,13 @@ class AdminSiteSettingsManager{
 
                 const div = UIDiv("admin-textarea-wrapper");
 
-                div.append(UIBr(), `Welcome Message Content`, UIBr(), UIBr());
+                const wmc = UIDiv("text-center");
+                wmc.append(`Welcome Message Content`);
+                div.append(UIBr(), wmc);
                 const warning = UIDiv("warning");
                 warning.innerHTML = `Input must be valid HTML, if you input invalid HTML the home page may experience 
                 problems rendering the rest of the content correctly. <br><br>Script tags are not permitted.
-                <br>You also have to have Welcome Message enabled in the Home Page settings for this area to be visible.`;
+                <br>You also have to enable Welcome Message in the Home Page settings for this area to be visible.`;
                 div.append(warning);
                 
                 const textarea = document.createElement("textarea");

@@ -106,3 +106,26 @@
 .backup-info{
 	margin-top:var(--margin-1);
 }
+
+.admin-textarea-wrapper{
+	margin-left:auto;
+	margin-right:auto;
+	color:white;
+	padding:5px;
+    max-width:var(--max-text-width);
+    overflow: hidden;
+	
+}
+
+.admin-textarea-wrapper textarea{
+	display:block;
+	width:95%;
+    min-width:95%;
+    max-width:95%;
+	padding:5px;
+	font-size:var(--font-size-80);
+	background-color:var(--bg-color-mid);
+	border:1px solid var(--border-color-1);
+	min-height:150px;
+    
+}
