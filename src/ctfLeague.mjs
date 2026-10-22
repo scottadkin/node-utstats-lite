@@ -651,8 +651,6 @@ function getCTFLeagueRestrictions(seasonInfo, settings){
      
     const cutOffDate = (maxDaysDate < seasonStartDate) ? seasonStartDate : maxDaysDate;
 
-   
-
 
     return {maxMatches, cutOffDate, seasonEndDate, maxDays}
 }
@@ -1141,4 +1139,47 @@ export async function ctfLeagueRecalculateSeason(seasonId){
         await updateSettings(newData);
 
     }
+}
+
+/**
+ * Get unique seasonIds, gametypeIds, mapIds for each player
+ * @param {Array<Number>} playerIds 
+ */
+async function getUniquePlayersMatchCombinations(playerIds){
+
+    const query = `SELECT DISTINCT season_id,gametype_id,map_id FROM nstats_player_totals_ctf WHERE player_id IN (?)`;
+
+    return await simpleQuery(query, [playerIds]);
+
+}
+
+export async function ctfLeagueRecalculatePlayers(playerIds){
+
+    if(playerIds.length === 0) return;
+
+
+    const leagueSettings = await getMultipleLeagueCategorySettings(["combined", "gametypes", "maps"]);
+
+    const uniqueData = await getUniquePlayersMatchCombinations(playerIds);
+
+    
+    const promises = [];
+
+    for(let i = 0; i < uniqueData.length; i++){
+
+        const {season_id, gametype_id, map_id} = uniqueData[i];
+
+        const seasonInfo = await getSeasonById(season_id);
+
+        const combinedRestrictions = getCTFLeagueRestrictions(seasonInfo, leagueSettings.combined);
+        const gametypesRestrictions = getCTFLeagueRestrictions(seasonInfo, leagueSettings.gametypes);
+        const mapsRestrictions = getCTFLeagueRestrictions(seasonInfo, leagueSettings.maps);
+
+        promises.push(refreshTable(season_id, 0, 0, combinedRestrictions.cutOffDate, combinedRestrictions.seasonEndDate, leagueSettings.combined));
+        promises.push(refreshTable(season_id, gametype_id, 0, gametypesRestrictions.cutOffDate, gametypesRestrictions.seasonEndDate, leagueSettings.gametypes));
+        promises.push(refreshTable(season_id, gametype_id, map_id, mapsRestrictions.cutOffDate, mapsRestrictions.seasonEndDate, leagueSettings.maps));
+    }
+
+    return await Promise.all(promises);
+
 }
