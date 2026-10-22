@@ -155,13 +155,10 @@ class AdminFTPManager{
 
         UIHeader(this.content, "Current FTP Servers");
 
-        const wrapper = UIDiv("info");
+        const infoContent = [`These are the current FTP servers that the importer will download log files from.`];
+        
 
-        const line1 = `These are the current FTP servers that the importer will download log files from.`;
-
-        wrapper.append(line1);
-
-        this.content.append(wrapper);
+        const wrapper = new UIInfo(this.content, infoContent);
 
         const tableOptions = {
             "className": "t-width-1",
@@ -327,8 +324,6 @@ class AdminFTPManager{
         const form = document.createElement("form");
         form.className = "form";
         form.id = `${(type === "add") ? "create" : "edit" }-ftp-server-form`;
-        
-        const info = UIDiv("form-info");
 
         let infoString = `Add a (S)FTP server to add to the importer list.`;
 
@@ -375,8 +370,9 @@ class AdminFTPManager{
 
         }
 
-        info.innerHTML = infoString;
-        form.append(info);
+
+        new UIInfo(form, [infoString]);
+       // form.append(info);
 
         const enableRow = UIDiv("form-row");
         enableRow.append(UILabel("Enabled"));
@@ -683,7 +679,7 @@ class AdminFTPManager{
         const form = document.createElement("form");
         form.className = "form"
         
-        const info = UIDiv("info-basic");
+     
 
     
         const infoList = UIUnorderedList([
@@ -692,11 +688,7 @@ class AdminFTPManager{
             `If the importer can not find download history for a log these settings are also used.`
         ]);
 
-        info.append(
-            infoList, UIBr()
-        );
-
-        form.append(info);
+        new UIInfo(form, [infoList]);
 
         const settings = this.logsFolderSettings;
 
@@ -1724,9 +1716,11 @@ class AdminSiteSettingsManager{
         const form = document.createElement("form");
         form.className = "form";
 
-        const info = UIDiv("form-info");
-        info.append("Change what components are displayed on each page, and how many of certain items are displayed.");
-        form.append(info);
+        const infoContent = [
+            "Change what components are displayed on each page, and how many of certain items are displayed."
+        ];
+
+        const info = new UIInfo(form, infoContent);
 
         const row = UIDiv("form-row");
         row.append(UILabel("Selected Page", "selected-page"));
@@ -2770,11 +2764,15 @@ class AdminRankingManager{
 
         const form = UIDiv("form");
 
-        const info = UIDiv("info-basic");
-        info.innerHTML = `Adjust how many points a player gets for each event and adjust time penalties.`;
-        info.innerHTML += `<br>For time penalties every 0.01 is 1% of the original score, a value of 1 will keep the players score the same, setting it to 0.1 will reduce the players score by 90%`;
-        info.innerHTML += `<br>You must recalculate rankings for the changes to take effect.`;
-        form.append(info);
+        const list = UIUnorderedList([
+            `Adjust how many points a player gets for each event and adjust time penalties.`,
+            `For time penalties every 0.01 is 1% of the original score, 
+            a value of 1 will keep the players score the same, setting it to 0.1 will reduce the players score by 90%`,
+            `You must recalculate rankings for the changes to take effect.`]);
+
+     
+
+        new UIInfo(form, [list]);
 
         const cats = this.getUniqueCategories();
 
@@ -2863,12 +2861,10 @@ class AdminRankingManager{
 
         UIHeader(this.content, "Recalculate Rankings");
         
-        const info = UIDiv("info");
-        info.className = "info";
 
-        info.append(`Recalculate all Map and Gametype Rankings, you may want to do this after adjusting ranking values to apply the changes.`);
-
-        this.content.append(info);
+        new UIInfo(this.content, [
+            `Recalculate all Map and Gametype Rankings, you may want to do this after adjusting ranking values to apply the changes.`
+        ]);
 
 
         const form = UIDiv("form");
@@ -2955,9 +2951,9 @@ class AdminClearDatabase{
 
         this.wrapper.innerHTML = ``;
         UIHeader(this.wrapper, "Clear Database Tables");
-        const info = UIDiv("info");
-        info.append(`Delete all match and player data, site settings and data are not affected.`);
-        this.wrapper.append(info);
+    
+        new UIInfo(this.wrapper, [`Delete all match and player data, site settings and data are not affected.`]);
+
 
         const form = UIDiv("form");
         form.className = "form";
@@ -3089,36 +3085,40 @@ class AdminCTFLeagueManager{
 
     createInfoElem(){
 
-        const elem = UIDiv("info");
+        const content = [];
 
         if(this.mode === "combined"){
 
-            elem.append(`Combined league settings refers to unique gametype & map combinations, each table is for 1 unique combination.`);
-            elem.append(UIBr(), `An example would be `, UIB(`CTF-Face - Capture The Flag (insta)`));
-            elem.append(` where every match that was played on CTF-Face and the gametype 
-                was Capture The Flag (insta) would be counted towards it's unique table.`);
+            content.push(
+                `Combined league settings refers to unique gametype & map combinations, each table is for 1 unique combination.`,
+                UIBr(),UIBr(), `An example would be `, UIB(`CTF-Face - Capture The Flag (insta)`),
+                ` where every match that was played on CTF-Face and the gametype 
+                was Capture The Flag (insta) would be counted towards it's unique table.`
+            );
 
         }else if(this.mode === "gametypes"){
 
-            elem.append(`Gametype league settings refer to any match played with a unique gametype, 
+            content.push(`Gametype league settings refer to any match played with a unique gametype, 
                 it doesn't matter what map was played, the match result will be counted towards this table.`);
 
         }else if(this.mode === "maps"){
 
-            elem.append(`Map league settings refer to any match played on a unique map, 
+            content.push(`Map league settings refer to any match played on a unique map, 
                 it doesn't matter what gametype was played, the match result will be counted towards this table.`);
 
         }else if(this.mode === "recalculate"){
 
-            elem.append(`Recalculate existing CTF league tables`);
+            content.push(`Recalculate existing CTF league tables`);
         }
 
         if(this.mode !== "recalculate"){
-            elem.append(UIBr(), `Whole League Refreshes refer to automatic recalculating of every CTF League table, 
+            content.push(UIBr(),UIBr(), `Whole League Refreshes refer to automatic recalculating of every CTF League table, 
             the importer will carry out this process every 24 hours since the previous whole league refresh.`);
 
         }
-        return elem;
+
+        new UIInfo(this.content, content)
+
     }
 
 
@@ -3219,7 +3219,7 @@ class AdminCTFLeagueManager{
 
         this.content.innerHTML = ``;
 
-        this.content.append(this.createInfoElem());
+        this.createInfoElem();
 
         if(this.mode === "recalculate"){
             this.renderRecalculate()
@@ -3296,8 +3296,6 @@ class AdminMatchesManager{
         this.bDeleteDuplicatesInProgress = false;
 
         this.selectedTab = "duplicate-matches";
-
-        this.deleteDupInfo = null;
 
         this.data = [];
         this.totalMatches = 0;
@@ -3564,9 +3562,8 @@ class AdminMatchesManager{
 
     renderMatchList(){
 
-        const info = UIDiv("info");
-        info.append(`Clicking a link opens the match in a new tab`);
-        this.content.append(info);
+
+        new UIInfo(this.content, [`Clicking a link opens the match in a new tab`]);
 
         const rows = [];
 
@@ -3651,21 +3648,13 @@ class AdminMatchesManager{
 
     renderDuplicates(){
 
-        if(this.deleteDupInfo === null){
-
-            this.deleteDupInfo = UIDiv("info");
-        }else{
-            this.deleteDupInfo.innerHTML = ``;
-        }
-
-        this.deleteDupInfo.append(
+    
+        const deleteDupInfo = [
             `Delete all duplicate matches.`,  UIBr(),
             `Remove all duplicate matches leaving only their most recent import of each match.`,
             UIBr(),
             `This action also recalculates player totals, gametype totals, map totals, and player rankings.`
-        );
-
-        this.content.append(this.deleteDupInfo);        
+        ];
 
         const tRows = [];
 
@@ -3691,13 +3680,6 @@ class AdminMatchesManager{
             tRows.push([{"content": "None Found", "colSpan": 5}]);
         }
 
-        const table = new UITable(this.content, {
-            "headers": ["Date", "Server", "Gametype", "Map", "Total Duplicates"],
-            "width": 1
-            },
-            tRows
-        );
-
 
         this.deleteAllDupButton = document.createElement("button");
         this.deleteAllDupButton.innerHTML = `Delete All Duplicate Matches`;
@@ -3707,7 +3689,15 @@ class AdminMatchesManager{
             this.deleteAllDuplicates();
         });
 
-        this.deleteDupInfo.append(UIBr(), this.deleteAllDupButton);
+        deleteDupInfo.push(UIBr(), this.deleteAllDupButton);
+        this.deleteDupInfo = new UIInfo(this.content, deleteDupInfo)
+
+         const table = new UITable(this.content, {
+            "headers": ["Date", "Server", "Gametype", "Map", "Total Duplicates"],
+            "width": 1
+            },
+            tRows
+        );
 
     }
 
@@ -3924,23 +3914,16 @@ class AdminServersManager{
 
         UIHeader(this.wrapper, "Merge Servers");
 
-        const info = UIDiv("info");
 
-        const infoElems = [
+        const infoElems = UIUnorderedList([
             "Merge one server into another.",
-            UIBr(),
             "You may want to do this if one of your Unreal Tournament servers has had a name change.",
-            UIBr(),
-            "Updates matches played on ", UIB("Old Server"), " id to use the ", UIB("New Server"), " id, deleting ", UIB("Old Server"), " from the server list."
-        ];
+            "Updates matches played on Old Server id to use the New Server id, deleting Old Server from the server list."
+        ]);
 
-        info.append(...infoElems);
+        new UIInfo(this.wrapper, [infoElems]);
         
-        this.wrapper.append(info);
-
         const form = UIDiv("form");
-
-        
 
         const serverOptions = this.getServerSelectOptions();
 
@@ -4467,10 +4450,7 @@ class AdminSQLiteBackupManager{
 
         if(this.mode !== "stats") return;
 
-        const info = UIDiv("info");
-
-        info.append("These are the current stats of your SQLite database.");
-        this.content.append(info);
+        new UIInfo(this.content, ["These are the current stats of your SQLite database."]);
 
         const basicRows = [
             [
@@ -4479,7 +4459,7 @@ class AdminSQLiteBackupManager{
             ],
             [
                 "Last Modified",
-                {"content": this.dbStats.sqliteStats.modifiedTime, "parse": ["date"], "className": "date"}
+                {"content": toDateString(new Date(this.dbStats.sqliteStats.modifiedTime).toISOString(), TIME_ZONE), "className": "date"}
             ]
         ];
 
@@ -4518,11 +4498,8 @@ class AdminSQLiteBackupManager{
 
         if(this.mode !== "create-backup") return;
 
-        const info = UIDiv("info");
 
-        info.append("Create a backup of your database with SQLite's built in backup creation.");
-
-        this.content.append(info);
+        new UIInfo(this.content, ["Create a backup of your database with SQLite's built in backup creation."]);
 
         const form = UIDiv("form");
 
@@ -4541,15 +4518,14 @@ class AdminSQLiteBackupManager{
     renderSavedBackups(){
 
         if(this.mode !== "saved-backups") return;
-        const info = UIDiv("info");
 
-        info.append(
+        
+        new UIInfo(this.content, [
             "These are the backups you currently have for your node-utstats-lite install.",
             UIBr(),
             "SQLite backups are located in the website's ",
             UIB("/backups/sqlite/"), ` folder.`
-        );
-        this.content.append(info);    
+        ]);
         
         const tableOptions = {
             "headers": [
@@ -4574,8 +4550,6 @@ class AdminSQLiteBackupManager{
         
         this.selectedInfoElem.innerHTML = "";
 
-        const elem = UIDiv("info");
-        this.selectedInfoElem.append(elem);
 
         let data = null;
 
@@ -4589,7 +4563,8 @@ class AdminSQLiteBackupManager{
         }
 
         if(data === null){
-            return elem.append("You have not selected a backup");
+            new UIInfo(this.selectedInfoElem, ["You have not selected a backup"]);
+            return;
         }
 
         const elems = [];
@@ -4598,7 +4573,7 @@ class AdminSQLiteBackupManager{
             UIB(data.name), 
             UIBr(), 
             UIBr(),
-            `Backup created ${toDateString(data.stats.birthtimeMs, TIME_ZONE)}`,
+            `Backup created ${toDateString(new Date(data.stats.birthtimeMs).toISOString(), TIME_ZONE)}`,
             UIBr(),
             `Size ${toByteString(data.stats.size)}(compressed)`
         );
@@ -4614,7 +4589,7 @@ class AdminSQLiteBackupManager{
         this.selectedInfoElem.append(this.restoreButton);
 
 
-        elem.append(...elems);
+        new UIInfo(this.selectedInfoElem, elems);
     }
 
     async restoreFromBackup(){

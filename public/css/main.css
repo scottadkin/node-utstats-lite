@@ -57,6 +57,7 @@
     --gold:rgb(121, 108, 34);
     --silver:rgb(96,96,96);
     --bronze:rgb(101,70,39);
+    --max-text-width:70ch;
 }
 
 main{
@@ -245,7 +246,7 @@ b{
 
 
 .form{
-	text-align: center;
+	/*text-align: center;*/
 	margin-bottom:var(--margin-2);
 	padding:var(--padding-1);
 	font-size:var(--font-size-80);
@@ -277,11 +278,6 @@ label, .form-label, .form-read-only{
 	text-align: left;
 }
 
-.form-info{
-	text-align: center;
-	font-size:var(--font-size-80);
-	margin-bottom:var(--margin-1);
-}
 
 .textbox{
 	font-size:var(--font-size-80);
@@ -537,27 +533,18 @@ option{
 }
 
 .info{
-	text-align: center;
-	padding:var(--padding-1) 20%;
 	margin-bottom:var(--margin-2);
 	font-size:var(--font-size-80);
 	line-height: var(--line-height-1);
 	background-color: var(--bg-color-mid);
 	border:1px solid var(--border-color-1);
+    
 }
-
-.info-basic{
-	text-align: center;
-	padding:var(--padding-1) 20%;
-	font-size:var(--font-size-80);
-	line-height: var(--line-height-1);
-}
-
 .info-text{
-	max-width:100ch;
-	text-align: center;
-	margin-left:auto;
-	margin-right: auto;
+    max-width:var(--max-text-width);
+    margin-left:auto;
+    margin-right:auto;
+    padding:var(--padding-1) 0px;
 }
 
 .dull{

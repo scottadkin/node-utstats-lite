@@ -2017,8 +2017,12 @@ class UIInfo{
         }else{
 
             throw new Error(`UIInfo not valid content`);
-        }
-        
+        }   
+    }
+
+    append(content){
+
+        this.content.append(content);
     }
 
     createElems(){
