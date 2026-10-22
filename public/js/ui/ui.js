@@ -1254,7 +1254,7 @@ class UICalendarHeatMap{
         this.parent = document.querySelector(parent);
 
         this.jsonURL = options?.jsonURL ?? "/json/unkown/";
-        this.div = UIDiv("text-center");
+        this.div = UIDiv();
         this.parent.append(this.div);
 
         this.wrapper = UIDiv("calendar-heatmap text-center");

@@ -765,6 +765,9 @@ class UIMapPlayerAverages{
         UIHeader(this.wrapper, "Top Player Averages");
         this.createTabs();
         this.info = new UIInfo(this.wrapper, this.getInfoContent());
+
+        this.form = UIDiv("form");
+        this.wrapper.append(this.form);
         this.createGametypeSelect();
         this.createTypesSelect();
         this.createMinMatchesSelect();
@@ -789,7 +792,7 @@ class UIMapPlayerAverages{
             this.loadData();
         });
 
-        this.wrapper.append(row);
+        this.form.append(row);
     }
 
     createTypesSelect(){
@@ -807,7 +810,7 @@ class UIMapPlayerAverages{
      
             this.loadData();
         }, "ma-type", "ma-type");
-        this.wrapper.append(row);
+        this.form.append(row);
     }
 
     createGametypeSelect(){
@@ -843,7 +846,7 @@ class UIMapPlayerAverages{
             this.loadData();
         }, "avg-gametype", "avg-gametype");
 
-        this.wrapper.append(row);
+        this.form.append(row);
     }
 
     createPagination(){
@@ -1063,8 +1066,13 @@ class UIMapCTFLeague{
 
         if(this.gametypeSelect === undefined){
 
+
+            const form = UIDiv("form");
             const row = UIDiv("form-row");
-            this.wrapper.append(row);
+            form.append(row);
+            this.wrapper.append(form);
+
+            
 
             row.append(UILabel("Gametype", "league-selected-gametype"));
 
@@ -1259,6 +1267,8 @@ class UIMapPlayerTotals{
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Totals");
+        this.form = UIDiv("form");
+        this.wrapper.append(this.form);
         this.parent.append(this.wrapper);
 
         this.createGametypeSelect();
@@ -1277,7 +1287,7 @@ class UIMapPlayerTotals{
             this.loadData();
         });
 
-        this.wrapper.append(row);
+        this.form.append(row);
     }
 
 
@@ -1298,7 +1308,7 @@ class UIMapPlayerTotals{
         });
         
 
-        this.wrapper.append(row);
+        this.form.append(row);
     }
 
     createValidTypesSelect(){
@@ -1312,7 +1322,7 @@ class UIMapPlayerTotals{
         });
         
 
-        this.wrapper.append(row);
+        this.form.append(row);
     }
 
     async loadData(){
@@ -1450,6 +1460,8 @@ class UIMapPlayerRecords{
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Match Records");
 
+        this.form = UIDiv(form);
+        this.wrapper.append(this.form);
         this.parent.append(this.wrapper);
 
         this.createForm();
@@ -1521,7 +1533,7 @@ class UIMapPlayerRecords{
             this.loadData();  
         });
 
-        this.wrapper.append(gametypeRow, typeRow, minMatchesRow);
+        this.form.append(gametypeRow, typeRow, minMatchesRow);
     }
 
     render(){

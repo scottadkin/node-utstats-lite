@@ -152,7 +152,7 @@ class PlayerRecentMatches{
 
     createForm(){
 
-        this.form = UIDiv();
+        this.form = UIDiv("form");
 
 
         this.gametypeRow = UIDiv("form-row");
