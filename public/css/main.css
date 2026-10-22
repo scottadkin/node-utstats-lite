@@ -341,6 +341,7 @@ table{
     padding:var(--padding-1) 0px;
     font-size:var(--font-size-60);
     user-select: none;
+    text-align: center;
 }
 
 .table-pagination-buttons{

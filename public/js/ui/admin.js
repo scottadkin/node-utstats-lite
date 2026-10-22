@@ -4642,13 +4642,7 @@ class AdminSQLiteBackupManager{
 
         if(this.mode !== "restore-from-backup") return;
 
-        const info = UIDiv("info");
-
-        info.append(
-            "Restore the database to a previous backed up state."
-        );
-
-        this.content.append(info);
+        new UIInfo(this.content, ["Restore the database to a previous backed up state."]);
 
         const warning = UIDiv("error");
         const warningTitle = UIDiv("error-title");
@@ -4881,27 +4875,25 @@ class AdminPlayerForceName{
 
     createElems(){
 
-        this.info = UIDiv("info");
-
-        this.info.append(
-            `Force a player's name by overriding the name used in the stats logs.`,
+        const infoContent = [`Force a player's name by overriding the name used in the stats logs.`,
             UIBr(),
             `If a single target player is forced by multiple methods the name override will use the highest priority one and skip the rest, the priority order:`,
-            UIBr(), `- HWID & MAC Combination`,
-            UIBr(), `- HWID`,
-            UIBr(), `- MAC Combination`,
-            UIBr(), `- Single MAC Address`,
-        );
-        
+            UIUnorderedList([
+                `HWID & MAC Combination`,
+                `HWID`,
+                `MAC Combination`,
+                `Single MAC Address`
+            ])
+        ];
 
-        this.wrapper.append(this.info);
+
+        new UIInfo(this.wrapper, infoContent);
+
         this.createTabs();
         this.content = UIDiv();
         
-
         this.form = UIDiv("form");
         
-
         this.content.append(this.form);
 
         this.wrapper.append(this.content);
@@ -4984,8 +4976,6 @@ class AdminPlayerForceName{
         }
 
         this.form.innerHTML = "";
-
-        const info = UIDiv("info");
 
         const tableOptions = {
             "headers": ["Type", "Value"]
@@ -5435,10 +5425,6 @@ class AdminPlayerForceName{
 
         this.createHWIDFormElems(hwids);
 
-        
-
-        const saveInfo = UIDiv("info");
-        saveInfo.append(`Any matches imported after saving force to name will automatically change the player's name.`);
 
         const submit = document.createElement("button");
         submit.className = "submit-button";
@@ -5448,14 +5434,11 @@ class AdminPlayerForceName{
             this.forceHWIDToName();
         });
 
-
-
         this.form.append(
             this.hwidInfoElem, submit
         );
         
 
-    
     }
 
     createMacSelectOptions(filter){
@@ -5918,23 +5901,25 @@ class AdminPlayerForceName{
 
         if(this.mode !== "mac") return;
 
-        const info = UIDiv("info");
 
-        info.append(
-            "Force a player name by a single MAC address or by a pair of MAC addresses.",
-            UIBr(),
-            "To force a name by a single address simply leave the second HWID empty.",
+
+        const infoContent = [
+            UIUnorderedList([
+                "Force a player name by a single MAC address or by a pair of MAC addresses.",
+                "To force a name by a single address simply leave the second HWID empty.",
+                `If both MAC1 and MAC2 are the same value you still have to select the same address in both dropdowns for the history to show.`
+            ]),
             UIBr(),
             "When ", UIB("Both MAC Addresses Must Match"), ` is disabled, history is displayed if there are any matches to the selected MAC addresses.`,
-            UIBr(),
+            UIBr(),UIBr(),
             "When ", UIB("Both MAC Addresses Must Match"), ` is enabled, history is only displayed 
             if both mac addresses are found in a single combination, 
             it doesn't matter which order they are in to be matched.`,
-            UIBr(), 
-            `If both MAC1 and MAC2 are the same value you still have to select the same address in both dropdowns for the history to show.`
-        );
+            
+        ];
 
-        this.form.append(info);
+        new UIInfo(this.form, infoContent);
+
 
         this.renderMacFormElems();
 
@@ -6236,15 +6221,14 @@ class AdminPlayerForceName{
 
         if(this.mode !== "both") return;
 
-        const info = UIDiv("info");
 
-        info.append(
-            `Force a player's name when both HWID and MAC addresses match.`,
-            UIBr(), "If the HWID string is empty or N/A it can't be used, and will not be displayed in the history.",
-            UIBr(), "If BOTH MAC strings are empty the combination can't be used, and will not be displayed in the history."
-        );
-
-        this.form.append(info);
+        new UIInfo(this.form, [
+            UIUnorderedList([
+                `Force a player's name when both HWID and MAC addresses match.`,
+                "If the HWID string is empty or N/A it can't be used, and will not be displayed in the history.",
+                "If BOTH MAC strings are empty the combination can't be used, and will not be displayed in the history."
+            ])
+        ]);
 
         const [selectedHWIDRow, hwidRow] = this.createHWIDFormElems();
 
@@ -6336,14 +6320,8 @@ class AdminPlayerForceName{
 
         if(this.mode !== "name-search") return;
 
-        const info = UIDiv("info");
-
-        info.append(
-            `Search for HWID and MAC usage history by player name.`, UIBr(),
-            `Click on a HWID, MAC1, or MAC2 to set it as your selected value for that type.`
-        );
-
-        this.form.append(info);
+        new UIInfo(this.form, [`Search for HWID and MAC usage history by player name.`, UIBr(),
+            `Click on a HWID, MAC1, or MAC2 to set it as your selected value for that type.`]);
 
         const searchRow = UIFormInputRow("Search By Name", "name-search", "text", this.nameSearch, "Search By Name...", (e) =>{
 
@@ -6463,11 +6441,7 @@ class AdminRenamePlayer{
 
     createElems(){
 
-        this.info = UIDiv("info");
-
-        this.info.append(`Rename a player in existing data.`);
-
-        this.wrapper.append(this.info);
+        new UIInfo(this.wrapper, [`Rename a player in existing data.`]);
 
         this.createTabs();
 
@@ -6592,15 +6566,17 @@ class AdminRenamePlayer{
 
         if(this.mode === "hwid"){
 
-            infoContent.push(`HWID was used in a total of ${totalMatches} ${plural(totalMatches, "match")}.`);
-            infoContent.push(UIBr(), ` ${uniqueNames.length} Unique ${plural(uniqueNames.length, "name")} used.`);
-            infoContent.push(UIBr(), ` ${uniqueIps.length} Unique IP ${plural(uniqueIps.length, "address")} used.`);
-            infoContent.push(UIBr(), ` ${uniqueMac1s.length} Unique MAC1 ${plural(uniqueMac1s.length, "address")} used.`);
-            infoContent.push(` ${uniqueMac2s.length} Unique MAC2 ${plural(uniqueMac2s.length, "address")} used.`);
-            infoContent.push(` ${uniqueMacs.length} Unique MAC(MAC1 or MAC2) ${plural(uniqueMacs.length, "address")} used.`);
-        }
 
-        info.append(...infoContent);
+            infoContent.push(UIUnorderedList([
+                `HWID was used in a total of ${totalMatches} ${plural(totalMatches, "match")}.`,
+                ` ${uniqueNames.length} Unique ${plural(uniqueNames.length, "name")} used.`,
+                ` ${uniqueIps.length} Unique IP ${plural(uniqueIps.length, "address")} used.`,
+                ` ${uniqueMac1s.length} Unique MAC1 ${plural(uniqueMac1s.length, "address")} used.`,
+                ` ${uniqueMac2s.length} Unique MAC2 ${plural(uniqueMac2s.length, "address")} used.`,
+                ` ${uniqueMacs.length} Unique MAC(MAC1 or MAC2) ${plural(uniqueMacs.length, "address")} used.`
+            ]));
+
+        }
 
 
         const tableOptions = {
@@ -6644,7 +6620,9 @@ class AdminRenamePlayer{
             ]
         });
 
-        this.previewElem.append(info);
+
+        new UIInfo(this.previewElem, infoContent);
+  
 
         const createIfNotRow = UIDiv("form-row");
         
@@ -6981,14 +6959,7 @@ class AdminPlayersImporterSettings{
 
     createInfo(){
 
-        
-        this.info = UIDiv("info");
-
-        this.info.append(
-            `These settings are applied to all logs imported no matter which server or method used.`
-        );
-
-        this.content.append(this.info);
+        new UIInfo(this.content, `These settings are applied to all logs imported no matter which server or method used.`);
 
         this.warning = UIDiv((this.bUnsavedChanges) ? "warning": "hidden");
         const saveButton = UIButton("Save Changes", "submit-button");

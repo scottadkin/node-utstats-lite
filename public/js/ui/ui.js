@@ -2025,6 +2025,12 @@ class UIInfo{
         this.content.append(content);
     }
 
+    setClassName(newClassName){
+
+        this.wrapper.className = newClassName;
+
+    }
+
     createElems(){
 
         this.wrapper = UIDiv("info");
