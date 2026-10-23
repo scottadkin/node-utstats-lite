@@ -1354,7 +1354,7 @@ section{
     display:flex;
     flex-direction: row;
     column-gap: var(--margin-5);
-    justify-content: start;
+    justify-content: space-evenly;
     flex-wrap: wrap;
 }
 
