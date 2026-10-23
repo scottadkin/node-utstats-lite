@@ -1254,10 +1254,10 @@ class UICalendarHeatMap{
         this.parent = document.querySelector(parent);
 
         this.jsonURL = options?.jsonURL ?? "/json/unkown/";
-        this.div = UIDiv();
+        this.div = UIDiv("text-center");
         this.parent.append(this.div);
 
-        this.wrapper = UIDiv("calendar-heatmap text-center");
+        this.wrapper = UIDiv("calendar-heatmap");
 
         this.now = new Date(Date.now());
 
@@ -1636,7 +1636,7 @@ function UIMatchScreenshot(parent, matchData, bLatest){
 
     parent = document.querySelector(parent);
 
-    const wrapper = UIDiv("margin-bottom-2");
+    const wrapper = UIDiv("margin-bottom-2 text-center");
     UIHeader(wrapper, `${(bLatest) ? "Latest " : ""}Match Screenshot`);
     const canvas = document.createElement("canvas"); 
     canvas.className = "match-sshot";

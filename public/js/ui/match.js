@@ -605,6 +605,7 @@ class MatchSpecialEvents{
         };
 
         const firstBlood = document.createElement("table");
+        firstBlood.className = "table-no-min-width";
 
         const firstBloodRow = document.createElement("tr");
         firstBloodRow.append(UITableCell({"content": "First Blood"}));
@@ -2535,6 +2536,7 @@ class MatchKillsMatchUp{
         UIHeader(parent, "Kills Match Up");
 
         this.table = document.createElement("table");
+        this.table.className = "table-no-min-width";
         this.createPlayers(players);
 
         this.kills = kills;
