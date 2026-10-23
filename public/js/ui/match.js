@@ -3,12 +3,8 @@ function UIMBInfo(name, value){
 
     const wrapper = UIDiv("mb-info");
 
-    const nElem = UIDiv();
-    const vElem = UIDiv();
-    nElem.append(name);
-    vElem.append(value);
 
-    wrapper.append(nElem, vElem);
+    wrapper.append(UIB(name), `: ${value}`);
 
     return wrapper;
 
@@ -2043,26 +2039,30 @@ class CTFCaps{
                         "playerId": c.taken_player, 
                         "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
                         "country": grabPlayer.country,
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bTableElem": true
                     }), 
-                    "value": grabPlayer.name.toLowerCase()
+                    "value": grabPlayer.name.toLowerCase(),
+                    "bSkipTD": true
                 }, 
                 {"display": ignore0(c.total_drops), "value": c.total_drops},
                 {"display": ignore0(c.total_covers), "value": c.total_covers},
-                {"display": kills, "value": c.red_kills + c.blue_kills},
-                {"display": suicides, "value": c.red_suicides + c.blue_suicides},
+                { "display": kills, "value": c.red_kills + c.blue_kills, "className": "no-padding"},
+                {"display": suicides, "value": c.red_suicides + c.blue_suicides, "className": "no-padding"},
                 {
                     "display": UIPlayerLink({
                         "playerId": c.cap_player, 
                         "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
                         "country": capPlayer.country,
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bTableElem": true
                     }), 
-                    "value": capPlayer.name.toLowerCase()
+                    "value": capPlayer.name.toLowerCase(),
+                    "bSkipTD": true
                 }, 
                 {"display": UIMMSS(c.cap_timestamp), "value": c.cap_timestamp},
                 {"display": toPlaytime(c.cap_time, true), "value": c.cap_time, "className": "playtime"},
-                {"display": scores, "value":teamScores[0] + teamScores[1]}
+                { "display": scores, "value": teamScores[0] + teamScores[1], "className": "no-padding"}
             ]);
         }
 

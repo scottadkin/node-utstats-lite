@@ -63,7 +63,7 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId){
         row.push({"value": m.players, url});
         row.push({"display": MMSS(m.playtime), "value": m.playtime,  "className": "playtime", url});
 
-        row.push({"display": UIMatchScoreBox(null, m, true, true), "bSkipTD": true});
+        row.push({"display": UIMatchScoreBox(null, m, true, true), "bSkipTD": true, "className": "no-padding"});
 
         rows.push(row);
     }

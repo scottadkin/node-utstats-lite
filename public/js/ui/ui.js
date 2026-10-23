@@ -134,6 +134,8 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
 
     wrapper.className = wrapperClassName;
 
+    if(bTableElem) wrapper.className += ` no-padding`; 
+
     if(parent !== null){
         parent.append(wrapper);
     }
@@ -142,6 +144,7 @@ function UIMatchScoreBox(parent, data, small, bTableElem){
 }
 
 function UIBasicTeamScore(redValue, blueValue){
+
 
     const scoreWrapper = UIDiv("duo basic-team-scores");
 
@@ -184,7 +187,8 @@ function UIPlayerLink(params){
     const elem = document.createElement("a");
 
     if(!bHeaderElem){
-        className += ` player-name-td`;
+        if(className !== "") className += ` `
+        className += `player-name-td`;
     }
 
     if(!bTableElem && className !== "") elem.className = className;

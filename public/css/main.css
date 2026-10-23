@@ -431,10 +431,6 @@ tfoot td{
     grid-template-columns: 1fr 1fr;   
 }
 
-td .duo{
-    font-size:44px;
-    background-color:red;
-}
 
 .trio{
     display:grid;
@@ -804,13 +800,9 @@ option{
 }
 
 
-.basic-team-scores div{
-	padding:0px 2px;
-    font-size:var(--font-size-90);
-}
-
 .basic-team-score{
-	padding:var(--padding-10);
+    width:100%;
+	box-sizing: border-box;
 }
 
 
@@ -861,14 +853,12 @@ ul{
 
 .match-basic-info-wrapper{
     margin-bottom:var(--margin-10);
-    margin-left:var(--margin-25);
 
 }
 
 .match-basic-info-wrapper-info{
 	padding-top:var(--padding-5);
 	line-height: var(--line-height-1);
-    text-align: center;
 }
 
 .mb-info{
@@ -877,18 +867,6 @@ ul{
     max-width:var(--max-text-width);
     margin-left:auto;
     margin-right:auto;
-}
-
-.mb-info div:nth-child(1){
-	color:var(--font-color-blue);
-	font-weight:600;
-    display:inline-block;
-
-}
-
-.mb-info div:nth-child(2){
-	padding-left:var(--padding-5);
-    display:inline-block;
 }
 
 
@@ -1257,9 +1235,9 @@ code{
 }
 
 .player-record-wrapper{
-    max-width: var(--max-width-1);
-    width: var(--width-4);
-    margin-left:var(--margin-25);
+    max-width: var(--max-text-width);
+    margin-left:auto;
+    margin-right:auto;
     font-size:var(--font-size-80);
     margin-bottom: var(--margin-10);
     box-shadow: var(--box-shadow-1);
@@ -1431,3 +1409,6 @@ section{
     color:yellow;
 }
 
+.no-padding{
+    padding:0px;
+}
