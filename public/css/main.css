@@ -83,7 +83,6 @@ body{
 
 #root{
     background-color:rgba(0,0,0,0.125);
-    width:95%;
     max-width:1200px;
     margin-left:auto;
     margin-right:auto;
@@ -256,7 +255,6 @@ b{
 
 .form{
 	margin-bottom:var(--margin-10);
-	padding:var(--padding-10);
 	font-weight:500;
     margin-left:auto;
     margin-right:auto;
@@ -266,7 +264,7 @@ b{
 	display:grid;
 	grid-template-columns: 1fr 2fr;
 	margin-bottom:var(--margin-5);
-    max-width:var(--max-text-width);
+    max-width:90%;
     font-size:var(--font-size-80);
     margin-left:auto;
     margin-right:auto;
@@ -525,12 +523,13 @@ option{
 	line-height: var(--line-height-1);
     margin-left:auto;
     margin-right:auto;
-    max-width:var(--max-text-width);
+    max-width:90%;
     
 }
 .info-text{
     
     padding:var(--padding-10) 0px;
+    max-width:var(--max-text-width);
     
 }
 
@@ -858,13 +857,15 @@ ul{
 
 .match-basic-info-wrapper-info{
 	padding-top:var(--padding-5);
+    
 	line-height: var(--line-height-1);
+
 }
 
 .mb-info{
 
     font-size:var(--font-size-80);
-    max-width:var(--max-text-width);
+    max-width:90%;
     margin-left:auto;
     margin-right:auto;
 }
@@ -1350,12 +1351,13 @@ section{
 
 
 .new-rich-wrapper{
-    padding-left:var(--padding-10);
     display:flex;
     flex-direction: row;
     column-gap: var(--margin-5);
     justify-content: space-evenly;
     flex-wrap: wrap;
+    margin-left:auto;
+    margin-right:auto;
 }
 
 
