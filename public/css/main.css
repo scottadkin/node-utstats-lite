@@ -2,9 +2,9 @@
 
 :root {
 	--bg-color-light:rgb(50,50,50);
-	--bg-color-mid:rgb(42,42,42);
-	--bg-color-dark:rgb(32,32,32);
-	--bg-header-color:rgb(27,45,59);
+	--bg-color-mid:rgb(37,37,37);
+	--bg-color-dark:rgb(33,33,33);
+	--bg-header-color:rgb(24,36,45);
 	--button-hover-color:rgb(56,56,56);
 	--tab-bg-color:rgb(0,0,0);
 	--font-color-1:rgb(230,230,230);
@@ -395,15 +395,15 @@ th a{
 }
 
 tr:nth-child(even){
-	background-color:var(--bg-color-mid);
+	background-color:var(--bg-color-dark);
 }
 
 tr:nth-child(odd){
-	background-color:var(--bg-color-light);
+	background-color:var(--bg-color-mid);
 }
 
 tr:hover{
-	background-color:rgb(64,64,64);
+	background-color:var(--bg-color-light);
 }
 
 tfoot td{
@@ -859,7 +859,7 @@ ul{
 .mb-info{
 
     font-size:var(--font-size-80);
-    max-width:90%;
+    max-width:95%;
     margin-left:auto;
     margin-right:auto;
 }
@@ -1333,23 +1333,28 @@ section{
 .new-rich-wrapper{
     display:flex;
     flex-direction: row;
-    column-gap: var(--margin-5);
+    column-gap: var(--margin-10);
+    row-gap: var(--margin-10);
     justify-content: center;
     flex-wrap: wrap;
     margin-left:auto;
     margin-right:auto;
     align-items: center;
+    transition: var(--transition-1);
+    margin-bottom:var(--margin-25);
 }
 
 
 
 .new-rich-box{
-    margin-bottom:10px;
-    border:1px solid var(--border-color-1);
     box-shadow: var(--box-shadow-1);
     background-color:var(--bg-color-mid);
-    background: linear-gradient(to bottom right, var(--bg-color-dark), var(--bg-color-mid));
     max-width:275px;
+}
+
+.new-rich-box:hover{
+  
+    background-color:var(--bg-color-dark);
 
 }
 
