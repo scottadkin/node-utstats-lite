@@ -87,8 +87,8 @@ function UIRichMatchBox(data, url){
 
         data.gametype_name, UIBr(),
         toDateString(data.date, TIME_ZONE, true), UIBr(),
-        `${data.players} ${plural(data.players, "player")}`, UIBr(),
-        toPlaytime(data.playtime),
+        `${data.players} ${plural(data.players, "Player")}`, UIBr(),
+        `Playtime: `,MMSS(data.playtime),
     ];
 
     return UIRichImageBox(image, url, data.map_name, content, scoreBox);

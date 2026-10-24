@@ -36,6 +36,7 @@
     --font-size-100:1rem;
     --font-size-90:0.9rem;
     --font-size-80:0.8rem;
+	--font-size-75:0.75rem;
 	--font-size-70:0.7rem;
     --font-size-65:0.65rem;
     --font-size-60:0.6rem;
@@ -600,7 +601,7 @@ option{
 .tabs-wrapper{
 	background-color:var(--bg-color-mid);
 	margin-bottom:var(--margin-10);
-	font-size: var(--font-size-80);
+	font-size: var(--font-size-75);
 	border-top: 1px solid var(--border-color-1);
 	border-bottom: 1px solid var(--border-color-1);
     display:flex;
@@ -1329,28 +1330,15 @@ section{
 }
 
 
-
-.gold{
-    background-color: var(--gold);
-}
-
-.silver{
-    background-color: var(--silver);
-}
-
-.bronze{
-    background-color: var(--bronze);
-}
-
-
 .new-rich-wrapper{
     display:flex;
     flex-direction: row;
     column-gap: var(--margin-5);
-    justify-content: space-evenly;
+    justify-content: center;
     flex-wrap: wrap;
     margin-left:auto;
     margin-right:auto;
+    align-items: center;
 }
 
 
@@ -1361,7 +1349,7 @@ section{
     box-shadow: var(--box-shadow-1);
     background-color:var(--bg-color-mid);
     background: linear-gradient(to bottom right, var(--bg-color-dark), var(--bg-color-mid));
-    max-width:340px;
+    max-width:275px;
 
 }
 
@@ -1373,13 +1361,13 @@ section{
 .new-rich-info-content{
     padding:var(--padding-5) var(--padding-10);
     font-size:var(--font-size-70);
-    color:var(--font-color-2);
+    color:var(--font-color-1);
     line-height: 1.6em;
 }
 
 .new-rich-title{
     font-weight:500;
-    font-size:var(--font-size-100);
+    font-size:var(--font-size-90);
     padding:var(--padding-5) var(--padding-10);
 }
 
