@@ -344,7 +344,7 @@ function UIMapImage(parent, image, requiredImageName){
             infoText.append(
                 `A partial match of `,UIB(image.fullSize),` was found and the website will use this image instead of default.jpg.`, 
                 UIBr(),
-                `If you wish to add an exact matching screenshot for this map the name required is `, UIB(`${requiredImageName}.jpg`)
+                `If you wish to add an exact matching screenshot for this map the name required is `, UIB(`${requiredImageName}.jpg`), UIBr()
             );
             const img = document.createElement("img");
             img.className = "map-sshot";
