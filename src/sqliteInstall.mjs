@@ -564,7 +564,7 @@ export function createTableQueries(){
                 epm_item_invis REAL NOT NULL,
                 epm_item_shp REAL NOT NULL,
                 epm_dom_caps REAL NOT NULL,
-                season_id NOT NULL DEFAULT 0
+                season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
 
             //`CREATE UNIQUE INDEX IF NOT EXISTS npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
@@ -1424,6 +1424,15 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
 
+    const queries = createTableQueries("");
+    for(let i = 0; i < queries.length; i++){
+
+        new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
+ 
+        await simpleQuery(queries[i]);
+        new Message(`Query passed`,"pass");
+    }
+
    //2.7.0
     await updatePlayerCTFTotalsTable();
     await updatePlayerTotalsTable();
@@ -1447,15 +1456,6 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.6.0 & 2.10.0
     await updateMapWeaponTotalsTable();
 
-
-   const queries = createTableQueries("");
-    for(let i = 0; i < queries.length; i++){
-
-        new Message(`Attempting Query ${i + 1} out of ${queries.length}`,"note");
- 
-        await simpleQuery(queries[i]);
-        new Message(`Query passed`,"pass");
-    }
 
 
     
