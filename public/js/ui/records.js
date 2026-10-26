@@ -2,7 +2,8 @@ class RecordsPage{
 
     constructor(siteName, parent, mode, validTypes, modeTitles, gametypes, maps, 
         gametypeMapCombos, selectedGametype, selectedMap, recordType, minimumMatchesPlayed, data, totalResults,
-        page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps, seasonId, seasonInfo
+        page, perPage, ctfGametypes, ctfMaps, domGametypes, domMaps, seasonId, seasonInfo,
+        bSkipSeasonLinks
     ){
 
         this.siteName = siteName;
@@ -15,6 +16,7 @@ class RecordsPage{
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
 
         this.seasonInfo = seasonInfo;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.gametypes = gametypes;
         this.maps = maps;
@@ -118,7 +120,11 @@ class RecordsPage{
 
     createUrl(){
 
-        const urlBase = (this.seasonId !== 0) ? `/season/${this.seasonId}/records` : `/records`;
+        const urlBase = (this.bSkipSeasonLinks || this.seasonId === 0) ? 
+        `/records` : 
+        `/season/${this.seasonId}/records`;
+        
+     
 
         let url = urlBase;
 
@@ -454,7 +460,8 @@ class RecordsPage{
                     "playerId": d.player_id,
                     "country": d.country,
                     "name": d.player_name,
-                    "bTableElem": true
+                    "bTableElem": true,
+                    "seasonId": (this.seasonId === 0 || this.bSkipSeasonLinks) ? 0 : this.seasonId
                 }),
                  "bSkipTD": true
             },

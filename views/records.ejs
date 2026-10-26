@@ -56,7 +56,8 @@ const jsBase = (seasonId !== 0) ? `../../../js/` : `../js/`
         <%- JSON.stringify(domGametypes) %>,
         <%- JSON.stringify(domMaps) %>,
         "<%= seasonId %>",
-        <%- JSON.stringify(seasonInfo) %>
+        <%- JSON.stringify(seasonInfo) %>,
+        <%= locals.bSkipSeasonLinks %>
     );
 </script>
 
