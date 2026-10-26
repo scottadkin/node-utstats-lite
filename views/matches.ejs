@@ -23,7 +23,8 @@ const jsBase = (seasonId == 0) ? "../js/" : "../../js/";
         "<%= displayMode %>",  
         <%- JSON.stringify(matches)%>,
         "<%= page %>",
-        "<%= perPage%>"
+        "<%= perPage%>",
+        <%- locals.bSkipSeasonLinks %>
     );
 </script>
 

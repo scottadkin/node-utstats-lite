@@ -14,7 +14,8 @@ const jsBase = (locals.seasonId !== 0) ? `../../../js/` : `../js/`;
 %>
 <script>
 
-    const USED_MATCH_SEASON_ID = <%= seasonId %>;
+const USED_MATCH_SEASON_ID = <%= (locals.bSkipSeasonLinks) ? 0 : locals.seasonId %>;
+
 </script>
 <script src="<%= jsBase %>ui/table.js"></script>
 <script src="<%= jsBase %>ui/match.js"></script>

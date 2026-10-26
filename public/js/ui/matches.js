@@ -1,5 +1,5 @@
 
-function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId){
+function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId, bSkipSeasonLinks){
 
     if(typeof parent === "string"){
         parent = document.querySelector(parent);
@@ -47,7 +47,7 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId){
 
         let url = "";
 
-        if(seasonId === 0){
+        if(seasonId === 0 || bSkipSeasonLinks){
             url = `/match/${m.id}`;
         }else{
             url = `/season/${seasonId}/match/${m.id}`;
@@ -96,13 +96,14 @@ function UIRichMatchBox(data, url){
 
 class MatchesRichView{
 
-    constructor(parent, matches, seasonId){
+    constructor(parent, matches, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.matches = matches;
         this.seasonId = parseInt(seasonId);
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
         this.wrapper = UIDiv("new-rich-wrapper");
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.parent.append(this.wrapper);
 
@@ -118,7 +119,7 @@ class MatchesRichView{
             const d = this.matches.data[i];
             let url = ``;
 
-            if(this.seasonId === 0){
+            if(this.seasonId === 0 || this.bSkipSeasonLinks){
                 url = `/match/${d.id}`;
             }else{
                 url = `/season/${this.seasonId}/match/${d.id}`;
@@ -131,7 +132,9 @@ class MatchesRichView{
 
 class MatchesSearchForm{
 
-    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, displayMode, matches, page, perPage){
+    constructor(seasonId, uniqueCombinations, selectedServer, selectedGametype, selectedMap, displayMode, matches, page, perPage,
+        bSkipSeasonLinks
+    ){
 
         this.seasonId = parseInt(seasonId);
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
@@ -151,6 +154,8 @@ class MatchesSearchForm{
         this.selectedGametype = parseInt(selectedGametype);
         this.selectedMap = parseInt(selectedMap);
         this.selectedDisplayMode = displayMode.toLowerCase();
+
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.parent = document.querySelector("#root");
 
@@ -234,7 +239,7 @@ class MatchesSearchForm{
 
         let url = ``;
 
-        if(this.seasonId !== 0){
+        if(this.seasonId !== 0 || !this.bSkipSeasonLinks){
             url += `/season/${this.seasonId}/matches/`;
         }
 
@@ -382,10 +387,10 @@ class MatchesSearchForm{
         this.content.innerHTML = ``;
 
         if(this.selectedDisplayMode === "default"){
-            new MatchesRichView("#matches-content",  this.matches, this.seasonId);
+            new MatchesRichView("#matches-content",  this.matches, this.seasonId, this.bSkipSeasonLinks);
         }else{
             //renderMatchesTable("#root", matchData, false, true);
-            renderMatchesTable("#matches-content", this.matches, false, true, this.seasonId);
+            renderMatchesTable("#matches-content", this.matches, false, true, this.seasonId, this.bSkipSeasonLinks);
         }
     }
 }
