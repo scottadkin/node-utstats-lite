@@ -59,7 +59,7 @@ class PlayersSearchList{
 
 class PlayersSearchForm{
 
-    constructor(parent, seasonId, searchName, sortBy, order, perPage, page, siteName){
+    constructor(parent, seasonId, searchName, sortBy, order, perPage, page, siteName, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         
@@ -71,6 +71,7 @@ class PlayersSearchForm{
         this.perPage = perPage;
         this.page = page;
         this.siteName = siteName;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.data = {"players": [], "totalPlayers": 0};
 
@@ -108,9 +109,11 @@ class PlayersSearchForm{
 
         try{
 
-            let slug = `?name=${encodeURIComponent(this.searchName)}&season=${this.seasonId}&sortBy=${this.sortBy}`;
+            const usedSeason = this.seasonId;
+
+            let slug = `?name=${encodeURIComponent(this.searchName)}&season=${usedSeason}&sortBy=${this.sortBy}`;
             slug += `&order=${this.order}&perPage=${this.perPage}&page=${this.page}`;
-            console.log(`/json/player-search/${slug}`);
+         
             const req = await fetch(`/json/player-search/${slug}`);
 
             const res = await req.json();
@@ -130,7 +133,7 @@ class PlayersSearchForm{
     changeSelected(){
 
 
-        const baseURL = (this.seasonId === 0) ? `/players` : `/season/${this.seasonId}/players`
+        const baseURL = (this.seasonId === 0 || this.bSkipSeasonLinks) ? `/players` : `/season/${this.seasonId}/players`
 
         const url = `${baseURL}?name=${this.searchName}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}`;
 
@@ -199,7 +202,7 @@ class PlayersSearchForm{
                     "country": player.country, 
                     "bTableElem": true, 
                     "className": "text-left",
-                    "seasonId": this.seasonId
+                    "seasonId": (this.bSkipSeasonLinks) ? 0 :this.seasonId
                 }),
                 "bSkipTD": true
             },

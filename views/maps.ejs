@@ -37,7 +37,8 @@ const jsBase = (locals.bSeasonPage) ? `../../../js/` : `../../js/`;
         "<%= perPage %>",
         <%- JSON.stringify(maps) %>,
         <%= parseInt(totalMatches) %>,
-        "<%= seasonId %>"
+        "<%= seasonId %>",
+        <%= locals.bSkipSeasonLinks %>
     );   
 </script>
 

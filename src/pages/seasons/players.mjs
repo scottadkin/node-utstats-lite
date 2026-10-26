@@ -37,6 +37,5 @@ export async function renderSeasonPlayersPage(req, res){
             perPage,
             page,
             siteName,
-            seasonId
         });
 }

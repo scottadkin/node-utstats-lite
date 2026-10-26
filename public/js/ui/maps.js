@@ -1,6 +1,7 @@
 class MapsSearchForm{
 
-    constructor(parent, nameSearch, sortBy, order, displayMode, page, perPage, maps, totalMatches, seasonId){
+    constructor(parent, nameSearch, sortBy, order, displayMode, page, perPage, maps, 
+        totalMatches, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.nameSearch = decodeHTML(nameSearch);
@@ -10,6 +11,7 @@ class MapsSearchForm{
         this.sortBy = sortBy;
         this.order = order;
         this.seasonId = parseInt(seasonId);
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.displayModes = [
             {"display": "Default", "value": "default"},
@@ -38,7 +40,8 @@ class MapsSearchForm{
             this.displayMode,
             this.sortBy,
             this.order,
-            this.seasonId
+            this.seasonId,
+            this.bSkipSeasonLinks
         );   
 
    
@@ -153,7 +156,7 @@ class MapsSearchForm{
 
         let url = ``;
 
-        if(this.seasonId !== 0){
+        if(this.seasonId !== 0 && !this.bSkipSeasonLinks){
             url += `/season/${this.seasonId}/maps/`;
         }else{
             url += `/maps/`;
@@ -182,7 +185,7 @@ class MapsSearchForm{
 
 class MapListDisplay{
 
-    constructor(parent, data, nameSearch, displayMode, sortBy, order, seasonId){
+    constructor(parent, data, nameSearch, displayMode, sortBy, order, seasonId, bSkipSeasonLinks){
 
         if(data.length === 0){
 
@@ -206,6 +209,7 @@ class MapListDisplay{
         this.displayMode = displayMode.toLowerCase();     
         this.sortBy = sortBy;
         this.bAscOrder = order === "ASC";
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
 
         if(this.displayMode === "table") this.renderTable();
@@ -230,7 +234,7 @@ class MapListDisplay{
 
     getMapUrl(mapId){
 
-        if(this.seasonId === 0) return `/map/${mapId}`;
+        if(this.seasonId === 0 || this.bSkipSeasonLinks) return `/map/${mapId}`;
 
         return `/season/${this.seasonId}/map/${mapId}`
     }
@@ -283,7 +287,7 @@ class MapListDisplay{
 
                     let url = ``;
 
-                    if(this.seasonId === 0){
+                    if(this.seasonId === 0 || this.bSkipSeasonLinks){
                         url += `/maps/`;
                     }else{
                         url += `/season/${this.seasonId}/maps/`;
@@ -308,7 +312,7 @@ class MapListDisplay{
 
             let url = ``;
 
-            if(this.seasonId === 0){
+            if(this.seasonId === 0 || this.bSkipSeasonLinks){
                 url = `/map/${d.id}`;
             }else{
                 url = `/season/${this.seasonId}/map/${d.id}`;

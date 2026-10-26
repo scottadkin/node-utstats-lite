@@ -17,13 +17,14 @@ const jsBase = (seasonId !== 0) ? "../../js/" : "../../js/";
 <script>
     new PlayersSearchForm(
         "#root", 
-        "<%= (locals.bSkipSeasonLinks) ? 0 :seasonId %>",
+        "<%= seasonId %>",
         "<%= searchName %>", 
         "<%= sortBy %>", 
         "<%= order %>", 
         "<%= perPage %>", 
         "<%= page %>", 
-        "<%= siteName %>"
+        "<%= siteName %>",
+        <%= locals.bSkipSeasonLinks %>
     );
 </script>
 <%- include('footer.ejs') -%>
