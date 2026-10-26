@@ -1,6 +1,6 @@
 class PlayerRecentMatches{
 
-    constructor(parent, playerId, seasonId){
+    constructor(parent, playerId, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.playerId = playerId;
@@ -8,7 +8,7 @@ class PlayerRecentMatches{
 
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
 
-
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
         this.gametypes = [];
         this.maps = [];
         this.gametypeMaps = {};
@@ -35,7 +35,7 @@ class PlayerRecentMatches{
 
     getJSONURLBase(){
 
-        return (this.seasonId !== 0) ? `../../../` : `../`;
+        return (this.seasonId !== 0 && !this.bSkipSeasonLinks) ? `../../../` : `../`;
     }
 
     async loadAllPlayedNames(){
@@ -200,8 +200,11 @@ class PlayerRecentMatches{
     createRow(data){
 
 
-        const url = `/match/${data.match_id}`;
+        let url = `/match/${data.match_id}`;
 
+        if(this.seasonId !== 0 && !this.bSkipSeasonLinks){
+            url = `/season/${this.seasonId}${url}`
+        }
 
         let string = "";
         let className = "";

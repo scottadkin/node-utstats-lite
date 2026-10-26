@@ -84,7 +84,7 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
                 %>new PlayerItemsSummary("#root", generalTotals);<%
             } break;
             case "Display Recent Matches": {
-                %>const rm = new PlayerRecentMatches("#root", <%= playerId %>, "<%= seasonId %>");<%
+                %>const rm = new PlayerRecentMatches("#root", <%= playerId %>, "<%= seasonId %>", <%= locals.bSkipSeasonLinks %>);<%
             } break;
             case "Display Activity Heatmap": {
                 %>new UIPlayerActivityHeatmap("#root", {

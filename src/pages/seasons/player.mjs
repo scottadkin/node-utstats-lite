@@ -1,6 +1,5 @@
 
 import { sanitizePlayerPageReq} from "../../players.mjs";
-import { getSeasonById } from "../../seasons.mjs";
 import { getSiteWideTimeZone } from "../../siteSettings.mjs";
 
 
