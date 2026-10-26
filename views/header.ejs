@@ -2,16 +2,12 @@
 
 const options = [];
 
-if(locals.bSeasonPage && locals.seasonInfo !== undefined && locals.seasonInfo !== null){
-    //options.push({"name": "Main Site", "url": "/", "highlight": ["home"]});
-}else{
-    options.push({"name": "Home", "url": "/", "highlight": ["home"]});
+
+if(!locals.bSeasonPage || locals.bSkipSeasonLinks){
+    options.push({"name": "Home", "url": "/", "highlight": ["home", "season-home"]});
 }
 
-
-//options.push({"name": "Seasons", "url": "/seasons", "highlight": ["season", "seasons"]});
-
-if(!locals.bSeasonPage || (locals.seasonInfo === undefined || locals.seasonInfo === null)){
+if(locals.bSkipSeasonLinks || !locals.bSeasonPage || (locals.seasonInfo === undefined || locals.seasonInfo === null)){
     options.push(
         {"name": "Matches", "url": "/matches", "highlight": ["matches", "match"]},
         {"name": "Players", "url": "/players", "highlight": ["player", "players"]},
@@ -22,7 +18,7 @@ if(!locals.bSeasonPage || (locals.seasonInfo === undefined || locals.seasonInfo 
     );
 }
 
-if(locals.bSeasonPage){
+if(locals.bSeasonPage && !locals.bSkipSeasonLinks){
 
     if(locals.seasonInfo === undefined) throw new Error(`Season Info is missing`);
 

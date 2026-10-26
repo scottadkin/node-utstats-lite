@@ -5,7 +5,7 @@ import { getMapWeaponStats } from "../weapons.mjs";
 import { VALID_PLAYER_EPM_TYPES, VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_AVG_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getLeagueCategorySettings } from "../ctfLeague.mjs";
 
-export async function renderMapPage(req, res, userSession){
+export async function renderMapPage(req, res){
 
     try{
 
@@ -47,7 +47,7 @@ export async function renderMapPage(req, res, userSession){
         res.render("map.ejs",{
             "host": req.headers.host,
             timeZone,
-            userSession,
+            "userSession": req.userSession,
             title,
             basic,
             pageSettings,

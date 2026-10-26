@@ -2,7 +2,7 @@ import { sanitizeMapsReq, searchMaps } from "../maps.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 
-export async function renderMapsPage(req, res, userSession){
+export async function renderMapsPage(req, res){
 
     try{
         
@@ -38,7 +38,7 @@ export async function renderMapsPage(req, res, userSession){
             nameSearch,
             totalMatches,
             maps,
-            userSession,
+            "userSession": req.userSession,
             perPage,
             page,
             "seasonId": 0

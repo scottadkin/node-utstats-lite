@@ -3,9 +3,8 @@ import { getMatchData as getClassicStatsData } from "../../classicWeaponStats.mj
 import { convertTimestamp, plural, toPlaytime } from "../../generic.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 import { getPageLayout } from "../../pageLayout.mjs";
-import { getSeasonById } from "../../seasons.mjs";
 
-export async function renderSeasonMatchPage(req, res, userSession){
+export async function renderSeasonMatchPage(req, res){
 
     try{
         
@@ -30,7 +29,7 @@ export async function renderSeasonMatchPage(req, res, userSession){
 
             return res.render("error.ejs", {
                 "host": req.headers.host, 
-                userSession, 
+                "userSession": req.userSession, 
                 timeZone,
                 "errorMessage": data.error
             });
@@ -41,7 +40,7 @@ export async function renderSeasonMatchPage(req, res, userSession){
 
                 return res.render("error.ejs", {
                     "host": req.headers.host, 
-                    userSession, 
+                    "userSession": req.userSession, 
                     timeZone,
                     "errorMessage": `Match was not played in the provided season.<br>
                     You can view the match on this <a href="/season/${data.basic.season_id}/match/${matchId}"><b>link</b></a>.`
@@ -72,7 +71,7 @@ export async function renderSeasonMatchPage(req, res, userSession){
                 "description": desc,
                 "image": `matchshot/${b.id}`
             },
-            userSession,
+            "userSession": req.userSession,
             data,	
             classicWeaponStats,
             pageSettings,

@@ -21,7 +21,7 @@ export async function renderMatchPage(req, res, userSession){
 
             return res.render("error.ejs", {
                 "host": req.headers.host, 
-                userSession, 
+                "userSession": req.userSession, 
                 timeZone,
                 "errorMessage": data.error
             });
@@ -51,7 +51,7 @@ export async function renderMatchPage(req, res, userSession){
                 "description": desc,
                 "image": `matchshot/${b.id}`
             },
-            userSession,
+            "userSession": req.userSession,
             data,	
             classicWeaponStats,
             pageSettings,

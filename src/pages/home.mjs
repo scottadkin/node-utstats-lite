@@ -7,7 +7,7 @@ import { getMostPlayedGametypes } from "../gametypes.mjs";
 import { getMostPlayedMaps } from "../maps.mjs";
 import { getMostActivePlayers } from "../players.mjs";
 
-export async function renderHomePage(req, res, userSession){
+export async function renderHomePage(req, res){
 
 
     try{
@@ -76,7 +76,7 @@ export async function renderHomePage(req, res, userSession){
             welcomeMessageSettings,
             recentMatches,
             serversList,
-            userSession,
+            "userSession": req.userSession,
             message,
             mostPlayedGametypes,
             mostPlayedMaps,

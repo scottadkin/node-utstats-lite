@@ -3,7 +3,7 @@ import { sanitizePlayersPageParams, searchPlayers, setPlayersPageMetaData } from
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 const DEFAULT_PER_PAGE = 25;
 
-export async function renderPlayersPage(req, res, userSession){
+export async function renderPlayersPage(req, res){
 
     try{
 
@@ -30,7 +30,7 @@ export async function renderPlayersPage(req, res, userSession){
             page,
             "perPageOptions": PER_PAGE_OPTIONS,
             players,
-            userSession,
+            "userSession": req.userSession,
             siteName,
             timeZone,
             "bSeasonPage": false,

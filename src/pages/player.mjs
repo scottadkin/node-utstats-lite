@@ -2,7 +2,7 @@ import { sanitizePlayerPageReq } from "../players.mjs";
 import { getSiteWideTimeZone } from "../siteSettings.mjs";
 
 
-export async function renderPlayerPage(req, res, userSession){
+export async function renderPlayerPage(req, res){
 
     try{
 
@@ -31,7 +31,7 @@ export async function renderPlayerPage(req, res, userSession){
             weaponTotals,
             rankings,
             ctfLeagueData,
-            userSession,
+            "userSession": req.userSession,
             pageSettings,
             pageLayout,
             timeZone,

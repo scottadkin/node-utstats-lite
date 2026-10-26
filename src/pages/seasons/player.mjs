@@ -4,7 +4,7 @@ import { getSeasonById } from "../../seasons.mjs";
 import { getSiteWideTimeZone } from "../../siteSettings.mjs";
 
 
-export async function renderSeasonPlayerPage(req, res, userSession){
+export async function renderSeasonPlayerPage(req, res){
 
     try{
 
@@ -33,7 +33,7 @@ export async function renderSeasonPlayerPage(req, res, userSession){
             weaponTotals,
             rankings,
             ctfLeagueData,
-            userSession,
+            "userSession": req.userSession,
             pageSettings,
             pageLayout,
             timeZone,

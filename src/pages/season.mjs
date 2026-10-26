@@ -1,5 +1,5 @@
 import { convertTimestamp, toPlaytime } from "../generic.mjs";
-import { getAllSeasons, getSeasonBasicObjectStats, getSeasonById, seasonsGetMostPlayedMaps } from "../seasons.mjs";
+import { getSeasonBasicObjectStats,seasonsGetMostPlayedMaps } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 

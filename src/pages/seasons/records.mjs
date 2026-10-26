@@ -8,7 +8,7 @@ import {
 import { getUniqueGametypeMapCombinations, getRecords, sanitizeRecordsPageReq, createRecordsPageMetaData } from "../../records.mjs";
 
 
-export async function renderSeasonRecordsPage(req, res, userSession){
+export async function renderSeasonRecordsPage(req, res){
 
     
     try{
@@ -73,7 +73,7 @@ export async function renderSeasonRecordsPage(req, res, userSession){
             ctfMaps,
             domGametypes,
             domMaps,
-            userSession,
+            "userSession": req.userSession,
             seasonInfo,
             "seasonId": seasonId,
             "bSeasonPage": true,

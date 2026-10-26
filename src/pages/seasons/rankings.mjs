@@ -4,7 +4,7 @@ import {
 } from "../../rankings.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 
-export async function renderSeasonRankingsPage(req, res, userSession){
+export async function renderSeasonRankingsPage(req, res){
 
     try{
 
@@ -43,7 +43,7 @@ export async function renderSeasonRankingsPage(req, res, userSession){
             "selectedTimeRange": timeRange,
             "selectedPerPage": perPage,
             "currentPage": page,
-            userSession,
+            "userSession": req.userSession,
             pageSettings,
             rankingSettings,
             minMatchesSetting,

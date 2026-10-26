@@ -115,12 +115,10 @@ app.get('/', async (req, res, next) => { await setSeasonsData(req, res, next)}, 
 	try{
 
         if(res.locals.seasonList.length > 0){
-     
-            //res.locals.season = res.locals.seasonList[0].id;
+            res.locals.bSkipSeasonLinks = true;
             renderSeasonPage(req, res);
-
         }else{
-		    renderHomePage(req, res, req.userSession);	
+		    renderHomePage(req, res);	
         }
 		
 	}catch(err){
@@ -130,62 +128,106 @@ app.get('/', async (req, res, next) => { await setSeasonsData(req, res, next)}, 
 });
 
 
-
-
-
 app.get('/match/:id',async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) => {
-	//res.locals.season = 0;
-	renderMatchPage(req, res, req.userSession);
+
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonMatchPage(req, res);
+    }else{
+	    renderMatchPage(req, res);
+    }
 });
 
 app.get("/matches", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
-	//res.locals.season = 0;
-	renderMatchesPage(req, res, req.userSession);
+	
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonMatchesPage(req, res);
+    }else{
+	    renderMatchesPage(req, res);
+    }
+    
 });
 
 app.get("/players",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
-    //res.locals.season = 0;
-	renderPlayersPage(req, res, req.userSession);
+  
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonPlayersPage(req, res);
+    }else{
+	    renderPlayersPage(req, res);
+    }
 });
 
 app.get("/rankings", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
-    //res.locals.season = 0;
-	renderRankingsPage(req, res, req.userSession);
+
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonRankingsPage(req, res);
+    }else{
+	    renderRankingsPage(req, res);
+    }
 });
 
 app.get("/ctfleague", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
-    //res.locals.season = 0;
-	renderCTFLeaguePage(req, res, req.userSession);
+    
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonCTFLeaguePage(req, res)
+    }else{
+	    renderCTFLeaguePage(req, res);
+    }
 });
 
 app.get("/records",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
-    //res.locals.season = 0;
-	renderRecordsPage(req, res, req.userSession);
+
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonRecordsPage(req, res);
+    }else{
+	    renderRecordsPage(req, res);
+    }
 });
 
 app.get("/maps", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
-    //res.locals.season = 0;
-	renderMapsPage(req, res, req.userSession);
+
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonMapsPage(req, res);
+    }else{
+	    renderMapsPage(req, res);
+    }
 });
 
 app.get("/player/:id",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
-    //res.locals.season = 0;
-	renderPlayerPage(req, res, req.userSession);
+ 
+
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonPlayerPage(req, res);
+    }else{
+	    renderPlayerPage(req, res);
+    }
 });
 
 app.get("/map/:id",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
-    //res.locals.season = 0;
-	renderMapPage(req, res, req.userSession);
+
+    if(res.locals.seasonList.length > 0){
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonMapPage(req, res);
+    }else{
+	    renderMapPage(req, res);
+    }
 });
 
 
 app.get("/watchlist",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
-    //res.locals.season = 0;
+
 	renderWatchlistPage(req, res, req.userSession);
 });
 
 app.get("/jsonexamples",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
-    //res.locals.season = 0;
+  
 	renderJSONExamples(req, res, req.userSession);
 });
 
@@ -243,7 +285,6 @@ app.get("/logout", async (req, res) =>{
 
 
 app.get("/register",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
-    //res.locals.season = 0;
 	renderRegisterPage(req, res, req.userSession);
 });
 
@@ -262,7 +303,6 @@ app.post("/register",async (req, res, next) => { await setSeasonsData(req, res, 
 
 app.get("/admin", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
 
-    //res.locals.season = 0;
 	if(req.userSession === null){
 		res.status(401).send("Access Denied");
 	}else{
@@ -353,8 +393,6 @@ app.get("/seasons",
 
     try{
 
-        res.locals.season = 0;
-
         renderSeasonsPage(req, res);
 
     }catch(err){
@@ -369,7 +407,7 @@ app.get("/season/:season",
     async (req, res) =>{
 
     try{
-
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonPage(req, res);
 
     }catch(err){
@@ -384,7 +422,7 @@ app.get("/season/:season/matches",
 
     try{
 
-
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonMatchesPage(req, res);
 
     
@@ -399,6 +437,7 @@ app.get("/season/:season/players",
     async (req, res) =>{
 
     try{
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonPlayersPage(req, res);
     
     }catch(err){
@@ -411,7 +450,7 @@ app.get("/season/:season/maps",
     async (req, res) =>{
 
     try{
-        
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonMapsPage(req, res);
     
     }catch(err){
@@ -424,7 +463,7 @@ app.get('/season/:season/match/:id',
     async (req, res) => {
 	
     try{
-
+        res.locals.bSkipSeasonLinks = false;
 	    await renderSeasonMatchPage(req, res, req.userSession);
         
     }catch(err){
@@ -438,6 +477,7 @@ app.get("/season/:season/map/:id",
     async (req, res) =>{
 
     try{
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonMapPage(req, res);
     }catch(err){
         res.json({"error": err.toString()});
@@ -449,6 +489,7 @@ app.get("/season/:season/rankings/",
     async (req, res) =>{
 
     try{
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonRankingsPage(req, res);
     }catch(err){
         res.json({"error": err.toString()});
@@ -460,6 +501,7 @@ app.get("/season/:season/records/",
     async (req, res) =>{
 
     try{
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonRecordsPage(req, res);
     }catch(err){
         res.json({"error": err.toString()});
@@ -472,6 +514,7 @@ app.get("/season/:season/ctfleague/",
     async (req, res) =>{
 
     try{
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonCTFLeaguePage(req, res);
     }catch(err){
         res.json({"error": err.toString()});
@@ -483,6 +526,7 @@ app.get("/season/:season/player/:id",
     async (req, res) =>{
 
     try{
+        res.locals.bSkipSeasonLinks = false;
         await renderSeasonPlayerPage(req, res);
     }catch(err){
         res.json({"error": err.toString()});

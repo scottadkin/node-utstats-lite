@@ -2,7 +2,7 @@ import { getRecentMatches, sanitizeMatchesReq } from "../matches.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 import { getSeasonUniqueMatchCombinations } from "../seasons.mjs";
 
-export async function renderMatchesPage(req, res, userSession){
+export async function renderMatchesPage(req, res){
 
     try{
 
@@ -42,7 +42,7 @@ export async function renderMatchesPage(req, res, userSession){
             pageSettings,
             displayMode,
             perPage,
-            userSession,
+            "userSession": req.userSession,
             timeZone,
             seasonId
         });
