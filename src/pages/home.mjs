@@ -12,14 +12,12 @@ export async function renderHomePage(req, res, userSession){
 
     try{
 
-        const timeZone = await getSiteWideTimeZone();
-       
+        const timeZone = await getSiteWideTimeZone(); 
 
         const pageSettings = await getCategorySettings("Home");
         const pageLayout = await getPageLayout("Home");
         const socialSettings = await getCategorySettings("Social Media");
         const welcomeMessageSettings = await getCategorySettings("Welcome Message");
-
 
         let perPage = pageSettings["Total Recent Matches"] ?? 5;
 

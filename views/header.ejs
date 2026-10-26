@@ -52,6 +52,12 @@ options.push({"name": "Watchlist", "url": "/watchlist", "highlight": ["watchlist
 
 const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
 
+let seasonDropDownText = "Season List";
+
+if(locals.season !== 0 && locals.seasonInfo !== undefined && locals.seasonInfo !== null){
+    seasonDropDownText = locals?.seasonInfo.name;
+}
+
 %><!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,7 +81,7 @@ const DEFAULT_DESC = `Unreal Tournament stats tracking website.`;
                 <% if(locals.seasonList.length > 0){ %>
                 <div class="nav-dropdown" id="nav-season-list">
                     <div id="nav-dummy">
-                        <%= (locals.season !== 0) ? locals?.seasonInfo.name : "Season List" %>
+                        <%= seasonDropDownText %>
                         <div id="nav-inner"></div>
                     </div>  
                 </div> 
