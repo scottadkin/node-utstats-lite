@@ -1,6 +1,5 @@
 
 import { sanitizePlayersPageParams, setPlayersPageMetaData } from "../../players.mjs";
-import { getSeasonById } from "../../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 
 const DEFAULT_PER_PAGE = 25;
@@ -9,16 +8,17 @@ export async function renderSeasonPlayersPage(req, res){
 
     const seasonId = res.locals.season;
 
-    const [brandingSettings, pageSettings, timeZone, basicSeasonInfo] = await Promise.all([
+    const [brandingSettings, pageSettings, timeZone] = await Promise.all([
         getCategorySettings("Branding"),
         getCategorySettings("Players"),
-        getSiteWideTimeZone(),
-        getSeasonById(seasonId)
+        getSiteWideTimeZone()
     ]);
+
+    const seasonInfo = res.locals.seasonInfo;
 
     
     const {searchName, sortBy, order, perPage, page} = sanitizePlayersPageParams(req, pageSettings, DEFAULT_PER_PAGE);
-    const {title, description, siteName} = setPlayersPageMetaData(brandingSettings, searchName, sortBy, order, basicSeasonInfo.name);
+    const {title, description, siteName} = setPlayersPageMetaData(brandingSettings, searchName, sortBy, order, seasonInfo.name);
 
 
     res.render("players.ejs",{
@@ -29,7 +29,7 @@ export async function renderSeasonPlayersPage(req, res){
             "meta": {"description": description, "image": "images/maps/default.jpg"},
             "userSession": req.userSession,
             seasonId,
-            "seasonInfo": basicSeasonInfo,
+            seasonInfo,
             "bSeasonPage": true,
             searchName,
             sortBy,

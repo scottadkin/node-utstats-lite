@@ -30,7 +30,7 @@ const jsBase = (locals.seasonId !== 0) ? `../../../js/`  : `../js/`;
     "<%= selectedTimeRange %>",
     "<%= selectedPerPage %>",
     "<%= currentPage %>",
-    "<%= seasonId %>"
+    "<%= (locals.bSkipSeasonLinks) ? 0 : seasonId %>"
     );
 
     new RankingsExplain("#root", <%- JSON.stringify(rankingSettings) %>, "<%= minMatchesSetting %>");

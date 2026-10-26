@@ -7,7 +7,7 @@
 <%- include("timeZone.ejs", {timeZone})%>
 
 <%
-const jsBase = (seasonId !== 0) ? "../../js/" : "../js/";
+const jsBase = (seasonId !== 0) ? "../../js/" : "../../js/";
 %>
 
 <script src="<%- jsBase %>ui/table.js"></script>
@@ -17,7 +17,7 @@ const jsBase = (seasonId !== 0) ? "../../js/" : "../js/";
 <script>
     new PlayersSearchForm(
         "#root", 
-        "<%= seasonId %>",
+        "<%= (locals.bSkipSeasonLinks) ? 0 :seasonId %>",
         "<%= searchName %>", 
         "<%= sortBy %>", 
         "<%= order %>", 

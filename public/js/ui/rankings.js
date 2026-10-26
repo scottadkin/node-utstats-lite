@@ -19,6 +19,8 @@ class RankingsSearchForm{
         this.wrapper = document.createElement("form");
         this.wrapper.className = "form";
 
+        console.log(`seasonId = is ${this.seasonId}`);
+
 
         this.urlBase = (this.seasonId === 0) ? `/rankings/` : `/season/${this.seasonId}/rankings/`
 
@@ -169,7 +171,12 @@ class RankingsSearchForm{
                 "className": "ordinal"
             }));
 
-            row.append(UIPlayerLink({"playerId": d.player_id, "country": d.country, "name": d.name, "bTableElem": true}));
+            row.append(UIPlayerLink({
+                "playerId": d.player_id, 
+                "country": d.country, 
+                "name": d.name, "bTableElem": true,
+                "seasonId": this.seasonId
+            }));
             row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
             row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
             row.append(UITableCell({"content": d.matches}));

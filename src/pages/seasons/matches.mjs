@@ -9,7 +9,7 @@ export async function renderSeasonMatchesPage(req, res){
 
     const [
         brandingSettings, pageSettings, 
-        timeZone, uniqueCombinations, basicSeasonInfo
+        timeZone, uniqueCombinations
     ] = await Promise.all([
         getCategorySettings("Branding"),
         getCategorySettings("Matches"),
@@ -18,7 +18,11 @@ export async function renderSeasonMatchesPage(req, res){
         getSeasonById(seasonId)
     ]);
 
-    const title = `Matches - ${basicSeasonInfo.name} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+    const seasonInfo = res.locals.seasonInfo;
+
+
+
+    const title = `Matches - ${seasonInfo.name} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
 
     const {
@@ -29,7 +33,7 @@ export async function renderSeasonMatchesPage(req, res){
     const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap, false, seasonId);
 
 
-    let description = `Search for matches played during the ${basicSeasonInfo.name} season.`;
+    let description = `Search for matches played during the ${seasonInfo.name} season.`;
 
     res.render("matches.ejs",{
         req,
@@ -47,7 +51,7 @@ export async function renderSeasonMatchesPage(req, res){
             perPage,
             displayMode,
             seasonId,
-            "seasonInfo": basicSeasonInfo,
+            seasonInfo,
             "bSeasonPage": true
         });
 }
