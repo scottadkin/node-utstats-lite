@@ -78,7 +78,7 @@ export async function renderSeasonCTFLeaguePage(req, res){
             subHeader,
             "bSeasonPage": true,
             seasonInfo,
-            "seasonId": seasonId,
+            "seasonId": (res.locals.bSkipSeasonLinks) ? 0 :seasonId,
             "userSession": req.userSession
         });
         

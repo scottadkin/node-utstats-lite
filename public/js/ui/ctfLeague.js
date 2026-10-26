@@ -77,7 +77,6 @@ class CTFLeagueFilterForm{
             orderedNames.unshift({"id": "0", "name": "Any"});
         }
 
-        const selectOptions = [];
 
         let currentValue = this.id;
 
@@ -182,12 +181,10 @@ class CTFLeagueTable{
 
             const d = this.data.data[i];
             
-
             let pos = 1;
 
             pos = i + 1 + (this.perPage * (this.currentPage - 1));
 
-            
             rows.push([
                 {"display": `${pos}${getOrdinal(pos)}`, "className": "ordinal"},
                 {
@@ -195,7 +192,8 @@ class CTFLeagueTable{
                         "playerId": d.player.id, 
                         "name": d.player.name, 
                         "country": d.player.country, 
-                        "bTableElem": true
+                        "bTableElem": true,
+                        "seasonId": this.seasonId
                     }), 
                     "bSkipTD": true
                 },
@@ -215,6 +213,7 @@ class CTFLeagueTable{
         const urlBase = (this.seasonId === 0) ? `/ctfleague/` : `/season/${this.seasonId}/ctfleague/`;
 
         const url = `${urlBase}?mode=${this.mode}${(this.mode === "gametypes") ? `&id=${this.id}` : `&gid=${this.gId}&id=${this.id}`}&page=`;
+
         new UIPagination(this.parent, url, this.data.totalRows, this.perPage, this.currentPage);
     }
 }

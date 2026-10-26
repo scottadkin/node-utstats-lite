@@ -19,8 +19,6 @@ class RankingsSearchForm{
         this.wrapper = document.createElement("form");
         this.wrapper.className = "form";
 
-        console.log(`seasonId = is ${this.seasonId}`);
-
 
         this.urlBase = (this.seasonId === 0) ? `/rankings/` : `/season/${this.seasonId}/rankings/`
 
