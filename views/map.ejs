@@ -52,19 +52,26 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
             } break;
 
             case "Display Rankings": {
-                %>new UIMapPlayerRankings("#root", "<%= basic.id %>", "<%= seasonId %>");<%
+                %>new UIMapPlayerRankings("#root", "<%= basic.id %>", "<%= seasonId %>", <%= locals.bSkipSeasonLinks %>);<%
             } break;
 
             case "Display CTF League": {
-                %>new UIMapCTFLeague("#root", "<%= basic.id %>", pageSettings, ctfLeagueSettings, "<%= seasonId %>");<%
+                %>new UIMapCTFLeague("#root", "<%= basic.id %>", pageSettings, ctfLeagueSettings, "<%= seasonId %>", <%= locals.bSkipSeasonLinks %>);<%
             } break;
 
             case "Display Recent Matches": {
-                %>new UIMapRecentMatches("#root", "<%= basic.id %>", "<%= seasonId %>");<%
+                %>new UIMapRecentMatches("#root", "<%= basic.id %>", "<%= seasonId %>", <%= locals.bSkipSeasonLinks %>);<%
             } break;
 
             case "Display Player Top Averages": {
-                %>new UIMapPlayerAverages("#root", "<%= basic.id %>", <%- JSON.stringify(validTypes["player-avg"]) %>, <%- JSON.stringify(validTypes["player-epm"])%>, <%- JSON.stringify(uniqueGametypes) %>, "<%= seasonId %>");<%
+                %>new UIMapPlayerAverages(
+                    "#root", 
+                    "<%= basic.id %>", 
+                    <%- JSON.stringify(validTypes["player-avg"]) %>, 
+                    <%- JSON.stringify(validTypes["player-epm"])%>, 
+                    <%- JSON.stringify(uniqueGametypes) %>, 
+                    "<%= seasonId %>", <%= locals.bSkipSeasonLinks %>);
+                    <%
             }  break;
 
             case "Display Activity Heatmap": {
@@ -85,7 +92,8 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
                     "<%= basic.id %>", 
                     <%- JSON.stringify(uniqueGametypes) %>, 
                     <%- JSON.stringify(validTypes["player-lifetime"]) %>,
-                    "<%= seasonId %>"
+                    "<%= seasonId %>", 
+                    <%= locals.bSkipSeasonLinks %>
                 );<%
             } break;
 

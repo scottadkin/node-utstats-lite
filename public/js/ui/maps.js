@@ -399,7 +399,7 @@ function UIMapBasicSummary(parent, data){
 
 class UIMapRecentMatches{
 
-    constructor(parent, mapId, seasonId){
+    constructor(parent, mapId, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
@@ -411,6 +411,7 @@ class UIMapRecentMatches{
 
         this.data = [];
         this.totalMatches = 0;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
 
         UIHeader(this.parent, "Recent Matches");
@@ -453,7 +454,7 @@ class UIMapRecentMatches{
 
         this.wrapper.innerHTML = ``;
         
-        renderMatchesTable("#map-recent-matches", {"data": this.data}, true, true, this.seasonId);
+        renderMatchesTable("#map-recent-matches", {"data": this.data}, true, true, this.seasonId, this.bSkipSeasonLinks);
    
         this.pagination.updateResults(this.page, this.totalMatches, this.perPage);
         
@@ -616,7 +617,7 @@ class UIMapWeaponsSummary{
 
 class UIMapPlayerRankings{
 
-    constructor(parent, mapId, seasonId){
+    constructor(parent, mapId, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
@@ -627,6 +628,7 @@ class UIMapPlayerRankings{
         this.data = [];
         this.totalMatches = 0;
         this.timeRange = 180;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Rankings");
@@ -698,7 +700,8 @@ class UIMapPlayerRankings{
                             "playerId": d.player_id, 
                             "name": d.name, 
                             "country": d.country, 
-                            "bTableElem": true
+                            "bTableElem": true,
+                            "seasonId": (this.bSkipSeasonLinks) ? 0 : this.seasonId
                         }), 
                     "bSkipTD": true
                 },
@@ -746,7 +749,7 @@ class UIMapPlayerRankings{
 
 class UIMapPlayerAverages{
 
-    constructor(parent, mapId, validAverageTypes, validEPMTypes, uniqueGametypes, seasonId){
+    constructor(parent, mapId, validAverageTypes, validEPMTypes, uniqueGametypes, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
@@ -757,6 +760,7 @@ class UIMapPlayerAverages{
         this.selectedCat = "avg_score";
         //this.validTypes = validTypes;
         this.validAverageTypes = validAverageTypes;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
         this.validEPMTypes = validEPMTypes;
         this.uniqueGametypes = uniqueGametypes;
         this.seasonId = parseInt(seasonId);
@@ -997,7 +1001,8 @@ class UIMapPlayerAverages{
                         "playerId": d.player_id, 
                         "name": d.player_name, 
                         "country": d.country,
-                        "bTableElem": true
+                        "bTableElem": true,
+                        "seasonId": (this.bSkipSeasonLinks) ? 0 : this.seasonId
                     }),
                 },
                 {
@@ -1032,7 +1037,7 @@ class UIMapPlayerAverages{
 
 class UIMapCTFLeague{
 
-    constructor(parent, mapId, pageSettings, leagueSettings, seasonId){
+    constructor(parent, mapId, pageSettings, leagueSettings, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.mapId = mapId;
@@ -1040,7 +1045,8 @@ class UIMapCTFLeague{
         this.pageSettings = pageSettings;
         this.leagueSettings = leagueSettings;
         this.seasonId = parseInt(seasonId);
-        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid itneger`);
+        if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
         this.page = 1;
         this.perPage = 10;
         this.timeRange = this.leagueSettings?.["Maximum Match Age In Days"].value ?? 180;
@@ -1194,7 +1200,8 @@ class UIMapCTFLeague{
                         "playerId": d.player_id, 
                         "name": d.name, 
                         "country": d.country,
-                        "bTableElem": true
+                        "bTableElem": true,
+                        "seasonId": (this.bSkipSeasonLinks) ? 0 : this.seasonId
                     })
                 },
                 {"display": d.total_matches},
@@ -1250,7 +1257,7 @@ function getTitleFromValidTypes(validTypes, target){
 
 class UIMapPlayerTotals{
 
-    constructor(parent, mapId, uniqueGametypes, validTypes, seasonId){
+    constructor(parent, mapId, uniqueGametypes, validTypes, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
@@ -1260,7 +1267,7 @@ class UIMapPlayerTotals{
         this.validTypes = validTypes;
         this.seasonId = parseInt(seasonId);
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);
-
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
         this.page = 1;
         this.totalResults = 0;
         this.perPage = 25;
@@ -1399,7 +1406,8 @@ class UIMapPlayerTotals{
                         "playerId": d.player_id,
                         "name": d.player_name,
                         "country": d.country,
-                        "bTableElem": true
+                        "bTableElem": true,
+                        "seasonId": (this.bSkipSeasonLinks) ? 0 : this.seasonId
                     }),
                     "bSkipTD": true,
                 },

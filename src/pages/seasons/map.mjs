@@ -45,7 +45,7 @@ export async function renderSeasonMapPage(req, res){
 
 
         const uniqueGametypes = await getAllUniquePlayedGametypes(basic.id, true, seasonId);
-        
+
         res.render("map.ejs",{
             "host": req.headers.host,
             timeZone,

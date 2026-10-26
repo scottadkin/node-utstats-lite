@@ -52,6 +52,7 @@ class PlayerRecentMatches{
 
             if(res.error !== undefined) throw new Error(res.error);
 
+
             this.gametypes = res.gametypes;
             this.maps = res.maps;
             this.gametypeMaps = res.gametypeMaps;
