@@ -11,13 +11,14 @@ function mapObjectStats(s){
 
 class SeasonPage{
 
-    constructor(basicInfo, objectStats, mostPlayedMaps){
+    constructor(basicInfo, objectStats, mostPlayedMaps, bSkipSeasonLinks){
 
         this.parent = document.querySelector("#root");
         this.wrapper = UIDiv();
         this.basicInfo = basicInfo;
         this.objectStats = objectStats;
         this.mostPlayedMaps = mostPlayedMaps;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
 
         UIHeader(this.wrapper, this.basicInfo.name);
@@ -50,7 +51,11 @@ class SeasonPage{
 
             const m = maps[i];
 
-            testMaps.append(UIRichMapBox(m, `/season/${this.basicInfo.id}/map/${m.map_id}`));
+            const url = (this.bSkipSeasonLinks) ? 
+            `/map/${m.map_id}` : 
+            `/season/${this.basicInfo.id}/map/${m.map_id}`;
+
+            testMaps.append(UIRichMapBox(m, url));
         }
 
 
@@ -61,35 +66,6 @@ class SeasonPage{
 
     renderObjectStats(){
 
-
-        const topMaps = UIDiv();
-
-        
-
-        UIHeader(topMaps, "Top 3 Maps Of The Season");
-        const testData = [];
-
-        const totalParts = (this.mostPlayedMaps.length >= 2) ? 3 : this.mostPlayedMaps.length;
-
-        for(let i = 0; i < totalParts; i++){
-
-            const m = this.mostPlayedMaps[i];
-            const image = getMapThumbOrFullSize(m);
-
-            testData.push({
-                "name": m.name,
-                "image": image,
-                "info":`${m.total_matches} Matches Played`,
-                "url": `/season/${this.basicInfo.id}/map/${m.map_id}`
-            });
-        }
-
-       // new UIPodium(topMaps, testData);
-
-        
-
-        //this.wrapper.append(topMaps);
-       
         const tableOptions = {
             "className": "t-width-1",
             "headers": [
@@ -106,8 +82,6 @@ class SeasonPage{
 
         const serversRows = this.objectStats.servers.map(mapObjectStats)
         const gametypeRows = this.objectStats.gametypes.map(mapObjectStats)
-        //const mapRows = this.objectStats.maps.map(mapObjectStats)
-
 
         new TESTUITable(this.wrapper, tableOptions, serversRows);
         new UIHeader(this.wrapper, "Gametypes");
@@ -165,7 +139,7 @@ class SeasonsPage{
         this.data = data;
         
         this.mostPlayedMaps = mostPlayedMaps;
-        console.log(data);
+  
 
         this.parent.append(this.wrapper);
 
