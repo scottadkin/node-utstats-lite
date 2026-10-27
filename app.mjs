@@ -1,6 +1,6 @@
 import express from 'express';
 import ejs from "ejs";
-import { websitePort } from './config.mjs';
+import { DEFAULT_DATE, websitePort } from './config.mjs';
 const app = express();
 app.use(express.static('public'));
 app.use(express.json()) // for parsing application/json
@@ -52,9 +52,9 @@ new Message("Attempting To Start Node UTStats Lite Website","progress");
 
 async function setSeasonsData(req, res, next){
 
-    const initialSeasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : 0;
+    const initialSeasonId = (req.params.season !== undefined) ? parseInt(req.params.season) : -1;
 
-    if( initialSeasonId !== initialSeasonId){
+    if(initialSeasonId !== initialSeasonId){
         return res.send("not a valid season");
     }
 
@@ -73,7 +73,7 @@ async function setSeasonsData(req, res, next){
 
     res.locals.seasonList = data;
 
-    if(data.length > 0 && initialSeasonId === 0){
+    if(data.length > 0 && initialSeasonId === -1){
         res.locals.season = data[0].id;
     }else{
         res.locals.season = initialSeasonId;
@@ -84,7 +84,11 @@ async function setSeasonsData(req, res, next){
     if(res.locals.season !== 0){
         info = await getSeasonById(res.locals.season);
         if(info === null) return res.send(`Season Doesn't exist`);
+    }else{
+
+        info = {"name": "All Time Totals", "start_date": null, "end_date": null, "id": 0}
     }
+
 
     res.locals.seasonInfo = info;
 
@@ -249,13 +253,12 @@ app.get("/matchshot/:id", async (req, res) =>{
 		console.trace(err);
 		res.status(500).send("Failed To Create Screenshot");
 	}
-	//res.send("<b>test</b>");
+
 });
 
 
 app.get("/login", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
 
-    //res.locals.season = 0;
 	renderLoginPage(req, res, sessionStore, req.userSession);
 });
 

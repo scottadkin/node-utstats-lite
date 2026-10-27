@@ -276,14 +276,21 @@ async function calculateSeasonObjectStats(seasonId, objectName){
 
     const targetCol = VALID_OBJECT_TYPES[objectName];
 
+    let where = ``;
+    const vars = [];
+
+    if(seasonId !== 0){
+        where += `WHERE season_id=?`;
+        vars.push(seasonId);
+    }
 
     const query = `SELECT ${targetCol} as target_id,
     COUNT(*) as total_matches,
     SUM(playtime) as total_playtime,
     MIN(date) as first_match,
-    MAX(date) as last_match FROM nstats_matches WHERE season_id=? GROUP BY target_id`;
+    MAX(date) as last_match FROM nstats_matches ${where} GROUP BY target_id`;
 
-    return await simpleQuery(query, [seasonId]);
+    return await simpleQuery(query, vars);
 
 }
 
@@ -361,9 +368,17 @@ async function calculateSeasonBasicTotals(seasonId){
 
     const query = `SELECT COUNT(*) as total_matches,
     COALESCE(SUM(playtime), 0) as total_playtime 
-    FROM nstats_matches WHERE season_id=?`;
+    FROM nstats_matches`;
 
-    const result = await simpleQuery(query, [seasonId]);
+    let where = ``;
+    const vars = [];
+
+    if(seasonId !== 0){
+        where += ` WHERE season_id=?`;
+        vars.push(seasonId);
+    }
+
+    const result = await simpleQuery(`${query}${where}`, vars);
 
     if(result.length === 0) return null;
 
@@ -807,7 +822,13 @@ export async function recalculateSeason(seasonId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer.`);
-    if(seasonId === 0) throw new Error(`You can not delete season 0.`);
+    if(seasonId === 0){
+
+        await calculateSeasonStats(seasonId);
+        return;
+        //throw new Error(`You can not delete season 0.`);
+
+    }
 
     const seasonInfo = await getSeasonById(seasonId);
     if(seasonInfo === null) throw new Error(`season doesn't exist`);

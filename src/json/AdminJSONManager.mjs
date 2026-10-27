@@ -555,7 +555,7 @@ export default class AdminJSONManager{
                 const season = (this.req.body.season !== undefined) ? parseInt(this.req.body.season) : NaN;
 
                 if(season !== season) throw new Error(`Season must be a valid integer`);
-                if(season === 0) throw new Error(`You have not selected a season`);
+                if(season === -1) throw new Error(`You have not selected a season`);
         
         
                 await recalculateSeason(season);

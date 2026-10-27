@@ -32,14 +32,24 @@ class SeasonPage{
 
     renderInfo(){
 
+        const infoContent = [];
 
-        this.info = new UIInfo(this.wrapper, [
+        if(this.basicInfo.start_date !== null && this.basicInfo.end_date !== null){
 
-            `Start Date ${toDateString(this.basicInfo.start_date, TIME_ZONE, true)}`,
-            UIBr(),
-            `End Date ${toDateString(this.basicInfo.end_date, TIME_ZONE, true)}`,
-            UIBr()
-        ]);
+            infoContent.push(
+                `Start Date ${toDateString(this.basicInfo.start_date, TIME_ZONE, true)}`,
+                UIBr(),
+                `End Date ${toDateString(this.basicInfo.end_date, TIME_ZONE, true)}`,
+                UIBr()
+            );
+
+        }else{
+
+            infoContent.push(`These are the all time totals, any match played in a season or not you can find here.`);
+
+        }
+
+        this.info = new UIInfo(this.wrapper, infoContent);
     }
 
 

@@ -21,7 +21,7 @@ class UINavDropDown{
     createElements(){
 
         const elem = document.createElement("a");
-        elem.href = `/`;
+        elem.href = `/season/0/`;
         elem.append(`All Time`);
         this.wrapper.append(elem);
 

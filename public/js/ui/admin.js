@@ -7459,7 +7459,7 @@ class AdminSeasonsManager{
         this.createName = "";
         this.createStartDate = new Date().toISOString();
         this.createEndDate = new Date().toISOString();
-        this.selectedSeason = 0;
+        this.selectedSeason = -1;
         this.editSeason = {
             "name": "",
             "startDate": new Date().toISOString(),
@@ -7500,7 +7500,7 @@ class AdminSeasonsManager{
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
             this.mode = e.detail.newTab;
-            if(this.mode === "edit" || this.mode === "recalculate") this.selectedSeason = 0;
+            if(this.mode === "edit" || this.mode === "recalculate") this.selectedSeason = -1;
             this.render();
         });
     }
@@ -7690,7 +7690,7 @@ class AdminSeasonsManager{
 
             new UINotification(this.parent, "pass", "Success", `Season deleted successfully.`);
 
-            this.selectedSeason = 0;
+            this.selectedSeason = -1;
             await this.loadData();
 
         }catch(err){
@@ -7795,7 +7795,7 @@ class AdminSeasonsManager{
             return 0;
         });
 
-        seasonOptions.unshift({"display": "- Please Select A Season -", "value": 0});
+        seasonOptions.unshift({"display": "- Please Select A Season -", "value": -1});
 
         return seasonOptions;
     }
@@ -7824,11 +7824,11 @@ class AdminSeasonsManager{
 
             const seasonInfo = this.getSeasonById(this.selectedSeason);
      
-            if(seasonInfo === null && this.selectedSeason !== 0){
+            if(seasonInfo === null && this.selectedSeason !== -1){
 
                 throw new Error(`Failed to find data`);
 
-            }else if(this.selectedSeason === 0){
+            }else if(this.selectedSeason === -1){
 
                 this.editSeason = {
                     "name": "",
@@ -7959,6 +7959,8 @@ class AdminSeasonsManager{
         seasonRow.append(UILabel("Selected Season"));
 
         const seasonOptions = this.getSeasonOptions();
+
+        seasonOptions.unshift({"display": "All Time Data", "value": 0});
 
         new UISelect(seasonRow, seasonOptions, this.selectedSeason, (e) =>{
             this.selectedSeason = parseInt(e);
