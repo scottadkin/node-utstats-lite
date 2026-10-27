@@ -1,6 +1,6 @@
 class RankingsSearchForm{
 
-    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage, seasonId){
+    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.seasonId = parseInt(seasonId);
@@ -13,6 +13,7 @@ class RankingsSearchForm{
         this.selectedTimeRange = selectedTimeRange;
         this.selectedPerPage = selectedPerPage;
         this.currentPage = currentPage;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.createTabs();
 
@@ -173,7 +174,8 @@ class RankingsSearchForm{
                 "playerId": d.player_id, 
                 "country": d.country, 
                 "name": d.name, "bTableElem": true,
-                "seasonId": this.seasonId
+                "seasonId": this.seasonId,
+                "bSkipSeasonLinks": this.bSkipSeasonLinks
             }));
             row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
             row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));

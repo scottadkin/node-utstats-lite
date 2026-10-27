@@ -701,7 +701,8 @@ class UIMapPlayerRankings{
                             "name": d.name, 
                             "country": d.country, 
                             "bTableElem": true,
-                            "seasonId": (this.bSkipSeasonLinks) ? 0 : this.seasonId
+                            "seasonId": this.seasonId,
+                            "bSkipSeasonLinks": this.bSkipSeasonLinks
                         }), 
                     "bSkipTD": true
                 },
@@ -1002,7 +1003,8 @@ class UIMapPlayerAverages{
                         "name": d.player_name, 
                         "country": d.country,
                         "bTableElem": true,
-                        "seasonId": (this.bSkipSeasonLinks) ? 0 : this.seasonId
+                        "seasonId": this.seasonId,
+                        "bSkipSeasonLinks": this.bSkipSeasonLinks
                     }),
                 },
                 {
@@ -1201,7 +1203,8 @@ class UIMapCTFLeague{
                         "name": d.name, 
                         "country": d.country,
                         "bTableElem": true,
-                        "seasonId": (this.bSkipSeasonLinks) ? 0 : this.seasonId
+                        "seasonId": this.seasonId,
+                        "bSkipSeasonLinks": this.bSkipSeasonLinks
                     })
                 },
                 {"display": d.total_matches},
@@ -1407,7 +1410,8 @@ class UIMapPlayerTotals{
                         "name": d.player_name,
                         "country": d.country,
                         "bTableElem": true,
-                        "seasonId": (this.bSkipSeasonLinks) ? 0 : this.seasonId
+                        "seasonId": this.seasonId,
+                        "bSkipSeasonLinks": this.bSkipSeasonLinks
                     }),
                     "bSkipTD": true,
                 },
@@ -1451,7 +1455,7 @@ class UIMapPlayerTotals{
 
 class UIMapPlayerRecords{
 
-    constructor(parent, mapId, uniqueGametypes, validTypes, seasonId){
+    constructor(parent, mapId, uniqueGametypes, validTypes, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.mapId = mapId;
@@ -1463,6 +1467,7 @@ class UIMapPlayerRecords{
         this.selectedType = "max_score";
         this.page = 1;
         this.perPage = 25;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         if(this.mapId !== this.mapId || this.seasonId !== this.seasonId){
             throw new Error(`Both mapId and seasonId must be valid integers`);
@@ -1585,7 +1590,9 @@ class UIMapPlayerRecords{
                         "playerId": d.player_id,
                         "name": d.player_name,
                         "country": d.country,
-                        "bTableElem": true
+                        "bTableElem": true,
+                        "seasonId": this.seasonId,
+                        "bSkipSeasonLinks": this.bSkipSeasonLinks
                     }),
                     "bSkipTD": true,
                 },

@@ -14,7 +14,8 @@ const jsBase = (locals.seasonId !== 0) ? `../../../js/` : `../js/`;
 %>
 <script>
 
-const USED_MATCH_SEASON_ID = <%= (locals.bSkipSeasonLinks) ? 0 : locals.seasonId %>;
+const USED_MATCH_SEASON_ID = <%= locals.seasonId %>;
+const SKIP_SEASON_LINKS = <%= locals.bSkipSeasonLinks %>
 
 </script>
 <script src="<%= jsBase %>ui/table.js"></script>
@@ -59,7 +60,7 @@ const USED_MATCH_SEASON_ID = <%= (locals.bSkipSeasonLinks) ? 0 : locals.seasonId
 
             case "Display Frags": {
 
-                %>new MatchFragsSummary("#root", basic, playerData, playerAverages);<%
+                %>new MatchFragsSummary("#root", basic, playerData, playerAverages, <%= locals.bSkipSeasonLinks %>);<%
 
             } break;
 

@@ -47,7 +47,7 @@ function renderMatchesTable(parent, data, bMapsPage, bNoSort, seasonId, bSkipSea
 
         let url = "";
 
-        if(seasonId === 0 || bSkipSeasonLinks){
+        if(bSkipSeasonLinks){
             url = `/match/${m.id}`;
         }else{
             url = `/season/${seasonId}/match/${m.id}`;
@@ -119,7 +119,7 @@ class MatchesRichView{
             const d = this.matches.data[i];
             let url = ``;
 
-            if(this.seasonId === 0 || this.bSkipSeasonLinks){
+            if(this.bSkipSeasonLinks){
                 url = `/match/${d.id}`;
             }else{
                 url = `/season/${this.seasonId}/match/${d.id}`;

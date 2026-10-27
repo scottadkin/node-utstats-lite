@@ -1,62 +1,3 @@
-
-class PlayersSearchList{
-
-    constructor(parent, players, name, sortBy, order, perPage, page){
-
-        this.parent = parent;
-        this.players = players.players;
-        this.totalPlayers = players.totalPlayers;
-
-        this.name = name;
-        this.sortBy = sortBy;
-        this.order = order;
-        this.perPage = perPage;
-        this.page = page;
-
-
-        this.table = document.createElement("table");
-        this.table.className = "t-width-1";
-
-        this.parent.append(this.table);
-
-        this.headers = ["Name", "Last Active", "Score", "Frags", 
-            "Kills", "Deaths", "Suicides", "Eff", "Matches", "Playtime"
-        ];
-
-        this.render();
-    }
-
-    render(){
-
-        this.table.innerHTML = "";
-
-        const headerRow = document.createElement("tr");
-
-        for(let i = 0; i < this.headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": this.headers[i]}));
-        }
-
-        this.table.append(headerRow);
-
-
-        if(this.totalPlayers === 0){
-
-            const row = document.createElement("tr");
-            const col = UITableCell({"content": "No players matching your search terms"});
-            col.colSpan = 10;
-            row.append(col);
-            this.table.append(row);
-            return;
-        }
-
-        for(let i = 0; i < this.players.length; i++){
-
-            const p = this.players[i];
-            this.table.append(this.createPlayerRow(p));
-        }
-    }
-}
-
 class PlayersSearchForm{
 
     constructor(parent, seasonId, searchName, sortBy, order, perPage, page, siteName, bSkipSeasonLinks){
@@ -100,8 +41,7 @@ class PlayersSearchForm{
 
         this.loadData();
 
-        this.parent.append(this.wrapper);
-        this.parent.append(this.content);
+        this.parent.append(this.wrapper, this.content);
 
     }
 
@@ -133,7 +73,7 @@ class PlayersSearchForm{
     changeSelected(){
 
 
-        const baseURL = (this.seasonId === 0 || this.bSkipSeasonLinks) ? `/players` : `/season/${this.seasonId}/players`
+        const baseURL = (this.bSkipSeasonLinks) ? `/players` : `/season/${this.seasonId}/players`
 
         const url = `${baseURL}?name=${this.searchName}&sortBy=${this.sortBy}&order=${this.order}&perPage=${this.perPage}`;
 
@@ -202,7 +142,8 @@ class PlayersSearchForm{
                     "country": player.country, 
                     "bTableElem": true, 
                     "className": "text-left",
-                    "seasonId": (this.bSkipSeasonLinks) ? 0 :this.seasonId
+                    "seasonId": this.seasonId,
+                    "bSkipSeasonLinks": this.bSkipSeasonLinks
                 }),
                 "bSkipTD": true
             },

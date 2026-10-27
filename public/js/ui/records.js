@@ -461,7 +461,8 @@ class RecordsPage{
                     "country": d.country,
                     "name": d.player_name,
                     "bTableElem": true,
-                    "seasonId": (this.seasonId === 0 || this.bSkipSeasonLinks) ? 0 : this.seasonId
+                    "seasonId": this.seasonId,
+                    "bSkipSeasonLinks": this.bSkipSeasonLinks
                 }),
                  "bSkipTD": true
             },

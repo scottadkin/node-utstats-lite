@@ -93,7 +93,7 @@ function createAverageCompareTD(averageValue, value, bForceDecPlaces){
 
 class MatchFragsSummary{
 
-    constructor(parent, matchBasicInfo, playerData, playerAverages){
+    constructor(parent, matchBasicInfo, playerData, playerAverages, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
 
@@ -102,6 +102,7 @@ class MatchFragsSummary{
         this.mapName = matchBasicInfo.map_name;
         this.playerData = playerData
         this.playerAverages = playerAverages;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Frags Summary");
@@ -301,7 +302,8 @@ class MatchFragsSummary{
                     "country": p.country,  
                     "bTableElem": true, 
                     "className": `text-left ${teamColorClass}`,
-                    "seasonId": USED_MATCH_SEASON_ID
+                    "seasonId": USED_MATCH_SEASON_ID,
+                    "bSkipSeasonLinks": this.bSkipSeasonLinks
                 }
             ), "bSkipTD": true});
             
@@ -379,7 +381,8 @@ class MatchFragsSummary{
                         "name": p.name,
                         "country": p.country,
                         "className": getTeamColorClass(p.team),
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS
                     }), 
                     "value": p.name.toLowerCase()
                 }
@@ -451,7 +454,8 @@ function createSpreeRow(player, totalTeams){
                 "country": player.country, 
                 "bTableElem": true, 
                 "name": player.name,
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             })
         }
     );
@@ -482,7 +486,8 @@ function createMultiRow(player, totalTeams){
                 "country": player.country, 
                 "bTableElem": true, 
                 "name": player.name,
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             })}
     ];
 
@@ -614,7 +619,8 @@ class MatchSpecialEvents{
             "country": firstBloodPlayer.country,
             "className": (this.basicMatchInfo.total_teams >= 2) ? getTeamColorClass(firstBloodPlayer.team) : "team-none",
             "bTableElem": true,
-            "seasonId": USED_MATCH_SEASON_ID
+            "seasonId": USED_MATCH_SEASON_ID,
+            "bSkipSeasonLinks": SKIP_SEASON_LINKS
         }));
 
         firstBlood.append(firstBloodRow);
@@ -1084,7 +1090,8 @@ class MatchDominationSummary{
                             "country": p.country, 
                             "bTableElem": true, 
                             "name": p.name,
-                            "seasonId": USED_MATCH_SEASON_ID
+                            "seasonId": USED_MATCH_SEASON_ID,
+                            "bSkipSeasonLinks": SKIP_SEASON_LINKS
                         })
                     }
                 );
@@ -1308,7 +1315,8 @@ class MatchCTFSummary{
                         "playerId": p.player_id,
                         "className": getTeamColorClass(i), 
                         "country": player.country, "bTableElem": "true", "name": player.name,
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS
                     }),
                     "bSkipTD": true
                 });
@@ -1601,14 +1609,16 @@ class CTFCaps{
                     "name": UISpan(coverPlayer.name, getTeamFont(coverPlayer.team)), 
                     "playerId": covers[x].id, 
                     "country": coverPlayer.country,
-                    "seasonId": USED_MATCH_SEASON_ID
+                    "seasonId": USED_MATCH_SEASON_ID,
+                    "bSkipSeasonLinks": SKIP_SEASON_LINKS
                 }), 
                 " Covered ",
                 UIPlayerLink({
                     "name": UISpan(carryPlayer.name, getTeamFont(carryPlayer.team)), 
                     "playerId": carryPlayer.id, 
                     "country": carryPlayer.country,
-                    "seasonId": USED_MATCH_SEASON_ID
+                    "seasonId": USED_MATCH_SEASON_ID,
+                    "bSkipSeasonLinks": SKIP_SEASON_LINKS
                 })
             ]));
         }
@@ -1654,7 +1664,8 @@ class CTFCaps{
                         "playerId": lastPlayer.id, 
                         "name": UISpan(lastPlayer.name, lastPlayerTeamFont), 
                         "country": lastPlayer.country,
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS
                     }),
                     ` Dropped The `,
                     UISpan(`${getTeamName(capInfo.flag_team)} Flag `, getTeamFont(capInfo.flag_team)),
@@ -1671,7 +1682,8 @@ class CTFCaps{
                         "playerId":c.player_id, 
                         "country":p.country, 
                         "name": UISpan(p.name, currentPlayerTeamFont),
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS
                     }), 
                     takenString,
                     UISpan(`${flagTeam} Flag`, getTeamFont(capInfo.flag_team))
@@ -1698,7 +1710,8 @@ class CTFCaps{
                 "playerId": capInfo.cap_player,
                 "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)),
                 "country": capPlayer.country,
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             }), 
             ` Captured The `,
             UISpan(`${flagTeam} Flag `, getTeamFont(capInfo.flag_team)),
@@ -1778,7 +1791,8 @@ class CTFCaps{
                 "playerId": t.playerId, 
                 "country": player.country, 
                 "name": UISpan(player.name, fontColor),
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             }));
 
             elems.push(UISpan(`(${t.total})`, "monospace"));
@@ -1859,7 +1873,8 @@ class CTFCaps{
                 "playerId": capInfo.taken_player, 
                 "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
                 "country": grabPlayer.country,
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             }),
             " at ",
             UIMMSS(capInfo.taken_timestamp)
@@ -1872,7 +1887,8 @@ class CTFCaps{
                 "playerId": capInfo.cap_player, 
                 "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
                 "country": capPlayer.country,
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             }),
             " at ",
             UIMMSS(capInfo.cap_timestamp)
@@ -1906,7 +1922,8 @@ class CTFCaps{
                     "playerId": playerId, 
                     "name": UISpan(player.name, getTeamFont(player.team)), 
                     "country": player.country,
-                    "seasonId": USED_MATCH_SEASON_ID
+                    "seasonId": USED_MATCH_SEASON_ID,
+                    "bSkipSeasonLinks": SKIP_SEASON_LINKS
                 }), UISpan(`(${cover.length})`, "monospace"));
 
                 if(currentIndex < totalCoverPlayers - 1){
@@ -1933,7 +1950,8 @@ class CTFCaps{
                 "playerId": c.player_id, 
                 "name": UISpan(p.name, getTeamFont(p.team)), 
                 "country": p.country,
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             }));
 
             if(usedCarryIds.length < capInfo.unique_carriers - 1){
@@ -2040,6 +2058,7 @@ class CTFCaps{
                         "name": UISpan(grabPlayer.name, getTeamFont(grabPlayer.team)), 
                         "country": grabPlayer.country,
                         "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS,
                         "bTableElem": true
                     }), 
                     "value": grabPlayer.name.toLowerCase(),
@@ -2055,6 +2074,7 @@ class CTFCaps{
                         "name": UISpan(capPlayer.name, getTeamFont(capPlayer.team)), 
                         "country": capPlayer.country,
                         "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS,
                         "bTableElem": true
                     }), 
                     "value": capPlayer.name.toLowerCase(),
@@ -2226,7 +2246,8 @@ class MatchWeaponSummary{
                     "country": player.country, 
                     "bTableElem": true,
                     "className": (this.totalTeams < 2) ? "" : getTeamColorClass(player.team),
-                    "seasonId": USED_MATCH_SEASON_ID
+                    "seasonId": USED_MATCH_SEASON_ID,
+                    "bSkipSeasonLinks": SKIP_SEASON_LINKS
                 }), 
                 "value": player.name.toLowerCase(),
                 "bSkipTD": true
@@ -2457,7 +2478,8 @@ class MatchClassicWeaponStats{
                         "country": player.country, 
                         "bTableElem": true,
                         "className": (this.totalTeams >= 2) ? getTeamColorClass(player.team) : "team-none",
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS
                     }),
                     "value": player.name.toLowerCase()
                 },
@@ -2511,7 +2533,8 @@ function renderMatchPings(parent, players, totalTeams){
                     "country": p.country, 
                     "bTableElem": true,
                     "className": (totalTeams >= 2) ? getTeamColorClass(p.team) : "team-none",
-                    "seasonId": USED_MATCH_SEASON_ID
+                    "seasonId": USED_MATCH_SEASON_ID,
+                    "bSkipSeasonLinks": SKIP_SEASON_LINKS
                 }),
                 "value": p.name.toLowerCase()
             },
@@ -2607,7 +2630,8 @@ class MatchKillsMatchUp{
                 "bTableElem": true, 
                 "bHeaderElem": true, 
                 "className": `vertical-text white text-left ${(this.totalTeams >= 2) ? getTeamColorClass(p.team) : "team-none"}`,
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             }));
     
         }
@@ -2626,7 +2650,8 @@ class MatchKillsMatchUp{
                 "country": p.country,
                 "className": `text-left ${(this.totalTeams >= 2) ? getTeamColorClass(p.team) : "team-none"}`,
                 "bTableElem": true,
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             }));
 
             for(let x = 0; x < this.players.length; x++){
@@ -2751,7 +2776,8 @@ class MatchItemsSummary{
                         "country": p.country, 
                         "bTableElem": true, 
                         "className": (this.totalTeams < 2) ? "team-none" : getTeamColorClass(p.team),
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS
                     })
                 }
             ];
@@ -2877,7 +2903,8 @@ class MatchDamageSummary{
                 "country": player.country, 
                 "bTableElem": true,
                 "className": (this.totalTeams < 2) ? "team-none" : getTeamColorClass(player.team),
-                "seasonId": USED_MATCH_SEASON_ID
+                "seasonId": USED_MATCH_SEASON_ID,
+                "bSkipSeasonLinks": SKIP_SEASON_LINKS
             })
         }];
 
@@ -3520,7 +3547,8 @@ class MatchPlayerWeaponDamage{
                         "country": player.country, 
                         "bTableElem": true,
                         "className": getTeamColorClass(player.team),
-                        "seasonId": USED_MATCH_SEASON_ID
+                        "seasonId": USED_MATCH_SEASON_ID,
+                        "bSkipSeasonLinks": SKIP_SEASON_LINKS
                     }),
                     "value": player.name.toLowerCase(), 
                     

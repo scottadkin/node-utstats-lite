@@ -105,7 +105,8 @@ const jsonBase = (seasonId !== 0) ? `../../../json/` : `../json/`;
                     "<%= basic.id %>", 
                     <%- JSON.stringify(uniqueGametypes) %>, 
                     <%- JSON.stringify(validTypes["player-match"]) %>,
-                    "<%= seasonId %>"
+                    "<%= seasonId %>",
+                    <%= locals.bSkipSeasonLinks%>
                 );
                 <%
             } break;

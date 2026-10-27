@@ -175,7 +175,7 @@ function UICountryFlag(country){
 function UIPlayerLink(params){
 
 
-    let {playerId, className, country, bTableElem, name, bHeaderElem, seasonId} = params;
+    let {playerId, className, country, bTableElem, name, bHeaderElem, seasonId, bSkipSeasonLinks} = params;
 
     if(className === undefined) className = "";
     if(country === undefined) country = "";
@@ -183,6 +183,7 @@ function UIPlayerLink(params){
     if(bTableElem === undefined) bTableElem = false;
     if(bHeaderElem === undefined) bHeaderElem = false;
     if(seasonId === undefined) seasonId = 0;
+    if(bSkipSeasonLinks === undefined) bSkipSeasonLinks = false;
 
     const elem = document.createElement("a");
 
@@ -195,7 +196,7 @@ function UIPlayerLink(params){
 
     let url = ``;
 
-    if(seasonId !== 0){
+    if(!bSkipSeasonLinks){
         url = `/season/${seasonId}/player/`;
     }else{
         url = `/player/`;
