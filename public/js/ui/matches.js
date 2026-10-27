@@ -91,7 +91,7 @@ function UIRichMatchBox(data, url){
         `Playtime: `,MMSS(data.playtime),
     ];
 
-    return UIRichImageBox(image, url, data.map_name, content, scoreBox);
+    return UIRichImageBox(image, url, data.map_name ?? data.object_name, content, scoreBox);
 }
 
 class MatchesRichView{

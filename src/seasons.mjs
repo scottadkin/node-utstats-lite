@@ -436,7 +436,7 @@ export async function calculateSeasonStats(seasonId){
 }
 
 
-async function getSeasonObjectStats(seasonId, type){
+async function getSeasonObjectStats(seasonId, type, overrideColumnName){
 
     if(VALID_OBJECT_TYPES[type] === undefined) throw new Error(`Not a valid type for getSeasonObjectStats`);
 
@@ -460,13 +460,33 @@ async function getSeasonObjectStats(seasonId, type){
         joinColumn = "gametype_id";
 
     }else{
-
         throw new Error(`missing option`);
     }
 
-    const query = `SELECT ${seasonTable}.*,${joinTable}.name as object_name FROM nstats_seasons_${type} 
+    const validOverrides = ["map_name"];
+
+    let objColumnName = "object_name";
+
+
+    let overrideIndex = -1;
+
+    if(overrideColumnName !== undefined){
+
+        overrideIndex = validOverrides.indexOf(overrideColumnName);
+
+        if(overrideIndex === -1){
+            throw new Error(`Not a valid name override`);
+        }
+    }
+
+    if(overrideColumnName !== undefined){
+        objColumnName = validOverrides[overrideIndex];
+    }
+
+    const query = `SELECT ${seasonTable}.*,${joinTable}.name as ${objColumnName} FROM nstats_seasons_${type} 
     LEFT JOIN ${joinTable} on ${seasonTable}.${joinColumn} = ${joinTable}.id
     WHERE season_id=? ORDER BY matches DESC`;
+
 
     return await simpleQuery(query, [seasonId]);
 }
@@ -483,6 +503,14 @@ export async function getSeasonBasicObjectStats(seasonId){
         getSeasonObjectStats(seasonId, "gametypes"),
         getSeasonObjectStats(seasonId, "maps"),
     ]);
+
+    const mapNames = [];
+
+    for(let i = 0; i < maps.length; i++){
+        mapNames.push(maps[i].object_name);
+    }
+
+    await setMatchResultsMapImages(maps, "object_name");
 
     return {servers, gametypes, maps}
 }

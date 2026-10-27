@@ -1179,17 +1179,19 @@ export async function getAllMapNamesWithBGametype(bReturnArray){
  * 
  * @param {Array} match search result 
  */
-export async function setMatchResultsMapImages(result){
+export async function setMatchResultsMapImages(result, overrideColumnName){
 
     const mapNames = new Set();
+
+    const columnName = (overrideColumnName !== undefined) ? overrideColumnName : "map_name"
 
     for(let i = 0; i < result.length; i++){
 
         const r = result[i];
 
-        if(typeof r.map_name === "string"){
-            mapNames.add(r.map_name);
-            r.image_name = r.map_name.toLowerCase();
+        if(typeof r[columnName] === "string"){
+            mapNames.add(r[columnName]);
+            r.image_name = r[columnName].toLowerCase();
         }else{
             r.image_name = "default";
         }

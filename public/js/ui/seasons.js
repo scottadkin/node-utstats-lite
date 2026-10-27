@@ -1,11 +1,14 @@
 
-function mapObjectStats(s){
+function createObjectStatRow(s, urlBase, idKey, objectName){
+
+    const url = `${urlBase}${s[idKey]}`;
+    
     return [
-        {"display": s.object_name, "value": s.object_name.toLowerCase(), "className": "text-left"},
-        {"value": s.matches},
-        {"display": toPlaytime(s.playtime), "value": s.playtime, "className": "playtime"},
-        {"display": toDateString(s.first_match, TIME_ZONE, true),"value": s.first_match, "className": "date"},
-        {"display": toDateString(s.last_match, TIME_ZONE, true),"value": s.last_match, "className": "date"}
+        {url, "display": s[objectName], "value": s[objectName].toLowerCase(), "className": "text-left"},
+        {url,"value": s.matches},
+        {url,"display": toPlaytime(s.playtime), "value": s.playtime, "className": "playtime"},
+        {url,"display": toDateString(s.first_match, TIME_ZONE, true),"value": s.first_match, "className": "date"},
+        {url,"display": toDateString(s.last_match, TIME_ZONE, true),"value": s.last_match, "className": "date"}
     ];
 }
 
@@ -70,6 +73,20 @@ class SeasonPage{
             return this.createSocials();
         });
 
+        this.addComponent(elems, "Display Servers", "Servers", () =>{
+
+            return this.createServerList();
+        });
+
+        this.addComponent(elems, "Display Most Played Gametypes", "Most Played Gametypes", () =>{
+
+            return this.createGametypeList();
+        })
+
+
+        this.addComponent(elems, "Display Most Played Maps", "Most Played Maps", () =>{
+            return this.createMapsList();
+        })
 
         for(let i = 0; i < elems.length; i++){
 
@@ -206,58 +223,93 @@ class SeasonPage{
             link.append(settings["External Site"]);
 
             new UIInfo(wrapper, [`We also have another website you may like to visit `, link]);
-        // UISocial(wrapper, settings["External Site"], "red.png");
+
         }
 
         return wrapper;
     }
 
+    createServerList(){
+        return this.createObjectList("Servers", "servers", "server_id", "s")
+    }
 
-    renderTestMaps(maps){
 
-        const testMaps = UIDiv(`new-rich-wrapper`);
+    createGametypeList(){
+        return this.createObjectList("Gametypes", "gametypes", "gametype_id", "g");
+    }
 
-        for(let i = 0; i < maps.length; i++){
+    createObjectList(title, objectStatsKey, objectKey, urlKey){
 
-            const m = maps[i];
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": ["Name", "Total Matches", "Total Playtime", "First Match", "Last Match"].map((h) =>{
+                return {"display": h}
+            })
+        };
 
-            const url = (this.bSkipSeasonLinks) ? 
-            `/map/${m.map_id}` : 
-            `/season/${this.basicInfo.id}/map/${m.map_id}`;
+        const wrapper = UIDiv();
+        const rows = [];
 
-            testMaps.append(UIRichMapBox(m, url));
+        let urlBase = `/matches/?${urlKey}=`;
+
+        if(!this.bSkipSeasonLinks){
+            urlBase = `/season/${this.basicInfo.id}${urlBase}`;
+        }
+
+        for(let i = 0; i < this.objectStats[objectStatsKey].length; i++){
+
+            const g = this.objectStats[objectStatsKey][i];
+
+            rows.push(createObjectStatRow(g, urlBase, objectKey, "object_name"));
         }
 
 
-        this.wrapper.append(testMaps);
+        new UIHeader(wrapper, title);
+        new TESTUITable(wrapper, tableOptions, rows);
+
+        return wrapper;
+    }
+
+    createMapsList(){
+
+        const wrapper = UIDiv();
+
+        new UIHeader(wrapper, "Most Played Maps");
+        
+        if(this.pageSettings["Most Played Maps Display Mode"] === "default"){
+
+            const testMaps = UIDiv(`new-rich-wrapper`);
+
+            const maps = this.objectStats.maps;
+
+            for(let i = 0; i < maps.length; i++){
+
+                const m = maps[i];
+
+                const url = (this.bSkipSeasonLinks) ? 
+                `/map/${m.map_id}` : 
+                `/season/${this.basicInfo.id}/map/${m.map_id}`;
+
+                testMaps.append(UIRichMapBox(m, url));
+            }
+
+            wrapper.append(testMaps);
+            return wrapper;
+
+        }else{
+
+
+            return this.createObjectList("Most Played Maps", "maps", "map_id", "m");
+
+        }
+
+        
 
 
     }
 
     renderObjectStats(){
 
-        const tableOptions = {
-            "className": "t-width-1",
-            "headers": [
-                {"display": "Name"},
-                {"display": "Total Matches"},
-                {"display": "Total Playtime"},
-                {"display": "First Match"},
-                {"display": "Last Match"},
-            ]
-        };
-
-        new UIHeader(this.wrapper, "Servers");
-
-
-        const serversRows = this.objectStats.servers.map(mapObjectStats)
-        const gametypeRows = this.objectStats.gametypes.map(mapObjectStats)
-
-        new TESTUITable(this.wrapper, tableOptions, serversRows);
-        new UIHeader(this.wrapper, "Gametypes");
-        new TESTUITable(this.wrapper, tableOptions, gametypeRows);
-        new UIHeader(this.wrapper, "Most Played Maps");
-        this.renderTestMaps(this.mostPlayedMaps);
     }
 }
 

@@ -2165,11 +2165,7 @@ function UIRichMapBox(data, url){
         `Last Match ${toDateString(data.last_match, TIME_ZONE, true)}`
     ];
 
-    return UIRichImageBox(image, url, data.name, content);
-}
-
-function UIRichMatchBox(){
-
+    return UIRichImageBox(image, url, data.name ?? data.object_name, content);
 }
 
 

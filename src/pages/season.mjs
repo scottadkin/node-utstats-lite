@@ -39,6 +39,7 @@ export async function renderSeasonPage(req, res){
 
     const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0, true);
 
+
     res.render("season.ejs",{
         req,
             "host": req.headers.host,
@@ -54,6 +55,6 @@ export async function renderSeasonPage(req, res){
             socialSettings,
             pageSettings,
             pageLayout,
-            recentMatches
+            recentMatches,
         });
 }
