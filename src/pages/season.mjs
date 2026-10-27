@@ -1,4 +1,5 @@
 import { convertTimestamp, toPlaytime } from "../generic.mjs";
+import { getRecentMatches } from "../matches.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getSeasonBasicObjectStats,seasonsGetMostPlayedMaps } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
@@ -34,6 +35,10 @@ export async function renderSeasonPage(req, res){
 
     const mostPlayedMaps = await seasonsGetMostPlayedMaps(seasonId,3);
 
+    const perPage = pageSettings["Total Recent Matches"];
+
+    const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0, true);
+
     res.render("season.ejs",{
         req,
             "host": req.headers.host,
@@ -48,6 +53,7 @@ export async function renderSeasonPage(req, res){
             welcomeMessageSettings,
             socialSettings,
             pageSettings,
-            pageLayout
+            pageLayout,
+            recentMatches
         });
 }

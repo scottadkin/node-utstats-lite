@@ -12,7 +12,7 @@ function mapObjectStats(s){
 class SeasonPage{
 
     constructor(basicInfo, objectStats, mostPlayedMaps, bSkipSeasonLinks, pageSettings, 
-        pageLayout, socialSettings, welcomeMessageSettings
+        pageLayout, socialSettings, welcomeMessageSettings, recentMatches
     ){
 
         this.parent = document.querySelector("#root");
@@ -26,6 +26,7 @@ class SeasonPage{
         this.pageSettings = pageSettings;
         this.socialSettings = socialSettings;
         this.welcomeMessageSettings = welcomeMessageSettings;
+        this.recentMatches = recentMatches;
 
         console.log(this.pageLayout);
         console.log(this.pageSettings);
@@ -59,12 +60,21 @@ class SeasonPage{
             elems[infoIndex] = this.createSeasonInfo();
         }
 
+        if(settings["Display Recent Matches"]){
+
+            const index = getPageComponentIndex(this.pageLayout, "Recent Matches");
+            if(index === null) throw new Error("recent matches index is missing");
+
+            
+
+            elems[index] = this.createRecentMatches();
+        }
 
 
         for(let i = 0; i < elems.length; i++){
 
             if(elems[i] === undefined) continue;
-            
+
             this.wrapper.append(elems[i]);
         }
 
@@ -112,7 +122,7 @@ class SeasonPage{
 
         }else{
 
-            infoContent.push(`These are the all time totals, any match played in a season or not you can find here.`);
+            infoContent.push(`These are the all time totals, any match played you can find here, so seasons filtering is active.`);
 
         }
 
@@ -124,6 +134,25 @@ class SeasonPage{
 
         UIHeader(wrapper, this.basicInfo.name);
         wrapper.append(elems);
+
+        return wrapper;
+    }
+
+    createRecentMatches(){
+
+        const displayMode = this.pageSettings["Recent Matches Display Mode"];
+
+        if(this.recentMatches.data.total === 0) return;
+
+        const wrapper = UIDiv();
+        wrapper.id = "home-recent-matches";
+        UIHeader(wrapper, "Recent Matches");
+
+        if(displayMode === "default"){
+            new MatchesRichView(wrapper, this.recentMatches, this.basicInfo.id, this.bSkipSeasonLinks);
+        }else{
+            renderMatchesTable(wrapper, this.recentMatches, false, false, this.basicInfo.id, this.bSkipSeasonLinks);
+        }
 
         return wrapper;
     }

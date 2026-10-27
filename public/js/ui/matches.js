@@ -98,7 +98,7 @@ class MatchesRichView{
 
     constructor(parent, matches, seasonId, bSkipSeasonLinks){
 
-        this.parent = document.querySelector(parent);
+        this.parent = (typeof parent === "string") ? document.querySelector(parent) : parent;
         this.matches = matches;
         this.seasonId = parseInt(seasonId);
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be a valid integer`);

@@ -110,25 +110,6 @@ function renderServerList(parent, servers){
 }
 
 
-function homeRenderRecentMatches(parent, data, displayMode){
-
-    parent = document.querySelector(parent);
-
-    if(data.total === 0) return;
-
-    const wrapper = UIDiv();
-    wrapper.id = "home-recent-matches";
-    UIHeader(wrapper, "Recent Matches");
-
-    parent.append(wrapper);
-
-    if(displayMode === "default"){
-        new MatchesRichView("#home-recent-matches", data, 0);
-    }else{
-        renderMatchesTable(parent, data, false, false, 0);
-    }
-}
-
 function homeRenderMostPlayedGametypes(parent, data){
 
     if(data.length === 0) return;

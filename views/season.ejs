@@ -13,6 +13,7 @@
 <%- include("timeZone.ejs", {timeZone})%>
 
 <script src="../../js/ui/table.js"></script>
+<script src="../../js/ui/matches.js"></script>
 <script src="../../js/ui/seasons.js"></script>
 
 <div id="root">
@@ -29,6 +30,7 @@
         <%- JSON.stringify(pageLayout) %>,
         <%- JSON.stringify(socialSettings) %>,
         <%- JSON.stringify(welcomeMessageSettings) %>,
+        <%- JSON.stringify(recentMatches) %>
         );
 </script>
 
