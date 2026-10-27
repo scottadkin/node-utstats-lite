@@ -4,6 +4,7 @@ import Message from "./message.mjs";
 const DEFAULT_PAGE_LAYOUTS = {
     "home": [
         "Welcome Message", 
+        "Season Info",
         "Social Media",
         "Latest Screenshot", 
         "Recent Matches", 

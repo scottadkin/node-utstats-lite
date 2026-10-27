@@ -11,6 +11,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Players" ,"type": `playersSortBy`, "name": "Default Sort By", "value": "name"},
     {"category": "Players" ,"type": `order`, "name": "Default Order", "value": "ASC"},
     {"category": "Home" ,"type": `bool`, "name": "Display Welcome Message", "value": "1"},
+    {"category": "Home" ,"type": `bool`, "name": "Display Season Info", "value": "1"},
     {"category": "Home" ,"type": `bool`, "name": "Display Social Media", "value": "1"},
     {"category": "Home" ,"type": `bool`, "name": "Display Recent Matches", "value": "1"},
     {"category": "Home" ,"type": `bool`, "name": "Display Most Played Maps", "value": "1"},

@@ -555,10 +555,12 @@ function UIHeader(parent, text, id, bUseHeaderDom){
         elem.append(text);
     }
 
-    parent.append(elem);
+    if(parent !== null){
+        parent.append(elem);
+    }else{
+        return elem;
+    }
 
-
-    return elem;
 }
 
 
@@ -1995,7 +1997,10 @@ function UIUnorderedList(data){
 }
 
 
-
+/**
+ * pass null as parent and call method createElems(), 
+ * else content is appended to parent
+ */
 class UIInfo{
 
     constructor(parent, content){
@@ -2004,7 +2009,9 @@ class UIInfo{
 
         this.originalContent = content;
 
-        this.createElems();
+        if(parent !== null){
+            this.createElems();
+        }
     }
 
     updateContent(content){
@@ -2043,7 +2050,14 @@ class UIInfo{
 
         this.updateContent(this.originalContent);
         this.wrapper.append(this.content);
-        this.parent.append(this.wrapper);
+
+        if(this.parent !== null){
+            this.parent.append(this.wrapper);
+        }else{
+
+            return this.wrapper;
+        }
+        
     }
 }
 

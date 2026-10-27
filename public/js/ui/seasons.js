@@ -51,18 +51,26 @@ class SeasonPage{
             }
         }
 
-        UIHeader(this.wrapper, this.basicInfo.name);
+        if(settings["Display Season Info"]){
+
+            const infoIndex = getPageComponentIndex(this.pageLayout, "Season Info");
+            if(infoIndex === null) throw new Error(`Missing season info page index`);
+
+            elems[infoIndex] = this.createSeasonInfo();
+        }
+
 
 
         for(let i = 0; i < elems.length; i++){
 
+            if(elems[i] === undefined) continue;
+            
             this.wrapper.append(elems[i]);
         }
 
         this.parent.append(this.wrapper);
 
         
-        this.renderInfo();
         this.renderObjectStats();
     }
 
@@ -89,7 +97,7 @@ class SeasonPage{
     }
 
 
-    renderInfo(){
+    createSeasonInfo(){
 
         const infoContent = [];
 
@@ -108,7 +116,16 @@ class SeasonPage{
 
         }
 
-        this.info = new UIInfo(this.wrapper, infoContent);
+        const info = new UIInfo(null, infoContent);
+
+        const elems = info.createElems();
+
+        const wrapper = UIDiv();
+
+        UIHeader(wrapper, this.basicInfo.name);
+        wrapper.append(elems);
+
+        return wrapper;
     }
 
 
