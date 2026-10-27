@@ -501,7 +501,6 @@ export async function getMapInfo(mapId, seasonId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
-
  
     let query = "";
     const vars = [];
@@ -1016,7 +1015,6 @@ async function seasonMapsSearch(seasonId, name, cleanStart, cleanPerPage, cleanS
 export async function searchMaps(name, dirtyPage, dirtyPerPage, sortBy, order, seasonId){
     
     if(VALID_MAP_SEARCH_BY.indexOf(sortBy) === -1) throw new Error(`Not a valid map search by type`);
-
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);

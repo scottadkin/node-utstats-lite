@@ -156,7 +156,7 @@ class MapsSearchForm{
 
         let url = ``;
 
-        if(this.seasonId !== 0 && !this.bSkipSeasonLinks){
+        if(!this.bSkipSeasonLinks){
             url += `/season/${this.seasonId}/maps/`;
         }else{
             url += `/maps/`;
@@ -234,7 +234,7 @@ class MapListDisplay{
 
     getMapUrl(mapId){
 
-        if(this.seasonId === 0 || this.bSkipSeasonLinks) return `/map/${mapId}`;
+        if(this.bSkipSeasonLinks) return `/map/${mapId}`;
 
         return `/season/${this.seasonId}/map/${mapId}`
     }
@@ -287,7 +287,7 @@ class MapListDisplay{
 
                     let url = ``;
 
-                    if(this.seasonId === 0 || this.bSkipSeasonLinks){
+                    if(this.bSkipSeasonLinks){
                         url += `/maps/`;
                     }else{
                         url += `/season/${this.seasonId}/maps/`;
@@ -312,7 +312,7 @@ class MapListDisplay{
 
             let url = ``;
 
-            if(this.seasonId === 0 || this.bSkipSeasonLinks){
+            if(this.bSkipSeasonLinks){
                 url = `/map/${d.id}`;
             }else{
                 url = `/season/${this.seasonId}/map/${d.id}`;
@@ -1477,7 +1477,7 @@ class UIMapPlayerRecords{
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Match Records");
 
-        this.form = UIDiv(form);
+        this.form = UIDiv("form");
         this.wrapper.append(this.form);
         this.parent.append(this.wrapper);
 
