@@ -706,9 +706,18 @@ export async function getMapWeaponStats(seasonId, mapId){
     FROM ${mT} 
     LEFT JOIN ${gT} ON ${mT}.gametype_id = ${gT}.id
     LEFT JOIN ${wT} ON ${mT}.weapon_id = ${wT}.id
-    WHERE ${mT}.map_id=? AND ${mT}.season_id=?`;
+    WHERE ${mT}.map_id=?`;
 
-    const result = await simpleQuery(query, [mapId, seasonId]);
+    let where = ``;
+    const vars = [mapId];
+
+    if(seasonId !== 0){
+
+        where += ` AND ${mT}.season_id=?`
+        vars.push(seasonId);
+    }
+
+    const result = await simpleQuery(`${query}${where}`, vars);
 
     return result;
 }

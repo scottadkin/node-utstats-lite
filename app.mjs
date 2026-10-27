@@ -1,32 +1,21 @@
 import express from 'express';
 import ejs from "ejs";
-import { DEFAULT_DATE, websitePort } from './config.mjs';
+import { websitePort } from './config.mjs';
 const app = express();
 app.use(express.static('public'));
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
-import { renderMatchPage } from './src/pages/match.mjs';
-import { renderMatchesPage } from './src/pages/matches.mjs';
 import serverMatchScreenshot from "./src/serverMatchScreenshot.mjs";
-import { renderHomePage } from './src/pages/home.mjs';
-import { renderPlayersPage } from './src/pages/players.mjs';
-import { renderPlayerPage } from './src/pages/player.mjs';
-import { renderRankingsPage } from './src/pages/rankings.mjs';
-import { renderCTFLeaguePage } from './src/pages/ctfLeague.mjs';
-import { renderRecordsPage } from './src/pages/records.mjs';
 import JSONManager from './src/json/JSONManager.mjs';
 import AdminJSONManager from './src/json/AdminJSONManager.mjs';
 import { renderLoginPage } from './src/pages/login.mjs';
 import { renderRegisterPage } from './src/pages/register.mjs';
 import { getSessionInfo, login, logout, register } from './src/authentication.mjs';
 import { renderAdminPage } from './src/pages/admin.mjs';
-import { renderMapPage } from './src/pages/map.mjs';
 import { renderWatchlistPage } from './src/pages/watchlist.mjs';
 import Message from './src/message.mjs';
-import { renderMapsPage } from './src/pages/maps.mjs';
 import {renderSeasonsPage} from "./src/pages/seasons.mjs";
-
 import cookieParser from 'cookie-parser';
 
 import multer from 'multer';
@@ -118,12 +107,9 @@ app.get('/', async (req, res, next) => { await setSeasonsData(req, res, next)}, 
 
 	try{
 
-        if(res.locals.seasonList.length > 0){
-            res.locals.bSkipSeasonLinks = true;
-            renderSeasonPage(req, res);
-        }else{
-		    renderHomePage(req, res);	
-        }
+        res.locals.bSkipSeasonLinks = true;
+        renderSeasonPage(req, res);
+       
 		
 	}catch(err){
 		console.trace(err);
@@ -134,94 +120,72 @@ app.get('/', async (req, res, next) => { await setSeasonsData(req, res, next)}, 
 
 app.get('/match/:id',async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) => {
 
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonMatchPage(req, res);
-    }else{
-	    renderMatchPage(req, res);
-    }
+
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonMatchPage(req, res);
+ 
 });
 
 app.get("/matches", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
 	
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonMatchesPage(req, res);
-    }else{
-	    renderMatchesPage(req, res);
-    }
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonMatchesPage(req, res);
+
     
 });
 
 app.get("/players",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
   
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonPlayersPage(req, res);
-    }else{
-	    renderPlayersPage(req, res);
-    }
+    
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonPlayersPage(req, res);
+   
 });
 
 app.get("/rankings", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
 
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonRankingsPage(req, res);
-    }else{
-	    renderRankingsPage(req, res);
-    }
+
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonRankingsPage(req, res);
+
 });
 
 app.get("/ctfleague", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
     
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonCTFLeaguePage(req, res)
-    }else{
-	    renderCTFLeaguePage(req, res);
-    }
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonCTFLeaguePage(req, res)
+  
 });
 
 app.get("/records",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
 
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonRecordsPage(req, res);
-    }else{
-	    renderRecordsPage(req, res);
-    }
+    
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonRecordsPage(req, res);
+    
 });
 
 app.get("/maps", async (req, res, next) => { await setSeasonsData(req, res, next)}, async (req, res) =>{
 
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonMapsPage(req, res);
-    }else{
-	    renderMapsPage(req, res);
-    }
+    
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonMapsPage(req, res);
+    
 });
 
 app.get("/player/:id",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
  
 
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonPlayerPage(req, res);
-    }else{
-	    renderPlayerPage(req, res);
-    }
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonPlayerPage(req, res);
+ 
 });
 
 app.get("/map/:id",async (req, res, next) => { await setSeasonsData(req, res, next)},  async (req, res) =>{
 
-    if(res.locals.seasonList.length > 0){
-        res.locals.bSkipSeasonLinks = true;
-        renderSeasonMapPage(req, res);
-    }else{
-	    renderMapPage(req, res);
-    }
+    res.locals.bSkipSeasonLinks = true;
+    renderSeasonMapPage(req, res);
+
 });
 
 
