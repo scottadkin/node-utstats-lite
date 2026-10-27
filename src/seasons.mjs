@@ -436,7 +436,7 @@ export async function calculateSeasonStats(seasonId){
 }
 
 
-async function getSeasonObjectStats(seasonId, type, overrideColumnName){
+async function getSeasonObjectStats(seasonId, type, maxRows){
 
     if(VALID_OBJECT_TYPES[type] === undefined) throw new Error(`Not a valid type for getSeasonObjectStats`);
 
@@ -463,45 +463,38 @@ async function getSeasonObjectStats(seasonId, type, overrideColumnName){
         throw new Error(`missing option`);
     }
 
-    const validOverrides = ["map_name"];
-
     let objColumnName = "object_name";
-
-
-    let overrideIndex = -1;
-
-    if(overrideColumnName !== undefined){
-
-        overrideIndex = validOverrides.indexOf(overrideColumnName);
-
-        if(overrideIndex === -1){
-            throw new Error(`Not a valid name override`);
-        }
-    }
-
-    if(overrideColumnName !== undefined){
-        objColumnName = validOverrides[overrideIndex];
-    }
 
     const query = `SELECT ${seasonTable}.*,${joinTable}.name as ${objColumnName} FROM nstats_seasons_${type} 
     LEFT JOIN ${joinTable} on ${seasonTable}.${joinColumn} = ${joinTable}.id
     WHERE season_id=? ORDER BY matches DESC`;
 
+    let limit = ``;
+    const vars = [seasonId];
+    if(maxRows !== undefined){
 
-    return await simpleQuery(query, [seasonId]);
+        maxRows = parseInt(maxRows);
+        if(maxRows !== maxRows) throw new Error(`MaxRows must be a valid integer`);
+
+        limit += ` LIMIT ?`;
+        vars.push(maxRows)
+    }
+
+
+    return await simpleQuery(`${query}${limit}`, vars);
 }
 
 
-export async function getSeasonBasicObjectStats(seasonId){
+export async function getSeasonBasicObjectStats(seasonId, maxServers, maxGametypes, maxMaps){
 
     seasonId = parseInt(seasonId);
 
     if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
 
     const [servers, gametypes, maps] = await Promise.all([
-        getSeasonObjectStats(seasonId, "servers"),
-        getSeasonObjectStats(seasonId, "gametypes"),
-        getSeasonObjectStats(seasonId, "maps"),
+        getSeasonObjectStats(seasonId, "servers", maxServers),
+        getSeasonObjectStats(seasonId, "gametypes", maxGametypes),
+        getSeasonObjectStats(seasonId, "maps", maxMaps),
     ]);
 
     const mapNames = [];

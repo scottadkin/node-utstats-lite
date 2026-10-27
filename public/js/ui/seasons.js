@@ -14,7 +14,7 @@ function createObjectStatRow(s, urlBase, idKey, objectName){
 
 class SeasonPage{
 
-    constructor(basicInfo, objectStats, mostPlayedMaps, bSkipSeasonLinks, pageSettings, 
+    constructor(basicInfo, objectStats, bSkipSeasonLinks, pageSettings, 
         pageLayout, socialSettings, welcomeMessageSettings, recentMatches
     ){
 
@@ -22,7 +22,6 @@ class SeasonPage{
         this.wrapper = UIDiv();
         this.basicInfo = basicInfo;
         this.objectStats = objectStats;
-        this.mostPlayedMaps = mostPlayedMaps;
         this.bSkipSeasonLinks = bSkipSeasonLinks;
 
         this.pageLayout = pageLayout;

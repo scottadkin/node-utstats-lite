@@ -30,10 +30,14 @@ export async function renderSeasonPage(req, res){
 
     const seasonId = res.locals.season;
 
+    const maxMaps = pageSettings["Total Most Played Maps"];
+    const maxGametypes = pageSettings["Total Most Played Gametypes"];
+    const maxPlayers = pageSettings["Total Most Active Players"];
+    const maxServers = pageSettings["Total Most Played Servers"]
     
-    const objectStats = await getSeasonBasicObjectStats(seasonId);
+    const objectStats = await getSeasonBasicObjectStats(seasonId, maxServers, maxGametypes, maxMaps);
 
-    const mostPlayedMaps = await seasonsGetMostPlayedMaps(seasonId,3);
+
 
     const perPage = pageSettings["Total Recent Matches"];
 
@@ -49,7 +53,6 @@ export async function renderSeasonPage(req, res){
             "userSession": req.userSession,
             basicSeasonInfo,
             objectStats,
-            mostPlayedMaps,
             seasonId,
             welcomeMessageSettings,
             socialSettings,

@@ -35,7 +35,7 @@ class PlayerRecentMatches{
 
     getJSONURLBase(){
 
-        return (this.seasonId !== 0 && !this.bSkipSeasonLinks) ? `../../../` : `../`;
+        return `../../../`;
     }
 
     async loadAllPlayedNames(){

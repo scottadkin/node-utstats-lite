@@ -1400,3 +1400,7 @@ section{
 .no-padding{
     padding:0px;
 }
+
+.underline{
+    text-decoration: underline;
+}

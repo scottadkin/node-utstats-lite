@@ -729,3 +729,22 @@ export const DEFAULT_ORDER_OPTIONS = [
     {"value": "ASC", "display": "Ascending"}, 
     {"value": "DESC", "display": "Descending"}, 
 ];
+
+
+export function escapeHTML(input){
+
+    const targets = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }
+
+    for(const [target, replacement] of Object.entries(targets)){
+
+        input = input.replaceAll(target, replacement);
+    }
+
+    return input;
+}

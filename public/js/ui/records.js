@@ -49,7 +49,8 @@ class RecordsPage{
         this.createInfo();
         this.createDropDowns();
 
-        this.header = UIHeader(this.parent, "Records");
+        this.header = UIHeader(null, "Records");
+        this.parent.append(this.header);
 
         this.render();
     }
