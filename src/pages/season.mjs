@@ -1,4 +1,5 @@
 import { convertTimestamp, toPlaytime } from "../generic.mjs";
+import { getPageLayout } from "../pageLayout.mjs";
 import { getSeasonBasicObjectStats,seasonsGetMostPlayedMaps } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
@@ -7,9 +8,14 @@ export async function renderSeasonPage(req, res){
 
 
 
-    const [brandingSettings, timeZone] = await Promise.all([
+    const [brandingSettings, timeZone, socialSettings, welcomeMessageSettings, pageSettings, pageLayout] = await Promise.all([
         getCategorySettings("Branding"), 
-        getSiteWideTimeZone()
+        getSiteWideTimeZone(),
+        getCategorySettings("Social Media"),
+        getCategorySettings("Welcome Message"),
+        getCategorySettings("Home"),
+        getPageLayout("Home")
+
     ]);
 
     const basicSeasonInfo = res.locals.seasonInfo;
@@ -24,7 +30,6 @@ export async function renderSeasonPage(req, res){
     const seasonId = res.locals.season;
 
     
-
     const objectStats = await getSeasonBasicObjectStats(seasonId);
 
     const mostPlayedMaps = await seasonsGetMostPlayedMaps(seasonId,3);
@@ -39,6 +44,10 @@ export async function renderSeasonPage(req, res){
             basicSeasonInfo,
             objectStats,
             mostPlayedMaps,
-            seasonId
+            seasonId,
+            welcomeMessageSettings,
+            socialSettings,
+            pageSettings,
+            pageLayout
         });
 }

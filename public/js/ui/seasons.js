@@ -11,7 +11,9 @@ function mapObjectStats(s){
 
 class SeasonPage{
 
-    constructor(basicInfo, objectStats, mostPlayedMaps, bSkipSeasonLinks){
+    constructor(basicInfo, objectStats, mostPlayedMaps, bSkipSeasonLinks, pageSettings, 
+        pageLayout, socialSettings, welcomeMessageSettings
+    ){
 
         this.parent = document.querySelector("#root");
         this.wrapper = UIDiv();
@@ -20,13 +22,70 @@ class SeasonPage{
         this.mostPlayedMaps = mostPlayedMaps;
         this.bSkipSeasonLinks = bSkipSeasonLinks;
 
+        this.pageLayout = pageLayout;
+        this.pageSettings = pageSettings;
+        this.socialSettings = socialSettings;
+        this.welcomeMessageSettings = welcomeMessageSettings;
+
+        console.log(this.pageLayout);
+        console.log(this.pageSettings);
+
+        this.renderElems();
+    }
+
+    renderElems(){
+
+        const settings = this.pageSettings;
+
+        const elems = [];
+
+        if(settings["Display Welcome Message"]){
+
+            const welcomeElem = this.createWelcomeMessage();
+            const compIndex = getPageComponentIndex(this.pageLayout, "Welcome Message");
+
+            if(compIndex === null) throw new Error(`failed to get page component index`);
+
+            if(welcomeElem !== null){
+                elems[compIndex] = welcomeElem;
+            }
+        }
 
         UIHeader(this.wrapper, this.basicInfo.name);
 
+
+        for(let i = 0; i < elems.length; i++){
+
+            this.wrapper.append(elems[i]);
+        }
+
         this.parent.append(this.wrapper);
 
+        
         this.renderInfo();
         this.renderObjectStats();
+    }
+
+    createWelcomeMessage(){
+
+        const title = this.welcomeMessageSettings["Welcome Title"];
+        const message = this.welcomeMessageSettings["Welcome Message"];
+
+        if(title === "" || message === "&#34;&#34;") return null;
+
+        const wrapper = UIDiv();
+
+        UIHeader(wrapper, title)
+        const messageElem = UIDiv("welcome-message");
+
+        if(message.length > 0){
+            messageElem.innerHTML = message;
+        }else{
+            messageElem.innerHTML = "";
+        }
+
+        wrapper.append(messageElem);
+        return wrapper;
     }
 
 

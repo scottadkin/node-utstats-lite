@@ -1,30 +1,3 @@
-function renderWelcomeMessage(parent, title, message){
-
-    if(title === "" || message === "&#34;&#34;") return;
-
-    const wrapper = document.createElement("div");
-
-    UIHeader(parent, title);
-    parent = document.querySelector(parent);
-
-
-    const messageElem = document.createElement("div");
-    messageElem.className = "welcome-message";
-
-    if(message.length > 0){
-        messageElem.innerHTML = decodeHTML(message);
-        messageElem.innerHTML = messageElem.innerHTML.slice(1, -1);
-    }else{
-        messageElem.innerHTML = "";
-    }
-    
-
-
-
-    wrapper.append(messageElem);
-    parent.appendChild(wrapper);
-}
-
 
 function UISocial(parent, url, icon){
 

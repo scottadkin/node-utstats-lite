@@ -2157,3 +2157,14 @@ function UIRichMapBox(data, url){
 function UIRichMatchBox(){
 
 }
+
+
+function getPageComponentIndex(pageLayoutSettings, targetName){
+
+    for(let i = 0; i < pageLayoutSettings.length; i++){
+
+        if(pageLayoutSettings[i] === targetName) return i;
+    }
+
+    return null;
+}

@@ -15,18 +15,20 @@
 <script src="../../js/ui/table.js"></script>
 <script src="../../js/ui/seasons.js"></script>
 
-
 <div id="root">
    
 </div>
 
 <script>
-
     new SeasonPage(
         <%- JSON.stringify(basicSeasonInfo) %>,
         <%- JSON.stringify(objectStats)%>,
         <%- JSON.stringify(mostPlayedMaps)%>,
-        <%- locals.bSkipSeasonLinks %>
+        <%- locals.bSkipSeasonLinks %>,
+        <%- JSON.stringify(pageSettings) %>,
+        <%- JSON.stringify(pageLayout) %>,
+        <%- JSON.stringify(socialSettings) %>,
+        <%- JSON.stringify(welcomeMessageSettings) %>,
         );
 </script>
 
