@@ -34,41 +34,41 @@ class SeasonPage{
         this.renderElems();
     }
 
-    renderElems(){
+    addComponent(elems, settingName, layoutName, createCallback){
 
-        const settings = this.pageSettings;
+        if(this.pageSettings[settingName]){
+
+            const content = createCallback();
+            const compIndex = getPageComponentIndex(this.pageLayout, layoutName);
+
+            if(compIndex === null) throw new Error(`failed to get ${layoutName} component index`);
+
+            if(content !== null){
+                elems[compIndex] = content;
+            }
+        }
+    }
+
+    renderElems(){
 
         const elems = [];
 
-        if(settings["Display Welcome Message"]){
+        this.addComponent(elems, "Display Welcome Message", "Welcome Message", () =>{
+            return this.createWelcomeMessage();
+        });
+      
+        this.addComponent(elems, "Display Season Info", "Season Info", () =>{
+            return this.createSeasonInfo();
+        });
+      
 
-            const welcomeElem = this.createWelcomeMessage();
-            const compIndex = getPageComponentIndex(this.pageLayout, "Welcome Message");
+        this.addComponent(elems, "Display Recent Matches", "Recent Matches", () =>{
+            return this.createRecentMatches();
+        });
 
-            if(compIndex === null) throw new Error(`failed to get page component index`);
-
-            if(welcomeElem !== null){
-                elems[compIndex] = welcomeElem;
-            }
-        }
-
-        if(settings["Display Season Info"]){
-
-            const infoIndex = getPageComponentIndex(this.pageLayout, "Season Info");
-            if(infoIndex === null) throw new Error(`Missing season info page index`);
-
-            elems[infoIndex] = this.createSeasonInfo();
-        }
-
-        if(settings["Display Recent Matches"]){
-
-            const index = getPageComponentIndex(this.pageLayout, "Recent Matches");
-            if(index === null) throw new Error("recent matches index is missing");
-
-            
-
-            elems[index] = this.createRecentMatches();
-        }
+        this.addComponent(elems, "Display Social Media", "Social Media", () =>{
+            return this.createSocials();
+        });
 
 
         for(let i = 0; i < elems.length; i++){
@@ -152,6 +152,61 @@ class SeasonPage{
             new MatchesRichView(wrapper, this.recentMatches, this.basicInfo.id, this.bSkipSeasonLinks);
         }else{
             renderMatchesTable(wrapper, this.recentMatches, false, false, this.basicInfo.id, this.bSkipSeasonLinks);
+        }
+
+        return wrapper;
+    }
+
+    createSocials(){
+
+        const settings = this.socialSettings;
+
+        const keys = [
+            "Discord Link",
+            "Twitch Link",
+            "Youtube Link",
+        ];
+
+        let bFoundLink = "";
+
+        for(let i = 0; i < keys.length; i++){
+
+            if(settings[keys[i]] !== ""){
+                bFoundLink = true;
+                break;
+            }
+        }
+
+        if(!bFoundLink) return;
+
+        const wrapper = UIDiv("text-center");
+        UIHeader(wrapper, "Find Us On Social Media");
+
+
+        if(settings["Discord Link"] !== ""){
+            UISocial(wrapper, settings["Discord Link"], "discordicon.svg");
+        }
+
+
+        if(settings["Twitch Link"] !== ""){
+            UISocial(wrapper, settings["Twitch Link"], "twitchicon.svg");
+        }
+
+        if(settings["Youtube Link"] !== ""){
+            UISocial(wrapper, settings["Youtube Link"], "youtubeicon.svg");
+        }
+
+        if(settings["External Site"] !== ""){
+
+            UIHeader(wrapper, "Find Us On Our Website");
+
+            const link = document.createElement("a");
+            link.href = settings["External Site"];
+            link.className = "bold"
+            link.append(settings["External Site"]);
+
+            new UIInfo(wrapper, [`We also have another website you may like to visit `, link]);
+        // UISocial(wrapper, settings["External Site"], "red.png");
         }
 
         return wrapper;
@@ -319,4 +374,20 @@ class SeasonsPage{
 
         new TESTUITable(this.wrapper, tableOptions, rows);
     }
+}
+
+function UISocial(parent, url, icon){
+
+    const elem = document.createElement("a");
+    elem.href = url;
+    elem.target = "_blank";
+    
+    const img = document.createElement("img");
+    img.src = `/images/${icon}`;
+    img.className = "social-media-icon";
+    img.alt = "social-icon";
+
+    elem.append(img);
+    parent.append(elem);
+ 
 }
