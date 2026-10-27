@@ -28,7 +28,7 @@ class AdminFTPManager{
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Importer Manager");
         this.parent.append(this.wrapper);
-        this.mode = "current";
+        this.mode = "rejected";
 
         this.selectedFTPServer = "";
         this.bActionInProgress = false;
@@ -46,6 +46,7 @@ class AdminFTPManager{
             {"display": "Add FTP Server", "value": "add-ftp"},
             {"display": "Edit FTP Server Settings", "value": "edit-ftp"},
             {"display": "Edit Logs Folder Settings", "value": "edit-folder"},
+            {"display": "Rejected Logs", "value": "rejected"},
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
@@ -724,6 +725,71 @@ class AdminFTPManager{
         this.content.append(form);
     }
 
+
+    async loadRejectedLogs(){
+
+        try{
+
+            this.rejectedLogs = [];
+
+            const req = await fetch("/admin",{
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-rejected-logs"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+           
+            this.rejectedLogs = res;
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load Rejected Logs", err.toString())
+        }
+    }
+
+    async renderRejectedLogs(){
+
+        if(this.mode !== "rejected") return;
+
+    
+        await this.loadRejectedLogs();
+      
+
+        UIHeader(this.content, "Rejected Logs");
+
+        const form = UIDiv("form");
+
+
+        const infoContent = [
+            `View the reason why each log was rejected during the import process.`
+        ];
+
+        new UIInfo(form, infoContent);
+
+        this.content.append(form);
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "perPage": 500,
+            "headers": ["FileName", "Import Attempt", "Reject Reason"].map((h) =>{ return {"display": h}})
+        };
+
+        const rows = this.rejectedLogs.data.map((r) =>{
+
+            return [
+                {"display": r.file_name, "value": r.file_name.toLowerCase(), "className": "text-left"},
+                {"display": toDateString(r.date, TIME_ZONE, true), "value": r.date, "className": "date"},
+                {"display": r.reason, "value": r.reason.toLowerCase()}
+            ];
+        });
+
+        new TESTUITable(this.content, tableOptions, rows)
+    }
+
     render(){
 
         this.content.innerHTML = "";
@@ -732,6 +798,7 @@ class AdminFTPManager{
         this.renderAddFTPServer();
         this.renderEditFTPSettings();
         this.renderEditLogsFolderSettings();
+        this.renderRejectedLogs();
     }
 }
 

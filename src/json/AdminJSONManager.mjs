@@ -31,6 +31,7 @@ import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDe
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
 import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
+import { getRejectedLogsInfo } from "../logs.mjs";
 
 
 
@@ -598,13 +599,17 @@ export default class AdminJSONManager{
 
                 if(bCreatePlayer === undefined) throw new Error(`bCreatePlayer argument is missing`);
 
-                console.log(name);
-
                 await renamePlayerByMatchHistory(name, rowIds, bCreatePlayer);
 
 
                 return this.res.json({"message": "passed"});
 
+
+            }else if(this.mode === "load-rejected-logs"){
+
+                const data = await getRejectedLogsInfo();
+
+                return this.res.json({data});
 
             }
 

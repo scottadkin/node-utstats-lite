@@ -955,7 +955,7 @@ ul{
 .notification{
 	position:fixed;
 	bottom:0px;
-	width:100%;
+	width:90%;
 	text-align:center;
 	color:white;
 }
