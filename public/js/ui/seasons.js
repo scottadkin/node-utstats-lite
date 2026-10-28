@@ -229,12 +229,12 @@ class SeasonPage{
     }
 
     createServerList(){
-        return this.createObjectList("Servers", "servers", "server_id", "s")
+        return this.createObjectList("Servers", "servers", "server_id", "sid")
     }
 
 
     createGametypeList(){
-        return this.createObjectList("Gametypes", "gametypes", "gametype_id", "g");
+        return this.createObjectList("Gametypes", "gametypes", "gametype_id", "gid");
     }
 
     createObjectList(title, objectStatsKey, objectKey, urlKey){
@@ -298,7 +298,7 @@ class SeasonPage{
         }else{
 
 
-            return this.createObjectList("Most Played Maps", "maps", "map_id", "m");
+            return this.createObjectList("Most Played Maps", "maps", "map_id", "mid");
 
         }
 

@@ -7445,7 +7445,7 @@ class AdminSeasonsManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "site-behaviour";
+        this.mode = "list";
 
         this.data = {
             "seasons": []
@@ -7489,7 +7489,6 @@ class AdminSeasonsManager{
     createTabs(){
 
         const options = [
-            {"display": "Site Behaviour", "value": "site-behaviour"},
             {"display": "List", "value": "list"},
             {"display": "Create Season", "value": "create"},
             {"display": "Edit Season", "value": "edit"},

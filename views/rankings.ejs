@@ -9,7 +9,8 @@
 <%- include("timeZone.ejs", {timeZone})%>
 
 <%
-const jsBase = `../../js/`;
+const jsBase = `/js/`;
+
 %>
 <script src="<%= jsBase %>ui/table.js"></script>
 <script src="<%= jsBase %>ui/rankings.js"></script>
@@ -24,13 +25,14 @@ const jsBase = `../../js/`;
 </div>
 <script>
     new RankingsSearchForm("#root", "<%= mode %>", 
-    <%- JSON.stringify(data) %>,
-    <%- JSON.stringify(names) %>, 
-    "<%= selectedId %>",
-    "<%= selectedTimeRange %>",
-    "<%= selectedPerPage %>",
-    "<%= currentPage %>",
-    "<%= (locals.bSkipSeasonLinks) ? 0 : seasonId %>"
+        <%- JSON.stringify(data) %>,
+        <%- JSON.stringify(names) %>, 
+        "<%= selectedId %>",
+        "<%= selectedTimeRange %>",
+        "<%= selectedPerPage %>",
+        "<%= currentPage %>",
+        "<%= seasonId %>",
+        <%- locals.bSkipSeasonLinks %>
     );
 
     new RankingsExplain("#root", <%- JSON.stringify(rankingSettings) %>, "<%= minMatchesSetting %>");
