@@ -34,9 +34,6 @@ class SeasonPage{
         this.activityHeatmapDefaultSetting = activityHeatmapDefaultSetting;
         this.screenshotData = screenshotData;
 
-        console.log(this.pageLayout);
-        console.log(this.pageSettings);
-
         this.renderElems();
     }
 
