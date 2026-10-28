@@ -16,7 +16,7 @@ class SeasonPage{
 
     constructor(basicInfo, objectStats, bSkipSeasonLinks, pageSettings, 
         pageLayout, socialSettings, welcomeMessageSettings, recentMatches,
-        mostActivePlayers, activityHeatmapDefaultSetting
+        mostActivePlayers, activityHeatmapDefaultSetting, screenshotData
     ){
 
         this.parent = document.querySelector("#root");
@@ -32,6 +32,7 @@ class SeasonPage{
         this.recentMatches = recentMatches;
         this.mostActivePlayers = mostActivePlayers;
         this.activityHeatmapDefaultSetting = activityHeatmapDefaultSetting;
+        this.screenshotData = screenshotData;
 
         console.log(this.pageLayout);
         console.log(this.pageSettings);
@@ -99,6 +100,11 @@ class SeasonPage{
         this.addComponent(elems, "Display Activity Heatmap", "Activity Heatmap", () =>{
 
             return this.createActivityHeatMap();
+        });
+
+        this.addComponent(elems, "Display Latest Screenshot", "Latest Screenshot", () =>{
+
+            return this.createMatchScreenshot();
         });
 
         for(let i = 0; i < elems.length; i++){
@@ -375,6 +381,15 @@ class SeasonPage{
             "jsonURL": `/json/activity-heatmap-data/`,
             "seasonId": this.basicInfo.id
         });
+
+        return wrapper;
+    }
+
+    createMatchScreenshot(){
+
+        const wrapper = UIDiv();
+
+        UIMatchScreenshot(wrapper, this.screenshotData, true);
 
         return wrapper;
     }

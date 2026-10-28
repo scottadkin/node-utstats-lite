@@ -1,14 +1,12 @@
 import { convertTimestamp, toPlaytime } from "../generic.mjs";
-import { getRecentMatches } from "../matches.mjs";
+import { getMatchData, getRecentMatches } from "../matches.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
 import { getMostActivePlayers } from "../players.mjs";
-import { getSeasonBasicObjectStats,seasonsGetMostPlayedMaps } from "../seasons.mjs";
+import { getSeasonBasicObjectStats } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
 
 export async function renderSeasonPage(req, res){
-
-
 
     const [brandingSettings, timeZone, socialSettings, welcomeMessageSettings, pageSettings, pageLayout] = await Promise.all([
         getCategorySettings("Branding"), 
@@ -35,19 +33,24 @@ export async function renderSeasonPage(req, res){
     const maxGametypes = pageSettings["Total Most Played Gametypes"];
     const maxPlayers = pageSettings["Total Most Active Players"];
     const maxServers = pageSettings["Total Most Played Servers"]
+    const perPage = pageSettings["Total Recent Matches"];
     
     const objectStats = await getSeasonBasicObjectStats(seasonId, maxServers, maxGametypes, maxMaps);
 
     let mostActivePlayers = [];
     
     if(pageSettings["Display Most Active Players"] === 1){
-        mostActivePlayers = await getMostActivePlayers(pageSettings["Total Most Active Players"], seasonId);
+        mostActivePlayers = await getMostActivePlayers(maxPlayers, seasonId);
     }
 
-    const perPage = pageSettings["Total Recent Matches"];
 
     const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0, true, seasonId);
 
+    let screenshotData = null;
+    
+    if(pageSettings["Display Latest Screenshot"] === 1 && recentMatches.total > 0){
+        screenshotData = await getMatchData(recentMatches.data[0].id);
+    }
 
     res.render("season.ejs",{
         req,
@@ -64,6 +67,7 @@ export async function renderSeasonPage(req, res){
             pageSettings,
             pageLayout,
             recentMatches,
-            mostActivePlayers
+            mostActivePlayers,
+            screenshotData
         });
 }

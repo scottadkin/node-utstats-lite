@@ -12,6 +12,7 @@
 -%>
 <%- include("timeZone.ejs", {timeZone})%>
 
+<script src="/js/matchScreenshot.js"></script>
 <script src="/js/ui/table.js"></script>
 <script src="/js/ui/matches.js"></script>
 <script src="/js/ui/seasons.js"></script>
@@ -33,7 +34,8 @@
         <%- JSON.stringify(welcomeMessageSettings) %>,
         <%- JSON.stringify(recentMatches) %>,
         <%- JSON.stringify(mostActivePlayers) %>,
-        "<%= pageSettings["Activity Heatmap Default Mode"] %>"
+        "<%= pageSettings["Activity Heatmap Default Mode"] %>",
+        <%- JSON.stringify(screenshotData)%>
         );
 </script>
 
