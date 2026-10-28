@@ -15,7 +15,8 @@ function createObjectStatRow(s, urlBase, idKey, objectName){
 class SeasonPage{
 
     constructor(basicInfo, objectStats, bSkipSeasonLinks, pageSettings, 
-        pageLayout, socialSettings, welcomeMessageSettings, recentMatches
+        pageLayout, socialSettings, welcomeMessageSettings, recentMatches,
+        mostActivePlayers
     ){
 
         this.parent = document.querySelector("#root");
@@ -29,6 +30,7 @@ class SeasonPage{
         this.socialSettings = socialSettings;
         this.welcomeMessageSettings = welcomeMessageSettings;
         this.recentMatches = recentMatches;
+        this.mostActivePlayers = mostActivePlayers;
 
         console.log(this.pageLayout);
         console.log(this.pageSettings);
@@ -87,6 +89,12 @@ class SeasonPage{
             return this.createMapsList();
         })
 
+
+        this.addComponent(elems, "Display Most Active Players", "Most Active Players", () =>{
+
+            return this.createMostActivePlayers();
+        });
+
         for(let i = 0; i < elems.length; i++){
 
             if(elems[i] === undefined) continue;
@@ -95,9 +103,6 @@ class SeasonPage{
         }
 
         this.parent.append(this.wrapper);
-
-        
-        this.renderObjectStats();
     }
 
     createWelcomeMessage(){
@@ -301,15 +306,59 @@ class SeasonPage{
             return this.createObjectList("Most Played Maps", "maps", "map_id", "mid");
 
         }
-
-        
-
-
     }
 
-    renderObjectStats(){
+    createMostActivePlayers(){
 
+        if(this.mostActivePlayers.length === 0) return;
+
+        const wrapper = UIDiv();
+
+        UIHeader(wrapper, "Most Active Players");
+
+        const rows = [];
+
+        for(let i = 0; i < this.mostActivePlayers.length; i++){
+
+            const d = this.mostActivePlayers[i];
+
+            const playerLink = UIPlayerLink({
+                "playerId": d.id,
+                "name": d.name,
+                "country": d.country,
+                "bTableElem": true,
+                "seasonId": this.seasonId,
+                "bSkipSeasonLinks": this.bSkipSeasonLinks
+            });
+
+            rows.push([
+                {"value": d.name.toLowerCase(), "display": playerLink, "bSkipTD": true},
+                {"display": toDateString(d.last_active, TIME_ZONE, true), "value": d.last_active, "className": "date"},
+                {"value": d.total_matches},
+                {"value": ignore0(d.wins)},
+                {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime"},
+            ]);
+
+        }
+
+
+        const table = new TESTUITable(wrapper, {
+            "headers": [
+                {"display": "Name"}, 
+                {"display": "Last Active"}, 
+                {"display": "Matches Played"}, 
+                {"display": "Wins"}, 
+                {"display": "Total Playtime"}
+            ],
+            "className": "t-width-1",
+            "bNoSort": true
+        }, rows);
+
+        return wrapper;
     }
+    
+
+ 
 }
 
 

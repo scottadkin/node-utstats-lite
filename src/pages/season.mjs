@@ -1,6 +1,7 @@
 import { convertTimestamp, toPlaytime } from "../generic.mjs";
 import { getRecentMatches } from "../matches.mjs";
 import { getPageLayout } from "../pageLayout.mjs";
+import { getMostActivePlayers } from "../players.mjs";
 import { getSeasonBasicObjectStats,seasonsGetMostPlayedMaps } from "../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../siteSettings.mjs";
 
@@ -37,7 +38,11 @@ export async function renderSeasonPage(req, res){
     
     const objectStats = await getSeasonBasicObjectStats(seasonId, maxServers, maxGametypes, maxMaps);
 
-
+    let mostActivePlayers = [];
+    
+    if(pageSettings["Display Most Active Players"] === 1){
+        mostActivePlayers = await getMostActivePlayers(pageSettings["Total Most Active Players"], seasonId);
+    }
 
     const perPage = pageSettings["Total Recent Matches"];
 
@@ -59,5 +64,6 @@ export async function renderSeasonPage(req, res){
             pageSettings,
             pageLayout,
             recentMatches,
+            mostActivePlayers
         });
 }
