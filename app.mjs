@@ -92,11 +92,12 @@ async function setSeasonsData(req, res, next){
 
     let info = null;
 
-    if(res.locals.season !== 0){
+    if(res.locals.season !== -1){
         info = await getSeasonById(res.locals.season);
         if(info === null) return res.send(`Season Doesn't exist`);
     }else{
 
+        res.locals.season = 0;
         info = {"name": "All Time Totals", "start_date": null, "end_date": null, "id": 0}
     }
 
