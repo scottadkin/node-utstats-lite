@@ -16,7 +16,7 @@ class SeasonPage{
 
     constructor(basicInfo, objectStats, bSkipSeasonLinks, pageSettings, 
         pageLayout, socialSettings, welcomeMessageSettings, recentMatches,
-        mostActivePlayers
+        mostActivePlayers, activityHeatmapDefaultSetting
     ){
 
         this.parent = document.querySelector("#root");
@@ -31,6 +31,7 @@ class SeasonPage{
         this.welcomeMessageSettings = welcomeMessageSettings;
         this.recentMatches = recentMatches;
         this.mostActivePlayers = mostActivePlayers;
+        this.activityHeatmapDefaultSetting = activityHeatmapDefaultSetting;
 
         console.log(this.pageLayout);
         console.log(this.pageSettings);
@@ -93,6 +94,11 @@ class SeasonPage{
         this.addComponent(elems, "Display Most Active Players", "Most Active Players", () =>{
 
             return this.createMostActivePlayers();
+        });
+
+        this.addComponent(elems, "Display Activity Heatmap", "Activity Heatmap", () =>{
+
+            return this.createActivityHeatMap();
         });
 
         for(let i = 0; i < elems.length; i++){
@@ -338,9 +344,7 @@ class SeasonPage{
                 {"value": ignore0(d.wins)},
                 {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime"},
             ]);
-
         }
-
 
         const table = new TESTUITable(wrapper, {
             "headers": [
@@ -353,6 +357,24 @@ class SeasonPage{
             "className": "t-width-1",
             "bNoSort": true
         }, rows);
+
+        return wrapper;
+    }
+
+    createActivityHeatMap(){
+
+
+        const wrapper = UIDiv();
+
+
+        new UIMatchesActivtyHeatmap(wrapper, {
+            "header": "Activity HeatMap", 
+            "gametype": 0,
+            "map": 0, 
+            "defaultMode": this.activityHeatmapDefaultSetting,
+            "jsonURL": `/json/activity-heatmap-data/`,
+            "seasonId": this.basicInfo.id
+        });
 
         return wrapper;
     }

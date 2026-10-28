@@ -46,7 +46,7 @@ export async function renderSeasonPage(req, res){
 
     const perPage = pageSettings["Total Recent Matches"];
 
-    const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0, true);
+    const recentMatches = await getRecentMatches(1, perPage, 0, 0, 0, true, seasonId);
 
 
     res.render("season.ejs",{
