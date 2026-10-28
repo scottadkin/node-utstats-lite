@@ -209,7 +209,8 @@ function toDateString(dateTime, timeZone, noDayName, noTime){
     noDayName = (noDayName !== undefined) ? noDayName : false;
     noTime = (noTime !== undefined) ? noTime : false;
 
-    const now = new Date(`${dateTime}${timeZone}`);
+    //const now = new Date(`${dateTime}${timeZone}`);
+    const now = new Date(dateTime);
 
     const UTCDate = now.toUTCString();
 

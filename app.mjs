@@ -38,6 +38,27 @@ import { getAllSeasons, getSeasonById } from './src/seasons.mjs';
 
 new Message("Attempting To Start Node UTStats Lite Website","progress");
 
+/**
+ * If seasons are enabled get the current active one
+ */
+function getMostRelevantSeasonId(seasonList){
+
+    const now = new Date();
+
+    for(let i = 0; i < seasonList.length; i++){
+
+        const s = seasonList[i];
+        const startDate = new Date(s.start_date);
+        const endDate = new Date(s.end_date);
+
+        if(now >= startDate && now <= endDate){
+            return s.id;
+        }
+    }
+
+    return 0;
+
+}
 
 async function setSeasonsData(req, res, next){
 
@@ -63,7 +84,8 @@ async function setSeasonsData(req, res, next){
     res.locals.seasonList = data;
 
     if(data.length > 0 && initialSeasonId === -1){
-        res.locals.season = data[0].id;
+
+        res.locals.season = getMostRelevantSeasonId(data);
     }else{
         res.locals.season = initialSeasonId;
     }
