@@ -204,7 +204,6 @@ function toPlaytime(seconds, bIncludeMilliSeconds){
 
 function toDateString(dateTime, timeZone, noDayName, noTime){
 
-    
     dateTime = dateTime.replace(/z$/i, "");
 
     noDayName = (noDayName !== undefined) ? noDayName : false;
@@ -212,30 +211,29 @@ function toDateString(dateTime, timeZone, noDayName, noTime){
 
     const now = new Date(`${dateTime}${timeZone}`);
 
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const dayName = now.getDay();
-    const day = now.getDate();
-    let hour = now.getHours();
-    let minute = now.getMinutes();
-    
-    if(minute < 10) minute = `0${minute}`;
+    const UTCDate = now.toUTCString();
 
-    if(hour < 10) hour = `0${hour}`;
+    const reg = /^(\w{3}?), (\d{2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2}) .+$/i;
 
-    let dayNameString = "";
+    const result = reg.exec(UTCDate);
 
-    if(!noDayName){
-        dayNameString = `${getDayName(dayName)} `;
-    }
-    
+    if(result === null) throw new Error(`Date regExp failed`);
+
+    const dayOfWeek = result[1];
+    const day = parseInt(result[2]);
+    const month = result[3];
+    const year = result[4];
+    const hour = result[5]
+    const minute = result[6];
+
     let timeString = "";
 
     if(!noTime){
         timeString = ` ${hour}:${minute}`;
     }
 
-    return `${dayNameString}${day}${getOrdinal(day)} ${getMonthName(month, true)} ${year}${timeString}`;
+    return `${dayOfWeek} ${day}${getOrdinal(day)} ${month} ${year}${timeString}`;
+
 }
 
 function ignore0(value){
@@ -566,6 +564,18 @@ function isoDateToParts(isoString){
     const timeZone = result[8];
 
     return {year, month, date, hours, minutes, seconds, milliSeconds, timeZone}
+}
+
+function toUTCDate(startDate){
+
+    const year = startDate.getFullYear();
+    const month = startDate.getMonth();
+    const dayOfMonth = startDate.getDate();
+    const hours = startDate.getHours();
+    const minutes = startDate.getMinutes();
+    const seconds = startDate.getSeconds();
+
+    console.log(year, month, dayOfMonth, hours, minutes, seconds);
 }
 
 

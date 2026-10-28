@@ -1271,7 +1271,12 @@ class UICalendarHeatMap{
 
         this.wrapper = UIDiv("calendar-heatmap");
 
-        this.now = new Date(Date.now());
+        if(options.overrideDate !== undefined){
+            this.now = new Date(options.overrideDate);
+        }else{
+            this.now = new Date(Date.now());
+        }
+
 
         this.currentYear = this.now.getFullYear();
         this.currentMonth = this.now.getMonth();

@@ -246,12 +246,12 @@ class SeasonPage{
     }
 
     createServerList(){
-        return this.createObjectList("Servers", "servers", "server_id", "sid")
+        return this.createObjectList("Most Active Servers", "servers", "server_id", "sid")
     }
 
 
     createGametypeList(){
-        return this.createObjectList("Gametypes", "gametypes", "gametype_id", "gid");
+        return this.createObjectList("Most Active Gametypes", "gametypes", "gametype_id", "gid");
     }
 
     createObjectList(title, objectStatsKey, objectKey, urlKey){
@@ -290,7 +290,7 @@ class SeasonPage{
 
         const wrapper = UIDiv();
 
-        new UIHeader(wrapper, "Most Played Maps");
+        new UIHeader(wrapper, "Most Active Maps");
         
         if(this.pageSettings["Most Played Maps Display Mode"] === "default"){
 
@@ -315,7 +315,7 @@ class SeasonPage{
         }else{
 
 
-            return this.createObjectList("Most Played Maps", "maps", "map_id", "mid");
+            return this.createObjectList("Most Active Maps", "maps", "map_id", "mid");
 
         }
     }
@@ -369,9 +369,18 @@ class SeasonPage{
 
     createActivityHeatMap(){
 
-
         const wrapper = UIDiv();
 
+        let startDate = new Date(Date.now());
+
+        if(this.basicInfo.id !== 0){
+
+            const endDate = new Date(this.basicInfo.end_date);
+  
+            if(startDate > endDate){
+                startDate = endDate;
+            }
+        }
 
         new UIMatchesActivtyHeatmap(wrapper, {
             "header": "Activity HeatMap", 
@@ -379,7 +388,8 @@ class SeasonPage{
             "map": 0, 
             "defaultMode": this.activityHeatmapDefaultSetting,
             "jsonURL": `/json/activity-heatmap-data/`,
-            "seasonId": this.basicInfo.id
+            "seasonId": this.basicInfo.id,
+            "overrideDate": startDate
         });
 
         return wrapper;
