@@ -16,13 +16,12 @@ const jsBase = `/js/`;
 <script src="<%= jsBase %>ui/ctfLeague.js"></script>
 
 
-
 <div id="root">
 
     <div class="header-wrapper">CTF League</div>
     <div id="tabs"></div>
     <script>
-        renderTypeTabs("#tabs", "<%= mode %>", "<%= seasonId %>");
+        renderTypeTabs("#tabs", "<%= mode %>", "<%= seasonId %>", <%- locals.bSkipSeasonLinks %>);
     </script>
     <div class="info">
         
@@ -68,8 +67,28 @@ const jsBase = `/js/`;
 
 
 <script>
-    new CTFLeagueFilterForm("#root", "<%= mode %>", <%- JSON.stringify(gametypeNames) %>, <%- JSON.stringify(mapNames) %>, "<%= id %>", "<%= gId %>", "<%= seasonId %>");
-    new CTFLeagueTable("#root", "<%= mode %>", <%- JSON.stringify(data) %>,  "<%= id %>", "<%= gId %>", "<%= page %>", "<%= perPage %>", "<%= subHeader %>", "<%= seasonId %>");
+    new CTFLeagueFilterForm(
+        "#root", 
+        "<%= mode %>", 
+        <%- JSON.stringify(gametypeNames) %>, 
+        <%- JSON.stringify(mapNames) %>, 
+        "<%= id %>", 
+        "<%= gId %>", 
+        "<%= seasonId %>",
+        <%- locals.bSkipSeasonLinks %>
+    );
+    new CTFLeagueTable(
+        "#root", 
+        "<%= mode %>", 
+        <%- JSON.stringify(data) %>,  
+        "<%= id %>", 
+        "<%= gId %>", 
+        "<%= page %>", 
+        "<%= perPage %>", 
+        "<%= subHeader %>", 
+        "<%= seasonId %>",
+        <%- locals.bSkipSeasonLinks %>
+    );
 </script>
 <div class="info">
     <div class="info-text">

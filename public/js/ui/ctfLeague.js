@@ -1,4 +1,4 @@
-function renderTypeTabs(parent, currentMode, seasonId){
+function renderTypeTabs(parent, currentMode, seasonId, bSkipSeasonLinks){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
@@ -13,7 +13,7 @@ function renderTypeTabs(parent, currentMode, seasonId){
     const tabs = new UITabs(parent, tabOptions, currentMode);
 
     tabs.wrapper.addEventListener("tabChanged", (e) =>{
-        const urlBase = (seasonId === 0) ? `/ctfleague/` : `/season/${seasonId}/ctfleague/`;
+        const urlBase = (bSkipSeasonLinks) ? `/ctfleague/` : `/season/${seasonId}/ctfleague/`;
 
         window.location.replace(`${urlBase}?mode=${e.detail.newTab}`);
     });
@@ -22,7 +22,7 @@ function renderTypeTabs(parent, currentMode, seasonId){
 
 class CTFLeagueFilterForm{
 
-    constructor(parent, mode, gametypeNames, mapNames, id, gId, seasonId){
+    constructor(parent, mode, gametypeNames, mapNames, id, gId, seasonId, bSkipSeasonLinks){
         
         if(mode === "combined") return;
         this.parent = document.querySelector(parent);
@@ -31,6 +31,7 @@ class CTFLeagueFilterForm{
         this.seasonId = parseInt(seasonId);
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be valid integer`)
         this.mapNames = mapNames;
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
         this.id = parseInt(id);
         this.gId = parseInt(gId);
 
@@ -101,7 +102,7 @@ class CTFLeagueFilterForm{
                 this[targetKey] = parseInt(e);
             }
 
-            const urlBase = (this.seasonId === 0) ? `/ctfleague/` : `/season/${this.seasonId}/ctfleague/`;
+            const urlBase = (this.bSkipSeasonLinks) ? `/ctfleague/` : `/season/${this.seasonId}/ctfleague/`;
             
             let newUrl = `${urlBase}?mode=${this.mode}`;
 
@@ -134,14 +135,14 @@ class CTFLeagueFilterForm{
 
 class CTFLeagueTable{
 
-    constructor(parent, mode, data, id, gId, page, perPage, subHeader, seasonId){
+    constructor(parent, mode, data, id, gId, page, perPage, subHeader, seasonId, bSkipSeasonLinks){
         
         this.parent = document.querySelector(parent);
         this.mode = mode;
         this.data = data;
         this.seasonId = parseInt(seasonId);
         if(this.seasonId !== this.seasonId) throw new Error(`seasonId must be valid integer`);
-
+        this.bSkipSeasonLinks = bSkipSeasonLinks;
         if(this.data.data.length === 0){
 
             new UIInfo(this.parent, [`There are no players in this CTF League Table.`]);
@@ -193,7 +194,8 @@ class CTFLeagueTable{
                         "name": d.player.name, 
                         "country": d.player.country, 
                         "bTableElem": true,
-                        "seasonId": this.seasonId
+                        "seasonId": this.seasonId,
+                        "bSkipSeasonLinks": this.bSkipSeasonLinks
                     }), 
                     "bSkipTD": true
                 },
