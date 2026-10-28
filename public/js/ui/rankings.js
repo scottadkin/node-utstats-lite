@@ -17,8 +17,7 @@ class RankingsSearchForm{
 
         this.createTabs();
 
-        this.wrapper = document.createElement("form");
-        this.wrapper.className = "form";
+        this.wrapper = UIDiv();
 
 
         this.urlBase = (this.seasonId === 0) ? `/rankings/` : `/season/${this.seasonId}/rankings/`
@@ -30,11 +29,6 @@ class RankingsSearchForm{
         this.parent.append(this.wrapper);
 
         this.createForm();
-
-        this.table = document.createElement("table");
-        this.table.className = `t-width-1`;
-
-        this.parent.append(this.table);
 
         this.render();
     }
@@ -55,10 +49,7 @@ class RankingsSearchForm{
 
     createDropDownRow(type, display, options, selected){
 
-        const row = document.createElement("div");
-        row.className = `form-row`;
-
-        row.append(UILabel(display));
+        const row = UIDiv("form-row");
 
         const select = document.createElement("select");
         select.name = type;
@@ -75,7 +66,7 @@ class RankingsSearchForm{
             select.append(option);
         }
 
-        row.append(select);
+        row.append(UILabel(display), select);
 
         select.addEventListener("change", (e) =>{
             this.selectedId = e.target.value;
@@ -93,6 +84,8 @@ class RankingsSearchForm{
     }
 
     createForm(){
+
+        const form = UIDiv("form");
 
         const nameOptions = [];
         
@@ -113,19 +106,18 @@ class RankingsSearchForm{
 
         const row = UIDiv("form-row");
         row.id = "last-active-row";
-        row.append(UILabel("Active In Previous"));
+
         const la = new UILastActiveSelect(row, this.selectedTimeRange, "tf");
-        row.append(la.elem.select);
+        row.append(UILabel("Active In Previous"),la.elem.select);
 
         la.elem.select.addEventListener("change", (e) =>{
             this.selectedTimeRange = e.target.value;
             this.changeURL();
         });
 
-        this.wrapper.append(row);
+        form.append(row);
 
         const perPageRow = UIDiv("form-row");
-        perPageRow.append(UILabel("Results Per Page"));
 
         const pp = new UIPerPageSelect(perPageRow, this.selectedPerPage, "pp");
 
@@ -134,56 +126,52 @@ class RankingsSearchForm{
             this.changeURL();
         });
 
-        perPageRow.append(pp.elem.select);
+        perPageRow.append(UILabel("Results Per Page"),pp.elem.select);
 
-        this.wrapper.append(perPageRow);
+        form.append(perPageRow);
+        this.wrapper.append(form);
     }
 
     render(){
 
         if(this.data.length === 0){
 
-            this.table.className = "hidden";
+            //this.table.className = "hidden";
             new UIInfo(this.parent, [`There has not been enough matches played in the selected time range for there to be any rankings.`]);
             return;
         }
 
         const headers = ["Place", "Player", "Last Active", "Playtime", "Matches", "Score"];
 
-        const headerRow = document.createElement("tr");
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": headers.map((h) => { return {"display": h}}),
+            "bNoSort": true
+        };
 
-        for(let i = 0; i < headers.length; i++){
-            headerRow.append(UITableHeaderColumn({"content": headers[i]}));
-        }
+        const rows = this.data.map((d,i) =>{
 
-        this.table.append(headerRow);
+            const place = (this.selectedPerPage * (this.currentPage - 1)) + i + 1;
 
-        for(let i = 0; i < this.data.length; i++){
 
-            const d = this.data[i];
+            return [
+                {"display": `${place}${getOrdinal(place)}`, "className": "ordinal"},
+                {
+                    "display": UIPlayerLink({
+                    "playerId": d.player_id, 
+                    "country": d.country, 
+                    "name": d.name, "bTableElem": true,
+                    "seasonId": this.seasonId,
+                    "bSkipSeasonLinks": this.bSkipSeasonLinks
+                })},
+                {"display": toDateString(d.last_active, TIME_ZONE, true), "className": "date"},
+                {"display": toPlaytime(d.playtime), "className": "playtime"},
+                {"display": d.matches},
+                {"display": d.score.toFixed(2)}
+            ];
+        });
 
-            const row = document.createElement("tr");
-
-            row.append(UITableCell({
-                "content": (this.selectedPerPage * (this.currentPage - 1)) + i + 1,
-                "parse": ["ordinal"], 
-                "className": "ordinal"
-            }));
-
-            row.append(UIPlayerLink({
-                "playerId": d.player_id, 
-                "country": d.country, 
-                "name": d.name, "bTableElem": true,
-                "seasonId": this.seasonId,
-                "bSkipSeasonLinks": this.bSkipSeasonLinks
-            }));
-            row.append(UITableCell({"content": d.last_active, "parse": ["date"], "className": "date"}));
-            row.append(UITableCell({"content": d.playtime, "parse": ["playtime"], "className": "playtime"}));
-            row.append(UITableCell({"content": d.matches}));
-            row.append(UITableCell({"content": d.score.toFixed(2)}));
-
-            this.table.append(row);
-        }
+        new TESTUITable(this.wrapper, tableOptions, rows)
 
         new UIPagination(
             this.parent, 
