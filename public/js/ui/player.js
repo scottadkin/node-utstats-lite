@@ -2307,7 +2307,7 @@ function UIPlayerProfileSeasonsList(parent, playerId, activeSeasons, seasonsList
     if(playerProfileSeason !== 0){
 
         const a = document.createElement("a");
-        a.href = `/player/${playerId}`;
+        a.href = `/season/0/player/${playerId}`;
 
         
         const elem = UIDiv("player-season-list-link");
