@@ -568,8 +568,13 @@ export function createTableQueries(){
             ) STRICT`,
 
             //`CREATE UNIQUE INDEX IF NOT EXISTS npt_pgm_idx ON nstats_player_totals(player_id,gametype_id,map_id)`,
-            `CREATE UNIQUE INDEX IF NOT EXISTS npt_psgm_idx ON nstats_player_totals(player_id,season_id,gametype_id,map_id)`,
+            //`CREATE UNIQUE INDEX IF NOT EXISTS npt_psgm_idx ON nstats_player_totals(player_id,season_id,gametype_id,map_id)`,
+            ////`CREATE UNIQUE INDEX IF NOT EXISTS npt_spgm_idx ON nstats_player_totals(season_id,player_id,gametype_id,map_id)`,
+            //used for records page
+            `CREATE UNIQUE INDEX IF NOT EXISTS npt_sgmp_idx ON nstats_player_totals(season_id,gametype_id,map_id,player_id)`,
             `DROP INDEX IF EXISTS npt_pgm_idx`,
+            `DROP INDEX IF EXISTS npt_psgm_idx`,
+            `DROP INDEX IF EXISTS npt_spgm_idx`,
 
             `CREATE TABLE IF NOT EXISTS nstats_player_totals_weapons (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -664,7 +669,9 @@ export function createTableQueries(){
                 season_id INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
             `DROP INDEX IF EXISTS nptc_pgm_idx`,
-           `CREATE UNIQUE INDEX IF NOT EXISTS nptc_psgm_idx ON nstats_player_totals_ctf(player_id,season_id, gametype_id, map_id)`,
+            `DROP INDEX IF EXISTS nptc_psgm_idx`,
+            //used for records page
+           `CREATE UNIQUE INDEX IF NOT EXISTS nptc_sgmp_idx ON nstats_player_totals_ctf(season_id, gametype_id, map_id, player_id)`,
 
             
 
@@ -970,7 +977,10 @@ export function createTableQueries(){
 
             `DROP INDEX IF EXISTS nstats_totals_max_pgm`,
             `DROP INDEX IF EXISTS nstats_totals_max_psgm`,
-            `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_spgm ON nstats_player_totals_max(season_id,player_id,gametype_id,map_id)`,
+            `DROP INDEX IF EXISTS nstats_totals_max_spgm`,
+            //used for records page
+            `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_sgmp ON nstats_player_totals_max(season_id,gametype_id,map_id,player_id)`,
+            ///`CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_spgm ON nstats_player_totals_max(season_id,player_id,gametype_id,map_id)`,
 
 
 
