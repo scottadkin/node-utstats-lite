@@ -254,13 +254,16 @@ b{
 .form{
 	margin-bottom:var(--margin-10);
 	font-weight:500;
+    max-width:var(--max-text-width);
+    margin-left:auto;
+    margin-right:auto;
+    overflow: hidden;
 }
 
 .form-row{
 	display:grid;
 	grid-template-columns: 1fr 2fr;
 	margin-bottom:var(--margin-5);
-    max-width:var(--max-text-width);
     font-size:var(--font-size-80);
     margin-left:auto;
     margin-right:auto;
@@ -268,10 +271,10 @@ b{
 
 label, .form-label, .form-read-only{
 	
-	
 	line-height: var(--line-height-1);
 	padding:var(--padding-5);
 	text-align:left;
+    min-width:200px;
 }
 
 
@@ -464,7 +467,8 @@ select{
 	background-color:var(--bg-color-mid);
 	font-size:var(--font-size-80);
 	border:1px solid var(--border-color-1);
-	font-weight:500;
+    max-width:100%;
+    width:100%;
 }
 
 option{

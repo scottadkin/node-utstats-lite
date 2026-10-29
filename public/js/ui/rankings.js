@@ -73,7 +73,7 @@ class RankingsSearchForm{
             this.changeURL();
         });
 
-        this.wrapper.append(row);
+        return row;
     }
 
 
@@ -102,7 +102,7 @@ class RankingsSearchForm{
         });
 
 
-        this.createDropDownRow("id", "Name", nameOptions, this.selectedId);
+        const nameRow = this.createDropDownRow("id", "Name", nameOptions, this.selectedId);
 
         const row = UIDiv("form-row");
         row.id = "last-active-row";
@@ -115,7 +115,7 @@ class RankingsSearchForm{
             this.changeURL();
         });
 
-        form.append(row);
+        form.append(nameRow, row);
 
         const perPageRow = UIDiv("form-row");
 
