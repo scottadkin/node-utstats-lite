@@ -36,7 +36,7 @@ export async function renderSeasonMatchPage(req, res){
 
         }else{
 
-            if(data.basic.season_id !== seasonId){
+            if(data.basic.season_id !== seasonId && seasonId !== 0){
 
                 return res.render("error.ejs", {
                     "host": req.headers.host, 
