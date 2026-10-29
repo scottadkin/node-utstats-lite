@@ -121,7 +121,7 @@ class RecordsPage{
 
     createUrl(){
 
-        const urlBase = (this.bSkipSeasonLinks || this.seasonId === 0) ? 
+        const urlBase = (this.bSkipSeasonLinks) ? 
         `/records` : 
         `/season/${this.seasonId}/records`;
         
