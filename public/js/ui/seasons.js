@@ -336,7 +336,7 @@ class SeasonPage{
                 "name": d.name,
                 "country": d.country,
                 "bTableElem": true,
-                "seasonId": this.seasonId,
+                "seasonId": this.basicInfo.id,
                 "bSkipSeasonLinks": this.bSkipSeasonLinks
             });
 
