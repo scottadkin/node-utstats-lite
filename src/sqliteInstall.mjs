@@ -969,7 +969,8 @@ export function createTableQueries(){
             ) STRICT`,
 
             `DROP INDEX IF EXISTS nstats_totals_max_pgm`,
-            `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_psgm ON nstats_player_totals_max(player_id,season_id,gametype_id,map_id)`,
+            `DROP INDEX IF EXISTS nstats_totals_max_psgm`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_spgm ON nstats_player_totals_max(season_id,player_id,gametype_id,map_id)`,
 
 
 
