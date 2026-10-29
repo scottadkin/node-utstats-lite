@@ -236,9 +236,17 @@ async function getPlayerMatchRecords(recordInfo, gametypeId, mapId, cleanStart, 
 }
 
 
+function uniqueCombosSetsToArrays(data){
+
+    for(const [gametypeId, mapList] of Object.entries(data)){
+        data[gametypeId] = [...mapList];
+    }
+}
+
 export async function getUniqueGametypeMapCombinations(seasonId){
 
     const query = `SELECT DISTINCT
+    uc.server_id, 
     uc.gametype_id, 
     uc.map_id,
     s.name as server_name,
@@ -266,7 +274,7 @@ export async function getUniqueGametypeMapCombinations(seasonId){
     const domGametypes = new Set();
     const domMaps = new Set();
 
-    const combos = [];
+    const gametypeMapCombos = {};
 
     for(let i = 0; i < result.length; i++){
 
@@ -298,13 +306,17 @@ export async function getUniqueGametypeMapCombinations(seasonId){
             usedMaps.add(r.map_id);
         }
 
-        combos.push({"gId": r.gametype_id, "mId": r.map_id});
+        if(gametypeMapCombos[r.gametype_id] === undefined){
+            gametypeMapCombos[r.gametype_id] = new Set();
+        }
+        gametypeMapCombos[r.gametype_id].add(r.map_id);
+ 
     }
 
-  
+    uniqueCombosSetsToArrays(gametypeMapCombos);
 
     return {
-        gametypes, maps, combos, 
+        gametypes, maps, "combos": gametypeMapCombos, 
         "ctfGametypes": [...ctfGametypes], 
         "ctfMaps": [...ctfMaps], 
         "domGametypes": [...domGametypes], 

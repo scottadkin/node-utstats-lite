@@ -189,21 +189,20 @@ class RecordsPage{
 
         const options = [];
 
+        for(const [gametypeId, mapList] of Object.entries(this.gametypeMapCombos)){
 
-        for(let i = 0; i < this.gametypeMapCombos.length; i++){
+            if(this.selectedGametype === 0 || this.selectedGametype == gametypeId){
 
-            const c = this.gametypeMapCombos[i];
+                for(let i = 0; i < mapList.length; i++){
 
-            if(this.selectedGametype === 0 || this.selectedGametype === c.gId){
+                    const m = mapList[i];
+                    options.push({"display": this.getIdName("maps", m), "value": m});
 
-                options.push({"display": this.getIdName("maps", c.mId), "value": c.mId});
-
-            }
+                }
+            }  
         }
 
         options.sort(sortUISelectOptionsByDisplay);
-
-
         options.unshift({"display": "Any", "value": 0});
 
 
