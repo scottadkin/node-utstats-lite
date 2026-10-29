@@ -54,7 +54,6 @@ async function getPlayerMatchCTFRecords(recordInfo, gametypeId, mapId, cleanStar
     WHERE ${tT}.gametype_id=? AND ${tT}.map_id=? AND record_value!=0 AND ${tT}.total_matches>=?${where}
     ORDER BY record_value DESC LIMIT ?, ?`;
 
-
     const [result, totalResults] = await Promise.all([
         simpleQuery(query, vars), 
         getTotalEntries("player-match", recordInfo, gametypeId, mapId, cleanMinimumMatchesPlayed, seasonId)
@@ -165,6 +164,7 @@ function getMaxTableQuery(seasonId, recordType, cleanStart, cleanPerPage, gamety
     return {query, vars}
 }
 
+
 async function getTotalEntries(cleanMode, recordInfo, cleanGametypeId, cleanMapId, cleanMinimumMatchesPlayed, seasonId){
 
     if(recordInfo === null){
@@ -174,47 +174,40 @@ async function getTotalEntries(cleanMode, recordInfo, cleanGametypeId, cleanMapI
     const bCTF = recordInfo.group === "CTF";
    
     let table = "";
+    let query = "";
 
-    if(cleanMode === "player-lifetime"){
-        table = (bCTF) ? "nstats_player_totals_ctf" : "nstats_player_totals";
-    }else if(cleanMode === "player-match"){
+    if(cleanMode === "player-match"){
         table = (bCTF) ? "nstats_player_totals_ctf" : "nstats_player_totals_max";
-    }else if(cleanMode === "player-epm"){
+
+        
+        if(table === "nstats_player_totals_ctf"){
+            query = `SELECT COUNT(*) as total_rows FROM ${table} 
+            WHERE ${recordInfo.value}!=0 
+            AND season_id=? AND gametype_id=? AND map_id=? AND ${table}.total_matches>=?`;
+        }else{
+
+            query = `SELECT COUNT(*) as total_rows FROM ${table} 
+            INNER JOIN nstats_player_totals ON ${table}.season_id=nstats_player_totals.season_id 
+            AND ${table}.player_id=nstats_player_totals.player_id  
+            AND ${table}.gametype_id=nstats_player_totals.gametype_id AND 
+            ${table}.map_id=nstats_player_totals.map_id 
+            WHERE ${table}.${recordInfo.value}!=0 
+            AND ${table}.season_id=? AND ${table}.gametype_id=? AND ${table}.map_id=? AND nstats_player_totals.total_matches>=?`;
+
+        }
+
+    }else{
+
         table = (bCTF) ? "nstats_player_totals_ctf" : "nstats_player_totals";
-    }else if(cleanMode === "player-avg"){
-        table = (bCTF) ? "nstats_player_totals_ctf" : "nstats_player_totals";
+
+        query = `SELECT COUNT(*) as total_rows FROM ${table} WHERE ${recordInfo.value}!=0 
+        AND season_id=? AND gametype_id=? AND map_id=? AND ${table}.total_matches>=?`;
     }
 
     if(table === "") throw new Error("No table found");
 
-    const vars = [cleanGametypeId, cleanMapId, cleanMinimumMatchesPlayed];
-
-    let query = `SELECT COUNT(*) as total_rows FROM ${table} WHERE ${recordInfo.value}!=0 
-    AND gametype_id=? AND map_id=? AND ${table}.total_matches>=?`;
-
+    const vars = [seasonId, cleanGametypeId, cleanMapId, cleanMinimumMatchesPlayed];
     
-
-    if(table === "nstats_player_totals_max" && !bCTF){
-
-        query = `SELECT COUNT(*) as total_rows FROM ${table} 
-        LEFT JOIN nstats_player_totals ON ${table}.player_id = nstats_player_totals.player_id 
-        AND ${table}.gametype_id=nstats_player_totals.gametype_id 
-        AND ${table}.map_id=nstats_player_totals.map_id AND ${table}.season_id=nstats_player_totals.season_id
-        WHERE ${recordInfo.value}!=0 AND ${table}.gametype_id=? AND ${table}.map_id=? AND nstats_player_totals.total_matches>=?`;
-
-        query += ` AND nstats_player_totals.season_id=?`;
-        vars.push(seasonId);
-        
-    }else{
-
-        query += ` AND ${table}.season_id=?`;
-        vars.push(seasonId);
-    }
-
-    //if(seasonId !== 0){
-        
-   // }
-
     const result = await simpleQuery(query, vars);
 
     return result[0].total_rows;
@@ -230,32 +223,38 @@ async function getPlayerMatchRecords(recordInfo, gametypeId, mapId, cleanStart, 
 
     const {query, vars} = getMaxTableQuery(seasonId, recordInfo.value, cleanStart, cleanPerPage, gametypeId, mapId, cleanMinimumMatchesPlayed);
 
-    const [data, totalResults] = await Promise.all([
+
+
+   const [data, totalResults] = await Promise.all([
         simpleQuery(query, vars), 
         getTotalEntries("player-match", recordInfo, gametypeId, mapId, cleanMinimumMatchesPlayed, seasonId)
     ]);
+
 
     return {data, totalResults};
 
 }
 
 
-export async function getUniqueGametypeMapCombinations(){
+export async function getUniqueGametypeMapCombinations(seasonId){
 
-    const query = `SELECT DISTINCT nstats_player_totals.gametype_id,
-    nstats_player_totals.map_id,
-    nstats_maps.name as map_name,
-    nstats_maps.b_ctf as b_map_ctf,
-    nstats_maps.b_dom as b_map_dom,
-    nstats_gametypes.name as gametype_name,
-    nstats_gametypes.b_ctf as b_gametype_ctf,
-    nstats_gametypes.b_dom as b_gametype_dom
-    FROM nstats_player_totals 
-    LEFT JOIN nstats_gametypes ON nstats_player_totals.gametype_id = nstats_gametypes.id
-    LEFT JOIN nstats_maps ON nstats_player_totals.map_id = nstats_maps.id
-    WHERE nstats_player_totals.gametype_id!=0 AND nstats_player_totals.map_id!=0`;
+    const query = `SELECT DISTINCT
+    uc.gametype_id, 
+    uc.map_id,
+    s.name as server_name,
+    g.name as gametype_name,
+    m.name as map_name,
+    g.b_ctf as b_gametype_ctf,
+    g.b_dom as b_gametype_dom,
+    m.b_ctf as b_map_ctf,
+    m.b_dom as b_map_dom 
+    FROM nstats_seasons_unique_match_combinations AS uc
+    LEFT JOIN nstats_servers as s ON uc.server_id = s.id
+    LEFT JOIN nstats_gametypes as g ON uc.gametype_id = g.id
+    LEFT JOIN nstats_maps as m ON uc.map_id = m.id
+    WHERE uc.season_id=?`;
 
-    const result = await simpleQuery(query);
+    const result = await simpleQuery(query, [seasonId]);
 
     const usedGametypes = new Set();
     const gametypes = [];
@@ -449,7 +448,7 @@ function bRecordsPageIdExists(data, id){
     return false;
 }
 
-export async function sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps){
+export function sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps){
 
     let mode = (req.query.mode !== undefined) ? req.query.mode.toLowerCase() : "player-match";
     let recordType = (req.query.rec !== undefined) ? req.query.rec.toLowerCase() : "score";

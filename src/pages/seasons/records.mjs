@@ -12,28 +12,33 @@ export async function renderSeasonRecordsPage(req, res){
 
     
     try{
-        
+
+        const seasonId = res.locals.season;
+        const seasonInfo = res.locals.seasonInfo;
+
         const [pageSettings, brandingSettings, timeZone, {gametypes, maps, combos, ctfGametypes, ctfMaps, domGametypes, domMaps}] = await Promise.all([
             getCategorySettings("Records"),
             getCategorySettings("Branding"),
             getSiteWideTimeZone(),
-            getUniqueGametypeMapCombinations()
+            getUniqueGametypeMapCombinations(seasonId)
         ]);
 
-        const seasonId = res.locals.season;
-        const seasonInfo = res.locals.seasonInfo;
+    
+
+        
 
         const {
             mode, recordType, dirtyPage, 
             dirtyPerPage, selectedGametype, 
             selectedMap, selectedMinimumMatchesPlayed
-        } = await sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps);
+        } = sanitizeRecordsPageReq(req, res, pageSettings, gametypes, maps);
 
 
         const {page, perPage, totalResults, data} = await getRecords(
             mode, recordType, selectedGametype, selectedMap, dirtyPage, dirtyPerPage,
             selectedMinimumMatchesPlayed, seasonId
         );
+
 
         const {
             title, 

@@ -1151,7 +1151,7 @@ async function insertPlayerGametypeMaxValues(data, seasonId){
         "nstats_player_totals_max", 
         ["player_id", "gametype_id", "map_id", ...columns, "season_id"], 
         insertVars, 
-        ["player_id", "season_id", "gametype_id", "map_id"]
+        ["season_id", "player_id", "gametype_id", "map_id"]
     );
 
 }
