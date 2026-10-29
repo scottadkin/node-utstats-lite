@@ -160,11 +160,14 @@ function renderCategory(mode){
 <script src="../js/ui/admin.js"></script>
 
 
-<div class="header-wrapper">Admin Control Panel</div>
 
-<% renderModes(mode) %>
-<% renderGoBackToMain(mode) %>
-<div id="root"></div>
+
+
+<div id="root">
+    <div class="header-wrapper">Admin Control Panel</div>
+    <% renderModes(mode) %>
+    <% renderGoBackToMain(mode) %>
+</div>
 <% renderCategory(mode) %>
 
 <%- include('footer.ejs') -%>

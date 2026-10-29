@@ -1520,7 +1520,7 @@ class PlayerWeaponsSummary{
 
         this.gametypeRow.className = (this.mode === "gametypes" || this.mode === "custom") ? "form-row" : "hidden";
         this.mapRow.className = (this.mode === "maps" || this.mode === "custom") ? "form-row" : "hidden";
-
+        this.form.className = (this.mode === "gametypes" || this.mode === "maps" || this.mode === "custom") ? "form": "hidden";
 
         if(this.mode === "custom"){
 
@@ -1585,6 +1585,8 @@ class PlayerWeaponsSummary{
             this.render();
         });
 
+        this.form = UIDiv(`${(this.mode === "gametypes" || this.mode === "custom") ? "form" : "hidden"}`);
+
         this.gametypeRow = UIDiv(`form-row ${(this.mode === "gametypes" || this.mode === "custom") ? "" : "hidden"}`);
 
         this.gametypeRow.append(UILabel("Gametype"));
@@ -1595,7 +1597,7 @@ class PlayerWeaponsSummary{
             this.render();
         });
 
-        this.wrapper.append(this.gametypeRow);
+        this.form.append(this.gametypeRow);
 
 
         this.mapRow = UIDiv(`form-row ${(this.mode === "maps" || this.mode === "custom") ? "" : "hidden"}`);
@@ -1607,7 +1609,9 @@ class PlayerWeaponsSummary{
             this.render();
         });
 
-        this.wrapper.append(this.mapRow);
+        this.form.append(this.mapRow);
+
+        this.wrapper.append(this.form);
 
     }
 
