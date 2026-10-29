@@ -342,6 +342,9 @@ class PlayerGeneralSummary{
 
     createDropDowns(){
 
+
+        this.form = UIDiv("form");
+
         const uniqueGametypes = this.getUniqueGametypes();
 
         if(uniqueGametypes.length > 0){
@@ -373,7 +376,7 @@ class PlayerGeneralSummary{
     
         this.mapRow = UIDiv((this.mode === "custom") ? "form-row": "hidden");
         this.mapRow.append(UILabel("Map"));
-        this.wrapper.append(this.mapRow);
+        this.form.append(this.gametypeRow, this.mapRow);
  
         
         if(this.mapSelect === undefined){
@@ -383,8 +386,9 @@ class PlayerGeneralSummary{
 
                 this.render();
             });
-
         }
+
+        this.wrapper.append(this.form);
     }
 
     createTabs(){
@@ -656,6 +660,12 @@ class PlayerGeneralSummary{
 
 
         const epmKeys = ["epm_score", "epm_frags", "epm_kills", "epm_deaths", "epm_suicides", "epm_team_kills", "epm_headshots"];
+
+        if(this.mode === "custom"){
+            this.form.className = "form";
+        }else{
+            this.form.className = "hidden";
+        }
 
 
         if(this.selectedType === "totals"){
@@ -1214,13 +1224,13 @@ class PlayerItemsSummary{
 
     createDropDowns(){
 
+        this.form = UIDiv("form");
 
         const uniqueGametypes = this.getUniqueGametypes()
 
         this.selectedGametype = uniqueGametypes[0] ?? 0;
 
         const {gametypeOptions, mapOptions} = this.getDropDownOptions();
-
 
         this.gametypeRow = UIDiv((this.mode !== "custom") ? "hidden" :"form-row");
         this.gametypeRow.append(UILabel("Gametype"));
@@ -1254,8 +1264,8 @@ class PlayerItemsSummary{
         });
 
 
-        this.wrapper.append(this.gametypeRow, this.mapRow);
-        
+        this.form.append(this.gametypeRow, this.mapRow);
+        this.wrapper.append(this.form);
     }
 
 
@@ -1377,9 +1387,6 @@ class PlayerItemsSummary{
             "Super Health Pack", "Shield Belt", "Damage Amplifier"
         ];
 
-        
-
-
         if(this.mode === "gametypes"){
             headers.unshift("Gametype");
         }else if(this.mode === "maps"){
@@ -1391,6 +1398,11 @@ class PlayerItemsSummary{
 
     render(){
      
+        if(this.mode !== "custom"){
+            this.form.className = "hidden";
+        }else{
+            this.form.className = "form";
+        }
         const headers = this.getHeaders();
 
         const rows = [];
@@ -2083,7 +2095,9 @@ class PlayerWeaponDamage{
 
         this.parent = document.querySelector(parent);
 
-        this.wrapper = new UISection(this.parent, "Weapon Damage Totals");
+        this.wrapper = UIDiv()//new UISection(this.parent, "Weapon Damage Totals");
+        UIHeader(this.wrapper, "Weapon Damage Totals")
+        this.parent.append(this.wrapper);
         this.data = data;
 
         this.mode = "all";
@@ -2107,7 +2121,7 @@ class PlayerWeaponDamage{
             {"display": "Custom", "value": "custom"},
         ];
 
-        this.tabs = new UITabs(this.wrapper.elem, options, this.mode);
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
 
@@ -2118,7 +2132,6 @@ class PlayerWeaponDamage{
 
 
     getUniqueOptions(bInitialRender){
-
 
         const gametypeOptions = [];
         const mapOptions = [];
@@ -2140,8 +2153,6 @@ class PlayerWeaponDamage{
 
                 if(d.map_id !== 0 && maps.indexOf(d.map_id) === -1 && d.gametype_id === this.selectedGametype){
 
-        
-                    
                     mapOptions.push({"display": d.map_name, "value": d.map_id});
                     maps.push(d.map_id);
                     
@@ -2151,7 +2162,6 @@ class PlayerWeaponDamage{
             }
 
             
-
             if(d.map_id !== 0 && maps.indexOf(d.map_id) === -1){
 
                 mapOptions.push({"display": d.map_name, "value": d.map_id});
@@ -2191,7 +2201,7 @@ class PlayerWeaponDamage{
 
         const {gametypeOptions, mapOptions} = this.getUniqueOptions(true);
 
-
+        this.form = UIDiv("form");
 
         this.gametypeSelectRow = UIDiv("hidden");
         this.gametypeSelectRow.append(UILabel("Gametype"));
@@ -2202,8 +2212,6 @@ class PlayerWeaponDamage{
             this.render();
         });
 
-        this.wrapper.elem.append(this.gametypeSelectRow);
-
         this.mapSelectRow = UIDiv("hidden");
         this.mapSelectRow.append(UILabel("Map"));
         
@@ -2213,7 +2221,9 @@ class PlayerWeaponDamage{
             this.render();
         });
 
-        this.wrapper.elem.append(this.mapSelectRow);
+        this.form.append(this.gametypeSelectRow, this.mapSelectRow);
+
+        this.wrapper.append(this.form);
     }
 
 
@@ -2233,11 +2243,14 @@ class PlayerWeaponDamage{
     render(){
 
         this.updateSelectOptions();
-      
+
+        this.form.className = "hidden";
+        
 
         if(this.mode === "gametypes" || this.mode === "custom"){
 
             this.gametypeSelectRow.className = "form-row";
+            this.form.className = "form";
         }else{
             this.gametypeSelectRow.className = "hidden";
         }
@@ -2247,6 +2260,7 @@ class PlayerWeaponDamage{
             this.mapSelectRow.className = "hidden";
         }else{
             this.mapSelectRow.className = "form-row";
+            this.form.className = "form";
         }
 
         const tableOptions = {
@@ -2285,7 +2299,7 @@ class PlayerWeaponDamage{
                
                 {"value": d.max_damage},
                 {"value": d.damage},
-                 {"value": d.avg_damage, "display": d.avg_damage.toFixed(2)},
+                {"value": d.avg_damage, "display": d.avg_damage.toFixed(2)},
                 {"value": d.damage_per_minute, "display": d.damage_per_minute.toFixed(2)},
             );
     
@@ -2294,7 +2308,7 @@ class PlayerWeaponDamage{
 
 
         if(this.table === undefined){
-            this.table = new TESTUITable(this.wrapper.elem, tableOptions, rows);
+            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
         }else{
             this.table.updateRows(rows, tableOptions.headers);
         }
