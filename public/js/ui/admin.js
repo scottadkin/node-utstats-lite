@@ -3388,7 +3388,7 @@ class AdminMatchesManager{
 
     async init(){
         
-        this.wrapper = UIDiv();
+        this.wrapper = UIDiv("form");
 
         this.parent.append(this.wrapper);
 
@@ -3713,9 +3713,8 @@ class AdminMatchesManager{
 
     
         const deleteDupInfo = [
-            `Delete all duplicate matches.`,  UIBr(),
+            `Delete all duplicate matches.`,
             `Remove all duplicate matches leaving only their most recent import of each match.`,
-            UIBr(),
             `This action also recalculates player totals, gametype totals, map totals, and player rankings.`
         ];
 
@@ -3752,8 +3751,7 @@ class AdminMatchesManager{
             this.deleteAllDuplicates();
         });
 
-        deleteDupInfo.push(UIBr(), this.deleteAllDupButton);
-        this.deleteDupInfo = new UIInfo(this.content, deleteDupInfo)
+        this.deleteDupInfo = new UIInfo(this.content, [UIUnorderedList(deleteDupInfo), UIBr(), this.deleteAllDupButton])
 
          const table = new UITable(this.content, {
             "headers": ["Date", "Server", "Gametype", "Map", "Total Duplicates"],
@@ -7797,10 +7795,9 @@ class AdminSeasonsManager{
 
         if(this.mode !== "edit") return;
 
-        new UIInfo(this.content, [
+        new UIInfo(this.content, [UIUnorderedList([
             "Edit an existing season.",
-            UIBr(),
-            `Existing data will automatically be adjusted to any date changes.`
+            `Existing data will automatically be adjusted to any date changes.`])
         ]);
 
 
@@ -7890,11 +7887,11 @@ class AdminSeasonsManager{
 
         UIHeader(this.content, "Delete Selected Season");
         const deleteForm = UIDiv("form");
-        new UIInfo(deleteForm, [
-            `Deleting a season `, UIB("will not delete"),` any match data.`, UIBr(),
-            `Matches that where assigned to the season will have their seasonId change to 0(no season).`, UIBr(),
+        new UIInfo(deleteForm, [UIUnorderedList([
+            [`Deleting a season `, UIB("will not delete"),` any match data.`],
+            [`Matches that where assigned to the season will have their seasonId change to 0(no season).`],
             `All totals, rankings, records, ctf league data for the season will be deleted.`
-        ]);
+        ])]);
 
         const deleteButton = UIButton("Delete Season","delete-button");
         deleteButton.addEventListener("click", () =>{
@@ -7941,10 +7938,10 @@ class AdminSeasonsManager{
 
         if(this.mode !== "recalculate") return;
 
-        new UIInfo(this.content, [
-            `Create season data from existing data without the need of reimporting logs.`, UIBr(),
+        new UIInfo(this.content, [UIUnorderedList([
+            `Create season data from existing data without the need of reimporting logs.`,
             `Previously imported matches will automatically be assigned to the season if applicable.`
-        ]);
+        ])]);
 
         const form = UIDiv("form");
         const seasonRow = UIDiv("form-row");
