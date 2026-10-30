@@ -133,7 +133,10 @@ class AdminFTPManager{
             row.append(UILabel(l), v);
             content.push(row);
         }
-        new UIInfo(this.content, content);
+
+        const form = UIDiv("form");
+        form.append(...content);
+        new UIInfo(this.content, [form]);
     }
 
 
@@ -160,13 +163,15 @@ class AdminFTPManager{
 
         const rows = [];
 
+        const wrapperClasses = "text-left font-small";
+
         for(let i = 0; i < this.ftpServers.length; i++){
 
             const s = this.ftpServers[i];
 
             const row =  [];
 
-            const ignoreWrapper = UIDiv("text-left");
+            const ignoreWrapper = UIDiv(wrapperClasses);
 
             ignoreWrapper.append(
                 `Ignore Bots: ${(s.ignore_bots) ? "True": "False"}`, 
@@ -174,15 +179,15 @@ class AdminFTPManager{
                 `Ignore Duplicates: ${(s.ignore_duplicates) ? "True": "False"}`
             );
            
-            const minWrapper = UIDiv("text-left");
+            const minWrapper = UIDiv(wrapperClasses);
 
             minWrapper.append(
-                `Minimum Players: ${s.min_players} Players`, 
+                `Min Players: ${s.min_players} Players`, 
                 UIBr(),
-                `Minimum Playtime: ${s.min_playtime} Seconds`
+                `Min Playtime: ${s.min_playtime} Seconds`
             );
 
-            const totalWrapper = UIDiv("text-left");
+            const totalWrapper = UIDiv(wrapperClasses);
 
             totalWrapper.append(`Total Imports: ${s.total_imports}`, 
                 UIBr(),
@@ -797,7 +802,7 @@ class AdminMapsManager{
         this.parent = document.querySelector(parent);
         UIHeader(this.parent, "Map Manager");
        
-        this.mode = "thumbs";
+        this.mode = "sshots";
 
         this.mapList = [];
         this.mapImages = {
@@ -1060,11 +1065,8 @@ class AdminMapsManager{
 
         const content = [];
 
-        content.push(
-            `- File names are automatically assigned to match the selected map, and images are converted to .jpg format.`,
-            UIBr(),
-            `- You can upload the following image types: `
-        );
+
+        const validItems = [];
 
         for(let i = 0; i < this.validScreenshotTypes.length; i++){
 
@@ -1077,40 +1079,45 @@ class AdminMapsManager{
                 item.append(", ");
             }
 
-            content.push(item);
+            validItems.push(item);
         }
 
-        content.push(
-            UIBr(),
-            `- You can manually place images into the site's `, 
-            UIB("/images/maps/"), 
-            " folder, but they must be a .jpg image",
-            UIBr(), 
-            `- The naming convention for images is the map name with the gametype prefix removed, `,
-            `all lowercase, and shouldn't include the following characters: `
-        );
+        let badCharsContent = [];
 
         for(let i = 0; i < this.badImageChars.length; i++){
             const b = this.badImageChars[i];
-            content.push(UIB(b));
-            if(i < this.badImageChars.length - 1) content.push(" ");
+            badCharsContent.push(UIB(b));
+            if(i < this.badImageChars.length - 1) badCharsContent.push(" ");
         }
 
-        content.push(
-            UIBr(), 
-            "An example: ", 
-            UIB("DM-Deck16]["), 
-            " will require the image to be called ", 
-            UIB("deck16.jpg"), UIBr(),
-            "- The website also does partial matches, ",
-            "if you have multiple version of a map like ", 
-            UIB("CTF-FaceLE01, "), UIB("CTF-FaceCE, "), UIB("CTF4-FaceV201"),
-            " you can place an image into the ",
-            UIB("/images/maps/"), " folder called ", 
-            UIB("face.jpg")," and every map with a name containg ",
-            UIB("face")," will use that image if there isn't an exact match for a map.",
-            UIBr(), `- For best results use an aspect ratio of 16:9.`, UIBr()
-        );
+        const list = UIUnorderedList([
+       
+            `File names are automatically assigned to match the selected map, and images are converted to .jpg format.`,
+            [`You can upload the following image types: `, ...validItems],
+            [`You can manually place images into the site's `, UIB("/images/maps/"), " folder, but they must be a .jpg image."],
+            [
+                `The naming convention for images is the map name with the gametype prefix removed, 
+                all lowercase, and shouldn't include the following characters: `, ...badCharsContent,
+            ],
+            [
+                "An example: ", 
+                UIB("DM-Deck16]["), 
+                " will require the image to be called ", 
+                UIB("deck16.jpg"),
+            ], [
+                "The website also does partial matches, ",
+                "if you have multiple version of a map like ", 
+                UIB("CTF-FaceLE01, "), UIB("CTF-FaceCE, "), UIB("CTF4-FaceV201"),
+                " you can place an image into the ",
+                UIB("/images/maps/"), " folder called ", 
+                UIB("face.jpg")," and every map with a name containg ",
+                UIB("face")," will use that image if there isn't an exact match for a map.",
+            ],
+            `For best results use an aspect ratio of 16:9.`
+
+        ]);
+
+        content.push(list);
 
         new UIInfo(this.wrapper, content);
 
@@ -1407,20 +1414,20 @@ class AdminMapsManager{
 
         UIHeader(this.wrapper, "Thumbnail Settings");
 
-        const infoContent = [
-            `Adjust the settings for map screenshot thumbnails.`, UIBr(),
-            UIB("Quality "),`1 to 100, higher the value the better looking the images will be at the cost of larger file sizes.`,
-            UIBr(), UIB("Width "), `1px to Npx, the width of the thumbnails when a new batch is created.`,
-            UIBr(), UIB("Height "), `1px to Npx, the height of the thumbnails when a new batch is created.`,
-            UIBr(), `For best results use a 16:9 aspect ratio.`
+
+        const listContent = [
+            `Adjust the settings for map screenshot thumbnails.`,
+            [UIB("Quality "),`1 to 100, higher the value the better looking the images will be at the cost of larger file sizes.`],
+            [UIB("Width "), `1px to Npx, the width of the thumbnails when a new batch is created.`],
+            [UIB("Height "), `1px to Npx, the height of the thumbnails when a new batch is created.`],
+            `For best results use a 16:9 aspect ratio.`
         ];
+        
+        const list = UIUnorderedList(listContent);
 
-
-        new UIInfo(this.wrapper, infoContent);
-
+        new UIInfo(this.wrapper, [list]);
 
         this.thumbForm = UIDiv("form");
-
 
         const qualityRow = UIDiv("form-row");
         qualityRow.append(UILabel("Quality"));
@@ -1482,16 +1489,16 @@ class AdminMapsManager{
         this.fullSizeSpan = UISpan(this.mapImages.fullSize.length);
         this.thumbSpan = UISpan(this.mapImages.thumbs.length);
         
+        
         const content = [
-            "Create thumbnails for all existing map screenshots.", UIBr(), 
-            `If you use the main screenshot uploader tab a thumbnail will automatically be created on a successful upload.`, UIBr(),
+            "Create thumbnails for all existing map screenshots.", 
+            `If you use the main screenshot uploader tab a thumbnail will automatically be created on a successful upload.`,
             `If a thumbnail for a map does not exist a fullsize one will be used instead.`,
-            UIBr(), UIBr(),
-            `Found a total of `,this.fullSizeSpan , ` fullsize images.`, UIBr(),
-            `Found a total of `,this.thumbSpan ,` thumbnail images.`
+            [`Found a total of `,this.fullSizeSpan , ` fullsize images.`], 
+            [`Found a total of `,this.thumbSpan ,` thumbnail images.`]
         ];
 
-        new UIInfo(this.wrapper, content);
+        new UIInfo(this.wrapper, [UIUnorderedList(content)]);
 
 
         this.renderThumbnailSettings();
