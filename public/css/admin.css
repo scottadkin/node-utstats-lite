@@ -77,19 +77,6 @@
 	
 }
 
-.admin-info-row{
-	display:grid;
-	grid-template-columns: 50% 50%;
-	max-width:var(--max-table-width-4);
-	padding:var(--padding-5);
-	text-align: left;
-}
-
-.admin-info-row-label{
-	color:yellow;
-	font-weight: 500;
-}
-
 
 .admin-home{
 	text-align:center;

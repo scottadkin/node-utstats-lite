@@ -1,24 +1,3 @@
-function UIAdminInfoRow(name, content){
-
-    const elem = UIDiv("admin-info-row center");
-
-    const label = UIDiv("admin-info-row-label");
-    label.innerHTML = name;
-
-    elem.append(label);
-
-    const display = UIDiv();
-
-    if(typeof content !== "object"){
-        display.innerHTML = content;
-    }else{
-        display.append(content);
-    }
-
-    elem.append(display);
-    return elem;
-}
-
 class AdminFTPManager{
 
     constructor(parent){
@@ -28,7 +7,7 @@ class AdminFTPManager{
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Importer Manager");
         this.parent.append(this.wrapper);
-        this.mode = "rejected";
+        this.mode = "current";
 
         this.selectedFTPServer = "";
         this.bActionInProgress = false;
@@ -134,18 +113,26 @@ class AdminFTPManager{
 
         const logs = this.logsFolderSettings;
 
-        content.push(
-            UIAdminInfoRow("Total Imports", logs["total_imports"]),
-            UIAdminInfoRow("Total Logs Imported", logs["total_logs_imported"]),
-            UIAdminInfoRow("Latest Import",  toDateString(logs["last"], TIME_ZONE)),
-            UIAdminInfoRow("First Import", toDateString(logs["first"], TIME_ZONE)),
-            UIAdminInfoRow("Ignore Bots", UIStaticTrueFalse(logs["ignore_bots"])),
-            UIAdminInfoRow("Ignore Duplicate Logs", UIStaticTrueFalse(logs["ignore_duplicates"])),
-            UIAdminInfoRow("Minimum Match Length", logs["min_playtime"])),
-            UIAdminInfoRow("Minimum Players", logs["min_players"]),
-            UIAdminInfoRow("Append Team Sizes To Gametype Names", UIStaticTrueFalse(logs["append_team_sizes"])
-        );
-        
+        const rows = [
+            {"l": "Total Imports", "v":logs["total_imports"]},
+            {"l": "Total Logs Imported", "v":logs["total_logs_imported"]},
+            {"l": "Latest Import", "v":toDateString(logs["last"], TIME_ZONE)},
+            {"l": "First Import", "v":toDateString(logs["first"], TIME_ZONE)},
+            {"l": "Ignore Bots", "v":UIStaticTrueFalse(logs["ignore_bots"])},
+            {"l": "Ignore Duplicate Logs", "v":UIStaticTrueFalse(logs["ignore_duplicates"])},
+            {"l": "Minimum Match Length", "v":logs["min_playtime"]},
+            {"l": "Minimum Players", "v":logs["min_players"]},
+            {"l": "Append Team Sizes To Gametype Names", "v":UIStaticTrueFalse(logs["append_team_sizes"])},
+        ];
+
+        for(let x = 0; x < rows.length; x++){
+
+            const {l, v} = rows[x];
+
+            const row = UIDiv("form-row");
+            row.append(UILabel(l), v);
+            content.push(row);
+        }
         new UIInfo(this.content, content);
     }
 

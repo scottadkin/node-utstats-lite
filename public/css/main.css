@@ -480,6 +480,7 @@ option{
 	padding:var(--padding-5);
 	border:1px solid var(--border-color-5);
     text-align: center;
+    align-content: center;
 }
 
 .warning, .error, .pass{
