@@ -6425,13 +6425,18 @@ class AdminPlayerForceName{
 
 class AdminRenamePlayer{
 
-    constructor(parent, parentMode){
+    constructor(parent, parentMode, reqQuery){
 
         this.parent = parent;
 
         this.wrapper = UIDiv();
 
-        this.mode = "hwid";
+        this.mode = reqQuery?.by ?? "hwid";
+
+
+        this.bAutoPreview = reqQuery.by !== undefined;
+     
+        console.log(this.bAutoPreview);
 
         this.usageData = [];
         this.hwidToNames = [];
@@ -6445,11 +6450,11 @@ class AdminRenamePlayer{
         this.bSelectAll = false;
 
         this.nameFilter = "";
-        this.hwidFilter = "";
+        this.hwidFilter = (this.mode === "hwid") ? reqQuery?.target : "";
         this.mac1Filter = "";
         this.mac2Filter = "";
 
-        this.selectedHWID = "";
+        this.selectedHWID = this.hwidFilter;
 
         this.selectedName = "";
 
@@ -6461,6 +6466,7 @@ class AdminRenamePlayer{
         
         this.createElems();
         this.loadData();
+      
     }
 
     resetPreviewData(){
@@ -6760,6 +6766,11 @@ class AdminRenamePlayer{
             this.macToNames = res.macToNames;
             this.bothToNames = res.bothToNames;
             this.playerNames = res.playerNames;
+
+            if(this.bAutoPreview){
+
+                await this.previewChanges(this.selectedHWID, "", "");
+            }
 
             this.render();
 
@@ -7327,18 +7338,19 @@ class AdminPlayersTotalsRecalculator{
 
 class AdminPlayersManager{
 
-    constructor(parent){
+    constructor(parent, reqQuery){
 
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
         
         this.parent.append(this.wrapper);
-        this.mode = "rename";
 
+        this.reqQuery = reqQuery;
+        this.mode = reqQuery?.sub ?? "importer";
 
         this.importerSettings = new AdminPlayersImporterSettings(this.parent, this.mode);
-        this.renamePlayer = new AdminRenamePlayer(this.parent, this.mode);
+        this.renamePlayer = new AdminRenamePlayer(this.parent, this.mode, reqQuery);
         this.forceNameManager = new AdminPlayerForceName(this.parent, this.mode);
         this.playerWeaponsRecalculator = new AdminPlayersWeaponsRecalculator(this.parent, this.mode);
         this.recalculateAll = new AdminPlayersTotalsRecalculator(this.parent, this.mode);
@@ -7998,8 +8010,6 @@ class UIPlayerProfileManager{
         //don't load this until switching to tab
         this.playerHistory = [];
 
-        console.log(this.basicInfo);
-
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Admin Player Manager")
         this.parent.append(this.wrapper);
@@ -8159,7 +8169,10 @@ class UIPlayerProfileManager{
 
         await this.loadHistory();
 
-        console.log(this.playerHistory);
+        new UIInfo(this.content, [
+            `View recent activity associated to this player name, clicking on an ip, 
+            hwid, or mac address will open the admin page in another tab.`
+        ]);
 
         const tableOptions = {
             "className": "t-width-1",
@@ -8185,10 +8198,13 @@ class UIPlayerProfileManager{
                     "className": "date"
                 },
                 {
+                    
                     "value": p.ip,
                     "display": [UICountryFlag(p.country), p.ip]
                 }, 
                 {
+                    "url": `/admin/?mode=players&sub=rename&by=hwid&target=${p.hwid}`,
+                    "urlTarget": "_blank",
                     "value": p.hwid,
                     "className": "font-small"
                 },

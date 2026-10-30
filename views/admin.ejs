@@ -140,7 +140,7 @@ function renderCategory(mode){
     }else if(mode === "sqlite-database-backup"){
         %><script>new AdminSQLiteBackupManager("#root")</script><%
     }else if(mode === "players"){
-        %><script>new AdminPlayersManager("#root")</script><%
+        %><script>new AdminPlayersManager("#root", <%- JSON.stringify(reqQuery) %>)</script><%
     }else if(mode === "seasons"){
         %><script>new AdminSeasonsManager("#root")</script><%
     }   
@@ -154,7 +154,7 @@ function renderCategory(mode){
     "userSession": userSession,
     meta
     }) -%>
-<link rel="stylesheet" type="text/css" href="css/admin.css">
+<link rel="stylesheet" type="text/css" href="/css/admin.css">
 <%- include("timeZone.ejs", {timeZone}); %>
 <script src="../js/ui/table.js"></script>
 <script src="../js/ui/admin.js"></script>

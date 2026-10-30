@@ -6,7 +6,10 @@ export async function renderAdminPage(req, res, userSession){
 
         const timeZone = await getSiteWideTimeZone();
 
-        let mode = req?.query?.mode ?? "";
+        let mode = req.query?.mode ?? "";
+
+        const reqQuery = req.query;
+
 
         return res.render("admin.ejs", {
             "title": "Admin",
@@ -17,7 +20,8 @@ export async function renderAdminPage(req, res, userSession){
             },
             "host": req.headers.host,
             userSession,
-            mode
+            mode,
+            reqQuery
         });
 
     }catch(err){
