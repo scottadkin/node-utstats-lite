@@ -71,7 +71,7 @@ class MatchScreenshot{
 
             if(u === "") continue;
 
-            images.push(`flags/${u}.svg`);
+            images.push(`flags/${u}.png`);
         }
 
         return images;
@@ -322,7 +322,7 @@ class MatchScreenshot{
 
         if(country === "") country = "xx";
 
-        this.drawImage(`/images/flags/${country}.svg`, startX - flagOffset, y, rowHeight * 0.5, rowHeight * 0.5);
+        this.drawImage(`/images/flags/${country}.png`, startX - flagOffset, y, rowHeight * 0.5, rowHeight * 0.5);
         this.fillText(pingOptions);
 
         const effOptions = {
@@ -775,7 +775,7 @@ class MatchScreenshot{
             this.drawImage("/images/faceless.png", startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize);
             this.strokeRect(startX + faceOffsetX, y + 0.4, faceIconSize * 0.5625, faceIconSize, "rgba(255,255,255,0.5)", 0.05);
 
-            const flagFile = `/images/flags/${(p.country !== "") ? p.country: "xx"}.svg`;
+            const flagFile = `/images/flags/${(p.country !== "") ? p.country: "xx"}.png`;
             this.drawImage(flagFile, x + faceOffsetX + paddingX, y + faceIconSize + 1, flagWidth, flagHeight);
 
 

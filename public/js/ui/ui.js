@@ -167,7 +167,7 @@ function UICountryFlag(country){
     elem.className = "country-flag";
     elem.loading = "lazy";
 
-    elem.src = `/images/flags/${country}.svg`;
+    elem.src = `/images/flags/${country}.png`;
 
     return elem;
 }
