@@ -27,7 +27,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminGetPlayerProfile, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
 import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
@@ -611,6 +611,11 @@ export default class AdminJSONManager{
 
                 return this.res.json({data});
 
+            }else if(this.mode === "load-player-profile"){
+
+                const data = await adminGetPlayerProfile(this.req.body.id);
+
+                return this.res.json({data});
             }
 
 

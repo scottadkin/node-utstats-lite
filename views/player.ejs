@@ -9,19 +9,20 @@
 <%- include("timeZone.ejs", {timeZone})%>
 
 <%
-const jsBase =  `/js/`
 const jsonBase = `/json/`;
 %>
 
 
-<script src="<%= jsBase %>ui/table.js"></script>
-<script src="<%= jsBase %>ui/player.js"></script>
+<script src="/js/ui/table.js"></script>
+<script src="/js/ui/player.js"></script>
 
 <div id="root">
     <div class="header-wrapper">
         <img class="header-country-flag" src="/images/flags/<%= basicPlayerInfo.country %>.svg" alt="flag"/>
         <%= basicPlayerInfo.name %> Player Profile
     </div>
+
+    
     <%
     if(locals.activeSeasons.length > 0){
         %>
@@ -42,8 +43,18 @@ const jsonBase = `/json/`;
     }
     %>
     <div class="perma-links text-center"></div>
-
     
+    <% 
+    if(userSession !== null){
+        %>
+            <script src="/js/ui/admin.js"></script>
+            <script>
+                new UIPlayerProfileManager("#root", <%- JSON.stringify(basicPlayerInfo) %>);    
+            </script>
+            
+        <%
+    }
+    %>
 </div>
 
 <script>

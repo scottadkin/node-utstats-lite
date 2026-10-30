@@ -3051,6 +3051,30 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
     X Recalculate affected player ctf league
     X Recalculate affected player rankings
      */
+}
+
+/**
+ * Get all unique hwids, and ips that playerId has used
+ * @param {Number} playerId 
+ * @returns 
+ */
+async function adminGetPlayerUniqueTypes(playerId){
 
 
+    const colVars = ` COUNT(*) as uses, MIN(match_date) as first_used, MAX(match_date) as last_used, SUM(time_on_server) as total_playtime `;
+
+    const query = `SELECT 'hwid' as type, hwid as value,${colVars}
+    FROM nstats_match_players WHERE player_id=? GROUP BY hwid
+    UNION ALL
+    SELECT 'ip' as type,ip as value,${colVars} FROM nstats_match_players WHERE player_id=? GROUP BY ip
+    `;
+
+    return await simpleQuery(query, [playerId, playerId]);
+}
+
+export async function adminGetPlayerProfile(playerId){
+
+    const uniqueTypesToPlayerId = await adminGetPlayerUniqueTypes(playerId);
+
+    return {uniqueTypesToPlayerId}
 }

@@ -2490,11 +2490,11 @@ class AdminSiteSettingsManager{
 
         UIHeader(this.wrapper, "Restore Default Page Settings");
 
-        new UIInfo(this.wrapper, [
-            "Restore page settings back to their defaults.", UIBr(),
-            "Restore Page Layout will restore the order of the page components.", UIBr(),
+        new UIInfo(this.wrapper, [UIUnorderedList([
+            "Restore page settings back to their defaults.",
+            "Restore Page Layout will restore the order of the page components.",
             "Restore Page Components will restore the components back to their defaults, this includes per page, display type, max time frames..."
-        ]);
+        ])]);
 
         UIHeader(this.wrapper, "Restore All Page Settings");
 
@@ -7978,5 +7978,119 @@ class AdminSeasonsManager{
         this.renderCreateSeason();
         this.renderEditSeason();
         this.renderRecalculateSeason();
+    }
+}
+
+class UIPlayerProfileManager{
+
+    constructor(parent, basicInfo){
+
+        this.parent = document.querySelector(parent);
+        this.basicInfo = basicInfo;
+
+        this.playerId = this.basicInfo.id;
+
+        this.mode = "general";
+
+        if(this.playerId === undefined) throw new Error(`playerId is undefined`);
+
+        this.data = [];
+
+        console.log(this.basicInfo);
+
+        this.wrapper = UIDiv();
+        UIHeader(this.wrapper, "Admin Player Manager")
+        this.parent.append(this.wrapper);
+
+        this.createTabs();
+
+        this.content = UIDiv();
+        this.wrapper.append(this.content);
+
+        this.loadData();
+    }
+
+    createTabs(){
+
+        const options = [
+            {"display": "General Summary", "value": "general"},
+            {"display": "HWIDS", "value": "hwid"},
+            {"display": "IPS", "value": "ip"},
+        ];
+
+        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
+            this.mode = e.detail.newTab;
+            this.render();
+        });
+        this.wrapper.append();
+    }
+
+    async loadData(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-player-profile", "id": this.playerId})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.data = res.data;
+            console.log(this.data);
+
+            this.render();
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Fetch Data", err.toString());
+        }
+    }
+
+    renderUsedUnique(type){
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "headers": [
+                type.toUpperCase(), "First Used", 
+                "Last Used", "Total Uses",
+                "Playtime"
+            ].map((h) =>{ return {"display": h}})
+        };
+
+
+        const rows = [];
+
+        for(let i = 0; i < this.data.uniqueTypesToPlayerId.length; i++){
+
+            const d = this.data.uniqueTypesToPlayerId[i];
+
+            if(d.type !== type) continue;
+
+            rows.push([
+                {"display": d.value, "value": d.value},
+                {"display": toDateString(d.first_used, TIME_ZONE, true), "value": d.first_used, "className": "date"},
+                {"display": toDateString(d.last_used, TIME_ZONE, true), "value": d.last_used, "className": "date"},
+                {"value": d.uses},
+                {"value": d.total_playtime, "display": toPlaytime(d.total_playtime), "className": "playtime"},
+            ]);
+        }
+
+        new TESTUITable(this.content, tableOptions, rows);
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        if(this.mode === "hwid" || this.mode === "ip"){
+            this.renderUsedUnique(this.mode);
+        }
     }
 }
