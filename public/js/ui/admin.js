@@ -7995,6 +7995,8 @@ class UIPlayerProfileManager{
         if(this.playerId === undefined) throw new Error(`playerId is undefined`);
 
         this.data = [];
+        //don't load this until switching to tab
+        this.playerHistory = [];
 
         console.log(this.basicInfo);
 
@@ -8016,6 +8018,7 @@ class UIPlayerProfileManager{
             {"display": "General Summary", "value": "general"},
             {"display": "HWIDS", "value": "hwid"},
             {"display": "IPS", "value": "ip"},
+            {"display": "History", "value": "history"}
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
@@ -8042,7 +8045,24 @@ class UIPlayerProfileManager{
             if(res.error !== undefined) throw new Error(res.error);
 
             this.data = res.data;
-            console.log(this.data);
+
+            this.uniqueHWIDS = new Set();
+            this.uniqueIps = new Set();
+
+            for(let i = 0; i < res.data.uniqueTypesToPlayerId.length; i++){
+
+                const d = res.data.uniqueTypesToPlayerId[i];
+
+                if(d.type === "ip"){
+                    this.uniqueIps.add(d.value);
+                }else if(d.type === "hwid"){
+                    this.uniqueHWIDS.add(d.value);
+                }
+            }
+
+            this.uniqueHWIDS = [...this.uniqueHWIDS];
+            this.uniqueIps = [...this.uniqueIps];
+       
 
             this.render();
 
@@ -8054,6 +8074,17 @@ class UIPlayerProfileManager{
     }
 
     renderUsedUnique(type){
+
+
+        const infoContent = [];
+
+        if(type === "ip"){
+           infoContent.push(`Unique IPs linked to this player name via match data.`);
+        }else if(type === "hwid"){
+            infoContent.push(`Unique HWIDs linked to this player name via match data.`);
+        }
+
+        new UIInfo(this.content, infoContent);
 
         const tableOptions = {
             "className": "t-width-1",
@@ -8085,12 +8116,108 @@ class UIPlayerProfileManager{
         new TESTUITable(this.content, tableOptions, rows);
     }
 
+    renderGeneral(){
+
+
+        const listContent = [
+            [`Last Active: `, toDateString(this.basicInfo.last_active, TIME_ZONE, true)],
+            [`Unique IPs Used: `, UIB(this.uniqueIps.length)],
+            [`Unique HWIDs Used: `, UIB(this.uniqueHWIDS.length)],
+        ];
+
+        const form = UIDiv("form");
+        form.append(UIUnorderedList(listContent));
+        new UIInfo(this.content, [form]);
+   
+    }
+
+
+    async loadHistory(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-player-profile-history", "id": this.playerId})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+
+            this.playerHistory = res;
+
+        }catch(err){
+            console.trace(err);
+            new UINotification(this.parent, "error", "Failed To Load History", err.toString());
+        }
+    }
+
+    async renderHistory(){
+
+        await this.loadHistory();
+
+        console.log(this.playerHistory);
+
+        const tableOptions = {
+            "className": "t-width-1",
+            "sortBy": 0,
+            "bAscOrder": false,
+            "perPage": 50,
+            "headers": [
+                "Date", "IP", "HWID", "MAC1", "MAC2"
+            ].map((h) => { return {"display": h}})
+        }
+
+        const rows = this.playerHistory.map((p) =>{
+
+            const matchLink = document.createElement("a");
+            matchLink.href = `/season/0/match/${p.match_id}`;
+            matchLink.target = "_blank";
+            matchLink.append(toDateString(p.match_date, TIME_ZONE, true));
+
+            return [
+                {
+                    "display": matchLink,
+                    "value": p.match_date,
+                    "className": "date"
+                },
+                {
+                    "value": p.ip,
+                    "display": [UICountryFlag(p.country), p.ip]
+                }, 
+                {
+                    "value": p.hwid,
+                    "className": "font-small"
+                },
+                {
+                    "value": p.mac1,
+                    "className": "font-small"
+                },
+                {
+                    "value": p.mac2,
+                    "className": "font-small"
+                }
+                
+            ];
+        });
+
+        new TESTUITable(this.content, tableOptions, rows)
+
+    }
+
     render(){
 
         this.content.innerHTML = ``;
 
         if(this.mode === "hwid" || this.mode === "ip"){
             this.renderUsedUnique(this.mode);
+        }else if(this.mode === "general"){
+            this.renderGeneral();
+        }else if(this.mode === "history"){
+            this.renderHistory();
         }
     }
 }

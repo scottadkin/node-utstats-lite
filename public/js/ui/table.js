@@ -436,6 +436,8 @@ class TESTUITable{
 
                 let currentCellData = d.display ?? d.value;
 
+                
+
                 if(d.url !== undefined){
 
                     const a = document.createElement("a");
@@ -443,7 +445,11 @@ class TESTUITable{
 
                     if(d.urlTarget !== undefined) a.target = d.urlTarget;
 
-                    a.append(currentCellData);
+                    if(Array.isArray(currentCellData)){
+                        a.append(...currentCellData);
+                    }else{
+                        a.append(currentCellData);
+                    }
 
                     currentCellData = a;
                 }
@@ -455,7 +461,11 @@ class TESTUITable{
 
                     const cell = document.createElement("td");
         
-                    cell.append(currentCellData);
+                    if(Array.isArray(currentCellData)){
+                        cell.append(...currentCellData);
+                    }else{
+                        cell.append(currentCellData);
+                    }
                     if(d.className !== undefined) cell.className = d.className;
 
                     if(d.id !== undefined){

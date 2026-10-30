@@ -165,6 +165,7 @@ function UICountryFlag(country){
 
     const elem = document.createElement("img");
     elem.className = "country-flag";
+    elem.loading = "lazy";
 
     elem.src = `/images/flags/${country}.svg`;
 

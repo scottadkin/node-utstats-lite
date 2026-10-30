@@ -3078,3 +3078,12 @@ export async function adminGetPlayerProfile(playerId){
 
     return {uniqueTypesToPlayerId}
 }
+
+export async function adminGetPlayerHistoryById(playerId){
+
+    const query = `SELECT match_id,match_date,ip,country,hwid,mac1,mac2,spectator FROM nstats_match_players WHERE player_id=? ORDER BY match_date DESC, match_id DESC`;
+
+    return await simpleQuery(query, [playerId]);
+
+   
+}
