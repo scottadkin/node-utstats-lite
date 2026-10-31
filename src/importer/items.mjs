@@ -24,6 +24,7 @@ export default class Items{
 
         const types = {
             "damage amplifier": "amp",
+            "ua damage amplifier": "amp",//renamed for some reason by a mod...
             "shield belt": "belt",
             "antigrav boots": "boots",
             "body armor": "body",

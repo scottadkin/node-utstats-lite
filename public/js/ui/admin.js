@@ -6436,8 +6436,6 @@ class AdminRenamePlayer{
 
         this.bAutoPreview = reqQuery.by !== undefined;
      
-        console.log(this.bAutoPreview);
-
         this.usageData = [];
         this.hwidToNames = [];
         this.macToNames = [];
@@ -8114,8 +8112,15 @@ class UIPlayerProfileManager{
 
             if(d.type !== type) continue;
 
+
+            let valueData = {"display": d.value, "value": d.value};
+
+            if(type === "hwid"){
+                valueData.url =`/admin/?mode=players&sub=rename&by=hwid&target=${d.value}`
+                valueData.utlTarget = "_blank"
+            }
             rows.push([
-                {"display": d.value, "value": d.value},
+                valueData,
                 {"display": toDateString(d.first_used, TIME_ZONE, true), "value": d.first_used, "className": "date"},
                 {"display": toDateString(d.last_used, TIME_ZONE, true), "value": d.last_used, "className": "date"},
                 {"value": d.uses},
