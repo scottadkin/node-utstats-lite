@@ -1682,6 +1682,7 @@ export async function deleteMatch(id){
     const basic = basicInfo[id];
     
 
+    await simpleQuery(`DELETE FROM nstats_logs WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_matches WHERE id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_dom WHERE match_id=?`, [id]);
     await simpleQuery(`DELETE FROM nstats_match_players WHERE match_id=?`, [id]);
