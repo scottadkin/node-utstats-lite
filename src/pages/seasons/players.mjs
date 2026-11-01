@@ -18,7 +18,10 @@ export async function renderSeasonPlayersPage(req, res){
 
     
     const {searchName, sortBy, order, perPage, page} = sanitizePlayersPageParams(req, pageSettings, DEFAULT_PER_PAGE);
-    const {title, description, siteName} = setPlayersPageMetaData(brandingSettings, searchName, sortBy, order, seasonInfo.name);
+    const {title, description, siteName} = setPlayersPageMetaData(
+        brandingSettings, searchName, sortBy, order, seasonInfo,
+        res.locals.bSkipSeasonLinks
+    );
 
 
     res.render("players.ejs",{

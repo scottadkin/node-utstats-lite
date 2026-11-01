@@ -2613,7 +2613,7 @@ export function sanitizePlayersPageParams(req, pageSettings, defaultPerPage){
 }
 
 
-export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, order, seasonName){
+export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, order, seasonInfo, bSkipSeasonLinks){
 
     let description = `Search for a player that has been active `;
 
@@ -2624,10 +2624,8 @@ export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, ord
         description = `Search result for player named "${searchName}" `;
     }
 
-    
-
-    if(seasonName !== null){
-        description += `during the season: ${seasonName}`
+    if(seasonInfo.id !== 0 && !bSkipSeasonLinks){
+        description += `during the season: ${seasonInfo.name}`
     }else{
         description += `on one of our servers`;
     }
@@ -2637,8 +2635,8 @@ export function setPlayersPageMetaData(brandingSettings, searchName, sortBy, ord
     const siteName = brandingSettings?.["Site Name"] ?? "Node UTStats Lite";
     
     
-    if(seasonName !== null){
-        title = `${title} - ${seasonName} - ${siteName}`;
+    if(seasonInfo.id !== 0 && !bSkipSeasonLinks){
+        title = `${title} - ${seasonInfo.name} - ${siteName}`;
     }else{
         title = `${title} - ${siteName}`;
     }
