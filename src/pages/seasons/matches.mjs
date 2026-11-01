@@ -21,8 +21,12 @@ export async function renderSeasonMatchesPage(req, res){
     const seasonInfo = res.locals.seasonInfo;
 
     let description = "";
-    let title = "";
-    title = `Matches - ${seasonInfo.name} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+    let title = "Matches";
+
+    if(seasonInfo.id !== 0){
+        title += ` - ${seasonInfo.name}`;
+    }
+    title += ` - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
     if(!res.locals.bSkipSeasonLinks || seasonInfo.id !== 0){
  

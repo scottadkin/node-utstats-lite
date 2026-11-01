@@ -22,7 +22,11 @@ export async function renderSeasonPage(req, res){
 
     const siteName = brandingSettings?.["Site Name"] ?? "Node UTStats Lite";
 
-    const title = `${basicSeasonInfo.name} - ${siteName}`;
+    let title = siteName;
+
+    if(basicSeasonInfo.id !== 0){
+        title = `${basicSeasonInfo.name} - ${siteName}`;
+    }
     
     let description = "";
 

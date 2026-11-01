@@ -48,11 +48,16 @@ export async function renderSeasonCTFLeaguePage(req, res){
         //need to get latest played gametypeId and mapId
 
         const {
-            title, brandingSettings, subHeader, 
-            gametypeName, mapName 
-        } = await setCTFLeaguePageMetaData(mode, gametypesInfo.names, mapsInfo.names, id, gId);
+            title, subHeader,
+        } = await setCTFLeaguePageMetaData(mode, gametypesInfo.names, mapsInfo.names, id, gId, seasonInfo);
 
-        let description = `View the top players for ${subHeader} during the ${seasonInfo.name} season.`;
+        let description = `View the top players in the CTF league for ${subHeader}`;
+
+        if(seasonInfo.id !== 0){
+            description += ` during the ${seasonInfo.name} season.`
+        }else{
+            description += `.`;
+        }
 
         if(subHeader.toLowerCase() === "combined"){
             description = `View the season all time CTF player league for ${seasonInfo.name}, any ctf gametype and map is counted.`

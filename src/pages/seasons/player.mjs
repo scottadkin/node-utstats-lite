@@ -26,7 +26,6 @@ export async function renderSeasonPlayerPage(req, res){
 
         const seasonId = res.locals.season;
         const seasonInfo = res.locals.seasonInfo;
-        const bSkipSeasonLinks = res.locals.bSkipSeasonLinks;
 
         try{
 

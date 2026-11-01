@@ -514,15 +514,15 @@ export function createRecordsPageMetaData(mode, recordType, gametypes, maps, sel
     
     let title = `${modeDisplayName} -`;
     
-    if(seasonInfo !== null){
+    if(seasonInfo.id !== 0){
         title += ` ${seasonInfo.name}`;
     }
     title += ` ${MODE_TITLES[mode]} - ${brandingSettings["Site Name"]}`;
 
-    let description = `View the top ${modeDisplayName} ${MODE_TITLES[mode].toLowerCase()}`;
+    let description = `View records for ${modeDisplayName} in the category ${MODE_TITLES[mode].toLowerCase()}`;
 
-    if(seasonInfo !== null){
-        description += ` for the ${seasonInfo.name} season`;
+    if(seasonInfo.id !== 0){
+        description += ` during the ${seasonInfo.name} season`;
     }
 
     if(selectedMap !== 0){

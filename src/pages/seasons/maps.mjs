@@ -14,9 +14,15 @@ export async function renderSeasonMapsPage(req, res){
     const seasonId = res.locals.season;
     const seasonInfo = res.locals.seasonInfo;
 
-    let title = `${seasonInfo.name} Maps - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+    let title = `Maps - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
-    let description = `View all the maps played on our servers during the ${seasonInfo.name} season.`;
+
+    let description = `View all the maps played on our servers`;
+    
+    if(seasonInfo.id !== 0){
+        title = `${seasonInfo.name} - ${title}`;
+        description += ` during the ${seasonInfo.name} season.`;
+    }
 
     const {nameSearch, page, perPage, displayMode, order, sortBy} = sanitizeMapsReq(req, pageSettings);
 

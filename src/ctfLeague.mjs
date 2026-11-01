@@ -771,7 +771,7 @@ export async function sanitizeCTFLeaguePageReq(req, seasonId, pageSettings){
 }
 
 
-export async function setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id, gId){
+export async function setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id, gId, seasonInfo){
 
     let gametypeName = "Gametypes";
     let mapName = "Maps";
@@ -782,7 +782,7 @@ export async function setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id
     if(mode === "gametypes"){
 
         gametypeName = gametypeNames?.[id] ?? "Gametypes";
-        title = `${gametypeName} - CTF League`;
+        title = `${gametypeName}`;
         subHeader = gametypeName;
 
     }else if(mode === "maps"){
@@ -790,24 +790,30 @@ export async function setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id
         mapName = mapNames?.[id] ?? "Maps";
 
         if(gId == 0){
-            title = `${mapName} - CTF League`;
+            title = `${mapName}`;
             subHeader = mapName;
         }else{
             gametypeName = gametypeNames?.[gId] ?? "Gametypes";
-            title = `${mapName} (${gametypeName}) - CTF League`;
+            title = `${mapName} (${gametypeName})`;
             subHeader = `${mapName} (${gametypeName})`
         }
 
     }else if(mode === "combined"){
 
-        title = `Combined - CTF League`;
+        title = `Combined`;
         subHeader = "Combined";
     }
+
+    if(seasonInfo.id !== 0){
+        title += ` - ${seasonInfo.name}`;
+    }
+
+    title += ` - CTF League`;
 
     const brandingSettings = await getCategorySettings("Branding");
     title = `${title} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
 
-    return {title, brandingSettings, subHeader, gametypeName, mapName}
+    return {title, subHeader}
 }
 
 /**

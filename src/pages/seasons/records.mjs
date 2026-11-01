@@ -55,7 +55,7 @@ export async function renderSeasonRecordsPage(req, res){
             "host": req.headers.host,
             timeZone,
             title,
-            "meta": {"description": description, "image": "images/maps/default.jpg"},
+            "meta": {description, "image": "images/maps/default.jpg"},
             mode,
             recordType,
             "validMatchTypes": VALID_PLAYER_MATCH_TYPES,

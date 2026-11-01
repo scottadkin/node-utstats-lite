@@ -390,7 +390,7 @@ class RecordsPage{
         }
 
 
-        if(this.seasonInfo === null){
+        if(this.seasonInfo.id === 0){
 
             document.title = `${displayName} - ${title} - ${this.siteName}`;
         }else{

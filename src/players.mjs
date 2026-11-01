@@ -2656,7 +2656,7 @@ export async function sanitizePlayerPageReq(id, seasonId, seasonInfo){
     let title = `${basicPlayerInfo.name}`;
     let description = `View the`;
 
-    if(seasonInfo !== null){
+    if(seasonInfo.id !== 0){
 
         title += ` - ${seasonInfo.name}`;
         description += ` ${seasonInfo.name} season player profile of ${basicPlayerInfo.name},`;

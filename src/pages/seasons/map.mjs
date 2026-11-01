@@ -26,7 +26,14 @@ export async function renderSeasonMapPage(req, res){
         if(basic === null) throw new Error(`Map does not exist`);
 
         let title = basic.name;
-        let description = `View ${seasonInfo.name} season stats for the map ${basic.name}.`;
+
+        let description = ``;
+
+        if(seasonInfo.id !== 0){
+            description = `View ${seasonInfo.name} season stats for the map ${basic.name}.`;
+        }else{
+            description = `View maps stats for the map ${basic.name}`;
+        }
 
 
         let ctfLeagueSettings = {};
@@ -41,7 +48,11 @@ export async function renderSeasonMapPage(req, res){
             weaponStats = await getMapWeaponStats(seasonId, basic.id);
         }
 
-        title = `${title} - ${seasonInfo.name} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+        if(seasonInfo.id !== 0){
+            title += ` - ${seasonInfo.name}`;
+        }
+
+        title += ` - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`
 
 
         const uniqueGametypes = await getAllUniquePlayedGametypes(basic.id, true, seasonId);
