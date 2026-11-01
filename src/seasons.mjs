@@ -27,6 +27,30 @@ export async function getSeasonByMatchDate(matchDate){
 }
 
 
+async function getSeason0Stats(){
+
+    const query = `SELECT COUNT(*) as total_matches,SUM(playtime) as total_playtime,MIN(date) as first_match, MAX(date) as last_match FROM nstats_matches`;
+    const playerQuery = `SELECT COUNT(*) as total_players FROM nstats_players`;
+
+
+    const [matchesResult, playerResult] = await Promise.all([
+        await simpleQuery(query),
+        simpleQuery(playerQuery),
+
+    ]);
+
+
+    return {
+        "name": "All Time Totals",
+        "id": 0,
+        "start_date": null,
+        "end_date": null,
+        "total_matches": matchesResult[0].total_matches,
+        "total_playtime": matchesResult[0].total_playtime,
+        "total_players": playerResult[0].total_players,
+    }
+}
+
 /**
  * 
  * @param {Number} id 
@@ -37,6 +61,12 @@ export async function getSeasonById(id){
     id = parseInt(id);
 
     if(id !== id) throw new Error(`id must be a valid integer`);
+
+    if(id === 0){
+
+        return await getSeason0Stats();
+
+    }
 
     const query = `SELECT * FROM nstats_seasons WHERE id=?`;
 

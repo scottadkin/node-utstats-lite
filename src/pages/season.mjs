@@ -20,12 +20,22 @@ export async function renderSeasonPage(req, res){
 
     const basicSeasonInfo = res.locals.seasonInfo;
 
-    const title = `${basicSeasonInfo.name} - ${brandingSettings?.["Site Name"] ?? "Node UTStats Lite"}`;
+    const siteName = brandingSettings?.["Site Name"] ?? "Node UTStats Lite";
+
+    const title = `${basicSeasonInfo.name} - ${siteName}`;
     
-    let description = `${basicSeasonInfo.name} season started ${convertTimestamp(basicSeasonInfo.start_date, true, true)}`;
-    description += ` and ended ${convertTimestamp(basicSeasonInfo.end_date, true, true)}.`;
-    description += ` ${basicSeasonInfo.total_matches} matches where played with a total of ${basicSeasonInfo.total_players} players,`;
-    description += ` with a total playtime of ${toPlaytime(basicSeasonInfo.total_playtime)}.`;
+    let description = "";
+
+    if(basicSeasonInfo.id !== 0){
+        description = `${basicSeasonInfo.name} season started ${convertTimestamp(basicSeasonInfo.start_date, true, true)}`;
+        description += ` and ended ${convertTimestamp(basicSeasonInfo.end_date, true, true)}.`;
+        
+    }else{
+
+        description = `Welcome to ${siteName}, view stats for matches played on our Unreal Tournament servers.`;
+    }
+    description += ` ${basicSeasonInfo.total_matches} matches have been played with a total of ${basicSeasonInfo.total_players} players,`;
+    description += ` and a total playtime of ${toPlaytime(basicSeasonInfo.total_playtime)}.`;
 
     const seasonId = res.locals.season;
 
