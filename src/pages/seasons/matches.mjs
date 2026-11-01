@@ -33,7 +33,15 @@ export async function renderSeasonMatchesPage(req, res){
     const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap, false, seasonId);
 
 
-    let description = `Search for matches played during the ${seasonInfo.name} season.`;
+    let description = "";
+
+
+    if(!res.locals.bSkipSeasonLinks || seasonInfo.id !== 0){
+        description = `Search for matches played during the ${seasonInfo.name} season.`;
+    }else{
+        description = `Search for matches played on our servers.`
+    }
+    
 
     res.render("matches.ejs",{
         req,
