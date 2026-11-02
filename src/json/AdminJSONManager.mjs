@@ -27,7 +27,7 @@ import {
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
-import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminGetPlayerHistoryById, adminGetPlayerProfile, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
+import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllIps, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminGetPlayerHistoryById, adminGetPlayerProfile, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
 import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
@@ -368,6 +368,7 @@ export default class AdminJSONManager{
                 const macToNames = await adminGetAllForceMacToNames();
                 const bothToNames = await adminGetAllForceNamesByHWIDAndMac();
                 const renameHistory = await adminGetNameOverrideHistory();
+                
 
   
                 return this.res.json({usage, hwidToNames, macToNames, bothToNames, renameHistory});
@@ -379,8 +380,9 @@ export default class AdminJSONManager{
                 const macToNames = await adminGetAllForceMacToNames();
                 const bothToNames = await adminGetAllForceNamesByHWIDAndMac();
                 const playerNames = await getAllNames();
+                const ips = await adminGetAllIps();
 
-                return this.res.json({usage, hwidToNames, macToNames, bothToNames, playerNames});
+                return this.res.json({usage, hwidToNames, macToNames, bothToNames, playerNames, ips});
                 
             }else if(this.mode === "preview-force-name"){
                 

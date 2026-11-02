@@ -6431,7 +6431,7 @@ class AdminRenamePlayer{
 
         this.wrapper = UIDiv();
 
-        this.mode = reqQuery?.by ?? "hwid";
+        this.mode = reqQuery?.by ?? "ip";
 
 
         this.bAutoPreview = reqQuery.by !== undefined;
@@ -6441,6 +6441,7 @@ class AdminRenamePlayer{
         this.macToNames = [];
         this.bothToNames = [];
         this.playerNames = [];
+        this.ipList = [];
 
         this.previewData = {};
         this.resetPreviewData();
@@ -6448,11 +6449,13 @@ class AdminRenamePlayer{
         this.bSelectAll = false;
 
         this.nameFilter = "";
-        this.hwidFilter = (this.mode === "hwid") ? reqQuery?.target : "";
+        this.hwidFilter = (this.mode === "hwid" && reqQuery.target !== undefined) ? reqQuery.target : "";
+        this.ipFilter = (this.mode === "ip" && reqQuery.target !== undefined) ? reqQuery.target : "";
         this.mac1Filter = "";
         this.mac2Filter = "";
 
         this.selectedHWID = this.hwidFilter;
+        this.selectedIP = this.ipFilter;
 
         this.selectedName = "";
 
@@ -6490,6 +6493,7 @@ class AdminRenamePlayer{
 
         const options = [
             {"display": "Rename By HWID History", "value": "hwid"},
+            {"display": "Rename By IP History", "value": "ip"},
            // {"display": "Rename By MAC History", "value": "mac"},
           //  {"display": "Rename By HWID & MAC History", "value": "both"},
         ];
@@ -6759,6 +6763,7 @@ class AdminRenamePlayer{
             this.macToNames = res.macToNames;
             this.bothToNames = res.bothToNames;
             this.playerNames = res.playerNames;
+            this.ipList = res.ips;
 
             if(this.bAutoPreview){
 
@@ -6843,51 +6848,107 @@ class AdminRenamePlayer{
         return options;
     }
 
+
+    renderHWIDForm(){
+
+        const filterHwidRow = UIDiv("form-row");
+
+        filterHwidRow.append(UILabel("Filter HWIDS"));
+
+        this.filterHWIDInput = UIInput("text", "hwid-filter", this.hwidFilter, "Filter HWIDS", (e) =>{
+
+            this.hwidFilter = e.toUpperCase();
+        
+            const newOptions = this.getHWIDSelectOptions();
+
+            this.bSelectAll = false;
+    
+            this.hwidSelect.unselect();
+            this.resetPreviewData();
+            if(this.hwidFilter !== ""){
+                this.previewChanges(this.hwidFilter, "", "");
+            }
+            this.updatePreview();
+            this.hwidSelect.updateOptions(newOptions, this.hwidFilter); 
+        });
+
+        filterHwidRow.append(this.filterHWIDInput);
+
+        const hwidRow = UIDiv("form-row");
+        hwidRow.append(UILabel("HWID"));
+
+
+        this.hwidSelect = new UISelect(hwidRow, this.getHWIDSelectOptions(), this.selectedHWID, (e) =>{
+            
+            this.selectedHWID = e.toUpperCase();
+            
+            //this.selectAllInput.setValue(false);
+            this.bSelectAll = false;
+            this.previewChanges(this.selectedHWID, "", "");
+        });
+
+        // this.hwidSelect = UISelect();
+
+        this.form.append(filterHwidRow, hwidRow);
+    }
+
+    getIpsOptions(){
+
+        const options = [];
+
+        for(let i = 0; i < this.ipList.length; i++){
+
+            const ip = this.ipList[i];
+
+            if(ip === "") continue;
+
+            console.log(this.ipFilter);
+
+            if(this.ipFilter !== "" && !ip.includes(this.ipFilter)) continue;
+            options.push({"display": ip, "value": ip});
+        }
+        options.unshift({"display": "- Please Select An Option - ", "value": -1});
+
+        return options;
+    }
+
+    renderIPForm(){
+
+
+        const filterRow = UIDiv("form-row");
+        
+
+        const ipFilter = UIInput("text", "ip-filter", this.ipFilter, "Filter IP addresses...", (e) =>{
+            this.ipFilter = e;
+
+            this.ipSelect.updateOptions(this.getIpsOptions(), this.ipFilter);
+        });
+
+        filterRow.append(UILabel("Filter IPs"), ipFilter);
+
+
+        const ipsRow = UIDiv("form-row");
+        ipsRow.append(UILabel("IP"));
+
+        this.ipSelect = new UISelect(ipsRow, this.getIpsOptions(), this.selectedIP, (e) =>{
+            console.log(e);
+            this.selectedIP = e;
+        });
+
+        this.form.append(filterRow, ipsRow);
+    }
+
     renderForm(){
 
         this.form.innerHTML = ``;
 
         if(this.mode === "hwid" || this.mode === "both"){
 
-            const filterHwidRow = UIDiv("form-row");
+            this.renderHWIDForm();
+        }
 
-            filterHwidRow.append(UILabel("Filter HWIDS"));
-
-            this.filterHWIDInput = UIInput("text", "hwid-filter", this.hwidFilter, "Filter HWIDS", (e) =>{
-
-                this.hwidFilter = e.toUpperCase();
-           
-                const newOptions = this.getHWIDSelectOptions();
-
-                this.bSelectAll = false;
-      
-                this.hwidSelect.unselect();
-                this.resetPreviewData();
-                if(this.hwidFilter !== ""){
-                    this.previewChanges(this.hwidFilter, "", "");
-                }
-                this.updatePreview();
-                this.hwidSelect.updateOptions(newOptions, this.hwidFilter); 
-            });
-
-            filterHwidRow.append(this.filterHWIDInput);
-
-            const hwidRow = UIDiv("form-row");
-            hwidRow.append(UILabel("HWID"));
-
-
-            this.hwidSelect = new UISelect(hwidRow, this.getHWIDSelectOptions(), this.selectedHWID, (e) =>{
-             
-                this.selectedHWID = e.toUpperCase();
-                
-                //this.selectAllInput.setValue(false);
-                this.bSelectAll = false;
-                this.previewChanges(this.selectedHWID, "", "");
-            });
-
-           // this.hwidSelect = UISelect();
-
-            this.form.append(filterHwidRow, hwidRow);
+        if(this.mode === "ip"){
+            this.renderIPForm();
         }
 
 
@@ -7335,7 +7396,7 @@ class AdminPlayersManager{
         this.parent.append(this.wrapper);
 
         this.reqQuery = reqQuery;
-        this.mode = reqQuery?.sub ?? "importer";
+        this.mode = reqQuery?.sub ?? "rename";
 
         this.importerSettings = new AdminPlayersImporterSettings(this.parent, this.mode);
         this.renamePlayer = new AdminRenamePlayer(this.parent, this.mode, reqQuery);

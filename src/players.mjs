@@ -3113,5 +3113,13 @@ export async function adminGetPlayerHistoryById(playerId){
 
     return await simpleQuery(query, [playerId]);
 
-   
+}
+
+export async function adminGetAllIps(){
+
+    const query = `SELECT DISTINCT ip FROM nstats_match_players ORDER BY ip ASC`;
+
+    const result = await simpleQuery(query);
+
+    return result.map((r) => { return r.ip});
 }
