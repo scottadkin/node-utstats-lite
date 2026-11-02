@@ -717,7 +717,7 @@ class UITrueFalse{
         }
 
         this.elem.innerHTML = text;
-        this.elem.className = `${className} white no-user-select hover`;
+        this.elem.className = `${className} white no-user-select hover true-false`;
     }
 }
 

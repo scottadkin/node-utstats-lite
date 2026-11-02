@@ -2749,12 +2749,13 @@ export async function sanitizePlayerPageReq(id, seasonId, seasonInfo){
     }
 }
 
-export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
+export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2, ip){
 
 
-    if(hwid === "" && mac1 === "" && mac2 === ""){
+    if(hwid === "" && mac1 === "" && mac2 === "" && ip === ""){
         throw new Error(`You can't search a player's history with just blank strings`);
     }
+
 
     const vars = [];
     let query = `SELECT 
@@ -2797,6 +2798,12 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
         if(vars.length > 0) query += `AND`;
         query += ` nstats_match_players.mac2=? `;
         vars.push(mac2);
+    }
+
+    if(ip !== ""){
+        if(vars.length > 0) query += `AND`;
+        query += ` nstats_match_players.ip=? `
+        vars.push(ip);
     }
 
 
@@ -2844,7 +2851,8 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2){
         "uniqueMacs": [...uniqueMacs],
         "uniqueMac1s": [...uniqueMac1s],
         "uniqueMac2s": [...uniqueMac2s],
-        "uniqueNames": [...uniqueNames]
+        "uniqueNames": [...uniqueNames],
+        "historyBy": {hwid, mac1, mac2, ip}
     };
 }
 

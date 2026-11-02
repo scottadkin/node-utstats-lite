@@ -6478,7 +6478,8 @@ class AdminRenamePlayer{
             "uniqueMacs": [],
             "uniqueMac1s": [],
             "uniqueMac2s": [],
-            "uniqueNames": []
+            "uniqueNames": [],
+            "historyBy": {"hwid": "", "mac1": "", "mac2": "", "ip": ""}
         };
     }
 
@@ -6504,6 +6505,12 @@ class AdminRenamePlayer{
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
             //console.log(e.detail.newTab);
             this.mode = e.detail.newTab;
+            this.resetPreviewData();
+            this.selectedHWID = "";
+            this.selectedMAC1 = "";
+            this.selectedMAC2 = "";
+            this.selectedIP = "";
+            this.updatePreview();
             this.render();
         })
     }
@@ -6524,7 +6531,7 @@ class AdminRenamePlayer{
         this.wrapper.append(this.previewElem);
     }
 
-    async previewChanges(hwid, mac1, mac2){
+    async previewChanges(hwid, mac1, mac2, ip){
 
         try{
 
@@ -6533,9 +6540,10 @@ class AdminRenamePlayer{
                 "method": "POST",
                 "body": JSON.stringify({
                     "mode": "preview-force-name",
-                    "hwid": hwid,
+                    hwid,
                     mac1,
-                    mac2
+                    mac2,
+                    ip
                 })
             });
 
@@ -6544,7 +6552,6 @@ class AdminRenamePlayer{
             if(res.error !== undefined) throw new Error(res.error);
 
             this.previewData = res;
-
 
             for(let i = 0; i < this.previewData.data.length; i++){
 
@@ -6625,39 +6632,22 @@ class AdminRenamePlayer{
 
         UIHeader(this.previewElem, "Full Match History");
 
-
-        const info = UIDiv("info");
-
         const totalMatches = this.previewData.data.length;
-        const {uniqueHWIDS, uniqueIps, uniqueMac1s, uniqueMac2s, uniqueMacs, uniqueNames} = this.previewData;
-
-        const infoContent = [];
-
-        if(this.mode === "hwid"){
-
-
-            infoContent.push(UIUnorderedList([
-                `HWID was used in a total of ${totalMatches} ${plural(totalMatches, "match")}.`,
-                ` ${uniqueNames.length} Unique ${plural(uniqueNames.length, "name")} used.`,
-                ` ${uniqueIps.length} Unique IP ${plural(uniqueIps.length, "address")} used.`,
-                ` ${uniqueMac1s.length} Unique MAC1 ${plural(uniqueMac1s.length, "address")} used.`,
-                ` ${uniqueMac2s.length} Unique MAC2 ${plural(uniqueMac2s.length, "address")} used.`,
-                ` ${uniqueMacs.length} Unique MAC(MAC1 or MAC2) ${plural(uniqueMacs.length, "address")} used.`
-            ]));
-
-        }
+        const {uniqueHWIDS, uniqueIps, uniqueMac1s, uniqueMac2s, uniqueMacs, uniqueNames, historyBy} = this.previewData;
 
 
         const tableOptions = {
             "className": "t-width-1",
             "headers": [
                 
+                
                 {"display": "Name"},
                 {"display": "Date"},
-                {"display": "Gametype"},
+                {"display": "HWID"},
+                {"display": "IP"},        
                 {"display": "Map"},
                 {"display": "Playtime"},
-                {"display": "Match Result"},
+                {"display": "Result"},
                 {"display": "Selected"},
             ]
         };
@@ -6665,7 +6655,7 @@ class AdminRenamePlayer{
         const rows = this.previewData.data.map((d, i) =>{
 
             const nameDisplay = UITableCell({
-                "className": "player-name-td"
+                "className": "text-left font-small"
             });
             nameDisplay.append(UICountryFlag(d.country), d.player_name);
 
@@ -6676,11 +6666,13 @@ class AdminRenamePlayer{
 
             return [
                 {"value":d.player_name.toLowerCase(), "display": nameDisplay, "bSkipTD": true},
-                {"value":d.match_date, "display": toDateString(d.match_date, TIME_ZONE, true), "className": "date font-small"},
-                {"value":d.gametype_name.toLowerCase(), "display": d.gametype_name, "className": "font-small"},
+                {"value":d.match_date, "display": toDateString(d.match_date, TIME_ZONE, true), "className": "date font-small"},   
+                {"value": d.hwid.toLowerCase(), "display": d.hwid.toUpperCase(), "className": "font-small"},
+                {"value": d.ip, "className": "font-small"},
+                
                 {"value":d.map_name.toLowerCase(), "display": d.map_name, "className": "font-small"},
                 {"value":d.time_on_server, "display": MMSS(d.time_on_server), "className": "mmss"},
-                {"value":d.match_result, "display": toMatchResultString(d.match_result)},
+                {"value":d.match_result, "display": toMatchResultString(d.match_result), "className": "font-small"},
                 {
                     "value": "", 
                     "display": sel.elem,
@@ -6690,7 +6682,6 @@ class AdminRenamePlayer{
         });
 
 
-        new UIInfo(this.previewElem, infoContent);
   
 
         const createIfNotRow = UIDiv("form-row");
@@ -6732,9 +6723,45 @@ class AdminRenamePlayer{
         
         buttonWrapper.append(selectAllRow);
 
-        buttonWrapper.append(createIfNotRow, currentButton, UIBr(), UIBr());
+        buttonWrapper.append(createIfNotRow, currentButton);
 
         this.previewElem.append(buttonWrapper); 
+
+        const previewInfoContent = [
+            `Matches found for search conditions of: `
+        ];
+
+        if(historyBy.hwid !== ""){
+
+            previewInfoContent.push(UIB("HWID"), ` of `, historyBy.hwid);
+
+            previewInfoContent.push(UIUnorderedList([
+                `HWID was used in a total of ${totalMatches} ${plural(totalMatches, "match")}.`,
+                ` ${uniqueNames.length} Unique ${plural(uniqueNames.length, "name")} used.`,
+                ` ${uniqueIps.length} Unique IP ${plural(uniqueIps.length, "address")} used.`,
+                ` ${uniqueMac1s.length} Unique MAC1 ${plural(uniqueMac1s.length, "address")} used.`,
+                ` ${uniqueMac2s.length} Unique MAC2 ${plural(uniqueMac2s.length, "address")} used.`,
+                ` ${uniqueMacs.length} Unique MAC(MAC1 or MAC2) ${plural(uniqueMacs.length, "address")} used.`
+            ]));
+        }
+
+        if(historyBy.ip !== ""){
+            previewInfoContent.push(UIB("IP Address"), ` of `, historyBy.ip);
+        }
+
+        if(historyBy.mac1 !== ""){
+            previewInfoContent.push(UIB("MAC1"), ` of `, historyBy.mac1);
+        }
+
+        if(historyBy.mac2 !== ""){
+            previewInfoContent.push(UIB("MAC1"), ` of `, historyBy.mac2);
+        }
+
+        const info = new UIInfo(buttonWrapper, previewInfoContent);
+
+       // this.previewElem.append(
+        //    `Result of search of ${historyBy.hwid}, ${historyBy.mac1}, ${historyBy.mac2}, ${historyBy.ip}`
+       // );
 
         const table = new TESTUITable(this.previewElem, tableOptions, rows);
 
@@ -6767,7 +6794,7 @@ class AdminRenamePlayer{
 
             if(this.bAutoPreview){
 
-                await this.previewChanges(this.selectedHWID, "", "");
+                await this.previewChanges(this.selectedHWID, "", "", this.selectedIP);
             }
 
             this.render();
@@ -6866,7 +6893,7 @@ class AdminRenamePlayer{
             this.hwidSelect.unselect();
             this.resetPreviewData();
             if(this.hwidFilter !== ""){
-                this.previewChanges(this.hwidFilter, "", "");
+                this.previewChanges(this.hwidFilter, "", "", "");
             }
             this.updatePreview();
             this.hwidSelect.updateOptions(newOptions, this.hwidFilter); 
@@ -6884,7 +6911,7 @@ class AdminRenamePlayer{
             
             //this.selectAllInput.setValue(false);
             this.bSelectAll = false;
-            this.previewChanges(this.selectedHWID, "", "");
+            this.previewChanges(this.selectedHWID, "", "", "");
         });
 
         // this.hwidSelect = UISelect();
@@ -6902,11 +6929,10 @@ class AdminRenamePlayer{
 
             if(ip === "") continue;
 
-            console.log(this.ipFilter);
-
             if(this.ipFilter !== "" && !ip.includes(this.ipFilter)) continue;
             options.push({"display": ip, "value": ip});
         }
+        
         options.unshift({"display": "- Please Select An Option - ", "value": -1});
 
         return options;
@@ -6931,8 +6957,9 @@ class AdminRenamePlayer{
         ipsRow.append(UILabel("IP"));
 
         this.ipSelect = new UISelect(ipsRow, this.getIpsOptions(), this.selectedIP, (e) =>{
-            console.log(e);
+
             this.selectedIP = e;
+            this.previewChanges("", "", "", this.selectedIP);
         });
 
         this.form.append(filterRow, ipsRow);
@@ -8254,7 +8281,8 @@ class UIPlayerProfileManager{
                     "className": "date"
                 },
                 {
-                    
+                    "url": `/admin/?mode=players&sub=rename&by=ip&target=${p.ip}`,
+                    "urlTarget": "_blank",
                     "value": p.ip,
                     "display": [UICountryFlag(p.country), p.ip]
                 }, 

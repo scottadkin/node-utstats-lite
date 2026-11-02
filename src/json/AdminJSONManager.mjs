@@ -389,12 +389,14 @@ export default class AdminJSONManager{
                 const hwid = this.req.body.hwid ?? null;
                 const mac1 = this.req.body.mac1 ?? null;
                 const mac2 = this.req.body.mac2 ?? null;
+                const ip = this.req.body.ip ?? null;
 
-                if(hwid === null || mac1 === null || mac2 === null){
-                    throw new Error(`hwid, mac1, and mac2 can't be undefined`);
+                if(hwid === null || mac1 === null || mac2 === null || ip === null){
+                    throw new Error(`hwid, mac1, mac2, and ip can't be undefined`);
                 }
 
-                const data = await adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2);
+
+                const data = await adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2, ip);
 
                 return this.res.json(data);
 

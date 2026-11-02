@@ -483,6 +483,10 @@ option{
     align-content: center;
 }
 
+.true-false{
+    font-size:var(--font-size-80);
+}
+
 .warning, .error, .pass{
 	text-align:center;
 	padding:var(--padding-10);
