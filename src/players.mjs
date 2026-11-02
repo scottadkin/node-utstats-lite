@@ -2884,9 +2884,11 @@ async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds, newPlayerId)
     nstats_match_players.player_id,
     nstats_matches.season_id, 
     nstats_matches.gametype_id, 
-    nstats_matches.map_id 
+    nstats_matches.map_id,
+    nstats_players.name as player_name 
     FROM nstats_match_players 
     LEFT JOIN nstats_matches ON nstats_matches.id = nstats_match_players.match_id
+    LEFT JOIN nstats_players ON nstats_match_players.player_id = nstats_players.id
     WHERE nstats_match_players.id IN(?)`;
 
     const result = await simpleQuery(query, [matchPlayerRowIds]);
@@ -2895,6 +2897,7 @@ async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds, newPlayerId)
     const uniqueGametypes = new Set();
     const uniqueMaps = new Set();
     const uniquePlayers = new Set();
+    const uniquePlayerNames = new Set();
 
     uniquePlayers.add(newPlayerId);
 
@@ -2909,6 +2912,7 @@ async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds, newPlayerId)
         uniqueGametypes.add(r.gametype_id);
         uniqueMaps.add(r.map_id);
         uniquePlayers.add(r.player_id);
+        uniquePlayerNames.add(r.player_id);
     }
 
     return {
@@ -2916,7 +2920,8 @@ async function getMatchesInfoByPlayerMatchRowIds(matchPlayerRowIds, newPlayerId)
         "uniqueSeasons": [...uniqueSeasons],
         "uniqueGametypes": [...uniqueGametypes],
         "uniqueMaps": [...uniqueMaps],
-        "uniquePlayers": [...uniquePlayers]
+        "uniquePlayers": [...uniquePlayers],
+        "uniquePlayerNames": [...uniquePlayerNames]
     }
 }
 
@@ -3002,6 +3007,28 @@ export async function recalculatePlayerTotals(playerIds, seasonIds){
 
 }
 
+async function insertRenameHistory(data, renameType, newName){
+
+    const insertVars = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        insertVars.push([
+            d.match_id,
+            d.player_id,
+            renameType,
+            d.player_name,
+            newName
+        ]);
+    }
+
+    const query = `INSERT INTO nstats_force_name_history (match_id, player_id, force_type, original_name, new_name) VALUES ?`;
+
+    await bulkInsert(query, insertVars);
+}
+
 export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, bCreatePlayerIfNotExist){
 
     if(matchPlayerRowIds.length === 0) return;
@@ -3041,6 +3068,9 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
     await rankingsRecalculatePlayers(matchesInfo.uniquePlayers);
 
     await ctfLeagueRecalculatePlayers(matchesInfo.uniquePlayers);
+
+
+    await insertRenameHistory(matchesInfo.data, "Manual By HWID", playerName);
 
     /** TODO
     X Update match rows with the new player_id
