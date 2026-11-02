@@ -66,7 +66,7 @@ class PlayersSearchForm{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Players", err.toString());
+            new UINotification( "error", "Failed To Load Players", err.toString());
         }
     }
 

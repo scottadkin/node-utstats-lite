@@ -284,7 +284,7 @@ class AdminFTPManager{
             if(res.error !== undefined) throw new Error(res.error);
 
 
-            new UINotification(this.wrapper, "pass", "Server Added", "FTP Server Added Successfully", () =>{
+            new UINotification("pass", "Server Added", "FTP Server Added Successfully", () =>{
                 form.reset();
             });
 
@@ -293,7 +293,7 @@ class AdminFTPManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.wrapper, "error", "Failed To Add Server", err.message);
+            new UINotification("error", "Failed To Add Server", err.message);
             if(err.message !== this.actionMessage) this.bActionInProgress = false;
         }
 
@@ -526,12 +526,12 @@ class AdminFTPManager{
             await this.loadData();
             
 
-            new UINotification(this.wrapper, "pass", "Changes Saved", "Changes were successfully applied.");
+            new UINotification("pass", "Changes Saved", "Changes were successfully applied.");
             this.bActionInProgress = false;
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.wrapper, "error", "Failed To Save Changes", err.toString());
+            new UINotification("error", "Failed To Save Changes", err.toString());
             if(err.message !== this.actionMessage) this.bActionInProgress = false;
         }
 
@@ -563,13 +563,13 @@ class AdminFTPManager{
             this.bActionInProgress = false;
             this.selectedFTPServer = "";
             this.render();
-            new UINotification(this.wrapper, "pass", "Server Delete", "FTP Server Deleted Successfully");
+            new UINotification("pass", "Server Delete", "FTP Server Deleted Successfully");
 
 
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.wrapper, "error", "Failed To Delete Server", err.toString());
+            new UINotification("error", "Failed To Delete Server", err.toString());
 
             if(err.message !== this.actionMessage) this.bActionInProgress = false;
 
@@ -651,14 +651,14 @@ class AdminFTPManager{
 
             this.bActionInProgress = false;
             await this.loadData();
-            new UINotification(this.wrapper, "pass", "Changes Saved", "Logs folder settings successfully updated");
+            new UINotification("pass", "Changes Saved", "Logs folder settings successfully updated");
             this.render();
 
         }catch(err){
             console.trace(err);
 
             if(err.message !== this.actionMessage) this.bActionInProgress = false;
-            new UINotification(this.wrapper, "error", "Failed To Save Changes", "Logs folder settings successfully updated");
+            new UINotification("error", "Failed To Save Changes", "Logs folder settings successfully updated");
 
         }
     }
@@ -739,7 +739,7 @@ class AdminFTPManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Rejected Logs", err.toString())
+            new UINotification("error", "Failed To Load Rejected Logs", err.toString())
         }
     }
 
@@ -868,7 +868,7 @@ class AdminMapsManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Maps Data", err.toString());
+            new UINotification("error", "Failed To Load Maps Data", err.toString());
         }
     }
 
@@ -999,7 +999,7 @@ class AdminMapsManager{
   
             if(res.error !== undefined) throw new Error(res.error);
             this.updateMapImages(this.sanatizeMapNameForQuerySelector(res.fileName), res.fileName);
-            new UINotification(this.parent, "pass", `Map Image Uploaded`, `Image uploaded successfully, Saved as ${res.fileName}`);
+            new UINotification("pass", `Map Image Uploaded`, `Image uploaded successfully, Saved as ${res.fileName}`);
 
             const thumbIndex = this.mapImages.thumbs.indexOf(res.fileName);
 
@@ -1009,7 +1009,7 @@ class AdminMapsManager{
             
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", `Failed To Upload Map Image`, err.toString());
+            new UINotification("error", `Failed To Upload Map Image`, err.toString());
         }
     }
 
@@ -1225,12 +1225,12 @@ class AdminMapsManager{
             
             
 
-            new UINotification(this.parent, "pass", "Created Thumbnail", `Thumbnail created for ${fileName}`);
+            new UINotification("pass", "Created Thumbnail", `Thumbnail created for ${fileName}`);
 
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Create Thumbnail", err.toString());
+            new UINotification("error", "Failed To Create Thumbnail", err.toString());
 
         }finally{
 
@@ -1397,7 +1397,6 @@ class AdminMapsManager{
             this.updateSaveThumbnailSettingsButton();
 
             new UINotification(
-                this.parent, 
                 "pass", 
                 "Settings Saved", 
                 ["Settings saved successfully. You will need to click create all thumbnails to generate new ones."]
@@ -1405,7 +1404,7 @@ class AdminMapsManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Save Thumbnail Settings", err.toString());
+            new UINotification("error", "Failed To Save Thumbnail Settings", err.toString());
         }
     }
 
@@ -1675,7 +1674,7 @@ class AdminSiteSettingsManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed to load settings", err.toString());
+            new UINotification("error", "Failed to load settings", err.toString());
         }
     }
 
@@ -1726,7 +1725,6 @@ class AdminSiteSettingsManager{
             if(res.error !== undefined) throw new Error(res.error);
 
             new UINotification(
-                this.parent, 
                 "note", 
                 "Site Settings Changed", 
                 `${res.passed} ${plural(res.passed, "change")}  successful, and ${res.failed} failed.`
@@ -1740,7 +1738,7 @@ class AdminSiteSettingsManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed to save changes", err.toString());
+            new UINotification( "error", "Failed to save changes", err.toString());
         }
     }
 
@@ -2318,14 +2316,14 @@ class AdminSiteSettingsManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Changes Saved", `Settings restored for page: ${pageName}`);
+            new UINotification("pass", "Changes Saved", `Settings restored for page: ${pageName}`);
 
             await this.loadData();
 
         }catch(err){
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Restore Page Layout", err.toString());
+            new UINotification("error", "Failed To Restore Page Layout", err.toString());
         }
     }
 
@@ -2336,7 +2334,7 @@ class AdminSiteSettingsManager{
 
             if(this.bRestoreAllCompInProgress){
 
-                new UINotification(this.parent, "error", "Please Wait...", "Action is already in progress.");
+                new UINotification("error", "Please Wait...", "Action is already in progress.");
                 return;
             }
 
@@ -2353,12 +2351,12 @@ class AdminSiteSettingsManager{
             const res = await req.json();
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Changes Saved", "Restored All Page Component Settings");
+            new UINotification("pass", "Changes Saved", "Restored All Page Component Settings");
             await this.loadData();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Restore All Page Component Settings", err.toString());
+            new UINotification("error", "Failed To Restore All Page Component Settings", err.toString());
         }finally{
 
             this.bRestoreAllCompInProgress = false;
@@ -2371,7 +2369,7 @@ class AdminSiteSettingsManager{
 
             if(this.bRestoreAllLayoutsInProgress){
 
-                new UINotification(this.parent, "error", "Please Wait...", "Action is already in progress.");
+                new UINotification("error", "Please Wait...", "Action is already in progress.");
                 return;
             }
 
@@ -2388,12 +2386,12 @@ class AdminSiteSettingsManager{
             const res = await req.json();
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Changes Saved", "Restored All Page Layout Settings");
+            new UINotification("pass", "Changes Saved", "Restored All Page Layout Settings");
             await this.loadData();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Restore All Page Layout Settings", err.toString());
+            new UINotification("error", "Failed To Restore All Page Layout Settings", err.toString());
         }finally{
 
             this.bRestoreAllLayoutsInProgress = false;
@@ -2406,7 +2404,7 @@ class AdminSiteSettingsManager{
 
             if(this.bRestoreAllPageSettingsInProgress){
 
-                new UINotification(this.parent, "error", "Please Wait...", "Action is already in progress.");
+                new UINotification("error", "Please Wait...", "Action is already in progress.");
                 return;
             }
 
@@ -2423,12 +2421,12 @@ class AdminSiteSettingsManager{
             const res = await req.json();
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Changes Saved", "Restored All Page Layout Settings, and Component settings.");
+            new UINotification("pass", "Changes Saved", "Restored All Page Layout Settings, and Component settings.");
             await this.loadData();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Restore All Page Settings", err.toString());
+            new UINotification("error", "Failed To Restore All Page Settings", err.toString());
         }finally{
 
             this.bRestoreAllPageSettingsInProgress = false;
@@ -2649,7 +2647,7 @@ class AdminRankingManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Rankings Data", err.toString());
+            new UINotification("error", "Failed To Load Rankings Data", err.toString());
         }
     }
 
@@ -2728,11 +2726,11 @@ class AdminRankingManager{
                     failedElem.append(UIB(f.category), " -> ", UIB(f.display_name), " change failed to save.", UIBr());
                 }
 
-                new UINotification(this.parent, "error", "Failed To Save All Changes", failedElem);
+                new UINotification("error", "Failed To Save All Changes", failedElem);
 
             }else{
 
-                new UINotification(this.parent, "pass", "All Changes Saved", "All changes were successfully saved.");
+                new UINotification( "pass", "All Changes Saved", "All changes were successfully saved.");
             }
 
             this.updateSavedSettings(res.passed);
@@ -2740,7 +2738,7 @@ class AdminRankingManager{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Save Changes", err.toString());
+            new UINotification("error", "Failed To Save Changes", err.toString());
 
         }
     }
@@ -2904,13 +2902,13 @@ class AdminRankingManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Rankings Recalculated", res.message);
+            new UINotification("pass", "Rankings Recalculated", res.message);
             
         }catch(err){
             
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Recalculate Rankings", err.toString())
+            new UINotification( "error", "Failed To Recalculate Rankings", err.toString())
 
         }finally{
 
@@ -2997,12 +2995,12 @@ class AdminClearDatabase{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Database Tables Cleared", "All Player and Match data has been deleted.");
+            new UINotification( "pass", "Database Tables Cleared", "All Player and Match data has been deleted.");
 
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Clear Database Tables", err.toString());
+            new UINotification("error", "Failed To Clear Database Tables", err.toString());
 
         }finally{
 
@@ -3086,7 +3084,7 @@ class AdminCTFLeagueManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Settings", err.toString());
+            new UINotification("error", "Failed To Load Settings", err.toString());
         }
     }
 
@@ -3116,12 +3114,12 @@ class AdminCTFLeagueManager{
 
             this.savedSettings = JSON.parse(JSON.stringify(this.settings));
 
-            new UINotification(this.parent, "pass", "Changes Saved", "CTF League settings have been updated.");
+            new UINotification("pass", "Changes Saved", "CTF League settings have been updated.");
             this.render();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Save Changes", err.toString());
+            new UINotification( "error", "Failed To Save Changes", err.toString());
         }finally{
 
             this.bActionInProgress = false;
@@ -3234,7 +3232,7 @@ class AdminCTFLeagueManager{
         try{
 
             if(this.bActionInProgress){
-                new UINotification(this.parent, "warning", "Please Wait", `A previous action is still being processed.`);
+                new UINotification( "warning", "Please Wait", `A previous action is still being processed.`);
                 return;
             }
 
@@ -3252,14 +3250,14 @@ class AdminCTFLeagueManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Success", `CTF league tables recalculated successfully.`);
+            new UINotification("pass", "Success", `CTF league tables recalculated successfully.`);
 
             this.bActionInProgress = false;
             await this.loadSettings();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Recalculate CTF League Tables", err.toString());
+            new UINotification("error", "Failed To Recalculate CTF League Tables", err.toString());
         }
     }
 
@@ -3489,7 +3487,7 @@ class AdminMatchesManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Names", err.toString());
+            new UINotification("error", "Failed To Load Names", err.toString());
         }
     }
 
@@ -3549,7 +3547,7 @@ class AdminMatchesManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification("error", "Failed To Load Data", err.toString());
         }
     }
 
@@ -3575,7 +3573,7 @@ class AdminMatchesManager{
 
             bFailed = true;
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Delete Match", err.toString());
+            new UINotification("error", "Failed To Delete Match", err.toString());
 
         }finally{
 
@@ -3608,7 +3606,6 @@ class AdminMatchesManager{
         if(this.deletePending.indexOf(id) !== -1){
 
             new UINotification(
-                this.parent, 
                 "warning", 
                 `Please Wait`, 
                 `The match is already queued for deletion please wait.`
@@ -3674,7 +3671,7 @@ class AdminMatchesManager{
     async deleteAllDuplicates(){
 
         if(this.bDeleteDuplicatesInProgress){
-            new UINotification(this.parent, "error", "Failed To Delete Duplicates", `Already Processing`);
+            new UINotification("error", "Failed To Delete Duplicates", `Already Processing`);
             return;
         }
 
@@ -3696,12 +3693,12 @@ class AdminMatchesManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Duplicates Deleted", "Duplicate matches have successfully been deleted.");
+            new UINotification("pass", "Duplicates Deleted", "Duplicate matches have successfully been deleted.");
             await this.loadData();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Delete Duplicates", err.toString());
+            new UINotification("error", "Failed To Delete Duplicates", err.toString());
         }finally{
 
             this.bDeleteDuplicatesInProgress = false;
@@ -3843,7 +3840,7 @@ class AdminServersManager{
             
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification( "error", "Failed To Load Data", err.toString());
         }finally{
             this.render();
         }
@@ -3944,7 +3941,7 @@ class AdminServersManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Merged Servers Successfully", `Total matches updated ${res.rowsChanged}`);
+            new UINotification("pass", "Merged Servers Successfully", `Total matches updated ${res.rowsChanged}`);
 
             this.oldSelectedServer = 0;
             await this.loadData();
@@ -3952,7 +3949,7 @@ class AdminServersManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Merge Servers", err.toString());
+            new UINotification( "error", "Failed To Merge Servers", err.toString());
         }finally{
 
             this.bMergeInProgress = false;
@@ -4099,7 +4096,7 @@ class AdminServersManager{
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
-            new UINotification(this.parent, "pass", "Success", "Rename completed.");
+            new UINotification( "pass", "Success", "Rename completed.");
             this.currentRenameNameSelected = 0;
             this.currentNewName = "";
             this.loadData();
@@ -4107,7 +4104,7 @@ class AdminServersManager{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Rename Server", err.toString());
+            new UINotification("error", "Failed To Rename Server", err.toString());
 
         }
     }
@@ -4239,7 +4236,7 @@ class AdminJSONManager{
             
         }catch(err){
 
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification("error", "Failed To Load Data", err.toString());
         }
     }
 
@@ -4294,7 +4291,7 @@ class AdminJSONManager{
         try{
 
             if(this.bSavingInProgress){
-                new UINotification(this.parent, "note", "Please Wait", "Previous changes are still being applied.");
+                new UINotification("note", "Please Wait", "Previous changes are still being applied.");
                 return;
             }
 
@@ -4324,7 +4321,7 @@ class AdminJSONManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Save Changes", err.toString());
+            new UINotification("error", "Failed To Save Changes", err.toString());
         }
     }
     createElems(){
@@ -4466,7 +4463,7 @@ class AdminSQLiteBackupManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load SQLite Stats", err.toString());
+            new UINotification("error", "Failed To Load SQLite Stats", err.toString());
         }
     }
 
@@ -4475,7 +4472,7 @@ class AdminSQLiteBackupManager{
         try{
 
             if(this.bBackupInProgress){
-                new UINotification(this.parent, "warning", "Please Wait", "Backup already in progress, please wait.");
+                new UINotification("warning", "Please Wait", "Backup already in progress, please wait.");
                 return;
             }
 
@@ -4491,7 +4488,7 @@ class AdminSQLiteBackupManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Backup Created", `Backup created and saved as ./backups/sqlite/${res}.gz`);
+            new UINotification("pass", "Backup Created", `Backup created and saved as ./backups/sqlite/${res}.gz`);
 
             await this.loadData();
             console.log(res);
@@ -4499,7 +4496,7 @@ class AdminSQLiteBackupManager{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Create SQLite Backup", err.toString());
+            new UINotification("error", "Failed To Create SQLite Backup", err.toString());
 
         }finally{
 
@@ -4688,11 +4685,11 @@ class AdminSQLiteBackupManager{
 
             console.log(res);
 
-            new UINotification(this.parent, "pass", `Restore Complete`, `Restore from backup completed`);
+            new UINotification( "pass", `Restore Complete`, `Restore from backup completed`);
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", `Failed To Restore From Backup`, err.toString());
+            new UINotification( "error", `Failed To Restore From Backup`, err.toString());
         }finally{
 
             this.bRestoreInProgress = false;
@@ -4904,7 +4901,7 @@ class AdminPlayerForceName{
         }catch(err){
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString())
+            new UINotification("error", "Failed To Load Data", err.toString())
         }
     }
 
@@ -5128,7 +5125,7 @@ class AdminPlayerForceName{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Success", "Forced HWID to name deleted successfully");
+            new UINotification( "pass", "Success", "Forced HWID to name deleted successfully");
             
             if(!bSkipRender){
                 await this.loadData();
@@ -5155,7 +5152,7 @@ class AdminPlayerForceName{
 
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Delete HWID To Name", err.toString());
+            new UINotification("error", "Failed To Delete HWID To Name", err.toString());
         }finally{
 
             this.bActionInProgress = false;
@@ -5184,7 +5181,7 @@ class AdminPlayerForceName{
         try{
 
             if(this.bActionInProgress){
-                new UINotification(this.parent, "error", "Please Wait", "A previous action has not finished.");
+                new UINotification("error", "Please Wait", "A previous action has not finished.");
                 return;
             }
 
@@ -5203,13 +5200,13 @@ class AdminPlayerForceName{
             this.updateHWIDToNames(hwid, newName);
             this.render();
 
-            new UINotification(this.parent, "pass", "Successful", "Force name by HWID successfully updated.");
+            new UINotification("pass", "Successful", "Force name by HWID successfully updated.");
 
             
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Rename Force Name BY HWID", err.toString());
+            new UINotification("error", "Failed To Rename Force Name BY HWID", err.toString());
         }finally{
 
             this.bActionInProgress = false;
@@ -5391,13 +5388,13 @@ class AdminPlayerForceName{
                 throw new Error(res.error);
             }
 
-            new UINotification(this.parent, "pass", "HWID Forced To Use Name", "Changes saved successfully");
+            new UINotification("pass", "HWID Forced To Use Name", "Changes saved successfully");
             //this.selectedHWID = "";
             this.hwidSearch = "";
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Force HWID To Use Name", err.toString())
+            new UINotification("error", "Failed To Force HWID To Use Name", err.toString())
         }finally{
 
             await this.loadData();
@@ -5598,12 +5595,12 @@ class AdminPlayerForceName{
             }
 
             
-            new UINotification(this.parent, "pass", "Success", "Deleted force MAC to name.");
+            new UINotification( "pass", "Success", "Deleted force MAC to name.");
 
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Delete Force MAC To Name", err.toString());
+            new UINotification("error", "Failed To Delete Force MAC To Name", err.toString());
 
         }finally{
 
@@ -5809,12 +5806,12 @@ class AdminPlayerForceName{
             }
 
             await this.loadData();
-            new UINotification(this.parent, "pass", "Success", "Force name by MAC addresses complete.");
+            new UINotification("pass", "Success", "Force name by MAC addresses complete.");
 
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Apply Force Name By MAC Addresses", err.toString());
+            new UINotification("error", "Failed To Apply Force Name By MAC Addresses", err.toString());
 
         }finally{
 
@@ -6081,7 +6078,7 @@ class AdminPlayerForceName{
 
             if(this.bActionInProgress){
 
-                new UINotification(this.parent, "error", "Failed To Delete Force By Both", "A previous action has not finished, please wait until it's finished.");
+                new UINotification("error", "Failed To Delete Force By Both", "A previous action has not finished, please wait until it's finished.");
                 return;
             }
 
@@ -6116,13 +6113,13 @@ class AdminPlayerForceName{
 
                 this.bothToNamesTable.updateRows(this.createBothToNamesRows());
             }
-            new UINotification(this.parent, "pass", "Success", "Deleted force name by HWID and MAC combination.");
+            new UINotification("pass", "Success", "Deleted force name by HWID and MAC combination.");
             
 
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Delete Force By Both", err.toString());
+            new UINotification("error", "Failed To Delete Force By Both", err.toString());
         }finally{
 
             this.bActionInProgress = false;
@@ -6243,7 +6240,7 @@ class AdminPlayerForceName{
 
             if(this.bActionInProgress){
 
-                new UINotification(this.parent, "error", "Failed To Force By HWID & MAC Addresses", "Previous action is still being processed.");
+                new UINotification("error", "Failed To Force By HWID & MAC Addresses", "Previous action is still being processed.");
                 return;
             }
 
@@ -6264,13 +6261,13 @@ class AdminPlayerForceName{
             if(res.error !== undefined) throw new Error(res.error);
 
             await this.loadData();
-            new UINotification(this.parent, "pass", "Success", `HWID and MAC combination is now force to use the name ${this.overrideName}`);
+            new UINotification("pass", "Success", `HWID and MAC combination is now force to use the name ${this.overrideName}`);
 
 
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Force By HWID & MAC Addresses", err.toString());
+            new UINotification("error", "Failed To Force By HWID & MAC Addresses", err.toString());
             
         }finally{
 
@@ -6563,7 +6560,7 @@ class AdminRenamePlayer{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Preview Data", err.toString());
+            new UINotification("error", "Failed To Load Preview Data", err.toString());
         }
     }
 
@@ -6589,6 +6586,7 @@ class AdminRenamePlayer{
                 throw new Error(`No matches selected to rename player`);
             }
 
+            new UINotification("processing", "Action In Progress", "Please Wait");
 
             const req = await fetch("/admin", {
                 "headers": {"Content-type": "application/json"},
@@ -6606,7 +6604,7 @@ class AdminRenamePlayer{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Success", "Player history updated successfully");
+            new UINotification("pass", "Success", "Player history updated successfully");
             this.resetPreviewData();
             this.updatePreview();
             await this.loadData();
@@ -6615,7 +6613,7 @@ class AdminRenamePlayer{
 
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Rename Player", err.toString());
+            new UINotification("error", "Failed To Rename Player", err.toString());
         }
 
     }
@@ -6758,11 +6756,6 @@ class AdminRenamePlayer{
         }
 
         const info = new UIInfo(buttonWrapper, previewInfoContent);
-
-       // this.previewElem.append(
-        //    `Result of search of ${historyBy.hwid}, ${historyBy.mac1}, ${historyBy.mac2}, ${historyBy.ip}`
-       // );
-
         const table = new TESTUITable(this.previewElem, tableOptions, rows);
 
     }
@@ -6802,7 +6795,7 @@ class AdminRenamePlayer{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification("error", "Failed To Load Data", err.toString());
         }
     }
 
@@ -6932,7 +6925,7 @@ class AdminRenamePlayer{
             if(this.ipFilter !== "" && !ip.includes(this.ipFilter)) continue;
             options.push({"display": ip, "value": ip});
         }
-        
+
         options.unshift({"display": "- Please Select An Option - ", "value": -1});
 
         return options;
@@ -7101,7 +7094,7 @@ class AdminPlayersImporterSettings{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Player Settings", err.toString());
+            new UINotification("error", "Failed To Load Player Settings", err.toString());
         }
     }
 
@@ -7156,7 +7149,7 @@ class AdminPlayersImporterSettings{
         try{
 
             if(this.bActionInProgress){
-                new UINotification(this.parent, "error", "Please Wait", "A previous action has not finished.");
+                new UINotification("error", "Please Wait", "A previous action has not finished.");
                 return;
             }
 
@@ -7174,7 +7167,7 @@ class AdminPlayersImporterSettings{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Success", "Changes saved successfully");
+            new UINotification("pass", "Success", "Changes saved successfully");
 
             this.savedSettings = JSON.parse(JSON.stringify(this.settings));
             this.warning.className = "hidden";
@@ -7183,7 +7176,7 @@ class AdminPlayersImporterSettings{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Save Changes", err.toString());
+            new UINotification("error", "Failed To Save Changes", err.toString());
 
         }finally{
 
@@ -7283,11 +7276,11 @@ class AdminPlayersWeaponsRecalculator{
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
-            new UINotification(this.parent, "pass", "Success", "Player weapon totals recalculated successfully.");
+            new UINotification("pass", "Success", "Player weapon totals recalculated successfully.");
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Recalculate Weapon Totals", err.toString());
+            new UINotification("error", "Failed To Recalculate Weapon Totals", err.toString());
         }finally{
 
             this.button.className = "submit-button";
@@ -7365,11 +7358,11 @@ class AdminPlayersTotalsRecalculator{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", `Player Totals Recalculated`, `Player totals recalculated successfully`);
+            new UINotification("pass", `Player Totals Recalculated`, `Player totals recalculated successfully`);
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", `Failed To Recalculate Player Totals`, err.toString());
+            new UINotification("error", `Failed To Recalculate Player Totals`, err.toString());
         }
     }
 
@@ -7604,7 +7597,7 @@ class AdminSeasonsManager{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification("error", "Failed To Load Data", err.toString());
         }
     }
 
@@ -7649,7 +7642,7 @@ class AdminSeasonsManager{
         try{
 
             if(this.bActionInProgress){
-                new UINotification(this.parent, "warning", "Please Wait", `A previous action is still being processed.`);
+                new UINotification("warning", "Please Wait", `A previous action is still being processed.`);
                 return;
             }
 
@@ -7682,12 +7675,12 @@ class AdminSeasonsManager{
 
             
 
-            new UINotification(this.parent, "pass", "Season Created", `Season successfully created.`);
+            new UINotification("pass", "Season Created", `Season successfully created.`);
             await this.loadData();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Create Season", err.toString());
+            new UINotification("error", "Failed To Create Season", err.toString());
         }finally{
 
             this.bActionInProgress = false;
@@ -7699,7 +7692,7 @@ class AdminSeasonsManager{
         try{
 
             if(this.bActionInProgress){
-                new UINotification(this.parent, "warning", "Please Wait", `A previous action is still being processed.`);
+                new UINotification("warning", "Please Wait", `A previous action is still being processed.`);
                 return;
             }
 
@@ -7734,12 +7727,12 @@ class AdminSeasonsManager{
 
             
 
-            new UINotification(this.parent, "pass", "Changes Saved", `Season updated successfully.`);
+            new UINotification("pass", "Changes Saved", `Season updated successfully.`);
             await this.loadData();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Edit Season", err.toString());
+            new UINotification("error", "Failed To Edit Season", err.toString());
         }finally{
 
             this.bActionInProgress = false;
@@ -7751,7 +7744,7 @@ class AdminSeasonsManager{
         try{
 
             if(this.bActionInProgress){
-                new UINotification(this.parent, "warning", "Please Wait", `A previous action is still being processed.`);
+                new UINotification("warning", "Please Wait", `A previous action is still being processed.`);
                 return;
             }
 
@@ -7767,14 +7760,14 @@ class AdminSeasonsManager{
 
             if(res.error !== undefined) throw new Error(res.error);
 
-            new UINotification(this.parent, "pass", "Success", `Season deleted successfully.`);
+            new UINotification("pass", "Success", `Season deleted successfully.`);
 
             this.selectedSeason = -1;
             await this.loadData();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Delete Season", err.toString());
+            new UINotification("error", "Failed To Delete Season", err.toString());
         }finally{
             this.bActionInProgress = false;
         }
@@ -7994,7 +7987,7 @@ class AdminSeasonsManager{
         try{
 
             if(this.bActionInProgress){
-                new UINotification(this.parent, "warning", "Action In Progress", `Please wait for previous action to finish`);
+                new UINotification("warning", "Action In Progress", `Please wait for previous action to finish`);
                 return;
             }
 
@@ -8009,13 +8002,13 @@ class AdminSeasonsManager{
             const res = await req.json();
 
             if(res.error !== undefined) throw new Error(res.error);
-            new UINotification(this.parent, "pass", "Success", `Season recalculated successfully`);
+            new UINotification("pass", "Success", `Season recalculated successfully`);
             
             await this.loadData();
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Recalculate Seasons", err.toString());
+            new UINotification("error", "Failed To Recalculate Seasons", err.toString());
         }finally{
 
             this.bActionInProgress = false;
@@ -8155,7 +8148,7 @@ class UIPlayerProfileManager{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Fetch Data", err.toString());
+            new UINotification("error", "Failed To Fetch Data", err.toString());
         }
     }
 
@@ -8244,7 +8237,7 @@ class UIPlayerProfileManager{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load History", err.toString());
+            new UINotification("error", "Failed To Load History", err.toString());
         }
     }
 

@@ -41,7 +41,7 @@ class UIWatchlistMatches{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", `Failed To Loaded Saved Matches`, err.toString());
+            new UINotification( "error", `Failed To Loaded Saved Matches`, err.toString());
         }
     }
 
@@ -185,7 +185,7 @@ class UIWatchlistPlayers{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Saved Players", err.toString());
+            new UINotification( "error", "Failed To Load Saved Players", err.toString());
         }
     }
 

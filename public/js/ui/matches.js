@@ -302,7 +302,7 @@ class MatchesSearchForm{
             if(err.name === "AbortError") return;
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification( "error", "Failed To Load Data", err.toString());
         }
     }
 

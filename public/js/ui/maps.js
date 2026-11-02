@@ -77,7 +77,7 @@ class MapsSearchForm{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification( "error", "Failed To Load Data", err.toString());
         }
     }
 
@@ -445,7 +445,7 @@ class UIMapRecentMatches{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Recent Matches", err.toString());
+            new UINotification( "error", "Failed To Load Recent Matches", err.toString());
         }
     }
 
@@ -665,7 +665,7 @@ class UIMapPlayerRankings{
         }catch(err){
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Load Player Rankings", err.toString());
+            new UINotification( "error", "Failed To Load Player Rankings", err.toString());
         }
     }
 
@@ -947,7 +947,7 @@ class UIMapPlayerAverages{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Player Averages Data", err.toString());
+            new UINotification( "error", "Failed To Load Player Averages Data", err.toString());
         }
     }
 
@@ -1124,7 +1124,7 @@ class UIMapCTFLeague{
             this.updateSelect();
 
         }catch(err){
-            new UINotification(this.parent, "error", "Failed To Load CTF League Data Played Gametypes", err.toString());
+            new UINotification( "error", "Failed To Load CTF League Data Played Gametypes", err.toString());
         }
     }
 
@@ -1158,7 +1158,7 @@ class UIMapCTFLeague{
 
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Load CTF League Data", err.toString());
+            new UINotification( "error", "Failed To Load CTF League Data", err.toString());
         }
     }
 
@@ -1361,7 +1361,7 @@ class UIMapPlayerTotals{
         }catch(err){
             console.trace(err);
 
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification( "error", "Failed To Load Data", err.toString());
         }finally{
 
             this.render();
@@ -1513,7 +1513,7 @@ class UIMapPlayerRecords{
         }catch(err){
 
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification( "error", "Failed To Load Data", err.toString());
         }
     }
 

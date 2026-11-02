@@ -115,7 +115,7 @@ class RecordsPage{
 
         }catch(err){
             console.trace(err);
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification( "error", "Failed To Load Data", err.toString());
         }
     }
 

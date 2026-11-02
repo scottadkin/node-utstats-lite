@@ -721,72 +721,6 @@ class UITrueFalse{
     }
 }
 
-class UINotification{
-
-    constructor(parent, type, title, content, callback){
-
-        this.parent = parent;
-        this.type = type.toLowerCase();
-        this.title = title;
-        this.content = content;
-        this.callback = callback ?? null;
-        this.date = new Date(Date.now());
-
-        this.wrapper = UIDiv();
-
-        this.title = UIDiv("notification-title");
-        this.title.append(title);
-
-        this.elem = UIDiv("notification-content");
-
-        this.closeButton = document.createElement("input");
-        this.closeButton.type = "button";
-        this.closeButton.value = "Close Notification";
-        this.closeButton.className = "small-button margin-bottom-1";
-
-
-        this.dateElem = UIDiv("notification-date");
-        this.dateElem.append(this.date);
-
-        this.wrapper.append(this.dateElem, this.title, this.elem, this.closeButton);
-
-        this.parent.append(this.wrapper);
-
-        this.createEvents();
-        this.render();
-    }
-
-    createEvents(){
-
-        this.closeButton.addEventListener("click", () =>{
-
-            if(this.callback !== null){
-                this.callback();
-            }
-            this.wrapper.remove();
-            
-        });
-    }
-
-    render(){
-
-        if(typeof this.content !== "object"){
-            this.elem.append(this.content);
-        }else{
-            this.elem.append(this.content);
-        }
-
-        let className = `team-none`;
-
-        if(this.type === "pass") className = "team-green";
-        if(this.type === "error") className = "team-red";
-        if(this.type === "warning") className = "team-yellow";
-
-        this.wrapper.className = `notification ${className}`;
-    }
-}
-
-
 
 class UIWatchlistButton{
 
@@ -1371,7 +1305,7 @@ class UICalendarHeatMap{
             this.render();
 
         }catch(err){
-            new UINotification(this.parent, "error", "Failed To Load Data", err.toString());
+            new UINotification( "error", "Failed To Load Data", err.toString());
         }
     }
 

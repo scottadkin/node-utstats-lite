@@ -961,28 +961,27 @@ ul{
     margin-right: auto;
 }
 
-.notification{
-	position:fixed;
-	bottom:0px;
-	width:90%;
-	text-align:center;
-	color:white;
+#notifications-wrapper{
+    position:fixed;
+    top:0;
+    width:100%;
+    background-color:var(--bg-color-dark);
+    text-align: center;
 }
 
 .notification-title{
-	padding:var(--padding-10);
+	padding:var(--padding-10) 0px;
 	font-weight:500;
 }
 
 .notification-content{
-	padding:var(--padding-10);
+	padding-bottom:var(--padding-10);
 	font-size:var(--font-size-80);
-    margin-bottom:var(--margin-25);
 }
 
 .notification-date{
-	font-size:var(--font-size-80);
-	padding:5px;
+	font-size:var(--font-size-70);
+	padding:2px;
 	border-top:1px solid var(--border-color-1);
 	border-bottom:1px solid var(--border-color-1);
 	background-color:rgba(0,0,0,0.25);
