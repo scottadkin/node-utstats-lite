@@ -6730,11 +6730,6 @@ class AdminRenamePlayer{
 
         buttonWrapper.append(createIfNotRow, currentButton, UIBr(), UIBr());
 
-
-        
-
-        
-
         this.previewElem.append(buttonWrapper); 
 
         const table = new TESTUITable(this.previewElem, tableOptions, rows);
@@ -6868,16 +6863,11 @@ class AdminRenamePlayer{
       
                 this.hwidSelect.unselect();
                 this.resetPreviewData();
+                if(this.hwidFilter !== ""){
+                    this.previewChanges(this.hwidFilter, "", "");
+                }
                 this.updatePreview();
-
-                
-                
-                this.hwidSelect.updateOptions(newOptions, this.hwidFilter);
-      
-                    
-                
-
-                
+                this.hwidSelect.updateOptions(newOptions, this.hwidFilter); 
             });
 
             filterHwidRow.append(this.filterHWIDInput);
