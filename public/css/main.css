@@ -969,6 +969,11 @@ ul{
     text-align: center;
 }
 
+#notifications-toolbar{
+    padding:5px;
+    font-size:var(--font-size-70);
+}
+
 .notification-title{
 	padding:var(--padding-10) 0px;
 	font-weight:500;

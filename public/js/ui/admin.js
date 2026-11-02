@@ -8189,6 +8189,9 @@ class UIPlayerProfileManager{
             if(type === "hwid"){
                 valueData.url =`/admin/?mode=players&sub=rename&by=hwid&target=${d.value}`
                 valueData.utlTarget = "_blank"
+            }else if(type === "ip"){
+                valueData.url =`/admin/?mode=players&sub=rename&by=ip&target=${d.value}`
+                valueData.utlTarget = "_blank"
             }
             rows.push([
                 valueData,

@@ -7,15 +7,43 @@ class UINotificationsManager{
 
         this.activeNotificationIndex = -1;
 
-        this.toolBar = UIDiv("notifications-toolbar");
+        this.toolBar = UIDiv();
+        this.toolBar.id = "notifications-toolbar";
 
-        this.toolBar.innerHTML = "test";
+        this.closeAllButton = UIButton("Close All Notifications", "small-button");
+
+        this.closeAllButton.addEventListener("click", () =>{
+
+            this.reset();
+        });
+
+        this.toolBar.innerHTML = "";
 
         this.content = UIDiv();
 
         this.elem.append(this.toolBar, this.content);
 
         this.notifications = [];
+    }
+
+    reset(){
+        this.notifications = [];
+        this.elem.className = "hidden";
+        this.activeNotificationIndex = -1;
+    }
+
+    updateToolBar(){
+
+        this.elem.className = "";
+
+        let message = `You have ${this.notifications.length} notification`;
+
+        if(this.notifications.length !== 1){
+            message += `s`;
+        }
+
+        this.toolBar.innerHTML = ``;
+        this.toolBar.append(message, this.closeAllButton);
     }
 
     addNotification(notification){
@@ -26,9 +54,8 @@ class UINotificationsManager{
             this.activeNotificationIndex = 0;
         }
 
-        this.elem.className = "";
-
-        this.toolBar.innerHTML = `You have ${this.notifications.length} notifications`;
+        
+        this.updateToolBar();
 
         this.focusNotification(this.activeNotificationIndex);
     }
@@ -55,18 +82,24 @@ class UINotificationsManager{
         }
 
         if(indexToRemove === null){
-            throw new Error(`failed to find matching notification`);
+
+            this.reset();
+            return;
         }
+
 
         this.notifications.splice(indexToRemove, 1);
         this.activeNotificationIndex = -1;
+
         if(this.notifications.length > 0){
             this.activeNotificationIndex = 0;
             this.focusNotification(this.activeNotificationIndex);
         }else{
-
-            this.elem.className = "hidden";
+            this.reset();
+            return;
         }
+
+        this.updateToolBar();
     }
 }
 
