@@ -603,7 +603,11 @@ export default class AdminJSONManager{
 
                 if(bCreatePlayer === undefined) throw new Error(`bCreatePlayer argument is missing`);
 
-                await renamePlayerByMatchHistory(name, rowIds, bCreatePlayer);
+                const renameType = this.req.body.renameType;
+
+                if(renameType === undefined) throw new Error(`renameType is argument is missing`);
+
+                await renamePlayerByMatchHistory(name, rowIds, bCreatePlayer, renameType);
 
 
                 return this.res.json({"message": "passed"});

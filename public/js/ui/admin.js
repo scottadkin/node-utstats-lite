@@ -6582,9 +6582,20 @@ class AdminRenamePlayer{
 
 
             if(toUpdate.length === 0){
-
                 throw new Error(`No matches selected to rename player`);
             }
+
+            let renameType = "";
+
+            if(this.selectedHWID !== ""){
+                renameType = "Manual By HWID";
+            }
+
+            if(this.selectedIP !== ""){
+                renameType = "Manual By IP";
+            }
+
+            if(renameType === "") throw new Error(`renameType is blank`);
 
             new UINotification("processing", "Action In Progress", "Please Wait");
 
@@ -6593,6 +6604,7 @@ class AdminRenamePlayer{
                 "method": "POST",
                 "body": JSON.stringify({
                     "mode": "rename-player-by-history", 
+                    renameType,
                     "rowIds": toUpdate,
                     "name": this.selectedName,
                     "bCreatePlayer": this.bCreatePlayer

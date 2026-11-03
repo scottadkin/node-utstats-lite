@@ -3037,7 +3037,7 @@ async function insertRenameHistory(data, renameType, newName){
     await bulkInsert(query, insertVars);
 }
 
-export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, bCreatePlayerIfNotExist){
+export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, bCreatePlayerIfNotExist, renameType){
 
     if(matchPlayerRowIds.length === 0) return;
 
@@ -3078,7 +3078,7 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
     await ctfLeagueRecalculatePlayers(matchesInfo.uniquePlayers);
 
 
-    await insertRenameHistory(matchesInfo.data, "Manual By HWID", playerName);
+    await insertRenameHistory(matchesInfo.data, renameType, playerName);
 
     /** TODO
     X Update match rows with the new player_id
