@@ -49,11 +49,13 @@
 .admin-cat-box{
 	text-align: center;
     margin-bottom: var(--margin-10);
+    
 	
 }
 
-.admin-cat-box:hover{
+.admin-cat-box:hover .admin-cat-info{
     background-color: var(--bg-color-dark);
+    color:yellow;
 }
 
 .admin-cat-title{
@@ -73,6 +75,7 @@
 	margin-right:auto;
 	padding-top:var(--padding-5);
     background-color:var(--bg-color-mid);
+    transition:var(--transition-all);
 	
 }
 
