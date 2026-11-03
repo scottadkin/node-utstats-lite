@@ -2749,10 +2749,10 @@ export async function sanitizePlayerPageReq(id, seasonId, seasonInfo){
     }
 }
 
-export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2, ip){
+export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac, ip){
 
 
-    if(hwid === "" && mac1 === "" && mac2 === "" && ip === ""){
+    if(hwid === "" && mac === "" && ip === ""){
         throw new Error(`You can't search a player's history with just blank strings`);
     }
 
@@ -2787,18 +2787,13 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2, ip){
         vars.push(hwid);
     }
 
-    if(mac1 !== ""){
+    if(mac !== ""){
         if(vars.length > 0) query += `AND`
-        query += ` nstats_match_players.mac1=? `;
-        vars.push(mac1);
+        query += ` (nstats_match_players.mac1=? OR nstats_match_players.mac2=?)`;
+        vars.push(mac, mac);
         
     }
 
-    if(mac2 !== ""){
-        if(vars.length > 0) query += `AND`;
-        query += ` nstats_match_players.mac2=? `;
-        vars.push(mac2);
-    }
 
     if(ip !== ""){
         if(vars.length > 0) query += `AND`;
@@ -2815,8 +2810,6 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2, ip){
     const uniqueIps = new Set();
     const uniqueHWIDs = new Set();
     const uniqueMacs = new Set();
-    const uniqueMac1s = new Set();
-    const uniqueMac2s = new Set();
 
     for(let i = 0; i < result.length; i++){
 
@@ -2834,12 +2827,10 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2, ip){
 
         if(mac1 !== ""){
             uniqueMacs.add(mac1);
-            uniqueMac1s.add(mac1);
         }
 
         if(mac2 !== ""){
             uniqueMacs.add(mac2);
-            uniqueMac2s.add(mac2);
         }
         
     }
@@ -2849,10 +2840,8 @@ export async function adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2, ip){
         "uniqueHWIDs": [...uniqueHWIDs],
         "uniqueIps": [...uniqueIps],
         "uniqueMacs": [...uniqueMacs],
-        "uniqueMac1s": [...uniqueMac1s],
-        "uniqueMac2s": [...uniqueMac2s],
         "uniqueNames": [...uniqueNames],
-        "historyBy": {hwid, mac1, mac2, ip}
+        "historyBy": {hwid, mac, ip}
     };
 }
 

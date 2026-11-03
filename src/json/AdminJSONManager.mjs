@@ -382,21 +382,34 @@ export default class AdminJSONManager{
                 const playerNames = await getAllNames();
                 const ips = await adminGetAllIps();
 
-                return this.res.json({usage, hwidToNames, macToNames, bothToNames, playerNames, ips});
+                const uniqueMACs = new Set();
+
+                for(let i = 0; i < usage.length; i++){
+
+                    const {mac1, mac2} = usage[i];
+
+                    if(mac1 !== "") uniqueMACs.add(mac1);
+                    if(mac2 !== "") uniqueMACs.add(mac2);
+                }
+
+                return this.res.json({
+                    usage, hwidToNames, macToNames, 
+                    bothToNames, playerNames, ips,
+                    "uniqueMACs": [...uniqueMACs]
+                });
                 
             }else if(this.mode === "preview-force-name"){
                 
                 const hwid = this.req.body.hwid ?? null;
-                const mac1 = this.req.body.mac1 ?? null;
-                const mac2 = this.req.body.mac2 ?? null;
+                const mac = this.req.body.mac ?? null;
                 const ip = this.req.body.ip ?? null;
 
-                if(hwid === null || mac1 === null || mac2 === null || ip === null){
-                    throw new Error(`hwid, mac1, mac2, and ip can't be undefined`);
+                if(hwid === null || mac === null || ip === null){
+                    throw new Error(`hwid, mac, and ip can't be undefined`);
                 }
 
 
-                const data = await adminGetFullPlayerHistoryByHWIDMACS(hwid, mac1, mac2, ip);
+                const data = await adminGetFullPlayerHistoryByHWIDMACS(hwid, mac, ip);
 
                 return this.res.json(data);
 

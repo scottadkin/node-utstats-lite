@@ -6439,8 +6439,8 @@ class AdminRenamePlayer{
         this.bothToNames = [];
         this.playerNames = [];
         this.ipList = [];
+        this.macList = [];
 
-        this.previewData = {};
         this.resetPreviewData();
 
         this.bSelectAll = false;
@@ -6448,11 +6448,12 @@ class AdminRenamePlayer{
         this.nameFilter = "";
         this.hwidFilter = (this.mode === "hwid" && reqQuery.target !== undefined) ? reqQuery.target : "";
         this.ipFilter = (this.mode === "ip" && reqQuery.target !== undefined) ? reqQuery.target : "";
-        this.mac1Filter = "";
-        this.mac2Filter = "";
+        this.macFilter = (this.mode === "mac" && reqQuery.target !== undefined) ? reqQuery.target : "";
+
 
         this.selectedHWID = this.hwidFilter;
         this.selectedIP = this.ipFilter;
+        this.selectedMAC = this.macFilter;
 
         this.selectedName = "";
 
@@ -6476,7 +6477,7 @@ class AdminRenamePlayer{
             "uniqueMac1s": [],
             "uniqueMac2s": [],
             "uniqueNames": [],
-            "historyBy": {"hwid": "", "mac1": "", "mac2": "", "ip": ""}
+            "historyBy": {"hwid": "", "mac": "", "ip": ""}
         };
     }
 
@@ -6492,7 +6493,7 @@ class AdminRenamePlayer{
         const options = [
             {"display": "Rename By HWID History", "value": "hwid"},
             {"display": "Rename By IP History", "value": "ip"},
-           // {"display": "Rename By MAC History", "value": "mac"},
+            {"display": "Rename By MAC History", "value": "mac"},
           //  {"display": "Rename By HWID & MAC History", "value": "both"},
         ];
 
@@ -6504,8 +6505,7 @@ class AdminRenamePlayer{
             this.mode = e.detail.newTab;
             this.resetPreviewData();
             this.selectedHWID = "";
-            this.selectedMAC1 = "";
-            this.selectedMAC2 = "";
+            this.selectedMAC = "";
             this.selectedIP = "";
             this.updatePreview();
             this.render();
@@ -6528,9 +6528,11 @@ class AdminRenamePlayer{
         this.wrapper.append(this.previewElem);
     }
 
-    async previewChanges(hwid, mac1, mac2, ip){
+    async previewChanges(hwid, mac, ip){
 
         try{
+
+            if(hwid === "" && mac === "" && ip === "") return;
 
             const req = await fetch("/admin", {
                 "headers": {"Content-type": "application/json"},
@@ -6538,8 +6540,7 @@ class AdminRenamePlayer{
                 "body": JSON.stringify({
                     "mode": "preview-force-name",
                     hwid,
-                    mac1,
-                    mac2,
+                    mac,
                     ip
                 })
             });
@@ -6549,7 +6550,6 @@ class AdminRenamePlayer{
             if(res.error !== undefined) throw new Error(res.error);
 
             this.previewData = res;
-
             for(let i = 0; i < this.previewData.data.length; i++){
 
                 const d = this.previewData.data[i];
@@ -6593,6 +6593,10 @@ class AdminRenamePlayer{
 
             if(this.selectedIP !== ""){
                 renameType = "Manual By IP";
+            }
+
+            if(this.selectedMAC !== ""){
+                renameType = "Manual BY MAC";
             }
 
             if(renameType === "") throw new Error(`renameType is blank`);
@@ -6643,7 +6647,7 @@ class AdminRenamePlayer{
         UIHeader(this.previewElem, "Full Match History");
 
         const totalMatches = this.previewData.data.length;
-        const {uniqueHWIDS, uniqueIps, uniqueMac1s, uniqueMac2s, uniqueMacs, uniqueNames, historyBy} = this.previewData;
+        const {uniqueHWIDS, uniqueIps, uniqueMacs, uniqueNames, historyBy} = this.previewData;
 
 
         const tableOptions = {
@@ -6691,12 +6695,8 @@ class AdminRenamePlayer{
             ]
         });
 
-
-  
-
         const createIfNotRow = UIDiv("form-row");
         
-
         const createButton = new UITrueFalse(this.bCreatePlayer, "create-player", false, (e) =>{
     
             this.bCreatePlayer = e;
@@ -6708,7 +6708,7 @@ class AdminRenamePlayer{
         const currentButton = UIButton("Apply Changes To Selected Data", "submit-button");
         currentButton.addEventListener("click", () =>{
 
-            this.updateSelectedEntries(this.hwidSearch, "", "");
+            this.updateSelectedEntries();
         });
 
         const buttonWrapper = UIDiv("form");
@@ -6749,8 +6749,6 @@ class AdminRenamePlayer{
                 `HWID was used in a total of ${totalMatches} ${plural(totalMatches, "match")}.`,
                 ` ${uniqueNames.length} Unique ${plural(uniqueNames.length, "name")} used.`,
                 ` ${uniqueIps.length} Unique IP ${plural(uniqueIps.length, "address")} used.`,
-                ` ${uniqueMac1s.length} Unique MAC1 ${plural(uniqueMac1s.length, "address")} used.`,
-                ` ${uniqueMac2s.length} Unique MAC2 ${plural(uniqueMac2s.length, "address")} used.`,
                 ` ${uniqueMacs.length} Unique MAC(MAC1 or MAC2) ${plural(uniqueMacs.length, "address")} used.`
             ]));
         }
@@ -6759,12 +6757,8 @@ class AdminRenamePlayer{
             previewInfoContent.push(UIB("IP Address"), ` of `, historyBy.ip);
         }
 
-        if(historyBy.mac1 !== ""){
-            previewInfoContent.push(UIB("MAC1"), ` of `, historyBy.mac1);
-        }
-
-        if(historyBy.mac2 !== ""){
-            previewInfoContent.push(UIB("MAC1"), ` of `, historyBy.mac2);
+        if(historyBy.mac !== ""){
+            previewInfoContent.push(UIB("MAC Address"), ` of `, historyBy.mac);
         }
 
         const info = new UIInfo(buttonWrapper, previewInfoContent);
@@ -6796,10 +6790,11 @@ class AdminRenamePlayer{
             this.bothToNames = res.bothToNames;
             this.playerNames = res.playerNames;
             this.ipList = res.ips;
+            this.macList = res.uniqueMACs;
 
             if(this.bAutoPreview){
 
-                await this.previewChanges(this.selectedHWID, "", "", this.selectedIP);
+                await this.previewChanges(this.selectedHWID, "", this.selectedIP);
             }
 
             this.render();
@@ -6898,7 +6893,7 @@ class AdminRenamePlayer{
             this.hwidSelect.unselect();
             this.resetPreviewData();
             if(this.hwidFilter !== ""){
-                this.previewChanges(this.hwidFilter, "", "", "");
+                this.previewChanges(this.hwidFilter, "", "");
             }
             this.updatePreview();
             this.hwidSelect.updateOptions(newOptions, this.hwidFilter); 
@@ -6916,7 +6911,7 @@ class AdminRenamePlayer{
             
             //this.selectAllInput.setValue(false);
             this.bSelectAll = false;
-            this.previewChanges(this.selectedHWID, "", "", "");
+            this.previewChanges(this.selectedHWID, "", "");
         });
 
         // this.hwidSelect = UISelect();
@@ -6964,10 +6959,41 @@ class AdminRenamePlayer{
         this.ipSelect = new UISelect(ipsRow, this.getIpsOptions(), this.selectedIP, (e) =>{
 
             this.selectedIP = e;
-            this.previewChanges("", "", "", this.selectedIP);
+            this.previewChanges("", "", this.selectedIP);
         });
 
         this.form.append(filterRow, ipsRow);
+    }
+
+    getMacOptions(){
+
+        const options = [];
+
+        for(let i = 0; i < this.macList.length; i++){
+
+            const mac = this.macList[i];
+
+            if(this.macFilter === "" || mac.includes(this.macFilter)){
+                options.push({"display": mac, "value": mac});
+            }
+        }
+
+        options.sort((a,b) =>{
+
+            a = a.value;
+            b = b.value;
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+
+            return 0;
+        });
+
+        options.unshift({"display": "- Please Select A MAC Address", "value": ""});
+
+        return options;
     }
 
     renderForm(){
@@ -6986,13 +7012,38 @@ class AdminRenamePlayer{
 
 
         if(this.mode === "mac" || this.mode === "both"){
-            const mac1Row = UIDiv("form-row");
-            mac1Row.append(UILabel("MAC1"));
+            const macFilterRow = UIDiv("form-row");
+            
 
-            const mac2Row = UIDiv("form-row");
-            mac2Row.append(UILabel("MAC2"));
+            const macFilterElem = UIInput("text", "filter-max", this.macFilter, "Filter MACS...", (e) =>{
+                this.macFilter = e.toUpperCase();
 
-            this.form.append(mac1Row, mac2Row);
+                const newOptions = this.getMacOptions();
+
+                this.bSelectAll = false;
+    
+                this.macSelect.unselect();
+                this.resetPreviewData();
+                if(this.macFilter !== ""){
+                    this.previewChanges("", this.macFilter, "");
+                }
+                this.updatePreview();
+                this.macSelect.updateOptions(newOptions, this.macFilter); 
+            });
+
+            macFilterRow.append(UILabel("Filter MAC Addresses"), macFilterElem);
+
+            const macRow = UIDiv("form-row");
+            macRow.append(UILabel("MAC"));
+
+            this.macSelect = new UISelect(macRow, this.getMacOptions(), this.selectedMAC, (e) =>{
+
+                this.selectedMAC = e;
+                this.previewChanges("", this.selectedMAC, "");
+            });
+
+
+            this.form.append(macFilterRow, macRow);
 
         }
 
@@ -8282,6 +8333,10 @@ class UIPlayerProfileManager{
             matchLink.target = "_blank";
             matchLink.append(toDateString(p.match_date, TIME_ZONE, true));
 
+            const urlTarget = "_blank";
+
+            const urlBase = "/admin/?mode=players&sub=rename&by="
+
             return [
                 {
                     "display": matchLink,
@@ -8289,22 +8344,26 @@ class UIPlayerProfileManager{
                     "className": "date"
                 },
                 {
-                    "url": `/admin/?mode=players&sub=rename&by=ip&target=${p.ip}`,
-                    "urlTarget": "_blank",
+                    "url": `${urlBase}ip&target=${p.ip}`,
+                    urlTarget,
                     "value": p.ip,
                     "display": [UICountryFlag(p.country), p.ip]
                 }, 
                 {
-                    "url": `/admin/?mode=players&sub=rename&by=hwid&target=${p.hwid}`,
-                    "urlTarget": "_blank",
+                    "url": `${urlBase}hwid&target=${p.hwid}`,
+                    urlTarget,
                     "value": p.hwid,
                     "className": "font-small"
                 },
                 {
+                    "url": `${urlBase}mac&target=${p.mac1}`,
+                    urlTarget,
                     "value": p.mac1,
                     "className": "font-small"
                 },
                 {
+                    "url": `${urlBase}mac&target=${p.mac2}`,
+                    urlTarget,
                     "value": p.mac2,
                     "className": "font-small"
                 }
