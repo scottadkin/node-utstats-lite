@@ -20,7 +20,6 @@ export const websitePort = 3000;
 //Higher the value the larger the file size of the screenshots
 export const mapScreenshotQuality = 85;
 
-
 //the maximum amount of failed login attempts before an ip is blocked from logging in.
 export const maxLoginAttempts = 5; 
 
@@ -28,14 +27,12 @@ export const maxLoginAttempts = 5;
 //in seconds
 export const maxLoginBanPeriod = 300;
 
-
 /*how often the importer saves the dom_team_score to the database
 UT logs this data every 5 * gamespeed * hardcore seconds (usually 5.5 seconds at 100% with hardcore mode)
 We also save our calculated domination scores at the same time.
 Setting this value to 1 will mean every 5 in game seconds data will be saved, 3 = every 15 seconds
 */
 export const dominationScoreSaveInterval = 3;
-
 
 /*
     Do not change this to true unless you know what you are doing,
@@ -47,3 +44,6 @@ export const bImportRandomizeNames = false;
 
 //How long a login session will last after last page load.(in hours)
 export const loginExpireTime = 24;
+
+//Skip automatic CTF league recalculations when running install.mjs
+export const bSkipInstallCTFLeagueRefresh = true;

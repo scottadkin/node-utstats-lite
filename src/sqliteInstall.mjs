@@ -13,6 +13,7 @@ import { setAllMapTotals } from "./weapons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "./ctf.mjs";
 import { setAllBGametypeFlags } from "./matches.mjs";
 import { getAllSeasonIds } from "./seasons.mjs";
+import { bSkipInstallCTFLeagueRefresh } from "../config.mjs";
 
 
 
@@ -1468,13 +1469,6 @@ export async function sqliteInstall(bOnlyCreateTables){
     await updateMapWeaponTotalsTable();
 
 
-
-    
-
-
-    
-
-
     new Message("Inserting Default Rankings Settings", "note");
     await insertDefaultRankingSettings();
     new Message("Inserting Default CTF League Settings", "note");
@@ -1506,16 +1500,9 @@ export async function sqliteInstall(bOnlyCreateTables){
     new Message(`Calculating player ctf totals`, "note");
     await ctfRecalculateAllPlayerTotals();
 
-
     //2.9.0
     new Message(`Marking Gametypes And Maps as BCTF or BDOM`, "note");
     await setAllBGametypeFlags();
-
-
-    
-
-    
-
 
     //2.9.0
    // new Message(`Calculating player max values.`, "note");
@@ -1524,7 +1511,6 @@ export async function sqliteInstall(bOnlyCreateTables){
     new Message(`Checking for map image thumbnail settings`, "note");
 
     await createThumbnailSettings();
-
 
     if(!fs.existsSync("./salt.mjs")){
 
@@ -1545,8 +1531,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     }
 
 
-
-    if(!bOnlyCreateTables){
+    if(!bSkipInstallCTFLeagueRefresh){
 
         const seasonIds = await getAllSeasonIds(false);
 
