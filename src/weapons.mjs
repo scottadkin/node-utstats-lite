@@ -722,13 +722,13 @@ export async function getMapWeaponStats(seasonId, mapId){
     return result;
 }
 
-export async function setAllMapTotals(){
+/*export async function setAllMapTotals(){
 
     const seasonIds = await getAllSeasonIds(false);
 
     await simpleQuery(`DELETE FROM nstats_map_weapon_totals`);
 
-
+    const start = performance.now();
     for(let i = 0; i < seasonIds.length; i++){
 
         const seasonId = seasonIds[i];
@@ -750,8 +750,95 @@ export async function setAllMapTotals(){
         }
     }
 
+    const end = performance.now();
+
+    console.log((end - start) * 0.001);
+
 
     new Message(`Set all map weapon totals completed.`,"pass");
+}*/
+
+
+//this version weapon stats(playtime, matches) aren't counted for just matches used but all matches with mapId
+export async function setAllMapTotals(){
+
+    const seasonIds = await getAllSeasonIds(false);
+
+    //await simpleQuery(`DELETE FROM nstats_map_weapon_totals`);
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        const seasonId = seasonIds[i];
+
+        let where = ``;
+        const vars = [seasonId];
+
+        if(seasonId !== 0){
+            where = `WHERE ws.match_id IN(SELECT id FROM nstats_matches WHERE season_id=?)`;
+            vars.push(seasonId);
+        }
+
+        //gametype_id isn't used yet
+        const query = `WITH map_stats AS (
+                SELECT map_id,SUM(playtime) as total_playtime, SUM(matches) as total_matches 
+                FROM nstats_seasons_unique_match_combinations WHERE season_id=? GROUP BY map_id
+            )
+        
+        
+        SELECT ws.match_id,ws.map_id,ws.weapon_id,
+        ${seasonId} as season_id,
+        SUM(ws.kills) as total_kills,
+        SUM(ws.deaths) as total_deaths,
+        SUM(ws.team_kills) as total_team_kills,
+        SUM(ws.suicides) as total_suicides,
+        MAX(ws.kills) as max_kills,
+        MAX(ws.deaths) as max_deaths,
+        MAX(ws.team_kills) as max_team_kills,
+        MAX(ws.suicides) as max_suicides,
+        COALESCE(map_stats.total_matches, 0) as total_matches,
+        COALESCE(map_stats.total_playtime, 0) as total_playtime
+        FROM nstats_match_weapon_stats as ws
+        LEFT JOIN map_stats ON map_stats.map_id = ws.map_id
+        ${where}
+        GROUP BY ws.map_id,ws.weapon_id`;
+
+        const result = await simpleQuery(query, vars);
+
+        
+
+        for(let x = 0; x < result.length; x++){
+
+            const r = result[x];
+
+            r.kpm = 0;
+            r.dpm = 0;
+            r.tkpm = 0;
+            r.spm = 0;
+
+            if(r.total_playtime === 0) continue;
+
+            const minutes = (r.total_playtime/60);
+
+            if(r.total_kills > 0){
+                r.kpm = r.total_kills / minutes;
+            }
+
+            if(r.total_deaths > 0){
+                r.dpm = r.total_deaths / minutes;
+            }
+
+            if(r.total_team_kills > 0){
+                r.tkpm = r.total_team_kills / minutes;
+            }
+
+            if(r.total_suicides > 0){
+                r.spm = r.total_suicides / minutes;
+            }
+            
+        }
+
+        console.log(result);
+    }
 }
 
 
