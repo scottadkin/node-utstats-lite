@@ -320,8 +320,11 @@ export class MatchParser{
             mapWeaponTotalPromises.push(this.weapons.updateMapTotals(seasonId, this.map.id, this.gametype.id));
         }
 
+       
+
         await Promise.all(mapWeaponTotalPromises);
 
+         process.exit();
         if(this.classicWeaponStats.lines.length > 0){
             await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
         }
