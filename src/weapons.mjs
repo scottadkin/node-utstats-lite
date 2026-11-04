@@ -548,19 +548,19 @@ async function bulkInsertMapWeaponTotals(seasonId, totals){
         const d = totals[i];
 
         insertVars.push([
-            d.mapId,
-            d.matches,
-            d.playtime,
+            d.map_id,
+            d.total_matches,
+            d.total_playtime,
             d.weapon_id,
-            d.kills,
-            d.deaths,
-            d.suicides,
-            d.team_kills,
-            d.killsPerMin,
-            d.deathsPerMin,
-            d.teamKillsPerMin,
-            d.suicidesPerMin,
-            d.gametypeId,
+            d.total_kills,
+            d.total_deaths,
+            d.total_suicides,
+            d.total_team_kills,
+            d.kpm,
+            d.dpm,
+            d.tkpm,
+            d.spm,
+            d.gametype_id,
             d.max_kills,
             d.max_deaths,
             d.max_suicides,
@@ -568,8 +568,6 @@ async function bulkInsertMapWeaponTotals(seasonId, totals){
             seasonId
         ]);
     }
-
-   // console.log(insertVars);
 
     const columns = [
         "map_id", "total_matches", "total_playtime", "weapon_id", "kills", 
@@ -582,111 +580,34 @@ async function bulkInsertMapWeaponTotals(seasonId, totals){
     //await bulkInsert(query, insertVars);
 }
 
-async function calcMapWeaponTotalsFromMatchTable(seasonId, mapId, gametypeId){
-
-
-    let gametypeIdString = "";
-
-    const vars = [];
-
-    let whereString = "WHERE map_id=?";
-    vars.push(mapId);
-
-    if(seasonId !== 0){
-        whereString += ` AND EXISTS (SELECT 1 
-        FROM nstats_matches WHERE nstats_matches.id = nstats_match_weapon_stats.match_id AND nstats_matches.season_id=?)`;
-        vars.push(seasonId);
-    }
-
-
-    if(gametypeId !== 0){
-        vars.push(gametypeId);
-        gametypeIdString = "gametype_id,";
-        whereString += " AND gametype_id=?";
-    }
-
-    const query = `SELECT ${gametypeIdString}weapon_id, 
-    SUM(kills) as kills, 
-    MAX(kills) as max_kills,
-    SUM(deaths) as deaths,
-    MAX(deaths) as max_deaths, 
-    SUM(team_kills) as team_kills,
-    MAX(team_kills) as max_team_kills, 
-    SUM(suicides) as suicides,
-    MAX(suicides) as max_suicides
-    FROM nstats_match_weapon_stats ${whereString} GROUP BY ${gametypeIdString}weapon_id`;
-
-    return await simpleQuery(query, vars);
-
-}
-
-
-function setXPH(data, totalMatches, playtime, mapId, gametypeId){
-
-    for(let i = 0; i < data.length; i++){
-
-        const d = data[i];
-
-        d.matches = totalMatches;
-        d.playtime = playtime;
-        d.mapId = mapId;
-        d.gametypeId = gametypeId;
-
-        d.killsPerMin = 0;
-        d.deathsPerMin = 0;
-        d.teamKillsPerMin = 0;
-        d.suicidesPerMin = 0;
-
-        if(playtime <= 0) continue;
-
-        if(d.kills > 0){
-            d.killsPerMin = (d.kills / playtime) * 60;
-        }
-
-        if(d.deaths > 0){
-            d.deathsPerMin = (d.deaths / playtime) * 60;
-        }
-
-        if(d.suicides > 0){
-            d.suicidesPerMin = (d.suicides / playtime) * 60;
-        }
-
-        if(d.team_kills > 0){
-            d.teamKillsPerMin = (d.team_kills / playtime) * 60;
-        }
-    }
-}
-
-/*export async function calcMapWeaponsTotals(seasonId, mapId, gametypeId){
-
-    seasonId = parseInt(seasonId);
-    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
-
-    const gametypeData = await calcMapWeaponTotalsFromMatchTable(seasonId, mapId, gametypeId);
-    const allTimeData = await calcMapWeaponTotalsFromMatchTable(seasonId, mapId, 0);
-
-    const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(seasonId, mapId, 0);
-    const {playtime: gametypePlaytime, matches: gametypeMatches} = await getTotalPlaytimeAndMatches(seasonId, mapId, gametypeId);
-
-    setXPH(allTimeData, allTimeMatches, allTimePlaytime, mapId, 0);
-    setXPH(gametypeData, gametypeMatches, gametypePlaytime, mapId, gametypeId);
-
-    await bulkInsertMapWeaponTotals(seasonId, allTimeData);
-    await bulkInsertMapWeaponTotals(seasonId, gametypeData);
-}*/
-
 export async function calcMapWeaponsTotals(seasonId, mapId, gametypeId){
 
-    const start = performance.now();
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
 
+    let where = "";
+    const vars = [];
+
+    if(seasonId !== 0){
+
+        where = `season_id=? AND `;
+        vars.unshift(seasonId);
+    }
+
+    if(gametypeId !== 0){
+        where += `gametype_id=? AND `;
+
+        vars.push(gametypeId);
+
+    }
+
+    vars.push(mapId);
 
 
     const query = `
-        SELECT 
-            ws.gametype_id,
+        WITH weapon_stats AS (SELECT 
+            ${(gametypeId === 0) ? "0 as gametype_id," : "ws.gametype_id,"}
             ws.map_id,
             ws.weapon_id,
             SUM(ws.kills) as total_kills,
@@ -699,45 +620,34 @@ export async function calcMapWeaponsTotals(seasonId, mapId, gametypeId){
             MAX(ws.suicides) as max_suicides,
             m.total_playtime,
             m.total_matches
-            
-        
         FROM nstats_match_weapon_stats AS ws
         INNER JOIN (
             SELECT id, map_id, SUM(playtime) as total_playtime, COUNT(*) as total_matches
             FROM nstats_matches
-            WHERE season_id=? AND gametype_id=? AND map_id=?
+            WHERE ${where}map_id=?
         ) as m ON ws.match_id = m.id
-        GROUP BY ws.gametype_id,ws.map_id,ws.weapon_id
+        GROUP BY ${(gametypeId === 0) ? "" : "ws.gametype_id,"}ws.map_id,ws.weapon_id)
+
+        SELECT *,
+        ${seasonId} as season_id, 
+        COALESCE(total_kills / (NULLIF(total_playtime, 0) / 60) , 0)as kpm,
+        COALESCE(total_deaths / (NULLIF(total_playtime, 0) / 60) , 0) as dpm,
+        COALESCE(total_suicides / (NULLIF(total_playtime, 0) / 60) , 0) as spm,
+        COALESCE(total_team_kills / (NULLIF(total_playtime, 0) / 60),  0) as tkpm
+        FROM weapon_stats
    
     `;
 
-    const vars = [];
-
-        vars.push(seasonId, gametypeId, mapId);
+    
   
 
     const result = await simpleQuery(query, vars);
-    console.log(result);
-    console.log("seasonId, gametypeId, mapId");
-    console.log(seasonId, gametypeId, mapId);
+
+
+
+    await bulkInsertMapWeaponTotals(seasonId, result);
 
     return;
-
-    const gametypeData = await calcMapWeaponTotalsFromMatchTable(seasonId, mapId, gametypeId);
-    const allTimeData = await calcMapWeaponTotalsFromMatchTable(seasonId, mapId, 0);
-
-    const {playtime: allTimePlaytime, matches: allTimeMatches} = await getTotalPlaytimeAndMatches(seasonId, mapId, 0);
-    const {playtime: gametypePlaytime, matches: gametypeMatches} = await getTotalPlaytimeAndMatches(seasonId, mapId, gametypeId);
-
-    setXPH(allTimeData, allTimeMatches, allTimePlaytime, mapId, 0);
-    setXPH(gametypeData, gametypeMatches, gametypePlaytime, mapId, gametypeId);
-
-    await bulkInsertMapWeaponTotals(seasonId, allTimeData);
-    await bulkInsertMapWeaponTotals(seasonId, gametypeData);
-
-    const end = performance.now();
-
-    console.log((end - start) * 0.001);
 }
 
 

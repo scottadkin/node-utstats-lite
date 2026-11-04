@@ -157,7 +157,13 @@ export class WeaponsManager{
 
     async updateMapTotals(seasonId, mapId, gametypeId){
 
-        await calcMapWeaponsTotals(seasonId, mapId, gametypeId);
+
+        return await Promise.all([
+            //gametypeTotals
+            calcMapWeaponsTotals(seasonId, mapId, gametypeId),
+            //alltime totals,
+            calcMapWeaponsTotals(seasonId, mapId, 0)
+        ]);
     }
 
 
