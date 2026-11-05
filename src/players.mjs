@@ -1118,7 +1118,7 @@ function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
         const t = targets[i];
 
         if(t === "playtime"){
-            totals[t] = `NULLIF(SUM(playtime), 0) / 60`
+            totals[t] = `(NULLIF(SUM(playtime), 0) / 60)`
         }else{
             totals[t] = `(SUM(${t}) * 1.0)`
         }
@@ -1247,7 +1247,6 @@ async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
             --gametype + map totals
         UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, true)}
     `;
-
 
     return await simpleQuery(query, vars);
 
