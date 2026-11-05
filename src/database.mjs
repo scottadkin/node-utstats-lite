@@ -465,3 +465,10 @@ export async function bulkUpdate(query, vars){
 
 
 }
+
+
+export async function sqliteDeleteTable(tableName){
+
+    await simpleQuery(`DELETE FROM nstats_${tableName}`);
+    await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${tableName}'`);
+}

@@ -1,4 +1,4 @@
-import { bulkInsert, simpleQuery, sqlInsertOnDuplicateUpdate, sqlInsertReturnRowId } from "./database.mjs";
+import { bulkInsert, simpleQuery, sqlInsertOnDuplicateUpdate, sqlInsertReturnRowId, sqliteDeleteTable } from "./database.mjs";
 import { getAllMapIds, getAllUniquePlayedGametypes, getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
 import Message from "./message.mjs";
@@ -638,11 +638,7 @@ export async function calcMapWeaponsTotals(seasonId, mapId, gametypeId){
    
     `;
 
-    
-  
-
     const result = await simpleQuery(query, vars);
-
 
 
     await bulkInsertMapWeaponTotals(seasonId, result);
@@ -698,7 +694,7 @@ export async function getMapWeaponStats(seasonId, mapId){
 }
 
 //this version weapon stats(playtime, matches) aren't counted for just matches used but all matches with mapId
-export async function setAllMapTotals(){
+/*export async function setAllMapTotals(){
 
     const seasonIds = await getAllSeasonIds(false);
 
@@ -765,6 +761,85 @@ export async function setAllMapTotals(){
 
         await sqlInsertOnDuplicateUpdate("nstats_map_weapon_totals", columns, insertVars, ["map_id","season_id","gametype_id","weapon_id"]);
     }
+}*/
+
+
+
+async function recalculateMapTotals(seasonId, bAllTime){
+
+    const query = `WITH weapon_stats AS (SELECT 
+    ${seasonId} as season_id,
+    ${((bAllTime) ? "0 as gametype_id," : "ws.gametype_id,")}
+    ws.map_id,
+    ws.weapon_id,
+    SUM(ws.kills) as total_kills,
+    SUM(ws.deaths) as total_deaths,
+    SUM(ws.suicides) as total_suicides,
+    SUM(ws.team_kills) as total_team_kills,
+    MAX(ws.kills) as max_kills,
+    MAX(ws.deaths) as max_deaths,
+    MAX(ws.suicides) as max_suicides,
+    MAX(ws.team_kills) as max_team_kills,
+    m.total_playtime,
+    m.total_matches
+    FROM nstats_match_weapon_stats AS ws
+    INNER JOIN (
+        SELECT id,map_id,${(bAllTime) ? "" : "gametype_id,"}SUM(playtime) as total_playtime, 
+        COUNT(*) as total_matches 
+        FROM nstats_matches 
+        ${((seasonId === 0) ? "" : "WHERE season_id=?")} GROUP BY ${(bAllTime) ? "" : "gametype_id,"}map_id
+    ) as m ON ws.match_id=m.id
+    GROUP BY ${((bAllTime) ? "" : "ws.gametype_id,")} ws.map_id, ws.weapon_id)
+    
+    SELECT *,
+    COALESCE(total_kills / (NULLIF(total_playtime, 0) / 60), 0) as kpm,
+    COALESCE(total_deaths / (NULLIF(total_playtime, 0) / 60), 0) as dpm,
+    COALESCE(total_team_kills / (NULLIF(total_playtime, 0) / 60), 0) as tkpm,
+    COALESCE(total_suicides / (NULLIF(total_playtime, 0) / 60), 0) as spm
+    FROM weapon_stats
+    `;
+
+    const vars = [];
+
+    if(seasonId !== 0) vars.push(seasonId);
+
+    const result = await simpleQuery(query, vars);
+
+
+    const columns = ["map_id", "total_matches", "total_playtime", "weapon_id", "kills", "deaths", "suicides", "team_kills",
+        "kills_per_min", "deaths_per_min", "team_kills_per_min", "suicides_per_min", "gametype_id", 
+        "max_kills", "max_deaths", "max_team_kills", "max_suicides", "season_id"];
+
+    const insertVars = result.map((r) =>{
+        
+        return [
+            r.map_id, r.total_matches, r.total_playtime, r.weapon_id, r.total_kills, 
+            r.total_deaths, r.total_suicides, r.total_team_kills, r.kpm, r.dpm, r.tkpm,
+            r.spm, r.gametype_id, r.max_kills, r.max_deaths, r.max_team_kills, r.max_suicides, seasonId
+        ]
+    });
+
+    await sqlInsertOnDuplicateUpdate("nstats_map_weapon_totals", columns, insertVars, ["map_id","season_id","gametype_id","weapon_id"]);
+}
+
+
+export async function setAllMapTotals(){
+
+
+    await sqliteDeleteTable("map_weapon_totals");
+
+    const seasonIds = await getAllSeasonIds(false);
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        const seasonId = seasonIds[i];
+
+        //gametypeTotals
+        await recalculateMapTotals(seasonId, false);
+        //map all time totals
+        await recalculateMapTotals(seasonId, true);
+    }
+
 }
 
 
