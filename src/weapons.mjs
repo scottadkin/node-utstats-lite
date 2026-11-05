@@ -651,46 +651,33 @@ export async function getMapWeaponStats(seasonId, mapId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
-    const mT = "nstats_map_weapon_totals";
-    const gT = "nstats_gametypes";
-    const wT = "nstats_weapons";
 
     const query = `SELECT 
-    ${mT}.total_matches,
-    ${mT}.total_playtime,
-    ${mT}.weapon_id,
-    ${mT}.kills,
-    ${mT}.deaths,
-    ${mT}.team_kills,
-    ${mT}.kills_per_min,
-    ${mT}.deaths_per_min,
-    ${mT}.team_kills_per_min,
-    ${mT}.suicides,
-    ${mT}.suicides_per_min,
-    ${mT}.gametype_id,
-    ${mT}.max_kills,
-    ${mT}.max_deaths,
-    ${mT}.max_suicides,
-    ${mT}.max_team_kills,
-    IF(${mT}.gametype_id != 0, ${gT}.name, 'All Gametypes') as gametype_name, 
-    ${wT}.name as weapon_name 
-    FROM ${mT} 
-    LEFT JOIN ${gT} ON ${mT}.gametype_id = ${gT}.id
-    LEFT JOIN ${wT} ON ${mT}.weapon_id = ${wT}.id
-    WHERE ${mT}.map_id=?`;
+    mt.total_matches,
+    mt.total_playtime,
+    mt.weapon_id,
+    mt.kills,
+    mt.deaths,
+    mt.team_kills,
+    mt.kills_per_min,
+    mt.deaths_per_min,
+    mt.team_kills_per_min,
+    mt.suicides,
+    mt.suicides_per_min,
+    mt.gametype_id,
+    mt.max_kills,
+    mt.max_deaths,
+    mt.max_suicides,
+    mt.max_team_kills,
+    IF(mt.gametype_id != 0, gt.name, 'All Gametypes') as gametype_name, 
+    wt.name as weapon_name 
+    FROM nstats_map_weapon_totals as mt
+    LEFT JOIN nstats_gametypes as gt ON mt.gametype_id = gt.id
+    LEFT JOIN nstats_weapons as wt ON mt.weapon_id = wt.id
+    WHERE mt.map_id=? AND mt.season_id=?`;
 
-    let where = ``;
-    const vars = [mapId];
+    return await simpleQuery(query, [mapId, seasonId]);
 
-    if(seasonId !== 0){
-
-        where += ` AND ${mT}.season_id=?`
-        vars.push(seasonId);
-    }
-
-    const result = await simpleQuery(`${query}${where}`, vars);
-
-    return result;
 }
 
 //this version weapon stats(playtime, matches) aren't counted for just matches used but all matches with mapId
