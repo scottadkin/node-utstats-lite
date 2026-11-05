@@ -1097,74 +1097,103 @@ export async function calculateSeasonPlayerTotals(seasonId){
  */
 function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
 
+    const targets = [
+        "total_matches", "playtime", "kills", "deaths", "team_kills", "suicides", "wins", "score", "frags",
+        "suicides", "headshots", "spree_1", "spree_2", "spree_3", "spree_4", "spree_5", "total_spree_best",
+        "multi_1", "multi_2", "multi_3", "multi_4", "total_multi_best",
+
+        "item_amp",
+        "item_belt",
+        "item_boots",
+        "item_body",
+        "item_pads",
+        "item_invis",
+        "item_shp", "dom_caps"
+    ];
+
+    const totals = {};
+
+    for(let i = 0; i < targets.length; i++){
+
+        const t = targets[i];
+
+        if(t === "playtime"){
+            totals[t] = `NULLIF(SUM(playtime), 0) / 60`
+        }else{
+            totals[t] = `(SUM(${t}) * 1.0)`
+        }
+    }
+
+
     return `SELECT *,
+        ${totals.total_matches} as total_matches,
         ${(!bGroupGametypes) ? "0 as gametype_id," : "gametype_id,"}
         ${(!bGroupMaps) ? "0 as map_id," : "map_id,"}
         ${seasonId} as season_id,
         (CASE 
-            WHEN pt.kills > 0 AND pt.deaths + pt.team_kills > 0 
-                THEN (pt.kills * 1.0) / (pt.kills + pt.deaths + pt.team_kills) * 100
-            WHEN pt.kills > 0 AND pt.deaths + pt.team_kills = 0
+            WHEN ${totals.kills} > 0 AND ${totals.deaths} + ${totals.team_kills} > 0 
+                THEN ${totals.kills}  / (${totals.kills} + ${totals.deaths} + ${totals.team_kills}) * 100
+            WHEN ${totals.kills} > 0 AND ${totals.deaths} + ${totals.team_kills} = 0
                 THEN 100
             ELSE 0
         END
         ) as efficiency,
-        ((pt.wins * 1.0) / pt.total_matches) * 100 as winrate,
-        (pt.score * 1.0) / pt.total_matches as avg_score,
-        (pt.frags * 1.0) / pt.total_matches as avg_frags,
-        (pt.kills * 1.0) / pt.total_matches as avg_kills,
-        (pt.deaths * 1.0) / pt.total_matches as avg_deaths,
-        (pt.suicides * 1.0) / pt.total_matches as avg_suicides,
-        (pt.team_kills * 1.0) / pt.total_matches as avg_team_kills,
-        (pt.spree_1 * 1.0) / pt.total_matches as avg_spree_1,
-        (pt.spree_2 * 1.0) / pt.total_matches as avg_spree_2,
-        (pt.spree_3 * 1.0) / pt.total_matches as avg_spree_3,
-        (pt.spree_4 * 1.0) / pt.total_matches as avg_spree_4,
-        (pt.spree_5 * 1.0) / pt.total_matches as avg_spree_5,
-        (pt.total_spree_best * 1.0) / pt.total_matches as avg_spree_best,
-        (pt.multi_1 * 1.0) / pt.total_matches as avg_multi_1,
-        (pt.multi_2 * 1.0) / pt.total_matches as avg_multi_2,
-        (pt.multi_3 * 1.0) / pt.total_matches as avg_multi_3,
-        (pt.multi_4 * 1.0) / pt.total_matches as avg_multi_4,
-        (pt.total_multi_best * 1.0) / pt.total_matches as avg_multi_best,
-        (pt.headshots * 1.0) / pt.total_matches as avg_headshots,
-        (pt.item_amp * 1.0) / pt.total_matches as avg_item_amp,
-        (pt.item_belt * 1.0) / pt.total_matches as avg_item_belt,
-        (pt.item_boots * 1.0) / pt.total_matches as avg_item_boots,
-        (pt.item_body * 1.0) / pt.total_matches as avg_item_body,
-        (pt.item_pads * 1.0) / pt.total_matches as avg_item_pads,
-        (pt.item_invis * 1.0) / pt.total_matches as avg_item_invis,
-        (pt.item_shp * 1.0) / pt.total_matches as avg_item_shp,
-        (pt.dom_caps * 1.0) / pt.total_matches as avg_dom_caps,
+        (${totals.wins} / ${totals.total_matches}) * 100 as winrate,
+        ${totals.score} / ${totals.total_matches} as avg_score,
+        ${totals.frags} / ${totals.total_matches} as avg_frags,
+        ${totals.kills} / ${totals.total_matches} as avg_kills,
+        ${totals.deaths} / ${totals.total_matches} as avg_deaths,
+        ${totals.suicides} / ${totals.total_matches} as avg_suicides,
+        ${totals.team_kills} / ${totals.total_matches} as avg_team_kills,
+        ${totals.spree_1} / ${totals.total_matches} as avg_spree_1,
+        ${totals.spree_2} / ${totals.total_matches} as avg_spree_2,
+        ${totals.spree_3} / ${totals.total_matches} as avg_spree_3,
+        ${totals.spree_4} / ${totals.total_matches} as avg_spree_4,
+        ${totals.spree_5} / ${totals.total_matches} as avg_spree_5,
+        ${totals.total_spree_best} / ${totals.total_matches} as avg_spree_best,
+        ${totals.multi_1} / ${totals.total_matches} as avg_multi_1,
+        ${totals.multi_2} / ${totals.total_matches} as avg_multi_2,
+        ${totals.multi_3} / ${totals.total_matches} as avg_multi_3,
+        ${totals.multi_4} / ${totals.total_matches} as avg_multi_4,
+        ${totals.total_multi_best} / ${totals.total_matches} as avg_multi_best,
+        ${totals.headshots} / ${totals.total_matches} as avg_headshots,
+        ${totals.item_amp} / ${totals.total_matches} as avg_item_amp,
+        ${totals.item_belt} / ${totals.total_matches} as avg_item_belt,
+        ${totals.item_boots} / ${totals.total_matches} as avg_item_boots,
+        ${totals.item_body} / ${totals.total_matches} as avg_item_body,
+        ${totals.item_pads} / ${totals.total_matches} as avg_item_pads,
+        ${totals.item_invis} / ${totals.total_matches} as avg_item_invis,
+        ${totals.item_shp} / ${totals.total_matches} as avg_item_shp,
+        ${totals.dom_caps} / ${totals.total_matches} as avg_dom_caps,
 
 
-        (pt.score * 1.0) / (pt.playtime / 60) as epm_score,
-        (pt.frags * 1.0) / (pt.playtime / 60) as epm_frags,
-        (pt.kills * 1.0) / (pt.playtime / 60) as epm_kills,
-        (pt.team_kills * 1.0) / (pt.playtime / 60) as epm_team_kills,
-        (pt.deaths * 1.0) / (pt.playtime / 60) as epm_deaths,
-        (pt.suicides * 1.0) / (pt.playtime / 60) as epm_suicides,
+        ${totals.score} / ${totals.playtime} as epm_score,
+        ${totals.frags} / ${totals.playtime} as epm_frags,
+        ${totals.kills} / ${totals.playtime} as epm_kills,
+        ${totals.team_kills}  / ${totals.playtime} as epm_team_kills,
+        ${totals.deaths} / ${totals.playtime} as epm_deaths,
+        ${totals.suicides} / ${totals.playtime} as epm_suicides,
 
-        (pt.multi_1 * 1.0) / (pt.playtime / 60) as epm_multi_1,
-        (pt.multi_2 * 1.0) / (pt.playtime / 60) as epm_multi_2,
-        (pt.multi_3 * 1.0) / (pt.playtime / 60) as epm_multi_3,
-        (pt.multi_4 * 1.0) / (pt.playtime / 60) as epm_multi_4,
+        ${totals.multi_1} / ${totals.playtime} as epm_multi_1,
+        ${totals.multi_2} / ${totals.playtime} as epm_multi_2,
+        ${totals.multi_3} / ${totals.playtime} as epm_multi_3,
+        ${totals.multi_4} / ${totals.playtime} as epm_multi_4,
 
-        (pt.spree_1 * 1.0) / (pt.playtime / 60) as epm_spree_1,
-        (pt.spree_2 * 1.0) / (pt.playtime / 60) as epm_spree_2,
-        (pt.spree_3 * 1.0) / (pt.playtime / 60) as epm_spree_3,
-        (pt.spree_4 * 1.0) / (pt.playtime / 60) as epm_spree_4,
-        (pt.spree_5 * 1.0) / (pt.playtime / 60) as epm_spree_5,
+        ${totals.spree_1} / ${totals.playtime} as epm_spree_1,
+        ${totals.spree_2} / ${totals.playtime} as epm_spree_2,
+        ${totals.spree_3} / ${totals.playtime} as epm_spree_3,
+        ${totals.spree_4} / ${totals.playtime} as epm_spree_4,
+        ${totals.spree_5} / ${totals.playtime} as epm_spree_5,
 
-        (pt.headshots * 1.0) / (pt.playtime / 60) as epm_headshots,
-        (pt.item_amp * 1.0) / (pt.playtime / 60) as epm_item_amp,
-        (pt.item_belt * 1.0) / (pt.playtime / 60) as epm_item_belt,
-        (pt.item_boots * 1.0) / (pt.playtime / 60) as epm_item_boots,
-        (pt.item_body * 1.0) / (pt.playtime / 60) as epm_item_body,
-        (pt.item_pads * 1.0) / (pt.playtime / 60) as epm_item_pads,
-        (pt.item_invis * 1.0) / (pt.playtime / 60) as epm_item_invis,
-        (pt.item_shp * 1.0) / (pt.playtime / 60) as epm_item_shp,
-        (pt.dom_caps * 1.0) / (pt.playtime / 60) as epm_dom_caps
+        ${totals.headshots} / ${totals.playtime} as epm_headshots,
+        ${totals.item_amp} / ${totals.playtime} as epm_item_amp,
+        ${totals.item_belt} / ${totals.playtime} as epm_item_belt,
+        ${totals.item_boots} / ${totals.playtime} as epm_item_boots,
+        ${totals.item_body} / ${totals.playtime} as epm_item_body,
+        ${totals.item_pads} / ${totals.playtime} as epm_item_pads,
+        ${totals.item_invis} / ${totals.playtime} as epm_item_invis,
+        ${totals.item_shp} / ${totals.playtime} as epm_item_shp,
+        ${totals.dom_caps} / ${totals.playtime} as epm_dom_caps
 
         FROM pt GROUP BY player_id${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
 }
@@ -1185,15 +1214,15 @@ async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
         vars.push(seasonId);
     }
 
-    if(gametypeId !== 0){
+    //if(gametypeId !== 0){
         where += ` AND gametype_id=?`
         vars.push(gametypeId);
-    }
+   // }
 
-    if(mapId !== 0){
+   // if(mapId !== 0){
         where += ` AND map_id=?`
         vars.push(mapId);
-    }
+   // }
 
     where += ` AND player_id IN (?)`;
     vars.push(playerIds);
@@ -1207,9 +1236,16 @@ async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
             ${PLAYER_TOTALS_MAX_COLUMNS}
             FROM nstats_match_players 
             ${where}
-            GROUP BY player_id
+            GROUP BY player_id,gametype_id,map_id
         )
-        ${getPlayerTotalsCTEQuery(seasonId)}
+            --all time
+        ${getPlayerTotalsCTEQuery(seasonId, false, false)}
+            --gametype totals
+        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, false)}
+            --map totals
+        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, false, true)}
+            --gametype + map totals
+        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, true)}
     `;
 
 
