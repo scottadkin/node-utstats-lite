@@ -1190,8 +1190,11 @@ async function testCalculate(seasonId, bGroupGametypes, bGroupMaps){
     return await simpleQuery(query, vars);
 }
 
+/**
+ * Insert new totals or update existing totals
+ * @param {Array<SQL resultset>} data 
+ */
 async function bulkInsertPlayerTotals(data){
-
 
     const columns = [
         'player_id',      'gametype_id',   'map_id',
@@ -1238,8 +1241,63 @@ async function bulkInsertPlayerTotals(data){
         insertVars.push(vars);
     }
 
-
     await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, conflict);
+}
+
+async function bulkInsertPlayerTotalsMaxValues(data){
+
+    const columns = [
+        "player_id",
+        "gametype_id",
+        "map_id",
+        "max_playtime",
+        "max_score",
+        "max_frags",
+        "max_kills",
+        "max_deaths",
+        "max_suicides",
+        "max_team_kills",
+        "max_spree_1",
+        "max_spree_2",
+        "max_spree_3",
+        "max_spree_4",
+        "max_spree_5",
+        "max_spree_best",
+        "max_multi_1",
+        "max_multi_2",
+        "max_multi_3",
+        "max_multi_4",
+        "max_multi_best",
+        "max_headshots",
+        "max_item_amp",
+        "max_item_belt",
+        "max_item_boots",
+        "max_item_body",
+        "max_item_pads",
+        "max_item_invis",
+        "max_item_shp",
+        "max_dom_caps",
+        "season_id"
+    ];
+
+    const conflict = ["season_id","gametype_id","map_id","player_id"];
+
+    const insertVars = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const vars = [];
+        for(let x = 0; x < columns.length; x++){
+
+            vars.push(d[columns[x]])
+        }
+
+        insertVars.push(vars);
+    }
+
+    await sqlInsertOnDuplicateUpdate("nstats_player_totals_max", columns, insertVars, conflict);
 }
 
 export async function calculateAllPlayerTotals(){
@@ -1260,7 +1318,7 @@ export async function calculateAllPlayerTotals(){
         ]);        
        
         const insertVars = [...allTime, ...gametypeTotals, ...mapTotals, ...gametypeMapTotals];
-        promises.push(bulkInsertPlayerTotals(insertVars));
+        promises.push(bulkInsertPlayerTotals(insertVars), bulkInsertPlayerTotalsMaxValues(insertVars));
     }
 
     return await Promise.all(promises);
