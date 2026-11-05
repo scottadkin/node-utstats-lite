@@ -997,7 +997,7 @@ export class PlayerManager{
         }
     }
 
-    async updatePlayerTotals(seasonId){
+    async updatePlayerTotals(seasonId, gametypeId, mapId){
 
         const masterIds = [];
         const idsToCountries = {};
@@ -1017,9 +1017,12 @@ export class PlayerManager{
             updateMasterPlayers(masterIds, idsToCountries), updatePlayerTotals(masterIds, seasonId)
         ];
 
-        if(seasonId !== 0) promises.push(updatePlayerTotals(masterIds, 0));
-
-        return await Promise.all([updateMasterPlayers(masterIds, idsToCountries), updatePlayerTotals(masterIds, seasonId)]);
+        if(seasonId !== 0) promises.push(updatePlayerTotals(masterIds, 0, gametypeId, mapId));
+//
+        return await Promise.all([
+            updateMasterPlayers(masterIds, idsToCountries), 
+            updatePlayerTotals(masterIds, seasonId, gametypeId, mapId)
+        ]);
         
     }
 

@@ -262,7 +262,7 @@ export class MatchParser{
         
         
         await Promise.all([
-            this.players.updatePlayerTotals(seasonId),
+            this.players.updatePlayerTotals(seasonId, this.gametype.id, this.map.id),
             this.ctf.updatePlayerTotals(this.players.players, seasonId)
         ]);
 

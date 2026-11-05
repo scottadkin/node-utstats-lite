@@ -931,7 +931,7 @@ function _updateTotals(totals, playerData){
             t.last_active = playerData.last_active;
         }
 
-        t.playtime += parseFloat(playerData.time_on_server);
+        t.playtime += parseFloat(playerData.playtime);
 
         if(t.wins > 0){
             t.winRate = t.wins / t.matches * 100;
@@ -1090,7 +1090,15 @@ export async function calculateSeasonPlayerTotals(seasonId){
 }*/
 
 
-async function testCalculate(seasonId, bGroupGametypes, bGroupMaps){
+/**
+ * 
+ * @param {Number} seasonId 
+ * @param {boolean} bGroupGametypes 
+ * @param {boolean} bGroupMaps 
+ * @returns 
+ */
+async function testCalculateAllSingleSeason(seasonId, bGroupGametypes, bGroupMaps){
+
 
     let where = `WHERE spectator=0`;
     const vars = [];
@@ -1103,6 +1111,8 @@ async function testCalculate(seasonId, bGroupGametypes, bGroupMaps){
         )`;
         vars.push(seasonId);
     }
+
+    
 
     const query = `WITH pt AS (SELECT
             ${(bGroupGametypes) ? "gametype_id," : "0 as gametype_id,"}
@@ -1311,10 +1321,10 @@ export async function calculateAllPlayerTotals(){
         const seasonId = seasonIds[i];
 
         const [allTime, gametypeTotals, mapTotals, gametypeMapTotals] = await Promise.all([
-            testCalculate(seasonId, false, false),
-            testCalculate(seasonId, true, false),
-            testCalculate(seasonId, false, true),
-            testCalculate(seasonId, true, true)
+            testCalculateAllSingleSeason(seasonId, false, false),
+            testCalculateAllSingleSeason(seasonId, true, false),
+            testCalculateAllSingleSeason(seasonId, false, true),
+            testCalculateAllSingleSeason(seasonId, true, true)
         ]);        
        
         const insertVars = [...allTime, ...gametypeTotals, ...mapTotals, ...gametypeMapTotals];
@@ -1519,7 +1529,10 @@ async function insertPlayerGametypeTotals(data, seasonId){
 }
 
 
-export async function updatePlayerTotals(playerIds, seasonId){
+export async function updatePlayerTotals(playerIds, seasonId, gametypeId, mapId){
+
+
+    //return await testCalculateSeason(seasonId, );
 
     const totals = await calcPlayerTotals(playerIds, seasonId);
 
