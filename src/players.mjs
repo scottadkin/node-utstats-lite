@@ -22,7 +22,7 @@ const DEFAULT_PLAYER_SETTINGS = [
     {"category": "Importer", "name": "Auto Assign HWID To First Used Name", "valueType": "bool", "value": "false"}
 ];
 
-const PLAYER_TOTALS_COLUMNS_MATCHES = `player_id,
+export const PLAYER_TOTALS_COLUMNS_MATCHES = `player_id,
 COUNT(*) as total_matches,
 MAX(match_date) as last_active,
 SUM(CASE
@@ -108,7 +108,7 @@ const AVERAGE_TYPES = [
 ];
 
 
-const PLAYER_TOTALS_MAX_COLUMNS = `
+export const PLAYER_TOTALS_MAX_COLUMNS = `
 MAX(time_on_server) as max_playtime,
 MAX(score) as max_score,
 MAX(frags) as max_frags,
@@ -1095,11 +1095,12 @@ export async function calculateSeasonPlayerTotals(seasonId){
  * @param {number} seasonId 
  * @returns SQL Query for the result of the player totals CTE
  */
-function getPlayerTotalsCTEQuery(seasonId){
+function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
 
     return `SELECT *,
+        ${(!bGroupGametypes) ? "0 as gametype_id," : "gametype_id,"}
+        ${(!bGroupMaps) ? "0 as map_id," : "map_id,"}
         ${seasonId} as season_id,
-        
         (CASE 
             WHEN pt.kills > 0 AND pt.deaths + pt.team_kills > 0 
                 THEN (pt.kills * 1.0) / (pt.kills + pt.deaths + pt.team_kills) * 100
@@ -1165,7 +1166,7 @@ function getPlayerTotalsCTEQuery(seasonId){
         (pt.item_shp * 1.0) / (pt.playtime / 60) as epm_item_shp,
         (pt.dom_caps * 1.0) / (pt.playtime / 60) as epm_dom_caps
 
-        FROM pt`;
+        FROM pt GROUP BY player_id${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
 }
 
 async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds){
@@ -1216,6 +1217,10 @@ async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
 
 }
 
+
+//COULD select and group by gametypeId, and mapId then SUM the pt results to get all time, gametype totals, map totals and gametype + map totals in a single query
+//instead of calling the function 4 times per season
+
 /**
  * 
  * @param {Number} seasonId 
@@ -1223,7 +1228,7 @@ async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
  * @param {boolean} bGroupMaps 
  * @returns 
  */
-async function testCalculateAllSingleSeason(seasonId, bGroupGametypes, bGroupMaps){
+async function testCalculateAllSingleSeason(seasonId){
 
 
     let where = `WHERE spectator=0`;
@@ -1238,20 +1243,25 @@ async function testCalculateAllSingleSeason(seasonId, bGroupGametypes, bGroupMap
         vars.push(seasonId);
     }
 
-    
-
     const query = `WITH pt AS (SELECT
-            ${(bGroupGametypes) ? "gametype_id," : "0 as gametype_id,"}
-            ${(bGroupMaps) ? "map_id," : "0 as map_id,"}
+            gametype_id,
+            map_id,
             ${PLAYER_TOTALS_COLUMNS_MATCHES},
             ${PLAYER_TOTALS_MAX_COLUMNS}
             FROM nstats_match_players 
             ${where}
-            GROUP BY player_id${((bGroupGametypes) ? ",gametype_id" : "")}
-            ${((bGroupMaps) ? ",map_id" : "")}
+            GROUP BY player_id,gametype_id,map_id
         )
-        ${getPlayerTotalsCTEQuery(seasonId)}
-    `;
+            
+        --all time
+        ${getPlayerTotalsCTEQuery(seasonId, false, false)}
+        --gametype totals
+        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, false)}
+        --map totals
+        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, false, true)}
+        --map gametype totals
+        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, true)}
+        `;
 
 
     return await simpleQuery(query, vars);
@@ -1378,7 +1388,7 @@ export async function calculateAllPlayerTotals(){
 
         const seasonId = seasonIds[i];
 
-        const [allTime, gametypeTotals, mapTotals, gametypeMapTotals] = await Promise.all([
+        /*const [allTime, gametypeTotals, mapTotals, gametypeMapTotals] = await Promise.all([
             testCalculateAllSingleSeason(seasonId, false, false),
             testCalculateAllSingleSeason(seasonId, true, false),
             testCalculateAllSingleSeason(seasonId, false, true),
@@ -1386,10 +1396,16 @@ export async function calculateAllPlayerTotals(){
         ]);        
        
         const insertVars = [...allTime, ...gametypeTotals, ...mapTotals, ...gametypeMapTotals];
-        promises.push(bulkInsertPlayerTotals(insertVars), bulkInsertPlayerTotalsMaxValues(insertVars));
+        promises.push(bulkInsertPlayerTotals(insertVars), bulkInsertPlayerTotalsMaxValues(insertVars));*/
+
+        const totals = await testCalculateAllSingleSeason(seasonId);
+        promises.push(bulkInsertPlayerTotals(totals), bulkInsertPlayerTotalsMaxValues(totals));
     }
 
     return await Promise.all(promises);
+ 
+
+  
 }
 
 //2.9.0
