@@ -1,8 +1,6 @@
 import { bulkInsert, simpleQuery, sqlInsertOnDuplicateUpdate, sqlInsertReturnRowId, sqliteDeleteTable } from "./database.mjs";
-import { getAllMapIds, getAllUniquePlayedGametypes, getTotalPlaytimeAndMatches } from "./maps.mjs";
 import { readdir } from 'node:fs/promises';
-import Message from "./message.mjs";
-import { getAllSeasonIds, seasonGetAllMapIds } from "./seasons.mjs";
+import { getAllSeasonIds } from "./seasons.mjs";
 
 
 export async function getWeaponId(name, bCreateIfMissing){

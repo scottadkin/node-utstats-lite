@@ -23,10 +23,7 @@ const DEFAULT_PLAYER_SETTINGS = [
 ];
 
 const PLAYER_TOTALS_COLUMNS_MATCHES = `player_id,
-gametype_id,
-map_id,
 COUNT(*) as total_matches,
-SUM(time_on_server) as time_on_server,
 MAX(match_date) as last_active,
 SUM(CASE
     WHEN match_result = 'w' THEN 1
@@ -49,7 +46,7 @@ SUM(kills) as kills,
 SUM(deaths) as deaths,
 SUM(suicides) as suicides,
 SUM(team_kills) as team_kills,
-SUM(time_on_server) as time_on_server,
+SUM(time_on_server) as playtime,
 SUM(ttl) as ttl,
 SUM(first_blood) as first_blood,
 SUM(spree_1) as spree_1,
@@ -139,7 +136,8 @@ MAX(item_body) as max_item_body,
 MAX(item_pads) as max_item_pads,
 MAX(item_invis) as max_item_invis,
 MAX(item_shp) as max_item_shp,
-MAX(dom_caps) as max_dom_caps`;
+MAX(dom_caps) as max_dom_caps
+`;
 
 function getPlayerTotalsColumnsProfile(){
 
@@ -1009,6 +1007,8 @@ export async function calcPlayerTotals(playerIds, seasonId){
     }
 
     let query = `SELECT
+    gametype_id,
+    map_id,
     ${PLAYER_TOTALS_COLUMNS_MATCHES},
     ${PLAYER_TOTALS_MAX_COLUMNS}
     FROM nstats_match_players 
@@ -1047,6 +1047,7 @@ export async function calculateSeasonPlayerTotals(seasonId){
     if(seasonId === 0){
 
         const query = `SELECT
+        gametype_id, map_id,
         ${PLAYER_TOTALS_COLUMNS_MATCHES},
         ${PLAYER_TOTALS_MAX_COLUMNS}
         FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
@@ -1056,6 +1057,7 @@ export async function calculateSeasonPlayerTotals(seasonId){
     }else{
         
         const query = `SELECT
+        gametype_id, map_id,
         ${PLAYER_TOTALS_COLUMNS_MATCHES},
         ${PLAYER_TOTALS_MAX_COLUMNS}
         FROM nstats_match_players 
@@ -1075,7 +1077,7 @@ export async function calculateSeasonPlayerTotals(seasonId){
     await insertPlayerGametypeMaxValues(totals, seasonId);
 }
 
-export async function calculateAllPlayerTotals(){
+/*export async function calculateAllPlayerTotals(){
 
     const seasonIds = await getAllSeasonIds(false);
 
@@ -1085,7 +1087,183 @@ export async function calculateAllPlayerTotals(){
 
         await calculateSeasonPlayerTotals(sid);
     }
+}*/
 
+
+async function testCalculate(seasonId, bGroupGametypes, bGroupMaps){
+
+    let where = `WHERE spectator=0`;
+    const vars = [];
+
+    if(seasonId !== 0){
+
+        where += ` AND EXISTS(
+            SELECT 1 FROM nstats_matches
+            WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?
+        )`;
+        vars.push(seasonId);
+    }
+
+    const query = `WITH pt AS (SELECT
+            ${(bGroupGametypes) ? "gametype_id," : "0 as gametype_id,"}
+            ${(bGroupMaps) ? "map_id," : "0 as map_id,"}
+            ${PLAYER_TOTALS_COLUMNS_MATCHES},
+            ${PLAYER_TOTALS_MAX_COLUMNS}
+            FROM nstats_match_players 
+            ${where}
+            GROUP BY player_id${((bGroupGametypes) ? ",gametype_id" : "")}
+            ${((bGroupMaps) ? ",map_id" : "")}
+        )
+        
+        SELECT *,
+        ${seasonId} as season_id,
+        
+        (CASE 
+            WHEN pt.kills > 0 AND pt.deaths + pt.team_kills > 0 
+                THEN (pt.kills * 1.0) / (pt.kills + pt.deaths + pt.team_kills) * 100
+            WHEN pt.kills > 0 AND pt.deaths + pt.team_kills = 0
+                THEN 100
+            ELSE 0
+        END
+        ) as efficiency,
+        ((pt.wins * 1.0) / pt.total_matches) * 100 as winrate,
+        (pt.score * 1.0) / pt.total_matches as avg_score,
+        (pt.frags * 1.0) / pt.total_matches as avg_frags,
+        (pt.kills * 1.0) / pt.total_matches as avg_kills,
+        (pt.deaths * 1.0) / pt.total_matches as avg_deaths,
+        (pt.suicides * 1.0) / pt.total_matches as avg_suicides,
+        (pt.team_kills * 1.0) / pt.total_matches as avg_team_kills,
+        (pt.spree_1 * 1.0) / pt.total_matches as avg_spree_1,
+        (pt.spree_2 * 1.0) / pt.total_matches as avg_spree_2,
+        (pt.spree_3 * 1.0) / pt.total_matches as avg_spree_3,
+        (pt.spree_4 * 1.0) / pt.total_matches as avg_spree_4,
+        (pt.spree_5 * 1.0) / pt.total_matches as avg_spree_5,
+        (pt.total_spree_best * 1.0) / pt.total_matches as avg_spree_best,
+        (pt.multi_1 * 1.0) / pt.total_matches as avg_multi_1,
+        (pt.multi_2 * 1.0) / pt.total_matches as avg_multi_2,
+        (pt.multi_3 * 1.0) / pt.total_matches as avg_multi_3,
+        (pt.multi_4 * 1.0) / pt.total_matches as avg_multi_4,
+        (pt.total_multi_best * 1.0) / pt.total_matches as avg_multi_best,
+        (pt.headshots * 1.0) / pt.total_matches as avg_headshots,
+        (pt.item_amp * 1.0) / pt.total_matches as avg_item_amp,
+        (pt.item_belt * 1.0) / pt.total_matches as avg_item_belt,
+        (pt.item_boots * 1.0) / pt.total_matches as avg_item_boots,
+        (pt.item_body * 1.0) / pt.total_matches as avg_item_body,
+        (pt.item_pads * 1.0) / pt.total_matches as avg_item_pads,
+        (pt.item_invis * 1.0) / pt.total_matches as avg_item_invis,
+        (pt.item_shp * 1.0) / pt.total_matches as avg_item_shp,
+        (pt.dom_caps * 1.0) / pt.total_matches as avg_dom_caps,
+
+
+        (pt.score * 1.0) / (pt.playtime / 60) as epm_score,
+        (pt.frags * 1.0) / (pt.playtime / 60) as epm_frags,
+        (pt.kills * 1.0) / (pt.playtime / 60) as epm_kills,
+        (pt.team_kills * 1.0) / (pt.playtime / 60) as epm_team_kills,
+        (pt.deaths * 1.0) / (pt.playtime / 60) as epm_deaths,
+        (pt.suicides * 1.0) / (pt.playtime / 60) as epm_suicides,
+
+        (pt.multi_1 * 1.0) / (pt.playtime / 60) as epm_multi_1,
+        (pt.multi_2 * 1.0) / (pt.playtime / 60) as epm_multi_2,
+        (pt.multi_3 * 1.0) / (pt.playtime / 60) as epm_multi_3,
+        (pt.multi_4 * 1.0) / (pt.playtime / 60) as epm_multi_4,
+
+        (pt.spree_1 * 1.0) / (pt.playtime / 60) as epm_spree_1,
+        (pt.spree_2 * 1.0) / (pt.playtime / 60) as epm_spree_2,
+        (pt.spree_3 * 1.0) / (pt.playtime / 60) as epm_spree_3,
+        (pt.spree_4 * 1.0) / (pt.playtime / 60) as epm_spree_4,
+        (pt.spree_5 * 1.0) / (pt.playtime / 60) as epm_spree_5,
+
+        (pt.headshots * 1.0) / (pt.playtime / 60) as epm_headshots,
+        (pt.item_amp * 1.0) / (pt.playtime / 60) as epm_item_amp,
+        (pt.item_belt * 1.0) / (pt.playtime / 60) as epm_item_belt,
+        (pt.item_boots * 1.0) / (pt.playtime / 60) as epm_item_boots,
+        (pt.item_body * 1.0) / (pt.playtime / 60) as epm_item_body,
+        (pt.item_pads * 1.0) / (pt.playtime / 60) as epm_item_pads,
+        (pt.item_invis * 1.0) / (pt.playtime / 60) as epm_item_invis,
+        (pt.item_shp * 1.0) / (pt.playtime / 60) as epm_item_shp,
+        (pt.dom_caps * 1.0) / (pt.playtime / 60) as epm_dom_caps
+
+        FROM pt ORDER BY total_matches DESC
+    `;
+
+
+    return await simpleQuery(query, vars);
+}
+
+async function bulkInsertPlayerTotals(data){
+
+
+    const columns = [
+        'player_id',      'gametype_id',   'map_id',
+        'last_active',    'playtime',       'total_matches', 'wins',
+        'draws',          'losses',         'winrate',       'score',
+        'frags',          'kills',          'deaths',        'suicides',
+        'team_kills',     'efficiency',     'ttl',           'first_blood',
+        'spree_1',        'spree_2',        'spree_3',       'spree_4',
+        'spree_5',        'spree_best',     'multi_1',       'multi_2',
+        'multi_3',        'multi_4',        'multi_best',    'headshots',
+        'item_amp',       'item_belt',      'item_boots',    'item_body',
+        'item_pads',      'item_invis',     'item_shp',      'dom_caps',
+        'avg_score',      'avg_frags',      'avg_kills',     'avg_deaths',
+        'avg_suicides',   'avg_team_kills', 'avg_spree_1',   'avg_spree_2',
+        'avg_spree_3',    'avg_spree_4',    'avg_spree_5',   'avg_spree_best',
+        'avg_multi_1',    'avg_multi_2',    'avg_multi_3',   'avg_multi_4',
+        'avg_multi_best', 'avg_headshots',  'avg_item_amp',  'avg_item_belt',
+        'avg_item_boots', 'avg_item_body',  'avg_item_pads', 'avg_item_invis',
+        'avg_item_shp',   'avg_dom_caps',   'epm_score',     'epm_frags',
+        'epm_kills',      'epm_deaths',     'epm_suicides',  'epm_team_kills',
+        'epm_spree_1',    'epm_spree_2',    'epm_spree_3',   'epm_spree_4',
+        'epm_spree_5',    'epm_multi_1',    'epm_multi_2',   'epm_multi_3',
+        'epm_multi_4',    'epm_headshots',  'epm_item_amp',  'epm_item_belt',
+        'epm_item_boots', 'epm_item_body',  'epm_item_pads', 'epm_item_invis',
+        'epm_item_shp',   'epm_dom_caps',   'season_id'
+    ];
+
+    const conflict = ["season_id","gametype_id","map_id","player_id"];
+
+    const insertVars = [];
+
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        const vars = [];
+
+        for(let x = 0; x < columns.length; x++){
+
+            vars.push(d[columns[x]]);
+        }
+
+        insertVars.push(vars);
+    }
+
+
+    await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, conflict);
+}
+
+export async function calculateAllPlayerTotals(){
+
+    const seasonIds = await getAllSeasonIds(false);
+
+    const promises = [];
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        const seasonId = seasonIds[i];
+
+        const [allTime, gametypeTotals, mapTotals, gametypeMapTotals] = await Promise.all([
+            testCalculate(seasonId, false, false),
+            testCalculate(seasonId, true, false),
+            testCalculate(seasonId, false, true),
+            testCalculate(seasonId, true, true)
+        ]);        
+       
+        const insertVars = [...allTime, ...gametypeTotals, ...mapTotals, ...gametypeMapTotals];
+        promises.push(bulkInsertPlayerTotals(insertVars));
+    }
+
+    return await Promise.all(promises);
 }
 
 //2.9.0

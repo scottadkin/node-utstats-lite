@@ -462,8 +462,6 @@ export async function bulkUpdate(query, vars){
 
         update.run(...vars[i]);
     }
-
-
 }
 
 
@@ -471,4 +469,14 @@ export async function sqliteDeleteTable(tableName){
 
     await simpleQuery(`DELETE FROM nstats_${tableName}`);
     await simpleQuery(`DELETE FROM SQLITE_SEQUENCE WHERE name='nstats_${tableName}'`);
+}
+
+export async function sqliteGetTableColumns(table){
+
+
+    const result = await simpleQuery(`PRAGMA table_info(${table})`);
+
+    return result.map((r) =>{
+        return r.name;
+    });
 }

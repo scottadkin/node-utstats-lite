@@ -1492,10 +1492,10 @@ export async function sqliteInstall(bOnlyCreateTables){
         await setAllMapTotals();   
     }
 
-
     //2.7.0
     new Message(`Calculating player totals.`,"note");
     await calculateAllPlayerTotals();
+
 
     new Message(`Calculating player ctf totals`, "note");
     await ctfRecalculateAllPlayerTotals();
