@@ -1,9 +1,9 @@
 import { ctfRecalculatePlayerTotals } from "./ctf.mjs";
-import { ctfLeagueRecalculateSeason, refreshAllTables } from "./ctfLeague.mjs";
+import { ctfLeagueRecalculateSeason} from "./ctfLeague.mjs";
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
-import { getMapImageName, sanitizePagePerPage } from "./generic.mjs";
+import {  sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
-import { calculateSeasonPlayerTotals } from "./players.mjs";
+import { updateAllPlayerTotalsSingleSeason } from "./players.mjs";
 import { playerWeaponDamageRecalculateSeasonTotals } from "./playerWeaponDamage.mjs";
 import { recalculateSeasonRankings } from "./rankings.mjs";
 import { deleteAllMapWeaponsTotals, updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
@@ -829,8 +829,8 @@ export async function deleteSeason(seasonId){
 
 async function recalculateSeasonPlayerTotals(seasonId){
 
-    await calculateSeasonPlayerTotals(seasonId);
-    await ctfRecalculatePlayerTotals(seasonId);
+    await updateAllPlayerTotalsSingleSeason(seasonId);
+    //await ctfRecalculatePlayerTotals(seasonId);
     await weaponsUpdatePlayerTotals(null, seasonId)
 
     await playerWeaponDamageRecalculateSeasonTotals(seasonId);

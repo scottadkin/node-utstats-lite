@@ -597,57 +597,6 @@ export async function searchPlayers(name, sortBy, order, page, perPage, seasonId
 
 /**
  * 
- * @param {*} playerId 
- * @returns 
- */
-export async function calcPlayerTotals(playerIds, seasonId){
-
-    if(playerIds.length === 0) return [];
-
-    let seasonCheck = ``;
-    const vars = [playerIds];
-
-    if(seasonId !== 0){
-        seasonCheck += ` AND nstats_matches.season_id=?`;
-        vars.push(seasonId);
-    }
-
-    let query = `SELECT
-    gametype_id,
-    map_id,
-    ${PLAYER_TOTALS_COLUMNS_MATCHES},
-    ${PLAYER_TOTALS_MAX_COLUMNS}
-    FROM nstats_match_players 
-    WHERE spectator=0 AND player_id IN (?) 
-    AND EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id=nstats_match_players.match_id${seasonCheck})
-    GROUP BY player_id,gametype_id,map_id`;
-
-    const result = await simpleQuery(query, vars);
-
-    const missing = [...playerIds]
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        const index = missing.indexOf(r.player_id);
-        if(index !== -1) missing.splice(index, 1)
-    }
-
-    if(missing.length > 0){
-
-        //need to do this first because of foreign key
-        await simpleQuery(`DELETE FROM nstats_player_totals_max WHERE player_id IN(?) AND season_id=?`, [missing, seasonId]);
-        await simpleQuery(`DELETE FROM nstats_player_totals WHERE player_id IN(?) AND season_id=?`, [missing, seasonId]);
-    }
-
-    return createPlayerTotalsFromData(result, seasonId);
-  
-}
-
-
-/**
- * 
  * @param {number} seasonId 
  * @returns SQL Query for the result of the player totals CTE
  */
@@ -874,7 +823,7 @@ async function calculatePlayerTotals(seasonId, gametypeId, mapId, playerIds){
  * @param {boolean} bGroupMaps 
  * @returns 
  */
-async function testCalculateAllSingleSeason(seasonId){
+async function calculateAllSingleSeason(seasonId){
 
 
     let where = `WHERE spectator=0`;
@@ -1036,14 +985,25 @@ export async function calculateAllPlayerTotals(){
 
         const seasonId = seasonIds[i];
 
-        const totals = await testCalculateAllSingleSeason(seasonId);
+        const totals = await calculateAllSingleSeason(seasonId);
         promises.push(bulkInsertPlayerTotals(totals), bulkInsertPlayerTotalsMaxValues(totals));
     }
 
-    return await Promise.all(promises);
- 
+    await Promise.all(promises);
 
-  
+    return;
+}
+
+export async function updateAllPlayerTotalsSingleSeason(seasonId){
+
+    const totals = await calculateAllSingleSeason(seasonId);
+
+    const promises = [];
+    promises.push(bulkInsertPlayerTotals(totals), bulkInsertPlayerTotalsMaxValues(totals));
+
+    await Promise.all(promises);
+
+    return;
 }
 
 //2.9.0
