@@ -1014,31 +1014,18 @@ export class PlayerManager{
 
 
         const promises = [
-           // updateMasterPlayers(masterIds, idsToCountries), 
-            //gametype + map totals
+            updateMasterPlayers(masterIds, idsToCountries), 
             updatePlayerTotals(masterIds, seasonId, gametypeId, mapId),
-            //gametype totals
-           // updatePlayerTotals(masterIds, seasonId, gametypeId, 0),
-            //map totals
-           // updatePlayerTotals(masterIds, seasonId, 0, mapId),
-            //all time totals
-           // updatePlayerTotals(masterIds, seasonId, 0, 0),
+
         ];
 
         if(seasonId !== 0){
 
             promises.push(
-                //gametype + map totals
                 updatePlayerTotals(masterIds, 0, gametypeId, mapId),
-                //gametype totals
-                //updatePlayerTotals(masterIds, 0, gametypeId, 0),
-                //map totals
-               // updatePlayerTotals(masterIds, 0, 0, mapId),
-                //all time totals
-               // updatePlayerTotals(masterIds, 0, 0, 0),
             );
         }
-//
+
         return await Promise.all(promises);
         
     }

@@ -595,400 +595,6 @@ export async function searchPlayers(name, sortBy, order, page, perPage, seasonId
 }
 
 
-/*async function getPlayersAllMatchData(playerIds, gametypeId, mapId){
-
-    if(playerIds.length === 0) return [];
-    if(gametypeId === undefined) throw new Error(`getPlayersAllMatchData gametypeId is missing`);
-    if(mapId === undefined) throw new Error(`getPlayersAllMatchData mapId is missing`);
-
-    //remove gametype_id and map_id only for testing
-    let query = `SELECT 
-    player_id,
-    gametype_id,
-    map_id,
-    match_id,
-    match_result,
-    team,
-    score,
-    frags,
-    kills,
-    deaths,
-    suicides,
-    team_kills,
-    time_on_server,
-    ttl,
-    first_blood,
-    spree_1,
-    spree_2,
-    spree_3,
-    spree_4,
-    spree_5,
-    spree_best,
-    multi_1,
-    multi_2,
-    multi_3,
-    multi_4,
-    multi_best,
-    headshots,
-    item_amp,
-    item_belt,
-    item_boots,
-    item_body,
-    item_pads,
-    item_invis,
-    item_shp
-    FROM nstats_match_players WHERE spectator=0 AND player_id IN (?)`;
-
-    const vars = [playerIds];
-
-    if(gametypeId !== 0){
-        vars.push(gametypeId);
-        query += ` AND gametype_id=?`;
-    }
-    if(mapId !== 0){
-        vars.push(mapId);
-        query += ` AND map_id=?`;
-    }
-
-    const result = await simpleQuery(query, vars);
-
-    const matchIds = [... new Set(result.map((r) =>{
-        return r.match_id;
-    }))]
-
-
-    return {"data": result, "matchIds": matchIds}
-}*/
-
-function _createNewTotals(totals, playerId, gametypeId, mapId){
-
-    if(totals[playerId]?.[gametypeId]?.[mapId] !== undefined) return;
-
-    if(totals[playerId] === undefined) totals[playerId] = {};
-    if(totals[playerId][gametypeId] === undefined) totals[playerId][gametypeId] = {};
-
-    totals[playerId][gametypeId][mapId] = {
-        "matches": 0,
-        "playtime": 0,
-        "totalTtl": 0,
-        "ttl": 0,
-        "eff": 0,
-        "last_active": DEFAULT_DATE,
-        "wins": 0,
-        "losses": 0,
-        "draws": 0,
-        "winRate": 0,
-        "score": 0,
-        "frags": 0,
-        "kills": 0,
-        "deaths": 0,
-        "suicides": 0,
-        "team_kills": 0,
-        "first_blood": 0,
-        "spree_1": 0,
-        "spree_2": 0,
-        "spree_3": 0,
-        "spree_4": 0,
-        "spree_5": 0,
-        "spree_best": 0,
-        "total_spree_best": 0,
-        "multi_1": 0,
-        "multi_2": 0,
-        "multi_3": 0,
-        "multi_4": 0,
-        "multi_best": 0,
-        "total_multi_best": 0,
-        "headshots": 0,
-        "item_amp": 0,
-        "item_belt": 0,
-        "item_boots": 0,
-        "item_body": 0,
-        "item_pads": 0,
-        "item_invis": 0,
-        "item_shp": 0,
-        "dom_caps": 0,
-        "avg_score": 0,
-        "avg_frags": 0,
-        "avg_kills": 0,
-        "avg_deaths": 0,
-        "avg_suicides": 0,
-        "avg_team_kills": 0,
-        "avg_spree_1": 0,
-        "avg_spree_2": 0,
-        "avg_spree_3": 0,
-        "avg_spree_4": 0,
-        "avg_spree_5": 0,
-        "avg_spree_best": 0,
-        "avg_multi_1": 0,
-        "avg_multi_2": 0,
-        "avg_multi_3": 0,
-        "avg_multi_4": 0,
-        "avg_multi_best": 0,
-        "avg_headshots": 0,
-        "avg_item_amp": 0,
-        "avg_item_belt": 0,
-        "avg_item_boots": 0,
-        "avg_item_body": 0,
-        "avg_item_pads": 0,
-        "avg_item_invis": 0,
-        "avg_item_shp": 0,
-        "avg_dom_caps": 0,
-        "epm_score": 0,
-        "epm_frags": 0,
-        "epm_kills": 0,
-        "epm_deaths": 0,
-        "epm_suicides": 0,
-        "epm_team_kills": 0,
-        "epm_spree_1": 0,
-        "epm_spree_2": 0,
-        "epm_spree_3": 0,
-        "epm_spree_4": 0,
-        "epm_spree_5": 0,
-        "epm_multi_1": 0,
-        "epm_multi_2": 0,
-        "epm_multi_3": 0,
-        "epm_multi_4": 0,
-        "epm_headshots": 0,
-        "epm_item_amp": 0,
-        "epm_item_belt": 0,
-        "epm_item_boots": 0,
-        "epm_item_body": 0,
-        "epm_item_pads": 0,
-        "epm_item_invis": 0,
-        "epm_item_shp": 0,
-        "epm_dom_caps": 0
-
-        
-    };
-}
-
-function _updateTotals(totals, playerData){
-
-    const gametypeId = playerData.gametype_id;
-    const mapId = playerData.map_id;
-    const playerId = playerData.player_id;
-
-
-    const maxKeys = Object.keys(playerData).filter((v, i) => v.startsWith("max_"))
-
-    if(totals[playerId] === undefined){
-        totals[playerId] = {};
-    }
-
-    //gametype map
-    _createNewTotals(totals, playerId, gametypeId, mapId);
-    //gametype totals
-    _createNewTotals(totals, playerId, gametypeId, 0);
-    //map totals
-    _createNewTotals(totals, playerId, 0, mapId);
-    //all time totals
-    _createNewTotals(totals, playerId, 0, 0);
-
-    const allTimeTotals = totals[playerId][0][0];
-    const gametypeTotals = totals[playerId][gametypeId][0];
-    const mapTotals = totals[playerId][0][mapId];
-    const mapGametypeTotals = totals[playerId][gametypeId][mapId];
-    
-
-    const mergeTypes = [
-      "score",
-      "frags",
-      "kills",
-      "deaths",
-      "suicides",
-      "team_kills",
-      //"time_on_server",
-      //ttl,
-      "first_blood",
-      "spree_1",
-      "spree_2",
-      "spree_3",
-      "spree_4",
-      "spree_5",
-      //spree_best,
-      "total_spree_best",
-      "multi_1",
-      "multi_2",
-      "multi_3",
-      "multi_4",
-      "total_multi_best",
-      //multi_best,
-      "headshots",
-      "item_amp",
-      "item_belt",
-      "item_boots",
-      "item_body",
-      "item_pads",
-      "item_invis",
-      "item_shp",
-      "wins",
-      "draws",
-      "losses",
-      "dom_caps",
-    ];
-
-    const higherBetter = [
-        "spree_best",
-        "multi_best",
-        "last_active"
-    ];
-
-    const floatTypes = ["playtime"];
-
-
-
-    const pTotals = [
-        allTimeTotals,
-        gametypeTotals,
-        mapTotals,
-        mapGametypeTotals
-    ];
-
-
-    for(let x = 0; x < pTotals.length; x++){
-
-        pTotals[x].matches += playerData.total_matches;
-    }
-
-
-
-    for(let i = 0; i < mergeTypes.length; i++){
-
-        const m = mergeTypes[i];
-
-        for(let x = 0; x < pTotals.length; x++){
-            if(floatTypes.indexOf(m) === -1){
-                pTotals[x][m] = parseInt(pTotals[x][m]) + parseInt(playerData[m]);
-            }else{
-                pTotals[x][m] += playerData[m];
-            }
-        }
-    }
-
-    for(let i = 0; i < higherBetter.length; i++){
-
-        const h = higherBetter[i];
-
-        for(let x = 0; x < pTotals.length; x++){
-
-            if(h === "last_active"){
-
-                const parsedDate = new Date(playerData[h]);
-                if(parsedDate > pTotals[x][h]){
-                    pTotals[x][h] = parsedDate;
-                }
-                
-                continue;
-            }
-            
-            if(pTotals[x][h] < playerData[h]){
-                pTotals[x][h] = playerData[h];
-            }
-        }
-    }
-
-    //2.8.1 keep track of max values for various player_totals
-    for(let i = 0; i < maxKeys.length; i++){
-
-        const maxKey = maxKeys[i];
-
-        for(let x =0; x < pTotals.length; x++){
-            
-
-            if(pTotals[x][maxKey] === undefined){
-                pTotals[x][maxKey] = playerData[maxKey];    
-            }else{
-
-                if(pTotals[x][maxKey] < playerData[maxKey]){
-
-                    pTotals[x][maxKey] = playerData[maxKey];
-                }
-            }
-        }
-    }
-
-    for(let i = 0; i < pTotals.length; i++){
-
-        const t = pTotals[i];
-
-
-        t.totalTtl += playerData.ttl;
-
-        if(t.totalTtl !== 0){
-            t.ttl = t.totalTtl / t.matches;
-        }
-
-        if(t.kills > 0){
-
-            if(t.deaths === 0){
-                t.eff = 100;
-            }else{
-                t.eff = (t.kills / (t.kills + t.deaths)) * 100;
-            }
-        }
-
-        if(playerData.last_active > t.last_active){
-            t.last_active = playerData.last_active;
-        }
-
-        t.playtime += parseFloat(playerData.playtime);
-
-        if(t.wins > 0){
-            t.winRate = t.wins / t.matches * 100;
-        }
-
-        if(t.total_spree_best > 0 && t.matches > 0){
-            t.avg_spree_best = t.total_spree_best / t.matches;
-        }else{
-            t.total_spree_best = 0;
-        }
-
-
-        if(t.total_multi_best > 0 && t.matches > 0){
-            t.avg_multi_best = t.total_multi_best / t.matches;
-        }else{
-            t.total_multi_best = 0;
-        }
-
-        for(let x = 0; x < AVERAGE_TYPES.length; x++){
-
-            const type = AVERAGE_TYPES[x];
-            const value = t[type];
-            
-            
-            if(value !== 0 && t.matches !== 0){
-
-                const averageKey = `avg_${type}`;
-      
-                t[averageKey] = value / t.matches;
-            }
-
-            if(value !== 0 && t.playtime > 0){
-
-                const epmKey = `epm_${type}`;
-                const mins = t.playtime / 60;
-                t[epmKey] = value / mins;
-            }
-
-        }
-    }
-}
-
-
-function createPlayerTotalsFromData(result, seasonId){
-
-    const totals = {};
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        _updateTotals(totals, r, seasonId);
-
-    }
-
-    return totals;
-}
 /**
  * 
  * @param {*} playerId 
@@ -1038,56 +644,6 @@ export async function calcPlayerTotals(playerIds, seasonId){
     return createPlayerTotalsFromData(result, seasonId);
   
 }
-
-export async function calculateSeasonPlayerTotals(seasonId){
-
-    let result = [];
-
-    //all time totals
-    if(seasonId === 0){
-
-        const query = `SELECT
-        gametype_id, map_id,
-        ${PLAYER_TOTALS_COLUMNS_MATCHES},
-        ${PLAYER_TOTALS_MAX_COLUMNS}
-        FROM nstats_match_players WHERE spectator=0 GROUP BY player_id,gametype_id,map_id`;
-
-        result = await simpleQuery(query);
-
-    }else{
-        
-        const query = `SELECT
-        gametype_id, map_id,
-        ${PLAYER_TOTALS_COLUMNS_MATCHES},
-        ${PLAYER_TOTALS_MAX_COLUMNS}
-        FROM nstats_match_players 
-        WHERE spectator=0 AND EXISTS(
-            SELECT 1 FROM nstats_matches
-            WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?
-        )
-        GROUP BY player_id,gametype_id,map_id`;
-
-        result = await simpleQuery(query, [seasonId]);
-    }
-
-    const totals = createPlayerTotalsFromData(result, seasonId);
-
-    await insertPlayerGametypeTotals(totals, seasonId);
-
-    await insertPlayerGametypeMaxValues(totals, seasonId);
-}
-
-/*export async function calculateAllPlayerTotals(){
-
-    const seasonIds = await getAllSeasonIds(false);
-
-    for(let i = 0; i < seasonIds.length; i++){
-
-        const sid = seasonIds[i];
-
-        await calculateSeasonPlayerTotals(sid);
-    }
-}*/
 
 
 /**
@@ -1266,12 +822,12 @@ function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
         FROM pt GROUP BY player_id${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
 }
 
-async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds){
+async function calculatePlayerTotals(seasonId, gametypeId, mapId, playerIds){
 
     if(playerIds.length === 0) return;
 
-    let where = `WHERE spectator=0`;
-    const vars = [];
+    let where = `WHERE spectator=0 AND gametype_id=? AND map_id=? AND player_id IN (?)`;
+    const vars = [gametypeId, mapId, playerIds];
 
     if(seasonId !== 0){
 
@@ -1281,20 +837,6 @@ async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
         )`;
         vars.push(seasonId);
     }
-
-    //if(gametypeId !== 0){
-        where += ` AND gametype_id=?`
-        vars.push(gametypeId);
-   // }
-
-   // if(mapId !== 0){
-        where += ` AND map_id=?`
-        vars.push(mapId);
-   // }
-
-    where += ` AND player_id IN (?)`;
-    vars.push(playerIds);
-
     
 
     const query = `WITH pt AS (SELECT
@@ -1303,6 +845,7 @@ async function testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
             ${PLAYER_TOTALS_COLUMNS_MATCHES},
             ${PLAYER_TOTALS_MAX_COLUMNS}
             FROM nstats_match_players 
+            LEFT JOIN nstats_players ON player_id = nstats_players.id
             ${where}
             GROUP BY player_id,gametype_id,map_id
         )
@@ -1493,16 +1036,6 @@ export async function calculateAllPlayerTotals(){
 
         const seasonId = seasonIds[i];
 
-        /*const [allTime, gametypeTotals, mapTotals, gametypeMapTotals] = await Promise.all([
-            testCalculateAllSingleSeason(seasonId, false, false),
-            testCalculateAllSingleSeason(seasonId, true, false),
-            testCalculateAllSingleSeason(seasonId, false, true),
-            testCalculateAllSingleSeason(seasonId, true, true)
-        ]);        
-       
-        const insertVars = [...allTime, ...gametypeTotals, ...mapTotals, ...gametypeMapTotals];
-        promises.push(bulkInsertPlayerTotals(insertVars), bulkInsertPlayerTotalsMaxValues(insertVars));*/
-
         const totals = await testCalculateAllSingleSeason(seasonId);
         promises.push(bulkInsertPlayerTotals(totals), bulkInsertPlayerTotalsMaxValues(totals));
     }
@@ -1614,7 +1147,6 @@ export async function deleteMultiplePlayerTotals(playerIds){
 async function insertPlayerGametypeTotals(data, seasonId){
 
 
-
     const insertVars = [];
 
     const playerIds = new Set();
@@ -1698,32 +1230,20 @@ async function insertPlayerGametypeTotals(data, seasonId){
 
     columns.push(...avgColumns, ...epmColumns);
 
-    //console.log(columns);
-    //process.exit();
-
     return await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, ["player_id", "season_id", "gametype_id", "map_id"]);
 
 
-    //await bulkInsert(query, insertVars);
 }
 
 
 export async function updatePlayerTotals(playerIds, seasonId, gametypeId, mapId){
 
 
-    //return await testCalculateSeason(seasonId, );
-
-    const totals = await testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
+ 
+    const totals = await calculatePlayerTotals(seasonId, gametypeId, mapId, playerIds);
 
     await Promise.all([bulkInsertPlayerTotals(totals), bulkInsertPlayerTotalsMaxValues(totals)]);
 
-
-
-    //old
-    //const totals = await calcPlayerTotals(playerIds, seasonId);
-
-    //await insertPlayerGametypeTotals(totals, seasonId);
-    //return await insertPlayerGametypeMaxValues(totals, seasonId);
 }
 
 
@@ -2985,48 +2505,6 @@ export async function getPlayersAverages(playerIds, gametypeId, mapId){
 
     return data;
 }
-
-
-/*async function getAllPlayerIds(){
-
-    const query = `SELECT DISTINCT player_id FROM nstats_match_players`;
-
-    const result = await simpleQuery(query);
-
-    return result.map((r) => { return r.player_id});
-}
-
-//2.9.0
-export async function calculateAllPlayerTotalsMax(){
-
-    const MAX_PLAYERS = 30;
-
-    const playerIds = await getAllPlayerIds();
-
-    console.log(playerIds);
-    let offset = 0;
-
-    while(offset < playerIds.length){
-
-        const test = playerIds.slice(offset, offset + MAX_PLAYERS);
-
-        offset += MAX_PLAYERS;
-    }
-}*/
-
-
-/*
-export async function getSeasonPlayers(seasonId){
-
-    const query = `SELECT nstats_player_totals.*,
-    nstats_players.name as name, nstats_players.country as country 
-    FROM nstats_player_totals 
-    LEFT JOIN nstats_players ON nstats_players.id = nstats_player_totals.player_id
-    WHERE season_id=? AND gametype_id=0 AND map_id=0 ORDER BY total_matches DESC`;
-
-    return await simpleQuery(query, [seasonId]);
-}*/
-
 
 export function sanitizePlayersPageParams(req, pageSettings, defaultPerPage){
 
