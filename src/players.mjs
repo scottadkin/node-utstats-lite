@@ -738,7 +738,6 @@ function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
         ${totals.item_shp} / ${totals.playtime} as epm_item_shp,
         ${totals.dom_caps} / ${totals.playtime} as epm_dom_caps,
 
-
         MAX(max_playtime) as max_playtime,
         MAX(max_score) as max_score,
         MAX(max_frags) as max_frags,
@@ -775,8 +774,8 @@ async function calculatePlayerTotals(seasonId, gametypeId, mapId, playerIds){
 
     if(playerIds.length === 0) return;
 
-    let where = `WHERE spectator=0 AND gametype_id=? AND map_id=? AND player_id IN (?)`;
-    const vars = [gametypeId, mapId, playerIds];
+    let where = `WHERE spectator=0  AND player_id IN (?)`;
+    const vars = [ playerIds];
 
     if(seasonId !== 0){
 
@@ -789,8 +788,8 @@ async function calculatePlayerTotals(seasonId, gametypeId, mapId, playerIds){
     
 
     const query = `WITH pt AS (SELECT
-            ${gametypeId} as gametype_id,
-            ${mapId} as map_id,
+            gametype_id,
+            map_id,
             ${PLAYER_TOTALS_COLUMNS_MATCHES},
             ${PLAYER_TOTALS_MAX_COLUMNS}
             FROM nstats_match_players 
@@ -1036,7 +1035,6 @@ export async function deleteMultiplePlayerTotals(playerIds){
 }
 
 export async function updatePlayerTotals(playerIds, seasonId, gametypeId, mapId){
-
 
     const totals = await calculatePlayerTotals(seasonId, gametypeId, mapId, playerIds);
 
