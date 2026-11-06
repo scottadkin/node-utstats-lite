@@ -241,6 +241,7 @@ export class CTF{
 
         if(!this.bMatchCTF) return;
 
+
         const playerIds = [];
 
         for(let i = 0; i < players.length; i++){
@@ -251,10 +252,14 @@ export class CTF{
             playerIds.push(p.masterId);
         }
 
-        await updatePlayerTotals(playerIds, 0);
+        const promises = [];
+
+        promises.push(updatePlayerTotals(playerIds, 0));
         if(seasonId !== 0){
-            await updatePlayerTotals(playerIds, seasonId);
+            promises.push(updatePlayerTotals(playerIds, seasonId));
         }
+
+        await Promise.all(promises);
        
     }
 

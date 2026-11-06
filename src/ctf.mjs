@@ -156,300 +156,7 @@ export async function getMatchData(matchId, bReturnJSON){
     return obj;
 }
 
-
-function createEmptyTotal(){
-
-    const current = {
-        "matches": 0,
-        "playtime": 0
-    };
-
-    for(let i = 0; i < CTF_TOTAL_KEYS.length; i++){
-
-        const k = CTF_TOTAL_KEYS[i];
-
-        current[k] = 0;
-        current[`max_${k}`] = 0;
-        current[`avg_${k}`] = 0;
-        current[`epm_${k}`] = 0;
-    }
-
-    return current;
-}
-
-function createPlayerTotal(totals, matchData){
-
-    const playerId = matchData.player_id;
-    const gametypeId = matchData.gametype_id;
-    const mapId = matchData.map_id;
-
-    if(totals?.[playerId]?.[gametypeId]?.mapId !== undefined) return;
-    //create all time totals if none
-    if(totals[playerId] === undefined){
-        totals[playerId] = {
-            "0": {
-                "0": createEmptyTotal()
-            }
-        };
-    }
-
-
-    //map all time totals
-    if(totals[playerId][0][mapId] === undefined){
-        totals[playerId][0][mapId] = createEmptyTotal();
-    }   
-
-    if(totals[playerId][gametypeId] === undefined){
-        totals[playerId][gametypeId] = {
-            "0": createEmptyTotal()
-        };
-    }
-
-    //gametype totals
-    if(totals[playerId][gametypeId][0] === undefined){
-        totals[playerId][gametypeId][0] = createEmptyTotal();
-    }
-
-    //map gametype totals
-    if(totals[playerId][gametypeId][mapId] === undefined){
-        totals[playerId][gametypeId][mapId] = createEmptyTotal();
-    }
-
-}
-
-function _updatePlayerTotals(totals, matchData){
-
-    const playerId = matchData.player_id;
-    const gametypeId = matchData.gametype_id;
-    const mapId = matchData.map_id;
-
-
-    //need to create totals for all, gametype, map, gametype+map
-    createPlayerTotal(totals, matchData);
-
-
-    const pTotals = [
-        totals[playerId][gametypeId][mapId],
-        totals[playerId][gametypeId][0],
-        totals[playerId][0][mapId],
-        totals[playerId][0][0],
-    ];
-
-    for(let x = 0; x < pTotals.length; x++){
-
-        const t = pTotals[x];
-        t.matches += matchData.total_matches;
-        t.playtime += matchData.total_playtime;
-
-
-        for(let i = 0; i < CTF_TOTAL_KEYS.length; i++){
-
-            const k = CTF_TOTAL_KEYS[i];
-            const mk = `max_${k}`;
-            const avgK = `avg_${k}`;
-            const epmK = `epm_${k}`;
-
-            t[k] += parseInt(matchData[k]);
-
-            if(t[k] > 0){
-                t[avgK] = t[k] / t.matches;
-            }else{
-                t[avgK] = 0;
-            }
-
-            if(t.playtime > 0){
-
-                if(t[k] > 0){
-
-                    const mins = t.playtime / 60;
-                    
-                    t[epmK] = t[k] / mins;
-                    //console.log(`played for ${mins} mins, ${t.playtime}, ${t.matches}`);
-                }else{
-                    t[k] = 0;
-                }
-            }
-            //console.log(t);
-
-            if(matchData[mk] > t[mk]){
-                t[mk] = matchData[mk];
-            }      
-        }
-    }
-
-
-}
-
-//slower than previous method
-/*async function testGetPlayerMatchesData(playerIds, type){
-
-    if(playerIds.length === 0) return [];
-
-    const validTypes = ["all", "gametypes", "maps", "both"];
-
-    type = type.toLowerCase();
-
-    let groupBy = "GROUP BY player_id";
-    let selectText = "player_id";
-    if(validTypes.indexOf(type) === -1) throw new Error("Not a valid type for getPlayerMatchesData");
-
-
-    if(type === "gametypes"){
-
-        groupBy = "GROUP BY player_id,gametype_id";
-        selectText = "player_id,gametype_id";
-
-    }else if(type === "maps"){
-
-        groupBy = "GROUP BY player_id,map_id";
-        selectText = "player_id,map_id";
-
-    }else if(type === "both"){
-
-        groupBy = "GROUP BY player_id,gametype_id,map_id";
-        selectText = "player_id,gametype_id,map_id";
-
-    }
-
-
-    const query = `SELECT ${selectText},
-    COUNT(*) as total_matches,
-    SUM(flag_taken) as flag_taken,
-    MAX(flag_taken) as max_flag_taken,
-    AVG(flag_taken) as avg_flag_taken,
-    SUM(flag_pickup) as flag_pickup,
-    MAX(flag_pickup) as max_flag_pickup,
-    AVG(flag_pickup) as avg_flag_pickup,
-    SUM(flag_drop) as flag_drop,
-    MAX(flag_drop) as max_flag_drop,
-    AVG(flag_drop) as avg_flag_drop,
-    SUM(flag_assist) as flag_assist,
-    MAX(flag_assist) as max_flag_assist,
-    AVG(flag_assist) as avg_flag_assist,
-    SUM(flag_cover) as flag_cover,
-    MAX(flag_cover) as max_flag_cover,
-    AVG(flag_cover) as avg_flag_cover,
-    SUM(flag_seal) as flag_seal,
-    MAX(flag_seal) as max_flag_seal,
-    AVG(flag_seal) as avg_flag_seal,
-    SUM(flag_cap) as flag_cap,
-    MAX(flag_cap) as max_flag_cap,
-    AVG(flag_cap) as avg_flag_cap,
-    SUM(flag_kill) as flag_kill,
-    MAX(flag_kill) as max_flag_kill,
-    AVG(flag_kill) as avg_flag_kill,
-    SUM(flag_return) as flag_return,
-    MAX(flag_return) as max_flag_return,
-    AVG(flag_return) as avg_flag_return,
-    SUM(flag_return_base) as flag_return_base,
-    MAX(flag_return_base) as max_flag_return_base,
-    AVG(flag_return_base) as avg_flag_return_base,
-    SUM(flag_return_mid) as flag_return_mid,
-    MAX(flag_return_mid) as max_flag_return_mid,
-    AVG(flag_return_mid) as avg_flag_return_mid,
-    SUM(flag_return_enemy_base) as flag_return_enemy_base,
-    MAX(flag_return_enemy_base) as max_flag_return_enemy_base,
-    AVG(flag_return_enemy_base) as avg_flag_return_enemy_base,
-    SUM(flag_return_save) as flag_return_save,
-    MAX(flag_return_save) as max_flag_return_save,
-    AVG(flag_return_save) as avg_flag_return_save
-    FROM nstats_match_ctf WHERE player_id IN (?)
-    ${groupBy}`;
-
-
-    return await simpleQuery(query, [playerIds]);
-}*/
-
-async function getPlayersMatchesData(playerIds, seasonId){
-
-
-    let where = ``;
-
-    const vars = [playerIds]
-
-    if(seasonId !== 0){
-        where += ` AND EXISTS (
-            SELECT 1 FROM nstats_matches
-            WHERE nstats_matches.id=nstats_match_players.match_id 
-            AND nstats_matches.season_id=?)
-        `;
-
-        vars.push(seasonId);
-    }
-
-    const query = `SELECT nstats_match_players.map_id,nstats_match_players.gametype_id,nstats_match_players.player_id,
-    SUM(nstats_match_players.time_on_server) as total_playtime,
-    COUNT(*) as total_matches,
-    SUM(flag_taken) as flag_taken,
-    MAX(flag_taken) as max_flag_taken,
-    SUM(flag_pickup) as flag_pickup,
-    MAX(flag_pickup) as max_flag_pickup,
-    SUM(flag_drop) as flag_drop,
-    MAX(flag_drop) as max_flag_drop,
-    SUM(flag_assist) as flag_assist,
-    MAX(flag_assist) as max_flag_assist,
-    SUM(flag_cover) as flag_cover,
-    MAX(flag_cover) as max_flag_cover,
-    SUM(flag_seal) as flag_seal,
-    MAX(flag_seal) as max_flag_seal,
-    SUM(flag_cap) as flag_cap,
-    MAX(flag_cap) as max_flag_cap,
-    SUM(flag_kill) as flag_kill,
-    MAX(flag_kill) as max_flag_kill,
-    SUM(flag_return) as flag_return,
-    MAX(flag_return) as max_flag_return,
-    SUM(flag_return_base) as flag_return_base,
-    MAX(flag_return_base) as max_flag_return_base,
-    SUM(flag_return_mid) as flag_return_mid,
-    MAX(flag_return_mid) as max_flag_return_mid,
-    SUM(flag_return_enemy_base) as flag_return_enemy_base,
-    MAX(flag_return_enemy_base) as max_flag_return_enemy_base,
-    SUM(flag_return_save) as flag_return_save,
-    MAX(flag_return_save) as max_flag_return_save
-    FROM nstats_match_players 
-    INNER JOIN nstats_match_ctf ON nstats_match_players.player_id = nstats_match_ctf.player_id  AND nstats_match_players.match_id = nstats_match_ctf.match_id
-    WHERE nstats_match_players.player_id IN (?)${where}
-    GROUP BY nstats_match_players.player_id,nstats_match_players.gametype_id,nstats_match_players.map_id`;
-
-    
-    return await simpleQuery(query, vars);
-}
-
-async function calcPlayerTotals(playerIds, seasonId){
-
-    const result = await getPlayersMatchesData(playerIds, seasonId);
-
-    const missing = [...playerIds];
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        const index = missing.indexOf(r.player_id);
-
-        if(index !== -1) missing.splice(index, 1);
-    }
-
-    if(missing.length > 0){
-
-        await simpleQuery(`DELETE FROM nstats_player_totals_ctf WHERE player_id IN(?) AND season_id=?`, [playerIds, seasonId]);
-    }
-
-    const totals = {};
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        _updatePlayerTotals(totals, r);
-    }
-
-
-    return totals;
-}
-
-
-async function insertPlayerTotals(insertVars){
+async function insertPlayerTotals(data){
 
     const t = "nstats_player_totals_ctf";
 
@@ -462,35 +169,50 @@ async function insertPlayerTotals(insertVars){
         "flag_return_base", "max_flag_return_base", "flag_return_mid",
         "max_flag_return_mid", "flag_return_enemy_base", "max_flag_return_enemy_base",
         "flag_return_save", "max_flag_return_save", "avg_flag_taken",
-                    "avg_flag_pickup",
-                    "avg_flag_drop",
-                    "avg_flag_assist",
-                    "avg_flag_cover",
-                    "avg_flag_seal",
-                    "avg_flag_cap",
-                    "avg_flag_kill",
-                    "avg_flag_return",
-                    "avg_flag_return_base",
-                    "avg_flag_return_mid",
-                    "avg_flag_return_enemy_base",
-                    "avg_flag_return_save",
+        "avg_flag_pickup",
+        "avg_flag_drop",
+        "avg_flag_assist",
+        "avg_flag_cover",
+        "avg_flag_seal",
+        "avg_flag_cap",
+        "avg_flag_kill",
+        "avg_flag_return",
+        "avg_flag_return_base",
+        "avg_flag_return_mid",
+        "avg_flag_return_enemy_base",
+        "avg_flag_return_save",
 
-                    "playtime",
-                    "epm_flag_taken",
-                    "epm_flag_pickup",
-                    "epm_flag_drop",
-                    "epm_flag_assist",
-                    "epm_flag_cover",
-                    "epm_flag_seal",
-                    "epm_flag_cap",
-                    "epm_flag_kill",
-                    "epm_flag_return",
-                    "epm_flag_return_base",
-                    "epm_flag_return_mid",
-                    "epm_flag_return_enemy_base",
-                    "epm_flag_return_save",
-                    "season_id"
+        "playtime",
+        "epm_flag_taken",
+        "epm_flag_pickup",
+        "epm_flag_drop",
+        "epm_flag_assist",
+        "epm_flag_cover",
+        "epm_flag_seal",
+        "epm_flag_cap",
+        "epm_flag_kill",
+        "epm_flag_return",
+        "epm_flag_return_base",
+        "epm_flag_return_mid",
+        "epm_flag_return_enemy_base",
+        "epm_flag_return_save",
+        "season_id"
     ];
+
+    const insertVars = [];
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+        const vars = [];
+
+        for(let x = 0; x < columns.length; x++){
+            vars.push(d[columns[x]]);
+        }
+
+        insertVars.push(vars);
+    }
+
 
 
     return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id", "season_id", "gametype_id", "map_id"]);
@@ -659,78 +381,9 @@ export async function updatePlayerTotals(playerIds, seasonId){
 
 
     const result = await simpleQuery(query, vars);
-    console.log(result);
-    process.exit();
+
+    await insertPlayerTotals(result);
 }
-
-/*export async function updatePlayerTotals(playerIds, seasonId){
-
-    if(playerIds.length === 0) return;
-
-    seasonId = parseInt(seasonId);
-    if(seasonId !== seasonId) throw new Error(`SeasonID must be a valid integer`);
-
-    const data = await calcPlayerTotals(playerIds, seasonId);
-
-    const insertVars = [];
-
-    for(const [playerId, gametypes] of Object.entries(data)){
-
-        for(const [gametypeId, maps] of Object.entries(gametypes)){
-
-            for(const [mapId, d] of Object.entries(maps)){
-
-                insertVars.push([
-                    playerId, gametypeId, mapId, d.matches,
-                    d.flag_taken, d.max_flag_taken,
-                    d.flag_pickup, d.max_flag_pickup,
-                    d.flag_drop, d.max_flag_drop,
-                    d.flag_assist, d.max_flag_assist,
-                    d.flag_cover, d.max_flag_cover,
-                    d.flag_seal, d.max_flag_seal,
-                    d.flag_cap, d.max_flag_cap,
-                    d.flag_kill, d.max_flag_kill,
-                    d.flag_return, d.max_flag_return,
-                    d.flag_return_base, d.max_flag_return_base,
-                    d.flag_return_mid, d.max_flag_return_mid,
-                    d.flag_return_enemy_base, d.max_flag_return_enemy_base,
-                    d.flag_return_save, d.max_flag_return_save,
-                    d.avg_flag_taken,
-                    d.avg_flag_pickup,
-                    d.avg_flag_drop,
-                    d.avg_flag_assist,
-                    d.avg_flag_cover,
-                    d.avg_flag_seal,
-                    d.avg_flag_cap,
-                    d.avg_flag_kill,
-                    d.avg_flag_return,
-                    d.avg_flag_return_base,
-                    d.avg_flag_return_mid,
-                    d.avg_flag_return_enemy_base,
-                    d.avg_flag_return_save,
-                    d.playtime,
-                    d.epm_flag_taken,
-                    d.epm_flag_pickup,
-                    d.epm_flag_drop,
-                    d.epm_flag_assist,
-                    d.epm_flag_cover,
-                    d.epm_flag_seal,
-                    d.epm_flag_cap,
-                    d.epm_flag_kill,
-                    d.epm_flag_return,
-                    d.epm_flag_return_base,
-                    d.epm_flag_return_mid,
-                    d.epm_flag_return_enemy_base,
-                    d.epm_flag_return_save,
-                    seasonId
-                ]);
-            }
-        }
-    }
-
-    await insertPlayerTotals(insertVars);     
-}*/
-
 
 export async function getPlayerCTFTotals(playerId, seasonId){
 
