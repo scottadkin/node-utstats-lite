@@ -839,6 +839,7 @@ export class PlayerManager{
         await this.forceHWIDNames();
 
         await this.forceMACNames();
+        
 
         const masterIds = await getMultiplePlayersMasterId(this.playerNames);
 

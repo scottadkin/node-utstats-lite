@@ -217,6 +217,18 @@ export async function getPlayerMasterId(playerName/*, hwid, mac1, mac2*/){
     return result[0].id;
 }
 
+export async function getPlayerMasterIdCreateOnNotExists(name){
+
+    const findQuery = `SELECT id FROM nstats_players WHERE name=?`;
+
+    const result = await simpleQuery(findQuery, [name]);
+
+    if(result.length === 0) return await createMasterPlayer(name);
+
+    return result[0].id;
+
+}
+
 export async function createMasterPlayer(name){
 
     const query = `INSERT INTO nstats_players VALUES(NULL,?,'',?)`;
@@ -233,41 +245,16 @@ export async function getMultiplePlayersMasterId(names){
 
     if(names.length === 0) return {};
 
-    const query = `SELECT id,name FROM nstats_players WHERE name IN (?)`;
-    const result = await simpleQuery(query, [names]);
-
-    const promises = [];
-
     const players = [];
-
-    for(let i = 0; i < result.length; i++){
-
-        const {name, id} = result[i];
-
-        players.push({name, id});
-        const index = names.indexOf(name);
-        if(index === -1) continue;
-        names.splice(index, 1);
-    }
-
-
-    if(names.length === 0) return players;
 
     for(let i = 0; i < names.length; i++){
 
+        const result = await getPlayerMasterIdCreateOnNotExists(names[i]);
+        players.push({"name": names[i], "id": result});
 
-        const current = createMasterPlayer(names[i]).then((id) =>{
-            players.push({id, "name": names[i]});
-        });
-
-        promises.push(current);
     }
 
-
-    await Promise.all(promises);
-
     return players;
-
 
 }
 

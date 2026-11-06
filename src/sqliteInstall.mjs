@@ -221,7 +221,8 @@ export function createTableQueries(){
                 hash TEXT COLLATE NOCASE NOT NULL
             ) STRICT`,
 
-            `CREATE INDEX IF NOT EXISTS np_name_idx ON nstats_players(name)`,
+            `DROP INDEX IF EXISTS np_name_idx`,
+            `CREATE UNIQUE INDEX IF NOT EXISTS np_name_idx_ic ON nstats_players(name COLLATE NOCASE)`,
             `CREATE INDEX IF NOT EXISTS np_hash_idx ON nstats_players(hash)`,
 
             `CREATE TABLE IF NOT EXISTS nstats_matches (
