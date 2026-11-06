@@ -1098,9 +1098,10 @@ export async function calculateSeasonPlayerTotals(seasonId){
 function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
 
     const targets = [
-        "total_matches", "playtime", "kills", "deaths", "team_kills", "suicides", "wins", "score", "frags",
+        "total_matches", "playtime", "kills", "deaths", "team_kills", "suicides", "wins",
+        "score", "frags",
         "suicides", "headshots", "spree_1", "spree_2", "spree_3", "spree_4", "spree_5", "total_spree_best",
-        "multi_1", "multi_2", "multi_3", "multi_4", "total_multi_best",
+        "multi_1", "multi_2", "multi_3", "multi_4", "total_multi_best", "first_blood", "ttl",
 
         "item_amp",
         "item_belt",
@@ -1125,7 +1126,44 @@ function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
     }
 
 
-    return `SELECT *,
+    return `SELECT 
+        player_id,
+        gametype_id,
+        map_id,
+        MAX(last_active) as last_active,
+        SUM(wins) as wins,
+        SUM(draws) as draws,
+        SUM(losses) as losses,
+        SUM(playtime) as playtime,
+        ${totals.score} as score,
+        ${totals.frags} as frags,
+        ${totals.kills} as kills,
+        ${totals.deaths} as deaths,
+        ${totals.suicides} as suicides,
+        ${totals.team_kills} as team_kills,
+        ${totals.ttl} / COUNT(*) as ttl,
+        ${totals.first_blood} as first_blood,
+        ${totals.spree_1} as spree_1,
+        ${totals.spree_2} as spree_2,
+        ${totals.spree_3} as spree_3,
+        ${totals.spree_4} as spree_4,
+        ${totals.spree_5} as spree_5,
+        MAX(spree_best) as spree_best,
+        ${totals.multi_1} as multi_1,
+        ${totals.multi_2} as multi_2,
+        ${totals.multi_3} as multi_3,
+        ${totals.multi_4} as multi_4,
+        MAX(multi_best) as multi_best,
+        ${totals.headshots} as headshots,
+        ${totals.item_amp} as item_amp,
+        ${totals.item_belt} as item_belt,
+        ${totals.item_boots} as item_boots,
+        ${totals.item_body} as item_body,
+        ${totals.item_pads} as item_pads,
+        ${totals.item_invis} as item_invis,
+        ${totals.item_shp} as item_shp,
+        ${totals.dom_caps} as dom_caps,
+        
         ${totals.total_matches} as total_matches,
         ${(!bGroupGametypes) ? "0 as gametype_id," : "gametype_id,"}
         ${(!bGroupMaps) ? "0 as map_id," : "map_id,"}
@@ -1193,7 +1231,37 @@ function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
         ${totals.item_pads} / ${totals.playtime} as epm_item_pads,
         ${totals.item_invis} / ${totals.playtime} as epm_item_invis,
         ${totals.item_shp} / ${totals.playtime} as epm_item_shp,
-        ${totals.dom_caps} / ${totals.playtime} as epm_dom_caps
+        ${totals.dom_caps} / ${totals.playtime} as epm_dom_caps,
+
+
+        MAX(max_playtime) as max_playtime,
+        MAX(max_score) as max_score,
+        MAX(max_frags) as max_frags,
+        MAX(max_kills) as max_kills,
+        MAX(max_deaths) as max_deaths,
+        MAX(max_suicides) as max_suicides,
+        MAX(max_team_kills) as max_team_kills,
+        MAX(max_ttl) as max_ttl,
+        MAX(max_spree_1) as max_spree_1,
+        MAX(max_spree_2) as max_spree_2,
+        MAX(max_spree_3) as max_spree_3,
+        MAX(max_spree_4) as max_spree_4,
+        MAX(max_spree_5) as max_spree_5,
+        MAX(max_spree_best) as max_spree_best,
+        MAX(max_multi_1) as max_multi_1,
+        MAX(max_multi_2) as max_multi_2,
+        MAX(max_multi_3) as max_multi_3,
+        MAX(max_multi_4) as max_multi_4,
+        MAX(max_multi_best) as max_multi_best,
+        MAX(max_headshots) as max_headshots,
+        MAX(max_item_amp) as max_item_amp,
+        MAX(max_item_belt) as max_item_belt,
+        MAX(max_item_boots) as max_item_boots,
+        MAX(max_item_body) as max_item_body,
+        MAX(max_item_pads) as max_item_pads,
+        MAX(max_item_invis) as max_item_invis,
+        MAX(max_item_shp) as max_item_shp,
+        MAX(max_dom_caps) as max_dom_caps
 
         FROM pt GROUP BY player_id${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
 }
@@ -1348,10 +1416,12 @@ async function bulkInsertPlayerTotals(data){
         for(let x = 0; x < columns.length; x++){
 
             vars.push(d[columns[x]]);
+
         }
 
         insertVars.push(vars);
     }
+
 
 
     await sqlInsertOnDuplicateUpdate("nstats_player_totals", columns, insertVars, conflict);
@@ -1644,7 +1714,7 @@ export async function updatePlayerTotals(playerIds, seasonId, gametypeId, mapId)
     //return await testCalculateSeason(seasonId, );
 
     const totals = await testCalculatePlayerTotals(seasonId, gametypeId, mapId, playerIds)
-    
+
     await Promise.all([bulkInsertPlayerTotals(totals), bulkInsertPlayerTotalsMaxValues(totals)]);
 
 
