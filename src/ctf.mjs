@@ -497,7 +497,97 @@ async function insertPlayerTotals(insertVars){
     //return await bulkInsert(query, insertVars);
 }
 
+
+
+function createSumQueryString(){
+
+    const targets = [
+        "taken",
+        "pickup",
+        "drop",
+        "assist",
+        "cover",
+        "seal",
+        "cap",
+        "kill",
+        "return",
+        "return_base",
+        "return_mid",
+        "return_enemy_base",
+        "return_save",
+        "carry_time"
+    ];
+
+
+    let sumString = ``;
+
+    for(let i = 0; i < targets.length; i++){
+
+        const s = targets[i];
+        sumString += `SUM(flag_${s}) as flag_${s},`
+        sumString += `MAX(flag_${s}) as max_flag_${s},`
+    }
+
+    return sumString;
+}
+
+function createTotalsForPTQuery(bGroupGametypes, bGroupMaps){
+
+    const sumString = createSumQueryString();
+
+    return `SELECT player_id,
+    season_id,
+    ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
+    ${(bGroupMaps) ? "map_id" : "0 as map_id"},
+    ${sumString}
+    MIN(flag_carry_time_min) as flag_carry_time_min,
+    MAX(flag_carry_time_max) as flag_carry_time_max,
+    SUM(total_matches) as total_matches,
+    SUM(playtime) as playtime
+    FROM pt GROUP BY player_id${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
+}
+
 export async function updatePlayerTotals(playerIds, seasonId){
+
+    if(playerIds.length === 0) return;
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`SeasonID must be a valid integer`);
+
+    const sumString = createSumQueryString();
+
+
+    let where = "";
+    let vars = [playerIds];
+
+    if(seasonId !== 0){
+        where = " AND season_id=? ";
+        vars.push(seasonId);
+    }
+
+    const query = `WITH pt AS (SELECT c.player_id,
+    c.gametype_id,
+    c.map_id,
+    ${seasonId} as season_id,
+    COUNT(*) as total_matches,
+    SUM(nstats_match_players.time_on_server) as playtime,
+    ${sumString}
+    MIN(flag_carry_time_min) as flag_carry_time_min,
+    MAX(flag_carry_time_max) as flag_carry_time_max
+    FROM nstats_match_ctf AS c 
+    INNER JOIN nstats_match_players ON nstats_match_players.match_id = c.match_id AND nstats_match_players.player_id = c.player_id
+    WHERE c.player_id IN(?)${where} GROUP BY c.player_id,c.gametype_id,c.map_id)
+    
+    ${createTotalsForPTQuery(false, false)}
+    `;
+
+
+    const result = await simpleQuery(query, vars);
+    console.log(result);
+    process.exit();
+}
+
+/*export async function updatePlayerTotals(playerIds, seasonId){
 
     if(playerIds.length === 0) return;
 
@@ -563,7 +653,7 @@ export async function updatePlayerTotals(playerIds, seasonId){
     }
 
     await insertPlayerTotals(insertVars);     
-}
+}*/
 
 
 export async function getPlayerCTFTotals(playerId, seasonId){
