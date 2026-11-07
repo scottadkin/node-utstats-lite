@@ -974,14 +974,6 @@ class MatchDominationSummary{
             `The calculated scores are usually within a +-0.5% error range`
         );
 
-        const canvas = document.createElement("canvas");
-
-        const testTabs = [
-            {"name": "Real Team Scores", "title": "Real Team Scores"},
-            {"name": "Importer Team Scores", "title": "Importer Team Scores"},
-            {"name": "Importer VS UT", "title": "Totals Of All Teams"},
-        ];
-
         const labels = [];
         
         const d1 = [];
@@ -994,15 +986,15 @@ class MatchDominationSummary{
             
             const currentReal = {
                 "name": currentName,
-                "values": []
+                "data": []
             };
 
             const currentFake = {
                 "name": currentName,
-                "values": []
+                "data": []
             };
 
-            const currentTotals = {"name": (i === 0) ? "Real Scores" : "Importer Scores", "values": []};
+            const currentTotals = {"name": (i === 0) ? "Real Scores" : "Importer Scores", "data": []};
 
             for(let x = 0; x < this.data.dom.scoreHistory.length; x++){
   
@@ -1010,12 +1002,12 @@ class MatchDominationSummary{
 
                 if(i === 0) labels.push(MMSS(d.timestamp - this.data.basic.match_start));
 
-                currentReal.values.push(parseFloat(d[`real_team_${i}_score`].toFixed(2)));
-                currentFake.values.push(parseFloat(d[`importer_team_${i}_score`].toFixed(2)));
+                currentReal.data.push(parseFloat(d[`real_team_${i}_score`].toFixed(2)));
+                currentFake.data.push(parseFloat(d[`importer_team_${i}_score`].toFixed(2)));
 
                 //only need 2 to compare log and ut scores
                 if(i > 1) continue;
-                currentTotals.values.push(parseFloat(d[`${(i === 0) ? "real" : "importer" }_total_score`].toFixed(2)));
+                currentTotals.data.push(parseFloat(d[`${(i === 0) ? "real" : "importer" }_total_score`].toFixed(2)));
             }
 
             d1.push(currentReal);
@@ -1024,26 +1016,42 @@ class MatchDominationSummary{
             totals.push(currentTotals);
         }
 
-        const testData = {
-            "data":[
-                d1, d2, totals
-            ],
-            "labelsPrefix": [
-                "Total Scores @ ", "Total Scores @ ", "Total Scores @ "
-            ],
-            "labels": [labels, labels, labels]
-        };
-
-        new Graph(canvas, new AbortController(), 1920, 1080, testTabs, false, testData);
-
- 
+        
+   
         new UIInfo(this.generalContent, infoContent);
 
         //new UITable(this.generalContent, tableOptions, rows);
         new TESTUITable(this.generalContent, tableOptions, rows)
 
-        const graphWrapper = UIDiv("graph-wrapper");
-        graphWrapper.append(canvas);
+        const graphWrapper = UIDiv("new-canvas");
+
+
+        new LineGraph(graphWrapper, "test-dom-graph", 1920, 1080, 
+            [
+                {
+                    "title": "Real Team Scores",
+                    "yAxisLabel": "Score",
+                    "data": d1,
+                    "dataTitles": labels
+                },
+                {
+                    "title": "Importer Team Scores",
+                    "yAxisLabel": "Score",
+                    "data": d2,
+                    "dataTitles": labels
+                },
+                {
+                    "title": "UT vs Importer Team Scores",
+                    "yAxisLabel": "Score",
+                    "data": totals,
+                    "dataTitles": labels
+                }
+            ],
+            {
+                "bNoXAxisLabels": true
+            }
+        );
+
         this.generalContent.append(graphWrapper);
 
     }
@@ -3122,46 +3130,10 @@ class MatchKillsGraph{
 
     createGraph(){
         
-
-        //this.canvas = document.createElement("canvas");
-        //this.wrapper.append(this.canvas);
-
-        //const abortController = new AbortController();
-
-        const tabs = [
-            {"name": "Kills", "title": "Player Kills"}, 
-            {"name": "Deaths", "title": "Player Deaths By Enemy"},
-            {"name": "Team Kills", "title": "Player Team Kills"}, 
-            {"name": "Team Deaths", "title": "Player Deaths By Team Kills"},
-        ];
-
-        
         this.totalDataPoints = Math.ceil(this.matchInfo.playtime / this.timeframe);
 
-
         const labels = this.createLabels();
-        
-        /*const data = [
-            {
-                "title": "Test Graph2",
-                "yAxisLabel": "yAxis",
-                "xAxisLabel": "xAxis",
-                "data": this.createGraphData("kills", false),
-                "dataTitles": labels
-            },
-        {
-            "title": "Test Graph",
-            "yAxisLabel": "yAxis",
-            "xAxisLabel": "xAxis",
-            "data": [
-                {
-                    "fillStyle": "red",
-                    "name": "name 1",
-                    "data": [1,2,3,4,2,2,3,1,2]
-                }
-            ]
-        }
-    ];*/
+
         const data = 
             [
             {
