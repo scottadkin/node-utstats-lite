@@ -1,4 +1,4 @@
-import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate, bulkUpdate} from "./database.mjs";
+import {simpleQuery, bulkInsert, sqlInsertReturnRowId, sqlInsertOnDuplicateUpdate, bulkUpdate, sqliteBTableExists} from "./database.mjs";
 import { getPlayer, mysqlSetTotalsByDate, getHeatmapDates, createRandomString, sortByName, convertTimestamp, toPlaytime } from "./generic.mjs";
 import { getMapAndGametypeIds } from "./matches.mjs";
 import { 
@@ -2871,4 +2871,43 @@ export async function getPlayerMatchRowIds(playerId){
     const result = await simpleQuery(query, [playerId]);
 
     return result.map((r) =>{ return r.id});
+}
+
+//bug where player profiles where created without being case insensitive 
+//2.10.0 preview 5
+export async function fixDuplicatePlayerProfiles(){
+
+    new Message(`Checking for duplicate player profiles`,"note");
+
+    //table doesn't exist if this is the first time install.
+    if(!await sqliteBTableExists("nstats_players")) return;
+
+    
+    const duplicates = await getDuplicatePlayerProfiles();
+
+    if(duplicates.length === 0){
+        new Message(`No duplicate player profiles found.`,"pass");
+        return;
+    }
+
+    new Message(`Found ${duplicates.length} duplicate player profiles.`,"note");
+
+    const players = await getMasterAndDuplicateIds(duplicates);
+
+
+    for(const [playerName, playerData] of Object.entries(players)){
+
+        new Message(playerName, "progress");
+
+        for(let i = 0; i < playerData.duplicateIds.length; i++){
+
+            const pId = playerData.duplicateIds[i];
+            const matchRowIds = await getPlayerMatchRowIds(pId);
+
+            await renamePlayerByMatchHistory(playerName, matchRowIds, false, "Duplicate Profile Merge");
+            await adminDeletePlayer(pId)
+        }
+  
+    }
+
 }

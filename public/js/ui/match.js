@@ -714,9 +714,9 @@ class MatchDominationSummary{
 
         this.createTabs();
 
-        this.info = UIDiv("info");
+        this.info = new UIInfo(this.playersWrapper, []);
         this.content = UIDiv();
-        this.playersWrapper.append(this.info, this.content);
+        this.playersWrapper.append(this.content);
         this.render();
 
         this.parent.append(this.playersWrapper);
@@ -826,26 +826,27 @@ class MatchDominationSummary{
 
     updateInfo(){
 
-        this.info.innerHTML = ``;
+
+        const infoContent = [];
 
         if(this.mode === "percent"){
 
-            this.info.append("Total control percent, based on first touch timestamp for each Control Point to match end.");
+            infoContent.push("Total control percent, based on first touch timestamp for each Control Point to match end.");
 
         }else if(this.mode === "time"){
 
-            this.info.append("Total time each player had control of each control point.");
+            infoContent.push("Total time each player had control of each control point.");
 
         }else if(this.mode === "caps"){
-            this.info.append("Total times a player captured the control point.");
+            infoContent.push("Total times a player captured the control point.");
 
         }else if(this.mode === "short-time"){
 
-            this.info.append("The shortest amount of time a player had control of the point for a single capture.");
+            infoContent.push("The shortest amount of time a player had control of the point for a single capture.");
 
         }else if(this.mode === "long-time"){
 
-            this.info.append("The longest amount of time a player had control of the point for a single capture.");
+            infoContent.push("The longest amount of time a player had control of the point for a single capture.");
 
         }else if(this.mode === "total-points" || this.mode === "max-points"){
 
@@ -853,7 +854,7 @@ class MatchDominationSummary{
 
             if(this.mode === "max-points") lines.push(UIBr(), `The most amount of points gotten from a single control point capture.`);
          
-            this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
+           infoContent.push(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
 
         }else if(this.mode === "stolen-points"){
 
@@ -873,7 +874,7 @@ class MatchDominationSummary{
                 `- This can give the newly captured player points if the Domination Timer is called before the Control Point's.`
             ];
          
-            this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
+            infoContent.push(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
 
         }else if(this.mode === "stolen-caps"){
 
@@ -883,9 +884,11 @@ class MatchDominationSummary{
                 `- This is the total amount of times a player got a stolen point capture.`
             ];
          
-            this.info.append(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
+            infoContent.push(UIB("Estimated Points Calculated From Stat Log"), UIBr(), ...lines);
 
         }
+
+        this.info.updateContent(infoContent);
     }
 
     renderGeneral(){
@@ -960,9 +963,9 @@ class MatchDominationSummary{
 
         }
 
-        const info = UIDiv("info");
+        const infoContent = [];
 
-        info.append(
+        infoContent.push(
             UIB(`* indicates calculated from stats log.`), 
             UIBr(),
             `With the multiple bugs in both Domination's and the Control Points, 
@@ -1034,7 +1037,8 @@ class MatchDominationSummary{
         new Graph(canvas, new AbortController(), 1920, 1080, testTabs, false, testData);
 
  
-        this.generalContent.append(info);
+        new UIInfo(this.generalContent, infoContent);
+
         //new UITable(this.generalContent, tableOptions, rows);
         new TESTUITable(this.generalContent, tableOptions, rows)
 
