@@ -18,10 +18,11 @@ const USED_MATCH_SEASON_ID = <%= locals.seasonId %>;
 const SKIP_SEASON_LINKS = <%= locals.bSkipSeasonLinks %>
 
 </script>
-<script src="<%= jsBase %>ui/table.js"></script>
-<script src="<%= jsBase %>ui/match.js"></script>
-<script src="<%= jsBase %>matchScreenshot.js"></script>
-<script src="<%= jsBase %>ui/canvas-graphs.js"></script>
+<script src="/js/ui/table.js"></script>
+<script src="/js/ui/match.js"></script>
+<script src="/js/matchScreenshot.js"></script>
+<script src="/js/ui/canvas-graphs.js"></script>
+<script src="/js/ui/new-canvas-graphs.js"></script>
 <div id="root"></div>
 <script>
     const basic = <%- JSON.stringify(data.basic) -%>;
@@ -114,6 +115,7 @@ const SKIP_SEASON_LINKS = <%= locals.bSkipSeasonLinks %>
             } break;
 
             case "Display Kills": {
+
 
                 %>new MatchKillsGraph("#root", basic, basicPlayers);<%
                 %>new MatchKillsMatchUp("#root", parsedData.kills, basicPlayers, basic.total_teams);<%

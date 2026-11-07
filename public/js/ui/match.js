@@ -3050,9 +3050,9 @@ class MatchKillsGraph{
 
             if(p.playerId === playerId){
 
-                const previousValue = p.values[p.values.length - 1];
+                const previousValue = p.data[p.data.length - 1];
 
-                p.values.push(previousValue + totalEvents);
+                p.data.push(previousValue + totalEvents);
                 return;
             }
         }    
@@ -3064,7 +3064,7 @@ class MatchKillsGraph{
 
             const p = players[i];
 
-            p.values.push(p.values[p.values.length - 1]);
+            p.data.push(p.data[p.data.length - 1]);
         }
     }
 
@@ -3074,7 +3074,7 @@ class MatchKillsGraph{
 
         for(const p of Object.values(this.players)){
 
-            data.push({"name": p.name, "playerId": p.id, "values": [0]});
+            data.push({"name": p.name, "playerId": p.id, "data": [0]});
         }
 
         let events = [];
@@ -3123,10 +3123,10 @@ class MatchKillsGraph{
     createGraph(){
         
 
-        this.canvas = document.createElement("canvas");
-        this.wrapper.append(this.canvas);
+        //this.canvas = document.createElement("canvas");
+        //this.wrapper.append(this.canvas);
 
-        const abortController = new AbortController();
+        //const abortController = new AbortController();
 
         const tabs = [
             {"name": "Kills", "title": "Player Kills"}, 
@@ -3138,41 +3138,70 @@ class MatchKillsGraph{
         
         this.totalDataPoints = Math.ceil(this.matchInfo.playtime / this.timeframe);
 
-        this.createGraphData();
 
         const labels = this.createLabels();
-
-        const data = {
+        
+        /*const data = [
+            {
+                "title": "Test Graph2",
+                "yAxisLabel": "yAxis",
+                "xAxisLabel": "xAxis",
+                "data": this.createGraphData("kills", false),
+                "dataTitles": labels
+            },
+        {
+            "title": "Test Graph",
+            "yAxisLabel": "yAxis",
+            "xAxisLabel": "xAxis",
             "data": [
-                this.createGraphData("kills", false), 
-                this.createGraphData("kills", true),
-                this.createGraphData("teamKills", false),
-                this.createGraphData("teamKills", true)
-            ],
-            "labels": [
-                [...labels],
-                [...labels],          
-                [...labels],          
-                [...labels]          
-            ],
-            "labelsPrefix": [
-                "Player Kills @ ", 
-                "Player Deaths @ ",
-                "Player Team Kills @ ",
-                "Player Team Deaths @ ",
+                {
+                    "fillStyle": "red",
+                    "name": "name 1",
+                    "data": [1,2,3,4,2,2,3,1,2]
+                }
             ]
-        };
+        }
+    ];*/
+        const data = 
+            [
+            {
+                "title": "Kills",
+                "yAxisLabel": "Kills",
+                "xAxisLabel": "xAxis",
+                "data": this.createGraphData("kills", false),
+                "dataTitles": labels
+            },
+             {
+                "title": "Deaths",
+                "yAxisLabel": "Deaths",
+                "xAxisLabel": "xAxis",
+                "data": this.createGraphData("kills", true),
+                "dataTitles": labels
+            },
+            {
+                "title": "Team Kills",
+                "yAxisLabel": "Team Kills",
+                "xAxisLabel": "xAxis",
+                "data": this.createGraphData("teamKills", false),
+                "dataTitles": labels
+            },
+            {
+                "title": "Deaths By Team Kills",
+                "yAxisLabel": "Deaths By Team Kills",
+                "xAxisLabel": "xAxis",
+                "data": this.createGraphData("teamKills", true),
+                "dataTitles": labels
+            }
+        ];
 
-        this.graph = new Graph(
-            this.canvas, 
-            abortController, 
-            1920, 
-            1080, 
-            tabs,
-            true,
-            data, 
-            0
-        );
+        
+        const test = UIDiv("new-canvas");
+
+        this.graph = new LineGraph(test, "test-graph", 1920, 1080, data, {
+            "bNoXAxisLabels": true,
+        });
+
+        this.wrapper.append(test);
     }
 }
 

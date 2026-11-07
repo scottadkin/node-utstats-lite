@@ -170,7 +170,7 @@ function reverseScale(canvas, axis, value){
     return value / max * 100;
 }
 
-class GraphCanvas{
+class NewGraphCanvas{
     
     constructor(parent, graphId, defaultWidth, defaultHeight, data, overrideOptions){
 
@@ -269,7 +269,7 @@ class GraphCanvas{
 
         this.bNoXAxisLabels = bNoXAxisLabels;
         this.maxXAxisSize = 2;
-        this.maxPossibleXAxisLabelSize = 9;
+        this.maxPossibleXAxisLabelSize = 15;
         this.minPossibleXAxisLabelSize = 1;
 
         this.buttons = [];
@@ -293,6 +293,25 @@ class GraphCanvas{
 
         this.maxDataPerPage = maxDataPerPage;
 
+        this.lastUsedDataColorIndex = -1;
+        this.defaultDataColors = [
+            "red",
+            "rgb(60,101,156)",
+            "rgb(0,150,0)",
+            "yellow",
+            "grey",
+            "pink",
+            "orange",
+            "lightblue",
+            "rgb(1,54,141)",
+            "rgb(135,243,34)",
+            "rgb(43,80,44)",
+            "rgb(45,220,197)",
+            "rgb(62,19,181)",
+            "rgb(126,189,26)",
+            "rgb(164,55,56)",
+            "rgb(130,23,223)",
+        ];
 
 
         if(Array.isArray(data)){
@@ -302,11 +321,37 @@ class GraphCanvas{
 
             this.multiDataSet = data;
 
+            
+
+            for(let i = 0; i < data.length; i++){
+
+                this.lastUsedDataColorIndex = -1;
+
+                for(let x = 0; x < data[i].data.length; x++){
+
+                    const d = data[i].data[x]; 
+
+                    if(d.fillStyle === undefined){
+                        d.fillStyle = this.getNextDataColor();
+                    }
+                }
+
+            }
+
             this.data = data[0];
 
         }else{
             this.currentMultiDataSetIndex = null;
             this.data = data;
+
+            for(let i = 0; i < this.data.data.length; i++){
+
+                const d = this.data.data[i];
+                
+                if(d.fillStyle === undefined){
+                    d.fillStyle = this.getNextDataColor();
+                }
+            }
         }
         
         
@@ -326,6 +371,18 @@ class GraphCanvas{
 
         this.createEvents();
 
+    }
+
+    getNextDataColor(){
+
+        this.lastUsedDataColorIndex++;
+
+        if(this.lastUsedDataColorIndex > this.defaultDataColors.length){
+
+            this.lastUsedDataColorIndex = 0;
+        }
+
+        return this.defaultDataColors[this.lastUsedDataColorIndex];
     }
 
     calculateMaxXAxisLabelSize(plotAreaWidth){
@@ -384,7 +441,7 @@ class GraphCanvas{
     setPlotAreaSize(){
 
         let width = 92;
-        let height = 70;
+        let height = 65;
         let x = 8;
         let y = 7;
      
@@ -398,11 +455,12 @@ class GraphCanvas{
         }
 
 
-        if(!this.bNoXAxisLabels && !this.state.bXAxisLabelsTooSmall){
-            height -= this.maxPossibleXAxisLabelSize - this.maxXAxisSize;
-        }else{
-            height += 10;
+        if(this.bNoXAxisLabels || this.state.bXAxisLabelsTooSmall){
+            height += this.maxPossibleXAxisLabelSize;
+           
         }
+
+    
 
 
         this.plotArea = {
@@ -1037,7 +1095,7 @@ class GraphCanvas{
                 "Fullscreen",  
                 "bFullScreen", () =>{ this.toggleFullScreen()},     
             ),
-            new ToggleButton(
+           /* new ToggleButton(
                 this, 
                 {
                     "x": startX + 15, 
@@ -1047,7 +1105,7 @@ class GraphCanvas{
                     "fontSize": this.buttonFontSize
                 },
                 "Normal View", "Large View", "bLargeView", () =>{ this.toggleLargeView()},     
-            )
+            )*/
         ]; 
 
 
@@ -1573,7 +1631,7 @@ class GraphCanvas{
      */
     getDataStartEnd(){
 
-        const dataEntryStart = this.state.page * this.dataPointsPerPage;
+        const dataEntryStart = (this.state.page > 0 && this.dataPointsPerPage > 0) ? this.state.page * this.dataPointsPerPage : 0;
 
         let dataEntryEnd = this.data.maxDataPoints;
 
@@ -1948,7 +2006,7 @@ class CanvasGraphKey{
     }
 }
 
-class BarChartGraph extends GraphCanvas{
+class BarChartGraph extends NewGraphCanvas{
 
     /**
      * 
@@ -2262,7 +2320,7 @@ class BarChartGraph extends GraphCanvas{
 }
 
 
-class LineGraph extends GraphCanvas{
+class LineGraph extends NewGraphCanvas{
 
     constructor(parent, graphId, defaultWidth, defaultHeight, data, overrideOptions){
 
@@ -2389,14 +2447,16 @@ class LineGraph extends GraphCanvas{
         //add dataOffsetX to allow more room for hover data
         const startX = this.plotArea.x + dataOffsetX;
 
-        const {dataEntryStart, dataEntryEnd} = this.getDataStartEnd();
+        
 
+        const {dataEntryStart, dataEntryEnd} = this.getDataStartEnd();
 
         let bFirstIndex = true;
         
         for(let i = 0; i < this.data.data.length; i++){
 
-            const {name, data, fillStyle} = this.data.data[i];
+            let {name, data, fillStyle} = this.data.data[i];
+
 
             const keyInfo = this.getGraphKeyByName(name);
 
@@ -2449,7 +2509,6 @@ class LineGraph extends GraphCanvas{
         this.setPlotAreaSize();
         this.createMouseOverData();
      
-
         this.toDefaultTextBaseLine();
 
         this.drawRect({
@@ -2460,7 +2519,7 @@ class LineGraph extends GraphCanvas{
         });
 
         this.renderTitle();
-        
+    
  
         this.renderPlotArea();
         this.renderData();
