@@ -480,3 +480,14 @@ export async function sqliteGetTableColumns(table){
         return r.name;
     });
 }
+
+
+export async function sqliteBTableExists(table){
+
+    const query = `SELECT name FROM sqlite_master WHERE type='table' and name=?`;
+
+    const result = await simpleQuery(query, [table]);
+
+    return result.length > 0;
+
+}

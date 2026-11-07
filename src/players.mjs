@@ -1355,11 +1355,13 @@ export async function adminDeletePlayer(playerId){
         {"table": "nstats_match_dom", "playerColumn": "player_id"},
         {"table": "nstats_match_players", "playerColumn": "player_id"},
         {"table": "nstats_match_weapon_stats", "playerColumn": "player_id"},
-        {"table": "nstats_players", "playerColumn": "id"},
+        
+        {"table": "nstats_player_totals_max", "playerColumn": "player_id"},
         {"table": "nstats_player_totals", "playerColumn": "player_id"},
         {"table": "nstats_player_totals_ctf", "playerColumn": "player_id"},
         {"table": "nstats_player_totals_weapons", "playerColumn": "player_id"},
-        {"table": "nstats_rankings", "playerColumn": "player_id"}
+        {"table": "nstats_rankings", "playerColumn": "player_id"},
+        {"table": "nstats_players", "playerColumn": "id"},
     ];
 
     let totalRows = 0;
@@ -2815,4 +2817,58 @@ export async function adminGetAllIps(){
     const result = await simpleQuery(query);
 
     return result.map((r) => { return r.ip});
+}
+
+
+export async function getDuplicatePlayerProfiles(){
+
+    const query = `SELECT name,COUNT(*) as entries FROM nstats_players GROUP BY name HAVING entries>1`;
+
+    return await simpleQuery(query);
+}
+
+
+export async function getMasterAndDuplicateIds(duplicates){
+
+    const query = `SELECT id,name FROM nstats_players WHERE name=? ORDER BY id ASC`;
+
+    const players = {};
+
+
+    for(let i = 0; i < duplicates.length; i++){
+
+        const {name} = duplicates[i];
+
+        const result = await simpleQuery(query, [name]);
+
+        if(result.length === 0) continue;
+
+        const firstId = result[0].id;
+
+        const duplicateIds = [];
+
+        for(let x = 1; x < result.length; x++){
+            duplicateIds.push(result[x].id)
+        }
+
+        players[name] = {firstId, duplicateIds}
+        
+    }
+
+    return players;
+}
+
+
+/**
+ * all row ids for target player in nstats_match_players
+ * @param {Number} playerId 
+ * @returns {Promise<Array<Number>>} 
+ */
+export async function getPlayerMatchRowIds(playerId){
+
+    const query = `SELECT id FROM nstats_match_players WHERE player_id=?`;
+
+    const result = await simpleQuery(query, [playerId]);
+
+    return result.map((r) =>{ return r.id});
 }

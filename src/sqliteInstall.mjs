@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { simpleQuery, sqliteBTableExists } from "./database.mjs";
 import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
@@ -8,7 +8,7 @@ import { refreshAllTables, insertDefaultCTFLeagueSettings, getMultipleLeagueCate
 import {insertDefaultRankingSettings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
-import { calculateAllPlayerTotals, installPlayerSettings } from "./players.mjs";
+import { adminDeletePlayer, calculateAllPlayerTotals, getDuplicatePlayerProfiles, getMasterAndDuplicateIds, getPlayerMatchRowIds, installPlayerSettings, renamePlayerByMatchHistory } from "./players.mjs";
 import { setAllMapTotals } from "./weapons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "./ctf.mjs";
 import { setAllBGametypeFlags } from "./matches.mjs";
@@ -1433,9 +1433,50 @@ async function addSeasonColumnToCTFLeague(){
 
 }
 
+//bug where player profiles where created without being case insensitive 
+//2.10.0 preview 5
+async function fixDuplicatePlayerProfile(){
+
+    new Message(`Checking for duplicate player profiles`,"note");
+
+    //table doesn't exist if this is the first time install.
+    if(!await sqliteBTableExists("nstats_players")) return;
+
+    
+    const duplicates = await getDuplicatePlayerProfiles();
+
+    if(duplicates.length === 0){
+        new Message(`No duplicate player profiles found.`,"pass");
+        return;
+    }
+
+    new Message(`Found ${duplicates.length} duplicate player profiles.`,"note");
+
+    const players = await getMasterAndDuplicateIds(duplicates);
+
+
+    for(const [playerName, playerData] of Object.entries(players)){
+
+        new Message(playerName, "progress");
+
+        for(let i = 0; i < playerData.duplicateIds.length; i++){
+
+            const pId = playerData.duplicateIds[i];
+            const matchRowIds = await getPlayerMatchRowIds(pId);
+
+            await renamePlayerByMatchHistory(playerName, matchRowIds, false, "Duplicate Profile Merge");
+            await adminDeletePlayer(pId)
+        }
+  
+    }
+
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
+
+    await fixDuplicatePlayerProfile();
 
     const queries = createTableQueries("");
     for(let i = 0; i < queries.length; i++){
