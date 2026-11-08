@@ -632,7 +632,6 @@ export async function adminUpdateCTFLeagueSettings(changes){
 
 function getCTFLeagueRestrictions(seasonInfo, settings){
 
-
     const maxDays = setInt(settings["Maximum Match Age In Days"]?.value, 180);
     const maxMatches = setInt(settings["Maximum Matches Per Player"]?.value, 20);
     

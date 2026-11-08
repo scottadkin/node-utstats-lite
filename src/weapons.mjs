@@ -393,13 +393,112 @@ async function testBulkUpdatePlayerTotals(totals, seasonId){
     );
 }
 
+
+function createPlayerTotalsSubQuery(bGroupGametypes, bGroupMaps){
+
+    
+    const minutes = `NULLIF((SUM(playtime) / 60), 0)`;
+
+    const totalMatches = `SUM(total_matches)`;
+
+    const totalKills = `(SUM(kills) * 1.0)`;
+    const totalDeaths = `(SUM(deaths) * 1.0)`;
+    const totalTeamKills = `(SUM(team_kills) * 1.0)`;
+    const totalSuicides = `(SUM(suicides) * 1.0)`;
+
+
+    return `SELECT player_id,
+    ${(bGroupMaps) ? "map_id" : "0 as map_id"},
+    ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
+    weapon_id,
+    season_id,
+    ${totalMatches} as total_matches,
+    SUM(playtime) as playtime,
+    SUM(kills) as kills,
+    ${totalKills} / ${totalMatches} as avg_kills,
+    ${totalKills} /  ${minutes} as epm_kills,
+    MAX(kills) as max_kills,
+    SUM(deaths) as deaths,
+    ${totalDeaths} / ${totalMatches} as avg_deaths,
+    ${totalDeaths} / ${minutes} as epm_deaths,
+    MAX(deaths) as max_deaths,
+    SUM(team_kills) as team_kills,
+    ${totalTeamKills} / ${totalMatches} as avg_team_kills,
+    ${totalTeamKills} / ${minutes} as epm_team_kills,
+    MAX(team_kills) as max_team_kills,
+    SUM(suicides) as suicides,
+    ${totalSuicides} / ${totalMatches} as avg_suicides,
+    ${totalSuicides} / ${minutes} as epm_suicides,
+    MAX(suicides) as max_suicides,
+    IF(${totalKills} > 0, ${totalKills} / (${totalKills} + ${totalDeaths} + ${totalTeamKills}) * 100, 0) as eff
+    FROM player_totals GROUP BY player_id
+    ${(bGroupGametypes) ? ",gametype_id" : ""}
+    ${(bGroupMaps) ? ",map_id" : ""}
+    ,weapon_id
+    `;
+}
+
 export async function updatePlayerTotals(playerIds, seasonId){
+
+    if(playerIds !== null && playerIds.length === 0) return;
+    
+    if(seasonId === undefined) seasonId = 0;
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+
+
+    const vars = [playerIds];
+    let seasonWhere = ``;
+
+    if(seasonId !== 0){
+        seasonWhere = ` AND ws.match_id IN (SELECT id FROM nstats_matches WHERE season_id=?) `;
+        vars.push(seasonId);
+    }
+
+    const query = `WITH player_totals AS (
+        SELECT ws.player_id,ws.map_id,ws.gametype_id,ws.weapon_id,
+        COUNT(*) as total_matches,
+        ${seasonId} as season_id,
+        SUM(mp.time_on_server) as playtime,
+        SUM(ws.kills) as kills,
+        MAX(ws.kills) as max_kills,
+        SUM(ws.deaths) as deaths,
+        MAX(ws.deaths) as max_deaths,
+        SUM(ws.team_kills) as team_kills,
+        MAX(ws.team_kills) as max_team_kills,
+        SUM(ws.suicides) as suicides,
+        MAX(ws.suicides) as max_suicides
+        FROM nstats_match_weapon_stats AS ws
+        INNER JOIN nstats_match_players AS mp ON mp.player_id=ws.player_id AND mp.match_id=ws.match_id
+        WHERE ws.player_id IN (?)${seasonWhere}
+        AND mp.spectator=0
+        
+        GROUP BY ws.player_id,ws.gametype_id,ws.map_id,ws.weapon_id
+
+    )
+    ${createPlayerTotalsSubQuery(true, true)}  
+    UNION ALL ${createPlayerTotalsSubQuery(true, false)}  
+    UNION ALL ${createPlayerTotalsSubQuery(true, false)}  
+    UNION ALL ${createPlayerTotalsSubQuery(false, false)}  
+    `;
+
+  
+
+    const result = await simpleQuery(query, vars);
+
+
+}
+
+
+/*export async function updatePlayerTotals(playerIds, seasonId){
 
     if(playerIds !== null && playerIds.length === 0) return null;
     
     if(seasonId === undefined) seasonId = 0;
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+
+    const start = performance.now();
 
     const test = await testCalculatePlayerTotalsFromMatchData(playerIds, seasonId);
 
@@ -414,9 +513,14 @@ export async function updatePlayerTotals(playerIds, seasonId){
 
     await testBulkUpdatePlayerTotals(totals, seasonId);
 
+    const end = performance.now();
+
+
+    console.log((end - start) * 0.001);
+
     return;
 
-}
+}*/
 
 
 export async function getPlayerTotals(playerId, seasonId){
