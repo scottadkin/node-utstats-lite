@@ -396,7 +396,6 @@ async function testBulkUpdatePlayerTotals(totals, seasonId){
 
 function createPlayerTotalsSubQuery(bGroupGametypes, bGroupMaps){
 
-    
     const minutes = `NULLIF((SUM(playtime) / 60), 0)`;
 
     const totalMatches = `SUM(total_matches)`;
@@ -440,6 +439,7 @@ function createPlayerTotalsSubQuery(bGroupGametypes, bGroupMaps){
 
 export async function updatePlayerTotals(playerIds, seasonId){
 
+ 
     if(playerIds !== null && playerIds.length === 0) return;
     
     if(seasonId === undefined) seasonId = 0;
@@ -451,7 +451,8 @@ export async function updatePlayerTotals(playerIds, seasonId){
     let seasonWhere = ``;
 
     if(seasonId !== 0){
-        seasonWhere = ` AND ws.match_id IN (SELECT id FROM nstats_matches WHERE season_id=?) `;
+        //seasonWhere = ` AND ws.match_id IN (SELECT id FROM nstats_matches WHERE season_id=?) `;
+        seasonWhere = ` AND EXISTS(SELECT 1 FROM nstats_matches WHERE season_id=?)  `;
         vars.push(seasonId);
     }
 
@@ -478,14 +479,47 @@ export async function updatePlayerTotals(playerIds, seasonId){
     )
     ${createPlayerTotalsSubQuery(true, true)}  
     UNION ALL ${createPlayerTotalsSubQuery(true, false)}  
-    UNION ALL ${createPlayerTotalsSubQuery(true, false)}  
+    UNION ALL ${createPlayerTotalsSubQuery(false, true)}  
     UNION ALL ${createPlayerTotalsSubQuery(false, false)}  
     `;
 
-  
+
 
     const result = await simpleQuery(query, vars);
 
+
+    const columns = [`player_id`, `gametype_id`, `weapon_id`,
+            `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, 
+            `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`,
+            `playtime`,
+            `avg_kills`, `avg_deaths`, `avg_suicides`, `avg_team_kills`,
+            `epm_kills`, `epm_deaths`, `epm_suicides`, `epm_team_kills`, `season_id`
+        ];
+
+    const insertVars = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        const vars = [];
+
+        for(let x = 0; x < columns.length; x++){
+
+            vars.push(r[columns[x]])
+        }
+
+        insertVars.push(vars);
+    }
+
+    await sqlInsertOnDuplicateUpdate(
+        "nstats_player_totals_weapons", 
+        columns, 
+        insertVars, 
+        ["player_id", "season_id", "gametype_id", "map_id", "weapon_id"]
+    );
+
+    return;
 
 }
 
