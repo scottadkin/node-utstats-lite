@@ -403,7 +403,9 @@ export function createTableQueries(){
                 suicides INTEGER NOT NULL
             ) STRICT`,
 
-            `CREATE INDEX IF NOT EXISTS nmws_match_idx ON nstats_match_weapon_stats(match_id)`,
+            //`CREATE INDEX IF NOT EXISTS nmws_match_idx ON nstats_match_weapon_stats(match_id)`,
+            `DROP INDEX IF EXISTS nmws_match_idx`,
+            `CREATE INDEX IF NOT EXISTS nmws_matchplayer_idx ON nstats_match_weapon_stats(match_id, player_id)`,
 
             `CREATE TABLE IF NOT EXISTS nstats_weapons (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
