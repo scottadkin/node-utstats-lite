@@ -50,31 +50,6 @@ export const DEFAULT_RANKING_SETTINGS = [
 
 const VALID_RANKING_TYPES = ["gametype", "map"];
 
-const PLAYER_MATCHES_TOTALS_COLUMNS = `
-nstats_match_players.player_id,
-MAX(nstats_match_players.match_date) as last_active,
-SUM(nstats_match_players.time_on_server) as playtime,
-COUNT(*) as total_matches,
-SUM(nstats_match_players.kills) as kills, 
-SUM(nstats_match_players.deaths) as deaths,
-SUM(nstats_match_players.suicides) as suicides, SUM(nstats_match_players.team_kills) as team_kills, 
-SUM(nstats_match_players.spree_1) as spree_1, SUM(nstats_match_players.spree_2) as spree_2, SUM(nstats_match_players.spree_3) as spree_3,
-SUM(nstats_match_players.spree_4) as spree_4, SUM(nstats_match_players.spree_5) as spree_5, SUM(nstats_match_players.multi_1) as multi_1, 
-SUM(nstats_match_players.multi_2) as multi_2, SUM(nstats_match_players.multi_3) as multi_3, SUM(nstats_match_players.multi_4) as multi_4,
-SUM(nstats_match_ctf.flag_taken) as flag_taken,
-SUM(nstats_match_ctf.flag_pickup) as flag_pickup,
-SUM(nstats_match_ctf.flag_drop) as flag_drop,
-SUM(nstats_match_ctf.flag_assist) as flag_assist,
-SUM(nstats_match_ctf.flag_cover) as flag_cover,
-SUM(nstats_match_ctf.flag_seal) as flag_seal,
-SUM(nstats_match_ctf.flag_cap) as flag_cap,
-SUM(nstats_match_ctf.flag_kill) as flag_kill,
-SUM(nstats_match_ctf.flag_return) as flag_return,
-SUM(nstats_match_ctf.flag_return_base) as flag_return_base,
-SUM(nstats_match_ctf.flag_return_mid) as flag_return_mid,
-SUM(nstats_match_ctf.flag_return_enemy_base) as flag_return_enemy_base,
-SUM(nstats_match_ctf.flag_return_save) as flag_return_save
-`;
 
 async function bRankingSettingExist(category, name){
 
@@ -117,7 +92,98 @@ function bValidRankingType(type){
     return VALID_RANKING_TYPES.indexOf(type) !== -1;
 }
 
-async function rankingsGetPlayerTotals(seasonId, type, targetId, playerIds, minMatches){
+
+async function rankingsGetPlayerTotals(seasonId, type, targetId, playerIds, minMatches, settings){
+
+    type = type.toLowerCase();
+
+
+    if(settings === undefined) throw new Error(`rankingSettings missing`);
+    if(settings.general === undefined) throw new Error(`general ranking settings are missing`);
+    if(settings.penalty === undefined) throw new Error(`penalty ranking settings are missing`);
+
+   
+
+    minMatches = parseInt(minMatches);
+    if(minMatches !== minMatches) minMatches = 0;
+
+    if(type !== "gametype" && type !== "map") throw new Error(`Not a valid rankingsGetPlayerTotals type`);
+
+    let column = `gametype_id`;
+
+    if(type === "map") column = "map_id";
+
+    let where = ``;
+    const vars = [targetId, playerIds];
+
+    if(seasonId !== 0){
+
+        where = ` AND EXISTS (SELECT 1 FROM nstats_matches WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?)`;
+        vars.push(seasonId);
+    }
+
+
+    vars.push(minMatches);
+
+
+    const {kills, deaths, suicides, team_kills, 
+        spree_1, spree_2, spree_3, spree_4, spree_5,
+        multi_1, multi_2, multi_3, multi_4,
+    } = settings.general;
+
+
+    const {flag_taken, flag_pickup, flag_drop, flag_assist, flag_cover, flag_seal, 
+        flag_cap, flag_kill, flag_return, flag_return_base, flag_return_mid, flag_return_enemy_base,
+        flag_return_save
+    } = settings.ctf;
+
+    const query = `WITH player_totals AS (
+        SELECT 
+        m.player_id,
+        MAX(m.match_date) as last_active,
+        SUM(m.time_on_server) as playtime,
+        SUM(m.time_on_server) / 60 as minutes,
+        COUNT(*) as total_matches,
+        SUM(m.kills) * ${kills} +
+        SUM(m.deaths) * ${deaths} +
+        SUM(m.suicides) * ${suicides} + 
+        SUM(m.team_kills) * ${team_kills}+
+        SUM(m.spree_1) * ${spree_1} +
+        SUM(m.spree_2) * ${spree_2} +
+        SUM(m.spree_3) * ${spree_3} +
+        SUM(m.spree_4) * ${spree_4} +
+        SUM(m.spree_5) * ${spree_5} +
+        SUM(m.multi_1) * ${multi_1} +
+        SUM(m.multi_2) * ${multi_2} +
+        SUM(m.multi_3) * ${multi_3} + 
+        SUM(m.multi_4) * ${multi_4} +
+        SUM(ctf.flag_taken) * ${flag_taken} +
+        SUM(ctf.flag_pickup) * ${flag_pickup} +
+        SUM(ctf.flag_drop) * ${flag_drop}  +
+        SUM(ctf.flag_assist) * ${flag_assist}  +
+        SUM(ctf.flag_cover) * ${flag_cover}  +
+        SUM(ctf.flag_seal) * ${flag_seal}  +
+        SUM(ctf.flag_cap) * ${flag_cap}  +
+        SUM(ctf.flag_kill) * ${flag_kill}  +
+        SUM(ctf.flag_return) * ${flag_return}  +
+        SUM(ctf.flag_return_base) * ${flag_return_base}  +
+        SUM(ctf.flag_return_mid) * ${flag_return_mid} +
+        SUM(ctf.flag_return_enemy_base) * ${flag_return_enemy_base}  +
+        SUM(ctf.flag_return_save) * ${flag_return_save} as points
+
+        FROM nstats_match_players AS m
+        LEFT JOIN nstats_match_ctf AS ctf ON ctf.match_id = m.match_id AND ctf.player_id = m.player_id
+        WHERE m.${column}=? AND m.player_id IN(?) AND m.spectator=0 ${where}
+        GROUP BY m.player_id HAVING total_matches>=?
+    )
+    SELECT * FROM player_totals    
+    `;
+
+    return await simpleQuery(query, vars);
+
+}
+
+/*async function rankingsGetPlayerTotals(seasonId, type, targetId, playerIds, minMatches){
 
     type = type.toLowerCase();
 
@@ -150,7 +216,7 @@ async function rankingsGetPlayerTotals(seasonId, type, targetId, playerIds, minM
 
     return await simpleQuery(query, vars);
     
-}
+}*/
 
 
 export async function getRankingSettings(bIncDisplayName){
@@ -204,18 +270,20 @@ async function bulkInsertRankings(seasonId, targetId, data, type){
 
     const insertVars = [];
 
-    for(const p of Object.values(data)){
+    for(let i = 0; i < data.length; i++){
 
+        const d = data[i];
         insertVars.push([
-            p.player_id,
+            d.player_id,
             targetId,
-            p.total_matches,
-            p.playtime,
-            p.ranking_points,
-            p.last_active,
+            d.total_matches,
+            d.playtime,
+            d.points,
+            d.last_active,
             seasonId
         ]);
     }
+
 
     const columns = [
         "player_id", idColumn, "matches", "playtime", "score", "last_active", "season_id"
@@ -272,7 +340,7 @@ function _applyTimePenalty(playerData, settings, minutesPlayed){
 
     if(penalty !== penalty || penalty === 0) return;
 
-    playerData.ranking_points *= penalty;
+    playerData.points *= penalty;
 }
 
 function bPlayerHaveCTFEvents(playerData){
@@ -303,7 +371,7 @@ function _setRankingPoints(settings, playerData){
         }
     }
 
-    t.ranking_points = currentPoints;
+    t.points = currentPoints;
 
     let mins = 0;
 
@@ -314,10 +382,10 @@ function _setRankingPoints(settings, playerData){
     //Punish players score heavily if they are under 30 mins by setting mins to 30
     if(mins < 30) mins = 30;
 
-    if(t.playtime > 0 && t.ranking_points !== 0){
-        t.ranking_points = t.ranking_points / mins;
+    if(t.playtime > 0 && t.points !== 0){
+        t.points = t.points / mins;
     }else{
-        t.ranking_points = 0;
+        t.points = 0;
     }
 
     _applyTimePenalty(t, settings.penalty, mins);
@@ -348,14 +416,60 @@ export async function calculateRankings(seasonId, targetId, playerIds, type){
 
     const minMatches = settings.penalty?.[minKey] ?? 0;
 
-    const totals = await rankingsGetPlayerTotals(seasonId, type, targetId, playerIds, minMatches);
+    const start = performance.now();
 
-    for(const playerData of Object.values(totals)){
-        _setRankingPoints(settings, playerData);
+    const totals = await rankingsGetPlayerTotals(seasonId, type, targetId, playerIds, minMatches, settings);
+
+    const penalty = settings.penalty;
+
+    for(let i = 0; i < totals.length; i++){
+
+        const t = totals[i];
+
+        const mins = t.minutes;
+
+        if(t.points === 0) continue;
+
+        t.points = (t.minutes > 0) ? t.points / t.minutes : 0;
+
+
+        if(mins < 30){
+            t.points = t.points * penalty.under_30;
+        }else if(mins < 60){
+            t.points = t.points * penalty.under_60;
+        }else if(mins < 90){
+            t.points = t.points * penalty.under_90;
+        }else if(mins < 120){
+            t.points = t.points * penalty.under_120;
+        }else if(mins < 180){
+            t.points = t.points * penalty.under_180;
+        }else if(mins < 240){
+            t.points = t.points * penalty.under_240;
+        }else if(mins < 300){
+            t.points = t.points * penalty.under_300;
+        }else if(mins < 600){
+            t.points = t.points * penalty.under_600;
+        }
+
+
+        //if(t.minutes < )
     }
- 
 
-    return await bulkInsertRankings(seasonId, targetId, Object.values(totals), type);
+   // const a = performance.now();
+    //for(const playerData of Object.values(totals)){
+    //    _setRankingPoints(settings, playerData);
+   // }
+   // const b = performance.now();
+
+   // console.log((b - a) * 0.001, "dioghjdfiopghjdfiopjhbdfop");
+    
+
+
+    await bulkInsertRankings(seasonId, targetId, totals, type);
+
+    const end = performance.now();
+
+    console.log((end - start) * 0.001);
 }
 
 
