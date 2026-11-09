@@ -46,7 +46,7 @@ class RankingsSearchForm{
 
         this.tabs = new UITabs(this.parent, options, this.mode);
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
-            window.location.replace(`${this.urlBase}?mode=${e.detail.newTab}`);// = "#";
+            window.location.replace(`${this.urlBase}?mode=${e.detail.newTab}&tf=${this.selectedTimeRange}&pp=${this.selectedPerPage}`);// = "#";
         });
     }
 
@@ -72,7 +72,6 @@ class RankingsSearchForm{
             gametypeOptions.push({"display":name, "value": id});
         }
 
-        
 
         for(const [id, name] of Object.entries(this.mapNames)){
             mapOptions.push({"display":name, "value": id});
@@ -204,9 +203,13 @@ class RankingsSearchForm{
 
         new TESTUITable(this.wrapper, tableOptions, rows)
 
+        let url = `?mode=${this.mode}&g=${this.selectedGametype}`;
+        url += `&m=${this.selectedMap}&tf=${this.selectedTimeRange}`;
+        url += `&pp=${this.selectedPerPage}&p=`;
+
         new UIPagination(
             this.parent, 
-            `?mode=${this.mode}&id=${this.selectedId}&tf=${this.selectedTimeRange}&pp=${this.selectedPerPage}&p=`, 
+            url, 
             this.totalResults, 
             this.selectedPerPage, 
             this.currentPage
