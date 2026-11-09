@@ -166,8 +166,7 @@ class RankingsSearchForm{
 
         if(this.data.length === 0){
 
-            //this.table.className = "hidden";
-            new UIInfo(this.parent, [`There has not been enough matches played in the selected time range for there to be any rankings.`]);
+            new UIInfo(this.parent, [`There have not been enough matches played in the selected time range for there to be any rankings.`]);
             return;
         }
 

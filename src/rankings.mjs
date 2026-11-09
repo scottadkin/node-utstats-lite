@@ -523,55 +523,34 @@ export async function recalculateGametype(seasonId, id){
   
 }
 
-async function getPlayerMapRankings(playerId, minDate, seasonId){
-
-
-    const query = `WITH rankings AS(
-        SELECT nstats_map_rankings.player_id,
-        nstats_map_rankings.map_id,
-        nstats_map_rankings.matches,
-        nstats_map_rankings.playtime,
-        nstats_map_rankings.score,
-        nstats_map_rankings.last_active,
-        nstats_maps.name,
-        RANK() OVER(
-            PARTITION BY map_id ORDER BY score DESC
-        ) position
-        FROM nstats_map_rankings 
-        LEFT JOIN nstats_maps ON map_id=nstats_maps.id 
-        WHERE nstats_map_rankings.last_active>=? AND nstats_map_rankings.season_id=?
-    )
-    SELECT * FROM rankings WHERE player_id=?`;
-
-    return await simpleQuery(query, [minDate, seasonId, playerId]);
-
-}
 
 export async function getPlayerRankings(playerId, minDate, seasonId){
 
     const query = `WITH rankings AS(SELECT nstats_rankings.score,
     nstats_rankings.player_id,
     nstats_rankings.gametype_id,
+    nstats_rankings.map_id,
     nstats_rankings.matches,
     nstats_rankings.playtime,
     nstats_rankings.last_active,
     nstats_rankings.season_id,
-    nstats_gametypes.name,
     RANK() OVER(
-        PARTITION BY gametype_id ORDER BY score DESC
+        PARTITION BY gametype_id,map_id ORDER BY score DESC
     ) as position
      FROM nstats_rankings 
-     LEFT JOIN nstats_gametypes ON nstats_rankings.gametype_id=nstats_gametypes.id
      WHERE  last_active>=? AND season_id=?)
-    SELECT * FROM rankings WHERE player_id=?`;
+    SELECT *,
+    IF(gametype_id = 0, 'All Time', COALESCE(nstats_gametypes.name, 'Not Found')) as gametype_name,
+    IF(map_id = 0, 'All Time', COALESCE(nstats_maps.name, 'Not Found')) as map_name 
+    FROM rankings 
+    
+    LEFT JOIN nstats_gametypes ON gametype_id=nstats_gametypes.id
+    LEFT JOIN nstats_maps ON map_id=nstats_maps.id
+    WHERE player_id=?
+    `;
 
-    const [gametypes, maps] = await Promise.all([
-        simpleQuery(query, [minDate, seasonId, playerId]),
-        getPlayerMapRankings(playerId, minDate, seasonId)
+    return await simpleQuery(query, [minDate, seasonId, playerId])
 
-    ]);
-
-    return {gametypes, maps}
 }
 
 

@@ -20,7 +20,7 @@ const jsBase = `/js/`;
 <div id="root">
 
     <div class="header-wrapper">
-    <%= (mode === "gametype") ? "Gametype" : "Map" %> Rankings
+    <%= (mode === "gametype") ? "Gametype" : (mode === "map") ? "Map" : "Custom" %> Rankings
 </div>
 </div>
 <script>

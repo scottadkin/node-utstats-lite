@@ -274,7 +274,6 @@ export class MatchParser{
         const uniquePlayerIds = this.players.getUniquePlayerIds();
 
         await calculateRankings(seasonId, this.gametype.id, this.map.id, uniquePlayerIds);
-    
        
         const hashVars = [this.map.name, 
             this.gametype.name, 
