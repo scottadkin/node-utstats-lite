@@ -18,6 +18,7 @@ export async function renderSeasonRankingsPage(req, res){
         const seasonId = res.locals.season;
         const seasonInfo = res.locals.seasonInfo;
 
+
         const {
             mode, itemNames, targetId, 
             timeRange, typeName, titleName, page, perPage

@@ -1,7 +1,7 @@
-import { simpleQuery, bulkInsert, sqlInsertOnDuplicateUpdate } from "./database.mjs";
+import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import { sanitizePagePerPage } from "./generic.mjs";
-import { getAll, getAllIds as getAllGametypeIds } from "./gametypes.mjs";
-import { getAllPlayerGametypeIds, getAllPlayerMapIds, getBasicPlayerInfo } from "./players.mjs";
+import { getAllIds as getAllGametypeIds } from "./gametypes.mjs";
+import { getAllPlayerGametypeIds, getAllPlayerMapIds } from "./players.mjs";
 import { getAllMapIds } from "./maps.mjs";
 import { getAllSeasonIds, seasonGetAllGametypeIds, seasonGetAllGametypeNames, seasonGetAllMapIds, seasonGetAllMapNames } from "./seasons.mjs";
 import Message from "./message.mjs";
@@ -174,7 +174,7 @@ async function rankingsGetPlayerTotals(seasonId, gametypeId, mapId, playerIds, m
         ctf.gametype_id=m.gametype_id AND 
         ctf.map_id = m.map_id AND ctf.player_id = m.player_id
 
-        WHERE ${seasonWhere} AND m.gametype_id IN (?,0) AND m.map_id IN(?,0) AND m.player_id IN(?) AND m.total_matches>=?
+        WHERE ${seasonWhere} AND m.gametype_id IN (?) AND m.map_id IN(?,0) AND m.player_id IN(?) AND m.total_matches>=?
 
     `;
 
@@ -314,7 +314,7 @@ async function getRankingPlayerCount(seasonId, targetId, minDate, type){
     let query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=? AND last_active>=? AND season_id=?`;
 
     if(type === "map"){
-        query = `SELECT COUNT(*) as total_rows FROM nstats_map_rankings WHERE map_id=? AND last_active>=? AND season_id=?`;
+        query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE map_id=? AND last_active>=? AND season_id=?`;
     }
 
     const result = await simpleQuery(query, [targetId, minDate, seasonId]);
@@ -334,6 +334,7 @@ async function getRankingPlayerCount(seasonId, targetId, minDate, type){
  */
 export async function getRankings(seasonId, targetId, page, perPage, timeRange, type){
 
+
     if(type === undefined) type = "gametype";
 
     if(!bValidRankingType(type)) type = "gametype";
@@ -345,8 +346,7 @@ export async function getRankings(seasonId, targetId, page, perPage, timeRange, 
 
     const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
 
-
-    const rT = (type === "gametype") ? "nstats_rankings" : "nstats_map_rankings";
+    const rT = "nstats_rankings";
     const pT = "nstats_players";
     const targetColumn = (type === "gametype") ? "gametype_id" : "map_id";
 
@@ -633,7 +633,7 @@ export async function getMostActiveInTimeRange(seasonId, type, timeRange){
     const gametypeQuery = `SELECT gametype_id as id,COUNT(*) as total_players FROM nstats_rankings 
     WHERE last_active>=? AND season_id=? GROUP BY gametype_id ORDER BY total_players DESC LIMIT 1`;
 
-    const mapQuery = `SELECT map_id as id,COUNT(*) as total_players FROM nstats_map_rankings 
+    const mapQuery = `SELECT map_id as id,COUNT(*) as total_players FROM nstats_rankings 
     WHERE last_active>=? AND season_id=? GROUP BY map_id ORDER BY total_players DESC LIMIT 1`;
 
     const query = (type === "map") ? mapQuery : gametypeQuery;
