@@ -1,4 +1,4 @@
-import { simpleQuery } from "./database.mjs";
+import { simpleQuery, sqliteBTableExists, sqliteGetTableColumns } from "./database.mjs";
 import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
@@ -15,10 +15,24 @@ import { setAllBGametypeFlags } from "./matches.mjs";
 import { getAllSeasonIds } from "./seasons.mjs";
 import { bSkipInstallCTFLeagueRefresh } from "../config.mjs";
 
+const rankingsTableQuery = `CREATE TABLE IF NOT EXISTS nstats_rankings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        player_id INTEGER NOT NULL,
+        season_id INTEGER NOT NULL DEFAULT 0,
+        gametype_id INTEGER NOT NULL,
+        map_id INTEGER NOT NULL,
+        matches INTEGER NOT NULL,
+        playtime REAL NOT NULL,
+        score REAL NOT NULL,
+        last_active TEXT NOT NULL
+    ) STRICT`;
+
+const rankingsIndexQuery = `CREATE UNIQUE INDEX IF NOT EXISTS rankings_sgmp ON nstats_rankings(season_id,gametype_id,map_id,player_id)`;
 
 
 export function createTableQueries(){
 
+    
     
     const queries = [
         
@@ -679,17 +693,8 @@ export function createTableQueries(){
 
             
 
-            `CREATE TABLE IF NOT EXISTS nstats_rankings (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id INTEGER NOT NULL,
-                gametype_id INTEGER NOT NULL,
-                matches INTEGER NOT NULL,
-                playtime REAL NOT NULL,
-                score REAL NOT NULL,
-                last_active TEXT NOT NULL,
-                season_id INTEGER NOT NULL DEFAULT 0
-                ) STRICT`,
-                `DROP INDEX IF EXISTS pg_idx`,
+            rankingsTableQuery,
+            `DROP INDEX IF EXISTS pg_idx`,
                 //moved to start of install script
                 //`CREATE UNIQUE INDEX IF NOT EXISTS psg_idx ON nstats_rankings(player_id,season_id,gametype_id)`,
 
@@ -831,18 +836,6 @@ export function createTableQueries(){
             //moved to top of install script
             //`CREATE UNIQUE INDEX IF NOT EXISTS mgsw_idx ON nstats_map_weapon_totals(map_id,season_id,gametype_id,weapon_id)`,
 
-            `CREATE TABLE IF NOT EXISTS nstats_map_rankings (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player_id INTEGER NOT NULL,
-                map_id INTEGER NOT NULL,
-                matches INTEGER NOT NULL,
-                playtime REAL NOT NULL,
-                score REAL NOT NULL,
-                last_active TEXT NOT NULL,
-                season_id INTEGER NOT NULL DEFAULT 0
-                ) STRICT`,
-                 //moved to top of install script
-            //`CREATE UNIQUE INDEX IF NOT EXISTS psm_idx ON nstats_map_rankings(player_id,season_id, map_id)`,
             `DROP INDEX IF EXISTS pm_idx`,
 
 
@@ -1342,9 +1335,9 @@ async function addSeasonColumnToMatches(){
 
 
 
-async function addSeasonColumnToPlayerTotals(){
 
-    //TODO MUST create new table without constraint
+
+async function addSeasonColumnToPlayerTotals(){
 
     if(!await bColumnExist("nstats_player_totals", "season_id")){
 
@@ -1410,23 +1403,6 @@ async function addSeasonColumnToPlayerTotals(){
 
 }
 
-async function addSeasonColumnsToRankings(){
-
-
-    await addColumn("nstats_rankings", "season_id", "INTEGER NOT NULL DEFAULT 0");
-    await addColumn("nstats_map_rankings", "season_id", "INTEGER NOT NULL DEFAULT 0");
-
-    const queries = [
-        `CREATE UNIQUE INDEX IF NOT EXISTS psg_idx ON nstats_rankings(player_id,season_id,gametype_id)`,
-        `CREATE UNIQUE INDEX IF NOT EXISTS psm_idx ON nstats_map_rankings(player_id,season_id, map_id)`
-    ];
-
-    for(let i = 0; i < queries.length; i++){
-
-        await simpleQuery(queries[i]);
-    }
-}
-
 async function addSeasonColumnToCTFLeague(){
 
     await addColumn("nstats_player_ctf_league", "season_id", "INTEGER NOT NULL DEFAULT 0");
@@ -1436,13 +1412,39 @@ async function addSeasonColumnToCTFLeague(){
 }
 
 
+//2.10.0 preview 5
+async function updateRankingTables(){
+
+
+    //if this table doesn't exist just drop nstats_rankings and recreate it
+    if(!await sqliteBTableExists("nstats_map_rankings")){
+
+        await simpleQuery(`DROP table nstats_rankings`);
+        await simpleQuery(rankingsTableQuery);
+        return;
+    }
+
+    const existingColumns = await sqliteGetTableColumns("nstats_rankings");
+
+    if(existingColumns.indexOf("map_id") !== -1){
+        return;       
+    }
+
+    await simpleQuery(`DROP table IF EXISTS nstats_rankings`);
+    await simpleQuery(`DROP table IF EXISTS nstats_map_rankings`);
+    await simpleQuery(rankingsTableQuery);
+
+}
+
 
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
 
     //2.10.0 preview 5
+    await updateRankingTables();
     await fixDuplicatePlayerProfiles();
+    
 
     const queries = createTableQueries("");
     for(let i = 0; i < queries.length; i++){
@@ -1452,6 +1454,10 @@ export async function sqliteInstall(bOnlyCreateTables){
         await simpleQuery(queries[i]);
         new Message(`Query passed`,"pass");
     }
+
+    //add index here incase the database was using an older rankings table layout
+    //otherwise will throw sql error for unknown column for map_id
+    await simpleQuery(rankingsIndexQuery);
 
    //2.7.0
     await updatePlayerCTFTotalsTable();
@@ -1468,7 +1474,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.10.0
     await addSeasonColumnToMatches();
     await addSeasonColumnToPlayerTotals();
-    await addSeasonColumnsToRankings();
+    //await addSeasonColumnsToRankings();
     await addSeasonColumnToCTFLeague();
 
     //2.6.0
