@@ -35,7 +35,6 @@ export async function renderSeasonMapPage(req, res){
             description = `View maps stats for the map ${basic.name}`;
         }
 
-
         let ctfLeagueSettings = {};
 
         if(pageSettings["Display CTF League"] === 1){

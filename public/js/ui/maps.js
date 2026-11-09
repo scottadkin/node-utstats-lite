@@ -617,7 +617,7 @@ class UIMapWeaponsSummary{
 
 class UIMapPlayerRankings{
 
-    constructor(parent, mapId, seasonId, bSkipSeasonLinks){
+    constructor(parent, mapId, seasonId, bSkipSeasonLinks, timeRange, uniqueGametypes){
 
         this.parent = document.querySelector(parent);
         this.mapId = parseInt(mapId);
@@ -627,8 +627,11 @@ class UIMapPlayerRankings{
         this.perPage = 10;
         this.data = [];
         this.totalMatches = 0;
-        this.timeRange = 180;
+        this.timeRange = timeRange;
         this.bSkipSeasonLinks = bSkipSeasonLinks;
+        this.gametypes = uniqueGametypes;
+
+        this.selectedGametype = 0;
 
         this.wrapper = UIDiv();
         UIHeader(this.wrapper, "Player Rankings");
@@ -638,18 +641,60 @@ class UIMapPlayerRankings{
         this.info = new UIInfo(this.wrapper, []);
         this.renderInfo();
 
+
+        this.createForm();
+
         this.content = UIDiv();
         this.parent.append(this.content);
 
         this.loadData();
     }
 
+    createForm(){
+
+
+        const options = this.gametypes.map((g) =>{
+            return {"display": g.gametype_name, "value": g.gametype_id}
+        });
+
+        options.sort((a, b) =>{
+            a = a.display.toLowerCase();
+            b = b.display.toLowerCase();
+
+            if(a < b){
+                return -1;
+            }else if(a > b){
+                return 1;
+            }
+
+            return 0;
+        });
+
+        options.unshift({"display": "All Time", "value": 0});
+
+        const form = UIDiv("form");
+        const row = UIDiv("form-row");
+        row.append(UILabel("Gametype"));
+
+        new UISelect(row, options, this.selectedGametype, (e) =>{
+            this.selectedGametype = parseInt(e);
+            this.loadData();
+        })
+
+        form.append(row);
+
+        this.wrapper.append(form);
+    }
+
     async loadData(){
 
         try{
 
-            const urlParts = `${this.mapId}&season=${this.seasonId}&timeRange=${this.timeRange}&page=${this.page}&perPage=${this.perPage}`;
-            const req = await fetch(`/json/map-rankings/?id=${urlParts}`);
+            let url = `/json/map-rankings/?m=${this.mapId}&g=${this.selectedGametype}`;
+            url += `&season=${this.seasonId}&timeRange=${this.timeRange}`;
+            url += `&page=${this.page}&perPage=${this.perPage}`;
+  
+            const req = await fetch(url);
 
             const res = await req.json();
 
@@ -657,6 +702,7 @@ class UIMapPlayerRankings{
 
 
             this.data = res.data;
+
             this.totalMatches = res.totalResults;
             
 

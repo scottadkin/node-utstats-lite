@@ -138,7 +138,8 @@ export default class JSONManager{
 
     async mapRankings(){
 
-        const id = this.querySanitizeInteger("id");
+        const gametypeId = this.querySanitizeInteger("g");
+        const mapId = this.querySanitizeInteger("m");
 
         const {page, perPage} = this.getPageAndPerPage();
 
@@ -148,8 +149,7 @@ export default class JSONManager{
 
         const seasonId = this.querySanitizeInteger("season");
         
-
-        const {data, totalResults} = await getRankings(seasonId, id, page, perPage, timeRange, "map")
+        const {data, totalResults} = await getRankings(seasonId, gametypeId, mapId, page, perPage, timeRange, "map")
 
         return this.res.status(200).json({data, totalResults});
    

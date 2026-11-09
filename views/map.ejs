@@ -52,7 +52,11 @@ const jsonBase =  `/json/`;
             } break;
 
             case "Display Rankings": {
-                %>new UIMapPlayerRankings("#root", "<%= basic.id %>", "<%= seasonId %>", <%= locals.bSkipSeasonLinks %>);<%
+                %>new UIMapPlayerRankings("#root", "<%= basic.id %>", "<%= seasonId %>", <%= locals.bSkipSeasonLinks %>,
+                    <%= locals.pageSettings["Rankings Activity Range"]%>,
+                    <%- JSON.stringify(locals.uniqueGametypes) %>
+
+                );<%
             } break;
 
             case "Display CTF League": {

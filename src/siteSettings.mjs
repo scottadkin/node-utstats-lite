@@ -46,6 +46,7 @@ const DEFAULT_PAGE_SETTINGS = [
     {"category": "Map" ,"type": `bool`, "name": "Display Player Totals", "value": "1"},
     {"category": "Map" ,"type": `bool`, "name": "Display Weapon Statistics", "value": "1"},
     {"category": "Map" ,"type": `bool`, "name": "Display Activity Heatmap", "value": "1"},
+    {"category": "Map" ,"type": `integer`, "name": "Rankings Activity Range", "value": "180"},
     {"category": "Map" ,"type": `heatmapMode`, "name": "Activity Heatmap Default Mode", "value": "matches"},
     {"category": "Map" ,"type": `bool`, "name": "Display CTF League", "value": "1"},
 
