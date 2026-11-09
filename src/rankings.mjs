@@ -174,7 +174,7 @@ async function rankingsGetPlayerTotals(seasonId, gametypeId, mapId, playerIds, m
         ctf.gametype_id=m.gametype_id AND 
         ctf.map_id = m.map_id AND ctf.player_id = m.player_id
 
-        WHERE ${seasonWhere} AND m.gametype_id IN (?) AND m.map_id IN(?,0) AND m.player_id IN(?) AND m.total_matches>=?
+        WHERE ${seasonWhere} AND m.gametype_id IN (?,0) AND m.map_id IN(?,0) AND m.player_id IN(?) AND m.total_matches>=?
 
     `;
 
@@ -308,16 +308,11 @@ export async function calculateRankings(seasonId, gametypeId, mapId, playerIds){
 
 
 
-async function getRankingPlayerCount(seasonId, targetId, minDate, type){
+async function getRankingPlayerCount(seasonId, gametypeId, mapId, minDate){
 
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE season_id=? AND gametype_id=? AND map_id=? AND last_active>=?`;
 
-    let query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE gametype_id=? AND last_active>=? AND season_id=?`;
-
-    if(type === "map"){
-        query = `SELECT COUNT(*) as total_rows FROM nstats_rankings WHERE map_id=? AND last_active>=? AND season_id=?`;
-    }
-
-    const result = await simpleQuery(query, [targetId, minDate, seasonId]);
+    const result = await simpleQuery(query, [seasonId, gametypeId, mapId, minDate]);
 
     return result[0].total_rows;
 }
@@ -332,12 +327,7 @@ async function getRankingPlayerCount(seasonId, targetId, minDate, type){
  * @param {*} type if undefined will fetch gametype rankings
  * @returns 
  */
-export async function getRankings(seasonId, targetId, page, perPage, timeRange, type){
-
-
-    if(type === undefined) type = "gametype";
-
-    if(!bValidRankingType(type)) type = "gametype";
+export async function getRankings(seasonId, gametypeId, mapId, page, perPage, timeRange){
 
     const day = 60 * 60 * 24;
 
@@ -346,25 +336,21 @@ export async function getRankings(seasonId, targetId, page, perPage, timeRange, 
 
     const [cleanPage, cleanPerPage, start] = sanitizePagePerPage(page, perPage);
 
-    const rT = "nstats_rankings";
-    const pT = "nstats_players";
-    const targetColumn = (type === "gametype") ? "gametype_id" : "map_id";
+    const vars = [seasonId, gametypeId, mapId, minDate, start, cleanPerPage];
 
-    const query = `SELECT ${rT}.player_id,
-    ${rT}.matches,
-    ${rT}.playtime,
-    ${rT}.score,
-    ${rT}.last_active,
-    ${pT}.name,
-    ${pT}.country
-    FROM ${rT} 
-    LEFT JOIN ${pT} ON ${pT}.id = ${rT}.player_id
-    WHERE ${rT}.${targetColumn}=? AND ${rT}.last_active>=? AND ${rT}.season_id=? ORDER by ${rT}.score DESC LIMIT ?, ?`;
+    const query = `SELECT rt.player_id,
+    rt.matches,
+    rt.playtime,
+    rt.score,
+    rt.last_active,
+    p.name,
+    p.country
+    FROM nstats_rankings as rt 
+    LEFT JOIN nstats_players as p ON p.id = rt.player_id
+    WHERE rt.season_id=? AND  rt.gametype_id=? AND rt.map_id=? AND rt.last_active>=? ORDER by rt.score DESC LIMIT ?, ?`;
 
-
-
-    const data = await simpleQuery(query, [targetId, minDate, seasonId, start, cleanPerPage]);
-    const totalResults = await getRankingPlayerCount(seasonId, targetId, minDate, type);
+    const data = await simpleQuery(query, vars);
+    const totalResults = await getRankingPlayerCount(seasonId, gametypeId, mapId, minDate);
 
     return {data, totalResults};
 }
@@ -630,13 +616,10 @@ export async function getUniqueGametypes(){
 export async function getMostActiveInTimeRange(seasonId, type, timeRange){
 
 
-    const gametypeQuery = `SELECT gametype_id as id,COUNT(*) as total_players FROM nstats_rankings 
-    WHERE last_active>=? AND season_id=? GROUP BY gametype_id ORDER BY total_players DESC LIMIT 1`;
+    const column = (type === "gametype") ? "gametype_id" : "map_id";
 
-    const mapQuery = `SELECT map_id as id,COUNT(*) as total_players FROM nstats_rankings 
-    WHERE last_active>=? AND season_id=? GROUP BY map_id ORDER BY total_players DESC LIMIT 1`;
-
-    const query = (type === "map") ? mapQuery : gametypeQuery;
+    const query = `SELECT ${column} as id,COUNT(*) as total_players FROM nstats_rankings 
+    WHERE last_active>=? AND season_id=? GROUP BY ${column} ORDER BY total_players DESC LIMIT 1`;
 
     const minDate = new Date(Date.now() - 60 * 60 * 24 * 1000 * timeRange);
 
@@ -673,8 +656,15 @@ export async function sanitizeRankingsPageReq(req, pageSettings){
 
     let page = (req.query.p !== undefined) ? parseInt(req.query.p) : 1;
     let perPage = req.query.pp ?? pageSettings["Results Per Page"] ?? 25;
-    let targetId = (req.query.id !== undefined) ? parseInt(req.query.id) : 0;
+    let gametypeId = (req.query.g !== undefined) ? parseInt(req.query.g) : 0;
+    let mapId = (req.query.m !== undefined) ? parseInt(req.query.m) : 0;
     let seasonId = req.params?.season ?? 0;
+
+    if(gametypeId !== gametypeId || mapId !== mapId){
+
+        throw new Error(`gametypeId and mapId must be valid integers`);
+    }
+
     seasonId = parseInt(seasonId);
 
     let defaultLastActive = 28;
@@ -689,7 +679,22 @@ export async function sanitizeRankingsPageReq(req, pageSettings){
 
     const timeRange = defaultLastActive;
 
-    const itemNames = (mode === "gametype") ? await seasonGetAllGametypeNames(seasonId)  : await seasonGetAllMapNames(seasonId);
+    const itemNames = (mode === "gametype") ? await seasonGetAllGametypeNames(seasonId) : await seasonGetAllMapNames(seasonId);
+
+    const itemKeys = Object.keys(itemNames);
+    
+    let targetId = 0;
+
+    if(mode === "gametype" || mode === "map"){
+
+        targetId = await getMostActiveInTimeRange(seasonId, mode, timeRange);
+
+        if(targetId === 0 && itemKeys.length > 0){
+            targetId = itemKeys[0]
+        }
+    }
+
+    /*
 
     if(targetId === 0){
 
@@ -705,12 +710,12 @@ export async function sanitizeRankingsPageReq(req, pageSettings){
                 targetId = itemKeys[0];
             }
         }
-    }
+    }*/
 
     let typeName = itemNames[targetId] ?? "Not Found";
     let titleName = (mode === "gametype") ? "Gametype" : "Map";
 
-    return {mode, itemNames, targetId, timeRange, typeName, titleName, page, perPage, seasonId}
+    return {mode, itemNames, gametypeId, mapId, timeRange, typeName, titleName, page, perPage, seasonId}
 }
 
 

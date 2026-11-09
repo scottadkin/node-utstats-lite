@@ -1,6 +1,6 @@
 class RankingsSearchForm{
 
-    constructor(parent, mode, data, names, selectedId, selectedTimeRange, selectedPerPage, currentPage, seasonId, bSkipSeasonLinks){
+    constructor(parent, mode, data, names, gametypeId, mapId, selectedTimeRange, selectedPerPage, currentPage, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.seasonId = parseInt(seasonId);
@@ -9,7 +9,8 @@ class RankingsSearchForm{
         this.data = data.data;
         this.totalResults = data.totalResults;
         this.names = names;
-        this.selectedId = selectedId;
+        this.selectedGametype = gametypeId;
+        this.selectedMap = mapId;
         this.selectedTimeRange = selectedTimeRange;
         this.selectedPerPage = selectedPerPage;
         this.currentPage = currentPage;
@@ -38,6 +39,7 @@ class RankingsSearchForm{
         const options = [
             {"display": "Gametypes", "value": "gametype"},
             {"display": "Maps", "value": "map"},
+            {"display": "Custom", "value": "custom"},
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode);
@@ -79,7 +81,11 @@ class RankingsSearchForm{
 
     changeURL(){
 
-        window.location.href = `?mode=${this.mode}&id=${this.selectedId}&tf=${this.selectedTimeRange}&pp=${this.selectedPerPage}&p=1`
+        let url = `?mode=${this.mode}&g=${this.selectedGametype}`;
+        url += `&m=${this.selectedMap}&tf=${this.selectedTimeRange}&`;
+        url += `pp=${this.selectedPerPage}&p=1`
+
+        window.location.href = url;
 
     }
 

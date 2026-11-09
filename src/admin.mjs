@@ -33,7 +33,6 @@ const DELETE_TABLES = [
     "logs_rejected",     
     "logs_downloads",     
     "maps",
-    "map_rankings",
     "map_weapon_totals",
     "matches",
     "matches_dom",

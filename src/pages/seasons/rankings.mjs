@@ -20,7 +20,7 @@ export async function renderSeasonRankingsPage(req, res){
 
 
         const {
-            mode, itemNames, targetId, 
+            mode, itemNames, gametypeId, mapId, 
             timeRange, typeName, titleName, page, perPage
         } = await sanitizeRankingsPageReq(req, pageSettings);
 
@@ -35,7 +35,7 @@ export async function renderSeasonRankingsPage(req, res){
         title += ` - Rankings`;
 
         const [data, minMatchesSetting] = await Promise.all([
-            getRankings(seasonId, targetId, page, perPage, timeRange, mode),
+            getRankings(seasonId, gametypeId, mapId, page, perPage, timeRange, mode),
             getMinMatchesSetting(mode)
         ]);
 
@@ -56,7 +56,8 @@ export async function renderSeasonRankingsPage(req, res){
             mode,
             data,
             "names": itemNames,
-            "selectedId": targetId,
+            "selectedGametype": gametypeId,
+            "selectedMap": mapId,
             "selectedTimeRange": timeRange,
             "selectedPerPage": perPage,
             "currentPage": page,
