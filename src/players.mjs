@@ -2414,8 +2414,8 @@ export async function sanitizePlayerPageReq(id, seasonId, seasonInfo){
     if(pageSettings["Display Rankings"] === 1){
         //no real speed diffs with indexes
         rankings = await getPlayerRankings(playerId, minDate, seasonId);
-        rankings.minDate = minDate;
-        rankings.maxDays = rankingDayRange;
+        rankings = {"data": rankings, minDate, "maxDays": rankingDayRange}
+
     
     }
     

@@ -539,7 +539,7 @@ export async function getPlayerRankings(playerId, minDate, seasonId){
     ) as position
      FROM nstats_rankings 
      WHERE  last_active>=? AND season_id=?)
-    SELECT *,
+    SELECT rankings.*,
     IF(gametype_id = 0, 'All Time', COALESCE(nstats_gametypes.name, 'Not Found')) as gametype_name,
     IF(map_id = 0, 'All Time', COALESCE(nstats_maps.name, 'Not Found')) as map_name 
     FROM rankings 

@@ -1836,10 +1836,13 @@ class PlayerRankingSummary{
 
     constructor(parent, data){
 
-        if(data.gametypes.length === 0 && data.maps.length === 0) return;
+        if(data.data.length === 0) return;
 
         this.parent = document.querySelector(parent);
-        this.data = data;
+        this.data = data.data;
+
+        this.selectedGametype = 0;
+        this.selectedMap = 0;
 
         UIHeader(this.parent, "Ranking Summary");
 
@@ -1850,9 +1853,63 @@ class PlayerRankingSummary{
         this.mode = "gametypes";
         this.createTabs();
 
+        this.createForm();
+        
+
 
         this.render();
 
+    }
+
+    getOptions(type){
+
+        const options = [];
+        const used = [];
+
+        const targetKey = (type === "gametype") ? "gametype_id" : "map_id";
+        const nameKey = (type === "gametype") ? "gametype_name" : "map_name";
+
+        for(let i = 0; i < this.data.length; i++){
+
+            const d = this.data[i];
+
+            if(used.indexOf(d[targetKey]) !== -1) continue;
+
+            used.push(d[targetKey]);
+
+            options.push({
+                "display": d[nameKey], "value": d[targetKey]
+            });
+        }
+
+        return options;
+    }
+    createForm(){
+        
+        this.form = UIDiv("hidden");
+
+        const gametypeRow = UIDiv("form-row");
+        gametypeRow.append(UILabel("Gametype"));
+
+        const gametypeSelect = new UISelect(gametypeRow, this.getOptions("gametype"), this.selectedGametype, (e) =>{
+   
+            this.selectedGametype = parseInt(e);
+            this.render();
+        })
+
+       
+
+        const mapRow = UIDiv("form-row");
+        mapRow.append(UILabel("Map"))
+         const mapSelect = new UISelect(mapRow, this.getOptions("map"), this.selectedMap, (e) =>{
+   
+            this.selectedMap = parseInt(e);
+            this.render();
+        })
+
+        this.form.append(gametypeRow, mapRow);
+
+        this.parent.append(this.form);
     }
 
     createTabs(){
@@ -1860,6 +1917,7 @@ class PlayerRankingSummary{
         const options = [
             {"display": "Gametypes", "value": "gametypes"},
             {"display": "Maps", "value": "maps"},
+            {"display": "Custom", "value": "custom"},
         ];
 
         this.tabs = new UITabs(this.parent, options, this.mode);
@@ -1874,9 +1932,18 @@ class PlayerRankingSummary{
     createRow(data){
 
 
-        return [
-            {"display": `${data.position}${getOrdinal(data.position)}`, "value": data.position, "className": "ordinal"},
-            {"display": data.name, "value": data.name.toLowerCase(), "className": "text-left"},
+        const row = [{"display": `${data.position}${getOrdinal(data.position)}`, "value": data.position, "className": "ordinal"}];
+
+        if(this.mode === "gametypes" || this.mode === "custom"){
+            row.push({"display": data.gametype_name, "value": data.gametype_name.toLowerCase()},);
+        }
+
+        if(this.mode === "maps" || this.mode === "custom"){
+            row.push({"display": data.map_name, "value": data.map_name.toLowerCase()},);
+        }
+
+        
+        return [...row,
             {"display": toDateString(data.last_active, TIME_ZONE, true), "value": data.last_active, "className": "date"},
             {"value": data.matches},
             {"display": toPlaytime(data.playtime), "value": data.playtime, "className": "playtime"},
@@ -1886,18 +1953,45 @@ class PlayerRankingSummary{
 
     render(){
 
-        const headers = [
-            "Place", "Name", "Last Active", 
-            "Matches", "Playtime", "Points"
-        ];
+
+        if(this.mode === "custom"){
+
+            this.form.className = "form";
+
+            
+
+        }else{
+            this.form.className = "hidden";
+        }
+
+        const headers = ["Rank"];
 
 
-        const data = (this.mode === "gametypes") ? this.data.gametypes : this.data.maps;
+        if(this.mode === "gametypes" || this.mode === "custom"){
+            headers.push("Gametype");
+        }
+
+        if(this.mode === "maps" || this.mode === "custom"){
+            headers.push("Map");
+        }
+
+        headers.push("Last Active", "Matches", "Playtime", "Points");
+
 
         const rows = [];
-        for(let i = 0; i < data.length; i++){
+        for(let i = 0; i < this.data.length; i++){
 
-            rows.push(this.createRow(data[i]));
+            const d = this.data[i];
+
+            
+            if(this.mode === "gametypes" && (d.gametype_id === 0 || d.map_id !== 0 )) continue;
+            if(this.mode === "maps" && (d.map_id === 0 || d.gametype_id !== 0)) continue;
+            if(this.mode === "custom" && (d.gametype_id !== this.selectedGametype || d.map_id !== this.selectedMap)){
+                
+                continue;
+            }
+
+            rows.push(this.createRow(d));
         }
 
         if(rows.length === 0){
@@ -1922,7 +2016,7 @@ class PlayerRankingSummary{
             );
         }else{
 
-            this.table.updateRows(rows);
+            this.table.updateRows(rows, headers.map((h) =>{ return {"display": h}}));
         }
     }
 }
