@@ -20,8 +20,8 @@ export async function renderSeasonRankingsPage(req, res){
 
 
         const {
-            mode, itemNames, gametypeId, mapId, 
-            timeRange, typeName, titleName, page, perPage
+            mode, gametypeNames, mapNames, gametypeId, mapId, 
+            timeRange, typeName, page, perPage
         } = await sanitizeRankingsPageReq(req, pageSettings);
 
 
@@ -55,7 +55,8 @@ export async function renderSeasonRankingsPage(req, res){
             "meta": {description, "image": "images/maps/default/jpg"},
             mode,
             data,
-            "names": itemNames,
+            gametypeNames,
+            mapNames,
             "selectedGametype": gametypeId,
             "selectedMap": mapId,
             "selectedTimeRange": timeRange,

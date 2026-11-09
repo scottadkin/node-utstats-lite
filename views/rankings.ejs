@@ -26,7 +26,8 @@ const jsBase = `/js/`;
 <script>
     new RankingsSearchForm("#root", "<%= mode %>", 
         <%- JSON.stringify(data) %>,
-        <%- JSON.stringify(names) %>, 
+        <%- JSON.stringify(gametypeNames) %>, 
+        <%- JSON.stringify(mapNames) %>, 
         "<%= selectedGametype %>",
         "<%= selectedMap %>",
         "<%= selectedTimeRange %>",

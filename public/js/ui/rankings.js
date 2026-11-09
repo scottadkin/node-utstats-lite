@@ -1,6 +1,7 @@
 class RankingsSearchForm{
 
-    constructor(parent, mode, data, names, gametypeId, mapId, selectedTimeRange, selectedPerPage, currentPage, seasonId, bSkipSeasonLinks){
+    constructor(parent, mode, data, gametypeNames, mapNames, gametypeId, mapId, 
+        selectedTimeRange, selectedPerPage, currentPage, seasonId, bSkipSeasonLinks){
 
         this.parent = document.querySelector(parent);
         this.seasonId = parseInt(seasonId);
@@ -8,7 +9,8 @@ class RankingsSearchForm{
         this.mode = mode;
         this.data = data.data;
         this.totalResults = data.totalResults;
-        this.names = names;
+        this.gametypeNames = gametypeNames;
+        this.mapNames = mapNames;
         this.selectedGametype = gametypeId;
         this.selectedMap = mapId;
         this.selectedTimeRange = selectedTimeRange;
@@ -49,36 +51,6 @@ class RankingsSearchForm{
     }
 
 
-    createDropDownRow(type, display, options, selected){
-
-        const row = UIDiv("form-row");
-
-        const select = document.createElement("select");
-        select.name = type;
-        select.id = type;
-        
-        for(let i = 0; i < options.length; i++){
-
-            const {name, value} = options[i];
-
-            const option = document.createElement("option");
-            option.append(name);
-            if(value == selected) option.selected = true;
-            option.value = value;
-            select.append(option);
-        }
-
-        row.append(UILabel(display), select);
-
-        select.addEventListener("change", (e) =>{
-            this.selectedId = e.target.value;
-            this.changeURL();
-        });
-
-        return row;
-    }
-
-
     changeURL(){
 
         let url = `?mode=${this.mode}&g=${this.selectedGametype}`;
@@ -93,22 +65,75 @@ class RankingsSearchForm{
 
         const form = UIDiv("form");
 
-        const nameOptions = [];
+        const gametypeOptions = [];
+        const mapOptions = [];
         
-        for(const [id, name] of Object.entries(this.names)){
-            nameOptions.push({name, "value": id});
+        for(const [id, name] of Object.entries(this.gametypeNames)){
+            gametypeOptions.push({"display":name, "value": id});
         }
 
-        nameOptions.sort((a, b) =>{
-            a = a.name.toLowerCase();
-            b = b.name.toLowerCase();
+        
+
+        for(const [id, name] of Object.entries(this.mapNames)){
+            mapOptions.push({"display":name, "value": id});
+        }
+        
+        function sbn(a, b){
+            a = a.display.toLowerCase();
+            b = b.display.toLowerCase();
             if(a < b) return -1;
             if(a > b) return 1;
             return 0;
-        });
+        }
+
+        gametypeOptions.sort(sbn);
+        mapOptions.sort(sbn);
 
 
-        const nameRow = this.createDropDownRow("id", "Name", nameOptions, this.selectedId);
+        if(this.mode === "custom"){
+            gametypeOptions.unshift({"display": "All Time", "value": 0});
+            mapOptions.unshift({"display": "All Time", "value": 0});
+        }
+
+
+        if(this.mode !== "map"){
+
+            const gametypeRow = UIDiv("form-row");
+            gametypeRow.append(UILabel("Gametype"));
+
+            const gametypeSelect = new UISelect(
+                gametypeRow,
+                gametypeOptions,
+                this.selectedGametype,
+                (e) =>{ 
+
+                    this.selectedGametype = e;
+                    this.changeURL();
+                }
+            );
+
+            form.append(gametypeRow);
+        }
+
+        if(this.mode !== "gametype"){
+
+            const mapRow = UIDiv("form-row");
+            mapRow.append(UILabel("Map"));
+
+            const mapSelect = new UISelect(
+                mapRow,
+                mapOptions,
+                this.selectedMap,
+                (e) =>{ 
+                    
+                    this.selectedMap = e;
+                    this.changeURL();
+                }
+            );
+
+
+            form.append(mapRow);
+        }
 
         const row = UIDiv("form-row");
         row.id = "last-active-row";
@@ -121,7 +146,7 @@ class RankingsSearchForm{
             this.changeURL();
         });
 
-        form.append(nameRow, row);
+        form.append(row);
 
         const perPageRow = UIDiv("form-row");
 

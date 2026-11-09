@@ -652,7 +652,7 @@ export async function sanitizeRankingsPageReq(req, pageSettings){
     let mode = req?.query?.mode ?? "gametype";
     mode = mode.toLowerCase();
 
-    if(mode !== "gametype" && mode !== "map") mode = "gametype";
+    if(mode !== "gametype" && mode !== "map" && mode !== "custom") mode = "gametype";
 
     let page = (req.query.p !== undefined) ? parseInt(req.query.p) : 1;
     let perPage = req.query.pp ?? pageSettings["Results Per Page"] ?? 25;
@@ -679,43 +679,41 @@ export async function sanitizeRankingsPageReq(req, pageSettings){
 
     const timeRange = defaultLastActive;
 
-    const itemNames = (mode === "gametype") ? await seasonGetAllGametypeNames(seasonId) : await seasonGetAllMapNames(seasonId);
+    const [gametypeNames, mapNames] = await Promise.all([
+        (mode === "gametype" || mode === "custom") ? seasonGetAllGametypeNames(seasonId) : {},
+        (mode === "map" || mode === "custom") ? seasonGetAllMapNames(seasonId) : {}
+    ]);
 
-    const itemKeys = Object.keys(itemNames);
+    const gametypeKeys = Object.keys(gametypeNames);
+    const mapKeys = Object.keys(mapNames);
     
     let targetId = 0;
 
-    if(mode === "gametype" || mode === "map"){
-
-        targetId = await getMostActiveInTimeRange(seasonId, mode, timeRange);
-
-        if(targetId === 0 && itemKeys.length > 0){
-            targetId = itemKeys[0]
-        }
+    if(mode === "gametype" && gametypeId === 0){
+        targetId = await getMostActiveInTimeRange(seasonId, "gametype", timeRange);
+    }else if(mode === "map" && mapId === 0){
+        targetId = await getMostActiveInTimeRange(seasonId, "map", timeRange);
+    }else if(mode === "custom" && gametypeId === 0 && mapId === 0){
+        targetId = await getMostActiveInTimeRange(seasonId, "gametype", timeRange);
     }
 
-    /*
+
+    let typeName = "Not Found";
 
     if(targetId === 0){
 
-        targetId = await getMostActiveInTimeRange(seasonId, mode, timeRange);
+        if((mode === "gametype" || mode === "custom") && gametypeKeys.length > 0){
 
-        //prevent page looking like not loaded any data for target
-        if(targetId === 0){
+            typeName = gametypeNames[gametypeKeys[0]];
 
-            const itemKeys = Object.keys(itemNames);
+        }else if(mode === "map" && mapKeys.length > 0){
 
-            if(itemKeys.length > 0){
-                
-                targetId = itemKeys[0];
-            }
+            typeName = mapNames[mapKeys[0]];
         }
-    }*/
 
-    let typeName = itemNames[targetId] ?? "Not Found";
-    let titleName = (mode === "gametype") ? "Gametype" : "Map";
-
-    return {mode, itemNames, gametypeId, mapId, timeRange, typeName, titleName, page, perPage, seasonId}
+    }
+    
+    return {mode, gametypeNames, mapNames, gametypeId, mapId, timeRange, typeName, page, perPage, seasonId}
 }
 
 
