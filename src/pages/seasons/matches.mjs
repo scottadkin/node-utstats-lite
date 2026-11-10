@@ -1,5 +1,5 @@
 
-import { getSeasonById, getSeasonUniqueMatchCombinations } from "../../seasons.mjs";
+import { getSeasonUniqueMatchCombinations } from "../../seasons.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 import { getRecentMatches, sanitizeMatchesReq } from "../../matches.mjs";
 
@@ -14,9 +14,9 @@ export async function renderSeasonMatchesPage(req, res){
         getCategorySettings("Branding"),
         getCategorySettings("Matches"),
         getSiteWideTimeZone(),
-        getSeasonUniqueMatchCombinations(seasonId),
-        getSeasonById(seasonId)
+        getSeasonUniqueMatchCombinations(seasonId)
     ]);
+
 
     const seasonInfo = res.locals.seasonInfo;
 
@@ -45,9 +45,6 @@ export async function renderSeasonMatchesPage(req, res){
     } = sanitizeMatchesReq(req, pageSettings);
 
     const matches = await getRecentMatches(page, perPage, selectedServer, selectedGametype, selectedMap, false, seasonId);
-
-
-    
     
 
     res.render("matches.ejs",{

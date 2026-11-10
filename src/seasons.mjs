@@ -562,7 +562,7 @@ export async function getSeasonBasicObjectStats(seasonId, maxServers, maxGametyp
 }
 
 
-export async function getSeasonUniqueMatchCombinations(seasonId){
+export async function getSeasonUniqueMatchCombinations(seasonId, bIncludeAllTime){
 
     seasonId = parseInt(seasonId);
 
@@ -576,6 +576,17 @@ export async function getSeasonUniqueMatchCombinations(seasonId){
     if(seasonId !== 0){
         where =`WHERE ${mT}.season_id=?`;
         vars.push(seasonId);
+    }
+
+    if(!bIncludeAllTime){
+
+        if(where === ``){
+            where += `WHERE`;
+        }else{
+            where += `AND`
+        }
+
+        where += ` server_id!=0 AND gametype_id!=0 AND map_id!=0`
     }
 
     const query = `SELECT ${mT}.*,
