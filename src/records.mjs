@@ -249,9 +249,9 @@ export async function getUniqueGametypeMapCombinations(seasonId){
     uc.server_id, 
     uc.gametype_id, 
     uc.map_id,
-    s.name as server_name,
-    g.name as gametype_name,
-    m.name as map_name,
+    COALESCE(s.name, 'Not Found') as server_name,
+    COALESCE(g.name, 'Not Found') as gametype_name,
+    COALESCE(m.name, 'Not Found') as map_name,
     g.b_ctf as b_gametype_ctf,
     g.b_dom as b_gametype_dom,
     m.b_ctf as b_map_ctf,
@@ -260,7 +260,7 @@ export async function getUniqueGametypeMapCombinations(seasonId){
     LEFT JOIN nstats_servers as s ON uc.server_id = s.id
     LEFT JOIN nstats_gametypes as g ON uc.gametype_id = g.id
     LEFT JOIN nstats_maps as m ON uc.map_id = m.id
-    WHERE uc.season_id=?`;
+    WHERE uc.season_id=? AND uc.server_id!=0 AND uc.gametype_id!=0 AND uc.map_id!=0`;
 
     const result = await simpleQuery(query, [seasonId]);
 

@@ -507,12 +507,12 @@ export async function getMapInfo(mapId, seasonId){
 
     if(seasonId !== 0){
 
-        query = `SELECT nstats_seasons_maps.matches,
-        nstats_seasons_maps.playtime, nstats_seasons_maps.first_match,
-        nstats_seasons_maps.last_match, nstats_maps.name, nstats_maps.id 
-        FROM nstats_seasons_maps 
-        LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id
-        WHERE nstats_seasons_maps.season_id=? AND nstats_seasons_maps.map_id=?`
+        query = `SELECT uc.matches,
+        uc.playtime, uc.first_match,
+        uc.last_match, nstats_maps.name, nstats_maps.id 
+        FROM nstats_seasons_unique_match_combinations as uc
+        LEFT JOIN nstats_maps ON nstats_maps.id = uc.map_id
+        WHERE uc.season_id=? AND uc.map_id=?`
 
         vars.push(seasonId, mapId);
 
@@ -969,42 +969,29 @@ async function getTotalPossibleMatches(nameSearch, seasonId){
 
     }else{
 
-        const query = `SELECT COUNT(*) as total_rows FROM nstats_seasons_maps WHERE EXISTS (SELECT 1 FROM nstats_maps WHERE name LIKE ?) AND season_id=?`;
+        const query = `SELECT COUNT(*) as total_rows 
+        FROM nstats_seasons_unique_match_combinations WHERE EXISTS (SELECT 1 FROM nstats_maps WHERE name LIKE ?) AND season_id=?`;
 
         const result = await simpleQuery(query, [`%${nameSearch}%`, seasonId]);
 
         return result[0].total_rows;
     }
-
-    
-}
-
-
-async function normalMapsSearch(name, cleanStart, cleanPerPage, cleanSortBy, cleanOrder){
-
-
-    const query = `SELECT id,name,first_match,last_match,matches,playtime 
-    FROM nstats_maps 
-    WHERE name LIKE ? 
-    ORDER BY ${cleanSortBy} ${cleanOrder}
-    LIMIT ?, ?`;
-
-    return await simpleQuery(query, [`%${name}%`, cleanStart, cleanPerPage]);
+  
 }
 
 async function seasonMapsSearch(seasonId, name, cleanStart, cleanPerPage, cleanSortBy, cleanOrder){
 
 
-    const query = `SELECT nstats_maps.id,nstats_seasons_maps.map_id,
+    const query = `SELECT nstats_maps.id,uc.map_id,
     nstats_maps.name,
-    nstats_seasons_maps.first_match,
-    nstats_seasons_maps.last_match,
-    nstats_seasons_maps.matches,
-    nstats_seasons_maps.playtime 
-    FROM nstats_seasons_maps
-    LEFT JOIN nstats_maps ON nstats_maps.id = nstats_seasons_maps.map_id
-    WHERE nstats_maps.name LIKE ? AND nstats_seasons_maps.season_id=?
-    ORDER BY ${(cleanSortBy !== "name") ? "nstats_seasons_maps" : "nstats_maps"}.${cleanSortBy} ${cleanOrder}
+    uc.first_match,
+    uc.last_match,
+    uc.matches,
+    uc.playtime 
+    FROM nstats_seasons_unique_match_combinations as uc
+    LEFT JOIN nstats_maps ON nstats_maps.id = uc.map_id
+    WHERE nstats_maps.name LIKE ? AND uc.season_id=? AND uc.gametype_id=0
+    ORDER BY ${(cleanSortBy !== "name") ? "uc" : "nstats_maps"}.${cleanSortBy} ${cleanOrder}
     LIMIT ?, ?`;
 
     return await simpleQuery(query, [`%${name}%`, seasonId, cleanStart, cleanPerPage]);
@@ -1028,11 +1015,9 @@ export async function searchMaps(name, dirtyPage, dirtyPerPage, sortBy, order, s
 
     let result = [];
     
-    if(seasonId !== 0){
-        result = await seasonMapsSearch(seasonId, name, start, perPage, sortBy, order);
-    }else{
-        result = await normalMapsSearch(name, start, perPage, sortBy, order);
-    }
+
+    result = await seasonMapsSearch(seasonId, name, start, perPage, sortBy, order);
+  
 
     const images = new Set();
 
