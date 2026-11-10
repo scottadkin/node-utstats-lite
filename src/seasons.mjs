@@ -1,4 +1,3 @@
-import { ctfRecalculatePlayerTotals } from "./ctf.mjs";
 import { ctfLeagueRecalculateSeason} from "./ctfLeague.mjs";
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import {  sanitizePagePerPage } from "./generic.mjs";
@@ -324,6 +323,7 @@ function createTotalsQuery(bGroupServers, bGroupGametypes, bGroupMaps){
 
 
     return `SELECT 
+    season_id,
     ${(bGroupServers) ? "server_id" : "0 as server_id"},
     ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
     ${(bGroupMaps) ? "map_id" : "0 as map_id"},
@@ -334,73 +334,6 @@ function createTotalsQuery(bGroupServers, bGroupGametypes, bGroupMaps){
     FROM combo_totals
     ${groupBy}`;
 }
-
-/**
- * 
- * @param {Number} seasonId 
- * @param {String} objectName gametypes,servers,maps
- */
-async function calculateSeasonObjectStats(seasonId){
-
-
-    let where = ``;
-    const vars = [];
-
-    if(seasonId !== 0){
-        where += `WHERE season_id=?`;
-        vars.push(seasonId);
-    }
-
-    const query = `WITH combo_totals AS (
-        SELECT ${seasonId} as season_id, gametype_id, map_id, server_id,
-        COUNT(*) as total_matches,
-        SUM(playtime) as total_playtime,
-        MIN(date) as first_match,
-        MAX(date) as last_match FROM nstats_matches ${where} GROUP BY server_id,gametype_id,map_id
-    )
-    ${createTotalsQuery(true, false, false)}
-    UNION ALL ${createTotalsQuery(false, true, false)}
-    UNION ALL ${createTotalsQuery(false, false, true)}
-    
-    `;
-
-    const result = await simpleQuery(query, vars);
-
-    const serverTotals = [];
-    const gametypeTotals = [];
-    const mapTotals = [];
-    
-
-    for(let i = 0; i < result.length; i++){
-
-        const r = result[i];
-
-        if(r.server_id !== 0) serverTotals.push(r);
-        if(r.gametype_id !== 0) gametypeTotals.push(r);
-        if(r.map_id !== 0) mapTotals.push(r);
-    }
-
-    return {serverTotals, gametypeTotals, mapTotals}
-}
-
-
-async function updateSeasonObjectStats(seasonId, data, objectName){
-
-    if(VALID_OBJECT_TYPES[objectName] === undefined) throw new Error(`Not a valid object for calculate object stats`);
-
-    const targetCol = VALID_OBJECT_TYPES[objectName];
-
-    const insertVars = data.map((d) =>{
-
-        return [seasonId, d[targetCol], d.total_matches, d.total_playtime, d.first_match, d.last_match]
-    });
-
-    const columns = ["season_id", targetCol, "matches", "playtime", "first_match", "last_match"];
-    const conflicts = ["season_id",targetCol];
-
-    await sqlInsertOnDuplicateUpdate(`nstats_seasons_${objectName}`, columns, insertVars, conflicts);
-}
-
 
 async function calculateSeasonUniqueCombinations(seasonId){
 
@@ -415,11 +348,23 @@ async function calculateSeasonUniqueCombinations(seasonId){
         vars.push(seasonId);
     }
 
-    const query = `SELECT server_id,gametype_id,map_id,SUM(playtime) as total_playtime,
-    COUNT(*) as total_matches,
-    MAX(date) as last_match,
-    MIN(date) as first_match 
-    FROM nstats_matches ${where} GROUP BY server_id,gametype_id,map_id`;
+    const query = `WITH combo_totals AS (
+        SELECT ${seasonId} as season_id,server_id,gametype_id,map_id, 
+        COUNT(*) as total_matches,
+        SUM(playtime) as total_playtime,
+        MAX(date) as last_match,
+        MIN(date) as first_match 
+        FROM nstats_matches ${where} GROUP BY server_id,gametype_id,map_id
+    )
+        --server gametypes and map totals
+    SELECT * FROM combo_totals 
+        --server totals 
+    UNION ALL ${createTotalsQuery(true, false, false)}   
+        --gametype totals 
+    UNION ALL ${createTotalsQuery(false, true, false)}
+        --map totals    
+    UNION ALL ${createTotalsQuery(false, false, true)}    
+    `;
 
     return await simpleQuery(query, vars);
 }
@@ -432,7 +377,7 @@ export async function updateSeasonUniqueCombinations(seasonId){
     const insertVars = totals.map((t) =>{
 
         return [
-            seasonId,
+            t.season_id,
             t.server_id,
             t.gametype_id,
             t.map_id,
@@ -442,7 +387,6 @@ export async function updateSeasonUniqueCombinations(seasonId){
             t.last_match
         ];
     });
-
 
     const columns = ["season_id", "server_id", "gametype_id", "map_id", "matches", "playtime", "first_match", "last_match"];
     const conflicts = ["season_id","server_id","gametype_id", "map_id"];
@@ -509,13 +453,10 @@ export async function calculateSeasonStats(seasonId){
     if(basicTotals === null) throw new Error(`No season data found`);
 
 
-    const {serverTotals, gametypeTotals, mapTotals} = await calculateSeasonObjectStats(seasonId);
+    //const {serverTotals, gametypeTotals, mapTotals} = await calculateSeasonObjectStats(seasonId);
 
     return await Promise.all([
         updateSeasonUniqueCombinations(seasonId),
-        updateSeasonObjectStats(seasonId, serverTotals, "servers"),
-        updateSeasonObjectStats(seasonId, gametypeTotals, "gametypes"),
-        updateSeasonObjectStats(seasonId, mapTotals, "maps"),
         updateSeasonBasicTotals(seasonId, basicTotals)
     ]);
 }

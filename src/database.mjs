@@ -491,3 +491,11 @@ export async function sqliteBTableExists(table){
     return result.length > 0;
 
 }
+
+
+export async function sqliteGetTableForeignKeys(table){
+
+    const query = `PRAGMA foreign_key_list(${table})`;
+
+    return await simpleQuery(query);
+}

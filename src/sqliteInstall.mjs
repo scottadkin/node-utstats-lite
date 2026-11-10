@@ -1,4 +1,4 @@
-import { simpleQuery, sqliteBTableExists, sqliteGetTableColumns } from "./database.mjs";
+import { simpleQuery, sqliteBTableExists, sqliteGetTableColumns, sqliteGetTableForeignKeys } from "./database.mjs";
 import fs from "fs";
 import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
@@ -28,6 +28,18 @@ const rankingsTableQuery = `CREATE TABLE IF NOT EXISTS nstats_rankings (
     ) STRICT`;
 
 const rankingsIndexQuery = `CREATE UNIQUE INDEX IF NOT EXISTS rankings_sgmp ON nstats_rankings(season_id,gametype_id,map_id,player_id)`;
+
+const seasonsUniqueCombosQuery = `CREATE TABLE IF NOT EXISTS nstats_seasons_unique_match_combinations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    season_id INTEGER NOT NULL,
+    server_id INTEGER NOT NULL,
+    gametype_id INTEGER NOT NULL,
+    map_id INTEGER NOT NULL,
+    matches INTEGER NOT NULL,
+    playtime REAL NOT NULL,
+    first_match TEXT NOT NULL,
+    last_match TEXT NOT NULL
+    ) STRICT`;
 
 
 export function createTableQueries(){
@@ -980,63 +992,7 @@ export function createTableQueries(){
             ///`CREATE UNIQUE INDEX IF NOT EXISTS nstats_totals_max_spgm ON nstats_player_totals_max(season_id,player_id,gametype_id,map_id)`,
 
 
-
-            `CREATE TABLE IF NOT EXISTS nstats_seasons_servers (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                season_id INTEGER NOT NULL,
-                server_id INTEGER NOT NULL,
-                matches INTEGER NOT NULL,
-                playtime REAL NOT NULL,
-                first_match TEXT NOT NULL,
-                last_match TEXT NOT NULL,
-                CONSTRAINT fk_seasons_servers_si
-                FOREIGN KEY(server_id)
-                REFERENCES nstats_servers(id)
-            ) STRICT`,
-             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_servers_sidx ON nstats_seasons_servers(season_id,server_id)`,
-
-            `CREATE TABLE IF NOT EXISTS nstats_seasons_gametypes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                season_id INTEGER NOT NULL,
-                gametype_id INTEGER NOT NULL,
-                matches INTEGER NOT NULL,
-                playtime REAL NOT NULL,
-                first_match TEXT NOT NULL,
-                last_match TEXT NOT NULL,
-                CONSTRAINT fk_seasons_gametypes_gi
-                FOREIGN KEY(gametype_id)
-                REFERENCES nstats_gametypes(id)
-            ) STRICT`,
-             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_gametypes_gidx ON nstats_seasons_gametypes(season_id,gametype_id)`,
-
-            `CREATE TABLE IF NOT EXISTS nstats_seasons_maps (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                season_id INTEGER NOT NULL,
-                map_id INTEGER NOT NULL,
-                matches INTEGER NOT NULL,
-                playtime REAL NOT NULL,
-                first_match TEXT NOT NULL,
-                last_match TEXT NOT NULL,
-                CONSTRAINT fk_seasons_maps_mi
-                FOREIGN KEY(map_id)
-                REFERENCES nstats_maps(id)
-            ) STRICT`,
-             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_maps_midx ON nstats_seasons_maps(season_id,map_id)`,
-
-             `CREATE TABLE IF NOT EXISTS nstats_seasons_unique_match_combinations (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                season_id INTEGER NOT NULL,
-                server_id INTEGER NOT NULL,
-                gametype_id INTEGER NOT NULL,
-                map_id INTEGER NOT NULL,
-                matches INTEGER NOT NULL,
-                playtime REAL NOT NULL,
-                first_match TEXT NOT NULL,
-                last_match TEXT NOT NULL,
-                CONSTRAINT kf_seasons_umc_si FOREIGN KEY(server_id) REFERENCES nstats_servers(id)
-                CONSTRAINT kf_seasons_umc_gi FOREIGN KEY(gametype_id) REFERENCES nstats_gametypes(id)
-                CONSTRAINT kf_seasons_umc_mi FOREIGN KEY(map_id) REFERENCES nstats_maps(id)
-             ) STRICT`,
+             seasonsUniqueCombosQuery,
 
             `CREATE UNIQUE INDEX IF NOT EXISTS nstats_seasons_unique_match_combinations_idx ON nstats_seasons_unique_match_combinations(season_id,server_id,gametype_id,map_id)`
 
@@ -1412,8 +1368,44 @@ async function addSeasonColumnToCTFLeague(){
 }
 
 
+//replace table used in earlier 2.10.0 previews
+async function removeForeignKeysSeasonsUniqueCombos(){
+
+
+    if(!await sqliteBTableExists("nstats_seasons_unique_match_combinations")) return;
+
+    const keys = await sqliteGetTableForeignKeys("nstats_seasons_unique_match_combinations");
+
+    if(keys.length !== 3 && keys.length !== 0) throw new Error(`Should be 3 or 0 foreign keys`);
+
+
+    await simpleQuery(`DROP table nstats_seasons_unique_match_combinations`);
+
+    await simpleQuery(seasonsUniqueCombosQuery);
+
+} 
+
+//tables that where used in 2.10.0 previews that are not longer needed
+async function removeSeasonsObjectStatTables() {
+    
+    const tables = ["nstats_seasons_servers", "nstats_seasons_gametypes", "nstats_seasons_maps"];
+
+    for(let i = 0; i < tables.length; i++){
+
+        const t = tables[i];
+
+        if(await sqliteBTableExists(t)){
+            await simpleQuery(`DROP table ${t}`);
+        }
+    }
+}
+
 //2.10.0 preview 5
 async function updateRankingTables(){
+
+
+    await removeForeignKeysSeasonsUniqueCombos();
+    await removeSeasonsObjectStatTables();
 
 
     //if this table doesn't exist just drop nstats_rankings and recreate it

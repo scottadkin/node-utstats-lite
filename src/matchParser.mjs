@@ -339,10 +339,15 @@ export class MatchParser{
             await this.gametype.setBDom();
         }
 
+        const start = performance.now();
+
         await calculateSeasonStats(0);
         if(seasonId !== 0){
             await calculateSeasonStats(seasonId);
         }
+
+        const end = performance.now();
+        console.log((end - start) * 0.001);
         //this.players.debugListAllPlayers();
     }
 
