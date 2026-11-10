@@ -1,10 +1,10 @@
 
-function createObjectStatRow(s, urlBase, idKey, objectName){
+function createObjectStatRow(s, urlBase){
 
-    const url = `${urlBase}${s[idKey]}`;
+    const url = `${urlBase}${s.target_id}`;
     
     return [
-        {url, "display": s[objectName], "value": s[objectName].toLowerCase(), "className": "text-left"},
+        {url, "display": s.name, "value": s.name.toLowerCase(), "className": "text-left"},
         {url,"value": s.matches},
         {url,"display": toPlaytime(s.playtime), "value": s.playtime, "className": "playtime"},
         {url,"display": toDateString(s.first_match, TIME_ZONE, true),"value": s.first_match, "className": "date"},
@@ -243,18 +243,20 @@ class SeasonPage{
     }
 
     createServerList(){
-        return this.createObjectList("Most Active Servers", "servers", "server_id", "sid")
+        return this.createObjectList("Most Active Servers", "servers", "sid")
     }
 
 
     createGametypeList(){
-        return this.createObjectList("Most Active Gametypes", "gametypes", "gametype_id", "gid");
+        return this.createObjectList("Most Active Gametypes", "gametypes", "gid");
     }
 
-    createObjectList(title, objectStatsKey, objectKey, urlKey){
+    createObjectList(title, objectStatsKey, urlKey){
 
         const tableOptions = {
             "className": "t-width-1",
+            "sortBy": 1,
+            "bAscOrder": false,
             "headers": ["Name", "Total Matches", "Total Playtime", "First Match", "Last Match"].map((h) =>{
                 return {"display": h}
             })
@@ -273,7 +275,7 @@ class SeasonPage{
 
             const g = this.objectStats[objectStatsKey][i];
 
-            rows.push(createObjectStatRow(g, urlBase, objectKey, "object_name"));
+            rows.push(createObjectStatRow(g, urlBase));
         }
 
 
@@ -300,8 +302,8 @@ class SeasonPage{
                 const m = maps[i];
 
                 const url = (this.bSkipSeasonLinks) ? 
-                `/map/${m.map_id}` : 
-                `/season/${this.basicInfo.id}/map/${m.map_id}`;
+                `/map/${m.target_id}` : 
+                `/season/${this.basicInfo.id}/map/${m.target_id}`;
 
                 testMaps.append(UIRichMapBox(m, url));
             }
@@ -312,7 +314,7 @@ class SeasonPage{
         }else{
 
 
-            return this.createObjectList("Most Active Maps", "maps", "map_id", "mid");
+            return this.createObjectList("Most Active Maps", "maps", "mid");
 
         }
     }

@@ -1,3 +1,4 @@
+
 import { ctfLeagueRecalculateSeason} from "./ctfLeague.mjs";
 import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import {  sanitizePagePerPage } from "./generic.mjs";
@@ -453,8 +454,6 @@ export async function calculateSeasonStats(seasonId){
     if(basicTotals === null) throw new Error(`No season data found`);
 
 
-    //const {serverTotals, gametypeTotals, mapTotals} = await calculateSeasonObjectStats(seasonId);
-
     return await Promise.all([
         updateSeasonUniqueCombinations(seasonId),
         updateSeasonBasicTotals(seasonId, basicTotals)
@@ -462,52 +461,83 @@ export async function calculateSeasonStats(seasonId){
 }
 
 
-async function getSeasonObjectStats(seasonId, type, maxRows){
+async function getSeasonObjectStats(seasonId, maxServers, maxGametypes, maxMaps){
 
-    if(VALID_OBJECT_TYPES[type] === undefined) throw new Error(`Not a valid type for getSeasonObjectStats`);
 
-    const seasonTable = `nstats_seasons_${type}`
-    let joinTable = ``;
-    let joinColumn = ``;
+    const serversQuery = `SELECT * FROM(
+     SELECT 
+        ${seasonId} as season_id,
+        'server' as type,
+        umc.server_id as target_id,
+        COALESCE(nstats_servers.name, 'Not Found') as name,
+        umc.matches,
+        umc.playtime,
+        umc.first_match, 
+        umc.last_match 
+        FROM nstats_seasons_unique_match_combinations as umc 
+        LEFT JOIN nstats_servers ON umc.server_id=nstats_servers.id
+        WHERE umc.season_id=? AND umc.server_id!=0 AND umc.gametype_id=0 AND umc.map_id=0 
+        ORDER BY umc.playtime DESC LIMIT ?
+    )
+    
+    UNION ALL SELECT * FROM(
+        SELECT
+        ${seasonId} as season_id,
+    'gametype' as type,
+    umc.gametype_id as target_id,
+    COALESCE(nstats_gametypes.name, 'Not Found') as name,
+    umc.matches,
+    umc.playtime,
+    umc.first_match, 
+    umc.last_match 
+    FROM nstats_seasons_unique_match_combinations as umc
+    LEFT JOIN nstats_gametypes ON umc.gametype_id=nstats_gametypes.id
+    
+    WHERE umc.season_id=? AND umc.server_id=0 AND umc.gametype_id!=0 AND umc.map_id=0 
+    ORDER BY umc.playtime DESC LIMIT ?)
 
-    if(type === "servers"){
+    UNION ALL SELECT * FROM(
+        SELECT
+        ${seasonId} as season_id,
+    'map' as type,
+    umc.map_id as target_id,
+    COALESCE(nstats_maps.name, 'Not Found') as name,
+    umc.matches,
+    umc.playtime,
+    umc.first_match, 
+    umc.last_match  
+    FROM nstats_seasons_unique_match_combinations as umc
+    LEFT JOIN nstats_maps ON umc.map_id=nstats_maps.id
+    
+    WHERE umc.season_id=? AND umc.server_id=0 AND umc.gametype_id=0 AND umc.map_id!=0 
+    ORDER BY umc.playtime DESC LIMIT ?)
+    `;
 
-        joinTable = "nstats_servers";
-        joinColumn = "server_id";
 
-    }else if(type === "maps"){
+    const result = await simpleQuery(serversQuery, [seasonId, maxServers, seasonId, maxGametypes, seasonId, maxMaps]);
 
-        joinTable = "nstats_maps";
-        joinColumn = "map_id";
 
-    }else if(type === "gametypes"){
+    const servers = [];
+    const gametypes = [];
+    const maps = [];
 
-        joinTable = "nstats_gametypes";
-        joinColumn = "gametype_id";
+    for(let i = 0; i < result.length; i++){
 
-    }else{
-        throw new Error(`missing option`);
+        const r = result[i];
+
+        const type = r.type;
+
+        if(type === "server"){
+            servers.push(r);
+        }else if(type === "gametype"){
+            gametypes.push(r);
+        }else if(type === "map"){
+            maps.push(r);
+        }
     }
 
-    let objColumnName = "object_name";
 
-    const query = `SELECT ${seasonTable}.*,${joinTable}.name as ${objColumnName} FROM nstats_seasons_${type} 
-    LEFT JOIN ${joinTable} on ${seasonTable}.${joinColumn} = ${joinTable}.id
-    WHERE season_id=? ORDER BY matches DESC`;
-
-    let limit = ``;
-    const vars = [seasonId];
-    if(maxRows !== undefined){
-
-        maxRows = parseInt(maxRows);
-        if(maxRows !== maxRows) throw new Error(`MaxRows must be a valid integer`);
-
-        limit += ` LIMIT ?`;
-        vars.push(maxRows)
-    }
-
-
-    return await simpleQuery(`${query}${limit}`, vars);
+    return {servers, gametypes, maps}
 }
 
 
@@ -517,19 +547,16 @@ export async function getSeasonBasicObjectStats(seasonId, maxServers, maxGametyp
 
     if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
 
-    const [servers, gametypes, maps] = await Promise.all([
-        getSeasonObjectStats(seasonId, "servers", maxServers),
-        getSeasonObjectStats(seasonId, "gametypes", maxGametypes),
-        getSeasonObjectStats(seasonId, "maps", maxMaps),
-    ]);
+    const {servers, gametypes, maps} = await getSeasonObjectStats(seasonId, maxServers, maxGametypes, maxMaps);
+    
 
     const mapNames = [];
 
     for(let i = 0; i < maps.length; i++){
-        mapNames.push(maps[i].object_name);
+        mapNames.push(maps[i].name);
     }
 
-    await setMatchResultsMapImages(maps, "object_name");
+    await setMatchResultsMapImages(maps, "name");
 
     return {servers, gametypes, maps}
 }
