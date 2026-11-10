@@ -294,17 +294,54 @@ export async function getSeasonMatchesData(seasonId){
     return await simpleQuery(query,[seasonId]);
 }
 
+
+
+function createTotalsQuery(bGroupServers, bGroupGametypes, bGroupMaps){
+
+
+    let groupBy = ``;
+
+    if(bGroupServers || bGroupGametypes || bGroupMaps){
+
+        groupBy = `GROUP BY `;
+        let bAddComma = false;
+
+        if(bGroupServers){
+            groupBy += `server_id`;
+            bAddComma = true;
+        }
+
+        if(bGroupGametypes){
+            if(bAddComma) groupBy += `, `;
+            groupBy += `gametype_id`
+        }
+
+        if(bGroupMaps){
+            if(bAddComma) groupBy += `, `;
+            groupBy += `map_id`
+        }
+    }
+
+
+    return `SELECT 
+    ${(bGroupServers) ? "server_id" : "0 as server_id"},
+    ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
+    ${(bGroupMaps) ? "map_id" : "0 as map_id"},
+    SUM(total_matches) as total_matches, 
+    SUM(total_playtime) as total_playtime, 
+    MIN(first_match) as first_match, 
+    MAX(last_match) as last_match 
+    FROM combo_totals
+    ${groupBy}`;
+}
+
 /**
  * 
  * @param {Number} seasonId 
  * @param {String} objectName gametypes,servers,maps
  */
-async function calculateSeasonObjectStats(seasonId, objectName){
+async function calculateSeasonObjectStats(seasonId){
 
-
-    if(VALID_OBJECT_TYPES[objectName] === undefined) throw new Error(`Not a valid object for calculate object stats`);
-
-    const targetCol = VALID_OBJECT_TYPES[objectName];
 
     let where = ``;
     const vars = [];
@@ -314,14 +351,36 @@ async function calculateSeasonObjectStats(seasonId, objectName){
         vars.push(seasonId);
     }
 
-    const query = `SELECT ${targetCol} as target_id,
-    COUNT(*) as total_matches,
-    SUM(playtime) as total_playtime,
-    MIN(date) as first_match,
-    MAX(date) as last_match FROM nstats_matches ${where} GROUP BY target_id`;
+    const query = `WITH combo_totals AS (
+        SELECT ${seasonId} as season_id, gametype_id, map_id, server_id,
+        COUNT(*) as total_matches,
+        SUM(playtime) as total_playtime,
+        MIN(date) as first_match,
+        MAX(date) as last_match FROM nstats_matches ${where} GROUP BY server_id,gametype_id,map_id
+    )
+    ${createTotalsQuery(true, false, false)}
+    UNION ALL ${createTotalsQuery(false, true, false)}
+    UNION ALL ${createTotalsQuery(false, false, true)}
+    
+    `;
 
-    return await simpleQuery(query, vars);
+    const result = await simpleQuery(query, vars);
 
+    const serverTotals = [];
+    const gametypeTotals = [];
+    const mapTotals = [];
+    
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        if(r.server_id !== 0) serverTotals.push(r);
+        if(r.gametype_id !== 0) gametypeTotals.push(r);
+        if(r.map_id !== 0) mapTotals.push(r);
+    }
+
+    return {serverTotals, gametypeTotals, mapTotals}
 }
 
 
@@ -333,7 +392,7 @@ async function updateSeasonObjectStats(seasonId, data, objectName){
 
     const insertVars = data.map((d) =>{
 
-        return [seasonId, d.target_id, d.total_matches, d.total_playtime, d.first_match, d.last_match]
+        return [seasonId, d[targetCol], d.total_matches, d.total_playtime, d.first_match, d.last_match]
     });
 
     const columns = ["season_id", targetCol, "matches", "playtime", "first_match", "last_match"];
@@ -450,12 +509,8 @@ export async function calculateSeasonStats(seasonId){
     if(basicTotals === null) throw new Error(`No season data found`);
 
 
-    const [serverTotals, gametypeTotals, mapTotals] = await Promise.all([
-        calculateSeasonObjectStats(seasonId, "servers"),
-        calculateSeasonObjectStats(seasonId, "gametypes"),
-        calculateSeasonObjectStats(seasonId, "maps"),
-    ]);
-    
+    const {serverTotals, gametypeTotals, mapTotals} = await calculateSeasonObjectStats(seasonId);
+
     return await Promise.all([
         updateSeasonUniqueCombinations(seasonId),
         updateSeasonObjectStats(seasonId, serverTotals, "servers"),
@@ -760,7 +815,6 @@ async function deleteAllPlayerSeasonData(seasonId){
         "nstats_totals_player_weapon_damage",
         "nstats_player_ctf_league",
         "nstats_rankings",
-        "nstats_map_rankings",
         "nstats_player_totals",
         
     ];
@@ -944,7 +998,6 @@ export async function debugCheckForOrphanedData(){
         "nstats_player_totals_ctf",
         "nstats_rankings",
         "nstats_map_weapon_totals",
-        "nstats_map_rankings",
         "nstats_player_ctf_league",
         "nstats_totals_player_weapon_damage",
         "nstats_player_totals_max",
