@@ -134,7 +134,7 @@ async function getMapId(name){
 
 async function createMap(name){
 
-    const query = `INSERT INTO nstats_maps VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00', 0, 0, 0 ,0)`;
+    const query = `INSERT INTO nstats_maps VALUES(NULL,?, 0, 0, 0 ,0)`;
 
     const result = await sqlInsertReturnRowId(query, [name]);
 
@@ -471,24 +471,15 @@ export async function getMapInfo(mapId, seasonId){
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`SeasonId must be a valid integer`);
  
-    let query = "";
-    const vars = [];
 
-    if(seasonId !== 0){
+    const query = `SELECT uc.matches,
+    uc.playtime, uc.first_match,
+    uc.last_match, nstats_maps.name, nstats_maps.id 
+    FROM nstats_seasons_unique_match_combinations as uc
+    LEFT JOIN nstats_maps ON nstats_maps.id = uc.map_id
+    WHERE uc.season_id=? AND uc.map_id=?`
 
-        query = `SELECT uc.matches,
-        uc.playtime, uc.first_match,
-        uc.last_match, nstats_maps.name, nstats_maps.id 
-        FROM nstats_seasons_unique_match_combinations as uc
-        LEFT JOIN nstats_maps ON nstats_maps.id = uc.map_id
-        WHERE uc.season_id=? AND uc.map_id=?`
-
-        vars.push(seasonId, mapId);
-
-    }else{
-        query = "SELECT * FROM nstats_maps WHERE id=?";
-        vars.push(mapId);
-    }
+    const vars = [seasonId, mapId];
 
     const result = await simpleQuery(query, vars);
 

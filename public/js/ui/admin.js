@@ -8063,7 +8063,7 @@ class AdminSeasonsManager{
             });
 
             const res = await req.json();
-
+    
             if(res.error !== undefined) throw new Error(res.error);
             new UINotification("pass", "Success", `Season recalculated successfully`);
             
@@ -8116,6 +8116,7 @@ class AdminSeasonsManager{
     }
 
     render(){
+        
 
         this.content.innerHTML = ``;
         this.renderSeasonsList();

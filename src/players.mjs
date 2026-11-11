@@ -1232,7 +1232,7 @@ export async function getAllPlayerGametypeIds(seasonId, gametypeId){
     
     if(arguments.length === 1) throw new Error(`seasonId getAllPlayerGametypeIds is missing`);
 
-    let query = `SELECT player_id FROM nstats_player_totals WHERE gametype_id=? AND map_id=0`;
+    let query = `SELECT DISTINCT player_id FROM nstats_player_totals WHERE gametype_id=? AND map_id=0`;
 
     const vars = [gametypeId];
 

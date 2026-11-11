@@ -915,8 +915,10 @@ export async function recalculateSeason(seasonId){
 
 
     await recalculateSeasonPlayerTotals(seasonId);
-    await ctfLeagueRecalculateSeason(seasonId),
+    await ctfLeagueRecalculateSeason(seasonId);
+ 
     await recalculateSeasonRankings(seasonId);
+
     
 }
 
