@@ -4,8 +4,6 @@ import { getMapImageName as genericGetMapImageName,
     mysqlSetTotalsByDate, sanitizePagePerPage
 } from "./generic.mjs";
 import { getRecords } from "./records.mjs";
-import { seasonsDeleteMapStats } from "./seasons.mjs";
-
 
 const validBoth = [
     {"value": "score", "display": "Score", "group": "General"}, 

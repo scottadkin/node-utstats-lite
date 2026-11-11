@@ -407,14 +407,14 @@ async function deleteGametypeRankings(seasonId, id){
 
 async function deleteMapRankings(seasonId, id){
 
-    const query = `DELETE FROM nstats_map_rankings WHERE map_id=? AND season_id=?`;
+    const query = `DELETE FROM nstats_rankings WHERE map_id=? AND season_id=?`;
 
     await simpleQuery(query, [id, seasonId]);
 }
 
 async function deleteAllMapSeasonRankings(seasonId){
 
-    const query = `DELETE FROM nstats_map_rankings WHERE season_id=?`;
+    const query = `DELETE FROM nstats_rankings WHERE season_id=?`;
 
     await simpleQuery(query, [seasonId]);
 }
@@ -570,7 +570,7 @@ export async function recalculateMap(seasonId, id){
 
 export async function getUniqueMaps(){
 
-    const query = `SELECT DISTINCT map_id FROM nstats_map_rankings`;
+    const query = `SELECT DISTINCT map_id FROM nstats_rankings`;
 
     const result = await simpleQuery(query);
 
@@ -757,12 +757,8 @@ async function deletePlayerRankings(playerIds){
     if(playerIds.length === 0) return;
 
     const gametypeQuery = `DELETE FROM nstats_rankings WHERE player_id IN(?)`;
-    const mapQuery = `DELETE FROM nstats_map_rankings WHERE player_id IN(?)`;
 
-    return Promise.all([
-        simpleQuery(gametypeQuery, [playerIds]),
-        simpleQuery(mapQuery, [playerIds])
-    ]);
+    await simpleQuery(gametypeQuery, [playerIds]);
 }
 
 /**

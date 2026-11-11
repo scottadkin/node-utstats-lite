@@ -706,7 +706,7 @@ export async function searchSeasonMatches(seasonId, serverId, gametypeId, mapId,
 
 export async function seasonGetAllGametypeIds(seasonId){
 
-    const query = `SELECT DISTINCT gametype_id FROM nstats_seasons_gametypes WHERE season_id=?`;
+    const query = `SELECT DISTINCT gametype_id FROM nstats_seasons_unique_match_combinations WHERE season_id=?`;
 
     const result = await simpleQuery(query, [seasonId]);
     
@@ -717,7 +717,7 @@ export async function seasonGetAllGametypeIds(seasonId){
 
 export async function seasonGetAllMapIds(seasonId){
 
-    const query = `SELECT DISTINCT map_id FROM nstats_seasons_maps WHERE season_id=?`;
+    const query = `SELECT DISTINCT map_id FROM nstats_seasons_unique_match_combinations WHERE season_id=?`;
 
     const result = await simpleQuery(query, [seasonId]);
     
@@ -819,24 +819,6 @@ async function deleteSeasonUniqueMatchCombinations(seasonId){
     return await simpleQuery(query, [seasonId]);
 }
 
-async function deleteSeasonObjectStats(seasonId){
-
-    const tables = [
-        "nstats_seasons_servers",
-        "nstats_seasons_gametypes",
-        "nstats_seasons_maps",
-    ];
-
-    for(let i = 0; i < tables.length; i++){
-
-        const t = tables[i];
-
-        const query = `DELETE FROM ${t} WHERE season_id=?`;
-        await simpleQuery(query, [seasonId]);
-    }
-}
-
-
 
 async function replaceMatchesSeasonId(find, replace){
 
@@ -853,7 +835,6 @@ export async function deleteSeason(seasonId){
 
     await deleteAllPlayerSeasonData(seasonId);
     await deleteSeasonUniqueMatchCombinations(seasonId);
-    await deleteSeasonObjectStats(seasonId);
     await deleteAllMapWeaponsTotals(seasonId);
     await replaceMatchesSeasonId(seasonId, 0);
 
@@ -926,7 +907,6 @@ export async function recalculateSeason(seasonId){
     await assignSeasonIdToMatchesInRange(seasonId, seasonInfo.start_date, seasonInfo.end_date);
 
     await deleteSeasonUniqueMatchCombinations(seasonId);
-    await deleteSeasonObjectStats(seasonId);
     await calculateSeasonStats(seasonId);
 
     await deleteAllPlayerSeasonData(seasonId);
@@ -944,29 +924,20 @@ export async function seasonsDeleteGametypeStats(gametypeId){
 
     const vars = [gametypeId];
 
-    const gametypeQuery = `DELETE FROM nstats_seasons_gametypes WHERE gametype_id=?`;
-
     const comboQuery = `DELETE FROM nstats_seasons_unique_match_combinations WHERE gametype_id=?`;
 
-    return await Promise.all([
-        simpleQuery(comboQuery, vars),
-        simpleQuery(gametypeQuery, vars),
-        
-    ]);
+    await simpleQuery(comboQuery, vars);
+    
 }
 
 export async function seasonsDeleteMapStats(mapId){
 
     const vars = [mapId];
 
-    const mapQuery = `DELETE FROM nstats_seasons_maps WHERE map_id=?`;
-
     const comboQuery = `DELETE FROM nstats_seasons_unique_match_combinations WHERE map_id=?`;
 
-    return await Promise.all([
-        simpleQuery(comboQuery, vars),
-        simpleQuery(mapQuery, vars),
-    ]);
+    await simpleQuery(comboQuery, vars);
+
 }
 
 
@@ -983,9 +954,6 @@ export async function debugCheckForOrphanedData(){
         "nstats_player_ctf_league",
         "nstats_totals_player_weapon_damage",
         "nstats_player_totals_max",
-        "nstats_seasons_servers",
-        "nstats_seasons_gametypes",
-        "nstats_seasons_maps",
         "nstats_seasons_unique_match_combinations"
     ];
 
@@ -1030,7 +998,6 @@ export async function seasonsMergeServers(oldId, newId){
 
     const tables = [
         `nstats_seasons_unique_match_combinations`,
-        `nstats_seasons_servers`   
     ];
 
     const seasonIds = await mergeServersGetAffectedSeasons(oldId);
