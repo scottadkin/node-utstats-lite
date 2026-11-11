@@ -101,7 +101,7 @@ export async function getMatchWeaponStats(matchId){
 }
 
 
-function createPlayerTotalsSubQuery(bGroupGametypes, bGroupMaps){
+function createPlayerTotalsSubQuery(bGroupSeasons, bGroupGametypes, bGroupMaps){
 
     const minutes = `NULLIF((SUM(playtime) / 60), 0)`;
 
@@ -114,10 +114,10 @@ function createPlayerTotalsSubQuery(bGroupGametypes, bGroupMaps){
 
 
     return `SELECT player_id,
+    ${(bGroupSeasons) ? "season_id" : "0 as season_id"},
     ${(bGroupMaps) ? "map_id" : "0 as map_id"},
     ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
     weapon_id,
-    season_id,
     ${totalMatches} as total_matches,
     SUM(playtime) as playtime,
     SUM(kills) as kills,
@@ -138,6 +138,7 @@ function createPlayerTotalsSubQuery(bGroupGametypes, bGroupMaps){
     MAX(suicides) as max_suicides,
     IF(${totalKills} > 0, ${totalKills} / (${totalKills} + ${totalDeaths} + ${totalTeamKills}) * 100, 0) as eff
     FROM player_totals GROUP BY player_id
+    ${(bGroupSeasons) ? ",season_id" : ""}
     ${(bGroupGametypes) ? ",gametype_id" : ""}
     ${(bGroupMaps) ? ",map_id" : ""}
     ,weapon_id
@@ -155,18 +156,12 @@ export async function updatePlayerTotals(playerIds, seasonId){
 
 
     const vars = [playerIds];
-    let seasonWhere = ``;
 
-    if(seasonId !== 0){
-        //seasonWhere = ` AND ws.match_id IN (SELECT id FROM nstats_matches WHERE season_id=?) `;
-        seasonWhere = ` AND EXISTS(SELECT 1 FROM nstats_matches WHERE season_id=? AND nstats_matches.id=ws.match_id)  `;
-        vars.push(seasonId);
-    }
 
     const query = `WITH player_totals AS (
         SELECT ws.player_id,ws.map_id,ws.gametype_id,ws.weapon_id,
         COUNT(*) as total_matches,
-        ${seasonId} as season_id,
+        nstats_matches.season_id,
         SUM(mp.time_on_server) as playtime,
         SUM(ws.kills) as kills,
         MAX(ws.kills) as max_kills,
@@ -177,24 +172,42 @@ export async function updatePlayerTotals(playerIds, seasonId){
         SUM(ws.suicides) as suicides,
         MAX(ws.suicides) as max_suicides
         FROM nstats_match_weapon_stats AS ws
+        INNER JOIN nstats_matches ON nstats_matches.id = ws.match_id
         INNER JOIN nstats_match_players AS mp ON mp.player_id=ws.player_id AND mp.match_id=ws.match_id
-        WHERE ws.player_id IN (?)${seasonWhere}
+        WHERE ws.player_id IN (?)
         AND mp.spectator=0
         
-        GROUP BY ws.player_id,ws.gametype_id,ws.map_id,ws.weapon_id
+        GROUP BY season_id,ws.player_id,ws.gametype_id,ws.map_id,ws.weapon_id
 
     )
-    ${createPlayerTotalsSubQuery(true, true)}  
-    UNION ALL ${createPlayerTotalsSubQuery(true, false)}  
-    UNION ALL ${createPlayerTotalsSubQuery(false, true)}  
-    UNION ALL ${createPlayerTotalsSubQuery(false, false)}  
+    ${createPlayerTotalsSubQuery(false, true, true)}  
+    UNION ALL ${createPlayerTotalsSubQuery(false, true, false)}  
+    UNION ALL ${createPlayerTotalsSubQuery(false, false, true)}  
+    UNION ALL ${createPlayerTotalsSubQuery(false, false, false)}  
+
+    UNION ALL ${createPlayerTotalsSubQuery(true, true, true)}  
+    UNION ALL ${createPlayerTotalsSubQuery(true, true, false)}  
+    UNION ALL ${createPlayerTotalsSubQuery(true, false, true)}  
+    UNION ALL ${createPlayerTotalsSubQuery(true, false, false)}  
     `;
 
 
 
     const result = await simpleQuery(query, vars);
 
+    //console.log(result);
 
+    //for(let i = 0; i < result.length; i++){
+
+      //  const r = result[i];
+
+      //  console.log(r.player_id, r.season_id, r.gametype_id, r.map_id, r.weapon_id, r.total_matches)
+   // }
+
+   // process.exit();
+
+
+    
     const columns = [`player_id`, `gametype_id`, `weapon_id`,
             `total_matches`, `kills`, `deaths`, `suicides`, `team_kills`, 
             `eff`, `map_id`, `max_kills`, `max_deaths`, `max_suicides`, `max_team_kills`,

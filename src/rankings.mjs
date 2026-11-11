@@ -510,13 +510,13 @@ export async function recalculateGametype(seasonId, id){
 
    
 
-   // if(arguments.length === 1) throw new Error(`You need to add seasonId parameter`);
+    if(arguments.length === 1) throw new Error(`You need to add seasonId parameter`);
  
  
     await deleteGametypeRankings(seasonId, id);
 
     
-    const playerIds = []//await getAllPlayerGametypeIds(seasonId, id);
+    const playerIds = await getAllPlayerGametypeIds(seasonId, id);
     await calculateRankings(seasonId, id, 0, playerIds);
   
 }

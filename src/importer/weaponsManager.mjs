@@ -145,13 +145,11 @@ export class WeaponsManager{
             playerIds.push(p.masterId);
         }
 
-        const promises = [updatePlayerTotals(playerIds, seasonId)];
   
-        if(seasonId !== 0){
-            promises.push(updatePlayerTotals(playerIds, 0))
-        }
+        await updatePlayerTotals(playerIds, seasonId);
 
-        await Promise.all(promises);
+
+
  
     }
 

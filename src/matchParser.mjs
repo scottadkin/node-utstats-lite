@@ -295,6 +295,7 @@ export class MatchParser{
             await this.damageManager.insertMatchData(this.players.players, this.matchId, this.map.id, this.gametype.id);
             await this.damageManager.updatePlayerTotals(this.players.players, this.gametype.id);
         }
+
         
         const mapWeaponTotalPromises = [this.weapons.updateMapTotals(0, this.map.id, this.gametype.id)];
       
@@ -303,8 +304,7 @@ export class MatchParser{
         }
 
         await Promise.all(mapWeaponTotalPromises);
-
-
+        
         if(this.classicWeaponStats.lines.length > 0){
             await this.classicWeaponStats.insertMatchStats(this.matchId, this.map.id, this.gametype.id, this.players.players, this.weapons);
         }
@@ -323,6 +323,7 @@ export class MatchParser{
         }
 
         await Promise.all(playerWeaponDamagePromises);
+      
 
 
         if(this.ctf.bMatchCTF){
@@ -335,7 +336,6 @@ export class MatchParser{
             await this.map.setBDom();
             await this.gametype.setBDom();
         }
-
 
         await calculateSeasonStats(0);
         if(seasonId !== 0){
