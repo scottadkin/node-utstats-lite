@@ -220,8 +220,6 @@ export class MatchParser{
             new Message(`Failed to create match id.`,"error")
             return;
         }
-
-        await Promise.all([this.gametype.updateTotals()]);
         
         //set player to w, d, or l
         this.players.setMatchResult(
@@ -268,8 +266,7 @@ export class MatchParser{
 
         
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
-        
-        await this.map.updateTotals();
+    
        
         const uniquePlayerIds = this.players.getUniquePlayerIds();
 

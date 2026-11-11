@@ -1,4 +1,4 @@
-import { gametypeSetBGametype, updateBasicTotals, updateGametype } from "../gametypes.mjs";
+import { gametypeSetBGametype, updateGametype } from "../gametypes.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
 import { createRandomString } from "../generic.mjs";
 
@@ -105,12 +105,6 @@ export class Gametype{
         if(this.bInsta === 0) return;
 
         this.name = `${this.name} (Instagib)`;
-    }
-
-
-    async updateTotals(){
-
-        await updateBasicTotals(this.id);
     }
 
 

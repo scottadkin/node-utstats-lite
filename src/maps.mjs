@@ -287,40 +287,11 @@ export async function getMapImages(names){
     return images;
 }
 
-
-async function calculateTotals(mapId){
-
-    const query = `SELECT COUNT(*) as total_matches,SUM(playtime) as playtime,MIN(date) as first_match,MAX(date) as last_match FROM nstats_matches WHERE map_id=?`;
-
-    const result = await simpleQuery(query, [mapId]);
-
-    if(result[0].total_matches === 0) return null;
-
-    return result[0];
-}
-
 export async function deleteMap(mapId){
 
     const query = `DELETE FROM nstats_maps WHERE id=?`;
 
     return await simpleQuery(query, [mapId]);
-}
-
-export async function updateTotals(mapId){
-
-    const totals = await calculateTotals(mapId);
-
-    if(totals === null){
-        
-        await seasonsDeleteMapStats(mapId);
-        await deleteMap(mapId);
-       // new Message(`Failed to calculate map totals.`,`error`);
-       return
-    }
-
-    const query = `UPDATE nstats_maps SET matches=?, playtime=?, first_match=?, last_match=? WHERE id=?`;
-
-    await simpleQuery(query, [totals.total_matches, totals.playtime, totals.first_match, totals.last_match, mapId]);
 }
 
 

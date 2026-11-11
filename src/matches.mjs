@@ -1,8 +1,8 @@
 import {simpleQuery, sqlInsertReturnRowId} from "./database.mjs";
 import {getMapNames, getNameById, setMatchResultsMapImages} from "./maps.mjs";
-import { getGametypeNames, updateBasicTotals as gametypeUpdateBasicTotals } from "./gametypes.mjs";
+import { getGametypeNames } from "./gametypes.mjs";
 import { getAllNames, getServerNames } from "./servers.mjs";
-import { getMapImages, updateTotals as mapUpdateTotals } from "./maps.mjs";
+import { getMapImages } from "./maps.mjs";
 import { 
     getPlayersById, getBasicPlayerInfo, getPlayerNamesByIds, 
     getPlayerIdsInMatch, updatePlayerTotals,
@@ -26,7 +26,7 @@ import { getWinner, getTeamName, sanitizePagePerPage,
  } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
-import { getValidGametypes, getValidMaps, deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
+import { deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
 import { calculateSeasonStats } from "./seasons.mjs";
 
@@ -1699,9 +1699,6 @@ export async function deleteMatch(id){
     
     }
 
-    await gametypeUpdateBasicTotals(basic.gametype_id); 
-
-    await mapUpdateTotals(basic.map_id); 
 
     await weaponCalcMapWeaponsTotals(basic.season_id, basic.map_id, basic.gametype_id); 
     if(basic.season_id !== 0){

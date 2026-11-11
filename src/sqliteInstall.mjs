@@ -1426,21 +1426,27 @@ async function updateRankingTables(){
 
 
 //2.10.0 preview 5
-async function dropServerTotalsColumns(){
+async function dropServerGametypeTotalsColumns(){
 
-    const currentColumns = await sqliteGetTableColumns("nstats_servers");
+    const tables = ["nstats_servers", "nstats_gametypes", "nstats_maps"];
 
-    const toDelete = ["matches", "playtime", "first_match", "last_match"];
+    for(let x = 0; x < tables.length; x++){
 
-    for(let i = 0; i < toDelete.length; i++){
+        const table = tables[x];
 
-        const index = currentColumns.indexOf(toDelete[i]);
+        const currentColumns = await sqliteGetTableColumns(table);
 
-        if(index === -1) continue;
+        const toDelete = ["matches", "playtime", "first_match", "last_match"];
 
-        await simpleQuery(`ALTER TABLE nstats_servers DROP COLUMN ${toDelete[i]}`);
-    }
- 
+        for(let i = 0; i < toDelete.length; i++){
+
+            const index = currentColumns.indexOf(toDelete[i]);
+
+            if(index === -1) continue;
+
+            await simpleQuery(`ALTER TABLE ${table} DROP COLUMN ${toDelete[i]}`);
+        }
+    } 
 }
 
 
@@ -1451,7 +1457,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.10.0 preview 5
     await updateRankingTables();
     await fixDuplicatePlayerProfiles();
-    await dropServerTotalsColumns();
+    await dropServerGametypeTotalsColumns();
     
 
     const queries = createTableQueries("");

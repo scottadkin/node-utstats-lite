@@ -4,7 +4,6 @@ import { changeMatchGametype, getAllMatchesGametypesPlayersTotalTeams } from "./
 import Message from "./message.mjs";
 import { calculateAllPlayerTotals } from "./players.mjs";
 import { recalculateAllRankings } from "./rankings.mjs";
-import { seasonsDeleteGametypeStats } from "./seasons.mjs";
 
 
 
@@ -21,7 +20,7 @@ async function bGametypeExist(name){
 
 async function createGametype(name){
 
-    const query = `INSERT INTO nstats_gametypes VALUES(NULL,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00', 0, 0, 0, 0)`;
+    const query = `INSERT INTO nstats_gametypes VALUES(NULL,?, 0, 0, 0, 0)`;
 
     const result = await sqlInsertReturnRowId(query, [name]);
 
@@ -93,42 +92,6 @@ export async function getGametypeNames(ids, bSkipAllGametype){
     }
 
     return data;
-}
-
-async function createTotals(gametypeId){
-
-    const query = `SELECT COUNT(*) as total_matches, MIN(date) as first_match, MAX(date) as last_match, SUM(playtime) as playtime
-    FROM nstats_matches WHERE gametype_id=?`;
-
-    const result = await simpleQuery(query, [gametypeId]);
-
-    if(result[0].total_matches === 0) return null;
-    return result[0];
-}
-
-async function updateTotals(id, totals){
-
-
-    if(totals === null){
-        //new Message(`Can't update gametype totals,first_match,last_match, or playtime are null`,"warning");
-
-        if(seasonId !== 0){
-            await seasonsDeleteGametypeStats(id);
-        }
-
-        return await simpleQuery(`DELETE FROM nstats_gametypes WHERE id=?`, [id]);
-    }
-
-    const query = `UPDATE nstats_gametypes SET matches=?,playtime=?,first_match=?,last_match=? WHERE id=?`;
-
-    return await simpleQuery(query, [totals.total_matches, totals.playtime, totals.first_match, totals.last_match, id]);
-}
-
-export async function updateBasicTotals(gametypeId){
-
-    const totals = await createTotals(gametypeId);
-
-    await updateTotals(gametypeId, totals);
 }
 
 

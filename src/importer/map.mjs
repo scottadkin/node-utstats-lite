@@ -1,5 +1,5 @@
 import { createRandomString, removeUNR } from "../generic.mjs";
-import { mapSetBGametype, updateMap, updateTotals } from "../maps.mjs";
+import { mapSetBGametype, updateMap } from "../maps.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
 
 export class Map{
@@ -34,9 +34,6 @@ export class Map{
         this.id = await updateMap(this.name);
     }
 
-    async updateTotals(){
-        await updateTotals(this.id);
-    }
 
 
     async setBCTF(){
