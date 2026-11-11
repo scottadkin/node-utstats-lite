@@ -1,4 +1,4 @@
-import { updateServer, updateServerTotals } from "../servers.mjs";
+import { updateServer } from "../servers.mjs";
 import { bImportRandomizeNames } from "../../config.mjs";
 import { createRandomString } from "../generic.mjs";
 
@@ -19,8 +19,4 @@ export class Server{
         this.id = await updateServer(this.name, this.ip, this.port);
     }
 
-    async updateTotals(){
-
-        await updateServerTotals(this.id);
-    }
 }

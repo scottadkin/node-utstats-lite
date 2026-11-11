@@ -17,7 +17,7 @@ async function bServerExist(name){
 
 async function createServer(name, ip, port){
 
-    const query = `INSERT INTO nstats_servers VALUES(NULL,?,?,?,0,0,'1999-11-30 00:00:00','1999-11-30 00:00:00')`;
+    const query = `INSERT INTO nstats_servers VALUES(NULL,?,?,?)`;
 
     const result = await sqlInsertReturnRowId(query, [name, ip, port]);
 
@@ -87,27 +87,6 @@ async function createServerTotals(serverId){
 
     return result[0];
 }
-
-
-async function updateTotals(id, totals){
-
-    const query = `UPDATE nstats_servers SET matches=?,playtime=?,first_match=?,last_match=? WHERE id=?`;
-
-    return await simpleQuery(query, [totals.total_matches, totals.playtime, totals.first_match, totals.last_match, id]);
-}
-
-export async function updateServerTotals(serverId){
-
-    const totals = await createServerTotals(serverId);
-
-    if(totals === null){
-        new Message(`Failed to createServerTotals (servers.updateServerTotals)`,"warning");
-        return;
-    }
-
-    await updateTotals(serverId, totals);
-}
-
 
 export async function getBasicList(){
 

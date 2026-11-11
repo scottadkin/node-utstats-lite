@@ -329,11 +329,7 @@ export function createTableQueries(){
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE ,
                 ip TEXT NOT NULL,
-                port INTEGER NOT NULL,
-                matches INTEGER NOT NULL,
-                playtime REAL NOT NULL,
-                first_match TEXT NOT NULL,
-                last_match TEXT NOT NULL
+                port INTEGER NOT NULL
             ) STRICT`,
 
             `CREATE TABLE IF NOT EXISTS nstats_gametypes (
@@ -1429,6 +1425,25 @@ async function updateRankingTables(){
 }
 
 
+//2.10.0 preview 5
+async function dropServerTotalsColumns(){
+
+    const currentColumns = await sqliteGetTableColumns("nstats_servers");
+
+    const toDelete = ["matches", "playtime", "first_match", "last_match"];
+
+    for(let i = 0; i < toDelete.length; i++){
+
+        const index = currentColumns.indexOf(toDelete[i]);
+
+        if(index === -1) continue;
+
+        await simpleQuery(`ALTER TABLE nstats_servers DROP COLUMN ${toDelete[i]}`);
+    }
+ 
+}
+
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1436,6 +1451,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.10.0 preview 5
     await updateRankingTables();
     await fixDuplicatePlayerProfiles();
+    await dropServerTotalsColumns();
     
 
     const queries = createTableQueries("");

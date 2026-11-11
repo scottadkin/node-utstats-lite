@@ -221,7 +221,7 @@ export class MatchParser{
             return;
         }
 
-        await Promise.all([this.server.updateTotals(), this.gametype.updateTotals()]);
+        await Promise.all([this.gametype.updateTotals()]);
         
         //set player to w, d, or l
         this.players.setMatchResult(
