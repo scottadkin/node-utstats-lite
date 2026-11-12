@@ -45,6 +45,7 @@ export async function renderSeasonCTFLeaguePage(req, res){
             data = await getSingleCTFLeague(seasonId, 0, 0, page, perPage);
         }
 
+
         //need to get latest played gametypeId and mapId
 
         const {

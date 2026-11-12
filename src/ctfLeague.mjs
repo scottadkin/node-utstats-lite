@@ -637,8 +637,16 @@ function getCTFLeagueRestrictions(seasonInfo, settings){
     
     const now = new Date(Date.now());
 
-    const seasonStartDate = (seasonInfo !== null) ? new Date(seasonInfo.start_date) : new Date(1);
-    const seasonEndDate = (seasonInfo !== null) ? new Date(seasonInfo.end_date) : now;
+
+    let seasonStartDate = new Date(0);
+    let seasonEndDate = new Date(Date.now());
+
+    //forgot to update after I allowed season 0(all times)
+    if(seasonInfo !== null && seasonInfo.id !== 0){
+        seasonStartDate = (seasonInfo !== null) ? new Date(seasonInfo.start_date) : new Date(1);
+        seasonEndDate = (seasonInfo !== null) ? new Date(seasonInfo.end_date) : now;
+    }
+
 
     let maxDaysDate = null;
 
@@ -873,7 +881,7 @@ async function bulkInsertSeasonTable(seasonId, gametypeId, mapId, data){
     if(data.length === 0) return;
 
 
-
+    
     const insertVars = [];
 
 
@@ -1035,6 +1043,7 @@ export async function calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, s
      
     FROM RankedMatches WHERE rn <=? GROUP BY player_id ORDER BY last_match DESC
     `;
+
 
     return await simpleQuery(test, vars);
 

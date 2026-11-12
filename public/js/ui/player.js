@@ -2080,7 +2080,8 @@ class PlayerCTFLeague{
         const row = [
             {
                 "display": `${data.position}${getOrdinal(parseInt(data.position))}`, 
-                "value": data.position
+                "value": data.position,
+                "className": "ordinal"
             },
             {
                 "display": name,
