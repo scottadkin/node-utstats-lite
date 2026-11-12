@@ -155,7 +155,11 @@ export async function updatePlayerTotals(playerIds, seasonId){
     if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
 
-    const vars = [playerIds];
+    const vars = [];
+
+    if(playerIds !== null){
+        vars.push(playerIds);
+    }
 
 
     const query = `WITH player_totals AS (
@@ -174,7 +178,7 @@ export async function updatePlayerTotals(playerIds, seasonId){
         FROM nstats_match_weapon_stats AS ws
         INNER JOIN nstats_matches ON nstats_matches.id = ws.match_id
         INNER JOIN nstats_match_players AS mp ON mp.player_id=ws.player_id AND mp.match_id=ws.match_id
-        WHERE ws.player_id IN (?)
+        WHERE ws.player_id IN (${(playerIds !== null) ? "?" : "SELECT id FROM nstats_players"})
         AND mp.spectator=0
         
         GROUP BY season_id,ws.player_id,ws.gametype_id,ws.map_id,ws.weapon_id
@@ -696,7 +700,8 @@ export async function recalculateAllPlayerTotals(){
 
 
     await deleteAllPlayerWeaponTotals();
-    return await updatePlayerTotals(null);
+    await updatePlayerTotals(null, 0);
+
 
     
 }
