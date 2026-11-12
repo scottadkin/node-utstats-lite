@@ -611,7 +611,7 @@ function getPlayerTotalsCTEQuery(bGroupSeasons, bGroupGametypes, bGroupMaps){
         const t = targets[i];
 
         if(t === "playtime"){
-            totals[t] = `(NULLIF(SUM(playtime), 0) / 60)`
+            totals[t] = `(SUM(playtime) / 60)`
         }else{
             totals[t] = `(SUM(${t}) * 1.0)`
         }

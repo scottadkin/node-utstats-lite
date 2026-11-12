@@ -213,8 +213,6 @@ async function insertPlayerTotals(data){
         insertVars.push(vars);
     }
 
-
-
     return await sqlInsertOnDuplicateUpdate(t, columns, insertVars, ["player_id", "season_id", "gametype_id", "map_id"]);
     //return await bulkInsert(query, insertVars);
 }
@@ -264,12 +262,12 @@ function createSumQueryString(type){
     return sumString;
 }
 
-function createTotalsForPTQuery(bGroupGametypes, bGroupMaps){
+function createTotalsForPTQuery(bGroupSeasons, bGroupGametypes, bGroupMaps){
 
     const sumString = createSumQueryString("groupedTotals");
 
     
-    const playtime = `(SUM(playtime) * 1.0) / 60`;
+    const minutes = `(SUM(playtime) / 60)`;
     const totalMatches = `SUM(total_matches)`;
 
 
@@ -298,23 +296,23 @@ function createTotalsForPTQuery(bGroupGametypes, bGroupMaps){
     }
 
     return `SELECT player_id,
-    season_id,
+    ${(bGroupSeasons) ? "season_id" : "0 as season_id"},
     ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
     ${(bGroupMaps) ? "map_id" : "0 as map_id"},
     ${sumString}
-    ${totals.flag_taken} / ${playtime} as epm_flag_taken,
-    ${totals.flag_pickup} / ${playtime} as epm_flag_pickup,
-    ${totals.flag_drop} / ${playtime} as epm_flag_drop,
-    ${totals.flag_assist} / ${playtime} as epm_flag_assist,
-    ${totals.flag_cover} / ${playtime} as epm_flag_cover,
-    ${totals.flag_seal} / ${playtime} as epm_flag_seal,
-    ${totals.flag_cap} / ${playtime} as epm_flag_cap,
-    ${totals.flag_kill} / ${playtime} as epm_flag_kill,
-    ${totals.flag_return} / ${playtime} as epm_flag_return,
-    ${totals.flag_return_base} / ${playtime} as epm_flag_return_base,
-    ${totals.flag_return_mid} / ${playtime} as epm_flag_return_mid,
-    ${totals.flag_return_enemy_base} / ${playtime} as epm_flag_return_enemy_base,
-    ${totals.flag_return_save} / ${playtime} as epm_flag_return_save,
+    ${totals.flag_taken} / ${minutes} as epm_flag_taken,
+    ${totals.flag_pickup} / ${minutes} as epm_flag_pickup,
+    ${totals.flag_drop} / ${minutes} as epm_flag_drop,
+    ${totals.flag_assist} / ${minutes} as epm_flag_assist,
+    ${totals.flag_cover} / ${minutes} as epm_flag_cover,
+    ${totals.flag_seal} / ${minutes} as epm_flag_seal,
+    ${totals.flag_cap} / ${minutes} as epm_flag_cap,
+    ${totals.flag_kill} / ${minutes} as epm_flag_kill,
+    ${totals.flag_return} / ${minutes} as epm_flag_return,
+    ${totals.flag_return_base} / ${minutes} as epm_flag_return_base,
+    ${totals.flag_return_mid} / ${minutes} as epm_flag_return_mid,
+    ${totals.flag_return_enemy_base} / ${minutes} as epm_flag_return_enemy_base,
+    ${totals.flag_return_save} / ${minutes} as epm_flag_return_save,
 
     ${totals.flag_taken} / ${totalMatches} as avg_flag_taken,
     ${totals.flag_pickup} / ${totalMatches} as avg_flag_pickup,
@@ -329,14 +327,20 @@ function createTotalsForPTQuery(bGroupGametypes, bGroupMaps){
     ${totals.flag_return_mid} / ${totalMatches} as avg_flag_return_mid,
     ${totals.flag_return_enemy_base} / ${totalMatches} as avg_flag_return_enemy_base,
     ${totals.flag_return_save} / ${totalMatches} as avg_flag_return_save,
+    SUM(playtime) as playtime,
 
     MIN(flag_carry_time_min) as flag_carry_time_min,
     MAX(flag_carry_time_max) as flag_carry_time_max,
-    SUM(total_matches) as total_matches,
-    SUM(playtime) as playtime
-    FROM pt GROUP BY player_id${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
+    SUM(total_matches) as total_matches
+    FROM pt GROUP BY player_id${(bGroupSeasons)? ",season_id": ""}${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
 }
 
+/**
+ * update all time and season totals if seasonId is not 0
+ * @param {*} playerIds 
+ * @param {*} seasonId 
+ * @returns 
+ */
 export async function updatePlayerTotals(playerIds, seasonId){
 
     if(playerIds.length === 0) return;
@@ -350,37 +354,51 @@ export async function updatePlayerTotals(playerIds, seasonId){
     let where = "";
     let vars = [playerIds];
 
+    let seasonsUnions = ``;
     if(seasonId !== 0){
-        where = " AND season_id=? ";
-        vars.push(seasonId);
+        //where = " AND season_id=? ";
+       // vars.push(seasonId);
+
+       seasonsUnions = `--all time
+        UNION ALL ${createTotalsForPTQuery(true, false, false)}
+        --gametype totals
+        UNION ALL ${createTotalsForPTQuery(true, true, false)}
+        --map totals
+        UNION ALL ${createTotalsForPTQuery(true, false, true)}
+        --map + gametypeTotals
+        UNION ALL ${createTotalsForPTQuery(true, true, true)}`
     }
 
     const query = `WITH pt AS (SELECT c.player_id,
         c.gametype_id,
         c.map_id,
-        ${seasonId} as season_id,
+        nstats_matches.season_id,
         COUNT(*) as total_matches,
         SUM(nstats_match_players.time_on_server) as playtime,
         ${sumString}
         MIN(flag_carry_time_min) as flag_carry_time_min,
         MAX(flag_carry_time_max) as flag_carry_time_max
         FROM nstats_match_ctf AS c 
-        INNER JOIN nstats_match_players ON nstats_match_players.match_id = c.match_id AND nstats_match_players.player_id = c.player_id
-        WHERE c.player_id IN(?)${where} GROUP BY c.player_id,c.gametype_id,c.map_id
+        INNER JOIN nstats_matches ON nstats_matches.id = nstats_match_players.match_id
+        INNER JOIN nstats_match_players ON nstats_match_players.match_id = c.match_id AND nstats_match_players.player_id = c.player_id  
+        WHERE c.player_id IN(?)${where} GROUP BY nstats_matches.season_id,c.player_id,c.gametype_id,c.map_id
     )
     
     --all time
-    ${createTotalsForPTQuery(false, false)}
+    ${createTotalsForPTQuery(false, false, false)}
     --gametype totals
-    UNION ALL ${createTotalsForPTQuery(true, false)}
+    UNION ALL ${createTotalsForPTQuery(false, true, false)}
     --map totals
-    UNION ALL ${createTotalsForPTQuery(false, true)}
+    UNION ALL ${createTotalsForPTQuery(false, false, true)}
     --map + gametypeTotals
-    UNION ALL ${createTotalsForPTQuery(true, true)}
+    UNION ALL ${createTotalsForPTQuery(false, true, true)}
+    ${seasonsUnions}
     `;
 
 
     const result = await simpleQuery(query, vars);
+
+
 
     await insertPlayerTotals(result);
 }

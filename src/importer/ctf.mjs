@@ -252,14 +252,10 @@ export class CTF{
             playerIds.push(p.masterId);
         }
 
-        const promises = [];
 
-        promises.push(updatePlayerTotals(playerIds, 0));
-        if(seasonId !== 0){
-            promises.push(updatePlayerTotals(playerIds, seasonId));
-        }
+        await updatePlayerTotals(playerIds, seasonId);
 
-        await Promise.all(promises);
+  
        
     }
 

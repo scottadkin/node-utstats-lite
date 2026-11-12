@@ -302,19 +302,22 @@ export class MatchParser{
         }
 
 
-        await this.playerWeaponDamage.insertPlayerMatchData(this.matchId, this.gametype.id, this.map.id);
+        if(this.playerWeaponDamage.bFoundData){
 
-        const playerWeaponDamagePromises = [this.playerWeaponDamage.updatePlayerTotals(seasonId, this.gametype.id, this.map.id)];
+            await this.playerWeaponDamage.insertPlayerMatchData(this.matchId, this.gametype.id, this.map.id);
 
-        if(seasonId !== 0){
+            const playerWeaponDamagePromises = [this.playerWeaponDamage.updatePlayerTotals(seasonId, this.gametype.id, this.map.id)];
 
-            playerWeaponDamagePromises.push(
+            if(seasonId !== 0){
 
-                this.playerWeaponDamage.updatePlayerTotals(0, this.gametype.id, this.map.id)
-            );
+                playerWeaponDamagePromises.push(
+
+                    this.playerWeaponDamage.updatePlayerTotals(0, this.gametype.id, this.map.id)
+                );
+            }
+
+            await Promise.all(playerWeaponDamagePromises);
         }
-
-        await Promise.all(playerWeaponDamagePromises);
       
 
 
