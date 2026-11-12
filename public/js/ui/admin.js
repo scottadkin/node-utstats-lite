@@ -1137,6 +1137,7 @@ class AdminMapsManager{
 
 
         const rows = [];
+        
 
         for(let i = 0; i < this.mapList.length; i++){
 

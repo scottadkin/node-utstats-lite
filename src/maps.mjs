@@ -1005,7 +1005,12 @@ export async function searchMaps(name, dirtyPage, dirtyPerPage, sortBy, order, s
 
 export async function getAllMaps(){
 
-    const query = `SELECT * FROM nstats_maps ORDER BY name ASC`;
+    const query = `SELECT m.id,m.name,m.b_ctf,m.b_dom,m.b_as,m.b_mh,
+    uc.last_match,uc.playtime 
+    FROM nstats_maps as m 
+    INNER JOIN nstats_seasons_unique_match_combinations as uc 
+    ON uc.map_id = m.id AND uc.season_id=0 AND uc.gametype_id=0 AND uc.map_id!=0 AND uc.server_id=0
+    ORDER BY m.name ASC`;
 
     return await simpleQuery(query);
 }
