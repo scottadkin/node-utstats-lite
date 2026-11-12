@@ -90,7 +90,11 @@ async function createServerTotals(serverId){
 
 export async function getBasicList(){
 
-    const query = `SELECT * FROM nstats_servers ORDER by NAME ASC`;
+    const query = `SELECT s.id,s.name,s.port,s.ip,
+    uc.first_match,uc.last_match,uc.playtime,uc.matches FROM nstats_servers AS s 
+    LEFT JOIN nstats_seasons_unique_match_combinations as uc ON 
+    uc.server_id=s.id AND uc.season_id=0 AND uc.gametype_id=0 AND uc.map_id=0
+    ORDER by s.name ASC`;
 
     return await simpleQuery(query);
 }

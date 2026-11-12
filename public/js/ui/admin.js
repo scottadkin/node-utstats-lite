@@ -3852,8 +3852,10 @@ class AdminServersManager{
         UIHeader(this.wrapper, "Server List");
 
         const tableOptions = {
-            "width": 1,
-            "headers": ["Name","First Match","Last Match", "Playtime", "Total Matches"]
+            "className": "t-width-1",
+            "headers": ["Name","First Match","Last Match", "Playtime", "Total Matches"].map((h) =>{
+                return {"display": h}
+            })
         };
 
         const data = [];
@@ -3863,15 +3865,15 @@ class AdminServersManager{
             const s = this.servers[i];
 
             data.push([
-                {"content": s.name, "className": "text-left"}, 
-                {"content": s.first_match, "parse": ["date"], "className": "date"}, 
-                {"content": s.last_match, "parse": ["date"], "className": "date"}, 
-                {"content": s.playtime, "parse": ["playtime"], "className": "playtime"}, 
-                s.matches
+                {"value": s.name.toLowerCase(), "display": s.name, "className": "text-left"}, 
+                {"value": s.first_match, "display": toDateString(s.first_match, TIME_ZONE, true),  "className": "date"}, 
+                {"value": s.last_match, "display": toDateString(s.last_match, TIME_ZONE, true),  "className": "date"}, 
+                {"value": s.playtime, "display": toPlaytime(s.playtime), "className": "playtime"}, 
+                {"value":s.matches}
             ]);
         }
 
-        this.table = new UITable(this.wrapper, tableOptions, data);
+        this.table = new TESTUITable(this.wrapper, tableOptions, data);
 
     }
 
