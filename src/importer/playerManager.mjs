@@ -1014,20 +1014,13 @@ export class PlayerManager{
         }
 
 
-        const promises = [
-            updateMasterPlayers(masterIds, idsToCountries), 
-            updatePlayerTotals(masterIds, seasonId, gametypeId, mapId),
+        await Promise.all([
+            updateMasterPlayers(masterIds, idsToCountries),
+            updatePlayerTotals(masterIds, seasonId, gametypeId, mapId)
+        ]);
 
-        ];
 
-        if(seasonId !== 0){
 
-            promises.push(
-                updatePlayerTotals(masterIds, 0, gametypeId, mapId),
-            );
-        }
-
-        return await Promise.all(promises);
         
     }
 

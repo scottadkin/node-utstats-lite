@@ -587,7 +587,7 @@ export async function searchPlayers(name, sortBy, order, page, perPage, seasonId
  * @param {number} seasonId 
  * @returns SQL Query for the result of the player totals CTE
  */
-function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
+function getPlayerTotalsCTEQuery(bGroupSeasons, bGroupGametypes, bGroupMaps){
 
     const targets = [
         "total_matches", "playtime", "kills", "deaths", "team_kills", "suicides", "wins",
@@ -620,8 +620,6 @@ function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
 
     return `SELECT 
         player_id,
-        gametype_id,
-        map_id,
         MAX(last_active) as last_active,
         SUM(wins) as wins,
         SUM(draws) as draws,
@@ -657,9 +655,9 @@ function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
         ${totals.dom_caps} as dom_caps,
         
         ${totals.total_matches} as total_matches,
-        ${(!bGroupGametypes) ? "0 as gametype_id," : "gametype_id,"}
-        ${(!bGroupMaps) ? "0 as map_id," : "map_id,"}
-        ${seasonId} as season_id,
+        ${(!bGroupGametypes) ? "0 as gametype_id" : "gametype_id"},
+        ${(!bGroupMaps) ? "0 as map_id" : "map_id"},
+        ${(bGroupSeasons) ? "season_id" : "0 as season_id"},
         (CASE 
             WHEN ${totals.kills} > 0 AND ${totals.deaths} + ${totals.team_kills} > 0 
                 THEN ${totals.kills}  / (${totals.kills} + ${totals.deaths} + ${totals.team_kills}) * 100
@@ -754,7 +752,7 @@ function getPlayerTotalsCTEQuery(seasonId, bGroupGametypes, bGroupMaps){
         MAX(max_item_shp) as max_item_shp,
         MAX(max_dom_caps) as max_dom_caps
 
-        FROM pt GROUP BY player_id${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
+        FROM pt GROUP BY player_id${(bGroupSeasons) ? ",season_id" : ""}${(bGroupGametypes) ? ",gametype_id" : ""}${(bGroupMaps) ? ",map_id" : ""}`;
 }
 
 async function calculatePlayerTotals(seasonId, gametypeId, mapId, playerIds){
@@ -764,34 +762,42 @@ async function calculatePlayerTotals(seasonId, gametypeId, mapId, playerIds){
     let where = `WHERE spectator=0  AND player_id IN (?)`;
     const vars = [ playerIds];
 
-    if(seasonId !== 0){
-
-        where += ` AND EXISTS(
-            SELECT 1 FROM nstats_matches
-            WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?
-        )`;
-        vars.push(seasonId);
-    }
     
+    let seasonUnions = ``;
+
+    if(seasonId !== 0){
+        seasonUnions = `
+        UNION ALL ${getPlayerTotalsCTEQuery(true, false, false)}
+            --gametype totals
+        UNION ALL ${getPlayerTotalsCTEQuery(true, true, false)}
+            --map totals
+        UNION ALL ${getPlayerTotalsCTEQuery(true, false, true)}
+            --gametype + map totals
+        UNION ALL ${getPlayerTotalsCTEQuery(true, true, true)}`;
+    }
 
     const query = `WITH pt AS (SELECT
-            gametype_id,
-            map_id,
+            nstats_match_players.gametype_id,
+            nstats_match_players.map_id,
+            nstats_matches.season_id,
             ${PLAYER_TOTALS_COLUMNS_MATCHES},
             ${PLAYER_TOTALS_MAX_COLUMNS}
             FROM nstats_match_players 
             LEFT JOIN nstats_players ON player_id = nstats_players.id
+            INNER JOIN nstats_matches ON nstats_match_players.match_id = nstats_matches.id
             ${where}
-            GROUP BY player_id,gametype_id,map_id
+            GROUP BY player_id,nstats_match_players.gametype_id,nstats_match_players.map_id
         )
             --all time
-        ${getPlayerTotalsCTEQuery(seasonId, false, false)}
+        ${getPlayerTotalsCTEQuery(false, false, false)}
             --gametype totals
-        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, false)}
+        UNION ALL ${getPlayerTotalsCTEQuery(false, true, false)}
             --map totals
-        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, false, true)}
+        UNION ALL ${getPlayerTotalsCTEQuery(false, false, true)}
             --gametype + map totals
-        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, true)}
+        UNION ALL ${getPlayerTotalsCTEQuery(false, true, true)}
+
+        ${seasonUnions}
     `;
 
     return await simpleQuery(query, vars);
@@ -815,33 +821,42 @@ async function calculateAllSingleSeason(seasonId){
     let where = `WHERE spectator=0`;
     const vars = [];
 
+    let seasonUnions = ``;
+
     if(seasonId !== 0){
 
-        where += ` AND EXISTS(
-            SELECT 1 FROM nstats_matches
-            WHERE nstats_matches.id = nstats_match_players.match_id AND nstats_matches.season_id=?
-        )`;
-        vars.push(seasonId);
+        seasonUnions = `
+        --all time
+        UNION ALL ${getPlayerTotalsCTEQuery(true, false, false)}
+        --gametype totals
+        UNION ALL ${getPlayerTotalsCTEQuery(true, true, false)}
+        --map totals
+        UNION ALL ${getPlayerTotalsCTEQuery(true, false, true)}
+        --map gametype totals
+        UNION ALL ${getPlayerTotalsCTEQuery(true, true, true)}`
     }
 
     const query = `WITH pt AS (SELECT
-            gametype_id,
-            map_id,
+            nstats_matches.season_id,
+            nstats_match_players.gametype_id,
+            nstats_match_players.map_id,
             ${PLAYER_TOTALS_COLUMNS_MATCHES},
             ${PLAYER_TOTALS_MAX_COLUMNS}
             FROM nstats_match_players 
+            INNER JOIN nstats_matches ON nstats_matches.id = nstats_match_players.match_id
             ${where}
-            GROUP BY player_id,gametype_id,map_id
+            GROUP BY player_id,nstats_match_players.gametype_id,nstats_match_players.map_id
         )
             
         --all time
-        ${getPlayerTotalsCTEQuery(seasonId, false, false)}
+        ${getPlayerTotalsCTEQuery(false, false, false)}
         --gametype totals
-        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, false)}
+        UNION ALL ${getPlayerTotalsCTEQuery(false, true, false)}
         --map totals
-        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, false, true)}
+        UNION ALL ${getPlayerTotalsCTEQuery(false, false, true)}
         --map gametype totals
-        UNION ALL ${getPlayerTotalsCTEQuery(seasonId, true, true)}
+        UNION ALL ${getPlayerTotalsCTEQuery(false, true, true)}
+        ${seasonUnions}
         `;
 
 

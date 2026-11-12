@@ -1723,10 +1723,8 @@ export async function deleteMatch(id){
    
 
     if(playerIds.length > 0){
-        await updatePlayerTotals(playerIds, basic.season_id);
-        if(basic.season_id !== 0){
-            await updatePlayerTotals(playerIds, 0);
-        }
+        await updatePlayerTotals(playerIds, basic.season_id, basic.gametype_id, basic.map_id);
+     
     }
 
 
