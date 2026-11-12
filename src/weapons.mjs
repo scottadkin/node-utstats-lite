@@ -359,7 +359,7 @@ export async function deleteAllMapWeaponsTotals(seasonId){
     return await simpleQuery(query, [seasonId]);
 }
 
-async function bulkInsertMapWeaponTotals(seasonId, totals){
+async function bulkInsertMapWeaponTotals(totals){
 
     const t = `nstats_map_weapon_totals`;
 
@@ -387,7 +387,7 @@ async function bulkInsertMapWeaponTotals(seasonId, totals){
             d.max_deaths,
             d.max_suicides,
             d.max_team_kills,
-            seasonId
+            d.season_id
         ]);
     }
 
@@ -402,7 +402,48 @@ async function bulkInsertMapWeaponTotals(seasonId, totals){
     //await bulkInsert(query, insertVars);
 }
 
-export async function calcMapWeaponsTotals(seasonId, mapId, gametypeId){
+
+function createMapTotalsQuery(bGroupSeasons, bGroupGametypes){
+
+    const kills = `SUM(kills)`;
+    const deaths = `SUM(deaths)`;
+    const suicides = `SUM(suicides)`;
+    const teamKills = `SUM(team_kills)`;
+
+    const playtime = `SUM(playtime)`
+
+    return `SELECT map_id,
+    weapon_id,
+    COUNT(DISTINCT match_id) as total_matches,
+    SUM(playtime) as total_playtime,
+    ${(bGroupSeasons) ? "season_id" : "0 as season_id"}, 
+    ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"}, 
+    ${kills} as total_kills,
+    MAX(kills) as max_kills,
+    ${deaths} as total_deaths,
+    MAX(deaths) as max_deaths,
+    ${teamKills} as total_team_kills,
+    MAX(team_kills) as max_team_kills,
+    ${suicides} as total_suicides,
+    MAX(suicides) as max_suicides,
+    ${playtime} as total_playtime,
+    COALESCE(${kills} / (NULLIF(${playtime}, 0) / 60) , 0)as kpm,
+    COALESCE(${deaths} / (NULLIF(${playtime}, 0) / 60) , 0) as dpm,
+    COALESCE(${suicides} / (NULLIF(${playtime}, 0) / 60) , 0) as spm,
+    COALESCE(${teamKills} / (NULLIF(${playtime}, 0) / 60),  0) as tkpm
+    FROM weapon_stats GROUP BY 
+    ${(bGroupSeasons) ? "season_id," : "" }weapon_id
+    ${(bGroupGametypes) ? ",gametype_id" : "" }`
+  
+}
+ 
+/**
+ * Update all time totals and season totals if seasonId is not 0
+ * @param {*} seasonId 
+ * @param {*} mapId 
+ * @returns 
+ */
+export async function calcMapWeaponsTotals(seasonId, mapId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
@@ -413,57 +454,51 @@ export async function calcMapWeaponsTotals(seasonId, mapId, gametypeId){
 
     if(seasonId !== 0){
 
-        where = `season_id=? AND `;
+        where = `m.season_id=? AND `;
         vars.unshift(seasonId);
-    }
-
-    if(gametypeId !== 0){
-        where += `gametype_id=? AND `;
-
-        vars.push(gametypeId);
-
     }
 
     vars.push(mapId);
 
 
-    const query = `
-        WITH weapon_stats AS (SELECT 
-            ${(gametypeId === 0) ? "0 as gametype_id," : "ws.gametype_id,"}
-            ws.map_id,
-            ws.weapon_id,
-            SUM(ws.kills) as total_kills,
-            MAX(ws.kills) as max_kills,
-            SUM(ws.deaths) as total_deaths,
-            MAX(ws.deaths) as max_deaths,
-            SUM(ws.team_kills) as total_team_kills,
-            MAX(ws.team_kills) as max_team_kills,
-            SUM(ws.suicides) as total_suicides,
-            MAX(ws.suicides) as max_suicides,
-            m.total_playtime,
-            m.total_matches
-        FROM nstats_match_weapon_stats AS ws
-        INNER JOIN (
-            SELECT id, map_id, SUM(playtime) as total_playtime, COUNT(*) as total_matches
-            FROM nstats_matches
-            WHERE ${where}map_id=?
-        ) as m ON ws.match_id = m.id
-        GROUP BY ${(gametypeId === 0) ? "" : "ws.gametype_id,"}ws.map_id,ws.weapon_id)
+    let seasonUnions = ``;
 
-        SELECT *,
-        ${seasonId} as season_id, 
-        COALESCE(total_kills / (NULLIF(total_playtime, 0) / 60) , 0)as kpm,
-        COALESCE(total_deaths / (NULLIF(total_playtime, 0) / 60) , 0) as dpm,
-        COALESCE(total_suicides / (NULLIF(total_playtime, 0) / 60) , 0) as spm,
-        COALESCE(total_team_kills / (NULLIF(total_playtime, 0) / 60),  0) as tkpm
-        FROM weapon_stats
-   
+    if(seasonId !== 0){
+        seasonUnions = `
+        UNION ALL ${createMapTotalsQuery(true, true)}
+        UNION ALL ${createMapTotalsQuery(true, false)}`;
+    }
+
+    const query = `
+        WITH weapon_stats AS (
+            SELECT 
+                ws.match_id,
+                m.playtime,
+                ws.gametype_id,
+                ws.map_id,
+                ws.weapon_id,
+                m.season_id,
+                ws.kills,
+                ws.deaths,
+                ws.team_kills,
+                ws.suicides
+            FROM nstats_match_weapon_stats AS ws
+            INNER JOIN nstats_matches as m ON m.id = ws.match_id
+            WHERE ${where}m.map_id=?
+        )
+
+        ${createMapTotalsQuery(false, true)}
+        UNION ALL ${createMapTotalsQuery(false, false)}
+
+        ${seasonUnions}
+        
     `;
 
     const result = await simpleQuery(query, vars);
 
 
-    await bulkInsertMapWeaponTotals(seasonId, result);
+
+    await bulkInsertMapWeaponTotals(result);
 
     return;
 }
