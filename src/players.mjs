@@ -2181,13 +2181,10 @@ export async function adminRenameForceHWIDToName(hwid, newName){
     return await simpleQuery(query, [newName, hwid]);
 }
 
-export async function getPlayersAverages(playerIds, gametypeId, mapId){
+export async function getPlayersAverages(playerIds, gametypeId, mapId, seasonId){
 
     if(playerIds.length === 0) return {};
 
-    const t = "nstats_player_totals";
-    const mT = "nstats_player_totals_max"
-  
     const columns = [
         "winrate",
         "avg_score",
@@ -2271,14 +2268,12 @@ export async function getPlayersAverages(playerIds, gametypeId, mapId){
 
     ];
 
-    let query = `SELECT ${t}.player_id,${t}.playtime,${t}.total_matches,${t}.wins,
-    ${t}.draws,${t}.losses,${t}.spree_best,${t}.multi_best,`;
+    let query = `SELECT t.player_id,t.playtime,t.total_matches,t.wins,
+    t.draws,t.losses,t.spree_best,t.multi_best,`;
    
     for(let i = 0; i < columns.length; i++){
 
         query += `${columns[i]},`;
-       // query += `printf('%.2f',${t}.${columns[i]}) as ${columns[i]},`;
-       // if(i < columns.length - 1) query += `,`;
     }
 
     for(let i = 0; i < maxColumns.length; i++){
@@ -2287,11 +2282,13 @@ export async function getPlayersAverages(playerIds, gametypeId, mapId){
         if(i < maxColumns.length - 1) query += `,`;
     }
 
-    query += ` FROM ${t} 
-    INNER JOIN ${mT} ON (${t}.player_id = ${mT}.player_id AND ${t}.gametype_id= ${mT}.gametype_id AND ${t}.map_id = ${mT}.map_id)
-    WHERE ${t}.player_id IN (?) AND ${t}.gametype_id=? AND ${t}.map_id=?`;
-    
-    const result = await simpleQuery(query, [playerIds, gametypeId, mapId]);
+    query += ` FROM nstats_player_totals as t 
+    INNER JOIN nstats_player_totals_max as mt ON 
+    t.player_id = mt.player_id AND t.gametype_id= mt.gametype_id AND t.map_id = mt.map_id AND t.season_id = mt.season_id
+    WHERE t.player_id IN (?) AND t.gametype_id=? AND t.map_id=? AND t.season_id=?`;
+
+  
+    const result = await simpleQuery(query, [playerIds, gametypeId, mapId, seasonId]);
     
     const data = {};
 

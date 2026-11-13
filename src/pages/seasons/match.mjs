@@ -23,7 +23,7 @@ export async function renderSeasonMatchPage(req, res){
 
         
         
-        const data = await getMatchData(matchId);
+        const data = await getMatchData(matchId, seasonId);
 
         if(data.error !== undefined){
 

@@ -1309,7 +1309,7 @@ export async function getMatchLadderJSON(id){
 
 
 
-export async function getCTFPlayersAverages(playerIds, gametypeId, mapId){
+export async function getCTFPlayersAverages(playerIds, gametypeId, mapId, seasonId){
 
     if(playerIds.length === 0) return {};
 
@@ -1330,9 +1330,6 @@ export async function getCTFPlayersAverages(playerIds, gametypeId, mapId){
     ];
 
     let query = `SELECT player_id,playtime,total_matches,`;
-   // max_flag_taken,max_flag_pickup,max_flag_drop,max_flag_assist,max_flag_cover,
-    //max_flag_seal,max_flag_cap,max_flag_kill,max_flag_return,max_flag_return_base,
-    //max_flag_return_mid,max_flag_return_enemy_base,max_flag_return_save`;
 
     for(let i = 0; i < columns.length; i++){
 
@@ -1343,9 +1340,9 @@ export async function getCTFPlayersAverages(playerIds, gametypeId, mapId){
     }
 
 
-    query += ` FROM nstats_player_totals_ctf WHERE player_id IN (?) AND gametype_id=? AND map_id=?`;
+    query += ` FROM nstats_player_totals_ctf WHERE player_id IN (?) AND gametype_id=? AND map_id=? AND season_id=?`;
 
-    const result = await simpleQuery(query, [playerIds, gametypeId, mapId]);
+    const result = await simpleQuery(query, [playerIds, gametypeId, mapId, seasonId]);
 
     
 

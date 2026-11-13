@@ -388,7 +388,7 @@ export async function bMatchExists(id){
     return false;
 }
 
-export async function getMatchData(id){
+export async function getMatchData(id, seasonId){
 
     try{
 
@@ -446,8 +446,8 @@ export async function getMatchData(id){
             getMatchKills(id), 
             ctfGetMatchData(id), 
             domGetMatchData(id),
-            getPlayersAverages([...playerIds], basic.gametype_id, basic.map_id),
-            getCTFPlayersAverages([...playerIds], basic.gametype_id, basic.map_id)
+            getPlayersAverages([...playerIds], basic.gametype_id, basic.map_id, seasonId),
+            getCTFPlayersAverages([...playerIds], basic.gametype_id, basic.map_id, seasonId)
         ]);
         
 

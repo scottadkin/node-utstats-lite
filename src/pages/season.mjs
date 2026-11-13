@@ -63,7 +63,7 @@ export async function renderSeasonPage(req, res){
     let screenshotData = null;
     
     if(pageSettings["Display Latest Screenshot"] === 1 && recentMatches.total > 0){
-        screenshotData = await getMatchData(recentMatches.data[0].id);
+        screenshotData = await getMatchData(recentMatches.data[0].id, recentMatches.data[0].season_id);
     }
 
 
