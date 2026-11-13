@@ -2132,7 +2132,7 @@ class MatchWeaponSummary{
         this.totalTeams = totalTeams;
         this.matchLength = matchLength;
 
-        this.wrapper = UIDiv(`scroll-x t-width-1`);
+        this.wrapper = UIDiv(` t-width-1`);
 
         UIHeader(this.parent, "Weapons Summary");
         this.currentMode = "kills";

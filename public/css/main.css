@@ -858,6 +858,7 @@ ul{
 
 .match-basic-info-wrapper{
     margin-bottom:var(--margin-10);
+    max-width:var(--max-text-width)
 
 }
 
@@ -871,9 +872,7 @@ ul{
 .mb-info{
 
     font-size:var(--font-size-80);
-    max-width:95%;
-    margin-left:auto;
-    margin-right:auto;
+
 }
 
 
@@ -932,8 +931,10 @@ ul{
 
 
 .weapon-icon{
-	width:68px;
-	height:26px;
+
+    max-width:100%;
+    display:block;
+    aspect-ratio: 2.66/1;
 }
 
 .vertical-text{
