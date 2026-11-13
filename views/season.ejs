@@ -25,6 +25,38 @@
 
 <script>
 
+    const messages = {
+        "account-created": {
+            "content": `Your account has been created, you have to wait for an admin to activate your account before you can login.`,
+            "type": "pass"
+        },
+        "banned": {
+            "content": `You have been banned from login attempts due to too many failed login attempts, please try again later.`,
+            "type": "error"
+        },
+        "already": {
+            "content": `You are already logged in.`,
+            "type": "error"
+        },
+        "login": {
+            "content": `You have logged in successfully`,
+            "type": "pass"
+        },
+        "logout": {
+            "content": `You have successfully logged out`,
+            "type": "pass"
+        },
+    };
+
+
+    const message = "<%= locals.message %>";
+
+    if(message !== "" && messages[message] !== undefined){
+
+        const m = messages[message];
+
+        new UINotification(m.type, "Notice", m.content);
+    }
 
 
     new SeasonPage(

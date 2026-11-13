@@ -66,6 +66,9 @@ export async function renderSeasonPage(req, res){
         screenshotData = await getMatchData(recentMatches.data[0].id);
     }
 
+
+    const message = req.query?.message ?? "";
+
     res.render("season.ejs",{
         req,
             "host": req.headers.host,
@@ -82,6 +85,7 @@ export async function renderSeasonPage(req, res){
             pageLayout,
             recentMatches,
             mostActivePlayers,
-            screenshotData
+            screenshotData,
+            message
         });
 }
