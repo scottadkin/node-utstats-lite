@@ -829,7 +829,7 @@ option{
 
 .header-wrapper, header{
     padding:var(--padding-10);
-    font-weight:400;
+    font-weight:500;
     margin-bottom:var(--margin-10);
 	background-color:var(--bg-header-color);
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
@@ -976,6 +976,7 @@ ul{
 #notifications-wrapper{
     position:fixed;
     top:0;
+    left:0;
     width:100%;
     background-color:var(--bg-color-dark);
     text-align: center;
