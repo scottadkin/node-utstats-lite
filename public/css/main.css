@@ -864,8 +864,7 @@ ul{
 
 .match-basic-info-wrapper-info{
 	padding-top:var(--padding-5);
-    
-	line-height: var(--line-height-1);
+
 
 }
 
@@ -1439,15 +1438,14 @@ section{
     grid-template-columns: auto 24px;
     border-top:1px dashed rgba(255,255,255,0.1);
     border-bottom:1px dashed rgba(255,255,255,0.1);
+    transition: var(--transition-all);
 }
 
-.collapsible:hover{
-    background-color: var(--bg-color-mid);
-}
 
 .collapsible-button{
 
     max-height:24px;
+    background-color: black;
 }
 
 .collapsible-button-img{

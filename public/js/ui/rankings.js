@@ -226,19 +226,26 @@ class RankingsExplain{
 
         this.wrapper = UIDiv();
 
-        UIHeader(this.wrapper, "Rankings Explained");
+        const header = UIHeader(this.wrapper, "Rankings Explained");
     
         this.mode = "general";
        
         this.parent.append(this.wrapper);
 
-
-        new UIInfo(this.wrapper, [`Ranking scores are calculated by total various events in matches divided by playtime.`,
+        const mainInfo = new UIInfo(null, [`Ranking scores are calculated by total various events in matches divided by playtime.`,
             UIBr(),
             `Players must participate in a minimum of ${this.minMatchesSetting} matches before getting a ranking score.`]);
+
+        this.mainContent = [mainInfo.createElems()];
+
+        new UICollapsibleDiv(this.wrapper, ["Explain Rankings"], this.mainContent, "text-center");
+
+     
+        
   
         
         this.createTabs();
+
         this.renderContent();
     }
 
@@ -250,12 +257,16 @@ class RankingsExplain{
             {"display": "CTF Events", "value": "ctf"},
             {"display": "Penalties", "value": "penalty"},
         ];
-        this.tabs = new UITabs(this.wrapper, options, this.mode);
+
+        this.tabsWrapper = UIDiv();
+        this.tabs = new UITabs(this.tabsWrapper , options, this.mode);
 
         this.tabs.wrapper.addEventListener("tabChanged", (e) =>{
             this.mode = e.detail.newTab;
             this.renderContent();
         });
+
+        this.mainContent.push(this.tabsWrapper);
     }
 
     renderContent(){
@@ -265,6 +276,14 @@ class RankingsExplain{
         let settings = this.settings[this.mode];
 
         if(settings === undefined) return;
+
+
+        if(this.tableWrapper === undefined){
+            this.tableWrapper = UIDiv();
+
+            this.mainContent.push(this.tableWrapper);
+            
+        }
 
         settings = Object.values(settings);
 
@@ -306,14 +325,14 @@ class RankingsExplain{
         };
 
         if(this.table === undefined){
-            this.table = new TESTUITable(this.wrapper, tableOptions, rows);
+            this.table = new TESTUITable(this.tableWrapper, tableOptions, rows);
         }else{
 
             this.table.setSortBy((this.mode !== "penalty") ? 0 : 1);
             this.table.updateRows(rows);
         }
         
-
+        
         
     }
 }
