@@ -219,3 +219,92 @@ class CTFLeagueTable{
         new UIPagination(this.parent, url, this.data.totalRows, this.perPage, this.currentPage);
     }
 }
+
+
+class CTFLeagueInfo{
+
+    constructor(parent, mode, maxMatchAge, maxPlayerMatches, seasonInfo, lastLeagueRefresh){
+
+        this.parent = document.querySelector(parent);
+
+        this.mode = mode;
+        this.maxMatchAge = maxMatchAge;
+        this.maxPlayerMatches = maxPlayerMatches;
+        this.seasonInfo = seasonInfo;
+        this.lastLeagueRefresh = lastLeagueRefresh;
+
+        this.createElems();
+
+    }
+
+    getLeagueType(mode){
+
+        let leagueType = "Unknown";
+
+        if(mode === "gametypes") leagueType = "Gametype";
+        if(mode === "maps") leagueType = "Map";
+        if(mode === "combined") leagueType = "Combined(Any CTF Gametype and Map combination)";
+
+        return leagueType;
+    }
+    createElems(){
+
+        this.wrapper = UIDiv();
+
+        const listItems = [
+            [UIB("3 Points"), ` per match for players on the winning team.`],
+            [UIB("1 Point"), ` per match for players for tie games.`],
+            [UIB("0 Points"), ` per match for players on the losing team.`],
+        ];
+
+
+        if(this.maxMatchAge === 0 && this.seasonInfo.id === 0){
+            listItems.push([
+                `Only matches played in the previous `,UIB(this.maxMatchAge), ` ${plural(this.maxMatchAge, "day")} are counted towards a league.`
+            ]);
+        }
+
+        if(this.maxMatchAge !== 0 && this.seasonInfo.id !== 0){
+
+            const startDateByDayLimit = new Date(new Date(this.seasonInfo.end_date ?? new Date(Date.now())) - (60 * 60 * 24 * 1000) * this.maxMatchAge);
+            const seasonStartDate = new Date(this.seasonInfo.start_date ?? new Date(0));
+
+            const realStartDate = (startDateByDayLimit < seasonStartDate) ? seasonStartDate : startDateByDayLimit; 
+            const endDate = new Date(this.seasonInfo.end_date ?? new Date(Date.now()))
+
+            listItems.push([
+
+                "Only matches played between ", UIB(toDateString(realStartDate.toISOString())),
+                " and ", UIB(toDateString(endDate.toISOString())), " are counted towards a league."
+            ]);
+
+        }
+
+        if(this.maxPlayerMatches !== 0){
+
+            listItems.push(
+                [
+                    "Players have a maximum of ", 
+                    UIB(this.maxPlayerMatches), 
+                    " ", 
+                    plural(this.maxPlayerMatches, "match"), 
+                    " counted towards a league, only their most recent will be counted if they play more"
+                ]
+            );
+        }
+
+        const openContent = [
+            UIUnorderedList(listItems),
+            UIBr(),
+            `Last whole ${this.getLeagueType(this.mode)} league refresh took place on `, UIB(this.lastLeagueRefresh),
+            UIBr(),
+            `All leagues are refreshed once every 24 hours to remove players and matches outside the specified time frame, 
+            and every time a match with the same gametype or map is imported.`
+        ];
+
+        
+       
+        new UICollapsibleDiv(this.parent, ["About CTF League"], openContent, "max-text-width center", "text-center");
+        this.parent.append(UIBr());
+    }
+}

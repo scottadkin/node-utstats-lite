@@ -2233,3 +2233,20 @@ class UICollapsibleDiv{
         }
     }
 }
+
+
+function UIInterfaceIcon(type){
+
+    type = type.toLowerCase();
+
+    const types = {
+        "info": "info.svg"
+    };
+
+    if(types[type] === undefined) throw new Error("Unknown interface icon");
+
+    const elem = new Image();
+    elem.src = `/images/${types[type]}`;
+    elem.className = "interface-icon"
+    return elem;
+}

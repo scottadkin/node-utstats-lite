@@ -8,12 +8,9 @@
     
 <%- include("timeZone.ejs", {timeZone})%>
 
-<%
-const jsBase = `/js/`;
-%>
 
-<script src="<%= jsBase %>ui/table.js"></script>
-<script src="<%= jsBase %>ui/ctfLeague.js"></script>
+<script src="/js/ui/table.js"></script>
+<script src="/js/ui/ctfLeague.js"></script>
 
 
 <div id="root">
@@ -22,82 +19,43 @@ const jsBase = `/js/`;
     <div id="tabs"></div>
     <script>
         renderTypeTabs("#tabs", "<%= mode %>", "<%= seasonId %>", <%- locals.bSkipSeasonLinks %>);
+
+        new CTFLeagueFilterForm(
+            "#root", 
+            "<%= mode %>", 
+            <%- JSON.stringify(gametypeNames) %>, 
+            <%- JSON.stringify(mapNames) %>, 
+            "<%= id %>", 
+            "<%= gId %>", 
+            "<%= seasonId %>",
+            <%- locals.bSkipSeasonLinks %>
+        );
+
+        new CTFLeagueInfo(
+            "#root",
+            "<%= mode %>",       
+            <%- maxMatchAge %>,
+            <%- maxMatchesPerPlayer %>,
+            <%- JSON.stringify(seasonInfo) %>,
+            "<%= lastLeagueRefresh %>"
+            
+
+        ); 
+
+        new CTFLeagueTable(
+            "#root", 
+            "<%= mode %>", 
+            <%- JSON.stringify(data) %>,  
+            "<%= id %>", 
+            "<%= gId %>", 
+            "<%= page %>", 
+            "<%= perPage %>", 
+            "<%= subHeader %>", 
+            "<%= seasonId %>",
+            <%- locals.bSkipSeasonLinks %>
+        );
     </script>
-    <div class="info">
-        
-        <div class="info-text">
-            <b>3 points</b> if the player is on the winning team, <b>1 point</b> for a tie, and <b>0 points</b> for a loss.
-            <br>
-            <% 
 
-            let leagueType = "Unknown";
-
-            if(mode === "gametypes") leagueType = "Gametype";
-            if(mode === "maps") leagueType = "Map";
-            if(mode === "combined") leagueType = "Combined(Any CTF Gametype and Map combination)";
-
-            if(maxMatchAge != 0 && seasonId == 0){
-                %>
-                    Only matches played in the previous <b><%= parseInt(maxMatchAge) %> days</b> are counted towards a league.<br>
-                <%
-            }else if(maxMatchAge != 0 && seasonId != 0){
-
-                const startDateByDayLimit = new Date(new Date(seasonInfo.end_date) - (60 * 60 * 24 * 1000) * maxMatchAge);
-                const seasonStartDate = new Date(seasonInfo.start_date);
-
-                let realStartDate = (startDateByDayLimit < seasonStartDate) ? seasonStartDate : startDateByDayLimit; 
-
-                %>
-                    
-                    Only matches played between <b><%= realStartDate.toISOString() %></b> and <b><%= new Date(seasonInfo.end_date).toISOString() %></b> are counted.<br>
-                <%
-            }
-
-            if(maxMatchesPerPlayer != 0){
-                %>
-                    Players have a maximum of <b><%= parseInt(maxMatchesPerPlayer) %> matches</b> counted towards a league, only their most recent will be counted if they play more.<br>
-                <%
-            }
-        
-
-        %>
-        </div>
-    </div>
-    
-
-
-<script>
-    new CTFLeagueFilterForm(
-        "#root", 
-        "<%= mode %>", 
-        <%- JSON.stringify(gametypeNames) %>, 
-        <%- JSON.stringify(mapNames) %>, 
-        "<%= id %>", 
-        "<%= gId %>", 
-        "<%= seasonId %>",
-        <%- locals.bSkipSeasonLinks %>
-    );
-    new CTFLeagueTable(
-        "#root", 
-        "<%= mode %>", 
-        <%- JSON.stringify(data) %>,  
-        "<%= id %>", 
-        "<%= gId %>", 
-        "<%= page %>", 
-        "<%= perPage %>", 
-        "<%= subHeader %>", 
-        "<%= seasonId %>",
-        <%- locals.bSkipSeasonLinks %>
-    );
-</script>
-<div class="info">
-    <div class="info-text">
-        Last whole <b><%= leagueType %></b> League refresh was <b><%= lastLeagueRefresh %></b><br/>
-        All leagues are refreshed once every 24 hours to remove players and matches outside the specified time frame, 
-        and every time a match with the same gametype or map is imported.
-    </div>
-    
-</div>
 </div>
 
 <%- include("footer.ejs") -%>

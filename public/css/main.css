@@ -271,6 +271,7 @@ b{
     font-size:var(--font-size-80);
     margin-left:auto;
     margin-right:auto;
+    max-width:var(--max-text-width)
 }
 
 label, .form-label, .form-read-only{
@@ -1448,7 +1449,7 @@ section{
 
 .collapsible-closed{
     background-color:var(--bg-color-mid);  
-    box-shadow: var(--box-shadow-1);
+    border:1px solid var(--border-color-1);
 }
 
 .collapsible-closed:hover{
@@ -1475,4 +1476,13 @@ section{
 
 .padding-left-5{
     padding-left:var(--padding-5);
+}
+
+.interface-icon{
+    width:24px;
+    height:24px;
+}
+
+.max-text-width{
+    max-width: var(--max-text-width);
 }
