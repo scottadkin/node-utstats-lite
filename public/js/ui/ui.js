@@ -575,6 +575,7 @@ function UIHeader(parent, text, id, bUseHeaderDom){
 
     if(parent !== null){
         parent.append(elem);
+        return elem;
     }else{
         return elem;
     }
@@ -2145,15 +2146,18 @@ function getPageComponentIndex(pageLayoutSettings, targetName){
 
 class UICollapsibleDiv{
 
-    constructor(parent, collapsedContent, mainContent, className){
+    constructor(parent, collapsedContent, mainContent, openClassName, closedClassName){
 
         if(!Array.isArray(collapsedContent) || !Array.isArray(mainContent)){
             throw new Error(`collapsedContent and mainContent must be an Array of elements`);
         }
 
+
+
         this.parent = getHTMLDom(parent);
         
-        this.className = className;
+        this.closedClassName = closedClassName;
+        this.openClassName = openClassName;
 
         this.collapsedContent = collapsedContent;
         this.mainContent = mainContent;
@@ -2164,12 +2168,33 @@ class UICollapsibleDiv{
         this.render();
     }
 
+
+    getWrapperClass(){
+
+        let className = "collapsible";
+
+        if(this.bCollapsed) className += ` collapsible-closed`;
+
+        return className;
+    }
+
+
+    setContentClass(){
+
+        let className = this.closedClassName;
+
+        if(!this.bCollapsed) className = this.openClassName;
+
+        this.content.className = className;
+
+    }
+
     createElems(){
 
-        this.wrapper = UIDiv("collapsible");
+        this.wrapper = UIDiv(this.getWrapperClass());
 
         this.content = UIDiv();
-        if(this.className !== undefined) this.content.className = this.className;
+        this.setContentClass();
         this.toggleButton = UIDiv("collapsible-button");
 
         const test = new Image();
@@ -2188,7 +2213,7 @@ class UICollapsibleDiv{
             this.render();
         });
 
-        this.wrapper.append(this.content, this.toggleButton);
+        this.wrapper.append(this.toggleButton, this.content);
 
 
         this.parent.append(this.wrapper);
@@ -2197,6 +2222,8 @@ class UICollapsibleDiv{
     render(){
 
         this.content.innerHTML = ``;
+        this.setContentClass();
+        this.wrapper.className = this.getWrapperClass();
 
         if(this.bCollapsed){
 

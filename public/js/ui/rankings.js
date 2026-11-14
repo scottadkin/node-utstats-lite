@@ -226,7 +226,8 @@ class RankingsExplain{
 
         this.wrapper = UIDiv();
 
-        const header = UIHeader(this.wrapper, "Rankings Explained");
+        const header = UIHeader(null, "Rankings Explained");
+        header.className += ` no-margin-bottom`;
     
         this.mode = "general";
        
@@ -236,9 +237,9 @@ class RankingsExplain{
             UIBr(),
             `Players must participate in a minimum of ${this.minMatchesSetting} matches before getting a ranking score.`]);
 
-        this.mainContent = [mainInfo.createElems()];
+        this.mainContent = [header, mainInfo.createElems()];
 
-        new UICollapsibleDiv(this.wrapper, ["Explain Rankings"], this.mainContent, "text-center");
+        new UICollapsibleDiv(this.wrapper, ["Explain Rankings"], this.mainContent, "", "text-center");
 
      
         

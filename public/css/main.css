@@ -831,6 +831,7 @@ option{
     padding:var(--padding-10);
     font-weight:500;
     margin-bottom:var(--margin-10);
+    font-size:var(--font-size-100);
 	background-color:var(--bg-header-color);
 	text-shadow: 1px 1px rgba(0,0,0,0.5);
 	border:1px solid var(--border-color-1);
@@ -871,6 +872,7 @@ ul{
 .mb-info{
 
     font-size:var(--font-size-80);
+    padding-left:var(--padding-5)
 
 }
 
@@ -1429,22 +1431,35 @@ section{
     padding:0px;
 }
 
+.no-margin-bottom{
+    margin-bottom:0px;
+}
+
 .underline{
     text-decoration: underline;
 }
 
 .collapsible{
-    display:grid;
-    grid-template-columns: auto 24px;
-    border-top:1px dashed rgba(255,255,255,0.1);
-    border-bottom:1px dashed rgba(255,255,255,0.1);
-    transition: var(--transition-all);
+    position:relative;
+    font-size:var(--font-size-80);
+    transition: var(--transition-1);
 }
 
 
-.collapsible-button{
+.collapsible-closed{
+    background-color:var(--bg-color-mid);  
+    box-shadow: var(--box-shadow-1);
+}
 
-    max-height:24px;
+.collapsible-closed:hover{
+    background-color:var(--bg-color-light);  
+}
+
+.collapsible-button{
+    position:absolute;
+    right:0;
+    height:24px;
+    width:24px;
     background-color: black;
 }
 
@@ -1456,4 +1471,8 @@ section{
 
 .collapsible-button:hover{
     cursor: pointer;
+}
+
+.padding-left-5{
+    padding-left:var(--padding-5);
 }

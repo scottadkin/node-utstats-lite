@@ -52,7 +52,7 @@ function renderBasicInfo(parent, data, players){
         UIMBInfo("Mutators", data.mutators)
     );
 
-    new UICollapsibleDiv(infoElems,  ["Match Settings"], matchSettingsElems, "mb-info");
+    new UICollapsibleDiv(infoElems,  ["Match Settings"], matchSettingsElems, "", "padding-left-5");
 
     wrapper.append(infoElems);
 
