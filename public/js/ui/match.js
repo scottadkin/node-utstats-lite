@@ -35,21 +35,24 @@ function renderBasicInfo(parent, data, players){
         UIMBInfo("Players", data.players)
     );
 
+    const matchSettingsElems = [];
+
     if(data.target_score !== 0){
-        infoElems.append(UIMBInfo("Target Score", data.target_score));
+        matchSettingsElems.push(UIMBInfo("Target Score", data.target_score));
     }
 
     if(data.time_limit !== 0){
-        infoElems.append(UIMBInfo("Time Limit", data.time_limit));
+        matchSettingsElems.push(UIMBInfo("Time Limit", data.time_limit));
     }
 
-
-    infoElems.append(
+    matchSettingsElems.push(
         UIMBInfo("Gamespeed", `${data.gamespeed_real}%`),
         UIMBInfo("Tournament Mode", `${(data.tournament_mode === 1) ? "True" : "False"}`),
         UIMBInfo("Server",  data.server_name),
         UIMBInfo("Mutators", data.mutators)
     );
+
+    new UICollapsibleDiv(infoElems,  ["Match Settings"], matchSettingsElems, "mb-info");
 
     wrapper.append(infoElems);
 
@@ -278,7 +281,7 @@ class MatchFragsSummary{
                 {
                     "value": p.time_on_server, 
                     "display": MMSS(p.time_on_server), 
-                    "className": `${teamColorClass} playtime`
+                    "className": `playtime`
                 },
                 {"value": p.score, "display": createAverageCompareTD(averages.avg_score, p.score), "bSkipTD": true},
                 {"value": p.frags, "display": createAverageCompareTD(averages.avg_frags, p.frags), "bSkipTD": true }, 

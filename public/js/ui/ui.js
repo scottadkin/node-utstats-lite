@@ -53,6 +53,23 @@ function UILabel(label, htmlFor){
 }
 
 /**
+ *  Gets the HTMLElement if it's a string or returns original input 
+ * @param {string | HTMLElement} input 
+ */
+function getHTMLDom(input){
+
+    if(typeof input === "string"){
+        const elem = document.querySelector(input);
+
+        if(elem === null) throw new Error(`Failed to get element, getParentDom()`);
+
+        return elem;
+    }
+
+    return input;
+}
+
+/**
  * If parent is null return the element else append
  * @param {HTMLElement | null} parent 
  * @param {*} data 
@@ -2124,4 +2141,68 @@ function getPageComponentIndex(pageLayoutSettings, targetName){
     }
 
     return null;
+}
+
+class UICollapsibleDiv{
+
+    constructor(parent, collapsedContent, mainContent, className){
+
+        if(!Array.isArray(collapsedContent) || !Array.isArray(mainContent)){
+            throw new Error(`collapsedContent and mainContent must be an Array of elements`);
+        }
+
+        this.parent = getHTMLDom(parent);
+        
+        this.className = className;
+
+        this.collapsedContent = collapsedContent;
+        this.mainContent = mainContent;
+
+        this.bCollapsed = true;
+
+        this.createElems();
+        this.render();
+    }
+
+    createElems(){
+
+        this.wrapper = UIDiv("collapsible");
+
+        this.content = UIDiv();
+        if(this.className !== undefined) this.content.className = this.className;
+        this.toggleButton = UIDiv("collapsible-button");
+
+        const test = new Image();
+        test.src = `/images/expand.svg`;
+        test.className = "collapsible-button-img";
+        this.toggleButton.append(test);
+
+        this.toggleButton.addEventListener("click", () =>{
+
+            this.bCollapsed = !this.bCollapsed;
+            if(this.bCollapsed){
+                test.src = "/images/expand.svg";
+            }else{
+                test.src = "/images/collapse.svg";
+            }
+            this.render();
+        });
+
+        this.wrapper.append(this.content, this.toggleButton);
+
+
+        this.parent.append(this.wrapper);
+    }
+
+    render(){
+
+        this.content.innerHTML = ``;
+
+        if(this.bCollapsed){
+
+            this.content.append(...this.collapsedContent);
+        }else{
+            this.content.append(...this.mainContent);
+        }
+    }
 }

@@ -387,7 +387,7 @@ th:hover{
 
 td{
 	padding:0px var(--padding-3);
-	font-size:var(--font-size-80);
+	font-size:var(--font-size-70);
 	font-weight:500;
     line-height: 2rem;
 }
@@ -1432,4 +1432,30 @@ section{
 
 .underline{
     text-decoration: underline;
+}
+
+.collapsible{
+    display:grid;
+    grid-template-columns: auto 24px;
+    border-top:1px dashed rgba(255,255,255,0.1);
+    border-bottom:1px dashed rgba(255,255,255,0.1);
+}
+
+.collapsible:hover{
+    background-color: var(--bg-color-mid);
+}
+
+.collapsible-button{
+
+    max-height:24px;
+}
+
+.collapsible-button-img{
+    max-width:100%;
+    height:100%;
+    justify-content: baseline;
+}
+
+.collapsible-button:hover{
+    cursor: pointer;
 }

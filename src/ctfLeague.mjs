@@ -989,7 +989,10 @@ export async function calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, s
         AND nstats_matches.date >= ?
         AND nstats_matches.date <= ?
     )
-    SELECT player_id,MIN(date) as first_match, MAX(date) as last_match, SUM(time_on_server) as total_playtime,
+    SELECT player_id,
+    MIN(date) as first_match, 
+    MAX(date) as last_match, 
+    SUM(time_on_server) as total_playtime,
     COUNT(*) as total_matches,
     SUM(CASE
         WHEN match_result = 'w'
@@ -1046,6 +1049,7 @@ export async function calcSeasonTable(seasonId, gametypeId, mapId, maxMatches, s
 
 
     return await simpleQuery(test, vars);
+
 
 }
 
