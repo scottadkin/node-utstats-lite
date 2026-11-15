@@ -29,7 +29,7 @@ import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { testChangeDatabase } from "../database.mjs";
 import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllIps, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminGetPlayerHistoryById, adminGetPlayerProfile, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
-import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason } from "../seasons.mjs";
+import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason, updateUniqueMatchCominationsPlayerCount } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
 import { getRejectedLogsInfo } from "../logs.mjs";
 
@@ -576,6 +576,7 @@ export default class AdminJSONManager{
         
         
                 await recalculateSeason(season);
+                await updateUniqueMatchCominationsPlayerCount();
 
                 return this.res.json({"message": "passed"});
 

@@ -12,7 +12,7 @@ import { ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshA
 import { DAY, setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID } from "./src/players.mjs";
-import { getAllSeasonIds } from "./src/seasons.mjs";
+import { getAllSeasonIds, updateUniqueMatchCominationsPlayerCount } from "./src/seasons.mjs";
 
 new Message('Node UTStats Lite Importer module started.','note');
 
@@ -401,8 +401,6 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers,
 async function main(ctfLeagueSettings){
 
 
-    
-
     const start = performance.now();
 
     const bAutoAssignHWIDToName = await bAutoForceNameToHWID();
@@ -425,6 +423,8 @@ async function main(ctfLeagueSettings){
         ls.min_players, ls.min_playtime, 
         ls.append_team_sizes, ctfLeagueSettings, bAutoAssignHWIDToName
     );
+
+    
 
     const leftOverEnd = performance.now();
 
@@ -502,6 +502,7 @@ async function main(ctfLeagueSettings){
 
     new Message(`Import completed in ${totalTime} seconds, ${totals.passed} imported, ${totals.failed} failed out of ${totals.totalLogs} logs.`,"progress");
     
+    return totals;
 
 }
 
@@ -510,7 +511,7 @@ async function startImport(){
 
     const ctfLeagueSettings = await getMultipleLeagueCategorySettings(["maps", "gametypes", "combined"]);
 
-    await main(ctfLeagueSettings);
+    const importTotals = await main(ctfLeagueSettings);
 
     const seasonIds = await getAllSeasonIds(false);
     
@@ -521,6 +522,14 @@ async function startImport(){
     const refreshMinDate = new Date(Date.now() - DAY);
 
     const compareDates = [combinedLastRefresh, gametypeLastRefresh, mapLastRefresh];
+
+
+    //2.10.0 preview 5 update total unique players for every combinations for all time and every season
+    //Do it once at the end of all current logs rather than every single log
+    //only do it when at least 1 log passed import
+    if(importTotals.passed > 0){
+        await updateUniqueMatchCominationsPlayerCount();
+    }
 
     let bRefreshTables = false;
 

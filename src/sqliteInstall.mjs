@@ -5,14 +5,14 @@ import {createRandomString} from "./generic.mjs";
 import { cleanPageSettings } from "./siteSettings.mjs";
 import { cleanDefaultPageLayouts} from "./pageLayout.mjs";
 import { refreshAllTables, insertDefaultCTFLeagueSettings, getMultipleLeagueCategorySettings } from "./ctfLeague.mjs";
-import {insertDefaultRankingSettings } from "./rankings.mjs";
+import {insertDefaultRankingSettings, recalculateAllRankings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
 import { calculateAllPlayerTotals, fixDuplicatePlayerProfiles, installPlayerSettings } from "./players.mjs";
 import { setAllMapTotals } from "./weapons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "./ctf.mjs";
 import { setAllBGametypeFlags } from "./matches.mjs";
-import { getAllSeasonIds, updateSeasonUniqueCombinations } from "./seasons.mjs";
+import { getAllSeasonIds, updateSeasonUniqueCombinations, updateUniqueMatchCominationsPlayerCount } from "./seasons.mjs";
 import { bSkipInstallCTFLeagueRefresh } from "../config.mjs";
 
 const rankingsTableQuery = `CREATE TABLE IF NOT EXISTS nstats_rankings (
@@ -38,7 +38,8 @@ const seasonsUniqueCombosQuery = `CREATE TABLE IF NOT EXISTS nstats_seasons_uniq
     matches INTEGER NOT NULL,
     playtime REAL NOT NULL,
     first_match TEXT NOT NULL,
-    last_match TEXT NOT NULL
+    last_match TEXT NOT NULL,
+    total_players INTEGER NOT NULL DEFAULT 0
     ) STRICT`;
 
 
@@ -408,6 +409,7 @@ export function createTableQueries(){
 
             `CREATE INDEX IF NOT EXISTS nmp_match_idx ON nstats_match_players(match_id)`,
             `CREATE INDEX IF NOT EXISTS nmp_player_idx ON nstats_match_players(player_id)`,
+            `CREATE INDEX IF NOT EXISTS nmp_match_player_idx ON nstats_match_players(match_id,player_id)`,
 
             `CREATE TABLE IF NOT EXISTS nstats_match_weapon_stats (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1376,6 +1378,7 @@ async function removeForeignKeysSeasonsUniqueCombos(){
 
     await simpleQuery(seasonsUniqueCombosQuery);
 
+
 } 
 
 //tables that where used in 2.10.0 previews that are not longer needed
@@ -1506,6 +1509,15 @@ async function dropSeasonTotalsColumns(){
     }
 }
 
+async function bAnyUniqueComboPlayerTotalsData(){
+
+    const query = `SELECT SUM(total_players) as total_players FROM nstats_seasons_unique_match_combinations`;
+
+    const result = await simpleQuery(query);
+
+    return result[0].total_players > 0;
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1591,6 +1603,11 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     //2.10.0 preview 5
     await checkUniqueSeasonsMatchCombinations();
+    await recalculateAllRankings();
+    //2.10.0 preview 5
+    if(!await bAnyUniqueComboPlayerTotalsData()){
+        await updateUniqueMatchCominationsPlayerCount();
+    }
 
     new Message(`Checking for map image thumbnail settings`, "note");
 

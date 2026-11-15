@@ -257,6 +257,9 @@ export async function createSeason(name, startDate, endDate){
     const seasonInfo = await getSeasonByName(name);
     if(seasonInfo === null) throw new Error(`Failed to get season data`);
     await recalculateSeason(seasonInfo.id);
+    //2.10.0 preview 5
+    //must be called as recalculate season itself doesnt calculate this
+    await updateUniqueMatchCominationsPlayerCount();
 
     return {"message": "passed"}
 }
@@ -290,6 +293,10 @@ export async function editSeason(seasonId, name, startDate, endDate){
     await simpleQuery(query, [name, startDate, endDate, seasonId]);
 
     await recalculateSeason(seasonId);
+
+    //2.10.0 preview 5
+    //must be called as recalculate season itself doesnt calculate this
+    await updateUniqueMatchCominationsPlayerCount();
 
     return {"message": "passed"}
 }
@@ -383,26 +390,26 @@ function getTotalPlayersQuery(bGroupSeasons, bGroupServers, bGroupGametypes, bGr
 
 }
 
-async function calculateTotalPlayers(){
+
+/**
+ * Update all time, every seasons, server, gametype, map combinations player counts
+ */
+export async function updateUniqueMatchCominationsPlayerCount(){
 
     const query = `
-
-    WITH match_rows AS (
-        SELECT m.id,
+    WITH match_rows AS MATERIALIZED (
+        SELECT DISTINCT
         m.season_id,
         m.server_id,
         m.gametype_id,
         m.map_id,
-        p.match_id,
         p.player_id FROM nstats_match_players as p
-
         INNER JOIN nstats_matches as m ON m.id = p.match_id
         WHERE p.spectator=0
     )
 
     --all time
     ${getTotalPlayersQuery(false,false,false,false)}
-
     --map all time
     UNION ALL ${getTotalPlayersQuery(false,false,false,true)}
     --gametyp all time
@@ -436,7 +443,6 @@ async function calculateTotalPlayers(){
 
     const result = await simpleQuery(query);
 
-
     const updateQuery = `UPDATE nstats_seasons_unique_match_combinations SET total_players=? WHERE season_id=? AND server_id=? AND gametype_id=? AND map_id=?`;
     const insertVars = [];
 
@@ -448,11 +454,9 @@ async function calculateTotalPlayers(){
             r.total_players, r.season_id, r.server_id, r.gametype_id, r.map_id
         ]);
     }
-    const start = performance.now();
-    await bulkUpdate(updateQuery, insertVars);
-    const end = performance.now();
 
-    console.log((end - start) * 0.001);
+    await bulkUpdate(updateQuery, insertVars);
+
 
 }
 
@@ -515,8 +519,6 @@ export async function updateSeasonUniqueCombinations(seasonId){
     const conflicts = ["season_id","server_id","gametype_id", "map_id"];
 
     await sqlInsertOnDuplicateUpdate("nstats_seasons_unique_match_combinations", columns, insertVars, conflicts);
-
-    await calculateTotalPlayers();
 }
 
 
