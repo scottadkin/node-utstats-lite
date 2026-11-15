@@ -399,49 +399,6 @@ export async function updateSeasonUniqueCombinations(seasonId){
 }
 
 
-async function calculateSeasonBasicTotals(seasonId){
-
-    const query = `SELECT COUNT(*) as total_matches,
-    COALESCE(SUM(playtime), 0) as total_playtime 
-    FROM nstats_matches`;
-
-    let where = ``;
-    const vars = [];
-
-    if(seasonId !== 0){
-        where += ` WHERE season_id=?`;
-        vars.push(seasonId);
-    }
-
-    const result = await simpleQuery(`${query}${where}`, vars);
-
-    if(result.length === 0) return null;
-
-    const totalPlayers = await getSeasonTotalPlayers(seasonId);
-
-    result[0].total_players = totalPlayers;
-
-    return result[0];
-}
-
-async function updateSeasonBasicTotals(seasonId, data){
-
-    const query = `UPDATE nstats_seasons SET total_matches=?, total_playtime=?, total_players=? WHERE id=?`;
-
-    await simpleQuery(query, [data.total_matches, data.total_playtime, data.total_players, seasonId]);
-}
-
-async function getSeasonTotalPlayers(seasonId){
-
-    const query = `SELECT COUNT(*) as total_players FROM nstats_player_totals WHERE season_id=? AND gametype_id=0 AND map_id=0`;
-
-    const result = await simpleQuery(query, [seasonId]);
-
-    if(result.length === 0) return 0;
-
-    return result[0].total_players;
-}
-
 /**
  * Update basic stats such as unique match combinations, gametype + map totals
  * @param {*} seasonId 
@@ -449,16 +406,8 @@ async function getSeasonTotalPlayers(seasonId){
  */
 export async function calculateSeasonStats(seasonId){
 
-    const basicTotals = await calculateSeasonBasicTotals(seasonId);
-    
+    await updateSeasonUniqueCombinations(seasonId);
 
-    if(basicTotals === null) throw new Error(`No season data found`);
-
-
-    return await Promise.all([
-        updateSeasonUniqueCombinations(seasonId),
-        updateSeasonBasicTotals(seasonId, basicTotals)
-    ]);
 }
 
 

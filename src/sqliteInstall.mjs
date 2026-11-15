@@ -235,10 +235,7 @@ export function createTableQueries(){
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 start_date TEXT NOT NULL,
                 end_date TEXT NOT NULL,
-                name TEXT NOT NULL COLLATE NOCASE,
-                total_matches INTEGER NOT NULL,
-                total_players INTEGER NOT NULL,
-                total_playtime REAL NOT NULL
+                name TEXT NOT NULL COLLATE NOCASE
             ) STRICT`,
             `CREATE TABLE IF NOT EXISTS nstats_players (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1490,6 +1487,25 @@ async function checkUniqueSeasonsMatchCombinations(){
 
 }
 
+//2.10.0 preview 5
+//we store this data now in seasons_unqiue_match_combinations
+//no need to calculate and store it 2 times
+async function dropSeasonTotalsColumns(){
+
+
+    const targets = ["total_matches", "total_players", "total_playtime"];
+
+    for(let i = 0; i < targets.length; i++){
+
+        const t = targets[i];
+
+        if(await bColumnExist("nstats_seasons", t)){
+            
+            await simpleQuery(`ALTER TABLE nstats_seasons DROP COLUMN ${t}`);
+        }
+    }
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1498,6 +1514,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     await updateRankingTables();
     await fixDuplicatePlayerProfiles();
     await dropServerGametypeTotalsColumns();
+    await dropSeasonTotalsColumns();
     
 
     const queries = createTableQueries("");
