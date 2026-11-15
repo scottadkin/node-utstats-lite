@@ -91,7 +91,15 @@ export async function getSeasonByName(name){
 
 export async function getAllSeasons(){
 
-    const query = `SELECT * FROM nstats_seasons ORDER BY end_date DESC, start_date DESC`;
+    const query = `SELECT s.id,
+    s.start_date,
+    s.end_date,
+    s.name,
+    COALESCE(uc.matches, 0) as total_matches,
+    COALESCE(uc.playtime, 0) as total_playtime 
+    FROM nstats_seasons as s 
+    LEFT JOIN nstats_seasons_unique_match_combinations as uc ON uc.season_id=s.id AND uc.server_id=0 AND uc.gametype_id=0 AND uc.map_id=0 
+    ORDER BY end_date DESC, start_date DESC`;
 
     const result = await simpleQuery(query);
     
