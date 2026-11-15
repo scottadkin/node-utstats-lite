@@ -265,7 +265,7 @@ export default class AdminJSONManager{
                 id = parseInt(id);
                 if(id !== id) throw new Error(`Match id must be an integer`);
 
-                await deleteMatch(id);
+                await deleteMatch(id, true);
 
                 return this.res.json({"message": "passed", "id": id});
 
@@ -576,6 +576,7 @@ export default class AdminJSONManager{
         
         
                 await recalculateSeason(season);
+                //2.10.0 preview 5
                 await updateUniqueMatchCominationsPlayerCount();
 
                 return this.res.json({"message": "passed"});

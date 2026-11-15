@@ -28,7 +28,7 @@ import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
 import { deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
-import { calculateSeasonStats } from "./seasons.mjs";
+import { calculateSeasonStats, updateUniqueMatchCominationsPlayerCount } from "./seasons.mjs";
 
 
 const MATCH_TABLE_COLUMNS_VERBOSE = `nstats_matches.id,
@@ -1669,7 +1669,7 @@ export async function getMatchesGametypes(matchIds){
 
 
 
-export async function deleteMatch(id){
+export async function deleteMatch(id, bUpdateUniqueCombos){
     
     const basicInfo = await getBasicMatchesInfo([id]);
     const playerIds = await getPlayerIdsInMatch(id);
@@ -1732,6 +1732,11 @@ export async function deleteMatch(id){
         await calculateSeasonStats(basic.season_id);
     }
     
+
+    //2.10.0 preview 5
+    if(bUpdateUniqueCombos){
+        await updateUniqueMatchCominationsPlayerCount();
+    }
 
 }
 
@@ -2092,10 +2097,12 @@ export async function deleteAllDuplicateMatches(){
 
         for(let x = 0; x < toDelete.length; x++){
 
-            await deleteMatch(toDelete[x]);
+            await deleteMatch(toDelete[x], false);
             console.log(`deleted matchId ${toDelete[x]}`);
         }
     }
+
+    await updateUniqueMatchCominationsPlayerCount();
 }
 
 

@@ -3373,7 +3373,7 @@ class AdminMatchesManager{
 
         const options = [
             {"value": "match-list", "display": "Match List"},
-            {"value": "duplicate-matches", "display": "Duplicate Matches"},
+            {"value": "duplicate-matches", "display": "Duplicate Matches"}
         ];
 
         this.tabs = new UITabs(this.parent, options, this.selectedTab);

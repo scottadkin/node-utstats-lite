@@ -1,6 +1,6 @@
 import { simpleQuery, sqlInsertReturnRowId } from "./database.mjs";
 import Message from "./message.mjs";
-import { seasonsMergeServers } from "./seasons.mjs";
+import { seasonsMergeServers, updateUniqueMatchCominationsPlayerCount } from "./seasons.mjs";
 
 
 async function bServerExist(name){
@@ -153,7 +153,8 @@ export async function mergeServers(oldId, newId){
     await seasonsMergeServers(oldId, newId);
 
     await deleteServer(oldId);
-    
+    //2.10.0 preview 5
+    await updateUniqueMatchCominationsPlayerCount();
     
     return {rowsChanged}
 }

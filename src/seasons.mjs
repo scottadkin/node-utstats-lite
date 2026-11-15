@@ -250,7 +250,7 @@ export async function createSeason(name, startDate, endDate){
 
     if(bNameAlreadyInUse) return {"error": `There is already a season called ${name}`};
 
-    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?,0,0,0)`;
+    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?)`;
 
     await simpleQuery(query, [startDate, endDate, name]);
 
