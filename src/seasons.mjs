@@ -1,6 +1,6 @@
 
 import { ctfLeagueRecalculateSeason} from "./ctfLeague.mjs";
-import { simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
+import { bulkUpdate, simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import {  sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
 import { updateAllPlayerTotalsSingleSeason } from "./players.mjs";
@@ -344,6 +344,118 @@ function createTotalsQuery(bGroupServers, bGroupGametypes, bGroupMaps){
     ${groupBy}`;
 }
 
+
+
+function getTotalPlayersQuery(bGroupSeasons, bGroupServers, bGroupGametypes, bGroupMaps){
+
+    let groupBy = ``;
+
+    if(bGroupSeasons){
+        groupBy = `season_id`;
+    }
+
+    if(bGroupServers){
+
+        if(groupBy !== "") groupBy += `,`
+        groupBy += `server_id`;
+    }
+
+    if(bGroupGametypes){
+        if(groupBy !== "") groupBy += `,`;
+        groupBy += `gametype_id`;
+    }
+
+    if(bGroupMaps){
+        if(groupBy !== "") groupBy += `,`;
+        groupBy += `map_id`
+    }
+
+    if(groupBy !== "") groupBy = `GROUP BY ${groupBy}`;
+
+    return `SELECT 
+    ${(bGroupSeasons) ? "season_id" : "0 as season_id"},
+    ${(bGroupServers) ? "server_id" : "0 as server_id"},
+    ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
+    ${(bGroupMaps) ? "map_id" : "0 as map_id"},
+    COUNT(DISTINCT player_id) as total_players 
+    FROM match_rows 
+    ${groupBy}`;
+
+}
+
+async function calculateTotalPlayers(){
+
+    const query = `
+
+    WITH match_rows AS (
+        SELECT m.id,
+        m.season_id,
+        m.server_id,
+        m.gametype_id,
+        m.map_id,
+        p.match_id,
+        p.player_id FROM nstats_match_players as p
+
+        INNER JOIN nstats_matches as m ON m.id = p.match_id
+        WHERE p.spectator=0
+    )
+
+    --all time
+    ${getTotalPlayersQuery(false,false,false,false)}
+
+    --map all time
+    UNION ALL ${getTotalPlayersQuery(false,false,false,true)}
+    --gametyp all time
+    UNION ALL ${getTotalPlayersQuery(false,false,true,false)}
+    -- serv all time
+    UNION ALL ${getTotalPlayersQuery(false,true,false,false)}
+    --season all time
+    UNION ALL ${getTotalPlayersQuery(true,false,false,false)}
+
+    --gametype map all time
+    UNION ALL ${getTotalPlayersQuery(false,false,true,true)}
+
+     --server map all time
+    UNION ALL ${getTotalPlayersQuery(false,true,false,true)}
+
+    --season map all time
+    UNION ALL ${getTotalPlayersQuery(true,false,false,true)}
+
+    --server gametype map all time 
+    UNION ALL ${getTotalPlayersQuery(false,true,true,true)}
+
+    --season gametype all time
+    UNION ALL ${getTotalPlayersQuery(true,false,true,false)}
+
+    --season server all time
+    UNION ALL ${getTotalPlayersQuery(true,true,false,false)}
+
+    --season server gametype map 
+    UNION ALL ${getTotalPlayersQuery(true,true,true,true)}
+    `;
+
+    const result = await simpleQuery(query);
+
+
+    const updateQuery = `UPDATE nstats_seasons_unique_match_combinations SET total_players=? WHERE season_id=? AND server_id=? AND gametype_id=? AND map_id=?`;
+    const insertVars = [];
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        insertVars.push([
+            r.total_players, r.season_id, r.server_id, r.gametype_id, r.map_id
+        ]);
+    }
+    const start = performance.now();
+    await bulkUpdate(updateQuery, insertVars);
+    const end = performance.now();
+
+    console.log((end - start) * 0.001);
+
+}
+
 async function calculateSeasonUniqueCombinations(seasonId){
 
     seasonId = parseInt(seasonId);
@@ -358,12 +470,13 @@ async function calculateSeasonUniqueCombinations(seasonId){
     }
 
     const query = `WITH combo_totals AS (
-        SELECT ${seasonId} as season_id,server_id,gametype_id,map_id, 
+        SELECT ${seasonId} as season_id,m.server_id,m.gametype_id,m.map_id, 
         COUNT(*) as total_matches,
         SUM(playtime) as total_playtime,
         MAX(date) as last_match,
-        MIN(date) as first_match 
-        FROM nstats_matches ${where} GROUP BY server_id,gametype_id,map_id
+        MIN(date) as first_match
+        FROM nstats_matches as m
+        ${where} GROUP BY m.server_id,m.gametype_id,m.map_id
     )
         --server gametypes and map totals
     SELECT * FROM combo_totals 
@@ -403,7 +516,7 @@ export async function updateSeasonUniqueCombinations(seasonId){
 
     await sqlInsertOnDuplicateUpdate("nstats_seasons_unique_match_combinations", columns, insertVars, conflicts);
 
-    
+    await calculateTotalPlayers();
 }
 
 
