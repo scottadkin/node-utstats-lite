@@ -12,7 +12,7 @@ import { calculateAllPlayerTotals, fixDuplicatePlayerProfiles, installPlayerSett
 import { setAllMapTotals } from "./weapons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "./ctf.mjs";
 import { setAllBGametypeFlags } from "./matches.mjs";
-import { getAllSeasonIds } from "./seasons.mjs";
+import { getAllSeasonIds, updateSeasonUniqueCombinations } from "./seasons.mjs";
 import { bSkipInstallCTFLeagueRefresh } from "../config.mjs";
 
 const rankingsTableQuery = `CREATE TABLE IF NOT EXISTS nstats_rankings (
@@ -1450,6 +1450,46 @@ async function dropServerGametypeTotalsColumns(){
 }
 
 
+/** 2.10.0 preview 5
+ * Check to see if the table is empty, if it is recalculate data
+ */
+async function checkUniqueSeasonsMatchCombinations(){
+
+    const totalMatches = await simpleQuery(`SELECT COUNT(*) as total_matches FROM nstats_matches`);
+
+    if(totalMatches[0].total_matches === 0){
+        new Message(`No matches found, skipping unique matches combinations data recalculation`,"pass");
+        return;
+    }
+
+
+    //2.10.0 preview 5 merged server, gametypes, maps totals to this table from their respective tables
+    //if there are no rows of this data recalculate all
+    const currentDataQuery = `SELECT COUNT(*) as total_rows 
+    FROM nstats_seasons_unique_match_combinations 
+    WHERE server_id=0 AND gametype_id=0 AND map_id=0`;
+
+    const currentData = await simpleQuery(currentDataQuery)
+
+    if(currentData[0].total_rows > 0){
+        new Message(`Found existing data, skipping unique matches combinations data recalculation`, "pass");
+        return;
+    }
+
+    const seasonIds = await getAllSeasonIds(false);
+
+    const promises = [];
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        const sId = seasonIds[i];
+        promises.push(updateSeasonUniqueCombinations(sId));
+    }
+
+    await Promise.all(promises);
+
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1532,9 +1572,8 @@ export async function sqliteInstall(bOnlyCreateTables){
     new Message(`Marking Gametypes And Maps as BCTF or BDOM`, "note");
     await setAllBGametypeFlags();
 
-    //2.9.0
-   // new Message(`Calculating player max values.`, "note");
-    //await calculateAllPlayerTotalsMax();
+    //2.10.0 preview 5
+    await checkUniqueSeasonsMatchCombinations();
 
     new Message(`Checking for map image thumbnail settings`, "note");
 

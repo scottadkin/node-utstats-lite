@@ -365,6 +365,8 @@ async function calculateSeasonUniqueCombinations(seasonId){
     UNION ALL ${createTotalsQuery(false, true, false)}
         --map totals    
     UNION ALL ${createTotalsQuery(false, false, true)}    
+    --all time totals
+    UNION ALL ${createTotalsQuery(false, false, false)}    
     `;
 
     return await simpleQuery(query, vars);
@@ -372,7 +374,6 @@ async function calculateSeasonUniqueCombinations(seasonId){
 
 export async function updateSeasonUniqueCombinations(seasonId){
 
-    
     const totals = await calculateSeasonUniqueCombinations(seasonId);
 
     const insertVars = totals.map((t) =>{
