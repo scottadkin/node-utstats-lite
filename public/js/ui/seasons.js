@@ -2,13 +2,14 @@
 function createObjectStatRow(s, urlBase){
 
     const url = `${urlBase}${s.target_id}`;
-    
     return [
         {url, "display": s.name, "value": s.name.toLowerCase(), "className": "text-left"},
+        {url, "value": s.total_players},
+        {url,"display": toDateString(s.first_match, TIME_ZONE, true),"value": s.first_match, "className": "date"},
+        {url,"display": toDateString(s.last_match, TIME_ZONE, true),"value": s.last_match, "className": "date"},
         {url,"value": s.matches},
         {url,"display": toPlaytime(s.playtime), "value": s.playtime, "className": "playtime"},
-        {url,"display": toDateString(s.first_match, TIME_ZONE, true),"value": s.first_match, "className": "date"},
-        {url,"display": toDateString(s.last_match, TIME_ZONE, true),"value": s.last_match, "className": "date"}
+        
     ];
 }
 
@@ -257,7 +258,7 @@ class SeasonPage{
             "className": "t-width-1",
             "sortBy": 1,
             "bAscOrder": false,
-            "headers": ["Name", "Total Matches", "Total Playtime", "First Match", "Last Match"].map((h) =>{
+            "headers": ["Name", "Unique Players", "First Match", "Last Match", "Total Matches", "Total Playtime"].map((h) =>{
                 return {"display": h}
             })
         };

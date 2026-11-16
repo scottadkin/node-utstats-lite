@@ -546,7 +546,8 @@ async function getSeasonObjectStats(seasonId, maxServers, maxGametypes, maxMaps)
         umc.matches,
         umc.playtime,
         umc.first_match, 
-        umc.last_match 
+        umc.last_match,
+        umc.total_players 
         FROM nstats_seasons_unique_match_combinations as umc 
         LEFT JOIN nstats_servers ON umc.server_id=nstats_servers.id
         WHERE umc.season_id=? AND umc.server_id!=0 AND umc.gametype_id=0 AND umc.map_id=0 
@@ -562,7 +563,8 @@ async function getSeasonObjectStats(seasonId, maxServers, maxGametypes, maxMaps)
     umc.matches,
     umc.playtime,
     umc.first_match, 
-    umc.last_match 
+    umc.last_match,
+    umc.total_players  
     FROM nstats_seasons_unique_match_combinations as umc
     LEFT JOIN nstats_gametypes ON umc.gametype_id=nstats_gametypes.id
     
@@ -578,7 +580,8 @@ async function getSeasonObjectStats(seasonId, maxServers, maxGametypes, maxMaps)
     umc.matches,
     umc.playtime,
     umc.first_match, 
-    umc.last_match  
+    umc.last_match,
+    umc.total_players  
     FROM nstats_seasons_unique_match_combinations as umc
     LEFT JOIN nstats_maps ON umc.map_id=nstats_maps.id
     
