@@ -17,6 +17,7 @@ import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
 import PlayerWeaponDamage from "./importer/playerWeaponDamage.mjs";
 import { calculateSeasonStats, getSeasonByMatchDate } from "./seasons.mjs";
 import { addPendingUpdates } from "./importer.mjs";
+import { bBatchUpdateLogs } from "../config.mjs";
 
 
 export class MatchParser{
@@ -255,28 +256,26 @@ export class MatchParser{
         this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides); 
         await this.weapons.insertPlayerMatchStats(this.matchId, this.gametype.id, this.map.id);  
 
-        //const aa = performance.now();
-        //await this.weapons.updatePlayerTotals(this.players.players, seasonId);
-        //const bb = performance.now();
-        //console.log((bb - aa) * 0.001);
         
-       // await Promise.all([
-            //updates the players country flags
+        if(!bBatchUpdateLogs){
+            await this.weapons.updatePlayerTotals(this.players.players, seasonId);
+        }
+
+        //methods themselves checks what bBatchUpdateLogs is set to
+        await Promise.all([
             this.players.updatePlayerTotals(seasonId, this.gametype.id, this.map.id),
-        //    this.ctf.updatePlayerTotals(this.players.players, seasonId)
-        //]);*/
+            this.ctf.updatePlayerTotals(this.players.players, seasonId)
+        ]);
 
         
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
     
        
-        //const uniquePlayerIds = this.players.getUniquePlayerIds();
+        if(!bBatchUpdateLogs){
+            const uniquePlayerIds = this.players.getUniquePlayerIds();
+            await calculateRankings(seasonId, this.gametype.id, this.map.id, uniquePlayerIds);
+        }
 
-       // const aa = performance.now();
-        //await calculateRankings(seasonId, this.gametype.id, this.map.id, uniquePlayerIds);
-       
-       // const bb = performance.now();
-       // console.log((bb - aa) * 0.001);
         const hashVars = [this.map.name, 
             this.gametype.name, 
             this.server.name, 
@@ -302,7 +301,9 @@ export class MatchParser{
         }
 
     
-       // await this.weapons.updateMapTotals(seasonId, this.map.id);
+        if(!bBatchUpdateLogs){
+            await this.weapons.updateMapTotals(seasonId, this.map.id);
+        }
       
         
         if(this.classicWeaponStats.lines.length > 0){
@@ -340,14 +341,19 @@ export class MatchParser{
             await this.gametype.setBDom();
         }
 
-        /*await calculateSeasonStats(0);
-        if(seasonId !== 0){
-            await calculateSeasonStats(seasonId);
-        }*/
+        if(!bBatchUpdateLogs){
+            await calculateSeasonStats(0);
+            if(seasonId !== 0){
+                await calculateSeasonStats(seasonId);
+            }
+        }else{
+            await addPendingUpdates(this.matchId, seasonId, this.server.id, this.gametype.id, this.map.id, this.ctf.bMatchCTF, this.dom.bAnyData, false, false);
+        }
 
 
 
-        await addPendingUpdates(this.matchId, seasonId, this.server.id, this.gametype.id, this.map.id, this.ctf.bMatchCTF, this.dom.bAnyData, false, false);
+
+        
         //this.players.debugListAllPlayers();
     }
 

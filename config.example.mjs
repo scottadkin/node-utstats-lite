@@ -47,3 +47,7 @@ export const loginExpireTime = 24;
 
 //Skip automatic CTF league recalculations when running install.mjs
 export const bSkipInstallCTFLeagueRefresh = true;
+
+//importer will calculate totals, ctf league, rankings at the end of each import rather than once per log
+//Enabling this will significantly speed up import if you are importing 1000s of logs in one go
+export const bBatchUpdateLogs = false;

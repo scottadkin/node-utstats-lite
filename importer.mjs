@@ -4,7 +4,7 @@ import { FTPImporter } from "./src/ftpimporter.mjs";
 import { SFTPImporter } from "./src/sftpimporter.mjs";
 import { readFile, readdir, rename } from 'node:fs/promises';
 import { MatchParser } from "./src/matchParser.mjs";
-import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
+import {importedLogsFolder, logFilePrefix, importInterval, bBatchUpdateLogs} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
 import { bLogAlreadyImported, getAllPendingUpdates } from "./src/importer.mjs";
@@ -564,19 +564,20 @@ async function startImport(){
     const refreshMinDate = new Date(Date.now() - DAY);
 
     const compareDates = [combinedLastRefresh, gametypeLastRefresh, mapLastRefresh];
-    
-    await calculateTotalsFromPendingUpdates();
+
+    if(bBatchUpdateLogs){
+        await calculateTotalsFromPendingUpdates();
+    }
 
     //2.10.0 preview 5 update total unique players for every combinations for all time and every season
     //Do it once at the end of all current logs rather than every single log
     //only do it when at least 1 log passed import
     if(importTotals.passed > 0){
+
         await updateUniqueMatchCominationsPlayerCount();
+   
     }
 
-
-
-    
 
     let bRefreshTables = false;
 

@@ -1,6 +1,7 @@
 import Message from "../message.mjs";
 import { insertPlayerMatchData, updatePlayerTotals, insertCaps } from "../ctf.mjs";
 import ctfFlag from "./ctfFlag.mjs";
+import { bBatchUpdateLogs } from "../../config.mjs";
 
 export class CTF{
 
@@ -239,7 +240,7 @@ export class CTF{
 
     async updatePlayerTotals(players, seasonId){
 
-        if(!this.bMatchCTF) return;
+        if(!this.bMatchCTF || !bBatchUpdateLogs) return;
 
 
         const playerIds = [];

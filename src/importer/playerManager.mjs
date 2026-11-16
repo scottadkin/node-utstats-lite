@@ -11,7 +11,7 @@ import { updateMasterPlayers,
 } from "../players.mjs";
 import geoip from "geoip-lite";
 import { createRandomString, scalePlaytime } from "../generic.mjs";
-import { bImportRandomizeNames } from "../../config.mjs";
+import { bBatchUpdateLogs, bImportRandomizeNames } from "../../config.mjs";
 
 
 export class PlayerManager{
@@ -998,6 +998,12 @@ export class PlayerManager{
         }
     }
 
+    /**
+     * Will only update player flags if bBatchUpdateLogs is enabled
+     * @param {*} seasonId 
+     * @param {*} gametypeId 
+     * @param {*} mapId 
+     */
     async updatePlayerTotals(seasonId, gametypeId, mapId){
 
         const masterIds = [];
@@ -1013,14 +1019,16 @@ export class PlayerManager{
             }
         }
 
-        await updateMasterPlayers(masterIds, idsToCountries);
+        if(!bBatchUpdateLogs){
+            await updateMasterPlayers(masterIds, idsToCountries);
+        }else{
+            await Promise.all([
+                updateMasterPlayers(masterIds, idsToCountries),
+                updatePlayerTotals(masterIds, seasonId, gametypeId, mapId)
+            ]);
+        }
 
-        return;
 
-        await Promise.all([
-            updateMasterPlayers(masterIds, idsToCountries),
-            updatePlayerTotals(masterIds, seasonId, gametypeId, mapId)
-        ]);
 
 
 
