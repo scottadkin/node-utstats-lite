@@ -564,7 +564,8 @@ async function startImport(){
     const refreshMinDate = new Date(Date.now() - DAY);
 
     const compareDates = [combinedLastRefresh, gametypeLastRefresh, mapLastRefresh];
-
+    
+    await calculateTotalsFromPendingUpdates();
 
     //2.10.0 preview 5 update total unique players for every combinations for all time and every season
     //Do it once at the end of all current logs rather than every single log
@@ -575,7 +576,7 @@ async function startImport(){
 
 
 
-    await calculateTotalsFromPendingUpdates();
+    
 
     let bRefreshTables = false;
 
