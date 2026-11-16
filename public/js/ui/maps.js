@@ -89,6 +89,7 @@ class MapsSearchForm{
             {"display": "Last Match", "value": "last_match"},
             {"display": "Matches", "value": "matches"},
             {"display": "Playtime", "value": "playtime"},
+            {"display": "Unique Players", "value": "total_players"},
         ];  
 
         const elem = new UISelect(parent, options, this.sortBy, (e) =>{
@@ -225,7 +226,8 @@ class MapListDisplay{
             "First": "first_match", 
             "Last": "last_match", 
             "Matches": "matches", 
-            "Playtime": "playtime"
+            "Playtime": "playtime",
+            "Unique Players": "total_players"
         };
 
         return headerNames[header] ?? "unknown";
@@ -253,6 +255,7 @@ class MapListDisplay{
                 {"display": d.name, "value": d.name.toLowerCase(), "className": "text-left", url},
                 {"value": d.first_match, "display": toDateString(d.first_match, TIME_ZONE, true), "className": "date", url},
                 {"value": d.last_match, "display": toDateString(d.last_match, TIME_ZONE, true), "className": "date", url},
+                {"value": d.total_players, url},
                 {"value": d.matches, url},
                 {"value": d.playtime, "display": toPlaytime(d.playtime), "className": "playtime", url}
             ]);
@@ -264,7 +267,7 @@ class MapListDisplay{
     renderTable(){
 
   
-        const headers = ["Name", "First", "Last", "Matches", "Playtime"];
+        const headers = ["Name", "First", "Last", "Unique Players", "Matches", "Playtime"];
 
 
         const tableOptions = {

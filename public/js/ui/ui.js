@@ -2126,6 +2126,7 @@ function UIRichMapBox(data, url){
 
     const content = [
         `${data.total_matches ?? data.matches} Matches Played`, UIBr(),
+        `${data.total_players} Unique Players`, UIBr(),
         `Playtime ${toPlaytime(data.total_playtime ?? data.playtime, false)}`,UIBr(),
         `Last Match ${toDateString(data.last_match, TIME_ZONE, true)}`
     ];

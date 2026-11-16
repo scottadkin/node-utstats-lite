@@ -64,7 +64,7 @@ export const VALID_PLAYER_EPM_AVERAGES = [
 ];
 
 
-export const VALID_MAP_SEARCH_BY = ["name", "first_match", "matches", "playtime", "last_match"];
+export const VALID_MAP_SEARCH_BY = ["name", "first_match", "matches", "playtime", "last_match", "total_players"];
 
 
 
@@ -947,7 +947,8 @@ async function seasonMapsSearch(seasonId, name, cleanStart, cleanPerPage, cleanS
     uc.first_match,
     uc.last_match,
     uc.matches,
-    uc.playtime 
+    uc.playtime,
+    uc.total_players 
     FROM nstats_seasons_unique_match_combinations as uc
     LEFT JOIN nstats_maps ON nstats_maps.id = uc.map_id
     WHERE nstats_maps.name LIKE ? AND uc.season_id=? AND uc.gametype_id=0
