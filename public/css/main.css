@@ -1454,6 +1454,7 @@ section{
 
 .collapsible-closed:hover{
     background-color:var(--bg-color-light);  
+    cursor: pointer;
 }
 
 .collapsible-button{
@@ -1472,6 +1473,10 @@ section{
 
 .collapsible-button:hover{
     cursor: pointer;
+}
+
+.collapsible:has(.collapsible-button:hover){
+    background-color:var(--bg-color-light);  
 }
 
 .padding-left-5{

@@ -2152,9 +2152,9 @@ class UICollapsibleDiv{
             throw new Error(`collapsedContent and mainContent must be an Array of elements`);
         }
 
-
-
         this.parent = getHTMLDom(parent);
+
+        this.bSkipWrapperClick = false;
         
         this.closedClassName = closedClassName;
         this.openClassName = openClassName;
@@ -2189,27 +2189,53 @@ class UICollapsibleDiv{
 
     }
 
+    updateButton(){
+        if(this.bCollapsed){
+             this.buttonIcon.src = "/images/expand.svg";
+        }else{
+             this.buttonIcon.src = "/images/collapse.svg";
+        }
+    }
     createElems(){
 
         this.wrapper = UIDiv(this.getWrapperClass());
+
+        this.wrapper.addEventListener("click", () =>{
+
+            if(this.bSkipWrapperClick) return;
+            if(!this.bCollapsed) return;
+
+            this.bCollapsed = !this.bCollapsed;
+            this.updateButton();
+            this.render();
+        });
 
         this.content = UIDiv();
         this.setContentClass();
         this.toggleButton = UIDiv("collapsible-button");
 
-        const test = new Image();
-        test.src = `/images/expand.svg`;
-        test.className = "collapsible-button-img";
-        this.toggleButton.append(test);
+        this.buttonIcon = new Image();
+        this.buttonIcon.src = `/images/expand.svg`;
+        this.buttonIcon.className = "collapsible-button-img";
+        this.toggleButton.append( this.buttonIcon);
+
+        this.toggleButton.addEventListener("mouseover", () =>{
+
+            this.bSkipWrapperClick = true;
+      
+        })
+
+        this.toggleButton.addEventListener("mouseleave", () =>{
+            this.bSkipWrapperClick = false;
+        
+        })
 
         this.toggleButton.addEventListener("click", () =>{
 
+
             this.bCollapsed = !this.bCollapsed;
-            if(this.bCollapsed){
-                test.src = "/images/expand.svg";
-            }else{
-                test.src = "/images/collapse.svg";
-            }
+  
+            this.updateButton();
             this.render();
         });
 
