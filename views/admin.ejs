@@ -91,12 +91,14 @@ function renderModes(mode){
         const {display, value, description, style} = modes[i];
 
         %>
-            <div class="admin-cat-box" <%- (style !== undefined) ? `style="${style}"` : ""%>>
-                <a href="/admin?mode=<%- value %>">
+            <a href="/admin?mode=<%- value %>">
+                <div class="admin-cat-box" <%- (style !== undefined) ? `style="${style}"` : ""%>>
+                
                     <div class="admin-cat-title"><%= display %></div>
                     <div class="admin-cat-info"><%- description %></div>
-                </a>
-            </div>
+                
+                </div>
+            </a>
         <%
     }
     %></div><%
@@ -108,10 +110,9 @@ function renderGoBackToMain(mode){
 
     %>
     <div class="text-center">
-        <a href="/admin">
-            <div class="admin-home">Return To Admin Home</div>
-        </a>
+        <a href="/admin"><img class="admin-icon" src="/images/home.svg" alt="home"/></a>    
     </div>
+
     <%
 }
 

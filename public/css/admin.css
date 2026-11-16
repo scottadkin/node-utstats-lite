@@ -39,16 +39,15 @@
 }
 
 .admin-cat-wrapper{
-	width:var(--max-text-width);
-	max-width:var(--max-text-width);
-    margin-left:auto;
-    margin-right:auto;
+
+
 
 }
 
 .admin-cat-box{
-	text-align: center;
     margin-bottom: var(--margin-10);
+    display: grid;
+    grid-template-columns: 1fr 2fr;
     
 	
 }
@@ -61,7 +60,6 @@
 .admin-cat-title{
 	padding:var(--padding-5);
 	font-size:var(--font-size-90);
-	text-align: center;
 	font-weight:500;
 	background-color: var(--bg-header-color);
 
@@ -71,8 +69,6 @@
 	font-size:var(--font-size-75);
 	padding:var(--padding-10);
 	line-height:1.6em;
-	margin-left:auto;
-	margin-right:auto;
 	padding-top:var(--padding-5);
     background-color:var(--bg-color-mid);
     transition:var(--transition-all);
@@ -117,4 +113,9 @@
 	border:1px solid var(--border-color-1);
 	min-height:150px;
     
+}
+
+.admin-icon{
+    width:64px;
+    height:64px;
 }
