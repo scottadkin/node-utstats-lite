@@ -932,11 +932,16 @@ export async function getCTFGametypesInSeason(seasonId){
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
-    const query = `SELECT DISTINCT gametype_id FROM nstats_match_ctf WHERE EXISTS (
+    const vars = [];
+    let query = `SELECT DISTINCT gametype_id FROM nstats_match_ctf`;
+    if(seasonId !== 0){
+        vars.push(seasonId);
+        query += ` WHERE EXISTS (
         SELECT 1 FROM nstats_matches WHERE nstats_matches.id=nstats_match_ctf.match_id AND nstats_matches.season_id=?
-    )`;
+    )`
+    }
 
-    const result = await simpleQuery(query, [seasonId]);
+    const result = await simpleQuery(query, vars);
 
     return result.map((r) => r.gametype_id);
 }

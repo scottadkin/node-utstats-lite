@@ -832,9 +832,13 @@ export async function setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id
  */
 async function ctfLeagueGetUniqueCombosBetweenDates(seasonId, startDate, endDate, ctfGametypes){
 
-    const query = `SELECT DISTINCT map_id FROM nstats_matches WHERE season_id=? AND gametype_id IN(?) AND date >=? AND date<=?`;
+    const vars = [ctfGametypes, startDate, endDate];
 
-    const result = await simpleQuery(query, [seasonId, ctfGametypes, startDate, endDate]);
+    if(seasonId !== 0) vars.unshift(seasonId);
+
+    const query = `SELECT DISTINCT map_id FROM nstats_matches WHERE ${(seasonId !== 0) ? "season_id=? AND" : ""} gametype_id IN(?) AND date >=? AND date<=?`;
+
+    const result = await simpleQuery(query, vars);
 
     return result.map((r) => { return r.map_id});
     
