@@ -16,6 +16,7 @@ import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
 import PlayerWeaponDamage from "./importer/playerWeaponDamage.mjs";
 import { calculateSeasonStats, getSeasonByMatchDate } from "./seasons.mjs";
+import { addPendingUpdates } from "./importer.mjs";
 
 
 export class MatchParser{
@@ -332,11 +333,14 @@ export class MatchParser{
             await this.gametype.setBDom();
         }
 
-        await calculateSeasonStats(0);
+        /*await calculateSeasonStats(0);
         if(seasonId !== 0){
             await calculateSeasonStats(seasonId);
-        }
+        }*/
 
+
+
+        await addPendingUpdates(this.matchId, seasonId, this.server.id, this.gametype.id, this.map.id, this.ctf.bMatchCTF, this.dom.bAnyData, false, false);
         //this.players.debugListAllPlayers();
     }
 

@@ -7,12 +7,12 @@ import { MatchParser } from "./src/matchParser.mjs";
 import {importedLogsFolder, logFilePrefix, importInterval} from "./config.mjs";
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
-import { bLogAlreadyImported } from "./src/importer.mjs";
-import { ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
+import { bLogAlreadyImported, getAllPendingUpdates } from "./src/importer.mjs";
+import { ctfLeagueRecalculateSeason, ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
 import { DAY, setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID } from "./src/players.mjs";
-import { getAllSeasonIds, updateUniqueMatchCominationsPlayerCount } from "./src/seasons.mjs";
+import { calculateSeasonStats, getAllSeasonIds, updateUniqueMatchCominationsPlayerCount } from "./src/seasons.mjs";
 
 new Message('Node UTStats Lite Importer module started.','note');
 
@@ -86,7 +86,7 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
 }
 
 
-async function updateCTFLeague(m, ctfLeagueSettings){
+/*async function updateCTFLeague(m, ctfLeagueSettings){
 
     const types = ["maps", "gametypes"];
 
@@ -162,7 +162,7 @@ async function updateCTFLeague(m, ctfLeagueSettings){
     const end = performance.now();
 
     console.log(`ctfLeague took ${(end - start) * 0.001}`);
-}
+}*/
 
 async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, 
     bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName){
@@ -209,11 +209,11 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         new Message(`MatchId: ${m.matchId}, Server: ${m.server.name}, Gametype: ${m.gametype.name}, Map: ${m.map.name}`,"note");
 
-        if(m.ctf.bMatchCTF){
+        /*if(m.ctf.bMatchCTF){
             new Message(`Updating CTF League`,"note");
             await updateCTFLeague(m, ctfLeagueSettings);
            // process.exit();
-        }
+        }*/
 
         await InsertLogHistory(file, m.matchId);
 
@@ -507,6 +507,38 @@ async function main(ctfLeagueSettings){
 }
 
 
+async function emptyPendingUpdates(){
+
+    await simpleQuery(`DELETE FROM nstats_pending_updates`);
+}
+
+
+async function calculateTotalsFromPendingUpdates(){
+
+    const {seasons} = await getAllPendingUpdates();
+
+    const start = performance.now();
+
+    const seasonStatPromises = [];
+    for(let i = 0; i < seasons.length; i++){
+
+        const sId = seasons[i];
+
+        seasonStatPromises.push(calculateSeasonStats(sId));
+        seasonStatPromises.push(ctfLeagueRecalculateSeason(sId));
+    }
+    
+
+    await Promise.all(seasonStatPromises);
+    const end = performance.now();
+
+    console.log((end - start) * 0.001);
+
+    await emptyPendingUpdates();
+
+}
+
+
 async function startImport(){
 
     const ctfLeagueSettings = await getMultipleLeagueCategorySettings(["maps", "gametypes", "combined"]);
@@ -530,6 +562,10 @@ async function startImport(){
     if(importTotals.passed > 0){
         await updateUniqueMatchCominationsPlayerCount();
     }
+
+
+
+    await calculateTotalsFromPendingUpdates();
 
     let bRefreshTables = false;
 

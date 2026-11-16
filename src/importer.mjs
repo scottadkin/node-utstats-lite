@@ -35,14 +35,6 @@ export async function insertLogDownloadHistory(host, importerId, name, fileSize)
 
     const t = `nstats_logs_downloads`;
 
-    const query = `INSERT INTO ${t} VALUES(NULL,?,?,?,?,?) as new 
-        ON DUPLICATE KEY UPDATE
-        ${t}.date = new.date,
-        ${t}.importer_id = new.importer_id,
-        ${t}.ftp_ip = new.ftp_ip,
-        ${t}.file_size = new.file_size
-    `;
-
     const date = new Date(Date.now());
 
     
@@ -119,4 +111,64 @@ export async function bLogAlreadyImported(fileName){
     if(result.length > 0) return true;
 
     return false;
+}
+
+
+export async function addPendingUpdates(matchId, seasonId, serverId, gametypeId, mapId, bCTF, bDom, bMH, bAS){
+
+    const query = `INSERT INTO nstats_pending_updates VALUES(NULL,?,?,?,?,?,?,?,?,?)`;
+
+    await simpleQuery(query, [
+        matchId, seasonId, serverId, gametypeId, mapId, bCTF, bDom, bMH, bAS
+    ]);
+}
+
+
+export async function getAllPendingUpdates(){
+
+    const query = `SELECT DISTINCT COUNT(*) as total_matches,season_id,server_id,gametype_id,map_id,b_ctf,b_dom 
+    FROM nstats_pending_updates GROUP BY season_id,server_id,gametype_id,map_id,b_ctf,b_dom`;
+    const result = await simpleQuery(query);
+
+
+    const seasons = new Set();
+    //always want all time
+    seasons.add(0);
+    const ctfGametypes = new Set();
+    const ctfMaps = new Set();
+    const domGametypes = new Set();
+    const domMaps = new Set();
+    const maps = new Set();
+    const gametypes = new Set();
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        seasons.add(r.season_id);
+        maps.add(r.map_id);
+        gametypes.add(r.gametype_id);
+
+        if(r.b_ctf){
+            ctfGametypes.add(r.gametype_id);
+            ctfMaps.add(r.map_id);
+        }
+
+        if(r.b_dom){
+            domGametypes.add(r.gametype_id);
+            domMaps.add(r.map_id);
+        }
+    }
+
+
+    return {
+        "data": result,
+        "maps": [...maps],
+        "gametypes": [...gametypes],
+        "ctfGametypes": [...ctfGametypes],
+        "ctfMaps": [...ctfMaps],
+        "domGametypes": [...domGametypes],
+        "domMaps": [...domMaps],
+        "seasons": [...seasons]
+    }
 }

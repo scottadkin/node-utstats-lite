@@ -48,6 +48,19 @@ export function createTableQueries(){
     
     
     const queries = [
+
+        `CREATE TABLE IF NOT EXISTS nstats_pending_updates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            match_id INTEGER NOT NULL,
+            season_id INTEGER NOT NULL,
+            server_id INTEGER NOT NULL,
+            gametype_id INTEGER NOT NULL,
+            map_id INTEGER NOT NULL,
+            b_ctf INTEGER NOT NULL DEFAULT 0,
+            b_dom INTEGER NOT NULL DEFAULT 0,
+            b_mh INTEGER NOT NULL DEFAULT 0,
+            b_as INTEGER NOT NULL DEFAULT 0
+        ) STRICT`,
         
         `CREATE TABLE IF NOT EXISTS nstats_sessions(
             id INTEGER PRIMARY KEY AUTOINCREMENT,

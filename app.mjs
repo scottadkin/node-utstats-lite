@@ -94,7 +94,12 @@ async function setSeasonsData(req, res, next){
 
     if(res.locals.season !== -1 && res.locals.season !== 0){
         info = await getSeasonById(res.locals.season);
-        if(info === null) return res.send(`Season Doesn't exist`);
+        if(info === null) return res.render("error.ejs", {
+            "host": req.headers.host,
+            "userSession": req.userSession,
+            "timeZone": "",
+            "errorMessage": `Season doesn't exist`
+        });
     }else{
 
         res.locals.season = 0;
@@ -402,6 +407,7 @@ app.get("/season/:season",
         await renderSeasonPage(req, res);
 
     }catch(err){
+
         res.json({"error": err.toString()});
     }
     
