@@ -11,8 +11,11 @@ import { bLogAlreadyImported, getAllPendingUpdates } from "./src/importer.mjs";
 import { ctfLeagueRecalculateSeason, ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
 import { DAY, setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
-import { bAutoForceNameToHWID } from "./src/players.mjs";
+import { bAutoForceNameToHWID, calculateAllPlayerTotals } from "./src/players.mjs";
 import { calculateSeasonStats, getAllSeasonIds, updateUniqueMatchCominationsPlayerCount } from "./src/seasons.mjs";
+import { recalculateSeasonRankings } from "./src/rankings.mjs";
+import { setAllMapTotals as setAllMapWeaponTotals, updatePlayerTotals as updatePlayerWeaponTotals } from "./src/weapons.mjs";
+import { ctfRecalculateAllPlayerTotals } from "./src/ctf.mjs";
 
 new Message('Node UTStats Lite Importer module started.','note');
 
@@ -526,10 +529,17 @@ async function calculateTotalsFromPendingUpdates(){
 
         seasonStatPromises.push(calculateSeasonStats(sId));
         seasonStatPromises.push(ctfLeagueRecalculateSeason(sId));
+        seasonStatPromises.push(recalculateSeasonRankings(sId));
+        seasonStatPromises.push(await updatePlayerWeaponTotals(null, sId));
     }
     
 
     await Promise.all(seasonStatPromises);
+    await setAllMapWeaponTotals();
+
+    await calculateAllPlayerTotals();
+    await ctfRecalculateAllPlayerTotals();
+    
     const end = performance.now();
 
     console.log((end - start) * 0.001);

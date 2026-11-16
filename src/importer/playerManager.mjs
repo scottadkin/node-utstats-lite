@@ -1013,6 +1013,9 @@ export class PlayerManager{
             }
         }
 
+        await updateMasterPlayers(masterIds, idsToCountries);
+
+        return;
 
         await Promise.all([
             updateMasterPlayers(masterIds, idsToCountries),

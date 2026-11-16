@@ -254,22 +254,29 @@ export class MatchParser{
     
         this.weapons.setPlayerStats(this.kills.kills, this.kills.suicides); 
         await this.weapons.insertPlayerMatchStats(this.matchId, this.gametype.id, this.map.id);  
-        await this.weapons.updatePlayerTotals(this.players.players, seasonId);
+
+        //const aa = performance.now();
+        //await this.weapons.updatePlayerTotals(this.players.players, seasonId);
+        //const bb = performance.now();
+        //console.log((bb - aa) * 0.001);
         
-        
-        await Promise.all([
+       // await Promise.all([
+            //updates the players country flags
             this.players.updatePlayerTotals(seasonId, this.gametype.id, this.map.id),
-            this.ctf.updatePlayerTotals(this.players.players, seasonId)
-        ]);
+        //    this.ctf.updatePlayerTotals(this.players.players, seasonId)
+        //]);*/
 
         
         await this.ctf.processFlagEvents(this.players, this.kills, this.matchId, this.map.id, this.gametype.id);
     
        
-        const uniquePlayerIds = this.players.getUniquePlayerIds();
+        //const uniquePlayerIds = this.players.getUniquePlayerIds();
 
-        await calculateRankings(seasonId, this.gametype.id, this.map.id, uniquePlayerIds);
+       // const aa = performance.now();
+        //await calculateRankings(seasonId, this.gametype.id, this.map.id, uniquePlayerIds);
        
+       // const bb = performance.now();
+       // console.log((bb - aa) * 0.001);
         const hashVars = [this.map.name, 
             this.gametype.name, 
             this.server.name, 
@@ -295,7 +302,7 @@ export class MatchParser{
         }
 
     
-        await this.weapons.updateMapTotals(seasonId, this.map.id);
+       // await this.weapons.updateMapTotals(seasonId, this.map.id);
       
         
         if(this.classicWeaponStats.lines.length > 0){

@@ -8,6 +8,7 @@ import { playerWeaponDamageRecalculateSeasonTotals } from "./playerWeaponDamage.
 import { recalculateSeasonRankings } from "./rankings.mjs";
 import { deleteAllMapWeaponsTotals, updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
 import Message from "./message.mjs";
+import { DEFAULT_DATE } from "../config.mjs";
 
 export const VALID_OBJECT_TYPES = {
         "gametypes": "gametype_id",
@@ -238,7 +239,6 @@ export async function createSeason(name, startDate, endDate){
 
     if(conficts.length > 0){
 
-
         return {
             "error": `Dates conflict with the following seasons:${conficts.map((c) =>{ return ` ${c.name}`})}.`,
             conficts
@@ -311,7 +311,7 @@ export async function getSeasonMatchesData(seasonId){
 
 
 
-function createTotalsQuery(bGroupServers, bGroupGametypes, bGroupMaps){
+function createTotalsQuery(seasonId, bGroupServers, bGroupGametypes, bGroupMaps){
 
 
     let groupBy = ``;
@@ -329,24 +329,26 @@ function createTotalsQuery(bGroupServers, bGroupGametypes, bGroupMaps){
         if(bGroupGametypes){
             if(bAddComma) groupBy += `, `;
             groupBy += `gametype_id`
+            bAddComma = true;
         }
 
         if(bGroupMaps){
             if(bAddComma) groupBy += `, `;
-            groupBy += `map_id`
+            groupBy += `map_id`;
+            bAddComma = true;
         }
     }
 
 
     return `SELECT 
-    season_id,
+    ${seasonId} as season_id,
     ${(bGroupServers) ? "server_id" : "0 as server_id"},
     ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
     ${(bGroupMaps) ? "map_id" : "0 as map_id"},
-    SUM(total_matches) as total_matches, 
-    SUM(total_playtime) as total_playtime, 
-    MIN(first_match) as first_match, 
-    MAX(last_match) as last_match 
+    COALESCE(SUM(total_matches), 0) as total_matches, 
+    COALESCE(SUM(total_playtime), 0) as total_playtime, 
+    COALESCE(MIN(first_match), '1999-11-30T00:00:00.000Z') as first_match, 
+    COALESCE(MAX(last_match), '1999-11-30T00:00:00.000Z') as last_match 
     FROM combo_totals
     ${groupBy}`;
 }
@@ -485,13 +487,13 @@ async function calculateSeasonUniqueCombinations(seasonId){
         --server gametypes and map totals
     SELECT * FROM combo_totals 
         --server totals 
-    UNION ALL ${createTotalsQuery(true, false, false)}   
+    UNION ALL ${createTotalsQuery(seasonId, true, false, false)}   
         --gametype totals 
-    UNION ALL ${createTotalsQuery(false, true, false)}
+    UNION ALL ${createTotalsQuery(seasonId, false, true, false)}
         --map totals    
-    UNION ALL ${createTotalsQuery(false, false, true)}    
+    UNION ALL ${createTotalsQuery(seasonId, false, false, true)}    
     --all time totals
-    UNION ALL ${createTotalsQuery(false, false, false)}    
+    UNION ALL ${createTotalsQuery(seasonId, false, false, false)}    
     `;
 
     return await simpleQuery(query, vars);
@@ -511,11 +513,13 @@ export async function updateSeasonUniqueCombinations(seasonId){
             t.total_matches,
             t.total_playtime,
             t.first_match,
-            t.last_match
+            t.last_match,
+            0
         ];
     });
 
-    const columns = ["season_id", "server_id", "gametype_id", "map_id", "matches", "playtime", "first_match", "last_match"];
+
+    const columns = ["season_id", "server_id", "gametype_id", "map_id", "matches", "playtime", "first_match", "last_match", "total_players"];
     const conflicts = ["season_id","server_id","gametype_id", "map_id"];
 
     await sqlInsertOnDuplicateUpdate("nstats_seasons_unique_match_combinations", columns, insertVars, conflicts);
