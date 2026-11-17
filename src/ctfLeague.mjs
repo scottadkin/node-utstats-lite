@@ -1207,23 +1207,94 @@ export async function ctfLeagueRecalculatePlayers(playerIds){
 }
 
 /**
- * Get every gametype + map combination used for a season
+ * Get every played gametype + map combination used for a season via match_ctf table
  * @param {*} seasonId 
  * @returns 
  */
-export async function ctfLeagueGetUniqueCombinations(seasonId){
+export async function ctfLeagueGetUniquePlayedCombinations(seasonId, minDate, maxDate){
 
 
-    const query = `SELECT DISTINCT
-    m.season_id,m.gametype_id,m.map_id
-    FROM nstats_matches as m WHERE ${(seasonId !== 0) ? "m.season_id=? " : ""} EXISTS(SELECT 1 FROM nstats_match_ctf as ctf WHERE ctf.match_id = m.id)`;
 
     const vars = [];
 
     if(seasonId !== 0){
         vars.push(seasonId);
     }
+
+    vars.push(minDate, maxDate);
+
+    const query = `SELECT DISTINCT
+    m.season_id,m.gametype_id,m.map_id
+    FROM nstats_matches as m WHERE 
+    ${(seasonId !== 0) ? "m.season_id=? AND " : ""} 
+    m.date>=? AND m.date<=? 
+    AND EXISTS(SELECT 1 FROM nstats_match_ctf as ctf WHERE ctf.match_id = m.id)`;
+
     
+
     return await simpleQuery(query, vars);
 
+}
+
+
+export async function testCalculateTable(){
+
+    const query = `WITH unique_totals as MATERIALIZED (
+        SELECT m.season_id,
+        mp.player_id,
+        MIN(m.date) as first_match,
+        MAX(m.date) as last_match,
+        SUM(mp.time_on_server) as playtime,
+        SUM(CASE WHEN mp.match_result='w'
+            THEN 1
+            ELSE 0 
+        END) as wins,
+        SUM(CASE WHEN mp.match_result='d'
+            THEN 1
+            ELSE 0 
+        END) as draws,
+        SUM(CASE WHEN mp.match_result='l'
+            THEN 1
+            ELSE 0 
+        END) as losses,
+        SUM(
+            CASE WHEN mp.match_result='w'
+            THEN 3
+            WHEN mp.match_result='d' 
+            THEN 1
+            ELSE 0
+        END
+        ) as points,
+        SUM(CASE WHEN mp.team = 0
+                THEN
+                m.team_0_score
+            WHEN mp.team = 1
+                THEN 
+                m.team_1_score
+            ELSE
+                0
+            END
+        )as cap_for,
+        SUM(CASE WHEN mp.team = 0
+                THEN
+                m.team_1_score
+            WHEN mp.team = 1
+                THEN 
+                m.team_0_score
+            ELSE
+                0
+            END
+        )as cap_against,
+        ctf.gametype_id,
+        ctf.map_id,
+        COUNT(*) as total_matches 
+        FROM nstats_match_ctf as ctf 
+        INNER JOIN nstats_match_players as mp ON ctf.player_id = mp.player_id AND ctf.match_id=mp.player_id
+        INNER JOIN nstats_matches as m ON m.id = mp.match_id
+        GROUP BY m.season_id,ctf.player_id,ctf.gametype_id,ctf.map_id
+    )
+    SELECT * FROM unique_totals`;
+
+
+    return await simpleQuery(query)
 }
