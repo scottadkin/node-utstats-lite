@@ -329,6 +329,7 @@ export class MatchParser{
         }
       
 
+        //add option bulk update danmage and other totals like the other stuff
 
         if(this.ctf.bMatchCTF){
             await this.map.setBCTF();

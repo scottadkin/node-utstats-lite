@@ -1205,3 +1205,25 @@ export async function ctfLeagueRecalculatePlayers(playerIds){
     return await Promise.all(promises);
 
 }
+
+/**
+ * Get every gametype + map combination used for a season
+ * @param {*} seasonId 
+ * @returns 
+ */
+export async function ctfLeagueGetUniqueCombinations(seasonId){
+
+
+    const query = `SELECT DISTINCT
+    m.season_id,m.gametype_id,m.map_id
+    FROM nstats_matches as m WHERE ${(seasonId !== 0) ? "m.season_id=? " : ""} EXISTS(SELECT 1 FROM nstats_match_ctf as ctf WHERE ctf.match_id = m.id)`;
+
+    const vars = [];
+
+    if(seasonId !== 0){
+        vars.push(seasonId);
+    }
+    
+    return await simpleQuery(query, vars);
+
+}

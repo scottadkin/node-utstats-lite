@@ -220,7 +220,6 @@ class PlayerWeaponDamageTotals{
 
 export async function updatePlayerWeaponDamageTotals(playerIds, seasonId, gametypeId, mapId){
 
-
     //await altApproach(playerIds);
     const test = new PlayerWeaponDamageTotals(playerIds, seasonId, gametypeId, mapId);
 

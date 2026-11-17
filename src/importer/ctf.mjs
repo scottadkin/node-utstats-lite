@@ -232,6 +232,7 @@ export class CTF{
 
     async insertPlayerMatchData(players, matchId, gametypeId, mapId){
 
+        
         if(this.bMatchCTF){
             await insertPlayerMatchData(players, matchId, gametypeId, mapId);
         }
