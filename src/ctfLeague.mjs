@@ -1237,6 +1237,38 @@ export async function ctfLeagueGetUniquePlayedCombinations(seasonId, minDate, ma
 }
 
 
+
+/*function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps){
+
+    const wins = "SUM(wins) * 1.0";
+    const totalMatches = "SUM(total_matches)";
+    const capOffset = "SUM(cap_for) - SUM(cap_against)"
+
+    return `
+    SELECT player_id,
+    ${(bGroupSeasons) ? "season_id" : "0 as season_id"},
+    ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
+    ${(bGroupMaps) ? "map_id" : "0 as map_id"},
+    ${wins} as wins,
+    SUM(losses) as losses,
+    SUM(draws) as draws,
+    ${totalMatches} as total_matches,
+    MIN(first_match) as first_match,
+    MAX(last_match) as last_match,
+    COALESCE(${wins} / NULLIF(${totalMatches},0),0) * 100 as win_rate,
+    SUM(points) as points,
+    SUM(cap_for) as cap_for,
+    SUM(cap_against) as cap_against,
+    SUM(playtime) as total_playtime,
+    ${capOffset} as cap_offset
+    FROM unique_totals 
+    GROUP BY player_id
+    ${(bGroupSeasons) ? ",season_id" : ""}
+    ${(bGroupGametypes) ? ",gametype_id" : ""}
+    ${(bGroupMaps) ? ",map_id" : ""}
+    `;
+}
+
 /**
  * pass null as start or end to skip the date restrictions
  * @param {Number} seasonId 
@@ -1244,7 +1276,7 @@ export async function ctfLeagueGetUniquePlayedCombinations(seasonId, minDate, ma
  * @param {Date|null} end 
  * @returns 
  */
-export async function testCalculateTable(seasonId, start, end){
+/*export async function testCalculateTable(seasonId, start, end){
 
     if(start === undefined) throw new Error("start is missing");
     if(end === undefined) throw new Error("end is missing");
@@ -1278,11 +1310,16 @@ export async function testCalculateTable(seasonId, start, end){
     if(where.length !== 0) where = `WHERE ${where}`;
 
     const query = `WITH unique_totals as MATERIALIZED (
-        SELECT m.season_id,
+        SELECT 
+        ${(seasonId !== 0) ? "m.season_id" : "0 as season_id"},
         ctf.player_id,
         MIN(m.date) as first_match,
         MAX(m.date) as last_match,
         SUM(mp.time_on_server) as playtime,
+        ROW_NUMBER() OVER(
+            PARTITION BY ctf.player_id,ctf.gametype_id,ctf.map_id
+            ORDER BY m.date DESC
+        ) as played_matches,
         SUM(CASE WHEN mp.match_result='w'
             THEN 1
             ELSE 0 
@@ -1329,10 +1366,181 @@ export async function testCalculateTable(seasonId, start, end){
         FROM nstats_match_ctf as ctf 
         INNER JOIN nstats_match_players as mp ON ctf.player_id = mp.player_id AND ctf.match_id=mp.match_id
         INNER JOIN nstats_matches as m ON m.id = mp.match_id
+        ${where} AND played_matches < 10
+        GROUP BY ${(seasonId !== 0) ? "m.season_id," : ""}ctf.player_id,ctf.gametype_id,ctf.map_id
+    )
+    --all time
+    ${testUnionThing(seasonId !== 0, false, false)}
+    --map all time
+    UNION ALL ${testUnionThing(seasonId !== 0, false, true)}
+    --gametype all time
+    UNION ALL ${testUnionThing(seasonId !== 0, true, false)}
+    --gametype + map all time
+    UNION ALL ${testUnionThing(seasonId !== 0, true, true)}
+    `
+
+    return await simpleQuery(query, vars);
+}*/
+
+function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps){
+
+    const wins = "SUM(wins) * 1.0";
+    const totalMatches = "COUNT(*)";
+    const capOffset = "SUM(cap_for) - SUM(cap_against)"
+
+    return `
+    SELECT player_id,
+    ${(bGroupSeasons) ? "season_id" : "0 as season_id"},
+    ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
+    ${(bGroupMaps) ? "map_id" : "0 as map_id"},
+    ${wins} as wins,
+    SUM(losses) as losses,
+    SUM(draws) as draws,
+    ${totalMatches} as total_matches,
+    MIN(date) as first_match,
+    MAX(date) as last_match,
+    COALESCE(${wins} / NULLIF(${totalMatches},0),0) * 100 as win_rate,
+    SUM(points) as points,
+    SUM(cap_for) as cap_for,
+    SUM(cap_against) as cap_against,
+    SUM(playtime) as total_playtime,
+    ${capOffset} as cap_offset
+    FROM unique_totals 
+    WHERE played_matches <= 10
+    GROUP BY player_id
+    ${(bGroupSeasons) ? ",season_id" : ""}
+    ${(bGroupGametypes) ? ",gametype_id" : ""}
+    ${(bGroupMaps) ? ",map_id" : ""}
+    `;
+}
+
+export async function testCalculateTable(seasonId, start, end){
+
+    if(start === undefined) throw new Error("start is missing");
+    if(end === undefined) throw new Error("end is missing");
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be an integer`);
+
+    let where = ``;
+    const vars = [];
+
+    if(seasonId !== 0){
+
+        where = "season_id=?";
+        vars.push(seasonId);
+    }
+
+    if(start !== null){
+
+        if(where.length > 0) where += ` AND `;
+        where += `m.date>=? `;
+        vars.push(start);
+    }
+
+    if(end !== null){
+
+        if(where.length > 0) where += ` AND `;
+        where += `m.date<=? `;
+        vars.push(end);
+    }
+
+    if(where.length !== 0) where = `WHERE ${where}`;
+
+    const query = `WITH unique_totals as MATERIALIZED (
+        SELECT 
+        ${(seasonId !== 0) ? "m.season_id" : "0 as season_id"},
+        ctf.player_id,
+        m.date,
+        mp.time_on_server as playtime,
+        CASE WHEN mp.match_result ='w' THEN 1 ELSE 0 END as wins,
+        CASE WHEN mp.match_result ='l' THEN 1 ELSE 0 END as losses,
+        CASE WHEN mp.match_result ='d' THEN 1 ELSE 0 END as draws,
+        ROW_NUMBER() OVER(
+            PARTITION BY ctf.player_id
+            ORDER BY m.date DESC
+        ) as played_matches,
+        mp.match_result,
+        
+            CASE WHEN mp.match_result='w'
+                THEN 3
+                WHEN mp.match_result='d' 
+                THEN 1
+                ELSE 0
+                END
+         as points,
+        CASE WHEN mp.team = 0
+                THEN
+                m.team_0_score
+            WHEN mp.team = 1
+                THEN 
+                m.team_1_score
+            ELSE
+                0
+            END
+        as cap_for,
+        CASE 
+            WHEN mp.team = 0 THEN m.team_1_score
+            WHEN mp.team = 1 THEN m.team_0_score ELSE 0 END
+        as cap_against,
+        ctf.gametype_id,
+        ctf.map_id
+        FROM nstats_match_ctf as ctf 
+        INNER JOIN nstats_match_players as mp ON ctf.player_id = mp.player_id AND ctf.match_id=mp.match_id
+        INNER JOIN nstats_matches as m ON m.id = mp.match_id
         ${where}
         GROUP BY ${(seasonId !== 0) ? "m.season_id," : ""}ctf.player_id,ctf.gametype_id,ctf.map_id
     )
-    SELECT * FROM unique_totals`;
+    --all time
+ 
+    ${testUnionThing(seasonId !== 0, false, false)}
+     --maps
+    UNION ALL ${testUnionThing(seasonId !== 0, false, true)}
+     --gametypes
+    UNION ALL ${testUnionThing(seasonId !== 0, true, false)}
+     --gametypes + maps
+    UNION ALL ${testUnionThing(seasonId !== 0, true, true)}
+    `
 
     return await simpleQuery(query, vars);
+}
+
+export async function testBulkInsertTable(data){
+
+    if(data.length === 0) return;
+
+
+    
+    const insertVars = [];
+
+
+    for(let i = 0; i < data.length; i++){
+
+        const d = data[i];
+
+        insertVars.push([
+            d.player_id,
+            d.gametype_id,
+            d.map_id,
+            d.first_match,
+            d.last_match,
+            d.total_playtime, d.total_matches, d.wins, d.draws,
+            d.losses, d.win_rate, d.cap_for, d.cap_against, 
+            d.cap_offset, d.points, d.season_id
+        ]);
+    }
+
+
+    const columns = [
+        "player_id", "gametype_id", "map_id", "first_match", "last_match",
+        "playtime", "total_matches", "wins", "draws", "losses", "winrate", "cap_for",
+        "cap_against", "cap_offset", "points", "season_id"
+    ];
+
+    const conflict = ["player_id","season_id","gametype_id","map_id"];
+
+    
+
+    await sqlInsertOnDuplicateUpdate("nstats_player_ctf_league", columns, insertVars, conflict);
+    //await bulkInsert(query, insertVars);
 }
