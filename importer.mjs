@@ -8,7 +8,7 @@ import {importedLogsFolder, logFilePrefix, importInterval, bBatchUpdateLogs} fro
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
 import { bLogAlreadyImported, getAllPendingUpdates } from "./src/importer.mjs";
-import { ctfLeagueRecalculateSeason, ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
+import { ctfLeagueRecalculateSeason, ctfLeagueRecalculateSeasonAllTables, ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
 import { DAY, setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID, calculateAllPlayerTotals } from "./src/players.mjs";
@@ -522,15 +522,21 @@ async function calculateTotalsFromPendingUpdates(){
 
     const start = performance.now();
 
+    const TEMP_MAX_MATCHES = 11;
+
     const seasonStatPromises = [];
     for(let i = 0; i < seasons.length; i++){
 
         const sId = seasons[i];
 
+        const startDate = new Date(seasons[i].start_date ?? new Date(0));
+        const endDate = new Date(seasons[i].end_date ?? new Date(Date.now()));
+
         seasonStatPromises.push(calculateSeasonStats(sId));
-        seasonStatPromises.push(ctfLeagueRecalculateSeason(sId));
+       // seasonStatPromises.push(ctfLeagueRecalculateSeason(sId));
         seasonStatPromises.push(recalculateSeasonRankings(sId));
-        seasonStatPromises.push(await updatePlayerWeaponTotals(null, sId));
+        seasonStatPromises.push(updatePlayerWeaponTotals(null, sId));
+        seasonStatPromises.push(ctfLeagueRecalculateSeasonAllTables(sId, startDate, endDate, TEMP_MAX_MATCHES))
     }
     
 
@@ -539,6 +545,8 @@ async function calculateTotalsFromPendingUpdates(){
 
     await calculateAllPlayerTotals();
     await ctfRecalculateAllPlayerTotals();
+
+    
     
     const end = performance.now();
 
@@ -566,6 +574,7 @@ async function startImport(){
     const compareDates = [combinedLastRefresh, gametypeLastRefresh, mapLastRefresh];
 
     if(bBatchUpdateLogs){
+      
         await calculateTotalsFromPendingUpdates();
     }
 

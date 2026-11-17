@@ -1079,7 +1079,7 @@ export async function ctfLeagueUpdateSeasonTable(seasonId, mapId, gametypeId, ma
 
 export async function ctfLeagueRecalculateSeason(seasonId){
 
-
+    throw new Error("repalce with ctfLeagueRecalculateSeasonAllTables");
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
 
@@ -1441,7 +1441,7 @@ function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps, maxMatches){
     `;
 }
 
-export async function testCalculateTable(seasonId, start, end, maxMatches){
+export async function ctfLeagueRecalculateSeasonAllTables(seasonId, start, end, maxMatches){
 
     if(start === undefined) throw new Error("start is missing");
     if(end === undefined) throw new Error("end is missing");
@@ -1541,7 +1541,9 @@ export async function testCalculateTable(seasonId, start, end, maxMatches){
     UNION ALL ${testUnionThing(seasonId !== 0, true, true, maxMatches)}
     `
 
-    return await simpleQuery(query, vars);
+    const data = await simpleQuery(query, vars);
+
+    await testBulkInsertTable(data);
 }
 
 export async function testBulkInsertTable(data){
