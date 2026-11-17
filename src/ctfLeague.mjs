@@ -1237,11 +1237,49 @@ export async function ctfLeagueGetUniquePlayedCombinations(seasonId, minDate, ma
 }
 
 
-export async function testCalculateTable(){
+/**
+ * pass null as start or end to skip the date restrictions
+ * @param {Number} seasonId 
+ * @param {Date|null} start 
+ * @param {Date|null} end 
+ * @returns 
+ */
+export async function testCalculateTable(seasonId, start, end){
+
+    if(start === undefined) throw new Error("start is missing");
+    if(end === undefined) throw new Error("end is missing");
+
+    seasonId = parseInt(seasonId);
+    if(seasonId !== seasonId) throw new Error(`seasonId must be an integer`);
+
+    let where = ``;
+    const vars = [];
+
+    if(seasonId !== 0){
+
+        where = "season_id=?";
+        vars.push(seasonId);
+    }
+
+    if(start !== null){
+
+        if(where.length > 0) where += ` AND `;
+        where += `m.date>=? `;
+        vars.push(start);
+    }
+
+    if(end !== null){
+
+        if(where.length > 0) where += ` AND `;
+        where += `m.date<=? `;
+        vars.push(end);
+    }
+
+    if(where.length !== 0) where = `WHERE ${where}`;
 
     const query = `WITH unique_totals as MATERIALIZED (
         SELECT m.season_id,
-        mp.player_id,
+        ctf.player_id,
         MIN(m.date) as first_match,
         MAX(m.date) as last_match,
         SUM(mp.time_on_server) as playtime,
@@ -1289,12 +1327,12 @@ export async function testCalculateTable(){
         ctf.map_id,
         COUNT(*) as total_matches 
         FROM nstats_match_ctf as ctf 
-        INNER JOIN nstats_match_players as mp ON ctf.player_id = mp.player_id AND ctf.match_id=mp.player_id
+        INNER JOIN nstats_match_players as mp ON ctf.player_id = mp.player_id AND ctf.match_id=mp.match_id
         INNER JOIN nstats_matches as m ON m.id = mp.match_id
-        GROUP BY m.season_id,ctf.player_id,ctf.gametype_id,ctf.map_id
+        ${where}
+        GROUP BY ${(seasonId !== 0) ? "m.season_id," : ""}ctf.player_id,ctf.gametype_id,ctf.map_id
     )
     SELECT * FROM unique_totals`;
 
-
-    return await simpleQuery(query)
+    return await simpleQuery(query, vars);
 }
