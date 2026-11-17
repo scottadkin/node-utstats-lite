@@ -1382,11 +1382,38 @@ export async function ctfLeagueGetUniquePlayedCombinations(seasonId, minDate, ma
     return await simpleQuery(query, vars);
 }*/
 
-function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps){
+function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps, maxMatches){
+
+    if(maxMatches === undefined) throw new Error(`maxMatches parameter is missing`);
+    maxMatches = parseInt(maxMatches);
+    if(maxMatches !== maxMatches) throw new Error(`maxMatches must be a valid number`);
 
     const wins = "SUM(wins) * 1.0";
     const totalMatches = "COUNT(*)";
-    const capOffset = "SUM(cap_for) - SUM(cap_against)"
+    const capOffset = "SUM(cap_for) - SUM(cap_against)";
+
+
+
+    let matchesName = "";
+
+    if(bGroupGametypes && !bGroupMaps){
+        matchesName = "gametype_played_matches";
+    }else if(!bGroupGametypes && bGroupMaps){
+        matchesName = "map_played_matches";
+    }else if(bGroupGametypes && bGroupMaps){
+        matchesName = "gametype_map_played_matches";
+    }else if(!bGroupGametypes && !bGroupMaps){
+        matchesName = "played_matches";
+    }else{
+        console.log(bGroupSeasons, bGroupGametypes, bGroupMaps);
+        throw new Error("Vhat do you vant");
+    }
+
+
+    let where = ``;
+    if(maxMatches !== 0){
+        where = `WHERE ${matchesName} <= ${maxMatches}`
+    }
 
     return `
     SELECT player_id,
@@ -1406,7 +1433,7 @@ function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps){
     SUM(playtime) as total_playtime,
     ${capOffset} as cap_offset
     FROM unique_totals 
-    WHERE played_matches <= 10
+    ${where}
     GROUP BY player_id
     ${(bGroupSeasons) ? ",season_id" : ""}
     ${(bGroupGametypes) ? ",gametype_id" : ""}
@@ -1414,7 +1441,7 @@ function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps){
     `;
 }
 
-export async function testCalculateTable(seasonId, start, end){
+export async function testCalculateTable(seasonId, start, end, maxMatches){
 
     if(start === undefined) throw new Error("start is missing");
     if(end === undefined) throw new Error("end is missing");
@@ -1447,7 +1474,7 @@ export async function testCalculateTable(seasonId, start, end){
 
     if(where.length !== 0) where = `WHERE ${where}`;
 
-    const query = `WITH unique_totals as MATERIALIZED (
+    const query = `WITH unique_totals AS MATERIALIZED (
         SELECT 
         ${(seasonId !== 0) ? "m.season_id" : "0 as season_id"},
         ctf.player_id,
@@ -1458,8 +1485,20 @@ export async function testCalculateTable(seasonId, start, end){
         CASE WHEN mp.match_result ='d' THEN 1 ELSE 0 END as draws,
         ROW_NUMBER() OVER(
             PARTITION BY ctf.player_id
-            ORDER BY m.date DESC
+            ORDER BY m.date DESC, m.id DESC
         ) as played_matches,
+         ROW_NUMBER() OVER(
+            PARTITION BY ctf.player_id,ctf.gametype_id
+            ORDER BY m.date DESC, m.id DESC
+        ) as gametype_played_matches,
+         ROW_NUMBER() OVER(
+            PARTITION BY ctf.player_id,ctf.map_id
+            ORDER BY m.date DESC, m.id DESC
+        ) as map_played_matches,
+         ROW_NUMBER() OVER(
+            PARTITION BY ctf.player_id,ctf.gametype_id,ctf.map_id
+            ORDER BY m.date DESC, m.id DESC
+        ) as gametype_map_played_matches,
         mp.match_result,
         
             CASE WHEN mp.match_result='w'
@@ -1489,17 +1528,17 @@ export async function testCalculateTable(seasonId, start, end){
         INNER JOIN nstats_match_players as mp ON ctf.player_id = mp.player_id AND ctf.match_id=mp.match_id
         INNER JOIN nstats_matches as m ON m.id = mp.match_id
         ${where}
-        GROUP BY ${(seasonId !== 0) ? "m.season_id," : ""}ctf.player_id,ctf.gametype_id,ctf.map_id
-    )
+        )
+    
     --all time
  
-    ${testUnionThing(seasonId !== 0, false, false)}
+    ${testUnionThing(seasonId !== 0, false, false, maxMatches)}
      --maps
-    UNION ALL ${testUnionThing(seasonId !== 0, false, true)}
+    UNION ALL ${testUnionThing(seasonId !== 0, false, true, maxMatches)}
      --gametypes
-    UNION ALL ${testUnionThing(seasonId !== 0, true, false)}
+    UNION ALL ${testUnionThing(seasonId !== 0, true, false, maxMatches)}
      --gametypes + maps
-    UNION ALL ${testUnionThing(seasonId !== 0, true, true)}
+    UNION ALL ${testUnionThing(seasonId !== 0, true, true, maxMatches)}
     `
 
     return await simpleQuery(query, vars);
