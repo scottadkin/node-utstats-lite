@@ -8,8 +8,8 @@ import {importedLogsFolder, logFilePrefix, importInterval, bBatchUpdateLogs} fro
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
 import { bLogAlreadyImported, getAllPendingUpdates } from "./src/importer.mjs";
-import { ctfLeagueRecalculateSeason, ctfLeagueRecalculateSeasonAllTables, ctfLeagueUpdateSeasonTable, getLeagueSiteSettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
-import { DAY, setInt } from "./src/generic.mjs";
+import { ctfLeagueRecalculateSeasonAllTables, getLeagueSiteSettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
+import { DAY } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID, calculateAllPlayerTotals } from "./src/players.mjs";
 import { calculateSeasonStats, getAllSeasonIds, updateUniqueMatchCominationsPlayerCount } from "./src/seasons.mjs";
@@ -88,110 +88,12 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
     await simpleQuery(query, [serverId, date, logsFound, passed, failed, totalTime]);
 }
 
-
-async function OLD_updateCTFLeague(m, ctfLeagueSettings){
-
-    const types = ["maps", "gametypes"];
-
-    const start = performance.now();
-
-    const seasonEndDate = (m.seasonId !== 0) ? new Date(m.seasonInfo.end_date) : new Date(Date.now());
-        
-    const seasonStartDate = (m.seasonId !== 0) ? new Date(m.seasonInfo.start_date) : new Date(1);
-
-    for(let i = 0; i < types.length; i++){
-
-        const t = types[i];
-
-        const settings = ctfLeagueSettings[t];
-
-        if(settings["Enable League"].value === undefined){
-            new Message(`${t.toUpperCase()} CTFLeague settings missing, please install using install.mjs.`,"error");
-            continue;
-        }
-
-        const bEnabledMapCTF = settings["Enable League"]?.value ?? "false";
-        const maxMatches = setInt(settings["Maximum Matches Per Player"]?.value, 5);
-        const maxDays = setInt(settings["Maximum Match Age In Days"]?.value, 180);
-
-        let cutOffDate = seasonStartDate;
-
-        if(maxDays > 0){
-            cutOffDate = new Date(seasonEndDate - DAY * maxDays);
-        }
-
-        if(bEnabledMapCTF !== "true"){
-       
-            new Message(`CTF ${t.toUpperCase()} league is disabled, skipping.`,"note");
-        
-            continue;
-        }
-
-        //we only want to do all time once
-        if(i === 0){
-
-
-            const allTimePromises = [ctfLeagueUpdateSeasonTable(0, 0, 0, maxMatches, cutOffDate, seasonEndDate)];
-            //season all time
-            if(m.seasonId !== 0) allTimePromises.push(ctfLeagueUpdateSeasonTable(m.seasonId, 0, 0, maxMatches, cutOffDate, seasonEndDate));
-            
-            await Promise.all(allTimePromises);
-
-        }
-
-        const gametypeMapPromises = [
-            //map gametype
-            ctfLeagueUpdateSeasonTable(0, (t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, cutOffDate, seasonEndDate),
-                //map all time
-            ctfLeagueUpdateSeasonTable(0, (t === "maps") ? m.map.id: 0, 0, maxMatches, cutOffDate, seasonEndDate),
-        ];
-
-        //if seasons are enabled
-        if(m.seasonId !== 0){
-
-            gametypeMapPromises.push(
-                //season map gametype
-                ctfLeagueUpdateSeasonTable(m.seasonId, (t === "maps") ? m.map.id: 0, m.gametype.id, maxMatches, cutOffDate, seasonEndDate),
-                //season map all time
-                ctfLeagueUpdateSeasonTable(m.seasonId, (t === "maps") ? m.map.id: 0, 0, maxMatches, cutOffDate, seasonEndDate),
-            );
-        }
-        
-        await Promise.all(gametypeMapPromises);
-
-        
-        
-    } 
-    const end = performance.now();
-
-    console.log(`ctfLeague took ${(end - start) * 0.001}`);
-}
-
-
 async function updateCTFLeague(matchData, ctfLeagueSettings){
-
-    console.log(matchData);
-    console.log(ctfLeagueSettings);
 
     const seasonInfo = matchData.seasonInfo;
 
-    const startDate = new Date(seasonInfo.start_date ?? new Date(0));
-    const endDate = new Date(seasonInfo.end_date ?? new Date(Date.now()));
-
-    const maxDays = parseInt(ctfLeagueSettings?.["combined"]?.["Maximum Match Age In Days"]?.value ?? 0);
-    const maxMatches = parseInt(ctfLeagueSettings?.["combined"]?.["Maximum Matches Per Player"]?.value ?? 0);
-
-    const maxDayStartDate = new Date(endDate - DAY * maxDays);
-
-    console.log(startDate, endDate, maxDays, maxDayStartDate);
-
-    const realStartDate = (maxDayStartDate >= startDate) ? maxDayStartDate : startDate;
-
-    console.log(realStartDate);
-    
-
     const a = performance.now();
-    await ctfLeagueRecalculateSeasonAllTables(seasonInfo.id, realStartDate, endDate, maxMatches);
+    await ctfLeagueRecalculateSeasonAllTables(seasonInfo.id, ctfLeagueSettings);
     const b = performance.now();
 
     console.log((b - a) * 0.001);
@@ -556,18 +458,18 @@ async function calculateTotalsFromPendingUpdates(){
     const TEMP_MAX_MATCHES = 11;
 
     const seasonStatPromises = [];
+
+    const leagueSettings = await getLeagueSiteSettings();
+
     for(let i = 0; i < seasons.length; i++){
 
         const sId = seasons[i];
-
-        const startDate = new Date(seasons[i].start_date ?? new Date(0));
-        const endDate = new Date(seasons[i].end_date ?? new Date(Date.now()));
 
         seasonStatPromises.push(calculateSeasonStats(sId));
        // seasonStatPromises.push(ctfLeagueRecalculateSeason(sId));
         seasonStatPromises.push(recalculateSeasonRankings(sId));
         seasonStatPromises.push(updatePlayerWeaponTotals(null, sId));
-        seasonStatPromises.push(ctfLeagueRecalculateSeasonAllTables(sId, startDate, endDate, TEMP_MAX_MATCHES))
+        seasonStatPromises.push(ctfLeagueRecalculateSeasonAllTables(sId, leagueSettings))
     }
     
 
@@ -609,8 +511,11 @@ async function startImport(){
     //Do it once at the end of all current logs rather than every single log
     //only do it when at least 1 log passed import
     if(importTotals.passed > 0){
-
+        new Message(`Updating unique match combinations player count`,"note")
+        const a = performance.now();
         await updateUniqueMatchCominationsPlayerCount();
+        const b = performance.now();
+        console.log((b - a) * 0.001);
    
     }
 
@@ -628,14 +533,15 @@ async function startImport(){
 
         new Message(`Refreshing CTFLeague tables for season ${seasonId}`,"note");
 
-        await refreshAllTables(seasonId, ctfLeagueSettings);
+       // await refreshAllTables(seasonId, ctfLeagueSettings);
+        await ctfLeagueRecalculateSeasonAllTables(seasonId, ctfLeagueSettings)
 
     }
 
     const newData = {"Last Whole League Refresh": {
         "value": new Date(Date.now()).toISOString()
     }};
-    
+
     await updateSettings(newData);
 }
 

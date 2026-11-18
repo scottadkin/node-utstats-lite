@@ -2130,7 +2130,7 @@ class PlayerCTFLeague{
             content.push(`Map CTF League Tables are split by map, any gametype played with the matching map is counted.`);
         }
 
-        const maxSettings = this.settings[this.mode];
+        const maxSettings = this.settings;
 
         content.push(
             UIBr(), "Only matches played within ", 

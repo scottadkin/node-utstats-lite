@@ -1,5 +1,5 @@
 
-import { ctfLeagueRecalculateSeason} from "./ctfLeague.mjs";
+import { ctfLeagueRecalculateSeasonAllTables, getLeagueSiteSettings} from "./ctfLeague.mjs";
 import { bulkUpdate, simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
 import {  sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
@@ -444,8 +444,10 @@ export async function updateUniqueMatchCominationsPlayerCount(){
     `;
 
     const result = await simpleQuery(query);
+   // console.log(result.length);
 
     const updateQuery = `UPDATE nstats_seasons_unique_match_combinations SET total_players=? WHERE season_id=? AND server_id=? AND gametype_id=? AND map_id=?`;
+ 
     const insertVars = [];
 
     for(let i = 0; i < result.length; i++){
@@ -995,7 +997,9 @@ export async function recalculateSeason(seasonId){
 
 
     await recalculateSeasonPlayerTotals(seasonId);
-    await ctfLeagueRecalculateSeason(seasonId);
+
+    const ctfLeagueSettings = await getLeagueSiteSettings();
+    await ctfLeagueRecalculateSeasonAllTables(seasonId, ctfLeagueSettings);
  
     await recalculateSeasonRankings(seasonId);
 
