@@ -8,7 +8,7 @@ import {importedLogsFolder, logFilePrefix, importInterval, bBatchUpdateLogs} fro
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
 import { bLogAlreadyImported, getAllPendingUpdates } from "./src/importer.mjs";
-import { ctfLeagueRecalculateSeason, ctfLeagueRecalculateSeasonAllTables, ctfLeagueUpdateSeasonTable, getMultipleLeagueCategorySettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
+import { ctfLeagueRecalculateSeason, ctfLeagueRecalculateSeasonAllTables, ctfLeagueUpdateSeasonTable, getLeagueSiteSettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
 import { DAY, setInt } from "./src/generic.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID, calculateAllPlayerTotals } from "./src/players.mjs";
@@ -590,19 +590,15 @@ async function calculateTotalsFromPendingUpdates(){
 
 async function startImport(){
 
-    const ctfLeagueSettings = await getMultipleLeagueCategorySettings(["maps", "gametypes", "combined"]);
+    const ctfLeagueSettings = await getLeagueSiteSettings();
 
     const importTotals = await main(ctfLeagueSettings);
 
     const seasonIds = await getAllSeasonIds(false);
     
-    const combinedLastRefresh = new Date(ctfLeagueSettings.combined["Last Whole League Refresh"].value);
-    const gametypeLastRefresh = new Date(ctfLeagueSettings.gametypes["Last Whole League Refresh"].value);
-    const mapLastRefresh = new Date(ctfLeagueSettings.maps["Last Whole League Refresh"].value);
+    const ctfLeagueLastRefresh = new Date(ctfLeagueSettings["Last Whole League Refresh"].value);
 
     const refreshMinDate = new Date(Date.now() - DAY);
-
-    const compareDates = [combinedLastRefresh, gametypeLastRefresh, mapLastRefresh];
 
     if(bBatchUpdateLogs){
       
@@ -618,16 +614,7 @@ async function startImport(){
    
     }
 
-
-    let bRefreshTables = false;
-
-    for(let i = 0; i < compareDates.length; i++){
-
-        if(compareDates[i] <= refreshMinDate){
-            bRefreshTables = true;
-            break;
-        }
-    }
+    const bRefreshTables = ctfLeagueLastRefresh <= refreshMinDate;
 
     if(!bRefreshTables){
 
@@ -645,11 +632,10 @@ async function startImport(){
 
     }
 
-    const newData = {};
+    const newData = {"Last Whole League Refresh": {
+        "value": new Date(Date.now()).toISOString()
+    }};
     
-    newData["combined"] = {"Last Whole League Refresh": {"value": new Date(Date.now()).toISOString(), "category": "combined"}};
-    newData["gametypes"] = {"Last Whole League Refresh": {"value": new Date(Date.now()).toISOString(), "category": "gametypes"}};
-    newData["maps"] = {"Last Whole League Refresh": {"value": new Date(Date.now()).toISOString(), "category": "maps"}};
     await updateSettings(newData);
 }
 

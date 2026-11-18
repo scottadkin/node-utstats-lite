@@ -2,7 +2,7 @@ import { getAllUniquePlayedGametypes, getMapInfo } from "../../maps.mjs";
 import { getCategorySettings, getSiteWideTimeZone } from "../../siteSettings.mjs";
 import { getPageLayout } from "../../pageLayout.mjs";
 import { getMapWeaponStats } from "../../weapons.mjs";
-import { getLeagueCategorySettings } from "../../ctfLeague.mjs";
+import { getLeagueSiteSettings } from "../../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_AVG_TYPES, VALID_PLAYER_EPM_TYPES, VALID_PLAYER_MATCH_TYPES } from "../../validRecordTypes.mjs";
 
 export async function renderSeasonMapPage(req, res){
@@ -38,7 +38,7 @@ export async function renderSeasonMapPage(req, res){
         let ctfLeagueSettings = {};
 
         if(pageSettings["Display CTF League"] === 1){
-            ctfLeagueSettings = await getLeagueCategorySettings("maps");
+            ctfLeagueSettings = await getLeagueSiteSettings("maps");
         }
 
         let weaponStats = null;

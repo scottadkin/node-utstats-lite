@@ -4,7 +4,7 @@ import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
 import { cleanPageSettings } from "./siteSettings.mjs";
 import { cleanDefaultPageLayouts} from "./pageLayout.mjs";
-import { refreshAllTables, insertDefaultCTFLeagueSettings, getMultipleLeagueCategorySettings } from "./ctfLeague.mjs";
+import { refreshAllTables, insertDefaultCTFLeagueSettings, getLeagueSiteSettings } from "./ctfLeague.mjs";
 import {insertDefaultRankingSettings, recalculateAllRankings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
@@ -1661,7 +1661,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
         const seasonIds = await getAllSeasonIds(false);
 
-        const ctfLeagueSettings = await getMultipleLeagueCategorySettings(["combined", "gametypes", "maps"]);
+        const ctfLeagueSettings = await getLeagueSiteSettings();
 
         for(let i = 0; i < seasonIds.length; i++){
 

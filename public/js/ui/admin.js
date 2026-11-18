@@ -3081,6 +3081,7 @@ class AdminCTFLeagueManager{
             this.settings = res.settings;
             this.savedSettings = JSON.parse(JSON.stringify(this.settings));
 
+            console.log(this.settings);
             this.render();
 
         }catch(err){
@@ -3131,9 +3132,8 @@ class AdminCTFLeagueManager{
 
         const options = [
             {"value": "recalculate", "display": "Recalculate Tables"},
-            {"value": "combined", "display": "Gametype & Map Combinations Tables"},
-            {"value": "gametypes", "display": "Gametype Tables"},
-            {"value": "maps", "display": "Maps Tables"},
+            {"value": "settings", "display": "League Settings"},
+
         ];
 
         this.tabs = new UITabs(this.wrapper, options, this.mode);
@@ -3149,28 +3149,12 @@ class AdminCTFLeagueManager{
 
         const content = [];
 
-        if(this.mode === "combined"){
-
-            content.push(
-                `Combined league settings refers to unique gametype & map combinations, each table is for 1 unique combination.`,
-                UIBr(),UIBr(), `An example would be `, UIB(`CTF-Face - Capture The Flag (insta)`),
-                ` where every match that was played on CTF-Face and the gametype 
-                was Capture The Flag (insta) would be counted towards it's unique table.`
-            );
-
-        }else if(this.mode === "gametypes"){
-
-            content.push(`Gametype league settings refer to any match played with a unique gametype, 
-                it doesn't matter what map was played, the match result will be counted towards this table.`);
-
-        }else if(this.mode === "maps"){
-
-            content.push(`Map league settings refer to any match played on a unique map, 
-                it doesn't matter what gametype was played, the match result will be counted towards this table.`);
-
-        }else if(this.mode === "recalculate"){
+        if(this.mode === "recalculate"){
 
             content.push(`Recalculate existing CTF league tables`);
+        }else{
+
+            content.push(`Change the settings for all CTF league tables.`);
         }
 
         if(this.mode !== "recalculate"){
@@ -3294,7 +3278,6 @@ class AdminCTFLeagueManager{
 
             const s = this.settings[i];
 
-            if(s.category !== this.mode) continue;
 
             const row = new UIDiv("form-row");
 

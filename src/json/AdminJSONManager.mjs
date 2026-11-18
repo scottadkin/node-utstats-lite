@@ -15,7 +15,7 @@ import {
     getSQLiteBackups, getSQLiteStats, /*restoreDatabase*/ 
     restoreFromSQLiteBackup 
 } from "../admin.mjs";
-import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings, getMultipleLeagueCategorySettings, refreshAllTables } from "../ctfLeague.mjs";
+import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings, getLeagueSiteSettings, refreshAllTables } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
 import { 
@@ -26,7 +26,6 @@ import {
 } from "../servers.mjs";
 import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplicateMatches } from "../matches.mjs";
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
-import { testChangeDatabase } from "../database.mjs";
 import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllIps, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminGetPlayerHistoryById, adminGetPlayerProfile, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
 import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason, updateUniqueMatchCominationsPlayerCount } from "../seasons.mjs";
@@ -585,7 +584,7 @@ export default class AdminJSONManager{
 
 
                 const seasonIds = await getAllSeasonIds(false);
-                const ctfLeagueSettings = await getMultipleLeagueCategorySettings(["combined", "gametypes", "maps"]);
+                const ctfLeagueSettings = await getLeagueSiteSettings();
 
                 for(let i = 0; i < seasonIds.length; i++){
 
