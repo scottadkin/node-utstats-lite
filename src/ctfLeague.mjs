@@ -9,45 +9,34 @@ import { getSeasonById } from "./seasons.mjs";
 
 
 export const DEFAULT_SETTINGS = [
-    {"category": "combined", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
-    {"category": "combined", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
-    {"category": "combined", "name": "Enable League", "type": "bool", "value": "true"},
-    {"category": "combined", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-    {"category": "combined", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(0)},
-
-    {"category": "maps", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
-    {"category": "maps", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
-    {"category": "maps", "name": "Enable League", "type": "bool", "value": "true"},
-    {"category": "maps", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-    {"category": "maps", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(0)},
-    {"category": "gametypes", "name": "Maximum Matches Per Player", "type": "integer", "value": 20},
-    {"category": "gametypes", "name": "Maximum Match Age In Days", "type": "integer", "value": 180},
-    {"category": "gametypes", "name": "Enable League", "type": "bool", "value": "true"},
-    {"category": "gametypes", "name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
-    {"category": "gametypes", "name": "Last Whole League Refresh", "type": "datetime", "value": new Date(0)},
+    {"name": "Maximum Matches Per Player", "type": "integer", "value": 20},
+    {"name": "Maximum Match Age In Days", "type": "integer", "value": 180},
+    {"name": "Enable League", "type": "bool", "value": "true"},
+    {"name": "Update Whole League End Of Import", "type": "bool", "value": "true"},
+    {"name": "Last Whole League Refresh", "type": "datetime", "value": new Date(0)},
 ];
 
 
-async function bCTFSettingExist(name, category){
+async function bCTFSettingExist(name){
 
-    const query = `SELECT COUNT(*) as total_rows FROM nstats_ctf_league_settings WHERE name=? AND category=?`;
+    const query = `SELECT COUNT(*) as total_rows FROM nstats_ctf_league_settings WHERE name=?`;
 
-    const result = await simpleQuery(query, [name, category]);
+    const result = await simpleQuery(query, [name]);
 
     return result[0].total_rows > 0;
 }
 
 export async function insertDefaultCTFLeagueSettings(){
 
-    const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?,?)`;
+    const query = `INSERT INTO nstats_ctf_league_settings VALUES(NULL,?,?,?)`;
 
     for(let i = 0; i < DEFAULT_SETTINGS.length; i++){
 
         const s = DEFAULT_SETTINGS[i];
 
-        if(!await bCTFSettingExist(s.name, s.category)){
+        if(!await bCTFSettingExist(s.name)){
             
-            await simpleQuery(query, [s.category, s.name, s.type, s.value]);
+            await simpleQuery(query, [s.name, s.type, s.value]);
         }
     }
 }
@@ -1382,11 +1371,35 @@ export async function ctfLeagueGetUniquePlayedCombinations(seasonId, minDate, ma
     return await simpleQuery(query, vars);
 }*/
 
-function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps, maxMatches){
+function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps){
 
-    if(maxMatches === undefined) throw new Error(`maxMatches parameter is missing`);
-    maxMatches = parseInt(maxMatches);
-    if(maxMatches !== maxMatches) throw new Error(`maxMatches must be a valid number`);
+
+    let maxDays = 0;
+    let maxMatches = 0;
+
+    if(!bGroupGametypes && !bGroupMaps){
+
+        maxDays = parseInt(ctfLeagueSettings?.["combined"]?.["Maximum Match Age In Days"]?.value ?? 0);
+        maxMatches = parseInt(ctfLeagueSettings?.["combined"]?.["Maximum Matches Per Player"]?.value ?? 0);
+
+    }else if(bGroupGametypes && !bGroupMaps){
+
+        maxDays = parseInt(ctfLeagueSettings?.["gametypes"]?.["Maximum Match Age In Days"]?.value ?? 0);
+        maxMatches = parseInt(ctfLeagueSettings?.["gametypes"]?.["Maximum Matches Per Player"]?.value ?? 0);
+
+    }else if(!bGroupGametypes && bGroupMaps){
+
+        maxDays = parseInt(ctfLeagueSettings?.["maps"]?.["Maximum Match Age In Days"]?.value ?? 0);
+        maxMatches = parseInt(ctfLeagueSettings?.["maps"]?.["Maximum Matches Per Player"]?.value ?? 0);
+    }else{
+
+        throw new Error("what did i miss");
+    }
+
+
+    //if(maxMatches === undefined) throw new Error(`maxMatches parameter is missing`);
+    //maxMatches = parseInt(maxMatches);
+   // if(maxMatches !== maxMatches) throw new Error(`maxMatches must be a valid number`);
 
     const wins = "SUM(wins) * 1.0";
     const totalMatches = "COUNT(*)";
@@ -1441,7 +1454,14 @@ function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps, maxMatches){
     `;
 }
 
-export async function ctfLeagueRecalculateSeasonAllTables(seasonId, start, end, maxMatches){
+/**
+ * 
+ * @param {Number} seasonId 
+ * @param {Date} start 
+ * @param {Date} end 
+ * @param {number} maxMatches 
+ */
+export async function ctfLeagueRecalculateSeasonAllTables(seasonId, ctfLeagueSettings){
 
     if(start === undefined) throw new Error("start is missing");
     if(end === undefined) throw new Error("end is missing");
@@ -1458,7 +1478,11 @@ export async function ctfLeagueRecalculateSeasonAllTables(seasonId, start, end, 
         vars.push(seasonId);
     }
 
-    if(start !== null){
+    const seasonInfo = await getSeasonById(seasonId);
+
+    if(seasonInfo === null) throw new Error(`seasonInfo is null`);
+
+    /*if(start !== null){
 
         if(where.length > 0) where += ` AND `;
         where += `m.date>=? `;
@@ -1470,7 +1494,7 @@ export async function ctfLeagueRecalculateSeasonAllTables(seasonId, start, end, 
         if(where.length > 0) where += ` AND `;
         where += `m.date<=? `;
         vars.push(end);
-    }
+    }*/
 
     if(where.length !== 0) where = `WHERE ${where}`;
 
@@ -1532,13 +1556,13 @@ export async function ctfLeagueRecalculateSeasonAllTables(seasonId, start, end, 
     
     --all time
  
-    ${testUnionThing(seasonId !== 0, false, false, maxMatches)}
+    ${testUnionThing(seasonId !== 0, false, false, ctfLeagueSettings, seasonInfo)}
      --maps
-    UNION ALL ${testUnionThing(seasonId !== 0, false, true, maxMatches)}
+    UNION ALL ${testUnionThing(seasonId !== 0, false, true, ctfLeagueSettings, seasonInfo)}
      --gametypes
-    UNION ALL ${testUnionThing(seasonId !== 0, true, false, maxMatches)}
+    UNION ALL ${testUnionThing(seasonId !== 0, true, false, ctfLeagueSettings, seasonInfo)}
      --gametypes + maps
-    UNION ALL ${testUnionThing(seasonId !== 0, true, true, maxMatches)}
+    UNION ALL ${testUnionThing(seasonId !== 0, true, true, maxctfLeagueSettingsMatches, seasonInfo)}
     `
 
     const data = await simpleQuery(query, vars);

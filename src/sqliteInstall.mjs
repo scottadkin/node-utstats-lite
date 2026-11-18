@@ -173,7 +173,6 @@ export function createTableQueries(){
             ) STRICT`,
              `CREATE TABLE IF NOT EXISTS nstats_ctf_league_settings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            category TEXT COLLATE NOCASE ,
             name TEXT COLLATE NOCASE ,
             type TEXT COLLATE NOCASE ,
             value TEXT NOT NULL
@@ -1531,6 +1530,16 @@ async function bAnyUniqueComboPlayerTotalsData(){
     return result[0].total_players > 0;
 }
 
+
+//v2.10.0 preview 6
+async function updateCTFLeagueSettingsTable(){
+
+    if(!await bColumnExist("nstats_ctf_league_settings","category")) return;
+
+    await simpleQuery(`DELETE FROM nstats_ctf_league_settings`);
+    await simpleQuery(`ALTER TABLE nstats_ctf_league_settings DROP column category`);
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1578,6 +1587,9 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.6.0 & 2.10.0
     await updateMapWeaponTotalsTable();
 
+
+    //2.10.0 preview 6
+    await updateCTFLeagueSettingsTable();
 
     new Message("Inserting Default Rankings Settings", "note");
     await insertDefaultRankingSettings();

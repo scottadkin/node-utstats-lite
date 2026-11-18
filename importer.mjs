@@ -89,7 +89,7 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
 }
 
 
-/*async function updateCTFLeague(m, ctfLeagueSettings){
+async function OLD_updateCTFLeague(m, ctfLeagueSettings){
 
     const types = ["maps", "gametypes"];
 
@@ -165,7 +165,37 @@ async function insertImporterHistory(serverId, logsFound, passed, failed, totalT
     const end = performance.now();
 
     console.log(`ctfLeague took ${(end - start) * 0.001}`);
-}*/
+}
+
+
+async function updateCTFLeague(matchData, ctfLeagueSettings){
+
+    console.log(matchData);
+    console.log(ctfLeagueSettings);
+
+    const seasonInfo = matchData.seasonInfo;
+
+    const startDate = new Date(seasonInfo.start_date ?? new Date(0));
+    const endDate = new Date(seasonInfo.end_date ?? new Date(Date.now()));
+
+    const maxDays = parseInt(ctfLeagueSettings?.["combined"]?.["Maximum Match Age In Days"]?.value ?? 0);
+    const maxMatches = parseInt(ctfLeagueSettings?.["combined"]?.["Maximum Matches Per Player"]?.value ?? 0);
+
+    const maxDayStartDate = new Date(endDate - DAY * maxDays);
+
+    console.log(startDate, endDate, maxDays, maxDayStartDate);
+
+    const realStartDate = (maxDayStartDate >= startDate) ? maxDayStartDate : startDate;
+
+    console.log(realStartDate);
+    
+
+    const a = performance.now();
+    await ctfLeagueRecalculateSeasonAllTables(seasonInfo.id, realStartDate, endDate, maxMatches);
+    const b = performance.now();
+
+    console.log((b - a) * 0.001);
+}
 
 async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, 
     bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName){
@@ -212,11 +242,12 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         new Message(`MatchId: ${m.matchId}, Server: ${m.server.name}, Gametype: ${m.gametype.name}, Map: ${m.map.name}`,"note");
 
-        /*if(m.ctf.bMatchCTF){
+        if(m.ctf.bMatchCTF){
             new Message(`Updating CTF League`,"note");
             await updateCTFLeague(m, ctfLeagueSettings);
+            //await OLD_updateCTFLeague(m, ctfLeagueSettings);
            // process.exit();
-        }*/
+        }
 
         await InsertLogHistory(file, m.matchId);
 
