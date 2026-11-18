@@ -553,9 +553,7 @@ function getCTFLeagueRestrictions(seasonInfo, settings){
     return {maxMatches, cutOffDate, seasonEndDate, maxDays}
 }
 
-export async function deleteMatch(seasonId, mapId, gametypeId){
-
-    if(arguments.length !== 3) throw new Error(`seasonId missing`);
+export async function ctfLeagueDeleteMatch(seasonId){
 
     seasonId = parseInt(seasonId);
     if(seasonId !== seasonId) throw new Error(`seasonId must be a valid integer`);
@@ -565,58 +563,17 @@ export async function deleteMatch(seasonId, mapId, gametypeId){
         throw new Error(`CTF League Missing Setting, Maximum Match Age In Days`);
     }
 
-    const seasonInfo = await getSeasonById(seasonId);
-
-
-    const recalPromises = [];
-
-
     if(settings["Enable League"].value){
 
-        //#####
-        const {cutOffDate, seasonEndDate, maxMatches} = getCTFLeagueRestrictions(seasonInfo, settings);
-
-        recalPromises.push([
-                //season map all time
-                recalculateSeasonTable(seasonId, mapId, 0, maxMatches, cutOffDate, seasonEndDate),
-                //season map gametype combo
-                recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, cutOffDate, seasonEndDate)
-            ]);
+        const recalPromises = [
+            ctfLeagueRecalculateSeasonAllTables(0, settings)
+        ];
 
         if(seasonId !== 0){
-            recalPromises.push([
-                //all time map totals
-                recalculateSeasonTable(0, mapId, 0, maxMatches, cutOffDate, seasonEndDate),
-                //all time map gametype
-                recalculateSeasonTable(0, mapId, gametypeId, maxMatches, cutOffDate, seasonEndDate)
-            ]);
-        }
- 
-    }
-
-
-    if(settings["Enable League"].value){
-
-        const {cutOffDate, seasonEndDate, maxMatches} = getCTFLeagueRestrictions(seasonInfo, settings);
-        //season gametype all time
-        recalPromises.push(recalculateSeasonTable(seasonId, 0, gametypeId, maxMatches, cutOffDate, seasonEndDate));
-        if(seasonId !== 0){
-            //all time gametype
-            recalPromises.push(recalculateSeasonTable(0, 0, gametypeId, maxMatches, cutOffDate, seasonEndDate));
-        }
-  
-    }
-
-    if(settings["Enable League"].value){
-
-        const {cutOffDate, seasonEndDate, maxMatches} = getCTFLeagueRestrictions(seasonInfo, settings);
-
-        recalPromises.push(recalculateSeasonTable(seasonId, 0, 0, maxMatches, cutOffDate, seasonEndDate));
-
-        if(seasonId !== 0){
-            recalPromises.push(recalculateSeasonTable(seasonId, 0, 0, maxMatches, cutOffDate, seasonEndDate));
+            recalPromises.push(ctfLeagueRecalculateSeasonAllTables(seasonId, settings));
         }
     }
+
 
     await Promise.all(recalPromises);
 }
@@ -714,47 +671,6 @@ export async function setCTFLeaguePageMetaData(mode, gametypeNames, mapNames, id
     return {title, subHeader}
 }
 
-/**
- * Get unique gametypes, maps where date >=startDate and date <=endDate
- * @param {Number} seasonId 
- * @param {Date} startDate 
- * @param {Date} endDate 
- * @param {Array<Number>} ctfGametypes 
- */
-async function ctfLeagueGetUniqueCombosBetweenDates(seasonId, startDate, endDate, ctfGametypes){
-
-    const vars = [ctfGametypes, startDate, endDate];
-
-    if(seasonId !== 0) vars.unshift(seasonId);
-
-    const query = `SELECT DISTINCT map_id FROM nstats_matches WHERE ${(seasonId !== 0) ? "season_id=? AND" : ""} gametype_id IN(?) AND date >=? AND date<=?`;
-
-    const result = await simpleQuery(query, vars);
-
-    return result.map((r) => { return r.map_id});
-    
-}
-
-async function getUniqueMatchCombinationsInDateRange(seasonId, startDate, endDate){
-
-    seasonId = parseInt(seasonId);
-    let where = ``;
-
-    const vars = [startDate, endDate];
-
-    if(seasonId !== 0){
-        where += `season_id=? AND`;
-        vars.unshift(seasonId);
-    }
-
-    const query = `SELECT DISTINCT gametype_id,map_id FROM nstats_matches WHERE ${where} date>=? AND date<=? AND gametype_id IN(
-        SELECT id FROM nstats_gametypes WHERE b_ctf=1
-    )`;
-
-    return await simpleQuery(query, vars);
-
-    
-}
 
 async function deleteSeasonTable(seasonId, gametypeId, mapId){
 
@@ -959,47 +875,6 @@ async function recalculateSeasonTable(seasonId, mapId, gametypeId, maxMatches, s
 }
 
 
-/**
- * Get unique seasonIds, gametypeIds, mapIds for each player
- * @param {Array<Number>} playerIds 
- */
-async function getUniquePlayersMatchCombinations(playerIds){
-
-    const query = `SELECT DISTINCT season_id,gametype_id,map_id FROM nstats_player_totals_ctf WHERE player_id IN (?)`;
-
-    return await simpleQuery(query, [playerIds]);
-
-}
-
-export async function ctfLeagueRecalculatePlayers(playerIds){
-
-    if(playerIds.length === 0) return;
-
-
-    const leagueSettings = await getLeagueSiteSettings();
-
-    const uniqueData = await getUniquePlayersMatchCombinations(playerIds);
-
-    
-    const promises = [];
-
-    for(let i = 0; i < uniqueData.length; i++){
-
-        const {season_id, gametype_id, map_id} = uniqueData[i];
-
-        const seasonInfo = await getSeasonById(season_id);
-
-        const restrictions = getCTFLeagueRestrictions(seasonInfo, leagueSettings);
-
-
-        promises.push(refreshTable(season_id, 0, 0, restrictions.cutOffDate, restrictions.seasonEndDate, leagueSettings.combined));
-        promises.push(refreshTable(season_id, gametype_id, 0, restrictions.cutOffDate, restrictions.seasonEndDate, leagueSettings.gametypes));
-        promises.push(refreshTable(season_id, gametype_id, map_id, restrictions.cutOffDate, restrictions.seasonEndDate, leagueSettings.maps));
-    }
-
-    return await Promise.all(promises);
-
-}
 
 /**
  * Get every played gametype + map combination used for a season via match_ctf table

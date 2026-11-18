@@ -26,7 +26,7 @@ import { getWinner, getTeamName, sanitizePagePerPage,
  } from "./generic.mjs";
 import { getMatchDamage, deleteMatch as deleteMatchDamage } from "./damage.mjs";
 import { recalculateGametype as rankingRecalculateGametype, recalculateMap as rankingRecalculateMap} from "./rankings.mjs";
-import { deleteMatch as deleteMatchCTFLeague } from "./ctfLeague.mjs";
+import { ctfLeagueDeleteMatch, ctfLeagueRecalculateSeasonAllTables, getLeagueSiteSettings } from "./ctfLeague.mjs";
 import { toJSONAPIKeyNames } from "./json.mjs";
 import { calculateSeasonStats, updateUniqueMatchCominationsPlayerCount } from "./seasons.mjs";
 
@@ -1690,14 +1690,7 @@ export async function deleteMatch(id, bUpdateUniqueCombos){
 
     await deleteMatchKills(id);
     await deleteMatchDamage(basic.season_id, id);
-    const ctfRowsDeleted = await ctfDeleteMatch(basic.season_id, id);
-    
-
-    
-    if(ctfRowsDeleted > 0){
-        await deleteMatchCTFLeague(basic.season_id, basic.map_id, basic.gametype_id);
-    
-    }
+    await ctfDeleteMatch(basic.season_id, id);
 
 
     await weaponCalcMapWeaponsTotals(basic.season_id, basic.map_id, basic.gametype_id); 

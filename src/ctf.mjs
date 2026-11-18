@@ -5,6 +5,7 @@ import { bIncludeMostUsedNameByHWID, toJSONAPIKeyNames } from "./json.mjs";
 import Message from "./message.mjs";
 import { getMostCommonNameUsedByHWIDS, getPlayersById } from "./players.mjs";
 import { getAllSeasonIds } from "./seasons.mjs";
+import { ctfLeagueRecalculateSeasonAllTables, getLeagueSiteSettings } from "./ctfLeague.mjs";
 
 const CTF_TOTAL_KEYS = [
     "flag_taken", "flag_pickup", "flag_drop", "flag_assist",
@@ -861,24 +862,31 @@ export async function deleteMatch(seasonId, matchId){
         "nstats_ctf_carry_times","nstats_ctf_covers", "nstats_match_ctf"
     ];
 
-    const playerIds = await getPlayerIdsInMatch(matchId);
+    const bAnyData = await simpleQuery(`SELECT id FROM nstats_match_ctf WHERE match_id=? LIMIT 1`, [matchId]);
 
-    let rowsAffected = 0;
+    if(bAnyData.length === 0){
+        return;
+    }
+
+    const playerIds = await getPlayerIdsInMatch(matchId);
 
     for(let i = 0; i < deleteFromTables.length; i++){
 
         const t = deleteFromTables[i];
 
-        const result = await simpleQuery(`DELETE FROM ${t} WHERE match_id=?`, [matchId]);
-
-        if(result.affectedRows !== undefined){
-            rowsAffected += result.affectedRows;
-        }
+        await simpleQuery(`DELETE FROM ${t} WHERE match_id=?`, [matchId]);
     }
 
     await recalculateTotals(seasonId, playerIds);
 
-    return rowsAffected;
+    const leagueSettings = await getLeagueSiteSettings();
+
+    if(seasonId !== 0){
+        await ctfLeagueRecalculateSeasonAllTables(seasonId, leagueSettings);
+    }
+
+    await ctfLeagueRecalculateSeasonAllTables(0, leagueSettings);
+
 }
 
 

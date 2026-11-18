@@ -15,7 +15,7 @@ import { getAllSeasonIds, getPlayerActiveSeasons, getSeasonById, seasonsGetMatch
 import { getCategorySettings } from "./siteSettings.mjs";
 import { getPageLayout } from "./pageLayout.mjs";
 import { getPlayerTotals as getPlayerWeaponTotals } from "./weapons.mjs";
-import { ctfLeagueRecalculatePlayers, getLeagueSiteSettings, getPlayerMapsLeagueData } from "./ctfLeague.mjs";
+import { ctfLeagueRefreshAllLeagueTables, getLeagueSiteSettings, getPlayerMapsLeagueData } from "./ctfLeague.mjs";
 import { getPlayerWeaponDamageTotals } from "./playerWeaponDamage.mjs";
 import { getPlayerRankings, rankingsRecalculatePlayers } from "./rankings.mjs";
 const DEFAULT_PLAYER_SETTINGS = [
@@ -2774,7 +2774,7 @@ export async function renamePlayerByMatchHistory(playerName, matchPlayerRowIds, 
 
     await rankingsRecalculatePlayers(matchesInfo.uniquePlayers);
 
-    await ctfLeagueRecalculatePlayers(matchesInfo.uniquePlayers);
+    await ctfLeagueRefreshAllLeagueTables();
 
 
     await insertRenameHistory(matchesInfo.data, renameType, playerName);
