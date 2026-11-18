@@ -393,7 +393,7 @@ function getTotalPlayersQuery(bGroupSeasons, bGroupServers, bGroupGametypes, bGr
 }
 
 
-/**
+/** this is really slow and probably really poorly done
  * Update all time, every seasons, server, gametype, map combinations player counts
  */
 export async function updateUniqueMatchCominationsPlayerCount(){
@@ -444,10 +444,9 @@ export async function updateUniqueMatchCominationsPlayerCount(){
     `;
 
     const result = await simpleQuery(query);
-   // console.log(result.length);
+  
 
     const updateQuery = `UPDATE nstats_seasons_unique_match_combinations SET total_players=? WHERE season_id=? AND server_id=? AND gametype_id=? AND map_id=?`;
- 
     const insertVars = [];
 
     for(let i = 0; i < result.length; i++){

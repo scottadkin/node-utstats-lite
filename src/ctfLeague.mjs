@@ -5,7 +5,7 @@ import { getBasicPlayerInfo} from "./players.mjs";
 import { convertTimestamp, DAY, getPlayer, sanitizePagePerPage, setInt } from "./generic.mjs";
 import Message from "./message.mjs";
 import { getCategorySettings } from "./siteSettings.mjs";
-import { getSeasonById } from "./seasons.mjs";
+import { getAllSeasonIds, getSeasonById } from "./seasons.mjs";
 
 
 export const DEFAULT_SETTINGS = [
@@ -273,57 +273,17 @@ async function refreshTable(seasonId, gametypeId, mapId, cutOffDate, seasonEndDa
 }
 
 
-export async function refreshAllTables(seasonId, ctfLeagueSettings){
+export async function ctfLeagueRefreshAllLeagueTables(){
 
-    seasonId = parseInt(seasonId);
-    if(seasonId !== seasonId) throw new Error(`seasonId must be valid integer`);
+    const [settings, seasonIds] = await Promise.all([getLeagueSiteSettings(), getAllSeasonIds(false)]);
 
+    for(let i = 0; i < seasonIds.length; i++){
 
-    const seasonInfo = await getSeasonById(seasonId);
+        const sId = seasonIds[i];
+        await ctfLeagueRecalculateSeasonAllTables(sId, settings);
 
-    const restrictions = getCTFLeagueRestrictions(seasonInfo, ctfLeagueSettings);
-
-    //season all time
-    await refreshTable(seasonId, 0, 0, restrictions.cutOffDate, restrictions.seasonEndDate, ctfLeagueSettings);
-
-    //const allValidCTFGametypes = await getAllValidCTFGametypes();
-
-    const uniqueCombos = await getUniqueMatchCombinationsInDateRange(seasonId, new Date(0), new Date(Date.now()));
-
-    const ctfGametypes = [...new Set(uniqueCombos.map((u) => { return u.gametype_id}))];
-
-
-    if(ctfGametypes.length === 0){
-        new Message(`No CTF gametypes found in seasonId ${seasonId}.`,"note");
-        return;
     }
-
-    const processedGametypes = new Set();
-    const processedMaps = new Set();
-
-    for(let i = 0; i < uniqueCombos.length; i++){
-
-        const {gametype_id: gametypeId, map_id: mapId} = uniqueCombos[i];
- 
-
-        //gametype + map
-        new Message(`Refreshing ctf league map ${mapId} + gametypeId ${gametypeId} table for season ${seasonId}`,"note");
-        await refreshTable(seasonId, gametypeId, mapId, restrictions.cutOffDate, restrictions.seasonEndDate, ctfLeagueSettings);
-
-        //map season, we only want to do map season total once otherwise just redoing same data over and over
-        if(!processedMaps.has(mapId)){
-            new Message(`Refreshing ctf league map ${mapId} table for season ${seasonId}`,"note");
-            await refreshTable(seasonId, 0, mapId, restrictions.cutOffDate, restrictions.seasonEndDate, ctfLeagueSettings);
-            processedMaps.add(mapId);
-        }
-
-        //gametype season, we only want to do gametype season total once otherwise just redoing same data over and over
-        if(!processedGametypes.has(gametypeId)){
-            new Message(`Refreshing ctf league gametype ${gametypeId} table for season ${seasonId}`,"note");
-            await refreshTable(seasonId, gametypeId, 0, restrictions.cutOffDate, restrictions.seasonEndDate, ctfLeagueSettings);
-            processedGametypes.add(gametypeId);
-        }
-    }
+    
 }
 
 
@@ -1126,6 +1086,7 @@ function testUnionThing(bGroupSeasons, bGroupGametypes, bGroupMaps, maxMatches){
     `;
 }
 
+
 /**
  * 
  * @param {Number} seasonId 
@@ -1208,7 +1169,7 @@ export async function ctfLeagueRecalculateSeasonAllTables(seasonId, ctfLeagueSet
         ctf.gametype_id,
         ctf.map_id
         FROM nstats_match_ctf as ctf 
-        INNER JOIN nstats_match_players as mp ON ctf.player_id = mp.player_id AND ctf.match_id=mp.match_id
+        INNER JOIN nstats_match_players as mp ON ctf.match_id=mp.match_id AND ctf.player_id = mp.player_id
         INNER JOIN nstats_matches as m ON m.id = mp.match_id
         ${where}
         )

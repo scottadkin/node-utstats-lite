@@ -4,7 +4,7 @@ import Message from "./message.mjs";
 import {createRandomString} from "./generic.mjs";
 import { cleanPageSettings } from "./siteSettings.mjs";
 import { cleanDefaultPageLayouts} from "./pageLayout.mjs";
-import { refreshAllTables, insertDefaultCTFLeagueSettings, getLeagueSiteSettings } from "./ctfLeague.mjs";
+import { insertDefaultCTFLeagueSettings, ctfLeagueRefreshAllLeagueTables } from "./ctfLeague.mjs";
 import {insertDefaultRankingSettings, recalculateAllRankings } from "./rankings.mjs";
 import { updateJSONApiSettings } from "./json.mjs";
 import { createDefaultLogsFolderSettings} from "./logsfoldersettings.mjs";
@@ -1659,17 +1659,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     if(!bSkipInstallCTFLeagueRefresh){
 
-        const seasonIds = await getAllSeasonIds(false);
-
-        const ctfLeagueSettings = await getLeagueSiteSettings();
-
-        for(let i = 0; i < seasonIds.length; i++){
-
-            const seasonId = seasonIds[i];
-
-            new Message(`Refreshing player ctf league Map tables.`,"note");
-            await refreshAllTables(seasonId, ctfLeagueSettings);
-
-        }
+        new Message("Refreshing CTF league tables");
+        await ctfLeagueRefreshAllLeagueTables();
     }
 }

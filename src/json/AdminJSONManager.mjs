@@ -15,7 +15,7 @@ import {
     getSQLiteBackups, getSQLiteStats, /*restoreDatabase*/ 
     restoreFromSQLiteBackup 
 } from "../admin.mjs";
-import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings, getLeagueSiteSettings, refreshAllTables } from "../ctfLeague.mjs";
+import { adminGetAllCTFLeagueSettings, adminUpdateCTFLeagueSettings, getLeagueSiteSettings, ctfLeagueRefreshAllLeagueTables } from "../ctfLeague.mjs";
 import { VALID_PLAYER_LIFETIME_TYPES, VALID_PLAYER_MATCH_TYPES } from "../validRecordTypes.mjs";
 import { getAllNames as getAllGametypeNames} from "../gametypes.mjs";
 import { 
@@ -582,16 +582,8 @@ export default class AdminJSONManager{
 
             }else if(this.mode === "recalculate-ctf-league-tables"){
 
-
-                const seasonIds = await getAllSeasonIds(false);
-                const ctfLeagueSettings = await getLeagueSiteSettings();
-
-                for(let i = 0; i < seasonIds.length; i++){
-
-                    const sId = seasonIds[i];
-                    await refreshAllTables(sId,ctfLeagueSettings);
-                }
-
+                await ctfLeagueRefreshAllLeagueTables();
+                
                 return this.res.json({"message": "passed"});
                 
             }else if(this.mode === "recalculate-players-totals"){

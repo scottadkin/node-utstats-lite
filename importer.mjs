@@ -1,5 +1,5 @@
 import Message from "./src/message.mjs";
-import {detachDatabase, simpleQuery} from "./src/database.mjs";
+import {simpleQuery} from "./src/database.mjs";
 import { FTPImporter } from "./src/ftpimporter.mjs";
 import { SFTPImporter } from "./src/sftpimporter.mjs";
 import { readFile, readdir, rename } from 'node:fs/promises';
@@ -8,8 +8,7 @@ import {importedLogsFolder, logFilePrefix, importInterval, bBatchUpdateLogs} fro
 import Encoding from 'encoding-japanese';
 import { getSettings as getLogsFolderSettings } from "./src/logsfoldersettings.mjs";
 import { bLogAlreadyImported, getAllPendingUpdates } from "./src/importer.mjs";
-import { ctfLeagueRecalculateSeasonAllTables, getLeagueSiteSettings, refreshAllTables, updateSettings } from "./src/ctfLeague.mjs";
-import { DAY } from "./src/generic.mjs";
+import { ctfLeagueRecalculateSeasonAllTables, getLeagueSiteSettings, updateSettings } from "./src/ctfLeague.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID, calculateAllPlayerTotals } from "./src/players.mjs";
 import { calculateSeasonStats, getAllSeasonIds, updateUniqueMatchCominationsPlayerCount } from "./src/seasons.mjs";
@@ -144,22 +143,9 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         new Message(`MatchId: ${m.matchId}, Server: ${m.server.name}, Gametype: ${m.gametype.name}, Map: ${m.map.name}`,"note");
 
-        if(m.ctf.bMatchCTF){
-            new Message(`Updating CTF League`,"note");
-            await updateCTFLeague(m, ctfLeagueSettings);
-            //await OLD_updateCTFLeague(m, ctfLeagueSettings);
-           // process.exit();
-        }
 
         await InsertLogHistory(file, m.matchId);
 
-    
-        
-
-        /*if(m.attachedDatabase !== undefined){
-            await detachDatabase(m.attachedDatabase);
-            new Message(`Detached database ${m.attachedDatabase}`,"pass");
-        }*/
 
         await rename(`./Logs/${file}`, `./Logs/imported/${file}`);
         
@@ -455,8 +441,6 @@ async function calculateTotalsFromPendingUpdates(){
 
     const start = performance.now();
 
-    const TEMP_MAX_MATCHES = 11;
-
     const seasonStatPromises = [];
 
     const leagueSettings = await getLeagueSiteSettings();
@@ -498,9 +482,6 @@ async function startImport(){
 
     const seasonIds = await getAllSeasonIds(false);
     
-    const ctfLeagueLastRefresh = new Date(ctfLeagueSettings["Last Whole League Refresh"].value);
-
-    const refreshMinDate = new Date(Date.now() - DAY);
 
     if(bBatchUpdateLogs){
       
@@ -519,13 +500,14 @@ async function startImport(){
    
     }
 
-    const bRefreshTables = ctfLeagueLastRefresh <= refreshMinDate;
+    /*const bRefreshTables = ctfLeagueLastRefresh <= refreshMinDate;
 
     if(!bRefreshTables){
 
         new Message(`Less than 24hours since full ctf league refresh, skipping full refresh.`, "note");
         return;
-    }
+    }*/
+
 
     for(let i = 0; i < seasonIds.length; i++){
 
@@ -533,10 +515,10 @@ async function startImport(){
 
         new Message(`Refreshing CTFLeague tables for season ${seasonId}`,"note");
 
-       // await refreshAllTables(seasonId, ctfLeagueSettings);
         await ctfLeagueRecalculateSeasonAllTables(seasonId, ctfLeagueSettings)
 
     }
+
 
     const newData = {"Last Whole League Refresh": {
         "value": new Date(Date.now()).toISOString()
