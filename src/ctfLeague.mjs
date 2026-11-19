@@ -539,21 +539,21 @@ function createCalculateTotalQuery(bGroupSeasons, bGroupGametypes, bGroupMaps, m
 
     return `
     SELECT player_id,
-    ${(bGroupSeasons) ? "season_id" : "0 as season_id"},
     ${(bGroupGametypes) ? "gametype_id" : "0 as gametype_id"},
     ${(bGroupMaps) ? "map_id" : "0 as map_id"},
-    ${wins} as wins,
-    SUM(losses) as losses,
-    SUM(draws) as draws,
-    ${totalMatches} as total_matches,
     MIN(date) as first_match,
     MAX(date) as last_match,
+    SUM(playtime) as playtime,
+    ${totalMatches} as total_matches,
+    ${wins} as wins,
+    SUM(draws) as draws,
+    SUM(losses) as losses,
     COALESCE(${wins} / NULLIF(${totalMatches},0),0) * 100 as win_rate,
-    SUM(points) as points,
     SUM(cap_for) as cap_for,
     SUM(cap_against) as cap_against,
-    SUM(playtime) as total_playtime,
-    ${capOffset} as cap_offset
+    ${capOffset} as cap_offset,
+    SUM(points) as points,
+    ${(bGroupSeasons) ? "season_id" : "0 as season_id"}
     FROM unique_totals 
     ${where}
     GROUP BY player_id
@@ -565,7 +565,7 @@ function createCalculateTotalQuery(bGroupSeasons, bGroupGametypes, bGroupMaps, m
 
 
 /**
- * 
+ * Delete all season data and create new(faster than upsert)
  * @param {Number} seasonId 
  * @param {Object} ctfLeagueSettings 
  */
@@ -653,51 +653,23 @@ export async function ctfLeagueRecalculateSeasonAllTables(seasonId, ctfLeagueSet
     
     --all time
  
+    INSERT INTO nstats_player_ctf_league(
+        player_id,gametype_id,map_id,
+        first_match,last_match,playtime,
+        total_matches,wins,draws,losses,
+        winrate,cap_for,cap_against,
+        cap_offset,points,season_id
+    )
     ${createCalculateTotalQuery(seasonId !== 0, false, false, restrictions.maxMatches)}
      --maps
     UNION ALL ${createCalculateTotalQuery(seasonId !== 0, false, true, restrictions.maxMatches)}
      --gametypes
     UNION ALL ${createCalculateTotalQuery(seasonId !== 0, true, false, restrictions.maxMatches)}
      --gametypes + maps
-    UNION ALL ${createCalculateTotalQuery(seasonId !== 0, true, true, restrictions.maxMatches)}
-    `
-
-    const data = await simpleQuery(query, vars);
-
-    await bulkInsertTable(data);
-}
-
-export async function bulkInsertTable(data){
-
-    if(data.length === 0) return;
-    
-    const insertVars = [];
-
-    for(let i = 0; i < data.length; i++){
-
-        const d = data[i];
-
-        insertVars.push([
-            d.player_id,
-            d.gametype_id,
-            d.map_id,
-            d.first_match,
-            d.last_match,
-            d.total_playtime, d.total_matches, d.wins, d.draws,
-            d.losses, d.win_rate, d.cap_for, d.cap_against, 
-            d.cap_offset, d.points, d.season_id
-        ]);
-    }
+    UNION ALL ${createCalculateTotalQuery(seasonId !== 0, true, true, restrictions.maxMatches)}`;
 
 
-    const columns = [
-        "player_id", "gametype_id", "map_id", "first_match", "last_match",
-        "playtime", "total_matches", "wins", "draws", "losses", "winrate", "cap_for",
-        "cap_against", "cap_offset", "points", "season_id"
-    ];
+    await simpleQuery(`DELETE FROM nstats_player_ctf_league WHERE season_id=?`, [seasonId]);
 
-    const conflict = ["player_id","season_id","gametype_id","map_id"];
-
-    await sqlInsertOnDuplicateUpdate("nstats_player_ctf_league", columns, insertVars, conflict);
-
+    await simpleQuery(query, vars);
 }
