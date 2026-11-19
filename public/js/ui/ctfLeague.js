@@ -137,6 +137,7 @@ class CTFLeagueTable{
 
     constructor(parent, mode, data, id, gId, page, perPage, subHeader, seasonId, bSkipSeasonLinks){
         
+        console.log(data);
         this.parent = document.querySelector(parent);
         this.mode = mode;
         this.data = data;
@@ -168,9 +169,13 @@ class CTFLeagueTable{
 
         const tableOptions = {
             "headers":[
-                "Place", "Player", "Played", "Wins", 
-                "Draws", "Losses", "Caps For",
-                "Caps Against", "Cap Offset", "Points"
+                "#", "Player", "MP", "W", 
+                "D", "L", 
+                
+                "Caps", "Assists", "FKill", "Cover",
+                "CF",
+                "CA", 
+                "COffset", "Points"
             ].map((h) => { return {"display": h}}),
             "className": "t-width-1",
             "bNoSort": true
@@ -203,9 +208,14 @@ class CTFLeagueTable{
                 {"display": ignore0(d.wins)},
                 {"display": ignore0(d.draws)},
                 {"display": ignore0(d.losses)},
+
+                {"display": ignore0(d.player_caps)},
+                {"display": ignore0(d.player_assists)},
+                {"display": ignore0(d.player_flag_kills)},
+                {"display": ignore0(d.player_covers)},
                 {"display": ignore0(d.cap_for)},
                 {"display": ignore0(d.cap_against)},
-                {"display": d.cap_offset},
+                {"display": `${(d.cap_offset > 0) ? "+" : ""}${d.cap_offset}`},
                 {"display": ignore0(d.points)},
             ]);
         }
