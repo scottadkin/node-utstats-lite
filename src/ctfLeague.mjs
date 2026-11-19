@@ -553,7 +553,12 @@ function createCalculateTotalQuery(bGroupSeasons, bGroupGametypes, bGroupMaps, m
     SUM(cap_against) as cap_against,
     ${capOffset} as cap_offset,
     SUM(points) as points,
-    ${(bGroupSeasons) ? "season_id" : "0 as season_id"}
+    ${(bGroupSeasons) ? "season_id" : "0 as season_id"},
+    SUM(flag_cap) as player_caps,
+    SUM(flag_assist) as player_assists,
+    SUM(flag_kill) as player_flag_kills,
+    SUM(flag_return) as player_returns,
+    SUM(flag_cover) as player_covers
     FROM unique_totals 
     ${where}
     GROUP BY player_id
@@ -599,6 +604,11 @@ export async function ctfLeagueRecalculateSeasonAllTables(seasonId, ctfLeagueSet
         SELECT 
         ${(seasonId !== 0) ? "m.season_id" : "0 as season_id"},
         ctf.player_id,
+        ctf.flag_cap,
+        ctf.flag_assist,
+        ctf.flag_return,
+        ctf.flag_kill,
+        ctf.flag_cover,
         m.date,
         mp.time_on_server as playtime,
         CASE WHEN mp.match_result ='w' THEN 1 ELSE 0 END as wins,
@@ -658,7 +668,7 @@ export async function ctfLeagueRecalculateSeasonAllTables(seasonId, ctfLeagueSet
         first_match,last_match,playtime,
         total_matches,wins,draws,losses,
         winrate,cap_for,cap_against,
-        cap_offset,points,season_id
+        cap_offset,points,season_id, player_caps,  player_assists, player_flag_kills, player_returns, player_covers
     )
     ${createCalculateTotalQuery(seasonId !== 0, false, false, restrictions.maxMatches)}
      --maps

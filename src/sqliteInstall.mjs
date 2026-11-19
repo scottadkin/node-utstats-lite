@@ -891,7 +891,12 @@ export function createTableQueries(){
             cap_against INTEGER NOT NULL,
             cap_offset INTEGER NOT NULL,
             points INTEGER NOT NULL,
-            season_id INTEGER NOT NULL DEFAULT 0
+            season_id INTEGER NOT NULL DEFAULT 0,
+            player_caps INTEGER NOT NULL,
+            player_assists INTEGER NOT NULL,
+            player_flag_kills INTEGER NOT NULL,
+            player_returns INTEGER NOT NULL,
+            player_covers INTEGER NOT NULL
             ) STRICT`,
             `CREATE INDEX IF NOT EXISTS npcl_mgp_idx ON nstats_player_ctf_league(map_id, gametype_id, player_id)`,
             //`CREATE UNIQUE INDEX IF NOT EXISTS npcl_pgm_idx ON nstats_player_ctf_league(player_id,gametype_id,map_id)`,
@@ -1540,6 +1545,29 @@ async function updateCTFLeagueSettingsTable(){
     await simpleQuery(`ALTER TABLE nstats_ctf_league_settings DROP column category`);
 }
 
+//2.10.0 preview 6
+async function addColumnsToPlayerCTFLeague(){
+
+    if(await bColumnExist("nstats_player_ctf_league")) return;
+
+    const t = "nstats_player_ctf_league";
+
+    const columns = ["player_caps", "player_assists", "player_flag_kills", "player_returns", "player_covers"];
+
+    for(let i = 0; i < columns.length; i++){
+
+        const c = columns[i];
+
+        await addColumn(t, c, "INTEGER NOT NULL DEFAULT 0"); 
+    }
+    
+    /*player_caps INTEGER NOT NULL,
+            player_assists INTEGER NOT NULL,
+            player_flag_kills INTEGER NOT NULL,
+            player_returns INTEGER NOT NULL,
+            player_covers INTEGER NOT NULL,*/
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1590,6 +1618,7 @@ export async function sqliteInstall(bOnlyCreateTables){
 
     //2.10.0 preview 6
     await updateCTFLeagueSettingsTable();
+    await addColumnsToPlayerCTFLeague();
 
     new Message("Inserting Default Rankings Settings", "note");
     await insertDefaultRankingSettings();
