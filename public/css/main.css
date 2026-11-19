@@ -1491,3 +1491,9 @@ section{
 .max-text-width{
     max-width: var(--max-text-width);
 }
+
+.ctf-league-player-stat{
+    font-style: italic;
+    background-color:rgba(0,0,0,0.1);
+    color:var(--font-color-2);
+}

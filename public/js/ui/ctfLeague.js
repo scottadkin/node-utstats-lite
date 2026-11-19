@@ -171,7 +171,6 @@ class CTFLeagueTable{
             "headers":[
                 "#", "Player", "MP", "W", 
                 "D", "L", 
-                
                 "Caps", "Assists", "FKill", "Cover",
                 "CF",
                 "CA", 
@@ -209,10 +208,10 @@ class CTFLeagueTable{
                 {"display": ignore0(d.draws)},
                 {"display": ignore0(d.losses)},
 
-                {"display": ignore0(d.player_caps)},
-                {"display": ignore0(d.player_assists)},
-                {"display": ignore0(d.player_flag_kills)},
-                {"display": ignore0(d.player_covers)},
+                {"display": ignore0(d.player_caps), "className": "ctf-league-player-stat"},
+                {"display": ignore0(d.player_assists), "className": "ctf-league-player-stat"},
+                {"display": ignore0(d.player_flag_kills), "className": "ctf-league-player-stat"},
+                {"display": ignore0(d.player_covers), "className": "ctf-league-player-stat"},
                 {"display": ignore0(d.cap_for)},
                 {"display": ignore0(d.cap_against)},
                 {"display": `${(d.cap_offset > 0) ? "+" : ""}${d.cap_offset}`},
@@ -302,6 +301,15 @@ class CTFLeagueInfo{
                 ]
             );
         }
+
+        listItems.push([UIB("MP"),` = Matches Played, `,UIB("W"),` = Wins, `,UIB("D"),` = Draws, `,UIB("L"),` = Losses`]);
+        listItems.push([UIB("Caps"), ` = Caps made by the player.`]);
+        listItems.push([UIB("Assists"),` = Assists made by the player.`]);
+        listItems.push([UIB("Covers"),` = Covers made by the player.`]);
+        listItems.push([UIB("FKill"),` = Flag Kills made by the player.`]);
+        listItems.push([UIB("CF"), ` Caps For(Total caps made by team)`]);
+        listItems.push([UIB("CA"), ` Caps Against(Total caps made by enemy team)`]);
+        listItems.push([UIB("COffset"), ` Cap Offset(CF - CA)`]);
 
         const openContent = [
             UIUnorderedList(listItems),
