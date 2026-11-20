@@ -80,6 +80,11 @@ export async function getMapCTFTable(mapId, gametypeId, page, perPage, timeRange
     nstats_player_ctf_league.cap_against,
     nstats_player_ctf_league.cap_offset,
     nstats_player_ctf_league.points, 
+    nstats_player_ctf_league.player_caps, 
+    nstats_player_ctf_league.player_assists, 
+    nstats_player_ctf_league.player_covers, 
+    nstats_player_ctf_league.player_flag_kills, 
+    nstats_player_ctf_league.player_returns, 
     nstats_players.name,
     nstats_players.country
     FROM nstats_player_ctf_league 

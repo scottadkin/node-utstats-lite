@@ -1235,54 +1235,57 @@ class UIMapCTFLeague{
         
         const rows = [];
 
+       const tableOptions = {
+            "headers":[
+                "#", "Player", "MP", "W", 
+                "D", "L", 
+                "Caps", "Assists", "FKill", "Cover",
+                "CF",
+                "CA", 
+                "COffset", "Points"
+            ].map((h) => { return {"display": h}}),
+            "className": "t-width-1",
+            "bNoSort": true
+        }
+
         for(let i = 0; i < this.data.length; i++){
 
             const d = this.data[i];
 
+            let pos = 1;
 
-            const place = i + 1 + (this.perPage * (this.page - 1));
-            const row = [
-                {
-                    "display": `${place}${getOrdinal(place)}`,
-                    "className": "ordinal"
-                },
+            pos = i + 1 + (this.perPage * (this.page - 1));
+
+            rows.push([
+                {"display": `${pos}${getOrdinal(pos)}`, "className": "ordinal"},
                 {
                     "display": UIPlayerLink({
                         "playerId": d.player_id, 
                         "name": d.name, 
-                        "country": d.country,
+                        "country": d.country, 
                         "bTableElem": true,
                         "seasonId": this.seasonId,
                         "bSkipSeasonLinks": this.bSkipSeasonLinks
-                    })
+                    }), 
+                    "bSkipTD": true
                 },
                 {"display": d.total_matches},
                 {"display": ignore0(d.wins)},
                 {"display": ignore0(d.draws)},
                 {"display": ignore0(d.losses)},
+
+                {"display": ignore0(d.player_caps), "className": "ctf-league-player-stat"},
+                {"display": ignore0(d.player_assists), "className": "ctf-league-player-stat"},
+                {"display": ignore0(d.player_flag_kills), "className": "ctf-league-player-stat"},
+                {"display": ignore0(d.player_covers), "className": "ctf-league-player-stat"},
                 {"display": ignore0(d.cap_for)},
                 {"display": ignore0(d.cap_against)},
-                {"display": ignore0((d.cap_offset > 0) ? `+${d.cap_offset}` : d.cap_offset)},
-                {"display": ignore0(d.points)}
-            ];
-
-
-            rows.push(row);
+                {"display": `${(d.cap_offset > 0) ? "+" : ""}${d.cap_offset}`},
+                {"display": ignore0(d.points)},
+            ]);
         }
 
         if(this.table === undefined){
-
-            const headers = [
-                "Place", "Player", "Played", "Wins",
-                "Draws", "Losses", "Caps For", "Caps Against",
-                "Caps Offset", "Points"
-            ];
-
-            const tableOptions = {
-                "headers": headers.map((h) => { return {"display": h}}),
-                "bNoSort": true,
-                "className": "t-width-1"
-            };
 
             this.table = new TESTUITable(this.wrapper, tableOptions, rows);
         }else{
