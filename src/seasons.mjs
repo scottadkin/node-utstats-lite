@@ -48,7 +48,37 @@ export async function insertSeasonsSettings(){
             await simpleQuery(`INSERT INTO nstats_seasons_settings VALUES(NULL,?,?,?)`, [s.name, s.type, s.value]);
         }
     }
+}
 
+export async function getSeasonsSettings(){
+
+    const query = `SELECT * FROM nstats_seasons_settings ORDER BY name ASC`;
+
+    const result = await simpleQuery(query);
+
+    const obj = {};
+
+    for(let i = 0; i < result.length; i++){
+
+        const r = result[i];
+
+        obj[r.name] = r;
+    }
+
+    return obj;
+}
+
+
+export async function saveSeasonsSettings(changes){
+
+    const query = `UPDATE nstats_seasons_settings SET value=? WHERE id=?`;
+
+    for(let i = 0; i < changes.length; i++){
+
+        const {value, id} = changes[i];
+
+        await simpleQuery(query, [value, id]);
+    }
 }
 
 export async function getSeasonByMatchDate(matchDate){

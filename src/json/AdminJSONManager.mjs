@@ -28,7 +28,7 @@ import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplica
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllIps, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminGetPlayerHistoryById, adminGetPlayerProfile, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
-import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, recalculateSeason, updateUniqueMatchCominationsPlayerCount } from "../seasons.mjs";
+import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, getSeasonsSettings, recalculateSeason, saveSeasonsSettings, SEASON_TIMEFRAME_OPTIONS, updateUniqueMatchCominationsPlayerCount } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
 import { getRejectedLogsInfo } from "../logs.mjs";
 
@@ -517,6 +517,19 @@ export default class AdminJSONManager{
                 await restoreAllPageSettings();
                 return this.res.json({"message": "passed"});
 
+            }else if(this.mode === "load-seasons-settings"){
+                
+                const data = await getSeasonsSettings();
+
+                return this.res.json({data, "timeFrames": SEASON_TIMEFRAME_OPTIONS});
+                
+            }else if(this.mode === "save-seasons-settings"){
+                
+                if(this.req.body.changes === undefined) throw new Error("Missing changes array");
+                await saveSeasonsSettings(this.req.body.changes);
+
+                return this.res.json({"message": "passed"});
+                
             }else if(this.mode === "load-seasons"){
 
                 const data = await getAllSeasons();

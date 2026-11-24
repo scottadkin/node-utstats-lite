@@ -7573,6 +7573,10 @@ class AdminSeasonsManager{
             "seasons": []
         };
 
+        this.savedSeasonsSettings = {};
+        this.seasonsSettings = {};
+        this.timeFrameOptions = [];
+
         UIHeader(this.wrapper, "Seasons Manager");
         this.content = UIDiv();
         
@@ -7588,14 +7592,18 @@ class AdminSeasonsManager{
             "endDate": new Date().toISOString()
         };
 
-
         this.bActionInProgress = false;
 
-        
         this.createTabs();
         this.wrapper.append(this.content);
-        this.loadData();
+        this.init();
         
+    }
+
+    async init(){
+
+        await this.loadSettings();
+        await this.loadData();
     }
 
     getSeasonById(id){
@@ -7625,6 +7633,30 @@ class AdminSeasonsManager{
             if(this.mode === "edit" || this.mode === "recalculate") this.selectedSeason = -1;
             this.render();
         });
+    }
+
+    async loadSettings(){
+
+        try{
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "load-seasons-settings"})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+            this.savedSeasonsSettings = JSON.parse(JSON.stringify(res.data));
+            this.seasonsSettings = res.data;
+            this.timeFrameOptions = res.timeFrames;
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification("error", "Failed To Load Seasons Settings", err.toString());
+        }
     }
 
     async loadData(){
@@ -8100,12 +8132,126 @@ class AdminSeasonsManager{
         this.content.append(form);
     }
 
+    getUnsavedSettings(){
+
+        const found = [];
+
+        const keys = Object.keys(this.savedSeasonsSettings);
+
+        for(let i = 0; i < keys.length; i++){
+
+            const k = keys[i];
+
+            const saved = this.savedSeasonsSettings[k];
+            const current = this.seasonsSettings[k];
+
+            if(saved.value !== current.value) found.push(current);
+        }
+
+        return found;
+    }
+
+    async saveSettings(){
+
+        try{
+
+            if(this.bActionInProgress){
+                new UINotification("warning", "Action In Progress", `Please wait for previous action to finish`);
+                return;
+            }
+
+            this.bActionInProgress = true;
+
+            const changes = this.getUnsavedSettings();
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({"mode": "save-seasons-settings", changes})
+            });
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+
+            await this.loadSettings();
+            this.render();
+
+        }catch(err){
+
+            console.trace(err);
+            new UINotification("error", "Failed To Save Setting Changes", err.toString());
+
+        }finally{
+            this.bActionInProgress = false;
+        }
+    }
+
+    renderUnsavedChanges(){
+
+        const settings = this.getUnsavedSettings();
+
+        if(this.unsavedChangesElem === undefined){
+            this.unsavedChangesElem = UIDiv();
+            this.content.append(this.unsavedChangesElem);
+        }
+
+        this.unsavedChangesElem.className = (settings.length > 0) ? "warning" : "hidden";
+
+        this.unsavedChangesElem.innerHTML = ``;
+
+        this.unsavedChangesElem.append(`You have ${settings.length} unsaved setting changes.`);
+
+        this.saveButton = UIButton("Save Changes", "submit-button");
+        this.saveButton.addEventListener("click", () =>{
+
+            this.saveSettings();
+        });
+        this.unsavedChangesElem.append(this.saveButton);
+    }
+
     renderAutomaticSeasons(){
+
+        this.renderUnsavedChanges();
 
         const infoContent = [
             `Enable or disable automatic seasons creation`
         ];
         new UIInfo(this.content, infoContent);
+
+        const form = UIDiv("form");
+
+        
+
+        const enabledRow = UIDiv("form-row");
+
+        
+        
+
+        const autoTF = new UITrueFalse(this.seasonsSettings["Automatic Seasons"].value === "true", "auto-seasons", false, (e) =>{
+            this.seasonsSettings["Automatic Seasons"].value = e.toString();
+
+            this.renderUnsavedChanges();
+        });
+
+        enabledRow.append(UILabel("Automatic Season Creation"), autoTF.wrapper);
+        
+        const timeRow = UIDiv("form-row");
+        timeRow.append(UILabel("Automatic Time Frame Interval"));
+
+        const timeOptions = this.timeFrameOptions.map((t) =>{
+            return {"display": t.name, "value": t.value};
+        });
+
+        new UISelect(timeRow, timeOptions, this.seasonsSettings["Automatic Seasons Timeframe"].value, (e) =>{
+            this.seasonsSettings["Automatic Seasons Timeframe"].value = e;
+            this.renderUnsavedChanges();
+        });
+
+        form.append(enabledRow, timeRow);
+
+        this.content.append(form);
     }
 
     render(){
