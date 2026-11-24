@@ -16,9 +16,9 @@ const DEFAULT_SEASONS_SETTINGS = [
 ];
 
 export const SEASON_TIMEFRAME_OPTIONS = [
-    {"name": "Yearly", "value": "YEAR"},
-    {"name": "Monthly", "value": "MONTH"},
-    {"name": "Weekly", "value": "WEEK"},
+    {"name": "Yearly", "value": "year"},
+    {"name": "Monthly", "value": "month"},
+    {"name": "Weekly", "value": "week"},
 ];
 
 export const VALID_OBJECT_TYPES = {

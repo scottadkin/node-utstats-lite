@@ -8213,6 +8213,7 @@ class AdminSeasonsManager{
 
     renderAutomaticSeasons(){
 
+        if(this.mode !== "automatic") return;
         this.renderUnsavedChanges();
 
         const infoContent = [
