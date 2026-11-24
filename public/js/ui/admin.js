@@ -7567,7 +7567,7 @@ class AdminSeasonsManager{
         this.parent = document.querySelector(parent);
 
         this.wrapper = UIDiv();
-        this.mode = "list";
+        this.mode = "automatic";
 
         this.data = {
             "seasons": []
@@ -7612,6 +7612,7 @@ class AdminSeasonsManager{
 
         const options = [
             {"display": "List", "value": "list"},
+            {"display": "Automatic Seasons", "value": "automatic"},
             {"display": "Create Season", "value": "create"},
             {"display": "Edit Season", "value": "edit"},
             {"display": "Recalculate Season", "value": "recalculate"}
@@ -8097,8 +8098,14 @@ class AdminSeasonsManager{
         form.append(button);
 
         this.content.append(form);
+    }
 
+    renderAutomaticSeasons(){
 
+        const infoContent = [
+            `Enable or disable automatic seasons creation`
+        ];
+        new UIInfo(this.content, infoContent);
     }
 
     render(){
@@ -8106,6 +8113,7 @@ class AdminSeasonsManager{
 
         this.content.innerHTML = ``;
         this.renderSeasonsList();
+        this.renderAutomaticSeasons();
         this.renderCreateSeason();
         this.renderEditSeason();
         this.renderRecalculateSeason();

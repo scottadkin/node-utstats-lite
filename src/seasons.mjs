@@ -8,13 +8,48 @@ import { playerWeaponDamageRecalculateSeasonTotals } from "./playerWeaponDamage.
 import { recalculateSeasonRankings } from "./rankings.mjs";
 import { deleteAllMapWeaponsTotals, updatePlayerTotals as weaponsUpdatePlayerTotals } from "./weapons.mjs";
 import Message from "./message.mjs";
-import { DEFAULT_DATE } from "../config.mjs";
+
+
+const DEFAULT_SEASONS_SETTINGS = [
+    {"name": "Automatic Seasons", "type": "bool", "value": "false"},
+    {"name": "Automatic Seasons Timeframe", "type": "text", "value": "YEAR"},
+];
+
+export const SEASON_TIMEFRAME_OPTIONS = [
+    {"name": "Yearly", "value": "YEAR"},
+    {"name": "Monthly", "value": "MONTH"},
+    {"name": "Weekly", "value": "WEEK"},
+];
 
 export const VALID_OBJECT_TYPES = {
-        "gametypes": "gametype_id",
-        "maps": "map_id",
-        "servers": "server_id"
-    };
+    "gametypes": "gametype_id",
+    "maps": "map_id",
+    "servers": "server_id"
+};
+
+
+async function bSettingExist(name){
+
+    const query = `SELECT COUNT(*) as total_rows from nstats_seasons_settings WHERE name=?`;
+
+    const result = await simpleQuery(query, [name]);
+
+    return result[0].total_rows > 0;
+}
+
+export async function insertSeasonsSettings(){
+
+    for(let i = 0; i < DEFAULT_SEASONS_SETTINGS.length; i++){
+
+        const s = DEFAULT_SEASONS_SETTINGS[i];
+
+        if(!await bSettingExist(s.name)){
+
+            await simpleQuery(`INSERT INTO nstats_seasons_settings VALUES(NULL,?,?,?)`, [s.name, s.type, s.value]);
+        }
+    }
+
+}
 
 export async function getSeasonByMatchDate(matchDate){
 

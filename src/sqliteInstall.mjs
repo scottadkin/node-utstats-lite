@@ -12,7 +12,7 @@ import { calculateAllPlayerTotals, fixDuplicatePlayerProfiles, installPlayerSett
 import { setAllMapTotals } from "./weapons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "./ctf.mjs";
 import { setAllBGametypeFlags } from "./matches.mjs";
-import { getAllSeasonIds, updateSeasonUniqueCombinations, updateUniqueMatchCominationsPlayerCount } from "./seasons.mjs";
+import { getAllSeasonIds, insertSeasonsSettings, updateSeasonUniqueCombinations, updateUniqueMatchCominationsPlayerCount } from "./seasons.mjs";
 import { bSkipInstallCTFLeagueRefresh } from "../config.mjs";
 
 const rankingsTableQuery = `CREATE TABLE IF NOT EXISTS nstats_rankings (
@@ -250,6 +250,14 @@ export function createTableQueries(){
                 end_date TEXT NOT NULL,
                 name TEXT NOT NULL COLLATE NOCASE
             ) STRICT`,
+
+            `CREATE TABLE IF NOT EXISTS nstats_seasons_settings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                value TEXT NOT NULL
+            ) STRICT`,
+
             `CREATE TABLE IF NOT EXISTS nstats_players (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT COLLATE NOCASE ,
@@ -1619,6 +1627,7 @@ export async function sqliteInstall(bOnlyCreateTables){
     //2.10.0 preview 6
     await updateCTFLeagueSettingsTable();
     await addColumnsToPlayerCTFLeague();
+    await insertSeasonsSettings();
 
     new Message("Inserting Default Rankings Settings", "note");
     await insertDefaultRankingSettings();
