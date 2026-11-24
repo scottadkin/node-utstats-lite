@@ -8216,18 +8216,14 @@ class AdminSeasonsManager{
         this.renderUnsavedChanges();
 
         const infoContent = [
-            `Enable or disable automatic seasons creation`
+            `Enable or disable automatic seasons creation.`, UIBr(),
+            `If automatic seasons are enabled and no matches where played during a timeframe that season will not be created.`
         ];
         new UIInfo(this.content, infoContent);
 
         const form = UIDiv("form");
 
-        
-
         const enabledRow = UIDiv("form-row");
-
-        
-        
 
         const autoTF = new UITrueFalse(this.seasonsSettings["Automatic Seasons"].value === "true", "auto-seasons", false, (e) =>{
             this.seasonsSettings["Automatic Seasons"].value = e.toString();

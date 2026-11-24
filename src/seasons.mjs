@@ -1,7 +1,7 @@
 
 import { ctfLeagueRecalculateSeasonAllTables, getLeagueSiteSettings} from "./ctfLeague.mjs";
 import { bulkUpdate, simpleQuery, sqlInsertOnDuplicateUpdate } from "./database.mjs";
-import {  sanitizePagePerPage } from "./generic.mjs";
+import {  getMonthName, sanitizePagePerPage } from "./generic.mjs";
 import { getMapImages, setMatchResultsMapImages } from "./maps.mjs";
 import { updateAllPlayerTotalsSingleSeason } from "./players.mjs";
 import { playerWeaponDamageRecalculateSeasonTotals } from "./playerWeaponDamage.mjs";
@@ -327,6 +327,65 @@ export async function createSeason(name, startDate, endDate){
     await updateUniqueMatchCominationsPlayerCount();
 
     return {"message": "passed"}
+}
+
+export async function createAutomaticSeason(matchDate, seasonsSettings){
+
+    const date = new Date(matchDate);
+    const year = date.getFullYear();
+  
+    const month = date.getMonth();
+
+    const startOfyear = new Date(Date.UTC(year, 0, 1));
+
+    const day = 60 * 60 * 24 * 1000;
+
+    const dayOfYear = Math.floor((date - startOfyear) / day);
+
+    const weekOfYear = Math.floor(dayOfYear / 7);
+
+    const autoType = seasonsSettings["Automatic Seasons Timeframe"].value;
+
+    let startDate = 0;
+    let endDate = 0;
+
+    let name = ``;
+
+    if(autoType === "year"){
+   
+        name = year.toString();
+        startDate = new Date(Date.UTC(year));
+        endDate = new Date(Date.UTC(year + 1) - 1)
+        
+    }else if(autoType === "month"){
+        
+        name = `${getMonthName(month, true)} ${year}`;
+
+        startDate = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+        endDate = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
+        
+    }else if(autoType === "week"){
+        
+        name = `Week ${weekOfYear} of ${year}`;
+
+        const week = day * 7;
+
+        startDate = new Date(Date.UTC(year) + weekOfYear * week);
+        endDate = new Date(Date.UTC(year) + (weekOfYear + 1) * week);
+        
+    }else{
+        throw new Error(`unknown automatch seasons timeframe value`);
+    }
+
+    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?)`;
+
+    await simpleQuery(query, [startDate, endDate, name]);
+
+    const seasonInfo = await getSeasonByName(name);
+
+    if(seasonInfo === null) throw new Error(`Failed to get newly created season`);
+
+    return seasonInfo;
 }
 
 export async function editSeason(seasonId, name, startDate, endDate){

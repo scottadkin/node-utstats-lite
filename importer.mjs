@@ -11,7 +11,7 @@ import { bLogAlreadyImported, getAllPendingUpdates } from "./src/importer.mjs";
 import { ctfLeagueRecalculateSeasonAllTables, getLeagueSiteSettings, updateSettings } from "./src/ctfLeague.mjs";
 import { getMultipleFTPServerSettings } from "./src/ftp.mjs";
 import { bAutoForceNameToHWID, calculateAllPlayerTotals } from "./src/players.mjs";
-import { calculateSeasonStats, getAllSeasonIds, updateUniqueMatchCominationsPlayerCount } from "./src/seasons.mjs";
+import { calculateSeasonStats, getAllSeasonIds, getSeasonsSettings, updateUniqueMatchCominationsPlayerCount } from "./src/seasons.mjs";
 import { recalculateSeasonRankings } from "./src/rankings.mjs";
 import { setAllMapTotals as setAllMapWeaponTotals, updatePlayerTotals as updatePlayerWeaponTotals } from "./src/weapons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "./src/ctf.mjs";
@@ -99,7 +99,7 @@ async function updateCTFLeague(matchData, ctfLeagueSettings){
 }
 
 async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, 
-    bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName){
+    bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName, seasonsSettings){
 
     try{
 
@@ -135,7 +135,11 @@ async function parseLog(file, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPla
 
         
 
-        const m = new MatchParser(data, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, bAutoAssignHWIDToName);
+        const m = new MatchParser(
+            data, bIgnoreBots, bIgnoreDuplicates, minPlayers, 
+            minPlaytime, bAppendTeamSizes, bAutoAssignHWIDToName, 
+            seasonsSettings
+        );
 
         await m.main();
 
@@ -211,7 +215,7 @@ async function getMultipleDownloadedFrom(fileNames){
 //serverId is -1 if logs are from the websites /Logs folder
 //if serverId is -1(leftover logs) look for download data and use the ftp settings from importer_id if exists.
 async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers, 
-    minPlaytime, bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName){
+    minPlaytime, bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName, seasonsSettings){
 
     const start = performance.now();
 
@@ -245,7 +249,8 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers,
                 f, 
                 bIgnoreBots, bIgnoreDuplicates, 
                 minPlayers, minPlaytime, bAppendTeamSizes, 
-                ctfLeagueSettings, bAutoAssignHWIDToName
+                ctfLeagueSettings, bAutoAssignHWIDToName,
+                seasonsSettings
             )){
                 imported++;
             }else{
@@ -262,7 +267,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers,
             new Message(`Could not find download information for ${f}, using logs folder importer settings instead.`,"note");
 
             if(await parseLog(f, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, 
-                bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName)){
+                bAppendTeamSizes, ctfLeagueSettings, bAutoAssignHWIDToName, seasonsSettings)){
                 imported++;
             }else{
                 failed++;
@@ -290,7 +295,8 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers,
             logSettings.min_playtime,
             logSettings.append_team_sizes, 
             ctfLeagueSettings, 
-            bAutoAssignHWIDToName
+            bAutoAssignHWIDToName,
+            seasonsSettings
         )){
             imported++;
         }else{
@@ -320,7 +326,7 @@ async function parseLogs(serverId, bIgnoreBots, bIgnoreDuplicates, minPlayers,
 }
 
 
-async function main(ctfLeagueSettings){
+async function main(ctfLeagueSettings, seasonsSettings){
 
 
     const start = performance.now();
@@ -343,7 +349,8 @@ async function main(ctfLeagueSettings){
     const leftOverStats = await parseLogs(
         -1, ls.ignore_bots, ls.ignore_duplicates, 
         ls.min_players, ls.min_playtime, 
-        ls.append_team_sizes, ctfLeagueSettings, bAutoAssignHWIDToName
+        ls.append_team_sizes, ctfLeagueSettings, bAutoAssignHWIDToName,
+        seasonsSettings
     );
 
     
@@ -409,7 +416,9 @@ async function main(ctfLeagueSettings){
             r.min_players,
             r.min_playtime,
             r.append_team_sizes,
-            ctfLeagueSettings, bAutoAssignHWIDToName
+            ctfLeagueSettings, 
+            bAutoAssignHWIDToName,
+            seasonsSettings
         );
 
         totals.passed += passed;
@@ -477,8 +486,9 @@ async function calculateTotalsFromPendingUpdates(){
 async function startImport(){
 
     const ctfLeagueSettings = await getLeagueSiteSettings();
+    const seasonsSettings = await getSeasonsSettings();
 
-    const importTotals = await main(ctfLeagueSettings);
+    const importTotals = await main(ctfLeagueSettings, seasonsSettings);
 
     const seasonIds = await getAllSeasonIds(false);
     

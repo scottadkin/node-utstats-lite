@@ -15,14 +15,17 @@ import {calculateRankings} from "./rankings.mjs";
 import DamageManager from "./importer/damageManager.mjs";
 import ClassicWeaponStats from "./importer/classicWeaponStats.mjs";
 import PlayerWeaponDamage from "./importer/playerWeaponDamage.mjs";
-import { calculateSeasonStats, getSeasonByMatchDate } from "./seasons.mjs";
+import { calculateSeasonStats, createAutomaticSeason, getSeasonByMatchDate } from "./seasons.mjs";
 import { addPendingUpdates } from "./importer.mjs";
 import { bBatchUpdateLogs } from "../config.mjs";
 
 
 export class MatchParser{
 
-    constructor(rawData, bIgnoreBots, bIgnoreDuplicates, minPlayers, minPlaytime, bAppendTeamSizes, bAutoAssignHWIDToName){
+    constructor(
+        rawData, bIgnoreBots, bIgnoreDuplicates, 
+        minPlayers, minPlaytime, bAppendTeamSizes, 
+        bAutoAssignHWIDToName, seasonsSettings){
 
         this.rawData = rawData;
         this.bIgnoreBots = bIgnoreBots;
@@ -31,6 +34,7 @@ export class MatchParser{
         this.minPlaytime = minPlaytime;
         this.bAppendTeamSizes = bAppendTeamSizes;
         this.bAutoAssignHWIDToName = bAutoAssignHWIDToName;
+        this.seasonsSettings = seasonsSettings;
         this.lines = [];
 
         const lineReg = /^(.+?)$/img;
@@ -172,9 +176,17 @@ export class MatchParser{
             this.map.setId(),
         ]);
 
-     
 
-        const seasonInfo = await getSeasonByMatchDate(this.match.date);
+        let seasonInfo = await getSeasonByMatchDate(this.match.date);
+   
+
+
+        if(this.seasonsSettings["Automatic Seasons"].value === "true" && seasonInfo === null){
+  
+            seasonInfo = await createAutomaticSeason(this.match.date, this.seasonsSettings);
+        }
+
+        
 
         if(seasonInfo === null){
 
