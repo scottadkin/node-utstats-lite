@@ -87,6 +87,9 @@ export async function getSeasonByMatchDate(matchDate){
 
     const result = await simpleQuery(query, [matchDate, matchDate]);
 
+    console.log(matchDate);
+    console.log(result);
+
     if(result.length === 0) return null;
 
     return result[0];
@@ -315,7 +318,7 @@ export async function createSeason(name, startDate, endDate){
 
     if(bNameAlreadyInUse) return {"error": `There is already a season called ${name}`};
 
-    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?)`;
+    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?,0)`;
 
     await simpleQuery(query, [startDate, endDate, name]);
 
@@ -342,7 +345,7 @@ export async function createAutomaticSeason(matchDate, seasonsSettings){
 
     const dayOfYear = Math.floor((date - startOfyear) / day);
 
-    const weekOfYear = Math.floor(dayOfYear / 7);
+    const weekOfYear = Math.ceil(dayOfYear / 7);
 
     const autoType = seasonsSettings["Automatic Seasons Timeframe"].value;
 
@@ -368,16 +371,17 @@ export async function createAutomaticSeason(matchDate, seasonsSettings){
         
         name = `Week ${weekOfYear} of ${year}`;
 
-        const week = day * 7;
 
-        startDate = new Date(Date.UTC(year) + weekOfYear * week);
-        endDate = new Date(Date.UTC(year) + (weekOfYear + 1) * week);
+        const test = seasonGetWeekStartAndEndDate(year, weekOfYear - 1);
+
+        startDate =test.startDate;
+        endDate = test.endDate;
         
     }else{
-        throw new Error(`unknown automatch seasons timeframe value`);
+        throw new Error(`unknown automatic seasons timeframe value`);
     }
 
-    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?)`;
+    const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?,1)`;
 
     await simpleQuery(query, [startDate, endDate, name]);
 
@@ -1240,4 +1244,111 @@ export async function seasonsGetMatchesSeasonIds(matchIds){
     }
 
     return data;
+}
+
+
+/**
+ * If week is 52nd merge it with 51st instead
+ * @param {Number} year
+ * @param {Number} weekIndex 0-52
+ */
+export function seasonGetWeekStartAndEndDate(year, weekIndex){
+
+    //force 53rd week to be 52nd
+    if(weekIndex === 52){
+        weekIndex = 51;
+    }
+
+    
+    const startDate =  new Date(year, 0, 1 + weekIndex * 7, 0, 0, 0, 0)
+
+    let endDate = null;
+    
+
+    //make sure final week ends on the 31st even if its more than 7 days
+    //we don't want a 1 day week at the end of the year
+    if(weekIndex === 51){
+        endDate = new Date(year, 11, 31, 23, 59, 59, 999);
+    }else{
+        endDate = new Date(year, 0, 1 + weekIndex * 7 + 6, 23, 59, 59, 999);
+    }
+
+
+    return {startDate, endDate}
+}
+
+async function createAutoSeasonFromExistingData(seasonsSettings){
+
+
+    const day = 60 * 60 * 24 * 1000;
+    const week = day * 7;
+
+    const mode = seasonsSettings["Automatic Seasons Timeframe"].value;
+    console.log(mode);
+    let found = [];
+
+    if(mode === "month"){
+
+        found = await simpleQuery(`SELECT DISTINCT strftime('%m', date) as month, strftime('%Y', date) as year FROM nstats_matches`);
+
+    }else if(mode === "week"){
+        found = await simpleQuery(`SELECT DISTINCT CEIL(strftime('%j', date) / 7) as week, strftime('%Y', date) as year FROM nstats_matches`);
+
+        for(let i = 0; i < found.length; i++){
+
+            const f = found[i];
+
+            let weekIndex = f.week;
+
+            
+            const {startDate, endDate} = seasonGetWeekStartAndEndDate(f.year, weekIndex);
+
+
+            //const endDate = startOfYear + (week * (weekIndex + 1)) - 1;
+
+       
+            console.log(f.year,f.week, startDate, endDate);
+        }
+
+    }else if(mode === "year"){
+        found = await simpleQuery(`SELECT DISTINCT strftime('%Y', date) as year FROM nstats_matches`);
+    }else{
+
+        throw new Error("Unknown mode passed to createAutoSeasonFromExistingData");
+    }
+    console.log(found);
+    //console.log(await simpleQuery(`SELECT date(date) as fart_flaps,strftime('%j') as day_of_year,strftime('%j') / 7 as week_of_year FROM nstats_matches`));
+}
+
+export async function seasonGetAutoSeasonTimeFrame(){
+
+    const result = await simpleQuery(`SELECT value FROM nstats_seasons_settings WHERE name = 'Automatic Seasons Timeframe'`);
+
+    if(result.length === 0) throw new Error(`Missing Automatic Seasons Timeframe setting`);
+
+    return result[0].value;
+}
+
+export async function seasonsDeleteAllCreateAuto(){
+
+
+    const seasonIds = await getAllSeasonIds(true);
+
+    console.log(seasonIds);
+
+    const deletePromises = [];
+
+    for(let i = 0; i < seasonIds.length; i++){
+
+        deletePromises.push(deleteSeason(seasonIds[i]));
+    }
+
+    await Promise.all(deletePromises);
+
+
+    const mode = await seasonGetAutoSeasonTimeFrame();
+
+    const seasonsSettings = await getSeasonsSettings();
+
+    await createAutoSeasonFromExistingData(seasonsSettings);
 }

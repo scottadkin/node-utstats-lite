@@ -8211,6 +8211,63 @@ class AdminSeasonsManager{
         this.unsavedChangesElem.append(this.saveButton);
     }
 
+
+    async deleteAllSeasonsCreateAutoSeasons(){
+
+        try{
+
+            if(this.bActionInProgress){
+
+                new UINotification("warning", "Please Wait", "A previous action has not finished.");
+                return;
+            }
+
+            this.bActionInProgress = true;
+
+            const req = await fetch("/admin", {
+                "headers": {"Content-type": "application/json"},
+                "method": "POST",
+                "body": JSON.stringify({
+                    "mode": "delete-all-seasons-create-auto-seasons"
+                })
+            })
+
+            const res = await req.json();
+
+            if(res.error !== undefined) throw new Error(res.error);
+
+            this.bActionInProgress = false;
+
+            console.log(res);
+        }catch(err){
+            console.trace(err);
+            new UINotification("error", "Failed To Delete All Seasons & Create Auto Seasons", err.toString());
+        }
+    }
+    renderDeleteAllCreateAutoSeasons(){
+
+        UIHeader(this.content, "Delete All Seasons And Create Automatic Seasons");
+
+        const infoContent = [
+            UIUnorderedList([
+                `This process will delete all existing seasons data, and then create new seasons data defined by the settings above.`,
+                `No match data will be deleted.`
+            ])
+        ];
+
+        const info = new UIInfo(this.content, infoContent);
+
+        const form = UIDiv("form text-center");
+        const button = UIButton(`Delete All Seasons And Create New Auto Seasons Data`,"delete-button");
+
+        button.addEventListener("click", () =>{
+            this.deleteAllSeasonsCreateAutoSeasons();
+        })
+        form.append(button);
+        this.content.append(form);
+
+
+    }
     renderAutomaticSeasons(){
 
         if(this.mode !== "automatic") return;
@@ -8250,6 +8307,11 @@ class AdminSeasonsManager{
         form.append(enabledRow, timeRow);
 
         this.content.append(form);
+
+
+        this.renderDeleteAllCreateAutoSeasons();
+
+
     }
 
     render(){

@@ -28,7 +28,7 @@ import { getRecentMatches, deleteMatch, getAllDuplicateMatches, deleteAllDuplica
 import { loadAllJSONSettings, saveJSONAPIChanges } from "../json.mjs";
 import { adminDeleteForceNameByBoth, adminDeleteForceNameOnMacAddresses, adminDeleteForceNameToHWID, adminForceNameOnBoth, adminForceNameOnHWID, adminForceNameOnMacAddresses, adminGetAllForceHWIDToNames, adminGetAllForceMacToNames, adminGetAllForceNamesByHWIDAndMac, adminGetAllIps, adminGetAllPlayerSettings, adminGetForceNamesData, adminGetFullPlayerHistoryByHWIDMACS, adminGetNameOverrideHistory, adminGetPlayerHistoryById, adminGetPlayerProfile, adminRenameForceHWIDToName, calculateAllPlayerTotals, getAllNames, renamePlayerByMatchHistory, updatePlayerSettings } from "../players.mjs";
 import { recalculateAllPlayerTotals as recalculateAllPlayerWeaponTotals} from "../weapons.mjs";
-import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, getSeasonsSettings, recalculateSeason, saveSeasonsSettings, SEASON_TIMEFRAME_OPTIONS, updateUniqueMatchCominationsPlayerCount } from "../seasons.mjs";
+import { createSeason, deleteSeason, editSeason, getAllSeasonIds, getAllSeasons, getSeasonsSettings, recalculateSeason, saveSeasonsSettings, SEASON_TIMEFRAME_OPTIONS, seasonsDeleteAllCreateAuto, updateUniqueMatchCominationsPlayerCount } from "../seasons.mjs";
 import { ctfRecalculateAllPlayerTotals } from "../ctf.mjs";
 import { getRejectedLogsInfo } from "../logs.mjs";
 
@@ -593,6 +593,12 @@ export default class AdminJSONManager{
 
                 return this.res.json({"message": "passed"});
 
+            }else if(this.mode === "delete-all-seasons-create-auto-seasons"){
+                
+                
+                await seasonsDeleteAllCreateAuto();
+
+                return this.res.json({"message": "passed"});
             }else if(this.mode === "recalculate-ctf-league-tables"){
 
                 await ctfLeagueRefreshAllLeagueTables();
