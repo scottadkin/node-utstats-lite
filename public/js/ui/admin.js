@@ -8217,8 +8217,9 @@ class AdminSeasonsManager{
         this.renderUnsavedChanges();
 
         const infoContent = [
-            `Enable or disable automatic seasons creation.`, UIBr(),
-            `If automatic seasons are enabled and no matches where played during a timeframe that season will not be created.`
+            UIUnorderedList([`Enable or disable automatic seasons creation.`,
+            `If automatic seasons are enabled and no matches where played during a timeframe that season will not be created.`])
+            
         ];
         new UIInfo(this.content, infoContent);
 

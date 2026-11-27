@@ -248,7 +248,8 @@ export function createTableQueries(){
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 start_date TEXT NOT NULL,
                 end_date TEXT NOT NULL,
-                name TEXT NOT NULL COLLATE NOCASE
+                name TEXT NOT NULL COLLATE NOCASE,
+                auto INTEGER NOT NULL DEFAULT 0
             ) STRICT`,
 
             `CREATE TABLE IF NOT EXISTS nstats_seasons_settings (
@@ -1576,6 +1577,16 @@ async function addColumnsToPlayerCTFLeague(){
             player_covers INTEGER NOT NULL,*/
 }
 
+async function addSeasonAutoColumn(){
+
+    if(await bColumnExist("nstats_seasons", "auto")) return;
+
+    new Message(`Adding auto column to nstats_seasons table`);
+
+    await addColumn("nstats_seasons", "auto", "INTEGER NOT NULL DEFAULT 0");
+
+}
+
 export async function sqliteInstall(bOnlyCreateTables){
 
     new Message(`Node UTStats Lite - SQLite Installer Started`,"note");
@@ -1585,6 +1596,8 @@ export async function sqliteInstall(bOnlyCreateTables){
     await fixDuplicatePlayerProfiles();
     await dropServerGametypeTotalsColumns();
     await dropSeasonTotalsColumns();
+    //2.10.0 preview 6
+    await addSeasonAutoColumn();
     
 
     const queries = createTableQueries("");
