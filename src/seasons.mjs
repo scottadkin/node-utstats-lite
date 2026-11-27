@@ -87,9 +87,6 @@ export async function getSeasonByMatchDate(matchDate){
 
     const result = await simpleQuery(query, [matchDate, matchDate]);
 
-    console.log(matchDate);
-    console.log(result);
-
     if(result.length === 0) return null;
 
     return result[0];
@@ -334,18 +331,17 @@ export async function createSeason(name, startDate, endDate){
 
 export async function createAutomaticSeason(matchDate, seasonsSettings){
 
-    const date = new Date(matchDate);
-    const year = date.getFullYear();
+    const year = matchDate.getFullYear();
   
-    const month = date.getMonth();
+    const month = matchDate.getMonth();
 
-    const startOfyear = new Date(Date.UTC(year, 0, 1));
+    const startOfyear = new Date(Date.UTC(year));
 
     const day = 60 * 60 * 24 * 1000;
 
-    const dayOfYear = Math.floor((date - startOfyear) / day);
+    const dayOfYear = Math.floor((matchDate - startOfyear) / day);
 
-    const weekOfYear = Math.ceil(dayOfYear / 7);
+    const weekOfYear = Math.floor(dayOfYear / 7);
 
     const autoType = seasonsSettings["Automatic Seasons Timeframe"].value;
 
@@ -366,13 +362,14 @@ export async function createAutomaticSeason(matchDate, seasonsSettings){
 
         startDate = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
         endDate = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
+
         
     }else if(autoType === "week"){
         
-        name = `Week ${weekOfYear} of ${year}`;
+        name = `Week ${weekOfYear + 1} of ${year}`;
 
 
-        const test = seasonGetWeekStartAndEndDate(year, weekOfYear - 1);
+        const test = seasonGetWeekStartAndEndDate(year, weekOfYear);
 
         startDate =test.startDate;
         endDate = test.endDate;
@@ -383,7 +380,9 @@ export async function createAutomaticSeason(matchDate, seasonsSettings){
 
     const query = `INSERT INTO nstats_seasons VALUES(NULL,?,?,?,1)`;
 
-    await simpleQuery(query, [startDate, endDate, name]);
+    const vars = [startDate, endDate, name];
+
+    await simpleQuery(query, vars);
 
     const seasonInfo = await getSeasonByName(name);
 
@@ -1284,7 +1283,7 @@ async function createAutoSeasonFromExistingData(seasonsSettings){
     const week = day * 7;
 
     const mode = seasonsSettings["Automatic Seasons Timeframe"].value;
-    console.log(mode);
+    //console.log(mode);
     let found = [];
 
     if(mode === "month"){
@@ -1316,7 +1315,7 @@ async function createAutoSeasonFromExistingData(seasonsSettings){
 
         throw new Error("Unknown mode passed to createAutoSeasonFromExistingData");
     }
-    console.log(found);
+    //console.log(found);
     //console.log(await simpleQuery(`SELECT date(date) as fart_flaps,strftime('%j') as day_of_year,strftime('%j') / 7 as week_of_year FROM nstats_matches`));
 }
 
