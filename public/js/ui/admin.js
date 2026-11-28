@@ -8176,6 +8176,7 @@ class AdminSeasonsManager{
 
 
             await this.loadSettings();
+            
             this.render();
 
         }catch(err){
@@ -8191,11 +8192,6 @@ class AdminSeasonsManager{
     renderUnsavedChanges(){
 
         const settings = this.getUnsavedSettings();
-
-        if(this.unsavedChangesElem === undefined){
-            this.unsavedChangesElem = UIDiv();
-            this.content.append(this.unsavedChangesElem);
-        }
 
         this.unsavedChangesElem.className = (settings.length > 0) ? "warning" : "hidden";
 
@@ -8244,6 +8240,7 @@ class AdminSeasonsManager{
             new UINotification("error", "Failed To Delete All Seasons & Create Auto Seasons", err.toString());
         }
     }
+
     renderDeleteAllCreateAutoSeasons(){
 
         UIHeader(this.content, "Delete All Seasons And Create Automatic Seasons");
@@ -8271,7 +8268,13 @@ class AdminSeasonsManager{
     renderAutomaticSeasons(){
 
         if(this.mode !== "automatic") return;
+
+        this.unsavedChangesElem = UIDiv("warning");
+        this.content.append(this.unsavedChangesElem);
+
         this.renderUnsavedChanges();
+
+        
 
         const infoContent = [
             UIUnorderedList([`Enable or disable automatic seasons creation.`,
